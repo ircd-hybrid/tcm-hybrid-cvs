@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.224 2004/05/11 19:31:58 bill Exp $
+ * $Id: bothunt.c,v 1.225 2004/05/19 09:58:14 bill Exp $
  */
 
 #include <stdio.h>
@@ -410,6 +410,28 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     return;
   }
 
+  /* billy-jon!bill@ummm.E{bill} has placed a local RESV on channel: #e [a] */
+  if ((q = strstr(p, " has placed a local RESV")))
+  {
+    *q = '\0';
+    q+=37;
+
+    send_to_all(NULL, FLAGS_VIEW_KLINES,
+                "RESV for %s by %s",
+                q, p);
+    return;
+  }
+  /* billy-jon!bill@ummm.E{bill} has removed the local RESV for channel: #e */
+  else if ((q = strstr(p, " has removed the local RESV")))
+  {
+    *q = '\0';
+    q+=41;
+
+    send_to_all(NULL, FLAGS_VIEW_KLINES,
+                "UNRESV for %s by %s",
+                q, p);
+    return;
+  }
 
   if (strstr(p, "-Line for"))
   {
@@ -449,9 +471,9 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   }
 
 #ifdef REPORT_GLINES
-  /* billy-jon!bill@aloha.from.hilo on irc.intranaut.com is
-     requesting gline for [this@is.a.test] [test test2] */
-  if (strstr(p, "is requesting gline for "))
+  /* billy-jon!bill@aloha.from.hilo on irc.intranaut.com is requesting gline for [this@is.a.test] [test test2] */
+  /* billy-jon!bill@holier.than.thou{bill} requesting G-Line for [a@test] [e] */
+  if (strstr(p, "is requesting gline for ") || strstr(p, "requesting G-Line for"))
   {
     nick = p;
     if ((q = strchr(p, ' ')) == NULL)
@@ -471,11 +493,35 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if (get_user_host(&user, &host, q) == NULL)
       return;
 
-    if ((q = strchr(p, ']')) == NULL)
+    if ((q = strrchr(p, ']')) == NULL)
       return;
     *q = '\0';
     send_to_all(NULL, FLAGS_VIEW_KLINES,
-                "GLINE for %s@%s requested by %s [%s]: %s", user, host, nick, target, p);
+                "GLINE for %s@%s requested by %s{%s} [%s]", user, host, nick, target, p);
+    return;
+  }
+  else if (strstr(p, "requesting G-Line for"))
+  {
+    nick = p;
+    if ((q = strchr(p, ' ')) == NULL)
+      return;
+    *q = '\0';
+
+    q+=23;        
+    if ((p = strchr(q, ' ')) == NULL)
+      return;
+
+    *(p-1) = '\0';
+    if (get_user_host(&user, &host, q) == NULL)
+      return;
+
+    *(++p) = '\0';
+    if ((q = strrchr(++p, ']')) == NULL)
+      return;
+
+    *q = '\0'; 
+    send_to_all(NULL, FLAGS_VIEW_KLINES,
+                "GLINE for %s@%s requested by %s [%s]", user, host, nick, p);
     return;
   }
   /* billy-jon!bill@ummm.E on irc.intranaut.com has triggered gline for [test@this.is.a.test] [test1 test2] */
@@ -485,9 +531,12 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q++ = '\0';
+    target = q+3;
 
-    p = strstr(q, "has triggered");
-    p+=24;
+    if ((p = strchr(target, ' ')) == NULL)
+      return;
+    *p = '\0';
+    p+=25;
 
     if ((q = strrchr(p, '[')) == NULL)
       return;
@@ -501,31 +550,37 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     *p = '\0';
 
     send_to_all(NULL, FLAGS_VIEW_KLINES,
-		"GLINE for %s@%s triggered by %s: %s", user, host, nick, q);
+		"GLINE for %s@%s triggered by %s{%s} [%s]", user, host, nick, target, q);
+    return;
+  }
+  /* billy-jon!bill@ummm.E{irc.intranaut.com} added G-Line for [test@this.is.a.test] [test1 test2 (2004/5/19 11.22)] */
+  else if (strstr(p, "added G-Line for"))
+  {
+    nick = p;
+    if ((q = strchr(nick, ' ')) == NULL)
+      return;
+    *q = '\0';
+    q+=18;
+
+    if ((p = strchr(q, ' ')) == NULL)
+      return;
+    *(p-1) = '\0';
+
+    if (get_user_host(&user, &host, q) == NULL)
+      return;
+
+    *(++p) = '\0';
+
+    if ((q = strrchr(++p, ']')) == NULL)
+      return;
+
+    *q = '\0';
+
+    send_to_all(NULL, FLAGS_VIEW_KLINES,
+                "GLINE for %s@%s triggered by %s [%s]", user, host, nick, p);
     return;
   }
 #endif /* REPORT_GLINES */
-
-  if ((q = strstr(p, " has placed a local RESV")))
-  {
-    *q = '\0';
-    q+=41;
-
-    send_to_all(NULL, FLAGS_VIEW_KLINES,
-                "RESV for %s by %s",
-                q, p);
-    return;
-  }
-  else if ((q = strstr(p, " has removed the local RESV")))
-  {
-    *q = '\0';
-    q+=41;
-
-    send_to_all(NULL, FLAGS_VIEW_KLINES,
-                "UNRESV for %s by %s",
-                q, p);
-    return;
-  }
 
   if (strstr(p, "is rehashing"))
   {

@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.152 2004/05/11 19:31:59 bill Exp $
+ * $Id: userlist.c,v 1.153 2004/05/19 09:58:14 bill Exp $
  */
 
 #include <errno.h>
@@ -13,6 +13,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <netinet/in.h>
 #include "config.h"
 #include "tcm.h"
 #include "tcm_io.h"

@@ -1,3 +1,24 @@
+db          2002/05/24 22:37:40 EDT	(20020525_2)
+
+  Modified files:
+    src                  commands.c logging.c modules.c parse.c 
+                         stdcmds.c userlist.c 
+  Log:
+  - removed extern struct connections[] from these *.c files
+    its defined in tcm_io.h
+  
+   Still more to do...
+  
+  Revision  Changes    Path
+  1.76      +0 -1      tcm-hybrid/src/commands.c
+  1.29      +0 -1      tcm-hybrid/src/logging.c
+  1.37      +0 -2      tcm-hybrid/src/modules.c
+  1.16      +0 -2      tcm-hybrid/src/parse.c
+  1.66      +0 -3      tcm-hybrid/src/stdcmds.c
+  1.68      +0 -1      tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/24 22:33:38 EDT	(20020525_1)
 
   Modified files:

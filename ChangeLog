@@ -1,3 +1,15 @@
+leeh        2002/05/24 18:40:01 EDT	(20020524_20)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - flags = 0, not isoper..
+  
+  Revision  Changes    Path
+  1.17      +0 -1      tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/24 16:52:47 EDT	(20020524_19)
 
   Modified files:

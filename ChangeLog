@@ -1,3 +1,15 @@
+leeh        2002/05/25 15:10:11 EDT	(20020525_29)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - added code to call the handlers (wheeeeeeeeee!)
+  
+  Revision  Changes    Path
+  1.20      +8 -0      tcm-hybrid/src/parse.c
+
+
+
 leeh        2002/05/25 14:44:09 EDT	(20020525_28)
 
   Modified files:

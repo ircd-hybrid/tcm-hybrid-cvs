@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.50 2002/05/06 02:11:59 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.51 2002/05/06 13:10:53 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -684,9 +684,10 @@ list_nicks(int sock,char *nick,int regex)
               numfound++;
 
               prnt(sock,
-                   "  %s (%s@%s)\n",
+                   "  %s (%s@%s) {%s}\n",
                    userptr->info->nick,
-                   userptr->info->user,userptr->info->host);
+                   userptr->info->user,userptr->info->host,
+                   userptr->info->class);
             }
         }
     }

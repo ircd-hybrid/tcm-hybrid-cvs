@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.68 2002/05/25 16:27:27 jmallett Exp $ */
+/* $Id: main.c,v 1.69 2002/05/25 16:29:14 jmallett Exp $ */
 
 #include "setup.h"
 
@@ -570,6 +570,10 @@ xmalloc(size_t size)
     exit(-1);
   }
 
+  if (totalmem + size < totalmem)
+    {
+      totalmem = 0;
+    }
   totalmem += size;
 
   return ret;

@@ -16,6 +16,8 @@ struct a_entry {
   int type, report;
 };
 
+struct a_entry actions[MAX_ACTIONS];
+
 struct config_list {
   int  hybrid;
   int  hybrid_version;

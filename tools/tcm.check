@@ -6,7 +6,7 @@
 #1,16,31,46 * * * * /path/to/your/tcm/dir/run.check >/dev/null
 #
 ADMIN=`whoami`
-RUN_PATH="/home/pro/tcm-hybrid"
+RUN_PATH="$HOME/tcm-hybrid"
 PIDFILE="etc/tcm.pid"
  
 DATE=`date +%D-%R`

@@ -3,7 +3,7 @@ CC = @CC@
 RM = @RM@
 MKDEP = ${CC} -MM
 
-TCMLIBS = @LIBS@
+TCMLIBS = @LIBS@ -ldl
 INCLUDES = -I./include
 CPPFLAGS = ${INCLUDES} @CPPFLAGS@
 
@@ -26,7 +26,7 @@ all: tcm
 
 build: tcm
 
-clean: 
+clean: cleandata
 	@${RM} -f DEBUG
 	@for i in $(SUBDIRS); do \
 		echo "Cleaning $$i";\
@@ -38,7 +38,7 @@ clean:
 	fi
 
 cleandata:
-	${RM} -f DEBUG *.log clone_log_* tcm.pid *.pref
+	${RM} -f DEBUG etc/tcm.pid
 
 distclean:
 	@for i in $(SUBDIRS); do \
@@ -47,7 +47,7 @@ distclean:
 		${MAKE} distclean; cd ..;\
 	done
 	${RM} -f Makefile config.status config.cache config.log include/setup.h
-	${RM} -f DEBUG bin/tcm bin/mkpasswd etc/*.pref
+	${RM} -f DEBUG bin/tcm bin/mkpasswd etc/*.pref logs/*.log logs/clone_log_*
 	@echo "all:" > Makefile
 	@echo "	@echo \"Run ./configure first, dumby\"" >> Makefile
 

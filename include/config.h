@@ -221,7 +221,7 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 #undef ENABLE_QUOTE
 
 /* Define this to prevent tcm from forking() */
-#undef DEBUGMODE
+#define DEBUGMODE
 
 /* Define this for dmalloc malloc debugging package */
 #undef DMALLOC

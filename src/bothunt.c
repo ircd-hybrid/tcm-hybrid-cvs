@@ -55,7 +55,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.1 2001/09/19 03:30:21 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.2 2001/09/19 16:27:03 bill Exp $";
 
 static char* find_domain( char* domain );
 static void  free_hash_links( struct hashrec *ptr );
@@ -279,10 +279,7 @@ void ontraceclass()
   if (doingtrace)
     {
       doingtrace = NO;
-      if(config_entries.defchannel_key[0])
-	join(config_entries.defchannel,config_entries.defchannel_key); 
-      else
-	join(config_entries.defchannel,(char *)NULL);
+      toserv("JOIN %s %s\n", config_entries.defchannel, config_entries.defchannel_key);
     }
 }
 
@@ -950,10 +947,7 @@ static void onservnotice(int connnum, int argc, char *argv[])
   while (msgs_to_mon[++i])
     {
       if (!strncmp(message,msgs_to_mon[i],strlen(msgs_to_mon[i])))
-	{
-	  message += strlen(msgs_to_mon[i]);
-	  break;
-	}
+        break;
     }
 
   /*
@@ -961,78 +955,76 @@ static void onservnotice(int connnum, int argc, char *argv[])
    * -bill
    */
 
-  if (strstr(message, "closed the connection") &&
-      !strncmp(message, "Server", 6)) 
+  q = message+strlen(msgs_to_mon[i]);
+  if (strstr(q, "closed the connection") &&
+      !strncmp(q, "Server", 6)) 
     {
-      q = split(message);
-      q = split(q);
-      sendtoalldcc(SEND_LINK_ONLY, "Lost server: %s\n", q);
+      sendtoalldcc(SEND_LINK_ONLY, "Lost server: %s\n", argv[2]);
       return;
     }
 
   /* Kline notice requested by Toast */
-  if (strstr(message, "added K-Line for"))
+  if (strstr(q, "added K-Line for"))
     {
-      kline_add_report(message);
+      kline_add_report(q);
       return;
     }
 
-  if (strstr(message, "KILL message for"))
+  if (strstr(q, "KILL message for"))
     {
-      kill_add_report(message);
+      kill_add_report(q);
       return;
     }
 
   switch (i)
     {
     case CONNECT:
-      chopuh(NO,message,&userinfo);
-      adduserhost(message,&userinfo,NO,NO);
+      chopuh(NO,q,&userinfo);
+      adduserhost(q,&userinfo,NO,NO);
       break;
 
     case EXITING:
-      chopuh(NO,message,&userinfo);
-      removeuserhost(message,&userinfo);
+      chopuh(NO,q,&userinfo);
+      removeuserhost(q,&userinfo);
       break;
 
     case UNAUTHORIZED:
-      p = strstr(message,"from");
+      p = strstr(q,"from");
       if(p)
         {
-	  p += 4;
-	  message = p;
+	  q = p+5;
 	}
-      logfailure(message,0);
+      logfailure(q,0);
       break;
     case REJECTING:
-      bot_reject(message);
+      bot_reject(q);
       break;
     case TOOMANY:
-      logfailure(message,0);
+      logfailure(q,0);
       break;
     case NICKCHANGE:
-      check_nick_flood(message);
+      check_nick_flood(q);
       break;
 /* CS style of reporting nick flooding */
     case CS_NICKFLOODING:
-      cs_nick_flood(message);
+      cs_nick_flood(q);
       break;
     case CS_CLONES:
     case CS_CLONEBOT_KILLED:
-      cs_clones(message);
+      cs_clones(q);
       break;
     case LINK_LOOK:
-      link_look_notice(message);
+      link_look_notice(q);
       break;
     case STATS:
-      stats_notice(message);
+      stats_notice(q);
       break;
     case JOHBOT:
 #ifdef DEBUGMODE
       placed;
 #endif
 #ifdef BOT_WARN
-      bot_report_kline(message,"johbot");
+      bot_report_kline(q,"johbot");
 #endif
       break;
     case EGGDROP:
@@ -1040,36 +1032,26 @@ static void onservnotice(int connnum, int argc, char *argv[])
       placed;
 #endif
 #ifdef BOT_WARN
-      bot_report_kline(message,"eggdrop");
+      bot_report_kline(q,"eggdrop");
 #endif
       break;
     case LINKWITH:
-      ++message;
+      ++q;
       
-      sendtoalldcc(SEND_LINK_ONLY, "Link with %s\n", message);
+      sendtoalldcc(SEND_LINK_ONLY, "Link with %s\n", q);
       break;
 
     case WRITEERR:
-      ++message;
-      q = split(message);
-
-      if( (p = strchr(q,',')) )
-	*p = '\0';
-
-      sendtoalldcc(SEND_LINK_ONLY, "Write error to %s, closing link.\n", q);
+      sendtoalldcc(SEND_LINK_ONLY, "Write error to %s, closing link.\n", argv[2]);
       break;
 
     case SQUITOF:
-      ++message;
-      q = split(message);
-      q = split(q);
-      r = split(q);
-      sendtoalldcc(SEND_LINK_ONLY, "SQUIT for %s from %s\n", q, r);
+      sendtoalldcc(SEND_LINK_ONLY, "SQUIT for %s from %s\n", argv[1], argv[4]);
       break;
 
     case MOTDREQ:
-      ++message;
-      sendtoalldcc(SEND_MOTD_ONLY, "[MOTD requested by %s]\n", message);
+      ++q;
+      sendtoalldcc(SEND_MOTD_ONLY, "[MOTD requested by %s]\n", q);
       break;
 
     case  IGNORE1:case IGNORE2:case IGNORE3:case IGNORE4:case IGNORE5:
@@ -1083,13 +1065,13 @@ static void onservnotice(int connnum, int argc, char *argv[])
 	 they see them */
 
     case FLOODER:
-      ++message;
-      if(!(p = strchr(message,' ')))
+      ++q;
+      if(!(p = strchr(q,' ')))
 	break;
 
       *p = '\0';
       p++;
-      nick = message;
+      nick = q;
 
       user = p;
       if(!(p = strchr(user,'[')))
@@ -1151,13 +1133,13 @@ static void onservnotice(int connnum, int argc, char *argv[])
       break;
 
     case SPAMBOT:
-      ++message;
-      if(!(p = strchr(message,' ')))
+      ++q;
+      if(!(p = strchr(q,' ')))
 	break;
 
       *p = '\0';
       p++;
-      nick = message;
+      nick = q;
 
       user = p;
       if(!(p = strchr(user,'(')))
@@ -1188,11 +1170,11 @@ static void onservnotice(int connnum, int argc, char *argv[])
       break;
 
     case ILINEFULL:
-      connect_flood_notice(message);
+      connect_flood_notice(q);
       break;
 
     default:
-      sendtoalldcc(SEND_OPERS_NOTICES_ONLY, message);
+      sendtoalldcc(SEND_OPERS_NOTICES_ONLY, q);
       break;
     }
 }

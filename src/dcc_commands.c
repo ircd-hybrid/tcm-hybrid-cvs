@@ -45,7 +45,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.1 2001/09/19 03:30:21 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.2 2001/09/19 16:27:03 bill Exp $";
 
 static int is_kline_time(char *p);
 static int not_legal_remote(int);
@@ -1400,10 +1400,9 @@ void dccproc(int connnum)
 	     * the key as well...
 	     */
 
-	    if(config_entries.defchannel_key[0])
-	      join(config_entries.defchannel,config_entries.defchannel_key); 
-	    else
-	      join(config_entries.defchannel,(char *)NULL);
+            toserv("JOIN %s %s\nMODE %s +ntk %s\n", config_entries.defchannel, 
+                   config_entries.defchannel_key, config_entries.defchannel, 
+                   config_entries.defchannel_key);
 	  }
 	else
 	  prnt(connections[connnum].socket,"You aren't registered\n");

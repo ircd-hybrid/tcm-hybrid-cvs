@@ -12,6 +12,9 @@
 /* scratch buffer size */
 #define MAX_BUFF       512
 
+/* maximum amount of actions */
+#define MAX_ACTIONS	100
+
 /* small scratch buffer size */
 #define SMALL_BUFF	32
 

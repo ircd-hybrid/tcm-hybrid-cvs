@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.3 2001/09/19 03:30:21 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.4 2001/09/19 16:27:03 bill Exp $";
 
 extern struct connection connections[];
 
@@ -132,14 +132,6 @@ void whois(char *nick)
 void names(char *chan)
 {
   toserv("NAMES %s\n", chan);
-}
-
-void join(char *chan,char *key)
-{
-  if(key)
-    toserv("JOIN %s %s\n", chan, key);
-  else
-    toserv("JOIN %s\n", chan);
 }
 
 void leave(char *chan)

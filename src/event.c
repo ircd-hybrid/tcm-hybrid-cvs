@@ -23,7 +23,7 @@
  *  developed and/or copyrighted by other sources.  Please see the
  *  CREDITS file for full details.
  *
- *  $Id: event.c,v 1.11 2002/09/20 05:06:56 bill Exp $
+ *  $Id: event.c,v 1.12 2002/09/20 05:15:29 db Exp $
  */
 
 /*
@@ -65,18 +65,26 @@ eventAdd(const char *name, EVH *func, void *arg, time_t when)
   
   /* find first inactive index, or use next index */
   for (i = 0; i < MAX_EVENTS; i++)
+  {
     if (event_table[i].active != YES)
-      break;
+    {
+      event_table[i].func = func;
+      event_table[i].name = name;
+      event_table[i].arg = arg;
+      event_table[i].when = current_time + when;
+      event_table[i].frequency = when; 
+      event_table[i].active = YES;
 
-  event_table[i].func = func;
-  event_table[i].name = name;
-  event_table[i].arg = arg;
-  event_table[i].when = current_time + when;
-  event_table[i].frequency = when; 
-  event_table[i].active = YES;
+      if ((event_table[i].when < event_time_min) || (event_time_min == -1))
+	event_time_min = event_table[i].when;
+      return;
+    }
+  }
 
-  if ((event_table[i].when < event_time_min) || (event_time_min == -1))
-    event_time_min = event_table[i].when;
+  /* XXX If get here, then never found a free slot. 
+   * probably should be reported.
+   * - Dianora
+   */
 }
 
 /*

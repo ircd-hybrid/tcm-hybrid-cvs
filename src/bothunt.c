@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.174 2002/06/21 19:17:11 leeh Exp $
+ * $Id: bothunt.c,v 1.175 2002/06/22 10:21:20 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1052,7 +1052,7 @@ check_nick_flood(char *snotice)
       if ((nick2 = strtok(NULL," ")) == NULL)
 	return;
       add_to_nick_change_table(user_host, nick2);
-      update_nick(nick1, nick2);
+      update_nick(user_host, nick1, nick2);
 
       return;
     }
@@ -1076,7 +1076,7 @@ check_nick_flood(char *snotice)
     *p = '\0';
 
   add_to_nick_change_table(user_host,nick2);
-  update_nick(nick1, nick2);
+  update_nick(user_host, nick1, nick2);
 }
 
 /*

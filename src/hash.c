@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.35 2002/06/21 16:46:46 leeh Exp $
+ * $Id: hash.c,v 1.36 2002/06/22 10:21:20 leeh Exp $
  */
 
 #include <stdio.h>
@@ -831,19 +831,46 @@ check_virtual_host_clones(char *ip_class_c)
  * output	- NONE
  * side effects - A user has changed nicks. update the nick
  */
-
 void
-update_nick(char *nick1, char *nick2)
+update_nick(char *userhost, char *old_nick, char *new_nick)
 {
   struct hash_rec *find;
+  unsigned int hash_val;
+  char *username;
+  char *host;
 
-  for (find = domain_table[hash_func(nick1)]; find; find = find->next)
+  username = userhost;
+
+  /* XXX - should we make an error? */
+  if((host = strchr(userhost, '@')) == NULL)
+    return;
+
+  *host++ = '\0';
+
+  hash_val = hash_func(username);
+  
+  for(find = user_table[hash_val]; find; find = find->next)
+  {
+    if(strcmp(find->info->nick, old_nick) == 0)
     {
-      if(strcmp(find->info->nick, nick1) == 0)
-	{
-	  strlcpy(find->info->nick, nick2, MAX_NICK);
-	}
+      strlcpy(find->info->nick, new_nick, MAX_NICK);
+      break;
     }
+  }
+
+  hash_val = hash_func(host);
+
+  /* XXX - does the hashtable have one entry for all? */
+  for(find = user_table[hash_val]; find; find = find->next)
+  {
+    if(strcmp(find->info->nick, old_nick) == 0)
+    {
+      strlcpy(find->info->nick, new_nick, MAX_NICK);
+      break;
+    }
+  }
+
+  /* XXX - domain table? */
 }
 
 /*

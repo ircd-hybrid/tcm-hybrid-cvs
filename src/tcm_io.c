@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.69 2002/05/28 21:10:27 bill Exp $
+ * $Id: tcm_io.c,v 1.70 2002/05/28 23:57:21 leeh Exp $
  */
 
 #include <stdio.h>
@@ -571,6 +571,9 @@ va_print_to_socket(int sock, const char *format, va_list va)
   if (msgbuf[strlen(msgbuf)-1] != '\n')
     strcat(msgbuf, "\n");
   send(sock, msgbuf, strlen(msgbuf), 0);
+#ifdef DEBUGMODE
+  printf("-> %s", msgbuf);
+#endif
 }
 
 /*

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.107 2002/05/28 18:47:16 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.108 2002/05/28 23:57:21 leeh Exp $ */
 
 #include "setup.h"
 
@@ -54,7 +54,6 @@ static void register_oper(int connnum, char *password, char *who_did_command);
 static void list_opers(int sock);
 static void list_connections(int sock);
 static void list_exemptions(int sock);
-static void handle_disconnect(int sock,char *param2,char *who_did_command);
 static void handle_save(int sock,char *nick);
 static int  is_legal_pass(int connect_id,char *password);
 static void print_help(int sock,char *text);
@@ -469,8 +468,20 @@ m_disconnect(int connnum, int argc, char *argv[])
     print_to_socket(connections[connnum].socket,
 		    "Usage: %s <nick>", argv[0]);
   else
-    handle_disconnect(connections[connnum].socket, argv[1],
-                      connections[connnum].registered_nick);
+  {
+    int i;
+
+    i = find_user_in_connections(argv[1]);
+
+    if(i >= 0)
+    {
+      print_to_socket(connnum, "Disconnecting oper %s", connections[i].nick);
+      print_to_socket(connections[i].socket, 
+		      "You have been disconnected by oper %s",
+		      connections[connnum].registered_nick);
+      close_connection(i);
+    }
+  }
 }
 
 void
@@ -1115,35 +1126,6 @@ list_connections(int sock)
 	     time((time_t *)NULL)-connections[i].last_message_time  );
       }
     }
-  }
-}
-
-/*
- * handle_disconnect
- *
- * inputs	- socket
- *		- who did the command
- * output	- NONE
- * side effects	- disconnect user
- */
-
-static void 
-handle_disconnect(int sock, char *nickname, char *who_did_command)
-{
-  int  i;
-
-  if (nickname == NULL)
-    print_to_socket(sock, "Usage: disconnect <nickname>");
-  else
-  {
-    for (i=1; i<maxconns; i++)
-      if (sock != INVALID && strcasecmp(nickname,connections[i].nick) == 0)
-      {
-	print_to_socket(sock, "Disconnecting oper %s", connections[i].nick);
-	print_to_socket(sock, "You have been disconnected by oper %s", 
-			who_did_command);
-	close_connection(i);
-      }
   }
 }
 

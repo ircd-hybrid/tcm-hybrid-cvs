@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.80 2002/05/26 20:44:42 leeh Exp $
+ * $Id: userlist.c,v 1.81 2002/05/27 01:54:49 leeh Exp $
  *
  */
 
@@ -227,9 +227,11 @@ get_umodes_from_prefs(int user)
 {
   FILE *fp;
   char user_pref[MAX_BUFF+1];
+  unsigned long type = 0;
+
+  type = userlist[user].type;
 
   snprintf(user_pref, MAX_BUFF, "etc/%s.pref", userlist[user].usernick);
-
   fp = fopen(user_pref, "r");
 
   if(fp != NULL)
@@ -249,13 +251,10 @@ get_umodes_from_prefs(int user)
 
     pref_type &= ~TYPE_PENDING;
 
-    return pref_type;
+    return (pref_type|type);
   }
   else
   {
-    unsigned long type = 0;
-
-    type = userlist[user].type;
     return type;
   }
 }

@@ -1,3 +1,9 @@
+*** 20011107_1 by wcampbel
+Document some items more clearly.
+Disable HOW_TO_MAIL by default.
+Add in zartik's suggested command for HOW_TO_MAIL on FreeBSD and OpenBSD.
+
+
 *** 20011105_2 by wcampbel
 Updated some documentation, spotted by paulsen <erik@pentadon.com>
 

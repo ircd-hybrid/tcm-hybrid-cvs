@@ -1,26 +1,17 @@
-/*
+/* tcm-hybrid/src/userlist.c
  *
- *  - added clear_userlist()
- *  - make it actually use MAXUSERS defined in config.h
- *  - added config file for bot nick, channel, server, port etc.
- *  - rudimentary remote tcm linking added
+ * contains functions for loading and updating the userlist and
+ * config files.
  *
- * $Id: userlist.c,v 1.138 2002/06/24 14:56:10 leeh Exp $
- *
+ * $Id: userlist.c,v 1.139 2002/06/26 11:52:50 leeh Exp $
  */
 
-#include <fcntl.h>
 #include <errno.h>
-#include <ctype.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include "config.h"
 #include "tcm.h"
@@ -38,21 +29,18 @@
 #include "handler.h"
 
 char wingate_class_list[MAXWINGATE][MAX_CLASS];
-
 int	wingate_class_list_index;
 
 static void load_a_user(char *);
 static void load_e_line(char *);
 static void add_oper(char *, char *, char *, char *, char *);
+static void set_initial_umodes(struct oper_entry *, const char *);
 
 static void m_umode(struct connection *, int, char *argv[]);
 static void set_umode_connection(struct connection *, int, const char *);
 static void set_umode_userlist(char *, const char *);
 
-/* XXX - use later */
-#ifdef FOOB
-static void save_umodes(struct oper_entry *);
-#endif
+static void save_umodes(const char *);
 
 struct dcc_command umode_msgtab = {
   "umode", NULL, {m_unregistered, m_umode, m_umode}
@@ -65,9 +53,8 @@ struct umode_struct
 };
 
 /* this table contains privleges that allow the user to do
- * certain things within tcm, such as kline.  users are
- * not able to set any of these flags themselves and they
- * are permanent and read via the userlist.cf
+ * certain things within tcm, such as kline.  only admins
+ * may set these flags once tcm is running
  */
 static struct umode_struct umode_privs[] =
 {
@@ -109,7 +96,7 @@ init_userlist_handlers(void)
 
 /* m_umode()
  *
- * input	- connection number of client doing .umode
+ * input	- connection performing command
  * 		- argc
  * 		- argv
  * output	-
@@ -181,7 +168,7 @@ m_umode(struct connection *connection_p, int argc, char *argv[])
 	  type_show(user_conn->type),
 	  connection_p->registered_nick);
       }
-      else
+      else 
       {
         set_umode_userlist(argv[1], argv[2]);
       }
@@ -199,9 +186,9 @@ m_umode(struct connection *connection_p, int argc, char *argv[])
   }
 }
 
-/* set_umode()
+/* set_umode_connection()
  *
- * input	- user in userlist to change umode for
+ * input	- connection to change usermode for
  * 		- admin, whether we can set privs as well as flags
  * 		- the umode change
  * output	-
@@ -209,7 +196,7 @@ m_umode(struct connection *connection_p, int argc, char *argv[])
  */
 void
 set_umode_connection(struct connection *user_conn,
-  int admin, const char *umode)
+                     int admin, const char *umode)
 {
   int plus = 1;
   int i;
@@ -256,9 +243,17 @@ set_umode_connection(struct connection *user_conn,
       }
     }
   }
+
   set_umode_userlist(user_conn->registered_nick, umode);
 }
 
+/* set_umode_userlist()
+ *
+ * inputs       - user to update
+ *              - umode to update with
+ * outputs      -
+ * side effects - users entry in the userlist is updated with flags
+ */
 void
 set_umode_userlist(char *nick, const char *umode)
 {
@@ -313,13 +308,15 @@ set_umode_userlist(char *nick, const char *umode)
       }
     }
   }
+
+  save_umodes(nick);
 }
 
 /* find_user_in_userlist()
  *
  * input	- username to search for
  * output	-
- * side effects - return place in userlist, or -1 if not found
+ * side effects - return user, or NULL if not found
  */
 struct oper_entry *
 find_user_in_userlist(const char *username)
@@ -338,20 +335,35 @@ find_user_in_userlist(const char *username)
   return NULL;
 }
 
-/* get_umodes_from_prefs()
+/* set_initial_umodes()
  *
- * input	- user to get prefs for
+ * input	- user to set umodes for
+ *              - initial umodes from confs
  * output	-
- * side effects - usermodes from preferences are returned
+ * side effects - usermodes from conf and prefs are set
  */
 void
-get_umodes_from_prefs(struct oper_entry *user)
+set_initial_umodes(struct oper_entry *user, const char *umode)
 {
   FILE *fp;
   char user_pref_filename[MAX_BUFF];
   char type_string[SMALL_BUFF];
   char *p;
   int type;
+  int i;
+  int j;
+
+  for(i = 0; umode[i] != '\0'; i++)
+  {
+    for(j = 0; umode_privs[j].umode; j++)
+    {
+      if(umode[i] == umode_privs[j].umode)
+      {
+        user->type |= umode_privs[j].type;
+        break;
+      }
+    }
+  }
 
   snprintf(user_pref_filename, MAX_BUFF,
 	   "etc/%s.pref", user->usernick);
@@ -383,21 +395,24 @@ get_umodes_from_prefs(struct oper_entry *user)
   }
 }
 
-#ifdef FOOB
-/* XXX - use later */
 /* save_umodes()
  *
- * input	-
+ * input	- users nick
  * output	- usermodes are saved to prefs file
  * side effects -
  */
 void
-save_umodes(struct oper_entry *user)
+save_umodes(const char *nick)
 {
   FILE *fp;
+  struct oper_entry *user;
   char user_pref[MAX_BUFF];
 
-  snprintf(user_pref, MAX_BUFF, "etc/%s.pref", user->usernick);
+  snprintf(user_pref, MAX_BUFF, "etc/%s.pref", nick);
+  user = find_user_in_userlist(nick);
+  
+  if(user == NULL)
+    return;
 
   if((fp = fopen(user_pref, "w")) != NULL)
   {
@@ -409,7 +424,6 @@ save_umodes(struct oper_entry *user)
     send_to_all(FLAGS_ALL, "Couldn't open %s for writing", user_pref);
   }
 }
-#endif
     
 /*
  * load_config_file
@@ -881,10 +895,7 @@ add_oper(char *username, char *host, char *usernick,
 
   /* its from the conf.. load their umodes. */
   if(*type != '\0')
-  {
-    set_umode_userlist(user->usernick, type); 
-    get_umodes_from_prefs(user);
-  }
+    set_initial_umodes(user, type);
 
   dlink_add_tail(user, ptr, &user_list);
 }

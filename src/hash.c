@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.44 2002/06/24 02:35:56 wcampbel Exp $
+ * $Id: hash.c,v 1.45 2002/06/26 11:52:50 leeh Exp $
  */
 
 #include <stdio.h>
@@ -324,14 +324,6 @@ add_user_host(struct user_entry *user_info, int fromtrace)
     }
 }
 
-static void foob(void);
-
-void
-foob(void)
-{
-  return;
-}
-
 /*
  * remove_user_host()
  * 
@@ -361,7 +353,6 @@ remove_user_host(struct user_entry *user_info)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from host table!\n",
 		      user_info->nick, user_info->username, user_info->host);
-              foob();
 	    }
 	}
     }

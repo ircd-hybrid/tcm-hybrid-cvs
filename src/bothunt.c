@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.186 2002/06/24 14:56:09 leeh Exp $
+ * $Id: bothunt.c,v 1.187 2002/06/26 11:52:50 leeh Exp $
  */
 
 #include <stdio.h>
@@ -145,6 +145,14 @@ struct msg_to_action msgs_to_mon[] = {
   {NULL, 0, INVALID}
 };	
 
+
+static void foob(void);
+
+void
+foob(void)
+{
+  return;
+}
 
 /*
  * on_trace_user()
@@ -342,16 +350,19 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* Kline notice requested by Toast */
   if (strstr(p, "added K-Line for"))
   {
+    foob();
     tcm_log(L_NORM, "%s", p);
     return;
   }
   else if (strstr(p, "added temporary "))
   {
+    foob();
     tcm_log(L_NORM, "%s", p);
     return;
   }
   else if (strstr(p, "has removed the "))
   {
+    foob();
     tcm_log(L_NORM, "%s", p);
     return;
   }

@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.12 2002/06/01 03:40:49 db Exp $
+ * $Id: clones.c,v 1.13 2002/06/01 12:36:15 wcampbel Exp $
  */
 
 #include <assert.h>
@@ -339,6 +339,7 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
   int i;
   int foundany = NO;
   int check_type;
+  /* XXX - This notip is never set before being used */
   int notip;
 
   nclones--;
@@ -364,7 +365,7 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
 		  if (!match(tptr->info->user, ptr->info->user))
 		    break;
 		}
-	      else if(check_type = HOST_CHECK)
+	      else if(check_type == HOST_CHECK)
 		{
 		  if (!match(tptr->info->host, ptr->info->host))
 		    break;

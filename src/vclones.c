@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.8 2002/05/31 04:54:51 db Exp $
+ * $Id: vclones.c,v 1.9 2002/06/01 12:36:16 wcampbel Exp $
  */
 
 #include <assert.h>
@@ -33,7 +33,6 @@ static void m_vmulti(int, int, char *argv[]);
 static void m_vbots(int, int, char *argv[]);
 static void m_vlist(int, int, char *argv[]);
 
-static void report_multi_virtuals(int, int);
 static void report_vbots(int, int, int);
 static void list_virtual_users(int, char *, int);
 

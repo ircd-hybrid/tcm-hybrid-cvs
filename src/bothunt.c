@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.165 2002/06/15 18:36:13 wcampbel Exp $
+ * $Id: bothunt.c,v 1.166 2002/06/21 05:45:53 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1586,11 +1586,12 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
     }
 
   /* If it's the first format, we have no problems */
-  if ((uh = strchr(nickuserhost,' ')) == NULL)
+  if((uh = strchr(nickuserhost,' ')) == NULL)
     {
       if((uh = strchr(nickuserhost,'[')) == NULL)
         {
-          if((uh = strchr(nickuserhost,'(')) != NULL)	/* lets see... */
+          /* no [, no (, god knows what the seperator is */
+          if((uh = strchr(nickuserhost,'(')) == NULL)
             {
               (void)fprintf(stderr,
                             "You have VERY badly screwed up +c output!\n");
@@ -1599,6 +1600,10 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
               return;           /*screwy...prolly core in the caller*/
             }
 
+	  /* there was a (, uh points to it.  shift uh up one */
+	  *uh++ = '\0';
+
+	  /* search for the ) to match and replace with \0 */
           if((p = strrchr(uh,')')) != NULL)
             {
               *p = '\0';
@@ -1612,6 +1617,7 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
                             nickuserhost);
               /* No ending ')' found, but lets try it anyway */
             }
+
           if (get_user_host(&user, &host, uh) == 0)
 	    return;
 	  strlcpy(userinfo->user, user, MAX_USER);
@@ -1619,10 +1625,13 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
           return;
         }
 
+      /* there *was* a [ as the seperator, uh points to it */
+
+      /* theres another one.  ugh. */
       if (strchr(uh+1,'[') != NULL)
         {
           /*moron has a [ in the nickname or username.  Let's do some AI crap*/
-          if ((strchr(uh, '~')) == NULL)
+          if ((uh = strchr(uh, '~')) == NULL)
             {
               /* no tilde to guess from:
 	       *
@@ -1638,13 +1647,13 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
                     break;
 #endif
             }
+	  /* uh points to the leading ~ */
           else
             {
               /* We have a ~ which is illegal in a nick, but also valid
                * in a faked username.  Assume it is the marker for the start
                * of a non-ident username, which means a [ should precede it.
                */
-
               if (*(uh-1) == '[')
                 {
                   --uh;

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.57 2002/04/22 22:32:03 bill Exp $ */
+/* $Id: bothunt.c,v 1.58 2002/04/25 02:24:44 bill Exp $ */
 
 #include "setup.h"
 
@@ -770,7 +770,7 @@ void onservnotice(int connnum, int argc, char *argv[])
   }
   else if (strstr(p, "clearing temp klines"))
   {
-    nick = q+1;
+    nick = p;
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';

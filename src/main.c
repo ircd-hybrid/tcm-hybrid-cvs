@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.84 2002/05/27 01:37:42 db Exp $ */
+/* $Id: main.c,v 1.85 2002/05/27 02:24:46 db Exp $ */
 
 #include "setup.h"
 
@@ -84,8 +84,6 @@ void set_action_time(int action, int klinetime);
 #ifdef HAVE_SETRLIMIT
 static void setup_corefile(void);
 #endif
-
-
 
 int
 add_action(char *name)
@@ -302,9 +300,9 @@ main(int argc, char *argv[])
 	}
     }
 
-  if(config_entries.tcm_pid_file[0])
+  if(config_entries.tcm_pid_file[0] != '\0')
     {
-      if( !(outfile = fopen(config_entries.tcm_pid_file,"w")) )
+      if ((outfile = fopen(config_entries.tcm_pid_file,"w")) == NULL)
 	{
 	  fprintf(stderr,"Cannot write %s as given in tcm.cf file\n",
 		  config_entries.tcm_pid_file);
@@ -323,7 +321,7 @@ main(int argc, char *argv[])
   (void)fprintf(outfile,"%d\n", (int) getpid());
   (void)fclose(outfile);
 
-  if(config_entries.debug && outfile)
+  if(config_entries.debug && (outfile != NULL))
     {
        if ((outfile = fopen(DEBUG_LOGFILE,"w")) == NULL)
 	 {
@@ -340,7 +338,7 @@ main(int argc, char *argv[])
 
   maxconns = 1;
 
-  if(config_entries.virtual_host_config[0])
+  if(config_entries.virtual_host_config[0] != '\0')
     {
       strncpy(ourhostname,config_entries.virtual_host_config,MAX_HOST-1);
     }
@@ -370,7 +368,7 @@ main(int argc, char *argv[])
 static void 
 init_debug(int sig)
 {
-  if(config_entries.debug && outfile)
+  if(config_entries.debug && (outfile != NULL))
     {
       fprintf(outfile, "Debug turned off.\n");
       fclose(outfile);
@@ -379,7 +377,7 @@ init_debug(int sig)
     }
   else
     {
-      if ( !(outfile = fopen(DEBUG_LOGFILE, "w")) )
+      if ((outfile = fopen(DEBUG_LOGFILE, "w")) == NULL)
 	{
 	  fprintf(stderr, "Cannot creat %s\n", DEBUG_LOGFILE);
 	  signal(sig, init_debug);

@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.35 2002/05/27 01:37:42 db Exp $
+ * $Id: logging.c,v 1.36 2002/05/27 02:24:46 db Exp $
  *
  * - db
  */
@@ -276,15 +276,15 @@ static FILE
 #ifdef LOGFILE
   last_filename[0] = '\0';
 
-  if( (last_log_fp = fopen(LAST_LOG_NAME,"r")) )
+  if ((last_log_fp = fopen(LAST_LOG_NAME,"r")) != NULL)
     {
       (void)fgets(last_filename,MAX_BUFF-1,last_log_fp);
-      if( (p = strchr(last_filename,'\n')) )
+      if ((p = strchr(last_filename,'\n')) != NULL)
 	*p = '\0';
 
-      if(config_entries.debug && outfile)
+      if(config_entries.debug && (outfile != NULL))
 	{
-	  fprintf(outfile, "last_filename = [%s]\n", last_filename );
+	  (void)fprintf(outfile, "last_filename = [%s]\n", last_filename );
 	}
       (void)fclose(last_log_fp);
     }
@@ -296,7 +296,7 @@ static FILE
 		(broken_up_time->tm_mon)+1,broken_up_time->tm_mday,
 		broken_up_time->tm_year + 1900);
 
-  if( (l_fp = fopen(filename,"a")) == NULL)
+  if ((l_fp = fopen(filename,"a")) == NULL)
     return (NULL);
 
   if( !last_filename[0] )
@@ -314,10 +314,10 @@ static FILE
                      HOW_TO_MAIL, config_entries.email_config);
       if( (email_fp = popen(command,"w")) )
 	{
-	  if( (log_to_email_fp = fopen(last_filename,"r")) )
+	  if ((log_to_email_fp = fopen(last_filename,"r")) != NULL)
 	    {
-	      while(fgets(command,MAX_BUFF-1,log_to_email_fp ))
-		fputs(command,email_fp);
+	      while(fgets(command,MAX_BUFF-1,log_to_email_fp ) != NULL)
+		(void)fputs(command,email_fp);
 	      (void)fclose(log_to_email_fp);
 	    }
 	  (void)fclose(email_fp);
@@ -325,7 +325,7 @@ static FILE
       (void)unlink(last_filename);
     }
 #endif
-  if( (last_log_fp = fopen(LAST_LOG_NAME,"w")) )
+  if ((last_log_fp = fopen(LAST_LOG_NAME,"w")) != NULL)
     {
       (void)fputs(filename,last_log_fp);
       (void)fclose(last_log_fp);
@@ -347,13 +347,11 @@ static FILE
 void 
 timestamp_log(FILE *fp)
 {
-  time_t current_time;
   struct tm *broken_up_time;
 
-  if(!fp)
+  if(fp == NULL)
     return;
 
-  current_time = time(NULL);
   broken_up_time = localtime(&current_time);
 
   (void)fprintf(fp,"%02d/%02d/%04d %02d:%02d\n",
@@ -529,10 +527,8 @@ void
 kline_report(char *server_notice)
 {
   FILE *fp_log;
-  time_t current_time;
   struct tm *broken_up_time;
 
-  current_time = time(NULL);
   broken_up_time = localtime(&current_time);
   
   send_to_all(SEND_KLINE_NOTICES,

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.81 2002/05/27 01:54:49 leeh Exp $
+ * $Id: userlist.c,v 1.82 2002/05/27 02:24:46 db Exp $
  *
  */
 
@@ -135,6 +135,8 @@ set_umode(int connnum, int override, const char *umode)
 
 void m_umode(int connnum, int argc, char *argv[])
 {
+  int user;
+
   if(argc < 2)
   {
     print_to_socket(connections[connnum].socket, 
@@ -153,8 +155,6 @@ void m_umode(int connnum, int argc, char *argv[])
     }
     else
     {
-      int user;
-
       if((connections[connnum].type & TYPE_ADMIN) == 0)
       {
         print_to_socket(connections[connnum].socket,
@@ -191,8 +191,6 @@ void m_umode(int connnum, int argc, char *argv[])
 #if 0
     if((argv[2][0] == '+') || (argv[2][0] == '-'))
     {
-      int user;
-
       user = find_user(argv[1]);
 
       if(user >= 0)
@@ -219,43 +217,38 @@ find_user(const char *username)
       return i;
   }
 
-  return -1;
+  return (-1);
 }
 
 unsigned long
 get_umodes_from_prefs(int user)
 {
   FILE *fp;
-  char user_pref[MAX_BUFF+1];
-  unsigned long type = 0;
+  unsigned long type=userlist[user].type;
+  unsigned long pref_type = 0;
+  char user_pref_filename[MAX_BUFF+1];
+  char type_string[SMALL_BUFF+1];
+  char *p;
 
-  type = userlist[user].type;
+  snprintf(user_pref_filename,
+	   MAX_BUFF, "etc/%s.pref", userlist[user].usernick);
 
-  snprintf(user_pref, MAX_BUFF, "etc/%s.pref", userlist[user].usernick);
-  fp = fopen(user_pref, "r");
-
-  if(fp != NULL)
+  if ((fp = fopen(user_pref_filename, "r")) != NULL)
   {
-    unsigned long pref_type;
+    if ((fgets(type_string, SMALL_BUFF, fp)) == NULL)
+      return(userlist[user].type);
 
-    char type_string[SMALL_BUFF+1];
-    char *p;
-
-    fgets(type_string, SMALL_BUFF, fp);
-    fclose(fp);
-
+    (void)fclose(fp);
     if((p = strchr(type_string, '\n')) != NULL)
       *p = '\0';
 
     sscanf(type_string, "%lu", &pref_type);
-
     pref_type &= ~TYPE_PENDING;
-
-    return (pref_type|type);
+    return (pref_type); /* XXX |type); eh? */
   }
   else
   {
-    return type;
+    return(type);
   }
 }
     
@@ -353,7 +346,6 @@ load_config_file(char *file_name)
     if(line[0] == '#')
       continue;
 
-    /* zap newlines */
     if ((p = strchr(line,'\n')) != NULL)
       *p = '\0';
 

@@ -1,3 +1,36 @@
+leeh        2002/05/24 10:14:01 EDT	(20020524_7)
+
+  Modified files:
+    include              tcm_io.h userlist.h 
+    modules              commands.c 
+    src                  bothunt.c event.c logging.c main.c 
+                         modules.c parse.c stdcmds.c tcm_io.c 
+                         userlist.c 
+  Log:
+  - merged TYPE_LINK and TYPE_MOTD into TYPE_SPY (+y)
+    will probably merge stats here later, but its a start
+  - initial start at getting rid of the optionally oper only stuff,
+    it should be mandatory, a user logging into tcm just wont happen.
+  - turned the SEND_* stuff for sendtoalldcc() into a proper bitmask, and
+    got rid of the _ONLY crap off the end.
+  .
+  
+  Revision  Changes    Path
+  1.4       +11 -14    tcm-hybrid/include/tcm_io.h
+  1.34      +3 -4      tcm-hybrid/include/userlist.h
+  1.68      +44 -66    tcm-hybrid/modules/commands.c
+  1.87      +59 -71    tcm-hybrid/src/bothunt.c
+  1.5       +1 -0      tcm-hybrid/src/event.c
+  1.27      +4 -6      tcm-hybrid/src/logging.c
+  1.53      +4 -5      tcm-hybrid/src/main.c
+  1.32      +12 -12    tcm-hybrid/src/modules.c
+  1.10      +7 -6      tcm-hybrid/src/parse.c
+  1.64      +12 -12    tcm-hybrid/src/stdcmds.c
+  1.9       +21 -27    tcm-hybrid/src/tcm_io.c
+  1.62      +10 -15    tcm-hybrid/src/userlist.c
+
+
+
 wcampbel    2002/05/24 09:19:28 EDT	(20020524_6)
 
   Modified files:

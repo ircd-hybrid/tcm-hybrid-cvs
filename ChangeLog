@@ -1,3 +1,15 @@
+leeh        2002/06/06 14:52:48 EDT	(20020606_2)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - take the servername from source_p in RPL_WELCOME.
+  
+  Revision  Changes    Path
+  1.68      +1 -15     tcm-hybrid/src/parse.c
+
+
+
 leeh        2002/06/06 08:06:17 EDT	(20020606_1)
 
   Modified files:

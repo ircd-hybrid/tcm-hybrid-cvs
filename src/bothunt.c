@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.155 2002/06/07 11:20:13 leeh Exp $
+ * $Id: bothunt.c,v 1.156 2002/06/07 11:25:06 leeh Exp $
  */
 
 #include <stdio.h>
@@ -58,7 +58,7 @@ struct s_testline testlines;
 
 struct nick_change_entry
 {
-  char user_host[MAX_USER+MAX_HOST];
+  char user_host[MAX_USERHOST];
   char last_nick[MAX_NICK];
   int  nick_change_count;
   time_t first_nick_change;
@@ -771,12 +771,10 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     {
       if (strchr(user, '@'))
 	snprintf(connect_flood[c].user_host,
-		 MAX_USER+MAX_HOST, "%s", 
-		 user);
+		 MAX_USERHOST, "%s", user);
       else
 	snprintf(connect_flood[c].user_host,
-		 MAX_USER+MAX_HOST, "%s@%s",
-		 user, host);
+		 MAX_USERHOST, "%s@%s", user, host);
       connect_flood[c].connect_count = 0;
       connect_flood[c].last_connect = current_time;
     }
@@ -831,9 +829,9 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if (c >= 0)
     {
       if (strchr(user, '@'))
-        snprintf(connect_flood[c].user_host, MAX_USER + MAX_HOST, "%s", user);
+        snprintf(connect_flood[c].user_host, MAX_USERHOST, "%s", user);
       else
-        snprintf(connect_flood[c].user_host, MAX_USER + MAX_HOST,
+        snprintf(connect_flood[c].user_host, MAX_USERHOST,
 			"%s@%s", user, host);
 
       connect_flood[c].connect_count = 0;
@@ -886,9 +884,9 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if (c >= 0)
     {
       if (strchr(user, '@'))
-        snprintf(connect_flood[c].user_host, MAX_USER + MAX_HOST, "%s", user);
+        snprintf(connect_flood[c].user_host, MAX_USERHOST, "%s", user);
       else
-        snprintf(connect_flood[c].user_host, MAX_USER + MAX_HOST,
+        snprintf(connect_flood[c].user_host, MAX_USERHOST,
                  "%s@%s", user, host);
       connect_flood[c].last_connect = current_time;
       connect_flood[c].connect_count = 0;
@@ -1093,7 +1091,7 @@ link_look_notice(char *snotice)
   send_to_all(FLAGS_SPY, "[LINKS by %s (%s@%s)]",
 	       nick_reported, user, host ); /* - zaph */
 
-  snprintf(user_host, MAX_USER + MAX_HOST, "%s@%s", user, host);
+  snprintf(user_host, MAX_USERHOST, "%s@%s", user, host);
 
   for(i = 0; i < MAX_LINK_LOOKS; i++ )
     {
@@ -1151,7 +1149,7 @@ link_look_notice(char *snotice)
 	{
 	  /* XXX */
 	  strlcpy(link_look[first_empty_entry].user_host,user_host,
-		  MAX_USER+MAX_HOST);
+		  MAX_USERHOST);
 	  link_look[first_empty_entry].last_link_look = current_time;
           link_look[first_empty_entry].link_look_count = 1;
 	}

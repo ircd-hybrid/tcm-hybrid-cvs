@@ -49,7 +49,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.1 2000/09/02 04:30:49 bill Exp $";
+static char *version="$Id: serverif.c,v 1.2 2000/09/02 04:45:31 lusky Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -1423,7 +1423,7 @@ char makeconn(char *hostport,char *nick,char *userhost)
 
   connections[i].last_message_time = time((time_t *)NULL);
 
-  toserv("%s\n",VERSION);
+  toserv("%s(%s)\n",VERSION,SERIALNUM);
 
   print_motd(connections[i].socket);
 

@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.37 2002/05/20 00:21:34 db Exp $ */
+/* $Id: main.c,v 1.38 2002/05/20 00:52:52 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -57,7 +57,9 @@
 #include "dmalloc.h"
 #endif
 
+#ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
+#endif
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -104,7 +106,9 @@ int action_log(char *name);
 char *get_action_reason(char *name);
 #endif
 
+#ifdef HAVE_SETRLIMIT
 static void setup_corefile(void);
+#endif
 
 /*
  * init_hash_tables
@@ -545,7 +549,9 @@ int main(int argc, char *argv[])
     printf("Unable to chdir to DPATH\nFatal Error, exiting\n");
     exit(1);
   }
+#ifdef HAVE_SETRLIMIT
   setup_corefile();
+#endif
   init_hash_tables();		/* clear those suckers out */
   init_tokenizer();		/* in token.c */
   init_userlist();
@@ -776,6 +782,7 @@ void m_not_admin(int connnum, int argc, char *argv[])
 }
 #endif
 
+#ifdef HAVE_SETRLIMIT
 /*
  * setup_corefile
  *
@@ -797,3 +804,4 @@ static void setup_corefile(void)
     setrlimit(RLIMIT_CORE, &rlim);
   }
 }
+#endif

@@ -1,3 +1,20 @@
+leeh        2002/06/22 06:21:22 EDT	(20020622_4)
+
+  Modified files:
+    include              hash.h 
+    src                  bothunt.c hash.c 
+  Log:
+  - attempted to fix tcm wrt nick changes.
+  
+    di: can you take a look at the XXX's ive added to update_nick() ? :)
+  
+  Revision  Changes    Path
+  1.19      +1 -1      tcm-hybrid/include/hash.h
+  1.175     +2 -2      tcm-hybrid/src/bothunt.c
+  1.36      +34 -7     tcm-hybrid/src/hash.c
+
+
+
 leeh        2002/06/22 05:57:38 EDT	(20020622_3)
 
   Modified files:

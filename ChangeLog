@@ -1,3 +1,27 @@
+jmallett    2002/05/25 12:14:39 EDT	(20020525_17)
+
+  Modified files:
+    include              logging.h tcm.h 
+    src                  commands.c event.c logging.c main.c 
+                         stdcmds.c 
+  Log:
+  Track total memory allocated over time.
+  
+  Release allocated memory for the log list on rehash.
+  
+  Fix some stylistic nits regarding using pointer values as booleans.
+  
+  Revision  Changes    Path
+  1.6       +1 -0      tcm-hybrid/include/logging.h
+  1.36      +2 -0      tcm-hybrid/include/tcm.h
+  1.82      +1 -0      tcm-hybrid/src/commands.c
+  1.7       +0 -2      tcm-hybrid/src/event.c
+  1.31      +26 -3     tcm-hybrid/src/logging.c
+  1.66      +9 -2      tcm-hybrid/src/main.c
+  1.70      +3 -1      tcm-hybrid/src/stdcmds.c
+
+
+
 db          2002/05/25 12:10:49 EDT	(20020525_16)
 
   Modified files:

@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.42 2004/06/02 20:05:55 bill Exp $
+# $Id: Makefile.in,v 1.43 2004/06/10 18:51:08 bill Exp $
 
 CC = @CC@
 RM = @RM@
@@ -28,8 +28,7 @@ lex.yy.o: y.tab.c lex.yy.c tcm_lexer.l
 lex.yy.c: tcm_lexer.l
 	${LEX} tcm_lexer.l
 
-SOURCES =       @UTIL_C@	\
-		actions.c	\
+SOURCES =       actions.c	\
 		bothunt.c       \
 		clones.c	\
 		client_list.c	\
@@ -44,7 +43,7 @@ SOURCES =       @UTIL_C@	\
 		main.c		\
 		match.c		\
 		parse.c		\
-		respond.c	\
+		@RESPOND_C@	\
 		seedrand.c	\
 		serv_commands.c	\
 		services.c	\
@@ -53,6 +52,7 @@ SOURCES =       @UTIL_C@	\
 		tcm_io.c	\
 		tools.c		\
 		userlist.c	\
+		@UTIL_C@	\
 		vclones.c	\
 		wild.c
 

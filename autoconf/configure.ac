@@ -2,15 +2,15 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.53)
 
-AC_COPYRIGHT([$Id: configure.ac,v 1.3 2004/06/04 01:54:26 bill Exp $])
+AC_COPYRIGHT([$Id: configure.ac,v 1.4 2004/06/10 18:51:03 bill Exp $])
 
-AC_INIT([tcm-hybrid],[3.1.0-pre])
+AC_INIT([tcm-hybrid],[4-beta1])
 
 AC_CONFIG_HEADER(include/setup.h)
 AC_PREFIX_DEFAULT(/usr/local/tcm)
 
 PACKAGE=tcm-hybrid
-VERSION=3.1.2-pre
+VERSION=4-beta1
 
 if test "$prefix" = "NONE"; then
   dnl Be smart.
@@ -78,9 +78,12 @@ AC_SEARCH_LIBS(inet_aton, resolv,
 [if test "$ac_cv_search_inet_aton" = "no"; then UTIL_C=util.c; fi])
 
 dnl Basic check for SSL.
-AC_CHECK_HEADER(openssl/rsa.h)
+AC_CHECK_HEADERS([openssl/err.h openssl/rsa.h openssl/pem.h openssl/md5.h],	\
+                  AC_DEFINE([RESPOND_C], "respond.c"),				\
+                  AC_DEFINE([NO_SSL]))
+AC_SUBST(RESPOND_C)
 
-AC_CHECK_LIB(crypto, RSA_private_decrypt)
+AC_CHECK_LIB(crypto, RSA_private_decrypt, , AC_DEFINE([NO_SSL]))
 AC_SEARCH_LIBS(crypt, [crypt descrypt], ,[error=1])
 
 if test "$error" = 1; then

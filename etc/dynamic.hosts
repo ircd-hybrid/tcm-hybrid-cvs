@@ -4,7 +4,7 @@
 #  by the tcm.  All dynamic hosts will receive temporary klines
 #  with the duration set in the appropriate action.
 #
-# $Id: dynamic.hosts,v 1.1 2003/04/14 08:50:31 bill Exp $
+# $Id: dynamic.hosts,v 1.2 2004/06/10 18:51:04 bill Exp $
 
 *ppp*.*.*
 *dial*.*.*
@@ -62,7 +62,6 @@
 *.twtelecom.net
 *.btopenworld.com
 *.dsl-verizon.net
-*.verizon.net
 *.speakeasy.net
 *.velocet.net
 *.telocity.com

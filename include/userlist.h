@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.96 2004/06/03 02:51:35 bill Exp $ */
+/* $Id: userlist.h,v 1.97 2004/06/10 18:51:06 bill Exp $ */
 
 #include "setup.h"
 #include "tools.h"
@@ -44,7 +44,7 @@ struct config_list {
   char virtual_host_config[MAX_CONFIG];
   char oper_nick_config[MAX_CONFIG];
   char oper_pass_config[MAX_CONFIG];
-#ifdef HAVE_LIBCRYPTO
+#ifndef NO_SSL
   char oper_keyfile[MAX_CONFIG];	/* CHALLENGE support.  e? */
   char oper_keyphrase[MAX_CONFIG];
 #endif

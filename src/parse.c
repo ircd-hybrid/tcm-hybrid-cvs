@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.89 2004/05/11 19:31:59 bill Exp $
+ * $Id: parse.c,v 1.90 2004/06/10 18:51:08 bill Exp $
  */
 
 #include <stdio.h>
@@ -36,7 +36,7 @@
 #include "patchlevel.h"
 #include "handler.h"
 #include "dcc.h"
-#ifdef HAVE_LIBCRYPTO
+#ifndef NO_SSL
 #include "respond.h"
 #endif
 
@@ -370,7 +370,7 @@ process_server(struct source_client *source_p, char *function, char *param)
         tcm_status.ping_time = atoi(argv[5]) * 2 + 15;
       break;
 
-#ifdef HAVE_LIBCRYPTO
+#ifndef NO_SSL
     case RPL_RSACHALLENGE:
       do_challenge(argv[3]);
       break;

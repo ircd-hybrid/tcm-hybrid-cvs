@@ -14,11 +14,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *  $Id: respond.c,v 1.2 2003/06/01 01:19:05 bill Exp $
+ *  $Id: respond.c,v 1.3 2004/06/10 18:51:08 bill Exp $
  */
 #include "setup.h"
-
-#ifdef HAVE_LIBCRYPTO
 
 #include <openssl/err.h>
 #include <openssl/rsa.h>
@@ -143,5 +141,3 @@ int do_challenge(char *challenge_string)
   send_to_server("CHALLENGE +%s", ndata);
   return 0;
 }
-
-#endif /* HAVE_LIBCRYPTO */

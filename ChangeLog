@@ -1,3 +1,18 @@
+wcampbel    2002/05/05 10:36:46 EDT	(20020505_1)
+
+  Modified files:
+    modules              commands.c 
+  Log:
+  Make report_multi_user() use match() instead of strcmp().
+    Reasoning:  although it doesn't use a pattern, match does take into account
+    case AND the [{]}\| legacy nonsense.  This I believe is more important then
+    the slight performance hit caused by match()
+  
+  Revision  Changes    Path
+  1.46      +2 -2      tcm-hybrid/modules/commands.c
+
+
+
 wcampbel    2002/05/04 23:06:05 EDT	(20020505_0)
 
   Modified files:

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.126 2002/05/28 05:46:41 db Exp $
+ * $Id: bothunt.c,v 1.127 2002/05/28 11:52:38 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1659,7 +1659,7 @@ stats_notice(char *snotice)
 	continue;
 
       /* display opers */
-      if (connections[i].type & TYPE_OPER)
+      if(has_umode(i, TYPE_OPER))
       {
 #ifdef HIDE_OPER_HOST
 	notice(nick,

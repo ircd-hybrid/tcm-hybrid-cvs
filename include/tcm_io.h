@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.26 2002/05/27 17:32:18 db Exp $
+ * $Id: tcm_io.h,v 1.27 2002/05/28 11:52:35 leeh Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -23,7 +23,6 @@ struct connection {
   void	(*io_write_function)(int connect_id);
   void	(*io_close_function)(int connect_id);
   int	user_state;
-  int	type;			/* why was this a char? -bill */
   int	set_modes;		/* for set options */
   char	user[MAX_USER];
   char	host[MAX_HOST];

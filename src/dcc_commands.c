@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.101 2002/05/28 00:35:09 db Exp $ */
+/* $Id: dcc_commands.c,v 1.102 2002/05/28 11:52:38 leeh Exp $ */
 
 #include "setup.h"
 
@@ -337,7 +337,7 @@ m_umulti(int connnum, int argc, char *argv[])
 void
 m_register(int connnum, int argc, char *argv[])
 {
-  if (connections[connnum].type & TYPE_OPER)
+  if(has_umode(connnum, TYPE_OPER))
   {
     print_to_socket(connections[connnum].socket, 
 		    "You are already registered.");
@@ -1172,11 +1172,14 @@ list_connections(int sock)
     {
       if(connections[i].registered_nick[0] != 0)
       {
+        int user;
+
+	user = find_user_in_userlist(connections[i].registered_nick);
 	print_to_socket(sock,
 	     "%s/%s %s (%s@%s) is connected - idle: %ld",
 	     connections[i].nick,
 	     connections[i].registered_nick,
-	     type_show(connections[i].type),
+	     type_show(userlist[user].type),
 	     connections[i].user,
 	     connections[i].host,
 	     time((time_t *)NULL)-connections[i].last_message_time );
@@ -1184,9 +1187,8 @@ list_connections(int sock)
       else
       {
 	print_to_socket(sock,
-	     "%s %s (%s@%s) is connected - idle: %ld",
+	     "%s O (%s@%s) is connected - idle: %ld",
 	     connections[i].nick,
-	     type_show(connections[i].type),
 	     connections[i].user,
 	     connections[i].host,
 	     time((time_t *)NULL)-connections[i].last_message_time  );
@@ -1510,8 +1512,8 @@ is_legal_pass(int connect_id, char *password)
 
   for(i=0; userlist[i].user && userlist[i].host[0]; i++)
     {
-      if ((!match(userlist[i].user,connections[connect_id].user)) &&
-          (!wldcmp(userlist[i].host,connections[connect_id].host)))
+      if ((match(userlist[i].user,connections[connect_id].user) == 0) &&
+          (wldcmp(userlist[i].host,connections[connect_id].host) == 0))
         {
 	  /* 
 	   * userlist entries discovered from stats O
@@ -1521,24 +1523,24 @@ is_legal_pass(int connect_id, char *password)
           if(userlist[i].password[0])
             {
 #ifdef USE_CRYPT
-              if(!strcmp((char*)crypt(password,userlist[i].password),
-                         userlist[i].password))
-                {
-                  strncpy(connections[connect_id].registered_nick,
-                          userlist[i].usernick,
-                          MAX_NICK);
-                  connections[connect_id].type = userlist[i].type;
-                  return userlist[i].type;
-                }
+              if(strcmp((char*)crypt(password,userlist[i].password),
+                         userlist[i].password) == 0)
+	      {
+                strncpy(connections[connect_id].registered_nick,
+                        userlist[i].usernick,
+                        MAX_NICK);
+
+		return 1;
+	      }
 #else
-              if(!strcmp(userlist[i].password,password))
-                {
-                  strncpy(connections[connect_id].registered_nick,
-                          userlist[i].usernick,
-                          MAX_NICK);
-                  connections[connect_id].type = userlist[i].type;
-                  return(userlist[i].type);
-                }
+              if(strcmp(userlist[i].password,password) == 0)
+	      {
+                strncpy(connections[connect_id].registered_nick,
+                        userlist[i].usernick,
+                        MAX_NICK);
+
+		return 1;
+	      }
 #endif
             }
         }

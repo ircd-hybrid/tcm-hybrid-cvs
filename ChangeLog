@@ -1,3 +1,10 @@
+*** 20011123_1 by wcampbel
+TCM Cleanups.  Look at the XXX's for more details.
+Moved report_multi*() to be static functions in modules/commands.c,
+  as they are only used there, and don't appear to depend on anything
+  else.
+
+
 *** 20011114_1 by bill
 
 - fixed bug with server buffer initialization

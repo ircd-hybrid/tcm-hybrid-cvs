@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.46 2002/06/01 19:43:13 db Exp $
+ * $Id: logging.c,v 1.47 2002/06/07 16:32:29 db Exp $
  *
  * - db
  */
@@ -54,200 +54,6 @@ static FILE *initlog(void);
 static void timestamp_log(FILE *);
 static char *duration(double);
 
-/*
- *   Chop a string of form "nick [user@host]" or "nick[user@host]" into
- *   nick and userhost parts.  Return pointer to userhost part.  Nick
- *   is still pointed to by the original param.  Note that since [ is a
- *   valid char for both nicks and usernames, this is non-trivial.
- */
-
-void 
-chopuh(int istrace,char *nickuserhost,struct user_entry *userinfo)
-{
-  char *uh;
-  char *p;
-  char skip = NO;
-  char *right_brace_pointer;
-  char *right_square_bracket_pointer;
-  char *user;
-  char *host;
-/* I try to pick up an [IP] from a connect or disconnect message
- * since this routine is also used on trace, some heuristics are
- * used to determine whether the [IP] is present or not.
- * *sigh* I suppose the traceflag could be used to not even go
- * through these tests
- * bah. I added a flag -Dianora
- */
-
-  userinfo->user[0] = '\0';
-  userinfo->host[0] = '\0';
-  memset(userinfo->ip_host,0,sizeof(userinfo->ip_host));
-
-  /* ok, if its a hybrid server or modified server,
-   * I go from right to left picking up extra bits
-   * [ip] {class}, then go and pick up the nick!user@host bit
-   */
-
-  if(!istrace)  /* trace output is not the same as +c output */
-    {
-      snprintf(userinfo->class, sizeof(userinfo->class) - 1, "unknown");
-
-      p = nickuserhost;
-      while(*p)
-        p++;
-
-      right_square_bracket_pointer = NULL;
-      right_brace_pointer = NULL;
-
-      while(p != nickuserhost)
-        {
-          if(right_square_bracket_pointer == NULL)
-            if(*p == ']')       /* found possible [] IP field */
-              right_square_bracket_pointer = p;
-
-          if(*p == '}') /* found possible {} class field */
-            right_brace_pointer = p;
-
-          if(*p == ')') /* end of scan for {} class field and [] IP field */
-            break;
-          p--;
-        }
-
-      if(right_brace_pointer)
-        {
-          p = right_brace_pointer;
-          *p = '\0';
-          p--;
-          while(p != nickuserhost)
-            {
-              if(*p == '{')
-                {
-                  p++;
-                  if (*p == ' ') p++;
-                  snprintf(userinfo->class, sizeof(userinfo->class) - 1,
-                           "%s", p);
-                  break;
-                }
-              p--;
-            }
-        }
-
-      if(right_square_bracket_pointer && config_entries.hybrid)
-        {
-          p = right_square_bracket_pointer;
-          *p = '\0';
-          p--;
-          while(p != nickuserhost)
-            {
-              if(*p == '[')
-                {
-                  *p = '\0';
-                  p++;
-                  break;
-                }
-              else if(*p == '@') /* nope. this isn't a +c line */
-                {
-                  p = NULL;
-                  break;
-                }
-              else
-                p--;
-          }
-        if (p)
-          snprintf(userinfo->ip_host, sizeof(userinfo->ip_host), "%s", p);
-      }
-    }
-
-  /* If it's the first format, we have no problems */
-  if (!(uh = strchr(nickuserhost,' ')))
-    {
-      if( !(uh = strchr(nickuserhost,'[')) )
-        {
-          if( !(uh = strchr(nickuserhost,'(')) )        /* lets see... */
-            {                                   /* MESSED up GIVE UP */
-              (void)fprintf(stderr,
-                            "You have VERY badly screwed up +c output!\n");
-              (void)fprintf(stderr,
-                            "1st case nickuserhost = [%s]\n", nickuserhost);
-              return;           /*screwy...prolly core in the caller*/
-            }
-
-          if((p = strrchr(uh,')')))
-            {
-              *p = '\0';
-            }
-          else
-            {
-              (void)fprintf(stderr,
-                            "You have VERY badly screwed up +c output!\n");
-              (void)fprintf(stderr,
-                            "No ending ')' nickuserhost = [%s]\n",
-                            nickuserhost);
-              /* No ending ')' found, but lets try it anyway */
-            }
-          if (get_user_host(&user, &host, uh) == 0)
-	    return;
-	  strlcpy(userinfo->user, user, MAX_USER);
-	  strlcpy(userinfo->host, host, MAX_HOST);
-          return;
-        }
-
-      if (strchr(uh+1,'['))
-        {
-          /*moron has a [ in the nickname or username.  Let's do some AI crap*/
-          uh = strchr(uh,'~');
-          if (!uh)
-            {
-              /* No tilde to guess off of... means the lamer checks out with
-                 identd and has (more likely than not) a valid username.
-                 Find the last [ in the string and assume this is the
-                 divider, unless it creates an illegal length username
-                 or nickname */
-              uh = nickuserhost + strlen(nickuserhost);
-              while (--uh != nickuserhost)
-                if (*uh == '[' && *(uh+1) != '@' && uh - nickuserhost < 10)
-                  break;
-            }
-          else
-            {
-              /* We have a ~ which is illegal in a nick, but also valid
-               * in a faked username.  Assume it is the marker for the start
-               * of a non-ident username, which means a [ should precede it.
-               */
-
-              if (*(uh-1) == '[')
-                {
-                  --uh;
-                }
-              else
-                /* Idiot put a ~ in his username AND faked identd.  Take the
-                 * first [ that precedes this, unless it creates an
-                 *  illegal length username or nickname
-                 */
-                while (--uh != nickuserhost)
-                  if (*uh == '[' && uh - nickuserhost < 10)
-                    break;
-            }
-        }
-    }
-  else
-    skip = YES;
-
-  *(uh++) = 0;
-  if (skip)
-    ++uh;                 /* Skip [ */
-  if (strchr(uh,' '))
-    *(strchr(uh,' ')) = 0;
-  if (uh[strlen(uh)-1] == '.')
-    uh[strlen(uh)-2] = 0;   /* Chop ] */
-  else
-    uh[strlen(uh)-1] = 0;   /* Chop ] */
-
-  if (get_user_host(&user, &host, uh) == 0)
-    return;
-  strlcpy(userinfo->user, user, MAX_USER);
-  strlcpy(userinfo->host, host, MAX_HOST);
-}
 
 /*
  * initlog()
@@ -431,24 +237,21 @@ logclear(void)
 /*
  * log_failure()
  *
- * inputs       - pointer to nick!user@host
+ * inputs       - pointer to struct user_entry
  * output       - NONE
  * side effects -
  */
 
 void 
-log_failure(char *nickuh)
+log_failure(struct user_entry *userinfo)
 {
-  struct user_entry userinfo;
   struct failrec *ptr;
   struct failrec *hold = NULL;
 
-  chopuh(YES,nickuh,&userinfo); /* use trace form of chopuh() */
-
   for (ptr = failures; ptr; ptr = ptr->next)
     {
-      if(!strcasecmp(ptr->user, userinfo.user) && 
-	 !strcasecmp(ptr->host, userinfo.host))
+      if(!strcasecmp(ptr->user, userinfo->user) && 
+	 !strcasecmp(ptr->host, userinfo->host))
         {
           /* For performance, move the most recent to the head of the queue */
           if (hold != NULL)
@@ -466,8 +269,8 @@ log_failure(char *nickuh)
     {
       ptr = (struct failrec *)xmalloc(sizeof(struct failrec));
 
-      strlcpy(ptr->user, userinfo.user, MAX_USER);
-      strlcpy(ptr->host, userinfo.host, MAX_HOST);
+      strlcpy(ptr->user, userinfo->user, MAX_USER);
+      strlcpy(ptr->host, userinfo->host, MAX_HOST);
       ptr->failcount = 0;
       ptr->next = failures;
       failures = ptr;

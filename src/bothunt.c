@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.156 2002/06/07 11:25:06 leeh Exp $
+ * $Id: bothunt.c,v 1.157 2002/06/07 16:32:29 db Exp $
  */
 
 #include <stdio.h>
@@ -49,6 +49,9 @@ static void link_look_notice(char *snotice);
 static void connect_flood_notice(char *snotice);
 static void add_to_nick_change_table(char *user_host, char *last_nick);
 static void stats_notice(char *snotice);
+static void chopuh(int istrace,char *nickuserhost,struct user_entry *userinfo);
+#define IS_FROM_TRACE		YES
+#define IS_NOT_FROM_TRACE	NO
 
 struct serv_command servnotice_msgtab = {
   "NOTICE", NULL, on_server_notice
@@ -133,7 +136,6 @@ void
 on_trace_user(int argc, char *argv[])
 {
   struct user_entry userinfo;
-  char *class_ptr;	/* pointer to class number */
   int  is_oper;
   char *ip_ptr;
   char *right_bracket_ptr;
@@ -172,15 +174,12 @@ on_trace_user(int argc, char *argv[])
   {
     snprintf(tcm_status.my_class, MAX_CLASS, "%s", argv[4]);
   }
-  class_ptr = argv[4];
 
-  chopuh(YES,argv[5],&userinfo);
-  snprintf(userinfo.ip_host, MAX_IP, "%s", argv[6]+1);
-  snprintf(userinfo.class, MAX_CLASS, "%s", class_ptr);
-
-  /* XXX */
-  strlcpy(userinfo.nick, argv[5], MAX_NICK); /* XXX */
-  add_user_host(&userinfo,YES,is_oper);
+  chopuh(IS_FROM_TRACE, argv[5], &userinfo);
+  strlcpy(userinfo.class, argv[4], MAX_CLASS);
+  strlcpy(userinfo.nick, argv[5], MAX_NICK);
+  strlcpy(userinfo.ip_host, argv[6]+1, MAX_IP);
+  add_user_host(&userinfo, YES, is_oper);
 }
 
 /* 
@@ -553,7 +552,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Client exiting: bill (bill@ummm.E) [e?] [255.255.255.255]*/
   case EXITING:
-    chopuh(NO,q,&userinfo);
+    chopuh(IS_NOT_FROM_TRACE, q, &userinfo);
     remove_user_host(q,&userinfo);
     break;
 
@@ -567,7 +566,8 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((q = strchr(p, ' ')) == NULL)
       return;
     *q = '\0';
-    log_failure(p);
+    chopuh(IS_FROM_TRACE, p, &userinfo);
+    log_failure(&userinfo);
     break;
 
   /* Nick change: From bill to aa [bill@ummm.E] */
@@ -770,10 +770,9 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if (c >= 0)
     {
       if (strchr(user, '@'))
-	snprintf(connect_flood[c].user_host,
-		 MAX_USERHOST, "%s", user);
+	strlcpy(connect_flood[c].user_host, user, MAX_USERHOST);
       else
-	snprintf(connect_flood[c].user_host,
+	snprintf(connect_flood[c].user_host, 
 		 MAX_USERHOST, "%s@%s", user, host);
       connect_flood[c].connect_count = 0;
       connect_flood[c].last_connect = current_time;
@@ -1674,4 +1673,199 @@ get_user_host(char **user_p, char **host_p, char *user_host)
   *p = '\0';
   *host_p = p+1; 
   return (1);
+}
+
+/*
+ *   Chop a string of form "nick [user@host]" or "nick[user@host]" into
+ *   nick and userhost parts.  Return pointer to userhost part.  Nick
+ *   is still pointed to by the original param.  Note that since [ is a
+ *   valid char for both nicks and usernames, this is non-trivial.
+ */
+
+static void 
+chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
+{
+  char *uh;
+  char *p;
+  char skip = NO;
+  char *right_brace_pointer;
+  char *right_square_bracket_pointer;
+  char *user;
+  char *host;
+/* I try to pick up an [IP] from a connect or disconnect message
+ * since this routine is also used on trace, some heuristics are
+ * used to determine whether the [IP] is present or not.
+ * *sigh* I suppose the traceflag could be used to not even go
+ * through these tests
+ * bah. I added a flag -Dianora
+ */
+
+  userinfo->user[0] = '\0';
+  userinfo->host[0] = '\0';
+  userinfo->ip_host[0] = '\0';
+
+  /* ok, if its a hybrid server or modified server,
+   * I go from right to left picking up extra bits
+   * [ip] {class}, then go and pick up the nick!user@host bit
+   */
+
+  if(!is_trace)  /* trace output is not the same as +c output */
+    {
+      /* a strcpy is acceptable IFF you know the sizes will always fit ! */
+      strcpy(userinfo->class, "unknown");
+
+      p = nickuserhost;
+      while(*p)
+        p++;
+
+      right_square_bracket_pointer = NULL;
+      right_brace_pointer = NULL;
+
+      while(p != nickuserhost)
+        {
+          if(right_square_bracket_pointer == NULL)
+            if(*p == ']')       /* found possible [] IP field */
+              right_square_bracket_pointer = p;
+
+          if(*p == '}') /* found possible {} class field */
+            right_brace_pointer = p;
+
+          if(*p == ')') /* end of scan for {} class field and [] IP field */
+            break;
+          p--;
+        }
+
+      if(right_brace_pointer)
+        {
+          p = right_brace_pointer;
+          *p = '\0';
+          p--;
+          while(p != nickuserhost)
+            {
+              if(*p == '{')
+                {
+                  p++;
+                  if (*p == ' ') p++;
+                  snprintf(userinfo->class, sizeof(userinfo->class) - 1,
+                           "%s", p);
+                  break;
+                }
+              p--;
+            }
+        }
+
+      if(right_square_bracket_pointer && config_entries.hybrid)
+        {
+          p = right_square_bracket_pointer;
+          *p = '\0';
+          p--;
+          while(p != nickuserhost)
+            {
+              if(*p == '[')
+                {
+                  *p = '\0';
+                  p++;
+                  break;
+                }
+              else if(*p == '@') /* nope. this isn't a +c line */
+                {
+                  p = NULL;
+                  break;
+                }
+              else
+                p--;
+          }
+        if (p)
+          snprintf(userinfo->ip_host, sizeof(userinfo->ip_host), "%s", p);
+      }
+    }
+
+  /* If it's the first format, we have no problems */
+  if ((uh = strchr(nickuserhost,' ')) == NULL)
+    {
+      if((uh = strchr(nickuserhost,'[')) == NULL)
+        {
+          if((uh = strchr(nickuserhost,'(')) != NULL)	/* lets see... */
+            {
+              (void)fprintf(stderr,
+                            "You have VERY badly screwed up +c output!\n");
+              (void)fprintf(stderr,
+                            "1st case nickuserhost = [%s]\n", nickuserhost);
+              return;           /*screwy...prolly core in the caller*/
+            }
+
+          if((p = strrchr(uh,')')) != NULL)
+            {
+              *p = '\0';
+            }
+          else
+            {
+              (void)fprintf(stderr,
+                            "You have VERY badly screwed up +c output!\n");
+              (void)fprintf(stderr,
+                            "No ending ')' nickuserhost = [%s]\n",
+                            nickuserhost);
+              /* No ending ')' found, but lets try it anyway */
+            }
+          if (get_user_host(&user, &host, uh) == 0)
+	    return;
+	  strlcpy(userinfo->user, user, MAX_USER);
+	  strlcpy(userinfo->host, host, MAX_HOST);
+          return;
+        }
+
+      if (strchr(uh+1,'[') != NULL)
+        {
+          /*moron has a [ in the nickname or username.  Let's do some AI crap*/
+          if ((uh = strchr(uh, '~')) != NULL)
+            {
+              /* No tilde to guess off of... means the lamer checks out with
+                 identd and has (more likely than not) a valid username.
+                 Find the last [ in the string and assume this is the
+                 divider, unless it creates an illegal length username
+                 or nickname */
+              uh = nickuserhost + strlen(nickuserhost);
+              while (--uh != nickuserhost)
+                if (*uh == '[' && *(uh+1) != '@' && uh - nickuserhost < 10)
+                  break;
+            }
+          else
+            {
+              /* We have a ~ which is illegal in a nick, but also valid
+               * in a faked username.  Assume it is the marker for the start
+               * of a non-ident username, which means a [ should precede it.
+               */
+
+              if (*(uh-1) == '[')
+                {
+                  --uh;
+                }
+              else
+                /* Idiot put a ~ in his username AND faked identd.  Take the
+                 * first [ that precedes this, unless it creates an
+                 *  illegal length username or nickname
+                 */
+                while (--uh != nickuserhost)
+                  if (*uh == '[' && uh - nickuserhost < 10)
+                    break;
+            }
+        }
+    }
+  else
+    skip = YES;
+
+  *(uh++) = '\0';
+  if (skip)
+    ++uh;                 /* Skip [ */
+  if (strchr(uh,' '))
+    *(strchr(uh,' ')) = '\0';
+  if (uh[strlen(uh)-1] == '.')
+    uh[strlen(uh)-2] = '\0';   /* Chop ] */
+  else
+    uh[strlen(uh)-1] = '\0';   /* Chop ] */
+
+  if (get_user_host(&user, &host, uh) == 0)
+    return;
+  strlcpy(userinfo->user, user, MAX_USER);
+  strlcpy(userinfo->host, host, MAX_HOST);
 }

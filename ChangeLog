@@ -1,3 +1,17 @@
+db          2002/05/30 18:41:00 EDT	(20020530_12)
+
+  Modified files:
+    src                  clones.c hash.c vclones.c 
+  Log:
+  - userptr -> ptr
+  
+  Revision  Changes    Path
+  1.8       +91 -88    tcm-hybrid/src/clones.c
+  1.13      +41 -37    tcm-hybrid/src/hash.c
+  1.6       +39 -36    tcm-hybrid/src/vclones.c
+
+
+
 db          2002/05/30 16:58:53 EDT	(20020530_11)
 
   Modified files:

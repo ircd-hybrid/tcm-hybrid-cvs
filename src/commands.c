@@ -40,7 +40,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.6 2000/12/05 00:54:47 bill Exp $";
+static char *version="$Id: commands.c,v 1.7 2000/12/08 23:22:30 bill Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -1757,6 +1757,13 @@ static void set_actions(int socket, char *key, char *action, char *reason,
   if(!key)
     {
       prnt(socket, "Current actions:\n");
+
+      if(config_entries.cflood_act[0])
+        prnt(socket,
+	     "Current cflood_act: \"%s\"\n", config_entries.cflood_act);
+      else
+	prnt(socket,
+	     "Current cflood_act: \"warn\"\n");
 
       if(config_entries.clone_act[0])
 	prnt(socket,

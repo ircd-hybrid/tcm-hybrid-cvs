@@ -298,6 +298,9 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 #define MAX_LINK_LOOKS  4
 #define MAX_LINK_TIME 120
 
+#define MAX_CONNECT_FAILS 4
+#define MAX_CONNECT_TIME 20
+
 /*
  * used in domain report
  * paragod reports 1000 for this, is too small on his servers

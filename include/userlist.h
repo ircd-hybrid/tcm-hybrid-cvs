@@ -37,6 +37,8 @@ struct config_list {
   char vclone_reason[MAX_CONFIG];
   char sclone_act[MAX_CONFIG];		/* services clone action */
   char sclone_reason[MAX_CONFIG];	
+  char cflood_act[MAX_CONFIG];		/* connect drone action */
+  char cflood_reason[MAX_CONFIG];
   char flood_act[MAX_CONFIG];
   char flood_reason[MAX_CONFIG];
   char ctcp_act[MAX_CONFIG];		/* ctcp flood action */
@@ -161,6 +163,7 @@ int islinkedbot(int connnum, char *botname, char *password);
 #define CHANNEL_REPORT_SPOOF	0x0400
 #define CHANNEL_REPORT_BOT	0x0800
 #define CHANNEL_REPORT_SPAMBOT	0x1000
+#define CHANNEL_REPORT_CFLOOD	0x2000
 
 #endif
 

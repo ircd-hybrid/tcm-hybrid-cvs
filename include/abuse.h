@@ -28,5 +28,6 @@ char* format_reason(char *reason);
 #define R_CTCP		0x100
 #define R_SPOOF		0x200
 #define R_SPAMBOT	0x400
+#define R_CFLOOD	0x800
 
 #endif

@@ -91,6 +91,7 @@ extern struct connection connections[];
 #define FLOODER		26
 #define SPAMBOT		27
 #define ILINEMASK	28
+#define ILINEFULL	29
 
 #define HASHTABLESIZE 3001
 

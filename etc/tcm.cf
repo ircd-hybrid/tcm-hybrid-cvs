@@ -27,6 +27,7 @@ C:&frizzle.net
 # A:case:action:log to channel? <yes/no>
 #  Sets the action to take on various automated situations.
 #   Possible values for case:
+# *NEW* - cflood	<what action to take with connect flooders>
 #	- clone		<what action to take when clones are found>
 #	- flood		<what action to take when a user floods>
 #	- link		<what action to take when a link looker is found>
@@ -38,6 +39,7 @@ C:&frizzle.net
 #	- kline		<kline the user using the proper message>
 #	- warn		<do nothing to the user, warn +w users on the tcm>
 #
+A:cflood:dline:no
 A:clone:kline:yes
 A:ctcp:kline 60:no
 A:flood:warn:no

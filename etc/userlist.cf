@@ -85,16 +85,6 @@ F:*:p@inept.rh.rit.edu
 F:bots:pro@oc12.net
 #  -bill (pro@oc12.net)
 #
-# C: lines
-# tcm's we know about
-# each entry here consists of a colon separated line
-#
-# hostname where remote tcm is running
-# default nickname of remote tcm
-# password and port
-#
-C:your.tcm.site.com:lametcm:nottherealpassword:6800
-#
 # ignore these users if they try to do a /dcc chat
 B:loser@*lamesite.com
 #

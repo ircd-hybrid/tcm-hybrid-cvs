@@ -34,7 +34,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.2 2000/09/02 05:42:35 lusky Exp $";
+static char *version="$Id: abuse.c,v 1.3 2000/12/08 23:22:29 bill Exp $";
 
 /*
  * do_a_kline()
@@ -207,14 +207,46 @@ void suggest_kill_kline(int reason,
       strcpy(suggested_user,"~*");
     }
 
-  suggested_host = suggest_host(host);
-
 /* 
  * Completely redone to conform to A: in config.
  * 	-pro 6/2000
  */
  switch (reason)
    {
+   case R_CFLOOD:  /* connect flooding drones */
+     if (config_entries.cflood_act[0])
+       {
+	 if(!strncasecmp(config_entries.cflood_act,"kline",5))
+	   {
+	     warn = NO;
+	     sendtoalldcc(SEND_OPERS_ONLY,
+	       "Connect flooder detected %s@%s,auto-klining...\n",
+               suggested_user, suggested_host);
+
+             toserv("%s %s@%s :%s\n",
+		    config_entries.cflood_act,
+		    suggested_user, suggested_host,
+		    config_entries.cflood_reason);
+	   } else if (!strncasecmp(config_entries.cflood_act, "dline", 5)) {
+	     warn = NO;
+	     sendtoalldcc(SEND_OPERS_ONLY,
+		"Connect flooder detected %s@%s,auto-\002d\002lining...\n",
+		suggested_user, host);
+	     toserv("%s %s :%s\n",
+		config_entries.cflood_act,
+		host,
+		config_entries.cflood_reason);
+	   }
+       } 
+
+     if(warn)
+       sendtoalldcc(SEND_WARN_ONLY,
+	    "*** Connect flooder detected from %s@%s.\n.kclone %s@%s\n",
+		    suggested_user, suggested_host,
+		    suggested_user, suggested_host);
+     break;
+
+
    case R_SCLONES: /* services clones */
      if (config_entries.sclone_act[0])
        {

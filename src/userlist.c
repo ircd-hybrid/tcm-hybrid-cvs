@@ -28,7 +28,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: userlist.c,v 1.3 2000/12/01 05:16:16 bill Exp $";
+static char *version="$Id: userlist.c,v 1.4 2000/12/08 23:22:31 bill Exp $";
 
 #ifdef NEXT
 char *strdup(char *);
@@ -112,6 +112,10 @@ void load_config_file(char *file_name)
 
   config_entries.channel_report = 
     CHANNEL_REPORT_ROUTINE | CHANNEL_REPORT_CLONES;
+
+  strcpy(config_entries.cflood_act, "dline");
+  strncpy(config_entries.cflood_reason, REASON_KDRONE,
+	  sizeof(config_entries.cflood_reason) - 1);
 
   strcpy(config_entries.sclone_act, "kline 60");
   strncpy(config_entries.sclone_reason, REASON_AUTO_MULTI_SERVER_CLONES,
@@ -502,6 +506,11 @@ void save_prefs(void)
 	    config_entries.channel_report&CHANNEL_REPORT_VCLONES?1:-1);
 #endif
 
+  if(config_entries.cflood_act[0])
+    fprintf(fp,"A:cflood:%s:%s:%d\n",
+	    config_entries.cflood_act,config_entries.cflood_reason,
+	    config_entries.channel_report&CHANNEL_REPORT_CFLOOD?1:-1);
+
   if(config_entries.sclone_act[0])
     fprintf(fp,"A:sclone:%s:%s:%d\n",
 	    config_entries.sclone_act,config_entries.sclone_reason,
@@ -597,6 +606,19 @@ static void add_action(char *value, char *action, char *reason, int message)
 	config_entries.channel_report &= ~CHANNEL_REPORT_VCLONES;
     }
 #endif
+  else if (!strcasecmp(value, "cflood"))
+    {
+        strncpy(config_entries.cflood_act, action,
+		sizeof(config_entries.cflood_act));
+
+	if(reason)
+	  strncpy(config_entries.cflood_reason, reason,
+		  sizeof(config_entries.cflood_reason));
+	if(message > 0)
+	  config_entries.channel_report |= CHANNEL_REPORT_CFLOOD;
+	else
+	  config_entries.channel_report &= ~CHANNEL_REPORT_CFLOOD;
+    }
   else if (!strcasecmp(value, "sclone"))
     {
 	strncpy(config_entries.sclone_act, action, 

@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.13 2001/07/22 04:31:59 wcampbel Exp $";
+static char *version="$Id: commands.c,v 1.14 2001/07/22 19:27:50 wcampbel Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -1826,6 +1826,10 @@ static void set_actions(int sock, char *key, char *act, char *reason,
 	prnt(sock,
 	     "Current cflood_act: \"warn\"\n");
 
+      if(config_entries.cflood_reason[0])
+        prnt(sock,
+             "Current cflood_reason: \"%s\"\n", config_entries.cflood_reason);
+
       if(config_entries.clone_act[0])
 	prnt(sock,
 	     "Current clone_act: \"%s\"\n", config_entries.clone_act);
@@ -2473,6 +2477,45 @@ static void set_actions(int sock, char *key, char *act, char *reason,
 	    }
 	}
 #endif
+      else if(!strcasecmp(key,"cflood_act"))
+        {
+          if(!act)
+            {
+              prnt(sock,
+                   "Set cflood_act to \"warn\", was \"%s\"\n",
+                   config_entries.cflood_act);
+              config_entries.cflood_act[0] = '\0';
+            }
+          else
+            {
+              prnt(sock,
+                   "Set cflood_act to \"%s\", was \"%s\"\n",
+                   act, config_entries.cflood_act);
+              strncpy(config_entries.cflood_act, act,
+                      sizeof(config_entries.cflood_act));
+
+              if(reason)
+                {
+                  prnt(sock,
+                       "Set cflood_reason to \"%s\", was \"%s\"\n",
+                       reason, config_entries.cflood_reason);
+                  strncpy(config_entries.cflood_reason, reason,
+                          sizeof(config_entries.cflood_reason));
+                }
+            }
+
+          if(message)
+            {
+              if(!strcasecmp(message,"yes"))
+                {
+                  config_entries.channel_report |= CHANNEL_REPORT_CFLOOD;
+                }
+              else if(!strcasecmp(message,"no"))
+                {
+                  config_entries.channel_report &= ~CHANNEL_REPORT_CFLOOD;
+                }
+            }
+        }
       else
 	{
 	  prnt(sock,"Unknown action\n");

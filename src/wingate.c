@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.41 2002/05/26 15:26:00 db Exp $ */
+/* $Id: wingate.c,v 1.42 2002/05/26 19:27:09 db Exp $ */
 
 
 #include <netdb.h>
@@ -29,14 +29,6 @@
 
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
 
-/* Maximum pending connects for wingates */
-#define MAXWINGATE 200
-
-/* Maximum pending connects for socks */
-#define MAXSOCKS 400 
-
-/* Maximum pending connects for squid */
-#define MAXSQUID 400
 
 #define SOCKS5_CONNECTING	4
 #define SOCKS4_CONNECTING	5
@@ -385,19 +377,6 @@ read_socks(int i)
 #endif	/* #if notyet */
 
 void
-_config(int connnum, int argc, char *argv[])
-{
-#if notyet
-  if ((argc==2) && ((argv[0][0]=='w') || (argv[0][0]=='W')))
-  {
-    strncpy(wingate_class_list[wingate_class_list_index], argv[1], 
-	    sizeof(wingate_class_list[0]));
-    wingate_class_list_index++;
-  }
-#endif
-}
-
-void
 user_signon(struct plus_c_info *info_p)
 {
   if (wingate_class(info_p->class))
@@ -474,10 +453,6 @@ void init_wingates(void)
 {
 #ifdef DEBUGMODE
   add_dcc_handler(&proxy_msgtab);
-#endif
-/* XXX */
-#if notyet
-  wingate_class_list_index = 0;
 #endif
 #ifdef DETECT_WINGATE
   act_wingate = add_action("wingate");

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.78 2002/05/26 19:04:15 leeh Exp $
+ * $Id: userlist.c,v 1.79 2002/05/26 19:27:09 db Exp $
  *
  */
 
@@ -38,11 +38,13 @@
 
 struct auth_file_entry userlist[MAXUSERS];
 struct exception_entry hostlist[MAXHOSTS];
+char wingate_class_list[MAXWINGATE][MAX_CLASS];
 
-int  user_list_index;
-int  tcm_list_index;
-int  host_list_index;
-int  ban_list_index;
+int	user_list_index;
+int	tcm_list_index;
+int	host_list_index;
+int	ban_list_index;
+int	wingate_class_list_index;
 
 static void load_a_user(char *);
 static void load_e_line(char *);
@@ -312,8 +314,16 @@ load_config_file(char *file_name)
       strncpy(config_entries.defchannel,argv[1],MAX_CHANNEL-1);
       break;
 
+    case 'w': case 'W':
+      strlcpy(wingate_class_list[wingate_class_list_index], argv[1],
+	      MAX_CLASS-1);	/* XXX MAX_CLASS or MAX_CLASS-1 ? */
+      wingate_class_list_index++;
+      break;
+
     default:
+#if 0
       _config(0, argc, argv);
+#endif
     }
   }
 
@@ -740,6 +750,7 @@ clear_userlist()
 {
   user_list_index = 0;
   host_list_index = 0;
+  wingate_class_list_index = 0;
 
   memset((void *)userlist, 0, sizeof(userlist));
   memset((void *)hostlist, 0, sizeof(hostlist));
@@ -1030,12 +1041,8 @@ local_ip(char *ourhostname)
 int
 wingate_class(char *class)
 {
-#if notyet
   int i;
-#endif
-  return YES;
-  /* XXX */
-#if notyet
+
   for(i=0; wingate_class_list[i] != '\0' ;i++)
     {
       if(strcasecmp(wingate_class_list[i], class) == 0)
@@ -1044,5 +1051,4 @@ wingate_class(char *class)
         }
     }
   return(NO);
-#endif
 }

@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.57 2002/05/26 13:09:19 leeh Exp $
+ * $Id: config.h,v 1.58 2002/05/26 19:27:06 db Exp $
  */
 
 /*
@@ -194,6 +194,15 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 
 /* Maximum users allowed in tcm userlist */
 #define MAXUSERS 100
+
+/* Maximum pending connects for wingates */
+#define MAXWINGATE 200
+
+/* Maximum pending connects for socks */
+#define MAXSOCKS 400 
+
+/* Maximum pending connects for squid */
+#define MAXSQUID 400
 
 /* maximum number of hosts not to auto kline */
 #define MAXHOSTS 100

@@ -56,7 +56,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.14 2001/10/11 20:45:22 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.15 2001/10/11 22:16:44 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -1673,6 +1673,7 @@ void check_virtual_host_clones(char *ip_class_c)
           if (user[0] == '\0') snprintf(user, sizeof(user), "%s", find->info->user);
           if (strcasecmp(user, find->info->user)) different=YES;
           if (find->info->user[0] == '~') ident = NO;
+          else ident = YES;
 	  if (clonecount == 1)
 	    {
 	      (void)snprintf(notice1,sizeof(notice1) - 1,

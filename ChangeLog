@@ -1,3 +1,15 @@
+db          2002/06/07 21:52:46 EDT	(20020608_0)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  - fixed style
+  
+  Revision  Changes    Path
+  1.158     +4 -3      tcm-hybrid/src/bothunt.c
+
+
+
 db          2002/06/07 12:32:31 EDT	(20020607_7)
 
   Modified files:

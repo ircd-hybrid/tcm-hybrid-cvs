@@ -1,3 +1,18 @@
+db          2002/06/23 22:30:41 EDT	(20020624_2)
+
+  Modified files:
+    include              wingate.h 
+    src                  userlist.c wingate.c 
+  Log:
+  - This should make wingate.c compile and quite possibly work.
+  
+  Revision  Changes    Path
+  1.6       +0 -2      tcm-hybrid/include/wingate.h
+  1.135     +0 -4      tcm-hybrid/src/userlist.c
+  1.63      +35 -40    tcm-hybrid/src/wingate.c
+
+
+
 db          2002/06/23 21:23:29 EDT	(20020624_1)
 
   Modified files:

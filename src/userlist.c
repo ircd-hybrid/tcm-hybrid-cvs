@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.128 2002/06/21 23:14:04 leeh Exp $
+ * $Id: userlist.c,v 1.129 2002/06/21 23:20:18 leeh Exp $
  *
  */
 
@@ -874,7 +874,7 @@ add_oper(char *username, char *host, char *usernick,
   user = (struct oper_entry *) xmalloc(sizeof(struct oper_entry));
   memset(user, 0, sizeof(struct oper_entry));
 
-  strlcpy(user->user, username, sizeof(user->user));
+  strlcpy(user->username, username, sizeof(user->username));
   strlcpy(user->host, host, sizeof(user->host));
   strlcpy(user->usernick, usernick, sizeof(user->usernick));
   strlcpy(user->password, password, sizeof(user->password));
@@ -890,7 +890,7 @@ add_oper(char *username, char *host, char *usernick,
 }
 
 void
-add_exempt(char *user, char *host, int type)
+add_exempt(char *username, char *host, int type)
 {
   slink_node *ptr;
   struct exempt_entry *exempt;
@@ -902,7 +902,7 @@ add_exempt(char *user, char *host, int type)
   exempt = (struct exempt_entry *) xmalloc(sizeof(struct exempt_entry));
   memset(exempt, 0, sizeof(struct exempt_entry));
 
-  strlcpy(exempt->user, user, sizeof(exempt->user));
+  strlcpy(exempt->username, username, sizeof(exempt->username));
   strlcpy(exempt->host, host, sizeof(exempt->host));
 
   if(type)
@@ -1006,7 +1006,7 @@ is_an_oper(char *username, char *host)
   {
     user = ptr->data;
 
-    if((match(user->user, username) == 0) &&
+    if((match(user->username, username) == 0) &&
        (wldcmp(user->host, host) == 0))
       return(YES);
   }
@@ -1023,7 +1023,7 @@ is_an_oper(char *username, char *host)
  * side effects	- none
  */
 int
-ok_host(char *user, char *host, int type)
+ok_host(char *username, char *host, int type)
 {
   slink_node *ptr;
   struct exempt_entry *exempt;
@@ -1034,14 +1034,14 @@ ok_host(char *user, char *host, int type)
     exempt = ptr->data;
     ok = 0;
     
-    if (strchr(user, '?') || strchr(user, '*'))
+    if (strchr(username, '?') || strchr(username, '*'))
     {
-      if(wldwld(exempt->user, user) == 0)
+      if(wldwld(exempt->username, username) == 0)
         ok++;
     }
     else
     {
-      if(wldcmp(exempt->user, user) == 0)
+      if(wldcmp(exempt->username, username) == 0)
         ok++;
     }
 

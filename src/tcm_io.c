@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.89 2002/06/21 23:14:04 leeh Exp $
+ * $Id: tcm_io.c,v 1.90 2002/06/21 23:20:18 leeh Exp $
  */
 
 #include <stdio.h>
@@ -804,7 +804,7 @@ show_stats_p(const char *nick)
 #else 
 	  notice(nick,
 		 "%s (%s@%s) idle %lu",
-		 connections[i].nick, connections[i].user, connections[i].host,
+		 connections[i].nick, connections[i].username, connections[i].host,
 		 time(NULL) - connections[i].last_message_time);
 #endif
 	  number_of_tcm_opers++;
@@ -844,7 +844,7 @@ list_connections(int sock)
   	  print_to_socket(sock,
 	       "%s/%s %s (%s@%s) is connected - idle: %ld",
 	       connections[i].nick, connections[i].registered_nick,
-	       type_show(user->type), connections[i].user,
+	       type_show(user->type), connections[i].username,
 	       connections[i].host,
 	       time((time_t *)NULL)-connections[i].last_message_time);
       }
@@ -852,7 +852,7 @@ list_connections(int sock)
       {
 	print_to_socket(sock,
 	     "%s O (%s@%s) is connected - idle: %ld",
-	     connections[i].nick, connections[i].user, connections[i].host,
+	     connections[i].nick, connections[i].username, connections[i].host,
 	     time(NULL) - connections[i].last_message_time);
       }
     }

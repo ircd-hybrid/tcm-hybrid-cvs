@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.77 2002/06/21 23:14:01 leeh Exp $ */
+/* $Id: userlist.h,v 1.78 2002/06/21 23:20:15 leeh Exp $ */
 
 #include "tools.h"
 
@@ -63,7 +63,7 @@ struct config_list {
 
 struct oper_entry
 {
-  char user[MAX_NICK];
+  char username[MAX_NICK];
   char host[MAX_HOST];
   char usernick[MAX_NICK];
   char password[MAX_CONFIG];
@@ -73,7 +73,7 @@ struct oper_entry
 
 struct exempt_entry
 {
-  char user[MAX_NICK];
+  char username[MAX_NICK];
   char host[MAX_HOST];
   unsigned int type;
 };

@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.14 2002/06/21 23:14:04 leeh Exp $
+ * $Id: dcc.c,v 1.15 2002/06/21 23:20:18 leeh Exp $
  */
 
 #include <stdio.h>
@@ -84,14 +84,14 @@ initiate_dcc_chat(struct source_client *source_p)
 
   notice(source_p->name, "Chat requested");
   strlcpy(connections[i].nick, source_p->name, MAX_NICK);
-  strlcpy(connections[i].user, source_p->username, MAX_USER);
+  strlcpy(connections[i].username, source_p->username, MAX_USER);
   strlcpy(connections[i].host, source_p->host, MAX_HOST);
 
   for(ptr = user_list; ptr; ptr = ptr->next)
   {
     user = ptr->data;
 
-    if((match(user->user, source_p->username) == 0) &&
+    if((match(user->username, source_p->username) == 0) &&
        (wldcmp(user->host, source_p->host) == 0))
     {
       strlcpy(connections[i].registered_nick, user->usernick,
@@ -181,7 +181,7 @@ accept_dcc_connection(struct source_client *source_p,
 
   connections[i].set_modes = 0;
   strlcpy(connections[i].nick, source_p->name, MAX_NICK);
-  strlcpy(connections[i].user, source_p->username, MAX_USER);
+  strlcpy(connections[i].username, source_p->username, MAX_USER);
   strlcpy(connections[i].host, source_p->host, MAX_HOST);
   connections[i].last_message_time = current_time;
 
@@ -189,7 +189,7 @@ accept_dcc_connection(struct source_client *source_p,
   {
     user = ptr->data;
 
-    if((match(user->user, source_p->username) == 0) &&
+    if((match(user->username, source_p->username) == 0) &&
        (wldcmp(user->host, source_p->host) == 0))
     {
       strlcpy(connections[i].registered_nick, user->usernick,
@@ -305,9 +305,8 @@ static void
 finish_dcc_chat(int i)
 {
   report(FLAGS_ALL,
-         "Oper %s (%s@%s) has connected\n",
-         connections[i].nick,
-         connections[i].user,
+         "Oper %s (%s@%s) has connected",
+         connections[i].nick, connections[i].username,
          connections[i].host);
 
   connections[i].state = S_CLIENT;
@@ -334,7 +333,7 @@ close_dcc_connection(int connnum)
 {
   report(FLAGS_ALL,
          "Oper %s (%s@%s) has disconnected",
-         connections[connnum].nick, connections[connnum].user,
+         connections[connnum].nick, connections[connnum].username,
          connections[connnum].host);
 
   close_connection(connnum);

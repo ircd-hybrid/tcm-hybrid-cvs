@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.132 2002/06/21 23:14:04 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.133 2002/06/21 23:20:18 leeh Exp $ */
 
 #include "setup.h"
 
@@ -311,7 +311,7 @@ void m_opers(int connnum, int argc, char *argv[])
     user = ptr->data;
 
     print_to_socket(connections[connnum].socket, "(%s) %s@%s %s",
-		    user->usernick, user->user, user->host,
+		    user->usernick, user->username, user->host,
 		    type_show(user->type));
   }
 }
@@ -352,7 +352,7 @@ void m_exempts(int connnum, int argc, char *argv[])
   for(ptr = exempt_list; ptr; ptr = ptr->next)
   {
     exempt = ptr->data;
-    sprintf(buf, "%s@%s is exempted for:", exempt->user, exempt->host);
+    sprintf(buf, "%s@%s is exempted for:", exempt->username, exempt->host);
 
     for(n = 0; actions[n].name[0] != '\0'; n++)
     {
@@ -1031,7 +1031,7 @@ is_legal_pass(int connect_id, char *password)
   {
     user = ptr->data;
 
-    if((match(user->user, connections[connect_id].user) == 0) &&
+    if((match(user->username, connections[connect_id].username) == 0) &&
        (wldcmp(user->host, connections[connect_id].host) == 0) &&
        (user->password[0] != '\0'))
     {

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.58 2002/05/22 01:34:30 wcampbel Exp $
+ * $Id: userlist.c,v 1.59 2002/05/22 22:09:27 leeh Exp $
  *
  */
 
@@ -960,28 +960,50 @@ char *type_show(unsigned long type)
 
   memset(&type_string, 0, sizeof(type_string));
   p = type_string;
-  if(type&TYPE_OPER)*p++ = 'O';
-  if(type&TYPE_REGISTERED)*p++ = 'K';
-  if(type&TYPE_GLINE)*p++ = 'G';
-  if(type&TYPE_SUSPENDED)*p++ = 'S';
-  if(type&TYPE_ADMIN)*p++ = 'M';
-  if(type&TYPE_INVM)*p++ = 'I';
+
+  if(type & TYPE_OPER)
+    *p++ = 'O';
+  if(type & TYPE_REGISTERED)
+    *p++ = 'K';
+  if(type & TYPE_GLINE)
+    *p++ = 'G';
+  if(type & TYPE_SUSPENDED)
+    *p++ = 'S';
+  if(type & TYPE_ADMIN)
+    *p++ = 'M';
+  if(type & TYPE_INVM)
+    *p++ = 'I';
+
 #ifndef NO_D_LINE_SUPPORT
-  if(type&TYPE_DLINE)*p++ = 'D';
+  if(type & TYPE_DLINE)
+    *p++ = 'D';
 #endif
 #ifdef ENABLE_W_FLAG
-  if(type&TYPE_OPERWALL)*p++ = 'W';
+  if(type & TYPE_OPERWALL)
+    *p++ = 'W';
 #endif
-  if(type&TYPE_PARTYLINE)*p++ = 'p';
-  if(type&TYPE_STAT)*p++ = 's';
-  if(type&TYPE_WARN)*p++ = 'w';
-  if(type&TYPE_ECHO)*p++ = 'e';
-  if(type&TYPE_INVS)*p++ = 'i';
-  if(type&TYPE_LOCOPS)*p++ = 'o';
-  if(type&TYPE_KLINE)*p++ = 'k';
-  if(type&TYPE_LINK)*p++ = 'l';
-  if(type&TYPE_MOTD)*p++ = 'm';
-  if(type&TYPE_SERVERS)*p++ = 'x';
+
+  if(type & TYPE_PARTYLINE)
+    *p++ = 'p';
+  if(type & TYPE_STAT)
+    *p++ = 's';
+  if(type & TYPE_WARN)
+    *p++ = 'w';
+  if(type & TYPE_ECHO)
+    *p++ = 'e';
+  if(type & TYPE_INVS)
+    *p++ = 'i';
+  if(type & TYPE_LOCOPS)
+    *p++ = 'o';
+  if(type & TYPE_KLINE)
+    *p++ = 'k';
+  if(type & TYPE_LINK)
+    *p++ = 'l';
+  if(type & TYPE_MOTD)
+    *p++ = 'm';
+  if(type & TYPE_SERVERS)
+    *p++ = 'x';
+
   *p = '\0';
   return(type_string);
 }

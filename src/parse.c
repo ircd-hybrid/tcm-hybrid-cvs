@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.25 2002/05/26 01:28:20 db Exp $
+ * $Id: parse.c,v 1.26 2002/05/26 02:12:46 db Exp $
  */
 
 #include <stdio.h>
@@ -55,8 +55,8 @@ int  maxconns = 0;
  * side effects - process server message
  */
 
-void
-parse_server(void)
+int
+parse_server(int unused)
 {
   char *buffer = connections[0].buffer;
   char *p;
@@ -120,9 +120,15 @@ parse_server(void)
  */
 
 int
-parse_client(int i, int argc, char *argv[])
+parse_client(int i)
 {
   struct dcc_command *ptr;
+  int argc;
+  char *argv[MAX_ARGV];
+
+  argc = parse_args(connections[i].buffer, argv);
+  if (argc == 0)
+    return(0);
 
   /* command */
   if(argv[0][0] == '.')
@@ -143,7 +149,6 @@ parse_client(int i, int argc, char *argv[])
 
     return(0);
   }
-
   /* message to partyline */
   else
   {
@@ -706,35 +711,6 @@ cannotjoin(char *channel)
             config_entries.defchannel_key);
 }
 
-/*
- * _signon
- *
- * inputs       - connection number
- *		- argc
- *		- argv[]
- * output       - NONE
- * side effects - does signon to server
- */
-
-void
-_signon (int connnum, int argc, char *argv[])
-{
-
-    connections[0].nbuf = 0;
-    if (*mynick == '\0')
-      strcpy (mynick,config_entries.dfltnick);
-
-    if( config_entries.server_pass[0] )
-      print_to_server("PASS %s", config_entries.server_pass);
-
-    print_to_server("USER %s %s %s :%s",
-           config_entries.username_config,
-           ourhostname,
-           config_entries.server_name,
-           config_entries.ircname_config);
-
-    print_to_server("NICK %s", mynick);
-}
 
 /*
  * check_clones

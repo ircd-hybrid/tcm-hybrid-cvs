@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.34 2002/05/26 01:28:20 db Exp $
+ * $Id: tcm_io.c,v 1.35 2002/05/26 02:12:46 db Exp $
  */
 
 #include <stdio.h>
@@ -57,8 +57,9 @@ static int get_line(char *inbuf,int *len, struct connection *connections_p);
 static int connect_to_dcc_ip(const char *nick, const char *hostport);
 static void va_print_to_socket(int sock, const char *format, va_list va);
 static void va_print_to_server(const char *format, va_list va);
-static int finish_accept_dcc_chat(int i, int unused, char *unused2[]);
-static int finish_dcc_chat(int i, int unused, char *unused2[]);
+static int finish_accept_dcc_chat(int i);
+static int finish_dcc_chat(int i);
+static int signon_to_server(int unused);
 
 fd_set readfds;            /* file descriptor set for use with select */
 fd_set writefds;
@@ -152,10 +153,7 @@ read_packet(void)
 	    if (connections[i].state == S_CONNECTING)
 	      {
 		connections[i].state = S_ACTIVE;
-		if (i == 0)
-		  _signon(0,0,NULL);
-		else
-		  (connections[i].io_function)(i, argc, argv);
+		(connections[i].io_function)(i);
 		continue;
 	      }
 
@@ -188,16 +186,7 @@ read_packet(void)
 #ifdef DEBUGMODE
 		    printf("<- %s\n", connections[i].buffer);
 #endif
-		    if (i == 0) /* kludge. someday....*/
-		      {
-			parse_server();
-		      }
-		    else
-		      {
-			argc = parse_args(connections[i].buffer, argv);
-			if (argc != 0)
-			  (connections[i].io_function)(i, argc, argv);
-		      }
+		    (connections[i].io_function)(i);
 		    tscanned += nscanned;
                   }
               }
@@ -354,10 +343,7 @@ linkclosed(int connnum, int argc, char *argv[])
   sleep(30);
 
   connections[0].socket = connect_to_server(serverhost);
-  connections[0].state = S_CONNECTING;
-#if 0
-  connections[0].io_function = _signon;
-#endif
+
   if (connections[0].socket == INVALID)
     {
       log_problem("linkclosed()", "invalid socket quitting");
@@ -365,7 +351,10 @@ linkclosed(int connnum, int argc, char *argv[])
       return;
     }
 
-  _signon(0, 0, NULL);
+/* XXX huh?*/
+#if 0
+  signon_to_server(0);
+#endif
 }
 
 
@@ -751,7 +740,7 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
  */
 
 static int
-finish_accept_dcc_chat(int i, int unused, char *unused2[])
+finish_accept_dcc_chat(int i)
 {
   struct sockaddr_in incoming_addr;
   int addrlen;
@@ -774,7 +763,7 @@ finish_accept_dcc_chat(int i, int unused, char *unused2[])
   connections[i].nbuf = 0;
   connections[i].type = 0;
 
-  finish_dcc_chat(i,0,0);
+  finish_dcc_chat(i);
 }
 
 /*
@@ -786,7 +775,7 @@ finish_accept_dcc_chat(int i, int unused, char *unused2[])
  */
 
 static int
-finish_dcc_chat(int i, int unused, char *unused2[])
+finish_dcc_chat(int i)
 {
   print_motd(connections[i].socket);
 
@@ -877,8 +866,37 @@ connect_to_server(const char *hostport)
 	  (void *) remote_hostent->h_addr,
 	  remote_hostent->h_length);
 
+  connections[0].state = S_CONNECTING;
+  connections[0].io_function = signon_to_server;
   return(connect_to_given_ip_port(&socketname, port));
+}
 
+/*
+ * signon_to_server
+ *
+ * inputs       - unused
+ * output       - NONE
+ * side effects - does signon to server
+ */
+
+int
+signon_to_server (int unused)
+{
+  connections[0].io_function = parse_server;
+  connections[0].nbuf = 0;
+  if (*mynick == '\0')
+    strcpy (mynick,config_entries.dfltnick);
+
+  if( config_entries.server_pass[0] )
+    print_to_server("PASS %s", config_entries.server_pass);
+
+  print_to_server("USER %s %s %s :%s",
+		  config_entries.username_config,
+		  ourhostname,
+		  config_entries.server_name,
+		  config_entries.ircname_config);
+  
+  print_to_server("NICK %s", mynick);
 }
 
 /*

@@ -7,14 +7,10 @@ with the original README.  its by far incomplete. Any volunteers? ;-) -db]
 I. What it does
 
   Its main function is to identify people who abuse the local server
-  in general.  It identifies potential clonebotters (more than 3
-  connections from a host in 15 seconds), potential bot-runners (more
-  than 1 active connection from the same userhost), potential infinitely
-  reconnecting bots (counts the number of rejected connections from a
-  given userhost due to K-lines, server full, etc.), and counts the
-  number of connections from each domain on the server.  It does NOT
-  hold a channel, give out ops, kill or kick people, or join/part
-  channels on request.
+  in general.  It identifies potential clonebotters potential bot-runners,
+  potential infinitely reconnecting bots and counts the number of
+  connections from each domain on the server.  It does NOT hold a channel,
+  give out ops, kill or kick people, or join/part channels on request.
 
   Clonebot detection is done proactively (i.e. it notifies any opers
   of clonebots as they are detected).  The other functions listed
@@ -60,3 +56,4 @@ III. How to use it
   (The original doc for this is in HISTORY/README)
 
 Diane Bruce, db@db.net
+W. Campbell, wcampbel@botbay.net

@@ -1,5 +1,5 @@
   This tcm has two methods of detecting open wingates. One is the
-class open port 1080. This will catch wingates as well as open proxies..
+classic open port 1080. This will catch wingates as well as open proxies..
 Unfortunately, it will not detect an open busy wingate!
 I discovered in testing that when a Microsoft wingate is full, it
 stops replying to all port 1080 connects. They get away with it if
@@ -14,7 +14,7 @@ This is possible in tcm-hybrid by putting your *ppp* etc. into a single
 "dialup class" and having tcm only probe port 23 with connects in this class.
 This is done with the new key letter 'W".
 
-  If you have "W:class" in userlist.cf, you can set a class to test for wingate
+  If you have "W:class" in tcm.cf, you can set a class to test for wingate
 i.e. you can set it up to only wingate test class 9, and set up
 matching I lines to only test "suspicious" sites such as *ppp* etc.
 not testing shell boxes.

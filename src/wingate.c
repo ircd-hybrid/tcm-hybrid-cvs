@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.15 2001/12/12 23:08:13 einride Exp $ */
+/* $Id: wingate.c,v 1.16 2001/12/16 00:28:26 einride Exp $ */
 
 #include <netdb.h>
 #include <unistd.h>
@@ -358,12 +358,13 @@ void _continuous(int connnum, int argc, char *argv[])
 
 }
 void _config(int connnum, int argc, char *argv[]) {
+#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
   if ((argc==2) && ((argv[0][0]=='w') || (argv[0][0]=='W'))) {
     strncpy(wingate_class_list[wingate_class_list_index], argv[1], 
 	    sizeof(wingate_class_list[0]));
     wingate_class_list_index++;
   }
-
+#endif
 }
 
 void _user_signon(int connnum, int argc, char *argv[])

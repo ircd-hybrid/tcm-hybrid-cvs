@@ -1,3 +1,17 @@
+db          2002/05/27 23:27:00 EDT	(20020528_8)
+
+  Modified files:
+    src                  hash.c tcm_io.c 
+  Log:
+  - cleanups more cleanups
+  - tcm now reconnects after pinging out
+  
+  Revision  Changes    Path
+  1.3       +2 -1      tcm-hybrid/src/hash.c
+  1.59      +3 -3      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/27 21:07:58 EDT	(20020528_7)
 
   Modified files:

@@ -1,3 +1,17 @@
+leeh        2002/05/27 18:40:42 EDT	(20020527_25)
+
+  Modified files:
+    include              userlist.h 
+    src                  userlist.c 
+  Log:
+  - added has_umode()
+  
+  Revision  Changes    Path
+  1.49      +2 -1      tcm-hybrid/include/userlist.h
+  1.90      +13 -0     tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/27 18:03:23 EDT	(20020527_24)
 
   Modified files:

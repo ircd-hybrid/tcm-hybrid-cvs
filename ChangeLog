@@ -1,3 +1,8 @@
+*** 20010722_5 by wcampbel
+Move the pref files and the cf's (and the motd) to the etc directory
+and document as such in INSTALL
+
+
 *** 20010722_4 by wcampbel
 Fix make lint in the tools/ Makefile
 

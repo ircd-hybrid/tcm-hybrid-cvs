@@ -1,3 +1,7 @@
+*** 20011027_6 by wcampbel
+Document .testline........<sigh>
+
+
 *** 20011027_5 by bill
 - fixed ping timeout bug.  we now reset last_ping_time whenever we read data
 

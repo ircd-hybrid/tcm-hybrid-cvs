@@ -1,7 +1,7 @@
 /* handler.c
  *
  * contains the code for the dcc and server command handlers
- * $Id: handler.c,v 1.8 2002/09/13 18:35:04 bill Exp $
+ * $Id: handler.c,v 1.9 2002/09/14 20:18:08 bill Exp $
  */
 
 #include <assert.h>
@@ -26,19 +26,6 @@
 struct serv_numeric *serv_numeric_table;
 
 static int hash_command(const char *);
-
-/* init_handlers()
- *
- * input        -
- * output       -
- * side effects - initialises the dcc/server handler stuff
- */
-void
-init_handlers(void)
-{
-  serv_numeric_table = NULL;
-  serv_notice_table = NULL;
-}
 
 /* add_dcc_handler()
  *

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.127 2002/09/13 18:35:04 bill Exp $ */
+/* $Id: main.c,v 1.128 2002/09/14 20:18:08 bill Exp $ */
 
 #include "setup.h"
 
@@ -151,7 +151,6 @@ main(int argc, char *argv[])
   init_connections();
   init_hash();
   modules_init();
-  init_handlers();
   init_commands();
   init_userlist_handlers();
   init_clones();

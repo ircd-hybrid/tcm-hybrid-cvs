@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.22 2002/06/02 23:13:18 db Exp $
+ * $Id: actions.c,v 1.23 2002/06/03 10:49:58 leeh Exp $
  */
 
 #include "setup.h"
@@ -569,6 +569,10 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
 	break;
 
       case HOSTSTRIP_NOIDENT_ALL:
+	*p++ = '*';
+	break;
+
+      case HOSTSTRIP_NOIDENT_ALL_NONE:
       default:
 	strcpy(p, "~*");
 	p += 2;

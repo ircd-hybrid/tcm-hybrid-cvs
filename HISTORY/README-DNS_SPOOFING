@@ -10,7 +10,7 @@ From the config.h file:
 
 There are three mechanisms it uses.. 
 
-It will use WHOIP (avaiable on some non standard versions of CSr29)
+It will use WHOIP (available on some non standard versions of CSr29)
 if available...(I have such a version - Dianora)
 
 It will use USRIP (available on th+hybrid)

@@ -40,7 +40,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.7 2000/12/08 23:22:30 bill Exp $";
+static char *version="$Id: commands.c,v 1.8 2001/02/01 03:50:01 wcampbel Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -889,32 +889,6 @@ void dccproc(int connnum)
 	}
       break;
 
-    case K_MULTI:
-      if (connections[connnum].type & TYPE_OPER)
-	{
-	  int i;
-	  if (param2)
-	    {
-	      i = atoi(param2);
-	      if (i < 3)
-		{
-		  prnt(connections[connnum].socket, "%s",
-           "Using a threshold less than 3 is not recommended, changed to 3\n");
-		  i=3;
-		}
-	    }
-	  else
-	    {
-	      i=3;
-	    }
-	  report_multi(connections[connnum].socket, i);
-	}
-      else
-	{
-	  not_authorized(connections[connnum].socket);
-	}
-      break;
-
     case K_UMULTI:
       if (connections[connnum].type & TYPE_OPER)
 	{
@@ -1414,9 +1388,6 @@ void dccproc(int connnum)
       }
     /* End of stuff added by ParaGod */
     break;
-
-    case K_TCMIDENT:
-      break;
 
     case K_INFO:
       prnt(connections[connnum].socket,

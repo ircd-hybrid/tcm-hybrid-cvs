@@ -1,7 +1,7 @@
   This tcm has two methods of detecting open wingates. One is the
 class open port 1080. This will catch wingates as well as open proxies..
 Unfortunately, it will not detect an open busy wingate!
-I discovered in testing that when a microsoft wingate is full, it
+I discovered in testing that when a Microsoft wingate is full, it
 stops replying to all port 1080 connects. They get away with it if
 you only check port 1080. However, they continue to still be open on port 23.
 That leaves us with a bit of a problem. The observant will note that port

@@ -26,9 +26,15 @@
  - .nfind <wildcarded nick> (OPERS ONLY)
     List all nicks which match the given wildcarded nick
  - .failures
-    This command lists userhosts that have exceeded the threshhold
+    This command lists userhosts that have exceeded the threshold
     of connect failures due to being K-lined, detected as a bot,
  - .domains [min connections] ( OPERS ONLY)
     List all connections to  by domain, showing those
     domains with more than [min connections] users.
+ - .nflood
+    List nick flooders.
+ - .vlist [IP mask]
+    List all users matching the IP mask.
+ - .vmulti (OPERS ONLY)
+    List all virtual hosted multiple connections.
 

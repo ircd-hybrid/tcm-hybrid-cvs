@@ -78,7 +78,7 @@
 
 /* #define HOW_TO_MAIL "/usr/ucb/mail -s" */
 
-/* For linux this is suggested by zaph */
+/* For Linux this is suggested by zaph */
 #define HOW_TO_MAIL "/bin/mail -s"
 
 /* define this if you want only your opers to connect to tcm */

@@ -1,29 +1,44 @@
- - .close,.quit
+ - .close, .quit
     Tell the tcm to close down your DCC CHAT connection
- - .disconnect nick
-    disconnect kick a user off of the tcm
+ - .disconnect nick, .kick nick
+    Disconnect kick a user off of the tcm
  - .register password (also see .help remote)
-    registers a remote oper for REMOTE_KLINE/KILL etc.
+    Registers a remote oper for REMOTE_KLINE/KILL etc.
  - .op nick nick2 nick3 (may require you be registered first)
-    The tcm will op those nicks if they are on channel
+    The tcm will op those nicks if they are on channel.
+ - .cycle
+    The tcm will part and rejoin it's channel.
+ - .die
+    Shut down the tcm.
  - .opers
-    Shows legal opers, not connections
- - .connections
+    Shows legal opers, not connections.
+ - .connections, .who, .whom
     List all users and opers currently connected to this tcm.
  - .rehash
-   This command reloads the userlist etc.
+    This command reloads the userlist etc.
  - .trace
-   retraces the server, this will clear out any "stale" nicks.
+    Retraces the server, this will clear out any "stale" nicks.
  - .class n
-   shows you the client in class n, you may need to use .trace to update
+    Shows you the client in class n, you may need to use .trace to update.
  - .classt n
-   shows you total number of clients in class n
+    Shows you total number of clients in class n.
  - .actions (see .help clones)
  - .exemptions 
-   Show users and sites with tcm kline/kill exemption (E: lines )
+    Show users and sites with tcm kline/kill exemption. (E: lines )
  - .set [messages|nomessage]|[notices|nonotices]
-   See privmsg's sent to the tcm or see selected server notices
+    See privmsg's sent to the tcm or see selected server notices.
  - .save 
-   Saves tcm prefs (actions) you must be registered and an admin to use this.
+    Saves tcm prefs (actions) you must be registered and an admin to use this.
  - .load
-   Load tcm prefs (actions) any oper may use this.
+    Load tcm prefs (actions) any oper may use this.
+ - .tcminfo
+    Show information about the tcm and the server it monitors.
+ - .uptime
+    Show the tcm uptime.
+ - .mem
+    Show rough memory usage.
+ - .motd
+    Print the tcm MOTD.
+ - .locops
+    Issue a LOCOPS message to the server.
+

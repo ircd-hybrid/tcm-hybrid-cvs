@@ -14,7 +14,7 @@ This is an update of the Hendrix bot tcm.
    "nflood" reports the current nick flooders.
 
 5) moved the OPER name password into config.h for convenience.
-   ditto with the DOMAIN (for bsdi) 
+   ditto with the DOMAIN (for BSDi) 
 
 6) "stole" some ideas from garfr and talen
    unrecognized commands will now be sent to all connected users
@@ -37,14 +37,14 @@ v0.3.3
 
 v0.3.4 was small typo bug fix to  v0.3.3 *sigh*
 
-10) Found solaris bug preventing dcc chat to the bot to work.
-    Its what I thought it was. :-) /dcc chat sends the precalculated
+10) Found Solaris bug preventing dcc chat to the bot to work.
+    Its what I thought it was. :-) /dcc chat sends the precalculate
     sin_addr to use as a decimal. strtol under SOLARIS signed
     extended and munges the address. I can't think of any systems
     where strtol() wouldn't munge the address... except possibly
     one where long long (64) numbers were standard.. let me know.
 
-11) Put everything under rcs control. About fripping time.
+11) Put everything under RCS control. About fripping time.
     I'll include the ,v in any release I do from now on.
 
 12) Fixed the bot so that updates can be done on the fly with 
@@ -67,7 +67,7 @@ v0.3.4 was small typo bug fix to  v0.3.3 *sigh*
 17) tcm will email recipients given in E: line in tcm.cf copies
     of the previous night clone logs. This should happen just
     after the next clone report occurs just after midnight.
-    SIGUSR1 could be commandered to force this, with an entry
+    SIGUSR1 could be commandeered to force this, with an entry
     in the crontab. be my guest. :-)
 
 18) CS style nick flooding reports and clone flood reports are
@@ -161,8 +161,8 @@ v0.3.6
     stamping on it, so its not seen every single time, but
     not today.
 
-33) working with EA I found where the core dump problem was with linux
-    and netbsd... zaph then sent me a fix, I've included some of
+33) working with EA I found where the core dump problem was with Linux
+    and NetBSD... zaph then sent me a fix, I've included some of
     his suggestions but the fix is mine.
 
 34) virtual host support. New key letter, 'V' in tcm.cf
@@ -175,7 +175,7 @@ N.B. the new email addresses
 
 v0.3.7
 
-What I decided to do from now on, is use the least signicant digit
+What I decided to do from now on, is use the least significant digit
 for minor bug fix releases.. adding no new features, just fixing
 bugs... This emulates what sendmail is doing now.. So the next
 formal major release will be v0.4.0 ... about fripping time I think.
@@ -246,7 +246,7 @@ v0.4.2
 51) fixed broken link look code, and made it NOT report local opers
     who link look at all. Also include the +th server name on link look.
 
-52) added .ca services code from chris portman (chris@istar.net)
+52) added .ca services code from Chris Portman (chris@istar.net)
 
 53) added .command @tcmnick handling code
 
@@ -276,7 +276,7 @@ v0.4.3
 
 61) consolidated date/time for KLINE log etc. in one function, 
 
-62) ansified a pile of code, getting there slowly....
+62) ANSI'fied a pile of code, getting there slowly....
 
 63) fixed a STOOPID buffer overrun with linked tcm's (I hope, alpha
     test should confirm that) this would core all the connected
@@ -353,7 +353,7 @@ Bug fixes are welcome.
 
 tcm-dianova-v0.4.4b4
 
-84) Fixed stupid in Makefile for solaris
+84) Fixed stupid in Makefile for Solaris
 
 84) added DETECT_WINGATE code (still experimental)
 

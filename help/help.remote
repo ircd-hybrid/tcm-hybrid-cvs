@@ -3,17 +3,32 @@ and you are a  oper) AND you are REGISTERED with .register
 
  - .register password
     registers a remote oper for REMOTE_KLINE/KILL etc.
- - .killlist user@host
+ - .killlist user@host, .kl user@host
     The tcm will kill each user@host found with the reason
     "no multiple connections read the motd" ( OPERS only)
 
 If you have a hybrid server, you can set a temporary kline by
 setting a time in seconds, in the [time] field.
 
- - .kclone [time] [nick|user@host] reason
- - .kbot [time] [nick|user@host] reason
+ - .kclone [time] [nick|user@host]
+ - .kbot [time] [nick|user@host]
+ - .kflood [time] [nick|user@host]
+ - .kdrone [time] [nick|user@host]
+ - .kspam [time] [nick|user@host]
+ - .kperm [time] [nick|user@host]
+    K-line with a default reason.
+
  - .kline [time] [nick|user@host] reason
- - .kflood [time] [nick|user@host] reason
+    Generic K-line command.
+ - .kfind user@host
+    Search for a K-line on the server.
+ - .gline user@host reason
+   Force the TCM to vote for a G-line.  Note that the TCM must have G-line
+   privileges on it's server for this to work.
+ - .kill nick reason
+   Issue a KILL for a specific user.
+ - .dline IP reason
+   Set a D-line for the IP or IP/CIDR mask.
  - .unkline user@host (must match exactly)
    The tcm will attempt to remove that kline
 

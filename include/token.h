@@ -34,7 +34,6 @@
 #define K_CYCLE   	30
 #define K_DIE     	31
 #define K_TCMINTRO   	32
-#define K_TCMIDENT   	33
 #define K_DLINE		34
 #define K_EXEMPTIONS	35
 #define K_SET		36
@@ -49,7 +48,6 @@
 #define K_KLINK		45
 #define K_HMULTI	46
 #define K_UMULTI	47
-#define K_MULTI		48
 #define K_MEM		49
 #define K_ACTION	50
 #define K_MOTD		51

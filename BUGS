@@ -1,10 +1,10 @@
-1) There is a free() error still to be fixed on freebsd alpha 
+1) There is a free() error still to be fixed on FreeBSD alpha 
    cdy (cyarnell@warped.com) and I have been working on it *sigh* slowly.
 
 Fri Mar  7 16:19:10 EST 1997
 
    I suspect it is fixed now with v0.3.6 as it was likely the same bug
-   as the linux bug. Freeing an already free()' struct.
+   as the Linux bug. Freeing an already free()' struct.
    please let me know someone.
 
 2) I suspect strtol() for any DCC connect would not work period. let me know.
@@ -18,7 +18,7 @@ Fri Mar  7 16:19:10 EST 1997
 
 tcm-hybrid known bugs
 
-1) Opers with spoofed hostnames issueing PRIVMSG tcm .chat, to have the TCM
+1) Opers with spoofed hostnames issuing PRIVMSG tcm .chat, to have the TCM
    initiate the DCC connection, require both the spoofed hostname and the
    real hostname in the TCM O: lines, or else when the user issues .register,
    TCM will core.  The reason why is still a mystery to us

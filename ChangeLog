@@ -1,3 +1,9 @@
+*** 20011020_1 by db
+- First pass of cleanups, if remote tcm is no longer supported
+  all the code needed for that is not needed!
+
+
+
 *** 20011017_4 by wcampbel
 Correction, that was .restart, not .rehash
 

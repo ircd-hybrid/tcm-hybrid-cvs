@@ -1,3 +1,22 @@
+db          2002/05/19 21:15:56 EDT	(20020520_2)
+
+  Modified files:
+    include              userlist.h 
+    modules              commands.c serverif.c 
+    src                  userlist.c 
+  Log:
+  - I don't like mixing c++ comments with c personally
+  - move local_ip() into userlist.c
+  - fix stupid in m_help with argc < 2
+  
+  Revision  Changes    Path
+  1.31      +18 -14    tcm-hybrid/include/userlist.h
+  1.61      +5 -3      tcm-hybrid/modules/commands.c
+  1.65      +3 -62     tcm-hybrid/modules/serverif.c
+  1.55      +63 -0     tcm-hybrid/src/userlist.c
+
+
+
 wcampbel    2002/05/19 20:52:53 EDT	(20020520_1)
 
   Modified files:

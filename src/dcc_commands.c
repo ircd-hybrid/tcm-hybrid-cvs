@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.72 2002/05/24 18:19:26 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.73 2002/05/24 18:29:19 leeh Exp $ */
 
 #include "setup.h"
 
@@ -1158,7 +1158,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
       case 'y': type = TYPE_SPY; break;
       case 'o': type = TYPE_LOCOPS; break;
       case 'p': type = TYPE_PARTYLINE; break;
-      case 's': type = TYPE_STAT; break;
       case 'w': type = TYPE_WARN; break;
       case 'x': type = TYPE_SERVERS; break;
 
@@ -1252,7 +1251,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
           case 'y': type = TYPE_SPY; break;
 	  case 'o': type = TYPE_LOCOPS; break;
 	  case 'p': type = TYPE_PARTYLINE; break;
-	  case 's': type = TYPE_STAT; break;
 	  case 'w': type = TYPE_WARN; break;
           case 'x': type = TYPE_SERVERS; break;
 	  case '-':
@@ -1336,7 +1334,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
 #endif
 	    case 'k': type = TYPE_VIEW_KLINES; break;
 	    case 'p': type = TYPE_PARTYLINE; break;
-	    case 's': type = TYPE_STAT; break;
 	    case 'w': type = TYPE_WARN; break;
 	    case 'e': type = TYPE_ECHO; break;
 	    case 'i': type = TYPE_INVS; break;

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.91 2002/05/24 18:19:29 leeh Exp $
+ * $Id: bothunt.c,v 1.92 2002/05/24 18:29:21 leeh Exp $
  */
 
 #include <stdio.h>
@@ -615,10 +615,10 @@ onservnotice(int connnum, int argc, char *argv[])
       return;
     *q++ = '\0';
     if (strstr(q, " DNS"))
-      send_to_all(SEND_STATS, "*** %s is rehashing DNS", nick);
+      send_to_all(SEND_SPY, "*** %s is rehashing DNS", nick);
     else
     {
-      send_to_all(SEND_STATS, "*** %s is rehashing config file", nick);
+      send_to_all(SEND_SPY, "*** %s is rehashing config file", nick);
       print_to_server("STATS Y");
     }
     return;
@@ -653,7 +653,7 @@ onservnotice(int connnum, int argc, char *argv[])
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
-    send_to_all(SEND_STATS, "*** %s is garbage collecting", nick);
+    send_to_all(SEND_SPY, "*** %s is garbage collecting", nick);
     return;
   }
   else if (strstr(p, "forcing re-reading of"))
@@ -665,7 +665,7 @@ onservnotice(int connnum, int argc, char *argv[])
     if ((p = strstr(q, "re-reading of")) == NULL)
       return;
     p+=14;
-    send_to_all(SEND_STATS, "*** %is is rehashing %s", nick, p);
+    send_to_all(SEND_SPY, "*** %is is rehashing %s", nick, p);
     return;
   }
 
@@ -2875,7 +2875,7 @@ stats_notice(char *snotice)
   }
 #endif
 
-  send_to_all(SEND_STATS, "[STATS %c requested by %s (%s)]",
+  send_to_all(SEND_SPY, "[STATS %c requested by %s (%s)]",
 	       stat, nick, fulluh);
 }
 

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.14 2002/05/24 18:19:30 leeh Exp $
+ * $Id: tcm_io.c,v 1.15 2002/05/24 18:29:22 leeh Exp $
  */
 
 #include <stdio.h>
@@ -676,11 +676,6 @@ send_to_all(int type, const char *format,...)
 		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 	      
-	    case SEND_STATS:
-	      if(connections[i].type & TYPE_STAT)
-		va_print_to_socket(connections[i].socket, format, va);
-	      break;
-
 	    case SEND_PRIVMSG:
 	      if(connections[i].set_modes & SET_PRIVMSG)
 		va_print_to_socket(connections[i].socket, format, va);

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.36 2002/05/24 18:19:24 leeh Exp $ */
+/* $Id: userlist.h,v 1.37 2002/05/24 18:29:16 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -220,7 +220,6 @@ extern int tcm_list_index;
 #define TYPE_GLINE		0x00004	/* user has .gline privs */ 
 #define TYPE_SERVERS            0x00008 /* user sees server intro/quits */
 #define TYPE_PARTYLINE		0x00010	/* user wants to be on partyline */
-#define TYPE_STAT		0x00040	/* user sees STATS requests */
 #define TYPE_WARN		0x00080	/* user sees clone reports */
 #define TYPE_INVS		0x00100	/* user is invisible to STATS p list */
 #define TYPE_PENDING		0x00200

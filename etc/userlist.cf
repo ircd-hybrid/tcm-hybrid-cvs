@@ -1,4 +1,4 @@
-# $Id: userlist.cf,v 1.19 2002/05/24 18:19:21 leeh Exp $
+# $Id: userlist.cf,v 1.20 2002/05/24 18:29:14 leeh Exp $
 # userlist.cf file
 #
 # each line is colon separated
@@ -24,8 +24,7 @@
 #   +/-W will allow this user to see WALLOPS and OPERWALL (this is only used
 #         if ENABLE_W_FLAG is defined)
 #   +/-k will show this user K-lines being set/unset
-#   +/-s will show this user STATS requests
-#   +/-y will show this user INFO, MOTD and LINKS requests.
+#   +/-y will show this user INFO, MOTD, LINKS and STATS requests.
 #   +/-w will show this user misc. warnings, such as clones detected and
 #         the like
 #   +/-i will make this user invisible to the list of tcm opers connected

@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.6 2002/05/24 15:38:28 db Exp $
+ * $Id: tcm_io.h,v 1.7 2002/05/24 18:29:16 leeh Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -23,16 +23,15 @@ void send_to_all(int type, const char *format,...);	/* - Hendrix (va'd by bill) 
 
 /* types for send_to_all */
 
-#define SEND_ALL		0x0001 /* general messages */
-#define SEND_PRIVMSG		0x0002 /* users privmsging tcm */
-#define SEND_NOTICES		0x0004 /* users noticing tcm */
-#define SEND_STATS		0x0008 /* stats requests */
-#define SEND_WALLOPS		0x0010 /* wallops and operwall */
-#define SEND_LOCOPS		0x0020 /* locops */
-#define SEND_WARN		0x0040 /* warning messages (clones etc) */
-#define SEND_SPY		0x0080 /* motd, links, info requests */
-#define SEND_KLINE_NOTICES	0x0100 /* klines/unklines */
-#define SEND_ADMINS		0x0200 /* admin stuff like modload */
-#define SEND_SERVERS		0x0400 /* server splits/joins */
+#define SEND_ALL		0x001 /* general messages */
+#define SEND_PRIVMSG		0x002 /* users privmsging tcm */
+#define SEND_NOTICES		0x004 /* users noticing tcm */
+#define SEND_WALLOPS		0x008 /* wallops and operwall */
+#define SEND_LOCOPS		0x010 /* locops */
+#define SEND_WARN		0x020 /* warning messages (clones etc) */
+#define SEND_SPY		0x040 /* motd, links, info, stats requests */
+#define SEND_KLINE_NOTICES	0x080 /* klines/unklines */
+#define SEND_ADMINS		0x100 /* admin stuff like modload */
+#define SEND_SERVERS		0x200 /* server splits/joins */
 
 #endif

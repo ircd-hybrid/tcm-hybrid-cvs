@@ -1,7 +1,7 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.14 2002/05/31 01:54:13 wcampbel Exp $ */
+/* $Id: hash.h,v 1.15 2002/06/01 03:40:47 db Exp $ */
 
 #define HASHTABLESIZE 3001
 
@@ -41,7 +41,7 @@ int remove_from_hash_table(struct hash_rec *table[],
 			   const char *key, const char *host_match,
 			   const char *user_match, const char *nick_match);
 void add_to_hash_table(struct hash_rec *table[], const char *key,
-		       struct hash_rec *item);
+		       struct user_entry *new_user);
 void add_user_host(struct user_entry *, int, int);
 void remove_user_host(char *, struct user_entry *);
 void update_nick(char *nick1, char *nick2);

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.17 2002/06/01 01:12:28 wcampbel Exp $
+ * $Id: hash.c,v 1.18 2002/06/01 03:40:49 db Exp $
  */
 
 #include <stdio.h>
@@ -183,28 +183,33 @@ find_host(const char *host)
  *		- pointer to key being used for hash
  *		- pointer to user_entry to add
  * output	- none
- * side effects	- 
+ * side	effects	- 
  */
 
 void
 add_to_hash_table(struct hash_rec *table[],
-		       const char *key, struct hash_rec *hashptr)
+		       const char *key, struct user_entry *new_user)
 {
   int ind;
+  struct hash_rec *new_hash;
 
-  assert(hashptr->info != NULL);
+  assert(new_user != NULL);
+
+  if ((new_hash = (struct hash_rec *)xmalloc(sizeof(struct hash_rec))) == NULL)
+    exit(-1);
+  new_hash->info = new_user;
 
   ind = hash_func(key);
   if (table[ind] == NULL)
     {
-      table[ind] = hashptr;
+      table[ind] = new_hash;
     }
   else
     {
-      ((struct hash_rec *)table[ind])->next = hashptr;
-      hashptr->next = NULL;
+      ((struct hash_rec *)table[ind])->next = new_hash;
+      new_hash->next = NULL;
     }
-  hashptr->info->link_count++;
+  new_user->link_count++;
 }
 
 
@@ -216,7 +221,7 @@ add_to_hash_table(struct hash_rec *table[],
  *		- pointer to hostname to match
  *		- pointer to username to match
  *		- pointer to nickname to match
- * output	- 1 if found and removed, 0 if not found
+ * output	- 0 if found and removed, 1 if not found
  * side effects	- removes entry from hash_table if found
  */
 
@@ -239,18 +244,21 @@ remove_from_hash_table(struct hash_rec *table[],
 	prev->next = find->next;
       else
 	table[ind] = find->next;
+
       if (find->info->link_count > 0)
 	{
 	  find->info->link_count--;
 	  if (find->info->link_count == 0)
-	    xfree(find->info);
+	    {
+	      xfree(find->info);
+	    }
 	}
       free(find);
-      return (1);	/* Found the item, and deleted. */
+      return (0);	/* Found the item, and deleted. */
     }
     prev = find;
   }
-  return (0);
+  return (1);
 }
 
 /*
@@ -267,7 +275,6 @@ remove_from_hash_table(struct hash_rec *table[],
 void
 add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
 {
-  struct hash_rec *new_hash;
   struct user_entry *new_user;
   char *domain;
 
@@ -276,8 +283,9 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
     user_signon(user_info);
 #endif
 
-  new_hash = (struct hash_rec *)xmalloc(sizeof(struct hash_rec));
-  new_user = (struct user_entry *)xmalloc(sizeof(struct user_entry));
+  if ((new_user = (struct user_entry *)xmalloc(sizeof(struct user_entry))) 
+      == NULL)
+    exit(-1);
   new_user->link_count = 0;
 
   strlcpy(new_user->nick, user_info->nick, MAX_NICK);
@@ -302,16 +310,15 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
   domain = find_domain(user_info->host);
 
   strlcpy(new_user->domain, domain, MAX_HOST);
-  new_hash->info = new_user;
 
   /* Add it to the hash tables */
-  add_to_hash_table(user_table, user_info->user, new_hash);
-  add_to_hash_table(host_table, user_info->host, new_hash);
-  add_to_hash_table(domain_table, domain, new_hash);
+  add_to_hash_table(user_table, user_info->user, new_user);
+  add_to_hash_table(host_table, user_info->host, new_user);
+  add_to_hash_table(domain_table, domain, new_user);
 
 #ifdef VIRTUAL
   if (new_user->ip_class_c[0])
-    add_to_hash_table(ip_table, new_user->ip_class_c, new_hash);
+    add_to_hash_table(ip_table, new_user->ip_class_c, new_user);
 #endif
 
   /* Clonebot check */
@@ -360,7 +367,6 @@ remove_user_host(char *nick, struct user_entry *user_info)
 	    }
 	}
     }
-
   if (!remove_from_hash_table(domain_table, domain,
 			      user_info->host, user_info->user, nick))
     {
@@ -376,7 +382,6 @@ remove_user_host(char *nick, struct user_entry *user_info)
 	    }
 	}
     }
-
   if (!remove_from_hash_table(user_table, user_info->user,
 			      user_info->host, user_info->user, nick))
     {
@@ -399,7 +404,6 @@ remove_user_host(char *nick, struct user_entry *user_info)
   else
     strcpy(ip_class_c, "0.0.0.0");
   make_ip_class_c(ip_class_c);
-
   if (!remove_from_hash_table(ip_table, ip_class_c,
 			      user_info->host, user_info->user, nick))
     {

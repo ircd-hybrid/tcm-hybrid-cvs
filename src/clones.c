@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.11 2002/06/01 01:12:27 wcampbel Exp $
+ * $Id: clones.c,v 1.12 2002/06/01 03:40:49 db Exp $
  */
 
 #include <assert.h>
@@ -136,8 +136,7 @@ check_clones(void *unused)
   struct hash_rec *tptr;
   int num_found;
   int i;
-  /* XXX - notip is not set in this function */
-  int notip;
+  int notip=0;
 
   for (i=0; i < HASHTABLESIZE; i++)
   {

@@ -1,0 +1,15 @@
+1) There is a free() error still to be fixed on freebsd alpha 
+   cdy (cyarnell@warped.com) and I have been working on it *sigh* slowly.
+
+Fri Mar  7 16:19:10 EST 1997
+
+   I suspect it is fixed now with v0.3.6 as it was likely the same bug
+   as the linux bug. Freeing an already free()' struct.
+   please let me know someone.
+
+2) I suspect strtol() for any DCC connect would not work period. let me know.
+   (look in serverif.c for DCC connect code) I've changed it to use
+   strtoul() for SOLARIS I suspect it should just be that way for all OS's.
+
+  - Dianora, Fri Mar  7 16:19:10 EST 1997
+    db@db.net

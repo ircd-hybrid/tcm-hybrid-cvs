@@ -1,0 +1,112 @@
+# Makefile for MrsBot
+#   Written by: Hendrix <jimi@texas.net>
+#
+
+# Pick your operating system below... uncomment it, comment the others
+#OS = SUNOS             # Tested
+#OS = SOLARIS          # Tested
+# BE sure to add a DEFINE for SOL26 below if you are using solaris 2.6
+#
+#OS = ULTRIX           # Tested
+#OS = OSF1             # Untested
+#OS = AIX              # Tested (Phisher)
+OS = LINUX            # Tested
+#OS = BSDI             # Tested
+#OS = HPUX             # Tested
+#OS = IRIX             # Untested
+#OS = FREEBSD          # Tested
+#OS = NEXT	       # Tested (Twazard)
+
+# If you like gcc better than cc, change the line below.
+CC = gcc
+
+# what is needed to do a make depend
+
+MKDEP = ${CC} -MM
+
+# Any other defines you need, add below.
+# if Solaris 2.6
+# DEFINES = -DSOL26
+DEFINES =
+
+# -O for optimization.  Can't debug.  Use -g for debuggable code.
+CFLAGS = -g
+
+# Any libraries that need to be linked in (-lresolv for example)
+# should go here.
+LIBS = -lcrypt
+
+###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
+
+
+OBJECTS =	serverif.o\
+		stdcmds.o\
+		wild.o\
+		bothunt.o\
+		commands.o\
+		abuse.o\
+		userlist.o\
+		token.o\
+		logging.o\
+
+SOURCES = 	serverif.c\
+		stdcmds.c\
+		wild.c\
+		bothunt.c\
+		commands.c\
+		abuse.c\
+		userlist.c\
+		token.c\
+		logging.c\
+
+
+all: tcm
+clean: 
+	rm -f *.o tcm core tcm.core *~ DEBUG *.log clone_log_* tcm.pid tools/mkpass *.pref
+
+dist: clean
+	co -l *,v
+
+.c.o:
+	${CC} ${CFLAGS} -D${OS} ${DEFINES} -c $<
+
+hpux_link:
+	${CC} ${CFLAGS} -o tcm ${OBJECTS} ${LIBS} -lM
+
+solaris_link:
+	${CC} ${CFLAGS} -o tcm ${OBJECTS} ${LIBS} -lnsl -lsocket
+
+
+next_link:
+	${CC} ${CFLAGS} -o tcm ${OBJECTS} ${LIBS}
+
+link:
+	${CC} ${CFLAGS} -o tcm ${OBJECTS} ${LIBS}
+
+bsd_link:
+	${CC} ${CFLAGS} -o tcm ${OBJECTS} ${LIBS} -lcrypt          
+
+tcm: HEN_${OS}
+	@rm -f DEBUG
+
+# Yes, this REALLY sucks.  But gmake does NOT recognize either the
+# wildcard char (%) or the := to add additional libraries to LIBS
+# so we're left the the lowest common denominator: "solaris_link",
+# "hpux_link", and this whole group of HEN_* targets.
+HEN_SUNOS: ${OBJECTS} link
+HEN_SOLARIS: ${OBJECTS} solaris_link
+HEN_ULTRIX: ${OBJECTS} link
+HEN_OSF1: ${OBJECTS} link
+HEN_AIX: ${OBJECTS} link
+HEN_LINUX: ${OBJECTS} link
+HEN_BSDI: ${OBJECTS} bsd_link
+HEN_HPUX: ${OBJECTS} hpux_link
+HEN_IRIX: ${OBJECTS} link
+HEN_FREEBSD: ${OBJECTS} bsd_link
+HEN_NEXT: ${OBJECTS} strdup.o next_link
+
+include .depend
+
+depend:
+	${MKDEP} ${SOURCES} > .depend
+

@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# Little shell script to reload tcm, should the box restart
+#
+#install in crontab using crontab -e the following line
+#1,16,31,46 * * * * /path/to/your/tcm/dir/run.check >/dev/null
+#
+ADMIN=`whoami`
+RUN_PATH="/home/pro/tcm-hybrid"
+PIDFILE="tcm.pid"
+ 
+DATE=`date +%D-%R`
+export PATH=$PATH:/usr/sbin:/bin:.
+ 
+##############################################################################
+# Check to see that tcm is running
+#
+cd $RUN_PATH;
+PID=`cat $PIDFILE`
+if ! kill -0 $PID >/dev/null
+then
+    if [ ! -f /tmp/tcm.stay.dead ]
+    then
+        echo "auto-starting tcm at $DATE" | mail -s "Restarting tcm" $ADMIN
+        tcm
+    fi
+fi

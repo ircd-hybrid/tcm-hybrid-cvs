@@ -1,0 +1,19 @@
+REMOTE_KLINE commands (only valid if REMOTE_KLINE is defined
+and you are a  oper) AND you are REGISTERED with .register
+
+ - .register password
+    registers a remote oper for REMOTE_KLINE/KILL etc.
+ - .killlist user@host
+    The tcm will kill each user@host found with the reason
+    "no multiple connections read the motd" ( OPERS only)
+
+If you have a hybrid server, you can set a temporary kline by
+setting a time in seconds, in the [time] field.
+
+ - .kclone [time] [nick|user@host] reason
+ - .kbot [time] [nick|user@host] reason
+ - .kline [time] [nick|user@host] reason
+ - .kflood [time] [nick|user@host] reason
+ - .unkline user@host (must match exactly)
+   The tcm will attempt to remove that kline
+

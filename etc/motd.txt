@@ -1,0 +1,6 @@
+
+tcm opers motd
+
+This is the distributed motd.txt file.
+REMEMBER all commands start with a '.' i.e. .bots etc.
+

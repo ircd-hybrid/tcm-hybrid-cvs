@@ -1,0 +1,34 @@
+ - .actions
+    each condition that can cause a kline or kill can be individually
+    configured now. typing .actions will show all actions. 
+    To set individual action 
+    e.g. .action clones kline 60:Please do not clone here
+ - .bots,multi
+    Report any userhost with multiple connections on this server.
+ - .vbots [n]
+    Report any ip blocks with multiple connections on this server
+    optional n gives trigger level
+ - .clones
+    This command lists any clonebots currently detected.
+ - .list <wildcarded userhost>  (OPERS ONLY)
+    List all connected users who match the given userhost (which
+    may contain wildcards). 
+ - .ulist <wildcarded user>  (OPERS ONLY)
+    List all connected users who match the given user (which
+    may contain wildcards). 
+ -  .umulti (OPERS ONLY)
+    List users with multiple hosts with same user names.
+ -  .hmulti (OPERS ONLY)
+    List hosts with multiple users.
+ - .hlist <wildcarded host>  (OPERS ONLY)
+    List all connected users who match the given host (which
+    may contain wildcards). 
+ - .nfind <wildcarded nick> (OPERS ONLY)
+    List all nicks which match the given wildcarded nick
+ - .failures
+    This command lists userhosts that have exceeded the threshhold
+    of connect failures due to being K-lined, detected as a bot,
+ - .domains [min connections] ( OPERS ONLY)
+    List all connections to  by domain, showing those
+    domains with more than [min connections] users.
+

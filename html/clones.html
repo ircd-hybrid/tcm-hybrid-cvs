@@ -1,0 +1,68 @@
+<HTML><HEAD>
+<title>tcm commands to deal with clones</title>
+</HEAD>
+<BODY>
+<BODY bgcolor="F0F0F0">
+<H2>
+Basic commands to deal with clones
+</H2>
+
+<UL>
+<LI> <EM>.actions</EM>
+<BR>
+    setting of each action-kill/kline reason is listed, this 
+<BR>
+    replaces .autopilot, since you can configure each individually.
+<LI> <EM>.bots|.multi [n]</EM>
+<BR>
+    Report any userhost with multiple connections on this server.
+<LI> <EM>.vbots [n]</EM>
+<BR>
+    Report any ip blocks with multiple connections on this server.
+<BR>
+    ircd does not show the IP of connectiosn on a trace, so this information
+<BR>
+    is all lost on a <EM>.trace</EM> command.
+<LI> <EM>.vlist ip_pattern</EM>
+<BR>
+    list all clients with this ip pattern, the hostname as seen by the ircd
+<BR>
+    will also be listed.
+
+<LI> <EM>.clones</EM>
+<BR>
+    This command lists any clonebots currently detected.
+<LI> <EM>.list</EM> <wildcarded userhost>  ( OPERS ONLY)
+<BR>
+    List all connected users who match the given userhost (which
+<BR>
+    may contain wildcards).
+
+<LI> <EM>.ulist user_pattern</EM>
+<BR>
+   list all connected users on any host, who match the given user
+<LI> <EM>.hlist host_pattern</EM>   
+<BR>
+   list all user@hosts, who match the given host
+<LI> <EM>.nfind</EM> <wildcarded nick> ( OPERS ONLY)
+<BR>
+    List all nicks which match the given wildcarded nick
+<LI> <EM>.failures</EM>
+<BR>
+    This command lists userhosts that have exceeded the threshhold
+<BR>
+    of connect failures due to being K-lined, detected as a bot,
+<LI> <EM>.domains</EM> [min connections] ( OPERS ONLY)
+<BR>
+    List all connections to  by domain, showing those
+<BR>
+    domains with more than [min connections] users.
+<LI> <EM>.trace</EM> (also mentioned in the admins help)
+<BR>
+retraces the server, this will clear out any "stale" nicks.
+<BR>
+<EM>caution</EM> it will also clear out any IP block information it has.
+</UL>
+
+<a href="tcm.html">back</a>
+

@@ -1,0 +1,90 @@
+<HTML><HEAD>
+<title>tcm description</title>
+</HEAD>
+<BODY>
+<BODY bgcolor="F0F0F0">
+<HR>
+<H2>
+What does a <EM>tcm</EM> do?
+</H2>
+<P>
+A <EM>tcm</EM> can be viewed as an extention of the irc server itself,
+it offloads some of the administrative work of the oper unto another process.
+Akin to using an unix pipeline, not building everything into one program,
+but rather using other processes as building blocks to a better whole.
+<P>
+<EM>tcm</EM> monitors all connections to the server, and checks for too many
+connections from one user@host in too quick a time.
+It can be compiled to, notify opers of the possible clones or
+automatically k-line the possible clones.
+<P>
+A <EM>tcm</EM> on a server which supports it (currently ircd-hybrid) will
+monitor connections in IP (/24) blocks, looking for clones from so-called
+virtual hosts. Presently, tcm will just notify opers of potential clones
+and does not take any automatic action.
+<P>
+A <EM>tcm</EM> also monitors for excessive links request, and will
+either auto kill or auto kline as configured at compile time
+<P>
+<EM>tcm</EM> can be used by remote opers, either those already in the conf file
+for the server, or those you add to userlist.cf of tcm
+<P>
+<EM>tcm</EM> can be remotely linked to other tcm's, allowing remote k-lines
+or just remote communication line.
+<P>
+Nick flooding is also detected and can trigger either a kill or a k-line
+or just an oper warning.
+<P>
+Bot sign on notices are also noted by <EM>tcm</EM> and it can be compiled
+to auto-kline eggdrops etc. run by stupid bot runners.
+<P>
+stats p requests on the server are also noted by the <EM>tcm</EM>
+and result in a listing of active <EM>tcm</EM> opers.
+<P>
+Privmsg's to the <EM>tcm</EM> can be optionally relayed to 
+opers on the <EM>tcm</EM>
+<HR>
+<H2>
+History
+</H2>
+<P>
+tcm was originally written by Hendrix, an oper at irc.texas.net.
+It stood for "texas connection monitor". Various versions of tcm
+kicked around the net for a while, before I got a hold of a copy
+for use on irc.mo.net...When Shadowfax added +n nick following code
+to irc.mo.net I started adding code to detect nick flooders to tcm.
+Poor shadowfax never beat me at adding k-lines for clones, so one day
+I added code to suggest klines to use, which could be cut and pasted
+in a hurry. Phisher took it the next step, which was to automatically
+k-line cloners. Toast contributed some code, which has been folded in.
+This all became a part of tcm-dianora.
+tcm is a long way from what originally was coded by hendrix, there are
+still some remnants left, but not too many now. 
+<P>
+Currently, tcm-dianora is about to become tcm-hybrid, with more
+open access to a few other coders. I refer to tcm as just plain
+tcm in these documents for that reason.
+<P>
+Now is the day!  As of May, 2000, tcm-dianora is now tcm-hybrid! REJOICE!
+<HR>
+<HR>
+<H2>
+How to set up a <a href="tcm_cfg.html">tcm.cf</a> file
+</H2>
+<HR>
+<H2>
+How to set up a <a href="userlist.html">userlist.cf</a> file
+</H2>
+<HR>
+<H2>
+Here are all the tcm commands
+</H2>
+<UL>
+<LI> Basic <a href="admin.html">admin</a> commands
+<LI> Basic <a href="clones.html">commands to deal with clones</a>
+<LI> Remote <a href="remote.html"> oper commands</a>
+<LI> Commands to deal with <a href="linking.html">linking</a> other remote tcm's
+</UL>
+<HR>
+</BODY>
+</HTML>

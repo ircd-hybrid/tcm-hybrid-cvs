@@ -1,0 +1,41 @@
+<HTML><HEAD>
+<title>tcm commands to deal with linking other remote tcm's</title>
+</HEAD>
+<BODY>
+<BODY bgcolor="F0F0F0">
+<H2>
+Commands to deal with linking other remote tcm's
+</H2>
+
+<UL>
+<LI> <EM>.tcmconn</EM> tcmnick
+<BR>
+   The tcm will attempt to link to remote tcm tcmnick.
+<LI> <EM>.tcmlist</EM>
+<BR>
+   The tcm will list all remote tcm's it knows about.
+<LI> <EM>.allow</EM> tcmnick
+<BR>
+   The tcm will normally ignore all bot wide messages from all other tcm's
+<BR>
+   however .allow tcmnick will allow you to see clone reports etc. from
+<BR>
+   other tcm's
+<LI> <EM>.allow</EM> [tcmnick]
+<BR>
+   The tcm will remove an allow on that tcmnick
+<BR>
+   Without the optional tcmnick, the tcm will list all allows presently on
+<LI> <EM>.command</EM> @tcmnick
+<BR>
+   with this prefix, you can send a command to "tcmnick" tcm
+<BR>
+   and get a response back. i.e. ".bots @mobot" will send the ".bots"
+<BR>
+   command to tcm linked bot mobot, and return the list of bots from mobot
+</UL>
+
+<a href="tcm.html">back</a>
+</BODY>
+</HTML>
+

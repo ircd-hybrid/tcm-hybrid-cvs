@@ -1,0 +1,10 @@
+The following commands are valid to send via a DCC CHAT session
+to this bot:
+
+ - For help on basic admin commands type .help admin
+ - For help on clone commands type .help clones
+ - For help on remote commands type .help remote
+ - For help on remote tcm linking type .help linking
+
+ - .help
+    Get a list of command descriptions.

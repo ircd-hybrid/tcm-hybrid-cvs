@@ -1,0 +1,47 @@
+# Username for the bot
+U:db
+# virtual host name if needed
+##V:irc.foozle.org
+# O line for the bot with password
+O:dianora:Nope
+# Server for the tcm 
+S:irc.frizzle.net:6666
+# Nick for the tcm
+N:example
+# Bot's IRCNAME
+I:irc.frizzle.net tcm
+# channel for the tcm
+C:&frizzle.net
+#
+# A:case:action
+#  Sets the action to take on various automated situations.
+#   Possible values for case:
+#	- clone		<what action to take when clones are found>
+#	- flood		<what action to take when a user floods>
+#	- link		<what action to take when a link looker is found>
+#	- bot		<what action to take when a bot is found>
+#	- wingate	<what action to take when an open wingate is found>
+#	- socks		<what action to take when an open soxy proxy is found>
+#   Possible values for action:
+#	- kline		<kline the user using the proper message>
+#	- warn		<do nothing to the user, warn +w users on the tcm>
+#
+A:clone:kline
+A:flood:warn
+A:link:kline
+A:bot:kline
+A:wingate:kline 60
+A:socks:kline 60
+A:drones:kline 60
+A:drone:kline 60
+# optional message to send to users who request STATS p
+M:For basic information, see www.db.net/~db/tcm.html
+# email address
+# clone logs etc. will get emailed to this address
+#E:db@db.net
+# port to listen on if 6800 is unavailable
+#P:6801
+#where the userlist.cf is for this tcm
+#default is userlist.cf
+#L:phoenix1/userlist.cf
+#L:phoenix2/userlist.cf                                        

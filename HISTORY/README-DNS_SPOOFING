@@ -1,0 +1,41 @@
+tcm v0.4.3 now has code to try and detect some of the dns spoofers
+we are getting
+
+From the config.h file:
+
+/* PLEASE note, when the dns spoofers discover tcm is verifying hosts
+   They will also go after the tcm host... *shrug* but maybe we can
+   keep them busy for a while eh? - Dianora
+*/
+
+There are three mechanisms it uses.. 
+
+It will use WHOIP (avaiable on some non standard versions of CSr29)
+if available...(I have such a version - Dianora)
+
+It will use USRIP (available on th+hybrid)
+
+and default to use STATS L if either of the two above are not available
+
+You must have DETECT_DNS_SPOOFERS defined for any of the above to work
+check config.h
+
+There is also still top level domain TLD checking still in the code,
+you can have tcm auto kill a bogus TLD right off. 
+
+Of course, using STATS L on every connect will flood opers 
+pretty darn well... sooooo da5id (William Rockwood wjr@wwa.com)
+came up with this quick and dirty solution for ircii clients...
+(no, I don't have one for mirc...)
+
+^server_notice "* notice -- stats L requested by % (user@host)"
+
+stick the user@host of the tcm into the above, load and be happy.
+
+For example, I found this worked for me, with my test tcm
+and stock ircii 2.9 client
+ 
+ /on ^server "* Notice -- STATS L requested by % (db@*ottawa.net)*"
+
+- Dianora
+

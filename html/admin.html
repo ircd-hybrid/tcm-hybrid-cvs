@@ -1,0 +1,74 @@
+<HTML><HEAD>
+<title>tcm commands to deal with admin functions</title>
+</HEAD>
+<BODY>
+<BODY bgcolor="F0F0F0">
+<H2>
+Basic admin commands
+</H2>
+
+<UL>
+<LI> <EM>.close,.quit</EM>
+<BR>
+Tell the tcm to close down your DCC CHAT connection
+<LI> <EM>.disconnect</EM> nick
+<BR>
+disconnect kick a user off of the tcm
+<LI> <EM>.register</EM> password (also see .help remote)
+<BR>
+registers a remote oper for REMOTE_KLINE/KILL etc.
+<LI> <EM>.op</EM> nick nick2 nick3 (may require you be registered first)
+<BR>
+The tcm will op those nicks if they are on channel
+<LI> <EM>.opers</EM>
+<BR>
+Shows legal opers, not connections
+<LI> <EM>.connections</EM>
+<BR>
+List all users and opers currently connected to this tcm.
+<LI> <EM>.rehash</EM>
+<BR>
+This command reloads the userlist etc.
+<LI> <EM>.trace</EM>
+<BR>
+retraces the server, this will clear out any "stale" nicks.
+<BR>
+<EM>caution</EM> it will also clear out any IP block information it has.
+<LI> <EM>.class</EM> n
+<BR>
+shows you the client in class n, you may need to use .trace to update
+<LI> <EM>.classt</EM> n
+<BR>
+shows you total number of clients in class n
+<LI> <EM>.actions</EM> (see .help clones)
+<BR>
+This controls what action/reason is used for clones/flooders etc.
+<BR>
+current state can be examined with .actions
+<LI> <EM>.exemptions</EM>
+<BR>   Show users and sites with tcm kline/kill exemption (E: lines )
+<LI> <EM>.set</EM> [messages|nomessage]|[notices|nonotices]|actions
+<BR>
+See privmsg's sent to the tcm or see selected server notices
+<BR>
+Also allows you to set kline actions for clones/drones/wingates etc.
+<BR>
+.i.e.
+<BR>
+.set action clones_act kline 60
+<BR>
+do .set action for a complete list
+<LI> <EM>.ban</EM>
+<BR>
+   This command lists all bans in B: lines in userlist.cf
+<LI> <EM>.save</EM>
+   This command saves all tcm prefs (actions), you must be registered
+   and an admin to use this.
+<LI> <EM>.load</EM>
+   This command loads the saved tcm pref. Any oper may use this.
+</UL>
+
+<a href="tcm.html">back</a>
+</BODY>
+</HTML>
+

@@ -1,0 +1,20 @@
+umode is used to save personal preferences for oneself or others.
+each flag is turned on with + turned off with -
+
+To change umode for oneself
+.umode +psweioklm
+ +p be on party line
+ +s see server messages
+ +w see warning messages
+ +e echo commands back to user
+ +i invisible, do not show up on stats p
+ +o see LOCOPS send LOCOPS via .locops
+ +k see klines/kills/unklines
+ +l see LINK notices
+ +m see motd  
+
+If you are an admin (Have M flag) you can change the flags of others
+and you have additional flags you can turn on/off
+.umode nick -D+S
+ -D turn off D line privs
+ +S suspend oper

@@ -1,0 +1,34 @@
+<HTML><HEAD>
+<title>tcm commands to deal with remote oper access</title>
+</HEAD>
+<BODY>
+<BODY bgcolor="F0F0F0">
+<H2>
+Remote oper commands
+</H2>
+<UL>
+<LI> <EM>.register</EM> password
+<BR>
+registers a remote oper for REMOTE_KLINE/KILL etc.
+<LI> <EM>.killlist</EM> user@host
+<BR>
+The tcm will kill each user@host found with the reason
+<BR>
+"no multiple connections read the motd" ( OPERS only)
+<P>
+If you have a hybrid server, you can set a temporary kline by
+setting a time in seconds, in the [time] field.
+</P>
+<LI> <EM>.kclone</EM> [time] [nick|user@host] reason
+<LI> <EM>.kbot</EM> [time] [nick|user@host] reason
+<LI> <EM>.kline</EM> [time] [nick|user@host] reason
+<LI> <EM>.kflood</EM> [time] [nick|user@host] reason
+<LI> <EM>.kspam</EM> [time] [nick|user@host] reason
+<LI> <EM>.unkline</EM> user@host (must match exactly)
+<BR>
+   The tcm will attempt to remove that kline
+</UL>
+
+<a href="tcm.html">back</a>
+</BODY>
+</HTML>

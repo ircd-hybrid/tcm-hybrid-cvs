@@ -1,0 +1,18 @@
+
+ - .tcmconn tcmnick
+   The tcm will attempt to link to remote tcm tcmnick.
+ - .tcmlist
+   The tcm will list all remote tcm's it knows about.
+ - .allow tcmnick
+   The tcm will normally ignore all bot wide messages from all other tcm's
+   however .allow tcmnick will allow you to see clone reports etc.
+ - .allow -tcmnick
+   The tcm will remove an allow on that tcmnick
+ - .allow
+   The tcm will list all allows presently on
+ - .command @tcmnick
+   With this prefix, you can send a command to "tcmnick" tcm
+   and get a response back. i.e. ".bots @mobot" will send the ".bots"
+   command to tcm linked bot mobot, and return the list of bots from mobot
+ - .ban
+   This command lists all bans in B: lines in userlist.cf

@@ -1,0 +1,78 @@
+From kraemer@u.washington.edu  Thu May  8 11:31:26 1997
+Return-Path: <kraemer@u.washington.edu>
+Received: from goodall1.u.washington.edu (kraemer@goodall1.u.washington.edu [140.142.12.163])
+	by mtbaker.tfm.com (8.8.5/8.8.5) with ESMTP id LAA28310
+	for <db@db.net>; Thu, 8 May 1997 11:31:25 -0700 (PDT)
+Received: from localhost (kraemer@localhost)
+          by goodall1.u.washington.edu (8.8.4+UW97.04/8.8.4+UW97.04) with SMTP
+	  id LAA21094 for <db@db.net>; Thu, 8 May 1997 11:31:11 -0700
+Date: Thu, 8 May 1997 11:31:11 -0700 (PDT)
+From: Brian Kraemer <kraemer@u.washington.edu>
+To: db@db.net
+Subject: local oper trace
+Message-ID: <Pine.A41.3.95b.970508112218.43926A-100000@goodall1.u.washington.edu>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Status: OR
+
+I did some checking and CSr29 allows local opers able to get a whole
+/trace listing by default.
+
+For +th servers, you have to make these changes:
+
+In s_serv.c in m_trac() locate this sections of code:
+
+		if (IsInvisible(acptr) && dow &&
+		    !(MyConnect(sptr) && IsOper(sptr)) &&
+		    !IsAnOper(acptr) && (acptr != sptr))
+
+And change it to read:
+
+		if (IsInvisible(acptr) && dow &&
+		    !(MyConnect(sptr) && IsAnOper(sptr)) &&
+		    !IsAnOper(acptr) && (acptr != sptr))
+
+( Notice the change from IsOper(sptr) to IsAnOper(sptr) )
+
+
+Next locate this section further down in the same function:
+
+			/* Only opers see users if there is a wildcard
+			 * but anyone can see all the opers.
+			 */
+			if (IsOper(sptr)  &&
+			    (MyClient(sptr) || !(dow && IsInvisible(acptr)))
+			    || !dow || IsAnOper(acptr))
+
+And change it to read:
+
+			/* Only opers see users if there is a wildcard
+			 * but anyone can see all the opers.
+			 */
+			if (IsAnOper(sptr)  &&
+			    (MyClient(sptr) || !(dow && IsInvisible(acptr)))
+			    || !dow || IsAnOper(acptr))
+
+
+( Notice the IsOper(sptr) to IsAnOper(sptr) change again )
+
+And that's it!
+
+-Brian
+
+
+___________________________________________________________
+
+From the old README-LT
+
+Note: for tcm to work under LT with a local o 
+
+Locate this code in trace in s_serv.c
+
+     if (IsPerson(acptr) &&
+         (!IsInvisible(acptr) || IsOper(sptr)))
+
+Change to
+     if (IsPerson(acptr) &&
+         (!IsInvisible(acptr) || IsAnOper(sptr)))
+

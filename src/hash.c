@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.13 2002/05/30 22:40:58 db Exp $
+ * $Id: hash.c,v 1.14 2002/05/30 22:48:24 jmallett Exp $
  */
 
 #include <stdio.h>
@@ -198,7 +198,7 @@ add_to_hash_table(struct hash_rec *table[],
   else
     {
       ((struct hash_rec *)table[ind])->next = hashptr;
-      hashptr->next = table[ind];
+      hashptr->next = NULL;
     }
 }
 

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.109 2002/06/02 22:16:59 db Exp $
+ * $Id: userlist.c,v 1.110 2002/06/02 22:24:16 wcampbel Exp $
  *
  */
 
@@ -1005,7 +1005,7 @@ is_an_oper(char *user,char *host)
 
 /* Checks for ok hosts to block auto-kline - Phisher */
 /*
- * okhost()
+ * ok_host()
  * 
  * inputs	- user
  * 		- host

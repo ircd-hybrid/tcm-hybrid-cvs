@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.64 2002/06/02 22:16:54 db Exp $ */
+/* $Id: userlist.h,v 1.65 2002/06/02 22:24:14 wcampbel Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -95,7 +95,7 @@ void init_userlist_handlers(void);
 void load_config_file(char *);
 void clear_userlist(void);
 void save_prefs(void);
-int  okhost(char *,char *,int);
+int  ok_host(char *,char *,int);
 int  str2type(char *);
 char *type_show(unsigned long type);
 int  wingate_class(char *class);

@@ -1,3 +1,15 @@
+db          2002/08/29 23:46:59 EDT	(20020830_0)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  - as pointed out by Hwy, removed superflous \n
+  
+  Revision  Changes    Path
+  1.54      +6 -6      tcm-hybrid/src/hash.c
+
+
+
 bill        2002/08/26 12:26:39 EDT	(20020826_0)
 
   Modified files:

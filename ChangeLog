@@ -1,3 +1,21 @@
+db          2002/06/09 12:23:20 EDT	(20020609_5)
+
+  Modified files:
+    include              bothunt.h 
+    src                  bothunt.c 
+  Log:
+  - use the function luke
+  
+    bunch of places duplicated the connect flood code. rewrote to use a
+  single function. I'm not sure they all still work TBH. That will have to
+  be tested.
+  
+  Revision  Changes    Path
+  1.50      +2 -1      tcm-hybrid/include/bothunt.h
+  1.162     +21 -184   tcm-hybrid/src/bothunt.c
+
+
+
 wcampbel    2002/06/08 22:30:16 EDT	(20020609_4)
 
   Modified files:

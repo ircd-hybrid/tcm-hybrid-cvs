@@ -1,3 +1,15 @@
+leeh        2002/06/21 08:58:54 EDT	(20020621_5)
+
+  Modified files:
+    src                  main.c 
+  Log:
+  - dont attempt to oper either.
+  
+  Revision  Changes    Path
+  1.116     +0 -2      tcm-hybrid/src/main.c
+
+
+
 leeh        2002/06/21 08:56:24 EDT	(20020621_4)
 
   Modified files:

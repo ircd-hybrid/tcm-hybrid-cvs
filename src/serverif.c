@@ -52,7 +52,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.9 2001/02/01 14:33:01 wcampbel Exp $";
+static char *version="$Id: serverif.c,v 1.10 2001/02/02 03:03:15 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -152,6 +152,9 @@ int bindsocket(char *hostport)
   char *hold;
   int optval;
   unsigned long remoteaddr;
+#ifdef DEBUG
+  placed;
+#endif
 
   /* Parse serverhost to look for port number */
   strcpy (server,hostport);
@@ -434,6 +437,9 @@ void prnt(int sock, ...)
   char msgbuf[MAX_BUFF];
   char *format;
   va_list va;
+#ifdef DEBUG
+  placed;
+#endif
 
   va_start(va,sock);
 
@@ -478,6 +484,9 @@ void toserv(char *format, ... )
 {
   char msgbuf[MAX_BUFF];
   va_list va;
+#ifdef DEBUG
+  placed;
+#endif
   
   va_start(va,format);
 
@@ -513,6 +522,9 @@ void sendtoalldcc(int type,...)
   int i;
   int echo;
   int local_tcm = NO;	/* local tcm ? */
+#ifdef DEBUG
+  placed;
+#endif
 
   /* what a hack...
    * each tcm prefixes its messages sent to each user
@@ -695,6 +707,9 @@ void rdpt(void)
   static time_t clones_last_check_time=(time_t)0;	/* clone check */
   static time_t remote_tcm_socket_setup_time=(time_t)0;
   time_t cur_time;
+#ifdef DEBUG
+  placed;
+#endif
 
   cur_time = time((time_t *)NULL);
   last_ping_time = cur_time;
@@ -1029,6 +1044,9 @@ static void report_open_socks(int i)
 static void check_services(void)
 {
   time_t cur_time;
+#ifdef DEBUG
+  placed;
+#endif
 
   cur_time = time((time_t *)NULL);
 
@@ -1066,6 +1084,9 @@ static void on_services_notice(char *body)
   int  identd;
   char *p;
   char *user, *host;
+#ifdef DEBUG
+  placed;
+#endif
 
   while(*body == ' ')
     body++;
@@ -1264,6 +1285,10 @@ static void serverproc(void)
 */
 void signon()
 {
+#ifdef DEBUG
+    placed;
+#endif
+
     connections[0].buffend = connections[0].buffer;
     if (!*mynick)
       strcpy (mynick,config_entries.dfltnick);
@@ -1282,6 +1307,10 @@ void signon()
 
 void do_init(void)
 {
+#ifdef DEBUG
+  placed;
+#endif
+
   toserv("VERSION\n");
 
   if(config_entries.defchannel_key[0])
@@ -1305,6 +1334,10 @@ void do_init(void)
 */
 static void linkclosed(char *reason)
 {
+#ifdef DEBUG
+  placed;
+#endif
+
   (void)close(connections[0].socket);
   log_problem("linkclosed()", reason);
 
@@ -1333,6 +1366,9 @@ char makeconn(char *hostport,char *nick,char *userhost)
   char *type;
   char *user;
   char *host;
+#ifdef DEBUG
+  placed;
+#endif
 
   for (i=1; i<MAXDCCCONNS+1; ++i)
     if (connections[i].socket == INVALID)
@@ -1459,6 +1495,9 @@ char makeconn(char *hostport,char *nick,char *userhost)
 int add_connection(int sock,int tcm_entry)
 {
   int i;
+#ifdef DEBUG
+  placed;
+#endif
 
   for( i=1; i<MAXDCCCONNS+1; ++i )
     {
@@ -1507,6 +1546,9 @@ void closeconn(int connnum)
 {
   int i;
   char *type;
+#ifdef DEBUG
+  placed;
+#endif
 
   if (connections[connnum].socket != INVALID)
     close(connections[connnum].socket);
@@ -1572,6 +1614,9 @@ void privmsgproc(char *nick,char *userhost,char *body)
   char *host;	/* host portion */
   char *p;
   char *param1;
+#ifdef DEBUG
+  placed;
+#endif
 
   user = userhost;
   if( !(p = strchr(userhost,'@')) )
@@ -1768,6 +1813,9 @@ static unsigned long local_ip(void)
 int already_have_tcm(char *tcmnick)
 {
   int i;
+#ifdef DEBUG
+  placed;
+#endif
 
   if(config_entries.debug && outfile)
     {
@@ -1826,6 +1874,9 @@ static void proc(char *source,char *fctn,char *param)
     int numeric;		/* if its an numeric */
     char *p;
     char *q;
+#ifdef DEBUG
+    placed;
+#endif
 
     if ( (userhost = strchr(source, '!') ) )
       {
@@ -2317,6 +2368,9 @@ static void connect_remote_tcm(int connnum)
   struct sockaddr_in incoming_addr;
   struct hostent *host_seen;
   int addrlen;
+#ifdef DEBUG
+  placed;
+#endif
 
   if(remote_tcm_socket < 0)	/* extra paranoia, shouldn't be even here if this is true -db */
     return;
@@ -2468,6 +2522,9 @@ static void connect_remote_client(char *nick,char *user,char *host,int sock)
   struct sockaddr_in incoming_addr;
   struct hostent *host_seen;
   int addrlen;
+#ifdef DEBUG
+  placed;
+#endif
 
   for (i=1; i<MAXDCCCONNS+1; ++i)
     {
@@ -2544,6 +2601,9 @@ static void connect_remote_client(char *nick,char *user,char *host,int sock)
 void sendto_all_linkedbots(char *buffer)
 {
   int i;
+#ifdef DEBUG
+  placed;
+#endif
 
   for( i = 1; i< maxconns; i++)
     {

@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.26 2001/10/27 16:17:21 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.27 2001/10/27 18:14:21 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -1277,7 +1277,7 @@ void _onctcp(int connnum, int argc, char *argv[])
     *--p = '\0';
     if (*p == '\001')
       *--p = '\0';
-    notice(nick, "\001PING %s\001\n", dccbuff);
+    notice(nick, "\001PING %s", dccbuff);
     return;
   }
   else if (strncasecmp(msg,"VERSION",7) == 0)

@@ -1,3 +1,27 @@
+leeh        2002/06/21 09:45:26 EDT	(20020621_8)
+
+  Modified files:
+    src                  actions.c bothunt.c dcc_commands.c hash.c 
+                         logging.c main.c services.c tcm_io.c 
+                         userlist.c wingate.c 
+  Log:
+  - made tcm_log() fprintf("\n")
+  - stripped out as many \n's as are not needed.
+  
+  Revision  Changes    Path
+  1.29      +14 -15    tcm-hybrid/src/actions.c
+  1.168     +10 -3     tcm-hybrid/src/bothunt.c
+  1.126     +9 -13     tcm-hybrid/src/dcc_commands.c
+  1.33      +14 -14    tcm-hybrid/src/hash.c
+  1.48      +1 -1      tcm-hybrid/src/logging.c
+  1.117     +1 -1      tcm-hybrid/src/main.c
+  1.19      +2 -2      tcm-hybrid/src/services.c
+  1.88      +10 -11    tcm-hybrid/src/tcm_io.c
+  1.119     +1 -1      tcm-hybrid/src/userlist.c
+  1.58      +3 -3      tcm-hybrid/src/wingate.c
+
+
+
 leeh        2002/06/21 09:14:51 EDT	(20020621_7)
 
   Modified files:

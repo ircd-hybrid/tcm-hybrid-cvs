@@ -1,3 +1,9 @@
+*** 20010702_2 by wcampbel
+Cleaned up some things lint found
+Added make lint
+Changed rand/srand to random/srandom
+
+
 *** 20010702_1 by wcampbel
 Fixed my last typo in ChangeLog
 

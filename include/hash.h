@@ -1,7 +1,7 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.20 2002/06/22 14:04:44 db Exp $ */
+/* $Id: hash.h,v 1.21 2002/06/23 13:24:27 wcampbel Exp $ */
 
 #define HASHTABLESIZE 3001
 
@@ -12,7 +12,7 @@ extern struct hash_rec *ip_table[HASHTABLESIZE];
 
 struct user_entry {
   char nick[MAX_NICK];
-  char user[MAX_USER];
+  char username[MAX_USER];
   char host[MAX_HOST];
   char ip_host[MAX_IP];         /* host ip as string */
 #ifdef VIRTUAL

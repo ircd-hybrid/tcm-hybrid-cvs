@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.18 2002/06/07 11:20:14 leeh Exp $
+ * $Id: clones.c,v 1.19 2002/06/23 13:24:31 wcampbel Exp $
  */
 
 #include <assert.h>
@@ -146,7 +146,7 @@ check_clones(void *unused)
       /* Ensure we haven't already checked this user & domain */
       for(tptr = top, num_found = 0; tptr != ptr; tptr = tptr->next)
       {
-        if (!strcmp(tptr->info->user, ptr->info->user) &&
+        if (!strcmp(tptr->info->username, ptr->info->username) &&
             !strcmp(tptr->info->domain, ptr->info->domain))
           break;
       }
@@ -155,7 +155,7 @@ check_clones(void *unused)
       {
         for(tptr = tptr->next; tptr; tptr = tptr->next)
         {
-          if (!strcmp(tptr->info->user, ptr->info->user) &&
+          if (!strcmp(tptr->info->username, ptr->info->username) &&
               !strcmp(tptr->info->domain, ptr->info->domain))
             num_found++; /* - zaph & Dianora :-) */
         }
@@ -169,7 +169,7 @@ check_clones(void *unused)
 
           send_to_all(FLAGS_WARN,
                        "clones> %2d connections -- %s@%s%s {%s}",
-                       num_found, ptr->info->user,
+                       num_found, ptr->info->username,
                        notip ? "*" : ptr->info->domain,
                        notip ? ptr->info->domain : "*",
                        ptr->info->class);
@@ -361,7 +361,7 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
             {
 	      if (check_type == USER_CHECK)
 		{
-		  if (!match(tptr->info->user, ptr->info->user))
+		  if (!match(tptr->info->username, ptr->info->username))
 		    break;
 		}
 	      else if(check_type == HOST_CHECK)
@@ -371,7 +371,7 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
 		}
 	      else if(check_type == DOMAIN_CHECK)
 		{
-		  if (!strcmp(tptr->info->user, ptr->info->user) &&
+		  if (!strcmp(tptr->info->username, ptr->info->username) &&
 		      !strcmp(tptr->info->domain, ptr->info->domain))
 		    break;
 		}
@@ -384,7 +384,7 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
                 {
 		  if (check_type == USER_CHECK)
 		    {
-		      if (!match(tptr->info->user, ptr->info->user))
+		      if (!match(tptr->info->username, ptr->info->username))
 			num_found++; /* - zaph & Dianora :-) */
 		    }
 		  else if(check_type == HOST_CHECK)
@@ -394,7 +394,7 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
 		    }
 		  else if(check_type == DOMAIN_CHECK)
 		    {
-		      if (!strcmp(tptr->info->user, ptr->info->user) &&
+		      if (!strcmp(tptr->info->username, ptr->info->username) &&
 			  !strcmp(tptr->info->domain, ptr->info->domain))
 			num_found++; /* - zaph & Dianora :-) */
 		    }
@@ -428,7 +428,8 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
 		  print_to_socket(sock,
 				  " %s %2d connections -- %s@* {%s}",
 				  (num_found-nclones > 2) ? "==>" : "   ",
-				  num_found, ptr->info->user, ptr->info->class);
+				  num_found, ptr->info->username,
+                                  ptr->info->class);
 		}
 	      else if(check_type == HOST_CHECK)
 		{
@@ -445,7 +446,7 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
 		  print_to_socket(sock,
 				  " %s %2d connections -- %s@%s%s {%s}",
 				  (num_found-nclones > 2) ? "==>" :
-				  "   ",num_found,ptr->info->user,
+				  "   ",num_found,ptr->info->username,
 				  is_ip ? ptr->info->domain : "*.",
 				  is_ip ? ".*" :ptr->info->domain,
 				  ptr->info->class);

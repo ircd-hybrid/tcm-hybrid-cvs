@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.50 2002/06/22 18:21:47 leeh Exp $
+ * $Id: logging.c,v 1.51 2002/06/23 13:24:31 wcampbel Exp $
  *
  * - db
  */
@@ -250,7 +250,7 @@ log_failure(struct user_entry *userinfo)
 
   for (ptr = failures; ptr; ptr = ptr->next)
     {
-      if(!strcasecmp(ptr->user, userinfo->user) && 
+      if(!strcasecmp(ptr->username, userinfo->username) && 
 	 !strcasecmp(ptr->host, userinfo->host))
         {
           /* For performance, move the most recent to the head of the queue */
@@ -269,7 +269,7 @@ log_failure(struct user_entry *userinfo)
     {
       ptr = (struct failrec *)xmalloc(sizeof(struct failrec));
 
-      strlcpy(ptr->user, userinfo->user, MAX_USER);
+      strlcpy(ptr->username, userinfo->username, MAX_USER);
       strlcpy(ptr->host, userinfo->host, MAX_HOST);
       ptr->failcount = 0;
       ptr->next = failures;

@@ -1,4 +1,4 @@
-# $Id: tcm.cf,v 1.28 2002/05/28 15:10:11 leeh Exp $
+# $Id: tcm.cf,v 1.29 2002/06/23 13:24:25 wcampbel Exp $
 # Username for the bot
 U:db
 
@@ -69,7 +69,7 @@ A:sclone:tkline 180:Clones on multiple servers
 A:drone:dccwarn kline:Drone bots
 A:wingate:dline:Open Wingate
 A:socks:dline:Open SOCKS server
-A:squid:dline:Open Squid proxy
+A:squid:dline:Open Squid/HTTP proxy
 
 # optional message to send to users who request STATS p
 M:For basic information, see http://www.ircd-hybrid.org/tcm/

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.37 2002/06/22 14:04:48 db Exp $
+ * $Id: hash.c,v 1.38 2002/06/23 13:24:31 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -227,7 +227,7 @@ remove_from_hash_table(struct hash_rec *table[],
   for (find = table[(ind = hash_func(key))]; find; find = find->next)
   {
     if((!host_match	|| !strcmp(find->info->host, host_match)) &&
-       (!user_match	|| !strcmp(find->info->user, user_match)) &&
+       (!user_match	|| !strcmp(find->info->username, user_match)) &&
        (!nick_match	|| !strcmp(find->info->nick, nick_match)))
     {
       if(prev != NULL)
@@ -279,7 +279,7 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
   new_user->link_count = 0;
 
   strlcpy(new_user->nick, user_info->nick, MAX_NICK);
-  strlcpy(new_user->user, user_info->user, MAX_NICK);
+  strlcpy(new_user->username, user_info->username, MAX_NICK);
   strlcpy(new_user->host, user_info->host, MAX_HOST);
 #ifdef VIRTUAL
   if(user_info->ip_host[0] != '\0')
@@ -303,7 +303,7 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
   strlcpy(new_user->domain, domain, MAX_HOST);
 
   /* Add it to the hash tables */
-  add_to_hash_table(user_table, user_info->user, new_user);
+  add_to_hash_table(user_table, user_info->username, new_user);
   add_to_hash_table(host_table, user_info->host, new_user);
   add_to_hash_table(domain_table, domain, new_user);
 
@@ -344,41 +344,41 @@ remove_user_host(char *nick, struct user_entry *user_info)
   domain = find_domain(user_info->host);
 
   if(!remove_from_hash_table(host_table, user_info->host,
-			      user_info->host, user_info->user, nick)) 
+			      user_info->host, user_info->username, nick)) 
     {
       if(!remove_from_hash_table(host_table, user_info->host,
-				  user_info->host, user_info->user, NULL))
+				  user_info->host, user_info->username, NULL))
 	{
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from host table!\n",
-		      nick, user_info->user, user_info->host);
+		      nick, user_info->username, user_info->host);
 	    }
 	}
     }
   if(!remove_from_hash_table(domain_table, domain,
-			      user_info->host, user_info->user, nick))
+			      user_info->host, user_info->username, nick))
     {
       if(!remove_from_hash_table(domain_table, domain,
-				  user_info->host, user_info->user, NULL))
+				  user_info->host, user_info->username, NULL))
 	{
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from domain table!\n",
-		      nick, user_info->user, user_info->host);
+		      nick, user_info->username, user_info->host);
 	    }
 	}
     }
-  if(!remove_from_hash_table(user_table, user_info->user,
-			      user_info->host, user_info->user, nick))
+  if(!remove_from_hash_table(user_table, user_info->username,
+			      user_info->host, user_info->username, nick))
     {
-      if(!remove_from_hash_table(user_table, user_info->user,
-				  user_info->host, user_info->user, NULL))
+      if(!remove_from_hash_table(user_table, user_info->username,
+				  user_info->host, user_info->username, NULL))
 	{
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from user table!\n",
-		      nick, user_info->user, user_info->host);
+		      nick, user_info->username, user_info->host);
 	    }
 	}
     }
@@ -390,16 +390,16 @@ remove_user_host(char *nick, struct user_entry *user_info)
     strcpy(ip_class_c, "0.0.0.0");
   make_ip_class_c(ip_class_c);
   if(!remove_from_hash_table(ip_table, ip_class_c,
-			      user_info->host, user_info->user, nick))
+			      user_info->host, user_info->username, nick))
     {
       if(!remove_from_hash_table(ip_table, ip_class_c,
-				  user_info->host, user_info->user, NULL))
+				  user_info->host, user_info->username, NULL))
 	{
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,
 		      "*** Error removing %s!%s@%s [%s] from iptable table!\n",
-		      nick, user_info->user, user_info->host, ip_class_c);
+		      nick, user_info->username, user_info->host, ip_class_c);
 	    }
 	}
     }
@@ -619,21 +619,21 @@ check_host_clones(char *host)
       {
 	(void)snprintf(notice1, MAX_BUFF,
 		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)",
-		       find->info->nick, find->info->user, find->info->host,
+		       find->info->nick, find->info->username, find->info->host,
 		       tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
       }
       else
       {
 	(void)snprintf(notice0, MAX_BUFF,
 		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)",
-		       find->info->nick, find->info->user, find->info->host,
+		       find->info->nick, find->info->username, find->info->host,
 		       tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
       }
 
       if(clonecount == 2)
       {
 	handle_action(act_clone, 
-		      find->info->nick, find->info->user,
+		      find->info->nick, find->info->username,
 		      find->info->host, find->info->ip_host, 0);
       }
 
@@ -756,12 +756,12 @@ check_virtual_host_clones(char *ip_class_c)
 	  tmrec = localtime(&find->info->connecttime);
 
           if(user[0] == '\0')
-	    snprintf(user, MAX_USER, "%s", find->info->user);
+	    snprintf(user, MAX_USER, "%s", find->info->username);
 
-          if(strcasecmp(user, find->info->user))
+          if(strcasecmp(user, find->info->username))
 	    different=YES;
 
-          if(find->info->user[0] == '~')
+          if(find->info->username[0] == '~')
 	    ident = NO;
           else
 	    ident = YES;
@@ -770,7 +770,7 @@ check_virtual_host_clones(char *ip_class_c)
 	    {
 	      (void)snprintf(notice1,MAX_BUFF - 1,
 			     "  %s is %s@%s [%s] (%2.2d:%2.2d:%2.2d)",
-			     find->info->nick, find->info->user,
+			     find->info->nick, find->info->username,
 			     find->info->host, find->info->ip_host,
 			     tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
 	    }
@@ -778,7 +778,7 @@ check_virtual_host_clones(char *ip_class_c)
 	    {
 	      (void)snprintf(notice0,MAX_BUFF - 1,
 			     "  %s is %s@%s [%s] (%2.2d:%2.2d:%2.2d)",
-			     find->info->nick, find->info->user,
+			     find->info->nick, find->info->username,
 			     find->info->host, find->info->ip_host,
 			     tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
 	    }
@@ -792,7 +792,7 @@ check_virtual_host_clones(char *ip_class_c)
           if((different == NO && ident == YES) || (ident == NO))
             {
 	      handle_action(act_vclone,
-			    find->info->nick, find->info->user,
+			    find->info->nick, find->info->username,
 			    find->info->ip_host, find->info->ip_host, 0);
 	    }
 
@@ -854,7 +854,7 @@ update_nick(char *user, char *host, char *old_nick, char *new_nick)
   
   for(find = user_table[hash_val]; find; find = find->next)
   {
-    if((strcmp(find->info->user,user) == 0) &&
+    if((strcmp(find->info->username,user) == 0) &&
        (strcmp(find->info->host,host) == 0) &&
        (strcmp(find->info->nick, old_nick) == 0))
     {
@@ -1040,7 +1040,7 @@ list_class(int sock,char *class_to_find,int total_only)
                     }
 
                     print_to_socket(sock, "  %s (%s@%s)", ptr->info->nick,
-                                    ptr->info->user, ptr->info->host);
+                                    ptr->info->username, ptr->info->host);
                 }
 
               num_found++;
@@ -1107,7 +1107,7 @@ list_nicks(int sock,char *nick,int regex)
 
               print_to_socket(sock,
 			      "  %s (%s@%s) {%s}",
-			      ptr->info->nick, ptr->info->user,
+			      ptr->info->nick, ptr->info->username,
 			      ptr->info->host, ptr->info->class);
             }
         }
@@ -1166,7 +1166,8 @@ kill_or_list_users(int sock, char *userhost, int regex,
   {
     for (ptr = domain_table[i]; ptr; ptr = ptr->next)
     {
-      snprintf(uhost, MAX_USERHOST, "%s@%s", ptr->info->user, ptr->info->host);
+      snprintf(uhost, MAX_USERHOST, "%s@%s", ptr->info->username,
+               ptr->info->host);
 #ifdef HAVE_REGEX_H
       if((regex == YES &&
           !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS)) 
@@ -1193,11 +1194,11 @@ kill_or_list_users(int sock, char *userhost, int regex,
 	    numfound++;
 	    if(ptr->info->ip_host[0] > '9' || ptr->info->ip_host[0] < '0')
 	      print_to_socket(sock, "  %s (%s@%s) {%s}", ptr->info->nick,
-               ptr->info->user, ptr->info->host, ptr->info->class);
+               ptr->info->username, ptr->info->host, ptr->info->class);
 	    else
 	      print_to_socket(sock,
 			      "  %s (%s@%s) [%s] {%s}", ptr->info->nick,
-			      ptr->info->user, ptr->info->host,
+			      ptr->info->username, ptr->info->host,
 			      ptr->info->ip_host, ptr->info->class);
 	  }
       }

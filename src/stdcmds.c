@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.94 2002/06/21 16:46:47 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.95 2002/06/23 13:24:31 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -258,7 +258,7 @@ report_failures(int sock,int num)
           print_to_socket(sock, "Userhosts with most connect rejections:");
           print_to_socket(sock," %5d rejections: %s@%s",
 			  found->failcount,
-			  (*found->user ? found->user : "<UNKNOWN>"),
+			  (*found->username ? found->username : "<UNKNOWN>"),
 			  found->host);
         }
       found->failcount = -found->failcount;   /* Yes, this is horrible */

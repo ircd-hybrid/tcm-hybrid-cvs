@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.31 2002/06/21 14:16:28 leeh Exp $
+ * $Id: actions.c,v 1.32 2002/06/23 13:24:30 wcampbel Exp $
  */
 
 #include "setup.h"
@@ -321,7 +321,7 @@ list_one_action(int conn_num, int actionid)
  */
 
 void
-handle_action(int actionid, char *nick, char *user,
+handle_action(int actionid, char *nick, char *username,
 	      char *host, char *ip, char * addcmt)
 {
   char comment[MAX_BUFF];
@@ -329,11 +329,11 @@ handle_action(int actionid, char *nick, char *user,
   char *p;
   struct user_entry *userptr;
 
-  if ((user != NULL) && (host != NULL) && (nick != NULL))
+  if ((username != NULL) && (host != NULL) && (nick != NULL))
     {
       if ((userptr = find_nick_or_host(nick, FIND_NICK)) != NULL)
 	{
-	  user = userptr->user;
+	  username = userptr->username;
 	  host = userptr->host;
 	  ip = userptr->ip_host;
 	  if (!strcmp(ip, "255.255.255.255"))
@@ -343,14 +343,14 @@ handle_action(int actionid, char *nick, char *user,
 
   /* Sane input? */
   if ((actionid < 0) || (actionid >= MAX_ACTIONS) ||
-      !user || !host || !host[0] ||
+      !username || !host || !host[0] ||
       strchr(host, '*') || strchr(host, '?') ||
-      strchr(user, '*') || strchr(user, '?')) 
+      strchr(username, '*') || strchr(username, '?')) 
     {
       if ((actionid < 0) || (actionid >= MAX_ACTIONS))
 	tcm_log(L_WARN, "handle_action: action is %i", actionid);
-      else if (!user)
-	tcm_log(L_WARN, "handle_action(%s): user is NULL",
+      else if (!username)
+	tcm_log(L_WARN, "handle_action(%s): username is NULL",
                 actions[actionid].name);
       else if (!host)
 	tcm_log(L_WARN, "handle_action(%s): host is NULL", 
@@ -361,9 +361,9 @@ handle_action(int actionid, char *nick, char *user,
       else if (strchr(host, '*') || strchr(host, '?'))
 	tcm_log(L_WARN, "handle_action(%s): host contains wildchars (%s)",
 	        actions[actionid].name, host);
-      else if (strchr(user, '*') || strchr(user, '?'))
+      else if (strchr(username, '*') || strchr(username, '?'))
 	tcm_log(L_WARN, "handle_action(%s): user contains wildchars (%s)",
-	        actions[actionid].name, user);
+	        actions[actionid].name, username);
       return;
     }
 
@@ -376,11 +376,11 @@ handle_action(int actionid, char *nick, char *user,
       return;
     }
 
-  userhost = get_method_userhost(actionid, nick, user, host);
+  userhost = get_method_userhost(actionid, nick, username, host);
 
   strcpy(comment, "No actions taken");
 
-  if (ok_host(user[0] ? user : "*", host, actionid) == 0)
+  if (ok_host(username[0] ? username : "*", host, actionid) == 0)
     {
       /* Now process the event, we got the needed data */
       if (actions[actionid].method & METHOD_KLINE)
@@ -473,14 +473,14 @@ handle_action(int actionid, char *nick, char *user,
 		     "*** %s violation (%s) from %s (%s@%s): %s", 
 		     actions[actionid].name, addcmt,
 		     (nick && nick[0]) ? nick : "<unknown>", 
-		     (user && user[0]) ? user : "<unknown>",
+		     (username && username[0]) ? username : "<unknown>",
 		     host, comment);
       else
 	send_to_all(FLAGS_WARN,
 		     "*** %s violation from %s (%s@%s): %s", 
 		     actions[actionid].name, 
 		     (nick && nick[0]) ? nick : "<unknown>", 
-		     (user && user[0]) ? user : "<unknown>",
+		     (username && username[0]) ? username : "<unknown>",
 		     host, comment);
 
     }
@@ -493,14 +493,14 @@ handle_action(int actionid, char *nick, char *user,
 		"*** %s violation (%s) from %s (%s@%s): %s",
 		actions[actionid].name, addcmt,
 		(nick && nick[0]) ? nick : "<unknown>", 
-		(user && user[0]) ? user : "<unknown>",
+		(username && username[0]) ? username : "<unknown>",
 		host, comment);
       else
 	privmsg(config_entries.channel,
 		"*** %s violation from %s (%s@%s): %s",
 		actions[actionid].name, 
 		(nick && nick[0]) ? nick : "<unknown>", 
-		(user && user[0]) ? user : "<unknown>",
+		(username && username[0]) ? username : "<unknown>",
 		host, comment);
     }
 }
@@ -554,7 +554,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
     if((userptr = find_nick_or_host(nick, FIND_NICK)) == NULL)
       return NULL;
 
-    user = userptr->user;
+    user = userptr->username;
     host = userptr->host;
   }
   else

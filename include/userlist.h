@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.81 2002/06/22 18:21:44 leeh Exp $ */
+/* $Id: userlist.h,v 1.82 2002/06/23 13:24:27 wcampbel Exp $ */
 
 #include "tools.h"
 
@@ -22,7 +22,7 @@ struct f_entry {
 
 struct failrec
 {
-  char user[MAX_NICK];
+  char username[MAX_USER];
   char host[MAX_HOST];
   int failcount;
   struct failrec *next;

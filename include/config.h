@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.74 2002/06/22 14:04:44 db Exp $
+ * $Id: config.h,v 1.75 2002/06/23 13:24:27 wcampbel Exp $
  */
 
 /*
@@ -125,6 +125,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 #define REASON_DRONE   "Drones"
 #define REASON_SOCKS   "Open SOCKS Proxy"
 #define REASON_WINGATE "Open WinGate Proxy"
+#define REASON_SQUID   "Open Squid/HTTP Proxy"
 
 /* .kperm */
 #define REASON_KPERM   "Permanent K-Line"
@@ -155,7 +156,17 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 #define SOCKS_CHECKPORT 6667
 #define SOCKS_CHECKIP "10.0.0.1"
 
+/*
+ * define this to flag open squid/http proxies
+ * XXX - Still in development, not yet working
+ */
+#undef DETECT_SQUID
 
+/*
+ * define this to the string the checkport/checkip above sends.  This is
+ * used to verify the HTTP proxy is open.
+ */
+#define SQUID_STRING "Looking up your hostname..."
 
 /* undef if you don't want klines reported - Toast */
 #define REPORT_KLINES

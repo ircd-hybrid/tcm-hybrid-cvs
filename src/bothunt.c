@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.176 2002/06/22 14:04:47 db Exp $
+ * $Id: bothunt.c,v 1.177 2002/06/23 13:24:30 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -490,7 +490,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if (get_user_host(&user, &host, q) != 1)
       return;
 
-    strlcpy(userinfo.user, user, MAX_USER);
+    strlcpy(userinfo.username, user, MAX_USER);
     strlcpy(userinfo.host, host, MAX_HOST);
 
     if ((q = strchr(p, ']')) == NULL)
@@ -1445,7 +1445,7 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
  * bah. I added a flag -Dianora
  */
 
-  userinfo->user[0] = '\0';
+  userinfo->username[0] = '\0';
   userinfo->host[0] = '\0';
   userinfo->ip_host[0] = '\0';
 
@@ -1567,7 +1567,7 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
 
           if (get_user_host(&user, &host, uh) == 0)
 	    return;
-	  strlcpy(userinfo->user, user, MAX_USER);
+	  strlcpy(userinfo->username, user, MAX_USER);
 	  strlcpy(userinfo->host, host, MAX_HOST);
           return;
         }
@@ -1631,6 +1631,6 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
 
   if (get_user_host(&user, &host, uh) == 0)
     return;
-  strlcpy(userinfo->user, user, MAX_USER);
+  strlcpy(userinfo->username, user, MAX_USER);
   strlcpy(userinfo->host, host, MAX_HOST);
 }

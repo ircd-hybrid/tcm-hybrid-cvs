@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.11 2002/06/05 15:10:26 leeh Exp $
+ * $Id: vclones.c,v 1.12 2002/06/23 13:24:32 wcampbel Exp $
  */
 
 #include <assert.h>
@@ -128,7 +128,7 @@ report_vbots(int sock, int nclones, int check_user)
             {
               if (check_user)
 		{
-		  if (!strcmp(tptr->info->user, ptr->info->user) &&
+		  if (!strcmp(tptr->info->username, ptr->info->username) &&
 		      !strcmp(tptr->info->ip_class_c, ptr->info->ip_class_c))
 		    break;
 		}
@@ -146,7 +146,7 @@ report_vbots(int sock, int nclones, int check_user)
                 {
 		  if (check_user)
 		    {
-		      if (!strcmp(tptr->info->user, ptr->info->user) &&
+		      if (!strcmp(tptr->info->username, ptr->info->username) &&
 			  !strcmp(tptr->info->ip_class_c, ptr->info->ip_class_c))
 			num_found++; /* - zaph & Dianora :-) */
 		    }
@@ -179,7 +179,7 @@ report_vbots(int sock, int nclones, int check_user)
 		      print_to_socket(sock,
 				  " %s %2d connections -- %s@%s.* {%s}",
 				      (num_found-nclones > 2) ? "==>" :
-				      "   ", num_found, ptr->info->user,
+				      "   ", num_found, ptr->info->username,
 				      ptr->info->ip_class_c,
 				      ptr->info->class);
 		    }
@@ -245,7 +245,7 @@ list_virtual_users(int sock, char *userhost, int regex)
     for (ipptr = ip_table[i]; ipptr; ipptr = ipptr->next)
     {
       snprintf(uhost, MAX_USERHOST,
-	       "%s@%s", ipptr->info->user, ipptr->info->ip_host);
+	       "%s@%s", ipptr->info->username, ipptr->info->ip_host);
 #ifdef HAVE_REGEX_H
       if ((regex == YES &&
           !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS))
@@ -259,7 +259,7 @@ list_virtual_users(int sock, char *userhost, int regex)
 
 	num_found++;
         print_to_socket(sock, "  %s (%s@%s) [%s] {%s}", ipptr->info->nick,
-             ipptr->info->user, ipptr->info->host, ipptr->info->ip_host,
+             ipptr->info->username, ipptr->info->host, ipptr->info->ip_host,
              ipptr->info->class);
       }
     }

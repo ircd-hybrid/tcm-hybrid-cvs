@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.58 2002/06/21 13:45:22 leeh Exp $ */
+/* $Id: wingate.c,v 1.59 2002/06/23 13:24:32 wcampbel Exp $ */
 
 
 #include <netdb.h>
@@ -135,7 +135,7 @@ wingate_start_test(struct user_entry *info_p)
 
   n_open_wingate_fds++;
 
-  strlcpy(connections[found_slot].user, info_p->user, MAX_USER);
+  strlcpy(connections[found_slot].username, info_p->username, MAX_USER);
   strlcpy(connections[found_slot].host, info_p->host, MAX_HOST);
   strlcpy(connections[found_slot].nick, info_p->nick, MAX_NICK);
   strlcpy(connections[found_slot].ip, info_p->ip_host, MAX_IP);
@@ -187,7 +187,7 @@ return;
   else
     return;
 
-  strlcpy(connections[found_slot].user, info_p->user, MAX_USER);
+  strlcpy(connections[found_slot].username, info_p->username, MAX_USER);
   strlcpy(connections[found_slot].host, info_p->host, MAX_HOST);
   strlcpy(connections[found_slot].nick, info_p->nick, MAX_NICK);
   strlcpy(connections[found_slot].ip, info_p->ip_host, MAX_IP);
@@ -221,7 +221,7 @@ squid_start_test(struct user_entry *info_p, int port)
   n_open_squid_fds++;
 
   connections[found_slot].curr_state = SQUID_CONNECTING;
-  strlcpy(connections[found_slot].user, info_p->user, MAX_USER);
+  strlcpy(connections[found_slot].username, info_p->username, MAX_USER);
   strlcpy(connections[found_slot].host, info_p->host, MAX_HOST);
   strlcpy(connections[found_slot].nick, info_p->nick, MAX_NICK);
   strlcpy(connections[found_slot].ip, info_p->ip_host, MAX_IP);
@@ -443,10 +443,10 @@ static void report_open_wingate(int i)
     fprintf(outfile, "Found wingate open\n");
 
   handle_action(act_wingate,
-		connections[i].nick, connections[i].user,
+		connections[i].nick, connections[i].username,
 		connections[i].host, connections[i].ip, 0);
   tcm_log(L_NORM, "Open Wingate %s!%s@%s",
-	  connections[i].nick, connections[i].user, connections[i].host);
+	  connections[i].nick, connections[i].username, connections[i].host);
 }
 #endif
 
@@ -458,7 +458,7 @@ void report_open_squid(int i)
     fprintf(outfile, "DEBUG: Found open squid proxy at %s\n",
 	    connections[i].host);
 
-  handle_action(act_squid, connections[i].nick, connections[i].user,
+  handle_action(act_squid, connections[i].nick, connections[i].username,
 		connections[i].host, connections[i].ip, 0);
   tcm_log(L_NORM, "Open squid proxy %s", connections[i].host);
 }
@@ -472,7 +472,7 @@ void report_open_socks(int i)
     fprintf(outfile, "DEBUG: Found open socks proxy at %s\n", 
 	    connections[i].host);
 
-  handle_action(act_socks, connections[i].nick, connections[i].user,
+  handle_action(act_socks, connections[i].nick, connections[i].username,
 		connections[i].host, connections[i].ip, 0);
   tcm_log(L_NORM, "Open socks proxy %s", connections[i].host);
 }

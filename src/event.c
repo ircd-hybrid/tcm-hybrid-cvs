@@ -23,7 +23,7 @@
  *  developed and/or copyrighted by other sources.  Please see the
  *  CREDITS file for full details.
  *
- *  $Id: event.c,v 1.13 2002/09/20 05:49:03 bill Exp $
+ *  $Id: event.c,v 1.14 2003/08/13 02:43:31 joshk Exp $
  */
 
 /*
@@ -36,6 +36,7 @@
 
 #include <stdlib.h>
 #include <sys/types.h>
+#include <string.h>
 #include <time.h>
 
 #include "tcm.h"

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.69 2003/06/01 01:19:05 bill Exp $
+ * $Id: hash.c,v 1.70 2003/08/13 02:43:31 joshk Exp $
  */
 
 #include <stdio.h>
@@ -1325,7 +1325,7 @@ kill_or_list_users(struct connection *connection_p, char *userhost, int regex,
   struct client_list *list;
   struct user_entry *user;
   char uhost[MAX_USERHOST], *rsn = BadPtr(reason) ? "No reason" : (char *)reason;
-  int numfound = 0, i, idx;
+  int numfound = 0, i, idx = 0;
   dlink_node *dptr;
 
 #ifdef HAVE_REGEX_H

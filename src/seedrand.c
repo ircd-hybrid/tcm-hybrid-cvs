@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2002-2003 Bill Jonus
  *
- * $Id: seedrand.c,v 1.6 2003/06/01 01:19:05 bill Exp $
+ * $Id: seedrand.c,v 1.7 2003/08/13 02:43:31 joshk Exp $
  */
 
 #include <assert.h>
@@ -144,7 +144,7 @@ m_seedrand(struct connection *connection_p, int argc, char *argv[])
   struct user_entry *results[HASHTABLESIZE], *temp_u;
   int scores[HASHTABLESIZE], temp_s;
   int numfound = 0, score_t, temp, threshold;
-  char *match_s;
+  char *match_s = NULL;
 
   if (argc == 1)
   {

@@ -1,3 +1,15 @@
+db          2002/06/02 01:26:42 EDT	(20020602_1)
+
+  Modified files:
+    src                  wingate.c 
+  Log:
+  - do some limiting of number of outstanding WINGATE/SQUID/SOCKS connections
+  
+  Revision  Changes    Path
+  1.52      +28 -1     tcm-hybrid/src/wingate.c
+
+
+
 db          2002/06/01 22:20:45 EDT	(20020602_0)
 
   Modified files:

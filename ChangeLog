@@ -1,3 +1,11 @@
+*** 20011029_6 by bill
+
+- added ability to specify user with ipmask in .vlist
+   you can now: .vlist some.net.block.* (or .vlist *@some.net.block.*)
+                .vlist user@some.net.block.*
+                etc
+
+
 *** 20011029_5 by wcampbel
 Added a logs .cvsignore file
 

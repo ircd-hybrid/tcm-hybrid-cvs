@@ -51,12 +51,13 @@
 #include "commands.h"
 #include "wild.h"
 #include "serno.h"
+#include "patchlevel.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.20 2001/07/03 03:47:02 wcampbel Exp $";
+static char *version="$Id: serverif.c,v 1.21 2001/07/22 04:05:45 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 

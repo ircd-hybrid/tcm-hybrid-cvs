@@ -1,3 +1,7 @@
+*** 20011026_8 by wcampbel
+Fixed modules/.depend
+
+
 *** 20011026_7 by wcampbel
 Massive code cleanup - no more warnings in modules/*.c
 Fixed some format string bugs and an if (... = ...)

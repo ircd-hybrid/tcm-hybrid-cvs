@@ -1,3 +1,8 @@
+*** 20011029_7 by bill
+
+- fixed bug in gline request/trigger parsing
+
+
 *** 20011029_6 by bill
 
 - added ability to specify user with ipmask in .vlist

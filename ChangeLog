@@ -1,3 +1,15 @@
+bill        2002/09/27 00:20:07 EDT	(20020927_0)
+
+  Modified files:
+    include              actions.h 
+  Log:
+  - changed hoststrip for sclone action to compensate for bug in EFNet's services.us
+  
+  Revision  Changes    Path
+  1.15      +1 -1      tcm-hybrid/include/actions.h
+
+
+
 bill        2002/09/26 12:17:49 EDT	(20020926_1)
 
   Modified files:

@@ -1,3 +1,32 @@
+db          2002/06/27 20:53:54 EDT	(20020628_0)
+
+  Modified files:
+    include              tcm_io.h 
+    src                  actions.c bothunt.c clones.c 
+                         dcc_commands.c hash.c main.c modules.c 
+                         parse.c serv_commands.c services.c 
+                         tcm_io.c userlist.c 
+  Log:
+  - get rid of send_to_parytline. send_to_all now checks from_p
+    to not send to itself
+  
+  Revision  Changes    Path
+  1.45      +1 -3      tcm-hybrid/include/tcm_io.h
+  1.35      +11 -11    tcm-hybrid/src/actions.c
+  1.189     +41 -36    tcm-hybrid/src/bothunt.c
+  1.22      +6 -6      tcm-hybrid/src/clones.c
+  1.141     +15 -14    tcm-hybrid/src/dcc_commands.c
+  1.46      +3 -3      tcm-hybrid/src/hash.c
+  1.124     +3 -2      tcm-hybrid/src/main.c
+  1.52      +10 -9     tcm-hybrid/src/modules.c
+  1.82      +3 -2      tcm-hybrid/src/parse.c
+  1.4       +6 -3      tcm-hybrid/src/serv_commands.c
+  1.22      +2 -2      tcm-hybrid/src/services.c
+  1.96      +4 -34     tcm-hybrid/src/tcm_io.c
+  1.142     +8 -7      tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/27 10:39:26 EDT	(20020627_0)
 
   Modified files:

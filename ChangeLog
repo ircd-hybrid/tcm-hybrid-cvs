@@ -1,3 +1,19 @@
+bill        2002/09/20 01:06:57 EDT	(20020920_1)
+
+  Modified files:
+    src                  event.c tcm_io.c 
+  Log:
+  - completed migration of event_table from linked list to array form
+  - removed unused eventNextTime()
+  - added checking in server_link_closed() to ensure we have not already
+    scheduled a server reconnect attempt.
+  
+  Revision  Changes    Path
+  1.11      +13 -43    tcm-hybrid/src/event.c
+  1.103     +4 -1      tcm-hybrid/src/tcm_io.c
+
+
+
 bill        2002/09/20 00:22:44 EDT	(20020920_0)
 
   Modified files:

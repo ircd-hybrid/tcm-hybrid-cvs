@@ -1,3 +1,7 @@
+*** 20011026_11 by wcampbel
+Added etc/.cvsignore
+
+
 *** 20011026_10 by bill
 - removed generation of 'rude' default Makefile on distclean
 

@@ -1,3 +1,18 @@
+wcampbel    2002/04/19 19:15:11 EDT	(20020420_0)
+
+  Modified files:
+    include              bothunt.h 
+    modules              .depend commands.c 
+  Log:
+  More -Wall -Wunused ...... cleanups
+  
+  Revision  Changes    Path
+  1.24      +2 -0      tcm-hybrid/include/bothunt.h
+  1.9       +1 -1      tcm-hybrid/modules/.depend
+  1.42      +1 -0      tcm-hybrid/modules/commands.c
+
+
+
 wcampbel    2002/04/17 18:09:29 EDT	(20020417_0)
 
   Modified files:

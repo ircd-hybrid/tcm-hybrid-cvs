@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.211 2003/02/01 00:55:37 bill Exp $
+ * $Id: bothunt.c,v 1.212 2003/02/03 06:35:45 bill Exp $
  */
 
 #include <stdio.h>
@@ -131,7 +131,8 @@ struct msg_to_action msgs_to_mon[] = {
   {MSG_USER_COUNT_OFF, sizeof(MSG_USER_COUNT_OFF)-1, IGNORE},
   {MSG_SQUIT, sizeof(MSG_SQUIT)-1, SQUITOF},
   {MSG_MOTD, sizeof(MSG_MOTD)-1, MOTDREQ},
-  {MSG_FLOODER, sizeof(MSG_FLOODER)-1, FLOODER},
+  {MSG_FLOODER, sizeof(MSG_DRONE_FLOODER)-1, FLOODER},
+  {MSG_POSSIBLE_FLOODER, sizeof(MSG_POSSIBLE_FLOODER)-1, FLOODER},
   {MSG_USER, sizeof(MSG_USER)-1, USER},
   {MSG_I_LINE_FULL, sizeof(MSG_I_LINE_FULL)-1, ILINEFULL},
   {MSG_TOOMANY, sizeof(MSG_TOOMANY)-1, TOOMANY},
@@ -637,32 +638,35 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     break;
 
   /* Flooder bill [bill@ummm.E] on irc.intranaut.com target: #clone */ 
+  /* Possible Flooder bill [bill@ummm.E] on irc.intranaut.com target: #clone */
+  /* Possible Flooder bill[bill@ummm.E] on irc.intranaut.com target: #clone */
   case FLOODER:
-    nick = p+8;
+    if (*p == 'P')
+      nick = p + 17;
+    else
+      nick = p + 8;
 
-    if ((p = strchr(nick, ' ')) == NULL)
-      break;
-    *p++ = '\0';
+    if ((p = strstr(nick, "] on")) == NULL)
+      return;
+    if ((q = strrchr(p, '[')) == NULL)
+      return;
 
-    if ((q = strchr(p, ' ')) == NULL)
-      break;
-    from_server = q+4;
+    if (*(q-1) == ' ')
+      *(q-1) = '\0';
 
-    if (get_user_host(&user, &host, p) == NULL)
-      break;
-
-    if ((p = strchr(from_server,' ')) == NULL)
-      break;
+    from_server = p + 5;
+    if ((p = strchr(from_server, ' ')) == NULL)
+      return;
     *p = '\0';
-    target = p+9;
+    target = p + 9;
 
-    if (strcasecmp(tcm_status.my_server, from_server) == 0)
-    {
-      send_to_all(NULL, FLAGS_WARN,
-		  "*** Flooder %s (%s@%s) target: %s",
-		  nick, user, host, target);
-      handle_action(act_flood, nick, user, host, 0, 0);
-    }
+    if (strcasecmp(from_server, tcm_status.my_server) != 0)
+      return;
+
+    if (get_user_host(&user, &host, q) == NULL)
+      break;
+
+    handle_action(act_flood, nick, user, host, NULL, NULL);
 
     break;
 
@@ -732,22 +736,27 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
     if ((p = strchr(q, ']')) == NULL)
       return;
-    p+=5;
+    *p = '\0';
+    from_server = p+5;
 
+    if ((p = strchr(from_server, ' ')) == NULL)
+      return;
+    *p = '\0';
+    p += 9;
+
+    if (strcasecmp(from_server, tcm_status.my_server) != 0)
+      return;
+    
     if (get_user_host(&user, &host, q) == NULL)
       return;
 
-    from_server = p;
     if ((q = strchr(p, ' ')) == NULL)
       return;
     *q = '\0';
     q+=9;
 
-    if (strcasecmp(from_server, tcm_status.my_server))
-      return;
-
     send_to_all(NULL, FLAGS_WARN,
-		"Possible drone flooder: %s!%s@%s target: %s",
+		"*** Possible drone flooder: %s!%s@%s target: %s",
 		nick, user, host, q);
     break;
 

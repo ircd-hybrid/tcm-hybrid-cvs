@@ -1,7 +1,7 @@
 #ifndef __BOTHNUT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.60 2002/09/20 06:37:21 bill Exp $ */
+/* $Id: bothunt.h,v 1.61 2003/02/03 06:35:43 bill Exp $ */
 
 
 struct source_client;
@@ -41,6 +41,7 @@ void _config(int, int, char *argv[]);
 #define MSG_SQUIT		"Received SQUIT"
 #define MSG_MOTD		"motd requested by"
 #define MSG_FLOODER		"Flooder"
+#define MSG_POSSIBLE_FLOODER	"Possible Flooder"
 #define MSG_USER		"User"
 #define MSG_I_LINE_MASK		"I-line mask"
 #define MSG_I_LINE_FULL		"I-line is full"

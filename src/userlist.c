@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.153 2004/05/19 09:58:14 bill Exp $
+ * $Id: userlist.c,v 1.154 2004/06/02 02:00:44 bill Exp $
  */
 
 #include <errno.h>
@@ -28,16 +28,13 @@
 #include "handler.h"
 #include "skline.h"
 
-static void load_a_user(char *);
-static void load_e_line(char *);
-static void add_oper(char *, char *, char *, char *, char *);
 static void set_initial_umodes(struct oper_entry *, const char *);
 
 static void m_umode(struct connection *, int, char *argv[]);
 static void set_umode_connection(struct connection *, int, const char *);
 static void set_umode_userlist(char *, const char *);
 
-static void save_umodes(const char *);
+void save_umodes(const char *);
 
 struct dcc_command umode_msgtab = {
   "umode", NULL, {m_unregistered, m_umode, m_umode}
@@ -57,13 +54,9 @@ static struct umode_struct umode_privs[] =
 {
   { 'M', FLAGS_ADMIN,		},
   { 'K', FLAGS_KLINE,		},
-#ifndef NO_D_LINE_SUPPORT
   { 'D', FLAGS_DLINE,		},
-#endif
   { 'S', FLAGS_SUSPENDED, 	},
-#ifdef ENABLE_W_FLAG
-  { 'W', FLAGS_WALLOPS,		},
-#endif
+  { 'W', FLAGS_OPERWALL,	},
   { 'X', FLAGS_XLINE,		},
   { 'J', FLAGS_JUPE,		},
   { (char)0, 0,			}
@@ -426,458 +419,6 @@ save_umodes(const char *nick)
   }
 }
     
-/*
- * load_config_file
- * 
- * inputs	- NONE
- * output	- NONE
- * side effects	- configuration items needed for tcm are loaded
- *	  from CONFIG_FILE
- *	  rudimentary error checking in config file are reported
- *	  and if any found, tcm is terminated...
- */
-void 
-load_config_file(char *file_name)
-{
-  FILE *fp;
-  char line[MAX_BUFF];
-  char *argv[MAX_ARGV];
-  int  argc, a;
-  char *p;
-  char *q;
-  int error_in_config;		/* flag if error was found in config file */
-
-  error_in_config = NO;
-
-  config_entries.hybrid = NO;
-  config_entries.hybrid_version = 0;
-
-  config_entries.tcm_pid_file[0] = '\0';
-  config_entries.username_config[0] = '\0';
-  config_entries.virtual_host_config[0] = '\0';
-  config_entries.oper_nick_config[0] = '\0';
-  config_entries.oper_pass_config[0] = '\0';
-  config_entries.server_pass[0] = '\0';
-  config_entries.ircname_config[0] = '\0';
-  config_entries.channel[0] = '\0';
-  config_entries.dfltnick[0] = '\0';
-  config_entries.email_config[0] = '\0';
-
-  strlcpy(config_entries.userlist_config, USERLIST_FILE,
-          sizeof(config_entries.userlist_config));
-
-  if((fp = fopen(file_name,"r")) == NULL)
-  {
-    fprintf(stderr,"GACK! I don't know who I am or anything!!\n");
-    fprintf(stderr,"tcm can't find %s file\n",file_name);
-    exit(1);
-  }
-
-  while(fgets(line, MAX_BUFF-1,fp))
-  {
-    if(line[0] == '#')
-      continue;
-
-    if ((p = strchr(line,'\n')) != NULL)
-      *p = '\0';
-
-    if (*line == '\0')
-      continue;
-
-    p = line;
-    argc=0;
-
-    for (q = strchr(p, ':'); q; q=strchr(p, ':'))
-    {
-      argv[argc++] = p;
-      *q = '\0';
-      p = q+1;
-    }
-    argv[argc++] = p;
-
-    switch(argv[0][0])
-    {
-    case 'a':case 'A':
-      set_action(argc, argv);
-      break;
-
-    case 'd':case 'D':
-      strlcpy(config_entries.dynamic_config, argv[1],
-              sizeof(config_entries.dynamic_config));
-      break;
-
-    case 'e':case 'E':
-      strlcpy(config_entries.email_config, argv[1],
-              sizeof(config_entries.email_config));
-      break;
-
-    case 'f':case 'F':
-      if (config_entries.debug && outfile)
-	(void)fprintf(outfile, "tcm.pid file name = [%s]\n", argv[1]);
-      strlcpy(config_entries.tcm_pid_file, argv[1],
-              sizeof(config_entries.tcm_pid_file));
-      break;
-
-    case 'l':case 'L':
-      strlcpy(config_entries.userlist_config, argv[1],
-              sizeof(config_entries.userlist_config));
-      break;
-
-    case 'm':case 'M':
-      strlcpy(config_entries.statspmsg, argv[1],
-              sizeof(config_entries.statspmsg));
-      for ( a = 2 ; a < argc ; ++a )
-      {
-	strcat(config_entries.statspmsg, ":");
-	strcat(config_entries.statspmsg, argv[a]);
-      }
-      if (config_entries.statspmsg[strlen(config_entries.statspmsg)-1] == ':')
-	config_entries.statspmsg[strlen(config_entries.statspmsg)-1] = '\0';
-      break;
-
-    case 'o':case 'O':
-      strlcpy(config_entries.oper_nick_config, argv[1],
-              sizeof(config_entries.oper_nick_config));
-#ifdef HAVE_LIBCRYPTO
-      memset(&config_entries.oper_keyfile, 0,
-             sizeof(config_entries.oper_keyfile));
-
-      if (argc >= 4)
-      {
-        strlcpy(config_entries.oper_keyfile, argv[2],
-                sizeof(config_entries.oper_keyfile));
-        strlcpy(config_entries.oper_pass_config, argv[3],
-                sizeof(config_entries.oper_pass_config));
-      }
-      else
-#endif
-        strlcpy(config_entries.oper_pass_config, argv[2],
-                sizeof(config_entries.oper_pass_config));
-      break;
-
-    case 'u':case 'U':
-      if (config_entries.debug && outfile)
-	fprintf(outfile, "user name = [%s]\n", argv[1]);
-
-      strlcpy(config_entries.username_config, argv[1],
-              sizeof(config_entries.username_config));
-      break;
-
-    case 'v':case 'V':
-      if (config_entries.debug && outfile)
-	fprintf(outfile, "virtual host name = [%s]\n", argv[1]);
-
-      strlcpy(config_entries.virtual_host_config, argv[1],
-              sizeof(config_entries.virtual_host_config));
-      break;
-
-    case 's':case 'S':
-      if (config_entries.debug && outfile)
-	fprintf(outfile, "server = [%s]\n", argv[1]);
-      strlcpy(config_entries.server_name, argv[1],
-              sizeof(config_entries.server_name));
-      strlcpy(tcm_status.my_server, argv[1],
-              sizeof(tcm_status.my_server));
-
-      if (argc > 2)
-	strlcpy(config_entries.server_port, argv[2],
-                sizeof(config_entries.server_port));
-
-      if (argc > 3)
-	strlcpy(config_entries.server_pass, argv[3],
-                sizeof(config_entries.server_pass));
-      break;
-
-    case 'n':case 'N':
-      if (config_entries.debug && outfile)
-	fprintf(outfile, "nick for tcm = [%s]\n", argv[1]);
-      strlcpy(config_entries.dfltnick, argv[1],
-              sizeof(config_entries.dfltnick));
-      break;
-
-    case 'i':case 'I':
-      if (config_entries.debug && outfile)
-	fprintf(outfile, "IRCNAME = [%s]\n", argv[1]);
-      strlcpy(config_entries.ircname_config, argv[1],
-              sizeof(config_entries.ircname_config));
-      break;
-
-    case 'c':case 'C':
-      if (config_entries.debug && outfile)
-	fprintf(outfile, "Channel = [%s]\n", argv[1]);
-
-      if (argc > 2)
-	strlcpy(config_entries.channel_key, argv[2],
-                sizeof(config_entries.channel_key));
-      else
-	config_entries.channel_key[0] = '\0';
-
-      strlcpy(config_entries.channel, argv[1],
-              sizeof(config_entries.channel));
-      break;
-
-    default:
-      break;
-    }
-  }
-
-  if(config_entries.username_config[0] == '\0')
-  {
-    fprintf(stderr,"I need a username (U:) in %s\n",CONFIG_FILE);
-    error_in_config = YES;
-  }
-
-  if(config_entries.oper_nick_config[0] == '\0')
-  {
-    fprintf(stderr,"I need an opernick (O:) in %s\n",CONFIG_FILE);
-    error_in_config = YES;
-  }
-
-  if(config_entries.oper_pass_config[0] == '\0')
-  {
-#ifdef HAVE_LIBCRYPTO
-    /* could be a pwless keyfile */
-    if (config_entries.oper_keyfile[0] == '\0')
-    {
-      fprintf(stderr,"I need an operpass (O:) in %s\n",CONFIG_FILE);
-      error_in_config = YES;
-    }
-#else
-    fprintf(stderr, "I need an operpass (O:) in %s\n", CONFIG_FILE);
-    error_in_config = YES;
-#endif
-  }
-
-  if(config_entries.server_name[0] == '\0')
-  {
-    fprintf(stderr,"I need a server (S:) in %s\n",CONFIG_FILE);
-    error_in_config = YES;
-  }
-
-  if(config_entries.server_port[0] == '\0')
-  {
-    fprintf(stderr,"I need a port in the server line (S:) in %s\n",
-	    CONFIG_FILE);
-    error_in_config = YES;
-  }
-
-  if(config_entries.ircname_config[0] == '\0')
-  {
-    fprintf(stderr,"I need an ircname (I:) in %s\n",CONFIG_FILE);
-    error_in_config = YES;
-  }
-
-  if(config_entries.dfltnick[0] == '\0')
-  {
-    fprintf(stderr,"I need a nick (N:) in %s\n", CONFIG_FILE);
-    error_in_config = YES;
-  }
-
-  if(error_in_config)
-    exit(1);
-}
-
-/*
- * save_prefs
- *
- * inputs	- NONE
- * output	- NONE
- * side effects - action table is affected
- */
-void 
-save_prefs(void)
-{
-  FILE *fp_in;
-  FILE *fp_out;
-  char *argv[MAX_ARGV];
-  char frombuff[MAX_BUFF];
-  char *p, *q, filename[80];
-  int argc=0, a;
-
-  if ((fp_in = fopen(CONFIG_FILE,"r")) == NULL)
-    {
-      send_to_all(NULL, FLAGS_ALL, "Couldn't open %s: %s",
-		  CONFIG_FILE, strerror(errno));
-      return;
-    }
-
-  snprintf(filename, sizeof(filename), "%s.%d", CONFIG_FILE, getpid());
-
-  if ((fp_out = fopen(filename, "w")) == NULL)
-    {
-      send_to_all(NULL, FLAGS_ALL,
-		  "Couldn't open %s: %s", filename, strerror(errno));
-      fclose(fp_in);
-      return;
-    }
-
-  while (fgets(frombuff, MAX_BUFF-1, fp_in) != NULL)
-    {
-      /* zap newlines */
-      if ((p = strchr(frombuff,'\n')) != NULL)
-	*p = '\0';
-
-      argc = 0;
-      p = frombuff;
-
-      for (q=strchr(p, ':'); q; q=strchr(p, ':'))
-	{
-	  argv[argc++] = p;
-	  *q = '\0';
-	  p = q+1;
-	}
-      argv[argc++] = p;
-      
-      switch (argv[0][0])
-	{
-	case 'A': case 'a':
-	  a = find_action(argv[1]);
-	  if (a>=0)
-	    {
-	      if (!(actions[a].method & 0x80000000))
-		{
-		  fprintf(fp_out, "A:%s:%s %d:%s\n",
-			  actions[a].name,
-			  get_method_names(actions[a].method),
-			  actions[a].klinetime,
-			  actions[a].reason);
-		  actions[a].method |= 0x80000000;
-		}
-	    }
-          break;
-	default:
-	  for (a=0; a < argc - 1; a++)
-	    {
-	      fprintf (fp_out, "%s:", argv[a]);
-	    }
-	  fprintf (fp_out, "%s\n", argv[a]);
-	  break;
-	}
-    }
-
-  for (a=0;actions[a].name[0];a++)
-    {
-      if (actions[a].method & 0x80000000)
-	actions[a].method &= 0x7FFFFFFF;
-      else
-	fprintf(fp_out, "A:%s:%s %d:%s\n",
-		actions[a].name,
-		get_method_names(actions[a].method),
-		actions[a].klinetime,
-		actions[a].reason);
-    }
-  fclose(fp_in);
-  fclose(fp_out);
-
-  if (rename(filename, CONFIG_FILE))
-    send_to_all(NULL, FLAGS_ALL,
-		"Error renaming new config file.  Changes may be lost.  %s",
-		strerror(errno));
-  chmod(CONFIG_FILE, 0600);
-}
-
-/*
- * load_userlist
- * 
- * inputs	- NONE
- * output	- NONE
- * side effects	- first part of oper list is loaded from file
- */
-void
-load_userlist()
-{
-  FILE *userfile;
-  char line[MAX_BUFF];
-  char *p;
-
-  if ((userfile = fopen(config_entries.userlist_config,"r")) == NULL)
-    {
-      fprintf(stderr,"Cannot read %s\n",config_entries.userlist_config);
-      return;
-    }
-
-  while (fgets(line, MAX_BUFF-1, userfile) )
-    {
-      char op_char;
-
-      if(line[0] == '#')
-	continue;
-
-      if ((p = strchr(line, '\n')) != NULL)
-	*p = '\0';
-
-      op_char = line[0];
-
-      if(line[1] == ':')
-	{
-	  switch(op_char)
-	    {
-	    case 'E':
-	      load_e_line(line+2);
-	      break;
-
-	    case 'O':
-	      load_a_user(line+2);
-	      break;
-
-	    default:
-	      break;
-	    }
-	}
-      
-    }
-}
-
-/*
- * load_a_user()
- * inputs	- rest of line past the 'O:' or 'o:'
- * output	- NONE
- * side effects	- userlist is updated
- */
-static void
-load_a_user(char *line)
-{
-  char *userathost;
-  char *user;
-  char *host;
-  char *usernick;
-  char *password;
-  char *type;
-  char *p;
-
-  if(config_entries.debug && outfile)
-    fprintf(outfile, "load_a_user() line =[%s]\n",line);
-
-  if ((userathost = strtok(line,":")) == NULL)
-    return;
-
-  if((usernick = strtok(NULL, ":")) == NULL)
-    return;
-
-  if((password = strtok(NULL, ":")) == NULL)
-    return;
-
-  if((type = strtok(NULL, ":")) == NULL)
-    return;
-
-  user = userathost;
-  if((p = strchr(userathost,'@')) != NULL)
-    {
-      *p++ = '\0';
-      host = p;
-    }
-  else
-    {
-      user = "*";
-      host = userathost;
-    }
-
-  if((p = strchr(host,' ')) != NULL)
-    *p = '\0';
-
-  add_oper(user, host, usernick, password, type);
-}
-
 /* on_stats_o()
  *
  * input	- server message body (argc/argv)
@@ -907,19 +448,16 @@ on_stats_o(int argc, char *argv[])
       host = p;
     }
 
-  add_oper(user, host, nick, "\0", "\0");
+  add_oper(user, host, nick, "\0", 0);
   add_exempt(user, host, 0);
 }
 
 void
 add_oper(char *username, char *host, char *usernick, 
-         char *password, char *type)
+         char *password, char flags)
 {
   dlink_node *ptr;
   struct oper_entry *user;
-
-  if(strcmp(host, "*") == 0)
-    return;
 
   if(is_an_oper(username, host))
     return;
@@ -933,9 +471,8 @@ add_oper(char *username, char *host, char *usernick,
   strlcpy(user->usernick, usernick, sizeof(user->usernick));
   strlcpy(user->password, password, sizeof(user->password));
 
-  /* its from the conf.. load their umodes. */
-  if(*type != '\0')
-    set_initial_umodes(user, type);
+  if (flags)
+    set_initial_umodes(user, flags);
 
   dlink_add_tail(user, ptr, &user_list);
 }
@@ -946,7 +483,7 @@ add_exempt(char *username, char *host, int type)
   dlink_node *ptr;
   struct exempt_entry *exempt;
 
-  if(strcmp(host, "*") == 0)
+  if (BadPtr(username) || BadPtr(host))
     return;
 
   ptr = dlink_create();
@@ -962,46 +499,6 @@ add_exempt(char *username, char *host, int type)
     exempt->type = 0xFFFFFFFF;
 
   dlink_add(exempt, ptr, &exempt_list);
-}
-
-static void
-load_e_line(char *line)
-{
-  char *vltn, *p, *uhost, *q;
-  unsigned int type=0, i;
-  /* E:actionmask[ actionmask]:user@hostmask */
-
-  if ((p = strchr(line, ':')) == NULL)
-    return;
-  
-  vltn = line;
-  *p = '\0';
-  uhost = p+1;
-  while (vltn)
-  {
-    p=strchr(vltn, ' ');
-    q=strchr(vltn, ',');
-    if (p && q)
-      p = (p<q)?p:q;
-    else if (q)
-      p=q;
-    if (p)
-      *p++=0;
-    for (i=0;actions[i].name[0];i++)
-      if (!wldcmp(vltn, actions[i].name))
-	type = type + (1 << i);
-    vltn = p;
-  }
-      
-  if ((p = strchr(uhost, '@')) != NULL)
-  {
-    *p++ = '\0';
-    add_exempt(uhost, p, type);
-  }
-  else
-  {
-    add_exempt("*", uhost, type);
-  }
 }
 
 /*
@@ -1152,8 +649,6 @@ type_show(unsigned long type)
 void
 reload_userlist(void)
 {
-  clear_userlist();
-  load_userlist();
   clear_dynamic_info();
   load_dynamic_info(config_entries.dynamic_config);
 

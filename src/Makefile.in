@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.40 2004/05/11 19:31:58 bill Exp $
+# $Id: Makefile.in,v 1.41 2004/06/02 02:00:43 bill Exp $
 
 CC = @CC@
 RM = @RM@
@@ -11,13 +11,29 @@ CPPFLAGS = ${INCLUDES} @CPPFLAGS@
 CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
 
+LEX = @LEX@
+YACC = @YACC@
+
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
+
+y.tab.o: y.tab.c tcm_parser.y
+	${CC} ${CFLAGS} ${CPPFLAGS} -I. -c y.tab.c
+
+y.tab.c: tcm_parser.y
+	${YACC} -d tcm_parser.y
+
+lex.yy.o: y.tab.c lex.yy.c tcm_lexer.l
+	${CC} ${CFLAGS} ${CPPFLAGS} -I. -c lex.yy.c
+
+lex.yy.c: tcm_lexer.l
+	${LEX} tcm_lexer.l
 
 SOURCES =       @UTIL_C@	\
 		actions.c	\
 		bothunt.c       \
 		clones.c	\
 		client_list.c	\
+		conf.c		\
 		dcc.c		\
 		dcc_commands.c	\
 		event.c		\
@@ -45,7 +61,7 @@ OBJECTS = ${SOURCES:.c=.o}
 all: build
 
 clean: 
-	${RM} -f *.o tcm core tcm.core *~
+	${RM} -f *.o *~ y.tab.c lex.yy.c
 
 distclean: clean
 	${RM} -f Makefile
@@ -53,8 +69,8 @@ distclean: clean
 .c.o:
 	${CC} ${INCLUDES} ${CFLAGS} ${DEFINES} -c $<
 
-build: ${OBJECTS}
-	${CC} ${CFLAGS} ${LDFLAGS} -o ../bin/tcm ${OBJECTS} ${TCMLIBS}
+build: ${OBJECTS} y.tab.o lex.yy.o
+	${CC} ${CFLAGS} ${LDFLAGS} -o ../bin/tcm ${OBJECTS} lex.yy.o y.tab.o ${TCMLIBS}
 
 lint:
 	lint -aacgprxhH $(INCLUDES) $(DEFINES) $(SOURCES) >../lint.out

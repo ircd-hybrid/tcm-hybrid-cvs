@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.108 2004/05/11 19:31:59 bill Exp $
+ * $Id: tcm_io.c,v 1.109 2004/06/02 02:00:44 bill Exp $
  */
 
 #include <stdio.h>
@@ -364,13 +364,12 @@ reconnect(void)
 {
   eventDelete((EVH *)reconnect, NULL);
 
-  if (connect_to_server(config_entries.server_name,
-			atoi(config_entries.server_port)) == NULL)
-    {
-      /* This one is fatal folks */
-      tcm_log(L_ERR, "server_link_closed() invalid socket quitting");
-      exit(-1);
-    }
+  if (connect_to_server(config_entries.server_name, config_entries.server_port) == NULL)
+  {
+    /* This one is fatal folks */
+    tcm_log(L_ERR, "server_link_closed() invalid socket quitting");
+    exit(-1);
+  }
 }
 
 /*

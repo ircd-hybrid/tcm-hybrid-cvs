@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.89 2004/05/20 09:26:25 bill Exp $
+ * $Id: config.h,v 1.90 2004/06/02 02:00:41 bill Exp $
  */
 
 /*
@@ -60,8 +60,7 @@
  * The default tcm config file, can be overridden with a file name
  * argument to tcm.
  */
-#define CONFIG_FILE "etc/tcm.cf"
-#define USERLIST_FILE "etc/userlist.cf"
+#define CONFIG_FILE "etc/tcm.conf"
 
 #define HELP_PATH "help"        /* No / at the end */
 #define HELP_FILE "help"        /* Inside of HELP_PATH */
@@ -151,12 +150,6 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 
 /* undef if you don't want glines reported */
 #define REPORT_GLINES
-
-/* Define this to enable the +W flag, which is required for a tcm oper
- * to be able to see OPERWALL/WALLOPS, LOCOPS is provided by the l
- * user flag.
- */
-#undef ENABLE_W_FLAG
 
 /*
  * Define this to allow people with admin privileges on the tcm to

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.71 2004/04/22 08:32:16 bill Exp $
+ * $Id: hash.c,v 1.72 2004/06/02 02:00:44 bill Exp $
  */
 
 #include <stdio.h>
@@ -1535,9 +1535,9 @@ list_gecos(struct connection *connection_p, char *u_gecos, int regex, char *list
                      MAX_NICK);
 
           send_to_connection(connection_p, format,
-                             ptr->info->username, ptr->info->host,
-                             ptr->info->ip_host, ptr->info->class,
-                             ptr->info->gecos);
+                             ptr->info->nick, ptr->info->username,
+                             ptr->info->host, ptr->info->ip_host,
+                             ptr->info->class, ptr->info->gecos);
         }
         else
         {

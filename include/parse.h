@@ -1,4 +1,4 @@
-/* $Id: parse.h,v 1.25 2003/02/26 10:25:38 bill Exp $ */
+/* $Id: parse.h,v 1.26 2004/06/02 02:00:41 bill Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
@@ -17,6 +17,7 @@ void expand_args(char *, int, int, char *argv[]);
 #define PRIV_ROUTE	0x040
 #define PRIV_UNLNE	0x080
 #define PRIV_ADMIN	0x100
+#define PRIV_DIE	0x200
 
 struct t_tcm_status {
   char my_nick[MAX_NICK];

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.226 2004/05/20 09:26:27 bill Exp $
+ * $Id: bothunt.c,v 1.227 2004/06/02 02:00:43 bill Exp $
  */
 
 #include <stdio.h>
@@ -132,15 +132,15 @@ struct msg_to_action msgs_to_mon[] = {
   {MSG_MOTD, sizeof(MSG_MOTD)-1, MOTDREQ},
   {MSG_FLOODER, sizeof(MSG_DRONE_FLOODER)-1, FLOODER},
   {MSG_POSSIBLE_FLOODER, sizeof(MSG_POSSIBLE_FLOODER)-1, FLOODER},
-  {MSG_USER, sizeof(MSG_USER)-1, USER},
+  {MSG_USER, sizeof(MSG_USER)-1, M_USER},
   {MSG_I_LINE_FULL, sizeof(MSG_I_LINE_FULL)-1, ILINEFULL},
   {MSG_TOOMANY, sizeof(MSG_TOOMANY)-1, TOOMANY},
   {MSG_BANNED, sizeof(MSG_BANNED)-1, BANNED},
   {MSG_D_LINED, sizeof(MSG_D_LINED)-1, BANNED},
-  {MSG_DRONE_FLOODER, sizeof(MSG_DRONE_FLOODER)-1, DRONE},
+  {MSG_DRONE_FLOODER, sizeof(MSG_DRONE_FLOODER)-1, M_DRONE},
   {MSG_X_LINE, sizeof(MSG_X_LINE)-1, XLINEREJ},
   {MSG_INVALID_USERNAME, sizeof(MSG_INVALID_USERNAME)-1, INVALIDUH},
-  {MSG_SERVER, sizeof(MSG_SERVER)-1, SERVER},
+  {MSG_SERVER, sizeof(MSG_SERVER)-1, M_SERVER},
   {MSG_FAILED_OPER, sizeof(MSG_FAILED_OPER)-1, FAILEDOPER},
   {MSG_INFO_REQUESTED, sizeof(MSG_INFO_REQUESTED)-1, INFOREQUESTED},
   {MSG_NO_ACONF, sizeof(MSG_NO_ACONF)-1, NOACONFFOUND},
@@ -434,6 +434,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   }
 
   /* billy-jon!bill@ummm.E{bill} added temporary 1 min. K-Line for [a@b.com] [Temporary K-line 1 min. - test (2004/5/20 08.54)] */
+  /* billy-jon!bill@ummm.E{bill} added temporary 1 min. D-Line for [1.1.1.1] [test] */
   /* billy-jon!bill@ummm.E{bill} added K-Line for [a@b.com] [test] */
   /* billy-jon!bill@ummm.E{bill} added D-Line for [1.2.3.4] [test] */
   if (strstr(p, "-Line for"))
@@ -454,16 +455,16 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     nick--;
 
-    q = nick+11;
+    q = nick+12;
 
     if ((p = strchr(q, ' ')) == NULL)
       return;
 
+    *(p-1) = '\0';
     *(++p) = '\0';
     p++;
 
-    if (get_user_host(&user, &host, q) == NULL)
-      return;
+    host = q;
 
     if ((q = strrchr(p, ']')) == NULL)
       return;
@@ -472,18 +473,18 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if (i)
     {
       send_to_all(NULL, FLAGS_VIEW_KLINES,
-                  "T%cLINE %d for %s@%s added by %s [%s]",
-                  *nick, i, user, host, target, p);
-      tcm_log(L_NORM, "T%cLINE %d for %s@%s added by %s [%s]",
-              *nick, i, user, host, target, p);
+                  "T%cLINE %d for %s added by %s [%s]",
+                  *nick, i, host, target, p);
+      tcm_log(L_NORM, "T%cLINE %d for %s added by %s [%s]",
+              *nick, i, host, target, p);
     }
     else
     {
       send_to_all(NULL, FLAGS_VIEW_KLINES,
-                  "%cLINE for %s@%s added by %s [%s]",
-                  *nick, user, host, target, p);
-      tcm_log(L_NORM, "%cLINE for %s@%s added by %s [%s]",
-              *nick, user, host, target, p);
+                  "%cLINE for %s added by %s [%s]",
+                  *nick, host, target, p);
+      tcm_log(L_NORM, "%cLINE for %s added by %s [%s]",
+              *nick, host, target, p);
     }
     return;
   }
@@ -829,7 +830,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* User bill (bill@ummm.E) is a possible spambot */
   /* User bill (bill@ummm.E) trying to join #tcm is a possible spambot */
   /* User billy-jon (bill@holier.than.thou) is attempting to join locally juped channel #twilight_zone */
-  case USER:
+  case M_USER:
     q=p+5;
     if ((p = strchr(q,' ')) == NULL)
       return;
@@ -883,7 +884,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Possible Drone Flooder bill [bill@ummm.E] on irc.intranaut.com target:
      #clone */
-  case DRONE:
+  case M_DRONE:
     nick = p + 23;
 
     if ((q = strchr(nick, ' ')) == NULL)
@@ -941,7 +942,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Server ircd.flamed.net split from ircd.secsup.org */
   /* Server irc.intranaut.com being introduced by ircd.secsup.org */
-  case SERVER:
+  case M_SERVER:
     q=p+7;
     if (strstr(q, "split"))
     {
@@ -1016,7 +1017,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       switch (*p)
       {
         case 'D':
-          tcm_status.oper_privs |= PRIV_DLINE;
+          tcm_status.oper_privs |= PRIV_DIE;
           break;
 
         case 'G':
@@ -1024,7 +1025,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
           break;
 
         case 'K':
-          tcm_status.oper_privs |= PRIV_KLINE;
+          tcm_status.oper_privs |= (PRIV_KLINE|PRIV_DLINE);
           break;
 
         case 'X':

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.94 2004/04/22 08:32:13 bill Exp $ */
+/* $Id: userlist.h,v 1.95 2004/06/02 02:00:41 bill Exp $ */
 
 #include "setup.h"
 #include "tools.h"
@@ -46,11 +46,11 @@ struct config_list {
   char oper_pass_config[MAX_CONFIG];
 #ifdef HAVE_LIBCRYPTO
   char oper_keyfile[MAX_CONFIG];	/* CHALLENGE support.  e? */
+  char oper_keyphrase[MAX_CONFIG];
 #endif
   char server_name[MAX_CONFIG];
-  char server_port[MAX_CONFIG];
   char server_pass[MAX_CONFIG];
-  char port_config[MAX_CONFIG];
+  int  server_port;
   char ircname_config[MAX_CONFIG];
   char email_config[MAX_CONFIG];
   char userlist_config[MAX_CONFIG];
@@ -90,6 +90,8 @@ struct exempt_entry
 };
 
 struct oper_entry *find_user_in_userlist(const char *);
+
+void add_oper(char *, char *, char *, char *, char);
 void show_stats_p(const char *nick);
 void set_umode(struct oper_entry *, int, const char *);
 void on_stats_o(int, char *argv[]);
@@ -99,7 +101,7 @@ void reload_userlist(void);
 void init_userlist_handlers(void);
 void load_config_file(char *);
 void clear_userlist(void);
-void save_prefs(void);
+void save_umodes(const char *);
 int  ok_host(char *,char *,int);
 char *type_show(unsigned long type);
 int  is_an_oper(char *user, char *host);
@@ -135,11 +137,7 @@ void exempt_summary();
 #define FLAGS_ADMIN		0x004000 /* user is an adminstrator */
 #define FLAGS_SPY		0x008000 /* links, motd, info requests */
 #define FLAGS_VIEW_KLINES	0x010000 /* user see's klines/unklines */
-#ifdef ENABLE_W_FLAG
-#define FLAGS_WALLOPS		0x020000 /* user can see OPERWALL */
-#else
-#define FLAGS_WALLOPS		FLAGS_LOCOPS /* with no +W, re-use +o */
-#endif
+#define FLAGS_OPERWALL		0x020000 /* user can see OPERWALL */
 
 #define FLAGS_VALID		0x200000 /* valid userfile */
 #define FLAGS_CHANGED		0x400000 /* changed and needs saving */

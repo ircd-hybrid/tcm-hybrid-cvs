@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.53)
 
-AC_COPYRIGHT([$Id: configure.ac,v 1.1 2004/05/11 19:31:51 bill Exp $])
+AC_COPYRIGHT([$Id: configure.ac,v 1.2 2004/06/02 02:00:38 bill Exp $])
 
 AC_INIT([tcm-hybrid],[3.1.0-pre])
 
@@ -37,6 +37,17 @@ AC_PROG_MAKE_SET
 AC_PATH_PROG(RM,rm)
 AC_PATH_PROG(CP,cp)
 AC_PROG_INSTALL
+AC_PROG_YACC
+
+if test "$YACC" = "yacc" -a -z "`which $YACC 2>/dev/null`"; then
+        AC_MSG_ERROR([could not locate a suitable parser generator; install bison, yacc, or byacc])
+fi                 
+               
+AC_PROG_LEX
+  
+if test "$LEX" = ":"; then
+        AC_MSG_ERROR([could not locate a suitable lexical generator, install flex or lex.])
+fi
 
 hold_ldflags=$LDFLAGS     
 AC_MSG_CHECKING(for the ld -export-dynamic flag)

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.154 2004/05/11 19:31:58 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.155 2004/06/02 02:00:44 bill Exp $ */
 
 #include "setup.h"
 
@@ -588,7 +588,7 @@ m_save(struct connection *connection_p, int argc, char *argv[])
 {
   send_to_all(NULL, FLAGS_ALL, "%s is saving %s and preferences",
               connection_p->registered_nick, CONFIG_FILE);
-  save_prefs();
+  save_umodes(connection_p->registered_nick);
 }
 
 void
@@ -692,7 +692,6 @@ m_unkline(struct connection *connection_p, int argc, char *argv[])
   }
 }
 
-#ifndef NO_D_LINE_SUPPORT
 void
 m_dline(struct connection *connection_p, int argc, char *argv[])
 {
@@ -810,7 +809,6 @@ m_undline(struct connection *connection_p, int argc, char *argv[])
   send_to_server("UNDLINE %s", argv[1]);
 }
 
-#endif /* !NO_DLINE_SUPPORT */
 
 #ifdef ENABLE_QUOTE
 void
@@ -1537,14 +1535,12 @@ struct dcc_command locops_msgtab = {
 struct dcc_command unkline_msgtab = {
  "unkline", NULL, {m_unregistered, m_unkline, m_unkline}
 };
-#ifndef NO_D_LINE_SUPPORT
 struct dcc_command dline_msgtab = {
  "dline", NULL, {m_unregistered, m_dline, m_dline}
 };
 struct dcc_command undline_msgtab = {
  "undline", NULL, {m_unregistered, m_undline, m_undline}
 };
-#endif
 #ifdef ENABLE_QUOTE
 struct dcc_command quote_msgtab = {
  "quote", NULL, {m_unregistered, m_not_admin, m_quote}
@@ -1639,10 +1635,8 @@ init_commands(void)
   add_dcc_handler(&info_msgtab);
   add_dcc_handler(&locops_msgtab);
   add_dcc_handler(&unkline_msgtab);
-#ifndef NO_D_LINE_SUPPORT
   add_dcc_handler(&dline_msgtab);
   add_dcc_handler(&undline_msgtab);
-#endif
 #ifdef ENABLE_QUOTE
   add_dcc_handler(&quote_msgtab);
 #endif

@@ -1,7 +1,7 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.22 2004/04/22 08:32:13 bill Exp $ */
+/* $Id: actions.h,v 1.23 2004/06/02 02:00:41 bill Exp $ */
 
 #define MAX_ACTIONS	16
 
@@ -15,14 +15,12 @@ struct a_entry {
 
 struct a_entry actions[MAX_ACTIONS];
 
-int act_sdrone;
 int act_sclone;
 int act_drone;
 int act_cflood;
 int act_vclone;
 int act_flood;
 int act_link;
-int act_bot;
 int act_spam;
 int act_clone;
 int act_rclone;

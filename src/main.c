@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.137 2004/05/11 19:31:59 bill Exp $ */
+/* $Id: main.c,v 1.138 2004/06/02 02:00:44 bill Exp $ */
 
 #include "setup.h"
 
@@ -53,6 +53,7 @@
 #include "skline.h"
 #include "seedrand.h"
 #include "client_list.h"
+#include "conf.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
@@ -166,10 +167,15 @@ main(int argc, char *argv[])
   init_services();
 #endif
 
+#if 0
   if (config_entries.conffile)
     load_config_file(config_entries.conffile);
   else
     load_config_file(CONFIG_FILE);
+#else
+  read_conf_files(1);
+#endif
+
 #ifdef DEBUGMODE
   exempt_summary();
 #endif
@@ -256,8 +262,7 @@ main(int argc, char *argv[])
   tcm_status.n_of_fds_open = 0;
   tcm_status.max_fds = 128; 	/* XXX */
 
-  if (connect_to_server(config_entries.server_name,
-                        atoi(config_entries.server_port)) == NULL)
+  if (connect_to_server(config_entries.server_name, config_entries.server_port) == NULL)
   {
     tcm_log(L_ERR, "Could not connect to server at startup");
     exit(1);

@@ -52,7 +52,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.7 2000/12/02 04:54:12 bill Exp $";
+static char *version="$Id: serverif.c,v 1.8 2001/01/14 02:53:26 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -1694,7 +1694,7 @@ static void initiate_dcc_chat(char *nick,char *user,char *host)
       return;
     }
 
-  msg(nick,"\001DCC CHAT chat %lu %d\001",
+  msg(nick,"\001DCC CHAT chat %lu %d\001\n",
       local_ip(),dcc_port);
 
   if(config_entries.debug && outfile)
@@ -1722,7 +1722,7 @@ static unsigned long local_ip(void)
 
   if(config_entries.virtual_host_config[0])
     {
-      if (!(local_host = gethostbyname (config_entries.virtual_host_config)))
+      if ((local_host = gethostbyname (config_entries.virtual_host_config)))
 	{
 	  if(config_entries.debug && outfile)
 	    {
@@ -1745,9 +1745,9 @@ static unsigned long local_ip(void)
     }
   else
     {
-      if ( !(local_host = gethostbyname (ourhostname)) )
+      if ((local_host = gethostbyname (ourhostname)) )
 	{
-	  if(config_entries.debug)
+	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile, "found official name [%s]\n",
 		      local_host->h_name);

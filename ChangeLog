@@ -1,3 +1,8 @@
+*** 20011011_13 by db
+- reverted missing tokens in commands.c
+
+
+
 *** 20011011_12 by db
 - no its 9 chars, it really does have a space after the '>'
 

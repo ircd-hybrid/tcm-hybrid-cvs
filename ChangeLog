@@ -1,3 +1,17 @@
+wcampbel    2002/05/23 10:10:59 EDT	(20020523_6)
+
+  Modified files:
+    modules              .depend 
+    src                  .depend 
+  Log:
+  Update .depend's
+  
+  Revision  Changes    Path
+  1.12      +1 -12     tcm-hybrid/modules/.depend
+  1.12      +28 -9     tcm-hybrid/src/.depend
+
+
+
 db          2002/05/23 09:38:19 EDT	(20020523_5)
 
   Modified files:

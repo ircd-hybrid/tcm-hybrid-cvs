@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.70 2002/05/25 15:49:39 leeh Exp $
+ * $Id: userlist.c,v 1.71 2002/05/25 15:57:56 db Exp $
  *
  */
 
@@ -47,7 +47,9 @@ int  ban_list_index;
 static void load_a_user(char *);
 static void load_e_line(char *);
 
-int get_method_number (char * methodname) {
+int
+get_method_number (char * methodname)
+{
   if (!strcasecmp(methodname, "kline"))
     return METHOD_KLINE;
   else if (!strcasecmp(methodname, "tkline"))
@@ -62,9 +64,13 @@ int get_method_number (char * methodname) {
     return 0;
 }
 
-char * get_method_names(int method) {
+char *
+get_method_names(int method)
+{
   static char namebuf[128];
-  namebuf[0]=0;
+
+  namebuf[0]= '\0';
+
   if (method & METHOD_IRC_WARN)
     strcat(namebuf, "ircwarn ");
   if (method & METHOD_DCC_WARN)
@@ -76,7 +82,7 @@ char * get_method_names(int method) {
   if (method & METHOD_DLINE)
     strcat(namebuf, "dline ");
   if (namebuf[0])
-    namebuf[strlen(namebuf)-1] = 0;
+    namebuf[strlen(namebuf)-1] = '\0';
   return namebuf;
 }
 
@@ -158,8 +164,8 @@ load_config_file(char *file_name)
     case 'a':case 'A':
       {
 	int act, met, klinetime=0;
-	// A:name:methods:reason
-	// A:clone:tkline 360 ircwarn dccwarn:No clones kthx
+	/* A:name:methods:reason */
+	/* A:clone:tkline 360 ircwarn dccwarn:No clones kthx */
 	if (argc < 3)
 	  break;
 	act = find_action(argv[1]);
@@ -240,8 +246,12 @@ load_config_file(char *file_name)
       if (config_entries.debug && outfile)
 	fprintf(outfile, "server = [%s]\n", argv[1]);
       strncpy(config_entries.server_name,argv[1],MAX_CONFIG-1);
-      if (argc > 2) strncpy(config_entries.server_port,argv[2],MAX_CONFIG-1);
-      if (argc > 3) strncpy(config_entries.server_pass,argv[3],MAX_CONFIG-1);
+
+      if (argc > 2)
+	strncpy(config_entries.server_port,argv[2],MAX_CONFIG-1);
+
+      if (argc > 3)
+	strncpy(config_entries.server_pass,argv[3],MAX_CONFIG-1);
       break;
 
     case 'n':case 'N':
@@ -342,72 +352,76 @@ save_prefs(void)
   int argc=0, a;
 
   if ((fp_in = fopen(CONFIG_FILE,"r")) == NULL)
-  {
-    send_to_all(SEND_ALL, "Couldn't open %s: %s", CONFIG_FILE, strerror(errno));
-    return;
-  }
+    {
+      send_to_all(SEND_ALL, "Couldn't open %s: %s",
+		  CONFIG_FILE, strerror(errno));
+      return;
+    }
 
   snprintf(filename, sizeof(filename), "%s.%d", CONFIG_FILE, getpid());
 
   if ((fp_out = fopen(filename, "w")) == NULL)
-  {
-    send_to_all(SEND_ALL, "Couldn't open %s: %s", filename, strerror(errno));
-    fclose(fp_in);
-    return;
-  }
-
-  while (fgets(frombuff, MAX_BUFF-1, fp_in))
-  {
-    /* zap newlines */
-    if ((p = strchr(frombuff,'\n')) != NULL)
-      *p = '\0';
-
-    argc = 0;
-    p = frombuff;
-
-    for (q=strchr(p, ':'); q; q=strchr(p, ':'))
     {
-      argv[argc++] = p;
-      *q = '\0';
-      p = q+1;
+      send_to_all(SEND_ALL, "Couldn't open %s: %s", filename, strerror(errno));
+      fclose(fp_in);
+      return;
     }
-    argv[argc++] = p;
 
-    switch (argv[0][0])
+  while (fgets(frombuff, MAX_BUFF-1, fp_in) != NULL)
     {
-    case 'A': case 'a':
-      a = find_action(argv[1]);
-      if (a>=0) {
-	if (!(actions[a].method & 0x80000000)) {
-	  fprintf(fp_out, "A:%s:%s %d:%s\n",
-		  actions[a].name,
-		  get_method_names(actions[a].method),
-		  actions[a].klinetime,
-		  actions[a].reason);
-	  actions[a].method |= 0x80000000;
+      /* zap newlines */
+      if ((p = strchr(frombuff,'\n')) != NULL)
+	*p = '\0';
+
+      argc = 0;
+      p = frombuff;
+
+      for (q=strchr(p, ':'); q; q=strchr(p, ':'))
+	{
+	  argv[argc++] = p;
+	  *q = '\0';
+	  p = q+1;
 	}
-	break;
-
-      }
-    default:
-      for (a=0; a < argc - 1; a++)
-      {
-	fprintf (fp_out, "%s:", argv[a]);
-      }
-      fprintf (fp_out, "%s\n", argv[a]);
-      break;
+      argv[argc++] = p;
+      
+      switch (argv[0][0])
+	{
+	case 'A': case 'a':
+	  a = find_action(argv[1]);
+	  if (a>=0)
+	    {
+	      if (!(actions[a].method & 0x80000000))
+		{
+		  fprintf(fp_out, "A:%s:%s %d:%s\n",
+			  actions[a].name,
+			  get_method_names(actions[a].method),
+			  actions[a].klinetime,
+			  actions[a].reason);
+		  actions[a].method |= 0x80000000;
+		}
+	      break;
+	    }
+	default:
+	  for (a=0; a < argc - 1; a++)
+	    {
+	      fprintf (fp_out, "%s:", argv[a]);
+	    }
+	  fprintf (fp_out, "%s\n", argv[a]);
+	  break;
+	}
     }
-  }
-  for (a=0;actions[a].name[0];a++) {
-    if (actions[a].method & 0x80000000)
-      actions[a].method &= 0x7FFFFFFF;
-    else
-      fprintf(fp_out, "A:%s:%s %d:%s\n",
-	      actions[a].name,
-	      get_method_names(actions[a].method),
-	      actions[a].klinetime,
-	      actions[a].reason);
-  }
+
+  for (a=0;actions[a].name[0];a++)
+    {
+      if (actions[a].method & 0x80000000)
+	actions[a].method &= 0x7FFFFFFF;
+      else
+	fprintf(fp_out, "A:%s:%s %d:%s\n",
+		actions[a].name,
+		get_method_names(actions[a].method),
+		actions[a].klinetime,
+		actions[a].reason);
+    }
   fclose(fp_in);
   fclose(fp_out);
 
@@ -426,7 +440,8 @@ save_prefs(void)
  * side effects	- first part of oper list is loaded from file
  */
 
-void load_userlist()
+void
+load_userlist()
 {
   FILE *userfile;
   char line[MAX_BUFF];
@@ -494,7 +509,8 @@ void load_userlist()
  * side effects	- userlist is updated
  */
 
-static void load_a_user(char *line)
+static void
+load_a_user(char *line)
   {
     char *userathost;
     char *user;
@@ -509,10 +525,10 @@ static void load_a_user(char *line)
 	fprintf(outfile, "load_a_user() line =[%s]\n",line);
       }
 
-    if( user_list_index == (MAXUSERS - 1))
+    if(user_list_index == (MAXUSERS - 1))
 	return;
 
-    if ( !(userathost = strtok(line,":")) )
+    if ((userathost = strtok(line,":")) == NULL)
       return;
 
     user = userathost;
@@ -543,19 +559,19 @@ static void load_a_user(char *line)
     strncpy(userlist[user_list_index].host, host, 
 	    sizeof(userlist[user_list_index].host));
 
-    usernick = strtok((char *)NULL,":");
+    usernick = strtok(NULL,":");
     
     if(usernick != NULL)
       strncpy(userlist[user_list_index].usernick, usernick, 
 	      sizeof(userlist[user_list_index].usernick));
 
-    password = strtok((char *)NULL,":");
+    password = strtok(NULL,":");
 
     if(password != NULL)
       strncpy(userlist[user_list_index].password, password, 
 	      sizeof(userlist[user_list_index].password));
 
-    type = strtok((char *)NULL,":");
+    type = strtok(NULL,":");
 
     if(type != NULL)
       {
@@ -632,11 +648,12 @@ static void load_a_user(char *line)
     userlist[user_list_index].type = 0;
 }
 
-static void load_e_line(char *line)
+static void
+load_e_line(char *line)
 {
   char *vltn, *p, *uhost, *q;
   unsigned int type=0, i;
-  // E:actionmask[ actionmask]:user@hostmask
+  /* E:actionmask[ actionmask]:user@hostmask */
   
   if ((p = strchr(line, ':')) == NULL)
     return;
@@ -644,36 +661,37 @@ static void load_e_line(char *line)
   vltn = line;
   *p = '\0';
   uhost = p+1;
-  while (vltn) {
-    p=strchr(vltn, ' ');
-    q=strchr(vltn, ',');
-    if (p && q)
-      p = (p<q)?p:q;
-    else if (q)
-      p=q;
-    if (p)
-      *p++=0;
-    for (i=0;actions[i].name[0];i++)
-      if (!wldcmp(vltn, actions[i].name))
-	type = type + (1 << i);
-    vltn = p;
-  }
+  while (vltn)
+    {
+      p=strchr(vltn, ' ');
+      q=strchr(vltn, ',');
+      if (p && q)
+	p = (p<q)?p:q;
+      else if (q)
+	p=q;
+      if (p)
+	*p++=0;
+      for (i=0;actions[i].name[0];i++)
+	if (!wldcmp(vltn, actions[i].name))
+	  type = type + (1 << i);
+      vltn = p;
+    }
       
   if ((p = strchr(uhost, '@')) != NULL)
-  {
-    *p = '\0';
-    snprintf(hostlist[host_list_index].user,
-             sizeof(hostlist[host_list_index].user), "%s", uhost);
-    snprintf(hostlist[host_list_index].host,
-             sizeof(hostlist[host_list_index].host), "%s", p+1);
-  }
+    {
+      *p = '\0';
+      snprintf(hostlist[host_list_index].user,
+	       sizeof(hostlist[host_list_index].user), "%s", uhost);
+      snprintf(hostlist[host_list_index].host,
+	       sizeof(hostlist[host_list_index].host), "%s", p+1);
+    }
   else
-  {
-    snprintf(hostlist[host_list_index].user,
-             sizeof(hostlist[host_list_index].user), "*");
-    snprintf(hostlist[host_list_index].host,
-             sizeof(hostlist[host_list_index].host), "%s", uhost);
-  }
+    {
+      snprintf(hostlist[host_list_index].user,
+	       sizeof(hostlist[host_list_index].user), "*");
+      snprintf(hostlist[host_list_index].host,
+	       sizeof(hostlist[host_list_index].host), "%s", uhost);
+    }
 
   hostlist[host_list_index].type = type;
   ++host_list_index;
@@ -690,7 +708,8 @@ static void load_e_line(char *line)
  *
  */
 
-void clear_userlist()
+void
+clear_userlist()
 {
   user_list_index = 0;
   host_list_index = 0;
@@ -710,13 +729,13 @@ void clear_userlist()
  *
  */
 
-void init_userlist()
+void
+init_userlist()
 {
   tcm_list_index = 0;
   ban_list_index = 0;
 
   clear_userlist();
-
 }
 
 /*
@@ -728,7 +747,8 @@ void init_userlist()
  * side effects	- NONE
  */
 
-int isoper(char *user,char *host)
+int
+isoper(char *user,char *host)
 {
   int i;
 
@@ -752,7 +772,8 @@ int isoper(char *user,char *host)
  * side effects	- none
  */
 
-int okhost(char *user,char *host, int type)
+int
+okhost(char *user,char *host, int type)
 {
   int i, ok;
 
@@ -791,7 +812,8 @@ int okhost(char *user,char *host, int type)
  * side effects	-
  */
 
-char *type_show(unsigned long type)
+char *
+type_show(unsigned long type)
 {
   static char type_string[SMALL_BUFF];
   char *p;
@@ -854,7 +876,8 @@ char *type_show(unsigned long type)
  *
  */
 
-void reload_user_list(int sig)
+void
+reload_user_list(int sig)
 {
   if(sig != SIGHUP)     /* should never happen */
     return;
@@ -888,7 +911,8 @@ void reload_user_list(int sig)
  * side effects - prints out summary of exemptions, indexed by action names
  */
 
-void exemption_summary()
+void
+exemption_summary()
 {
   int i, j;
 

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.80 2002/05/25 15:49:38 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.81 2002/05/25 15:57:56 db Exp $ */
 
 #include "setup.h"
 
@@ -749,8 +749,7 @@ m_dline(int connnum, int argc, char *argv[])
 void
 m_quote(int connnum, int argc, char *argv[])
 {
-  char *p, dccbuff[MAX_BUFF];
-  int i, len;
+  char dccbuff[MAX_BUFF];
 
   if (argc < 2)
   {
@@ -759,14 +758,7 @@ m_quote(int connnum, int argc, char *argv[])
          argv[0]);
     return;
   }
-  p = dccbuff;
-  for (i = 1; i < argc; i++)
-  {
-    len = sprintf(p, "%s ", argv[i]);
-    p += len;
-  }
-  /* blow away last ' ' */
-  *--p = '\0';
+  expand_args(dccbuff, MAX_BUFF-1, argc, argv);
   print_to_server("%s", dccbuff);
 }
 #endif

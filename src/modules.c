@@ -1,5 +1,5 @@
 /*
- * $Id: modules.c,v 1.40 2002/05/25 15:36:26 leeh Exp $B
+ * $Id: modules.c,v 1.41 2002/05/25 15:57:56 db Exp $B
  *
  */
 
@@ -52,7 +52,8 @@ struct dcc_command modlist_msgtab = {
   "modlist", NULL, {m_unregistered, m_not_admin, m_modlist}
 };
 
-void modules_init(void)
+void
+modules_init(void)
 {
   add_dcc_handler(&modload_msgtab);
   add_dcc_handler(&modunload_msgtab);
@@ -60,13 +61,15 @@ void modules_init(void)
   add_dcc_handler(&modlist_msgtab);
 }
 
+void
+init_hashtables(void)
+
 /* init_hashtables()
  *
  * input	-
  * output	-
  * side effects - clears the dcc command and server command hashtables
  */
-void init_hashtables(void)
 {
   memset(dcc_command_table, 0, sizeof(struct dcc_command) * MAX_HASH);
   memset(serv_command_table, 0, sizeof(struct serv_command) * MAX_HASH);
@@ -78,7 +81,8 @@ void init_hashtables(void)
  * output	-
  * side effects - command is added to dcc hash table
  */
-void add_dcc_handler(struct dcc_command *ptr)
+void
+add_dcc_handler(struct dcc_command *ptr)
 {
   int hashval;
 
@@ -96,7 +100,8 @@ void add_dcc_handler(struct dcc_command *ptr)
  * output	-
  * side effects - command (if found) is removed from dcc hashtable
  */
-void del_dcc_handler(char *cmd)
+void
+del_dcc_handler(char *cmd)
 {
   struct dcc_command *ptr;
   struct dcc_command *last_ptr = NULL;
@@ -170,7 +175,7 @@ hash_command(const char *p)
 
   return(hash_val % MAX_HASH);
 }
-
+	
 /* m_unregistered()
  *
  * sent to an oper who needs to register to use a command
@@ -192,7 +197,8 @@ m_not_admin(int connnum, int argc, char *argv[])
 		  "Only authorized admins may use this command");
 }
 
-int findmodule(char *name)
+int
+findmodule(char *name)
 {
   int i;
 
@@ -203,7 +209,8 @@ int findmodule(char *name)
   return -1;
 }
 
-int load_a_module(char *name, int log)
+int
+load_a_module(char *name, int log)
 {
   void *modpointer;
   char absolute_path[100], *ver, **verp;
@@ -223,7 +230,10 @@ int load_a_module(char *name, int log)
     }
 
   initmod = (void (*)(void)) dlsym(modpointer, "_modinit");
-  if (initmod == NULL) initmod = (void (*)(void)) dlsym(modpointer, "__modinit");
+
+  if (initmod == NULL)
+    initmod = (void (*)(void)) dlsym(modpointer, "__modinit");
+
   if (initmod == NULL)
     {
 #ifdef DEBUGMODE
@@ -235,12 +245,17 @@ int load_a_module(char *name, int log)
     }
 
   verp = (char **) dlsym(modpointer, "_version");
-  if (verp == NULL) verp = (char **) dlsym(modpointer, "__version");
-  if (verp == NULL) ver = (char *)&unknown_ver;
-  else ver = *verp;
+  if (verp == NULL)
+    verp = (char **) dlsym(modpointer, "__version");
+  if (verp == NULL)
+    ver = (char *)&unknown_ver;
+  else
+    ver = *verp;
   
-  for (i=0;i<max_mods;++i) if (!modlist[i].name) break;
-  if (modlist[i].name)
+  for (i=0;i<max_mods;++i)
+    if (modlist[i].name != NULL) break;
+
+  if (modlist[i].name != NULL)
     {
       send_to_all(SEND_ALL, "Too many modules loaded");
       return -1;
@@ -264,7 +279,8 @@ int load_a_module(char *name, int log)
   return 0;
 }
 
-int unload_a_module(char *name, int log)
+int
+unload_a_module(char *name, int log)
 {
   int modindex;
   void (*unloadmod) (void);
@@ -287,23 +303,27 @@ int unload_a_module(char *name, int log)
   return 0;
 }
 
-void m_modload (int connnum, int argc, char *argv[])
+void
+m_modload (int connnum, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (load_a_module(argv[1], 1) != -1)
     send_to_all(SEND_ADMINS, "Loaded by %s", connections[connnum].nick);
   else
-    print_to_socket(connections[connnum].socket, "Load of %s failed\n", argv[1]);
+    print_to_socket(connections[connnum].socket,
+		    "Load of %s failed", argv[1]);
 }
 
-void m_modunload (int connnum, int argc, char *argv[])
+void
+m_modunload (int connnum, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (unload_a_module(argv[1], 1) != -1)
     send_to_all(SEND_ADMINS, "Loaded by %s", connections[connnum].nick);
 }
 
-void m_modreload (int connnum, int argc, char *argv[])
+void
+m_modreload (int connnum, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (unload_a_module(argv[1], 0) != -1)
@@ -316,7 +336,8 @@ void m_modreload (int connnum, int argc, char *argv[])
 		    "Module %s is not loaded", argv[1]);
 }
 
-void m_modlist (int connnum, int argc, char *argv[])
+void
+m_modlist (int connnum, int argc, char *argv[])
 {
   int i;
 
@@ -342,7 +363,8 @@ void m_modlist (int connnum, int argc, char *argv[])
 }
 
 /* XXX - Return value is ignored...use it or lose it... */
-int load_all_modules(int log)
+int
+load_all_modules(int log)
 {
   DIR *module_dir;
   struct dirent *mdirent;

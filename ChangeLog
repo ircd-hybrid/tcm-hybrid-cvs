@@ -1,3 +1,18 @@
+einride     2002/03/06 05:58:59 EST	(20020306_3)
+
+  Modified files:
+    modules              wingate.c 
+    src                  main.c 
+  Log:
+  First round of fixing socks/wingate detection.
+  Added a SIGPIPE ignore and made sure #define DETECT_WINGATE/SOCKS takes
+  
+  Revision  Changes    Path
+  1.19      +3 -3      tcm-hybrid/modules/wingate.c
+  1.26      +1 -1      tcm-hybrid/src/main.c
+
+
+
 bill        2002/03/06 04:08:14 EST	(20020306_2)
 
   Modified files:

@@ -1,3 +1,19 @@
+leeh        2002/05/30 11:59:35 EDT	(20020530_6)
+
+  Modified files:
+    include              actions.h tcm.h 
+    src                  actions.c commands.c 
+  Log:
+  - more action cleanups..
+  
+  Revision  Changes    Path
+  1.7       +3 -0      tcm-hybrid/include/actions.h
+  1.50      +0 -3      tcm-hybrid/include/tcm.h
+  1.13      +41 -5     tcm-hybrid/src/actions.c
+  1.115     +1 -46     tcm-hybrid/src/commands.c
+
+
+
 leeh        2002/05/30 11:27:33 EDT	(20020530_5)
 
   Modified files:

@@ -1,3 +1,16 @@
+wcampbel    2002/06/01 08:36:17 EDT	(20020601_9)
+
+  Modified files:
+    src                  clones.c vclones.c 
+  Log:
+  -Wall cleanups on Solaris
+  
+  Revision  Changes    Path
+  1.13      +2 -1      tcm-hybrid/src/clones.c
+  1.9       +0 -1      tcm-hybrid/src/vclones.c
+
+
+
 db          2002/06/01 00:46:33 EDT	(20020601_8)
 
   Modified files:

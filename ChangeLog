@@ -1,3 +1,17 @@
+wcampbel    2002/05/21 21:52:42 EDT	(20020522_2)
+
+  Modified files:
+    modules              commands.c 
+    src                  main.c 
+  Log:
+  Revision to umode +x, actually make it work...
+  
+  Revision  Changes    Path
+  1.64      +3 -0      tcm-hybrid/modules/commands.c
+  1.43      +1 -1      tcm-hybrid/src/main.c
+
+
+
 db          2002/05/21 21:40:12 EDT	(20020522_1)
 
   Modified files:

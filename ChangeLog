@@ -1,3 +1,19 @@
+db          2002/09/11 13:55:41 EDT	(20020911_0)
+
+  Modified files:
+    include              tools.h 
+    src                  dcc_commands.c tcm_io.c userlist.c 
+  Log:
+  - converted to use DLINK_FOREACH and DLINK_FOREACH_SAFE, as suggested by Hwy
+  
+  Revision  Changes    Path
+  1.5       +22 -0     tcm-hybrid/include/tools.h
+  1.144     +3 -3      tcm-hybrid/src/dcc_commands.c
+  1.100     +111 -112  tcm-hybrid/src/tcm_io.c
+  1.145     +60 -66    tcm-hybrid/src/userlist.c
+
+
+
 db          2002/08/29 23:46:59 EDT	(20020830_0)
 
   Modified files:

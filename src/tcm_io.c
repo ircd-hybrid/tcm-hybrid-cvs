@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.82 2002/06/04 04:43:13 db Exp $
+ * $Id: tcm_io.c,v 1.83 2002/06/04 05:54:04 db Exp $
  */
 
 #include <stdio.h>
@@ -360,7 +360,8 @@ reconnect(void)
 {
   eventDelete((EVH *)reconnect, NULL);
 
-  if (connect_to_server(tcm_status.server_host) == INVALID)
+  if (connect_to_server(config_entries.server_name,
+			atoi(config_entries.server_port)) == INVALID)
     {
       /* This one is fatal folks */
       tcm_log(L_ERR, "server_link_closed() invalid socket quitting");
@@ -602,17 +603,16 @@ close_connection(int connnum)
 /*
  * connect_to_server
  *
- * input	- pointer to string giving hostname:port OR
+ * inputs	- pointer to string giving hostname
+ *		- port #
  * output	- socket or -1 if no socket
  * side effects	- Sets up a socket and connects to the given host and port
  */
 int
-connect_to_server(const char *hostport)
+connect_to_server(const char *server, const int port)
 {
   struct sockaddr_in socketname;
   int i;
-  int port = 6667;
-  char server[MAX_HOST];
   struct hostent *remote_hostent;
   char *p;
 
@@ -624,14 +624,6 @@ connect_to_server(const char *hostport)
     }
 
   server_id = i;
-  /* Parse server host to look for port number */
-  strcpy(server, hostport);
-
-  if ((p = strchr(server,':')) != NULL)
-    {
-      *p++ = '\0';
-      port = atoi(p);
-    }
 
   if ((remote_hostent = gethostbyname (server)) == NULL)
     {
@@ -649,9 +641,7 @@ connect_to_server(const char *hostport)
   connections[i].io_close_function = server_link_closed;
   connections[i].io_timeout_function = server_link_closed;
   connections[i].socket = connect_to_given_ip_port(&socketname, port);
-
   connections[i].time_out = SERVER_TIME_OUT_CONNECT;
-
   current_time = time(NULL);
   connections[server_id].last_message_time = current_time;
   return(connections[i].socket);

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.107 2002/06/02 23:30:10 db Exp $ */
+/* $Id: main.c,v 1.108 2002/06/04 05:54:04 db Exp $ */
 
 #include "setup.h"
 
@@ -175,10 +175,6 @@ main(int argc, char *argv[])
   exemption_summary();
 #endif
 
-  snprintf(tcm_status.server_host,
-	   MAX_HOST, "%s:%d", config_entries.server_name, 
-           atoi(config_entries.server_port));
-
   init_connections();
   srandom(time(NULL));	/* -zaph */
   signal(SIGUSR1,init_debug);
@@ -251,7 +247,8 @@ main(int argc, char *argv[])
 	 }
     }
 
-  if(connect_to_server(tcm_status.server_host) < 0)
+  if(connect_to_server(config_entries.server_name,
+		       atoi(config_entries.server_port)) == INVALID)
     {
       tcm_log(L_ERR, "Could not connect to server at startup\n");
       exit(1);

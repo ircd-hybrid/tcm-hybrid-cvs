@@ -1,4 +1,4 @@
-/* $Id: parse.h,v 1.18 2002/06/04 01:18:19 db Exp $ */
+/* $Id: parse.h,v 1.19 2002/06/04 05:54:02 db Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
@@ -13,7 +13,6 @@ struct t_tcm_status {
   char my_channel[MAX_CHANNEL];
   char my_hostname[MAX_HOST];	/* This is our hostname with domainname */
   char my_class[MAX_CLASS];
-  char server_host[MAX_HOST];	/* Server tcm will use. */
   int  am_opered;
   int  ping_time;
   int  doing_trace;		/* presently doing trace */

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.19 2002/06/01 03:49:24 db Exp $
+ * $Id: hash.c,v 1.20 2002/06/01 04:22:03 db Exp $
  */
 
 #include <stdio.h>
@@ -207,8 +207,8 @@ add_to_hash_table(struct hash_rec *table[],
     }
   else
     {
-      ((struct hash_rec *)table[ind])->next = new_hash;
-      new_hash->next = NULL;
+      new_hash->next = table[ind];
+      table[ind] = new_hash;
     }
   new_user->link_count++;
 }
@@ -629,7 +629,7 @@ check_host_clones(char *host)
 	    host, clonecount, now - oldest);
   }
 
-  for(find = host_table[ind],clonecount = 0; find; find = find->next)
+  for (find = host_table[ind],clonecount = 0; find; find = find->next)
   {
     if ((strcmp(find->info->host, host) == 0) &&
 	(now - find->info->connecttime < CLONECONNECTFREQ + 1) &&

@@ -23,8 +23,6 @@ char* format_reason(char *reason);
 #define R_FLOOD		0x008
 #define R_LINK		0x010
 #define R_BOTS		0x020
-#define R_WINGATE	0x040
-#define R_SOCKS		0x080
 #define R_CTCP		0x100
 #define R_SPOOF		0x200
 #define R_SPAMBOT	0x400

@@ -6,14 +6,15 @@
  *  - rudimentary remote tcm linking added
  */
 
+#include <ctype.h>
+#include <netinet/in.h>
+#include <signal.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "config.h"
 #include "token.h"
 #include "tcm.h"
@@ -23,6 +24,7 @@
 #include "stdcmds.h"
 #include "wild.h"
 #include "abuse.h"
+#include "modules.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
@@ -32,42 +34,24 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.13 2001/07/29 05:06:10 bill Exp $";
+static char *version="$Id: userlist.c,v 1.14 2001/09/19 03:30:21 bill Exp $";
 
-struct config_list config_entries;
 struct auth_file_entry userlist[MAXUSERS];
 struct tcm_file_entry tcmlist[MAXTCMS];
 struct exception_entry hostlist[MAXHOSTS];
 struct exception_entry banlist[MAXBANS];
-
-#if defined(DETECT_WINGATE)||defined(DETECT_SOCKS)
-char wingate_class_list[MAXWINGATES][100];
-int  wingate_class_list_index;
-#endif
+extern struct connection connections[];
 
 int  user_list_index;
 int  tcm_list_index;
 int  host_list_index;
 int  ban_list_index;
 
-#ifdef DETECT_WINGATE
-extern struct wingates wingate[];
-#endif
-
-#ifdef DETECT_SOCKS
-extern struct wingates socks[];
-#endif
-
-#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
-static void load_a_wingate_class(char *class);
-#endif
-
 static void load_a_ban(char *);
 static void load_a_user(char *,int);
 static void load_a_tcm(char *);
 static void load_a_host(char *);
 static void load_f_line(char *);
-static void add_action(char *value, char *act, char *reason,int message);
 
 #if 0
 /* Not used currently */
@@ -162,18 +146,6 @@ void load_config_file(char *file_name)
 
   config_entries.spambot_act[0] = '\0';
   config_entries.spambot_reason[0] = '\0';
-
-#ifdef DETECT_WINGATE
-  strcpy(config_entries.wingate_act,"kline 60");
-  strncpy(config_entries.wingate_reason,REASON_WINGATE,
-	 sizeof(config_entries.wingate_reason) - 1 );
-#endif
-
-#ifdef DETECT_SOCKS
-  strcpy(config_entries.socks_act,"kline 60");
-  strncpy(config_entries.socks_reason,REASON_SOCKS,
-	 sizeof(config_entries.socks_reason) - 1 );
-#endif
 
 #ifdef SERVICES_DRONES
   config_entries.drones_act[0] = '\0';
@@ -273,7 +245,7 @@ void load_config_file(char *file_name)
 		  }
 	      }
 
-	    add_action(value, act, reason, message);
+//	    add_action(value, act, reason, message);
 	    break;
 
 	case 'o':case 'O':
@@ -311,12 +283,6 @@ void load_config_file(char *file_name)
 	    }
 	  strncpy(config_entries.virtual_host_config,value,MAX_CONFIG-1);
 	  break;
-
-#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
-	case 'w': case 'W':
-	  load_a_wingate_class(value);
-	  break;
-#endif
 
 	case 's':case 'S':
 	  if(config_entries.debug && outfile)
@@ -486,7 +452,7 @@ void load_prefs(void)
 		}
 	    }
 
-	  add_action(value, act, reason, message);
+//	  add_action(value, act, reason, message);
 	  break;
 
 	  break;
@@ -554,20 +520,6 @@ void save_prefs(void)
 	    config_entries.bot_act,config_entries.bot_reason,
 	    config_entries.channel_report&CHANNEL_REPORT_BOT?1:-1);
 
-#ifdef DETECT_WINGATE
-  if(config_entries.wingate_act[0])
-    fprintf(fp,"A:wingate:%s:%s:%d\n",
-	    config_entries.wingate_act,config_entries.wingate_reason,
-	    config_entries.channel_report&CHANNEL_REPORT_WINGATE?1:-1);
-#endif
-
-#ifdef DETECT_SOCKS
-  if(config_entries.socks_act[0])
-    fprintf(fp,"A:socks:%s:%s:%d\n",
-	    config_entries.socks_act,config_entries.socks_reason,
-	    config_entries.channel_report&CHANNEL_REPORT_SOCKS?1:-1);
-#endif
-
 #ifdef SERVICES_DRONES
   if(config_entries.drones_act[0])
     fprintf(fp,"A:drones:%s:%s:%d\n",
@@ -583,6 +535,7 @@ void save_prefs(void)
   (void)fclose(fp);
 }
 
+#if 0
 /*
  * add_action
  *
@@ -740,38 +693,6 @@ static void add_action(char *value, char *act, char *reason, int message)
       else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_SPAMBOT;
     }
-#ifdef DETECT_WINGATE
-  else if (!strcasecmp(value, "wingate"))
-    {
-	strncpy(config_entries.wingate_act, act, 
-		sizeof(config_entries.wingate_act));
-      
-      if(reason)
-	strncpy(config_entries.wingate_reason, reason, 
-		sizeof(config_entries.wingate_reason));
-
-      if(message > 0)
-	config_entries.channel_report |= CHANNEL_REPORT_WINGATE;
-      else if(message <= 0)
-	config_entries.channel_report &= ~CHANNEL_REPORT_WINGATE;
-    }
-#endif
-#ifdef DETECT_SOCKS
-  else if (!strcasecmp(value, "socks"))
-    {
-	strncpy(config_entries.socks_act, act,
-		sizeof(config_entries.socks_act));
-      
-      if(reason)
-	strncpy(config_entries.socks_reason, reason, 
-		sizeof(config_entries.socks_reason));
-
-      if(message > 0)
-	config_entries.channel_report |= CHANNEL_REPORT_SOCKS;
-      else if(message <= 0)
-	config_entries.channel_report &= ~CHANNEL_REPORT_SOCKS;
-    }
-#endif
 #ifdef SERVICES_DRONES
   else if (!strcasecmp(value, "drones"))
     {
@@ -788,6 +709,7 @@ static void add_action(char *value, char *act, char *reason, int message)
     }
 #endif
 }
+#endif
 
 /*
  * load_userlist
@@ -1069,25 +991,6 @@ static void load_a_user(char *line,int link_tcm)
     userlist[user_list_index].type = 0;
 }
 
-#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
-
-/*
- * load_a_wingate_class()
- * inputs	- rest of line past the 'W:' or 'w:'
- * output	- NONE
- * side effects	- userlist is updated
- */
-
-void load_a_wingate_class(char *class)
-  {
-    if( wingate_class_list_index == (MAXWINGATES - 1))
-	return;
-
-    snprintf(wingate_class_list[wingate_class_list_index++], sizeof(wingate_class_list[wingate_class_list_index]), "%s", class);
-    snprintf(wingate_class_list[wingate_class_list_index], sizeof(wingate_class_list[wingate_class_list_index]), "unknown");
-  }
-#endif
-
 /*
  * load_a_tcm
  *
@@ -1155,17 +1058,20 @@ static void load_a_tcm(char *line)
 }
 
 int str2type(char *vltn) {
-  if (!strcasecmp(vltn, "clone")) return R_CLONES;
+  int ret;
+  if (!(ret = get_action_type(vltn))) return 0;
+  return ret;
+
+
+/*  if (!strcasecmp(vltn, "clone")) return R_CLONES;
   else if (!strcasecmp(vltn, "sclone")) return R_SCLONES;
   else if (!strcasecmp(vltn, "flood")) return R_FLOOD;
   else if (!strcasecmp(vltn, "ctcp")) return R_CTCP;
   else if (!strcasecmp(vltn, "link")) return R_LINK;
   else if (!strcasecmp(vltn, "bot")) return R_BOTS;
-  else if (!strcasecmp(vltn, "wingate")) return R_WINGATE;
-  else if (!strcasecmp(vltn, "socks")) return R_SOCKS;
   else if (!strcasecmp(vltn, "spoof")) return R_SPOOF;
   else if (!strcasecmp(vltn, "spambot")) return R_SPAMBOT;
-  else return 0;
+  else return 0;*/
 }
 
 /*
@@ -1280,13 +1186,9 @@ static void load_a_host(char *line)
 void clear_userlist()
 {
   int cnt;
+  struct common_function *temp;
   user_list_index = 0;
-  tcm_list_index = 0;
   host_list_index = 0;
-
-#ifdef DETECT_WINGATE
-  wingate_class_list_index = 0;
-#endif
 
   for(cnt = 0; cnt < MAXUSERS; cnt++)
     {
@@ -1295,14 +1197,6 @@ void clear_userlist()
       userlist[cnt].usernick[0] = '\0';
       userlist[cnt].password[0] = '\0';
       userlist[cnt].type = 0;
-    }
-
-  for(cnt = 0; cnt < MAXTCMS; cnt++)
-    {
-      tcmlist[cnt].host[0] = '\0';
-      tcmlist[cnt].theirnick[0] = '\0';
-      tcmlist[cnt].password[0] = '\0';
-      tcmlist[cnt].port = '\0';
     }
 
   for(cnt = 0; cnt < MAXHOSTS; cnt++)
@@ -1317,35 +1211,10 @@ void clear_userlist()
       banlist[cnt].host[0] = '\0';
     }
 
-#ifdef DETECT_WINGATE
-  for(cnt = 0; cnt < MAXWINGATES; cnt++)
+  for (temp=reload;temp;temp=temp->next)
     {
-      if(wingate[cnt].socket != INVALID)
-	{
-	  (void)close(wingate[cnt].socket);
-	}
-      wingate[cnt].socket = INVALID;
-      wingate[cnt].user[0] = '\0';
-      wingate[cnt].host[0] = '\0';
-      wingate[cnt].state = 0;
-      wingate[cnt].nick[0] = '\0';
+      temp->function(0, 0, NULL);
     }
-#endif
-
-#ifdef DETECT_SOCKS
-  for(cnt = 0; cnt < MAXSOCKS; cnt++)
-    {
-      if(socks[cnt].socket != INVALID)
-	{
-	  (void)close(socks[cnt].socket);
-	}
-      socks[cnt].socket = INVALID;
-      socks[cnt].user[0] = '\0';
-      socks[cnt].host[0] = '\0';
-      socks[cnt].state = 0;
-      socks[cnt].nick[0] = '\0';
-    }
-#endif
 }
 
 /*
@@ -1365,10 +1234,6 @@ void init_userlist()
   tcm_list_index = 0;
   host_list_index = 0;
   ban_list_index = 0;
-
-#ifdef DETECT_WINGATE
-  wingate_class_list_index = 0;
-#endif
 
   for(cnt = 0; cnt < MAXUSERS; cnt++)
     {
@@ -1398,13 +1263,6 @@ void init_userlist()
 	banlist[cnt].user[0] = 0;
 	banlist[cnt].host[0] = 0;
       }
-
-#ifdef DETECT_WINGATE
-    for(cnt = 0; cnt < MAXWINGATES; cnt++)
-      {
-	wingate[cnt].socket = INVALID;
-      }
-#endif
 }
 
 /*
@@ -1700,30 +1558,6 @@ int okhost(char *user,char *host)
   return(NO);
 }
 
-#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
-/*
- * wingate_class
- * 
- * inputs	- class
- * output	- if this class is a wingate class to check
- * side effects	- none
- */
-
-int wingate_class(char *class)
-{
-  int i;
-
-  for(i=0; (strlen(wingate_class_list[i]) > 0) ;i++)
-    {
-      if(!strcasecmp(wingate_class_list[i], class))
-	{
-	  return YES;
-	}
-    }
-  return(NO);
-}
-#endif
-
 /*
  * type_show()
  * 
@@ -1760,3 +1594,30 @@ char *type_show(unsigned long type)
   *p = '\0';
   return(type_string);
 }
+
+/*
+ * reload_user_list()
+ *
+ * Thanks for the idea garfr
+ *
+ * inputs - signal number
+ * output - NONE
+ * side effects -
+ *             reloads user list without having to restart tcm
+ *
+ */
+
+void reload_user_list(int sig)
+{
+  struct common_function *temp;
+  if(sig != SIGHUP)     /* should never happen */
+    return;
+
+  for (temp=reload;temp;temp=temp->next)
+    temp->function(sig, 0, NULL);
+  clear_userlist();
+  load_userlist();
+  load_prefs();
+  sendtoalldcc(SEND_ALL_USERS, "*** Caught SIGHUP ***\n");
+}
+

@@ -1,6 +1,9 @@
 #ifndef __TCM_H
 #define __TCM_H
 
+#include <sys/time.h>
+#include "config.h"
+
 /* Buffer sizes */
 
 /* Size of read buffer on DCC or server connections */
@@ -49,7 +52,23 @@
  */
 #define REMOTE_TCM_CHECK_TIME 60
 
-#include <sys/time.h>
 time_t startup_time, oper_time;
+
+char mychannel[MAX_CHANNEL];
+char mynick[MAX_NICK];
+int amianoper;
+int quit;			/* Quit when = YES */
+int remote_tcm_socket;		/* listening socket */
+
+fd_set readfds;
+
+int maxconns;
+
+#ifdef IRCD_HYBRID
+#else
+void m_unregistered(int connnum, int argc, char *argv[]);
+void m_not_oper(int connnum, int argc, char *argv[]);
+void m_not_admin(int connnum, int argc, char *argv[]);
+#endif
 
 #endif

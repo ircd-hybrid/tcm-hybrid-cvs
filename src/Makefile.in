@@ -18,15 +18,12 @@ CFLAGS = -g -O2
 
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
 
-SOURCES = 	serverif.c\
-		stdcmds.c\
-		wild.c\
-		bothunt.c\
-		commands.c\
-		abuse.c\
-		userlist.c\
-		token.c\
+SOURCES = 	main.c\
 		logging.c\
+		stdcmds.c\
+		token.c\
+		userlist.c\
+		wild.c
 
 OBJECTS = ${SOURCES:.c=.o}
 
@@ -35,7 +32,7 @@ all: build
 clean: 
 	${RM} -f *.o tcm core tcm.core *~
 
-distclean:
+distclean: clean
 	${RM} -f Makefile
 
 .c.o:

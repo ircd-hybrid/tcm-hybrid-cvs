@@ -17,13 +17,13 @@
 #include "config.h"
 #include "tcm.h"
 #include "token.h"
-#include "bothunt.h"	/* bill */
+//#include "bothunt.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: token.c,v 1.7 2001/07/29 00:37:13 bill Exp $";
+static char *version="$Id: token.c,v 1.8 2001/09/19 03:30:21 bill Exp $";
 
 static int hash_cmd(char *);
 
@@ -235,6 +235,7 @@ int occurance(char *string, char find)
 #ifdef DEBUGMODE
   placed;
 #endif
+
   if (!string) return 0;
   for (a=0;a<strlen(string);++a)
     if (string[a] == find) ++found;

@@ -55,6 +55,8 @@
  *  argument to tcm
  */
 
+#define MODULE_DIRECTORY "modules/"
+
 #define CONFIG_FILE "etc/tcm.cf"
 #define USERLIST_FILE "etc/userlist.cf"
 
@@ -139,10 +141,6 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 
 /* .kdrone reason */
 #define REASON_KDRONE "Drone bots"
-
-/* wingate and socks reason */
-#define REASON_WINGATE "Open wingate"
-#define REASON_SOCKS   "Open SOCKS"
 
 /*
  * define this if you want services code at all
@@ -233,12 +231,6 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 
 /* Maximum users allowed in tcm userlist */
 #define MAXUSERS 100
-
-/* Maximum pending connects for wingates */
-#define MAXWINGATES 100
-
-/* Maximum pending connects for socks */
-#define MAXSOCKS 100
 
 /* Maximum linked tcm's allowed in tcm's tcmlist */
 #define MAXTCMS 20

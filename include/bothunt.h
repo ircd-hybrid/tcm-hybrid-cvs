@@ -12,7 +12,6 @@ void on_stats_e(char *);
 void on_stats_i(char *);	
 void on_stats_k(char *);	
 void kfind(int sock, char *pattern);
-void onservnotice(char *);
 void print_help(int sock,char *help);
 
 void onctcp(char *,char *,char *);
@@ -55,8 +54,6 @@ struct failrec
   int failcount;
   struct failrec *next;
 };
-
-extern struct connection connections[];
 
 /* The code uses the index into the msgs_to_mon[] table as the
  * token value to hand to the switch.

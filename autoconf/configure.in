@@ -35,6 +35,6 @@ AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - tcm-hy
 dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
 
-AC_OUTPUT(Makefile src/Makefile tools/Makefile)
+AC_OUTPUT(Makefile src/Makefile tools/Makefile modules/Makefile)
 
 

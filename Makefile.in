@@ -18,7 +18,7 @@ CFLAGS = -g -O2
 
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
 
-SUBDIRS = src tools
+SUBDIRS = src modules tools
 
 OBJECTS = ${SOURCES:.c=.o}
 
@@ -27,7 +27,7 @@ all: tcm
 build: tcm
 
 clean: 
-	@rm -f DEBUG
+	@${RM} -f DEBUG
 	@for i in $(SUBDIRS); do \
 		echo "Cleaning $$i";\
 		cd $$i;\
@@ -40,7 +40,7 @@ clean:
 cleandata:
 	${RM} -f DEBUG *.log clone_log_* tcm.pid *.pref
 
-distclean: clean
+distclean:
 	@for i in $(SUBDIRS); do \
 		echo "Distcleaning $$i";\
  		cd $$i;\

@@ -11,7 +11,6 @@ void leave(char *chan);
 void notice(char *nick,...);
 void privmsg(char *nick,...);
 void say(char *chan,...);
-void action(char *chan,char *msg);
 void newnick(char *nick);
 void invite(char *nick,char *chan);
 

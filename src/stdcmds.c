@@ -14,7 +14,6 @@
 *   void notice                                             *
 *   void msg                                                *
 *   void say                                                *
-*   void action                                             *
 *   void newnick                                            *
 *   void invite                                             *
 *   void get_userhost                                       *
@@ -31,12 +30,78 @@
 #include "logging.h"
 #include "serverif.h"
 #include "stdcmds.h"
+#include "userlist.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.2 2001/02/01 14:33:02 wcampbel Exp $";
+static char *version="$Id: stdcmds.c,v 1.3 2001/09/19 03:30:21 bill Exp $";
+
+extern struct connection connections[];
+
+/*
+ * toserv
+ *
+ * inputs       - msg to send directly to server
+ * output       - NONE
+ * side effects - server executes command.
+ */
+
+void toserv(char *format, ... )
+{
+  char msgbuf[MAX_BUFF];
+  va_list va;
+#ifdef DEBUGMODE
+  placed;
+#endif
+
+  va_start(va,format);
+
+  if (connections[0].socket != INVALID)
+    {
+      vsnprintf(msgbuf,sizeof(msgbuf),format, va);
+      send(connections[0].socket, msgbuf, strlen(msgbuf), 0);
+    }
+#ifdef DEBUGMODE
+  printf("->%s", msgbuf);
+#endif
+
+  va_end(va);
+}
+
+/*
+ * prnt()
+ *
+ * inputs        - socket to reply on
+ * output        - NONE
+ * side effects  - NONE
+ */
+void prnt(int sock, ...)
+{
+  char dccbuff[DCCBUFF_SIZE];
+  char msgbuf[MAX_BUFF];
+  char *format;
+  va_list va;
+#ifdef DEBUGMODE
+  placed;
+#endif
+
+  va_start(va,sock);
+
+  format = va_arg(va, char *);
+  vsnprintf(msgbuf, sizeof(msgbuf)-2, format, va);
+  if (msgbuf[strlen(msgbuf)-1] != '\n') strncat(msgbuf, "\n\0", 2);
+  send(sock, msgbuf, strlen(msgbuf), 0);
+
+  if(config_entries.debug)
+    {
+      (void)printf("-> %s",msgbuf);     /* - zaph */
+      if(outfile)
+        (void)fprintf(outfile,"%s",msgbuf);
+    }
+ va_end(va);
+}
 
 
 /* The following are primitives that send messages to the server to perform
@@ -127,13 +192,6 @@ void say(char *chan,...)
   va_end(va);
 }
 
-void action(char *chan,char *msg)
-{
-#ifdef IRC_MESSAGES
-  toserv("PRIVMSG %s :\001ACTION %s\001", chan, msg);
-#endif
-}
-
 void newnick(char *nick)
 {
   toserv("NICK %s\n", nick);
@@ -143,6 +201,5 @@ void invite(char *nick,char *chan)
 {
   toserv("INVITE %s %s\n", nick, chan);
 }
-
 
 

@@ -9,6 +9,13 @@ struct f_entry {
   struct f_entry *next;
 };
 
+struct a_entry {
+  char name[MAX_CONFIG];
+  char method[MAX_CONFIG];
+  char reason[MAX_CONFIG];
+  int type, report;
+};
+
 struct config_list {
   int  hybrid;
   int  hybrid_version;
@@ -54,16 +61,6 @@ struct config_list {
   char spoof_reason[MAX_CONFIG];
   char spambot_act[MAX_CONFIG];
   char spambot_reason[MAX_CONFIG];
-
-#ifdef DETECT_WINGATE
-  char wingate_act[MAX_CONFIG];
-  char wingate_reason[MAX_CONFIG];
-#endif
-
-#ifdef DETECT_SOCKS
-  char socks_act[MAX_CONFIG];
-  char socks_reason[MAX_CONFIG];
-#endif
 
 #ifdef SERVICES_DRONES
   char drones_act[MAX_CONFIG];
@@ -116,8 +113,6 @@ int  okhost(char *,char *);
 int  str2type(char *);
 char *type_show(unsigned long type);
 
-extern struct config_list config_entries;
-
 extern struct auth_file_entry userlist[];
 extern int user_list_index;
 
@@ -151,8 +146,11 @@ extern int tcm_list_index;
 #define TYPE_SUSPENDED		0x40000 /* user is suspended */
 
 int isoper(char *user, char *host);
-void init_userlist(void);
 int islinkedbot(int connnum, char *botname, char *password);
+void init_userlist(void);
+void reload_user_list(int sig);
+
+struct config_list config_entries;
 
 /* channel_report flags */
 #define CHANNEL_REPORT_CLONES	0x0001

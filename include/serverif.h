@@ -23,27 +23,8 @@ struct connection {
   time_t last_message_time;
 };
 
-extern struct connection connections[];
-
-#define WINGATE_CONNECTING 1
-#define WINGATE_READING 2
-#define WINGATE_READ 3
-#define SOCKS_CONNECTING 4
-
 #ifndef OPERS_ONLY
 extern int isbanned(char *,char *);
-#endif
-
-#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
-struct wingates {
-  char user[MAX_USER];
-  char host[MAX_HOST];
-  char nick[MAX_NICK+2];	/* allow + 2 for incoming bot names */
-  int  socket;
-  int  state;
-  time_t connect_time;
-  struct sockaddr_in socketname;
-  };
 #endif
 
 struct 
@@ -87,16 +68,6 @@ void sendto_all_linkedbots(char *);
 int  add_connection(int,int);
 int  already_have_tcm(char *);
 
-#ifdef DETECT_WINGATE
-int wingate_bindsocket(char *,char *,char *,char *);
-extern struct wingates wingate[];
-#endif
-
-#ifdef DETECT_SOCKS
-int socks_bindsocket(char *,char *,char *,char *);
-extern struct wingates socks[];
-#endif
-
 void oper();
 void msg_mychannel(char *msg,...);
 
@@ -113,6 +84,7 @@ void msg_mychannel(char *msg,...);
 #define SEND_LINK_ONLY 8
 #define SEND_MOTD_ONLY 9
 #define SEND_KLINE_NOTICES_ONLY 10
+#define SEND_ADMIN_ONLY 11
 
 /* wait five minutes after last PING before figuring server is stoned */
 #define PING_OUT_TIME 300

@@ -1,3 +1,8 @@
+*** 20010402_2 by db
+- action must specifically say "warn" or no warning is given at all
+
+
+
 *** 20010402_1 by db
 - cleaned up the logging, no more 0 length log files
 - renamed clone_log to just log, its a generic log

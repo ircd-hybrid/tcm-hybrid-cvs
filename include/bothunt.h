@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.43 2002/05/28 20:01:48 leeh Exp $ */
+/* $Id: bothunt.h,v 1.44 2002/05/30 18:59:35 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -135,6 +135,7 @@ extern void on_trace_user(int argc, char *argv[]);
 extern void on_stats_e(int argc, char *argv[]);
 extern void on_stats_i(int argc, char *argv[]);
 extern void on_server_notice(int argc, char *argv[]);
+int    get_user_host(char **user_p, char **host_p, char *user_host);
 extern struct s_testline testlines;
 extern int doingtrace;
 #endif

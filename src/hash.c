@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.9 2002/05/30 18:22:15 db Exp $
+ * $Id: hash.c,v 1.10 2002/05/30 18:59:38 db Exp $
  */
 
 #include <stdio.h>
@@ -248,7 +248,7 @@ remove_from_hash_table(struct hashrec *table[],
 /*
  * add_user_host()
  * 
- * inputs	- pointer to struct plus_c_info
+ * inputs	- pointer to struct userentry
  * 		- from a trace YES or NO
  * 		- is this user an oper YES or NO
  * output	- NONE
@@ -257,7 +257,7 @@ remove_from_hash_table(struct hashrec *table[],
  */
 
 void
-add_user_host(struct plus_c_info *user_info, int fromtrace, int is_oper)
+add_user_host(struct userentry *user_info, int fromtrace, int is_oper)
 {
   struct hashrec *new_hash;
   struct userentry *new_user;
@@ -276,8 +276,8 @@ add_user_host(struct plus_c_info *user_info, int fromtrace, int is_oper)
   strlcpy(new_user->user, user_info->user, MAX_NICK);
   strlcpy(new_user->host, user_info->host, MAX_HOST);
 #ifdef VIRTUAL
-  if (user_info->ip[0] != '\0')
-    strlcpy(new_user->ip_host, user_info->ip, MAX_IP);
+  if (user_info->ip_host[0] != '\0')
+    strlcpy(new_user->ip_host, user_info->ip_host, MAX_IP);
   else
     strcpy(new_user->ip_host,"0.0.0.0");
   make_ip_class_c(new_user->ip_class_c);
@@ -320,13 +320,13 @@ add_user_host(struct plus_c_info *user_info, int fromtrace, int is_oper)
  * remove_user_host()
  * 
  * inputs	- nick
- * 		- pointer to struct plus_c_info
+ * 		- pointer to struct userentry
  * output	- NONE
  * side effects	- 
  */
 
 void
-remove_user_host(char *nick, struct plus_c_info *user_info)
+remove_user_host(char *nick, struct userentry *user_info)
 {
 #ifdef VIRTUAL
   char ip_class_c[MAX_IP];
@@ -384,8 +384,8 @@ remove_user_host(char *nick, struct plus_c_info *user_info)
     }
 
 #ifdef VIRTUAL
-  if (user_info->ip[0])
-    strlcpy(ip_class_c, user_info->ip, MAX_IP);
+  if (user_info->ip_host[0])
+    strlcpy(ip_class_c, user_info->ip_host, MAX_IP);
   else
     strcpy(ip_class_c, "0.0.0.0");
   make_ip_class_c(ip_class_c);

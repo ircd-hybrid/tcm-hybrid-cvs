@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.139 2002/05/30 18:22:14 db Exp $
+ * $Id: bothunt.c,v 1.140 2002/05/30 18:59:37 db Exp $
  */
 
 #include <stdio.h>
@@ -51,7 +51,7 @@ static void link_look_notice(char *snotice);
 static void connect_flood_notice(char *snotice);
 static void add_to_nick_change_table(char *user_host, char *last_nick);
 static void stats_notice(char *snotice);
-static int  get_user_host(char **user_p, char **host_p, char *user_host);
+
 
 struct s_testline testlines;
 
@@ -131,7 +131,7 @@ struct connect_flood_entry connect_flood[CONNECT_FLOOD_TABLE_SIZE];
 void
 on_trace_user(int argc, char *argv[])
 {
-  struct plus_c_info userinfo;
+  struct userentry userinfo;
   char *class_ptr;	/* pointer to class number */
   int  is_oper;
   char *ip_ptr;
@@ -174,11 +174,11 @@ on_trace_user(int argc, char *argv[])
   class_ptr = argv[4];
 
   chopuh(YES,argv[5],&userinfo);
-  snprintf(userinfo.ip, MAX_IP, "%s", argv[6]+1);
+  snprintf(userinfo.ip_host, MAX_IP, "%s", argv[6]+1);
   snprintf(userinfo.class, MAX_CLASS, "%s", class_ptr);
 
   /* XXX */
-  userinfo.nick = argv[5]; /* XXX */
+  strlcpy(userinfo.nick, argv[5], MAX_NICK); /* XXX */
   add_user_host(&userinfo,YES,is_oper);
 }
 
@@ -307,7 +307,7 @@ on_server_notice(int argc, char *argv[])
 {
   int i = -1, a, b, c = -1;
   int faction = -1;
-  struct plus_c_info userinfo;
+  struct userentry userinfo;
   char *from_server;
   /* XXX - Verify these down below */
   char *nick = NULL;
@@ -522,19 +522,22 @@ on_server_notice(int argc, char *argv[])
     if ((q = strchr(p, '(')) == NULL)
       return;
     *(q-1) = '\0';
-    userinfo.nick = p+19;
+    strlcpy(userinfo.nick,p+19, MAX_NICK);;
     if ((p = strchr(q, '[')) == NULL)
       return;
     ++p;
 
-    if (get_user_host(&userinfo.user, &userinfo.host, q) != 1)
+    if (get_user_host(&user, &host, q) != 1)
       return;
+
+    strlcpy(userinfo.user, user, MAX_USER);
+    strlcpy(userinfo.host, host, MAX_HOST);
 
     if ((q = strchr(p, ']')) == NULL)
       return;
     *q++ = '\0';
 
-    strcpy((char *)&userinfo.ip, p);
+    strcpy((char *)&userinfo.ip_host, p);
 
     if ((p = strchr(q, '{')) == NULL)
       return;
@@ -1660,7 +1663,7 @@ report_nick_flooders(int sock)
  * side effects	- input user_host is modified in place
  */
 
-static int
+int
 get_user_host(char **user_p, char **host_p, char *user_host)
 {
   char *user = user_host;

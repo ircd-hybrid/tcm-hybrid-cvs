@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.42 2002/05/30 18:22:15 db Exp $
+ * $Id: logging.c,v 1.43 2002/05/30 18:59:38 db Exp $
  *
  * - db
  */
@@ -38,6 +38,7 @@
 #include "tcm_io.h"
 #include "bothunt.h"
 #include "parse.h"
+#include "hash.h"
 #include "logging.h"
 #include "stdcmds.h"
 
@@ -61,13 +62,15 @@ static char *duration(double);
  */
 
 void 
-chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
+chopuh(int istrace,char *nickuserhost,struct userentry *userinfo)
 {
   char *uh;
   char *p;
   char skip = NO;
   char *right_brace_pointer;
   char *right_square_bracket_pointer;
+  char *user;
+  char *host;
 /* I try to pick up an [IP] from a connect or disconnect message
  * since this routine is also used on trace, some heuristics are
  * used to determine whether the [IP] is present or not.
@@ -76,9 +79,9 @@ chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
  * bah. I added a flag -Dianora
  */
 
-  userinfo->user = NULL;
-  userinfo->host = NULL;
-  memset(userinfo->ip,0,sizeof(userinfo->ip));
+  userinfo->user[0] = '\0';
+  userinfo->host[0] = '\0';
+  memset(userinfo->ip_host,0,sizeof(userinfo->ip_host));
 
   /* ok, if its a hybrid server or modified server,
    * I go from right to left picking up extra bits
@@ -151,12 +154,12 @@ chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
                 p--;
           }
         if (p)
-          snprintf(userinfo->ip, sizeof(userinfo->ip), "%s", p);
+          snprintf(userinfo->ip_host, sizeof(userinfo->ip_host), "%s", p);
       }
     }
 
   /* If it's the first format, we have no problems */
-  if ( !(uh = strchr(nickuserhost,' ')) )
+  if (!(uh = strchr(nickuserhost,' ')))
     {
       if( !(uh = strchr(nickuserhost,'[')) )
         {
@@ -182,13 +185,10 @@ chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
                             nickuserhost);
               /* No ending ')' found, but lets try it anyway */
             }
-          userinfo->user = uh+1;
-          if((p = strchr(userinfo->user,'@')))
-            {
-              *p = '\0';
-              p++;
-              userinfo->host = p;
-            }
+          if (get_user_host(&user, &host, uh) == 0)
+	    return;
+	  strlcpy(userinfo->user, user, MAX_USER);
+	  strlcpy(userinfo->host, host, MAX_HOST);
           return;
         }
 
@@ -242,14 +242,11 @@ chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
     uh[strlen(uh)-2] = 0;   /* Chop ] */
   else
     uh[strlen(uh)-1] = 0;   /* Chop ] */
-  userinfo->user = uh;
 
-  if( (p = strchr(userinfo->user,'@')) )
-    {
-      *p = '\0';
-      p++;
-      userinfo->host = p;
-    }
+  if (get_user_host(&user, &host, uh) == 0)
+    return;
+  strlcpy(userinfo->user, user, MAX_USER);
+  strlcpy(userinfo->host, host, MAX_HOST);
 }
 
 /*
@@ -471,7 +468,7 @@ logclear(void)
 void 
 logfailure(char *nickuh,int botreject)
 {
-  struct plus_c_info userinfo;
+  struct userentry userinfo;
   struct failrec *tmp, *hold = NULL;
 
   chopuh(YES,nickuh,&userinfo); /* use trace form of chopuh() */
@@ -528,7 +525,7 @@ logfailure(char *nickuh,int botreject)
  */
 
 void 
-kline_report(const char *server_notice)
+kline_report(char *server_notice)
 {
   FILE *fp_log;
   struct tm *broken_up_time;

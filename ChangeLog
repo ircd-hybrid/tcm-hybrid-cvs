@@ -1,3 +1,15 @@
+wcampbel    2002/06/01 09:06:03 EDT	(20020601_11)
+
+  Modified files:
+    .                    configure 
+  Log:
+  And rebuild configure
+  
+  Revision  Changes    Path
+  1.19      +84 -95    tcm-hybrid/configure
+
+
+
 wcampbel    2002/06/01 09:04:27 EDT	(20020601_10)
 
   Modified files:

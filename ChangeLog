@@ -1,3 +1,16 @@
+leeh        2002/06/27 10:39:26 EDT	(20020627_0)
+
+  Modified files:
+    src                  dcc_commands.c userlist.c 
+  Log:
+  - debugmode fix, missing declaration of m_events()
+  
+  Revision  Changes    Path
+  1.140     +1 -0      tcm-hybrid/src/dcc_commands.c
+  1.141     +1 -1      tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/26 08:21:37 EDT	(20020626_1)
 
   Modified files:

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.45 2001/12/07 20:06:14 bill Exp $ */
+/* $Id: bothunt.c,v 1.46 2001/12/13 14:21:09 einride Exp $ */
 
 #include "setup.h"
 
@@ -2278,7 +2278,7 @@ static void connect_flood_notice(char *snotice)
 		{
 		  if (connect_flood[i].connect_count >= MAX_CONNECT_FAILS)
 		    {
-                      if (user[0] == '~') ident = NO;
+                      if ((user[0] == '~') || (!strcmp(user, "unknown"))) ident = NO;
 		      if (!strncasecmp((char *)get_action_method("cflood"), "dline", 5))
 			suggest_action(get_action_type("cflood"), nick_reported, user, ip,
                                        NO, ident);

@@ -1,3 +1,15 @@
+leeh        2002/05/29 09:36:44 EDT	(20020529_6)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - somebody "fixing" dcc broke /msg tcm .chat, reverted part of the change.
+  
+  Revision  Changes    Path
+  1.73      +2 -0      tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/29 09:10:44 EDT	(20020529_5)
 
   Modified files:

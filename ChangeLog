@@ -1,3 +1,19 @@
+db          2002/06/05 10:55:22 EDT	(20020605_9)
+
+  Modified files:
+    include              parse.h 
+    src                  parse.c 
+  Log:
+  - renamed parse_args into split_args, thats what it really does, made it static
+  - cleaned up statics
+  - no need to malloc source_p, taking it off of a stack is fine
+  
+  Revision  Changes    Path
+  1.21      +0 -2      tcm-hybrid/include/parse.h
+  1.61      +31 -34    tcm-hybrid/src/parse.c
+
+
+
 leeh        2002/06/05 10:43:40 EDT	(20020605_8)
 
   Modified files:

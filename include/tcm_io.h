@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.3 2002/05/24 04:04:17 db Exp $
+ * $Id: tcm_io.h,v 1.4 2002/05/24 14:13:51 leeh Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -24,19 +24,16 @@ void sendtoalldcc(int incoming_connum,
 
 /* types for sendtoalldcc */
 
-#define SEND_ALL_USERS	0
-#define SEND_OPERS_ONLY	1
-#define SEND_OPERS_PRIVMSG_ONLY 2
-#define SEND_OPERS_NOTICES_ONLY 3
-#define SEND_OPERS_STATS_ONLY 4
-#define SEND_WALLOPS_ONLY 5
-#define SEND_LOCOPS_ONLY 6
-#define SEND_WARN_ONLY 7
-#define SEND_LINK_ONLY 8
-#define SEND_MOTD_ONLY 9
-#define SEND_KLINE_NOTICES_ONLY 10
-#define SEND_ADMIN_ONLY 11
-#define SEND_OPERWALL_ONLY 12
-#define SEND_SERVERS_ONLY 13
+#define SEND_ALL		0x0001 /* general messages */
+#define SEND_PRIVMSG		0x0002 /* users privmsging tcm */
+#define SEND_NOTICES		0x0004 /* users noticing tcm */
+#define SEND_STATS		0x0008 /* stats requests */
+#define SEND_WALLOPS		0x0010 /* wallops and operwall */
+#define SEND_LOCOPS		0x0020 /* locops */
+#define SEND_WARN		0x0040 /* warning messages (clones etc) */
+#define SEND_SPY		0x0080 /* motd, links, info requests */
+#define SEND_KLINE_NOTICES	0x0100 /* klines/unklines */
+#define SEND_ADMINS		0x0200 /* admin stuff like modload */
+#define SEND_SERVERS		0x0400 /* server splits/joins */
 
 #endif

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.8 2002/05/24 04:04:23 db Exp $
+ * $Id: tcm_io.c,v 1.9 2002/05/24 14:13:58 leeh Exp $
  */
 
 #include <stdio.h>
@@ -120,7 +120,7 @@ read_packet(void)
     if (CurrentTime > (connections[0].last_message_time + server_time_out))
     {
       /* timer expired */
-      sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+      sendtoalldcc(incoming_connnum, SEND_ALL,
 		   "PING time out on server");
       log_problem("read_packet()", "ping time out");
       argv[0] = "ping time out";
@@ -226,7 +226,7 @@ read_packet(void)
     {
       if (errno != EINTR)
       {
-        sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+        sendtoalldcc(incoming_connnum, SEND_ALL,
 		     "Select error: %s (%d)",
                      strerror(errno), errno);
         (void)snprintf(dccbuff, sizeof(dccbuff) - 1,"select error %d", errno);
@@ -487,7 +487,7 @@ connect_remote_client(char *nick,char *user,char *host,int sock)
   print_motd(connections[i].socket);
   print_to_socket(connections[i].socket,
 		  "Connected.  Send '.help' for commands.");
-  report(SEND_ALL_USERS, CHANNEL_REPORT_ROUTINE, "%s %s (%s@%s) has connected\n",
+  report(SEND_ALL, CHANNEL_REPORT_ROUTINE, "%s %s (%s@%s) has connected\n",
          connections[i].type & TYPE_OPER ? "Oper" : "User", connections[i].nick,
          connections[i].user, connections[i].host);
 
@@ -579,7 +579,6 @@ initiate_dcc_chat(char *nick, char *user, char *host)
 void
 print_to_socket(int sock, const char *format, ...)
 {
-  char msgbuf[MAX_BUFF];
   va_list va;
 
   va_start(va,format);
@@ -657,66 +656,61 @@ sendtoalldcc(int incoming_connnum, int type, char *format,...)
 	{
 	  switch(type)
 	    {
-	    case SEND_KLINE_NOTICES_ONLY:
+	    case SEND_KLINE_NOTICES:
 	      if (connections[i].type & TYPE_KLINE)
 		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
-	    case SEND_MOTD_ONLY:
-	      if (connections[i].type & TYPE_MOTD)
-		print_to_socket(connections[i].socket, msgbuf);
+	    case SEND_SPY:
+	      if(connections[i].type & TYPE_SPY)
+                print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
-	    case SEND_LINK_ONLY:
-	      if (connections[i].type & TYPE_LINK)
-		print_to_socket(connections[i].socket, msgbuf);
-	      break;
-
-	    case SEND_WARN_ONLY:
+	    case SEND_WARN:
 	      if (connections[i].type & TYPE_WARN)
 		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 	      
-            case SEND_OPERWALL_ONLY:
+            case SEND_WALLOPS:
 #ifdef ENABLE_W_FLAG
-              if (connections[i].type & TYPE_OPERWALL)
+              if (connections[i].type & TYPE_WALLOPS)
                 print_to_socket(connections[i].socket, msgbuf);
 #endif
               break;
 
-	    case SEND_LOCOPS_ONLY:
+	    case SEND_LOCOPS:
 	      if (connections[i].type & TYPE_LOCOPS)
 		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 	      
-	    case SEND_OPERS_STATS_ONLY:
+	    case SEND_STATS:
 	      if(connections[i].type & TYPE_STAT)
 		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
-	    case SEND_OPERS_ONLY:
-	      if(connections[i].type & (TYPE_OPER | TYPE_WARN))
-		print_to_socket(connections[i].socket, msgbuf);
-	      break;
-
-	    case SEND_OPERS_PRIVMSG_ONLY:
+	    case SEND_PRIVMSG:
 	      if((connections[i].type & TYPE_OPER) &&
 		 (connections[i].set_modes & SET_PRIVMSG))
 		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
-	    case SEND_OPERS_NOTICES_ONLY:
+	    case SEND_NOTICES:
 	      if((connections[i].type & TYPE_OPER) &&
 		 (connections[i].set_modes & SET_NOTICES))
 		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
-            case SEND_SERVERS_ONLY:
+            case SEND_SERVERS:
               if(connections[i].type & TYPE_SERVERS)
                 print_to_socket(connections[i].socket, msgbuf);
               break;
 
-	    case SEND_ALL_USERS:
+	    case SEND_ADMINS:
+	      if(connections[i].type & TYPE_ADMIN)
+                print_to_socket(connections[i].socket, msgbuf);
+	      break;
+
+	    case SEND_ALL:
 	      print_to_socket(connections[i].socket, msgbuf);
 	      break;
 

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.61 2002/05/24 04:04:23 db Exp $
+ * $Id: userlist.c,v 1.62 2002/05/24 14:13:58 leeh Exp $
  *
  */
 
@@ -360,7 +360,7 @@ save_prefs(void)
 
   if ((fp_in = fopen(CONFIG_FILE,"r")) == NULL)
   {
-    sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+    sendtoalldcc(incoming_connnum, SEND_ALL,
 		 "Couldn't open %s: %s", CONFIG_FILE, strerror(errno));
     return;
   }
@@ -369,7 +369,7 @@ save_prefs(void)
 
   if ((fp_out = fopen(filename, "w")) == NULL)
   {
-    sendtoalldcc(incoming_connnum, SEND_ALL_USERS, 
+    sendtoalldcc(incoming_connnum, SEND_ALL,
 		 "Couldn't open %s: %s", filename, strerror(errno));
     fclose(fp_in);
     return;
@@ -431,7 +431,7 @@ save_prefs(void)
   fclose(fp_out);
 
   if (rename(filename, CONFIG_FILE))
-    sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+    sendtoalldcc(incoming_connnum, SEND_ALL,
 		 "Error renaming new config file.  Changes may be lost.  %s",
                  strerror(errno));
   chmod(CONFIG_FILE, 0600);
@@ -658,14 +658,11 @@ static void load_a_user(char *line)
 		break;
 #ifdef ENABLE_W_FLAG
               case 'W':
-                type_int |= TYPE_OPERWALL;
+                type_int |= TYPE_WALLOPS;
                 break;
 #endif
-	      case 'l':
-		type_int |= TYPE_LINK;
-		break;
-	      case 'm':
-		type_int |= TYPE_MOTD;
+	      case 'y':
+		type_int |= TYPE_SPY;
 		break;
 	      case 'p':
 		type_int |= TYPE_PARTYLINE;
@@ -980,7 +977,7 @@ char *type_show(unsigned long type)
     *p++ = 'D';
 #endif
 #ifdef ENABLE_W_FLAG
-  if(type & TYPE_OPERWALL)
+  if(type & TYPE_WALLOPS)
     *p++ = 'W';
 #endif
 
@@ -998,10 +995,8 @@ char *type_show(unsigned long type)
     *p++ = 'o';
   if(type & TYPE_KLINE)
     *p++ = 'k';
-  if(type & TYPE_LINK)
-    *p++ = 'l';
-  if(type & TYPE_MOTD)
-    *p++ = 'm';
+  if(type & TYPE_SPY)
+    *p++ = 'y';
   if(type & TYPE_SERVERS)
     *p++ = 'x';
 
@@ -1043,7 +1038,7 @@ void reload_user_list(int sig)
 
   initopers();
 
-  sendtoalldcc(incoming_connnum, SEND_ALL_USERS, "*** Caught SIGHUP ***\n");
+  sendtoalldcc(incoming_connnum, SEND_ALL, "*** Caught SIGHUP ***\n");
 }
 
 #ifdef DEBUGMODE

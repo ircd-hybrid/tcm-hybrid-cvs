@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.26 2002/05/24 04:04:23 db Exp $
+ * $Id: logging.c,v 1.27 2002/05/24 14:13:57 leeh Exp $
  *
  * - db
  */
@@ -477,10 +477,8 @@ logfailure(char *nickuh,int botreject)
       tmp = (struct failrec *)malloc(sizeof(struct failrec));
       if(tmp == NULL)
         {
-          print_to_socket(connections[0].socket,
-			  "Ran out of memory in logfailure");
-          sendtoalldcc(incoming_connnum,
-		       SEND_ALL_USERS, "Ran out of memory in logfailure");
+          sendtoalldcc(incoming_connnum, SEND_ALL,
+		       "Ran out of memory in logfailure");
 	  exit(0);
         }
 
@@ -522,8 +520,8 @@ kline_report(char *server_notice)
   current_time = time(NULL);
   broken_up_time = localtime(&current_time);
   
-  sendtoalldcc(incoming_connnum,
-	       SEND_KLINE_NOTICES_ONLY, "*** %s", server_notice);
+  sendtoalldcc(incoming_connnum, SEND_KLINE_NOTICES,
+	       "*** %s", server_notice);
 
 /* Probably don't need to log klines. --- Toast */
 /* I think we need to log everything JIC - Dianora */

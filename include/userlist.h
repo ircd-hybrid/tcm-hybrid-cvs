@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.33 2002/05/24 05:34:12 bill Exp $ */
+/* $Id: userlist.h,v 1.34 2002/05/24 14:13:51 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -221,7 +221,7 @@ extern int tcm_list_index;
 #define TYPE_GLINE		0x00004	/* user has .gline privs */ 
 #define TYPE_SERVERS            0x00008 /* user sees server intro/quits */
 #define TYPE_PARTYLINE		0x00010	/* user wants to be on partyline */
-#define TYPE_STAT		0x00040	/* user sees STAT requests */
+#define TYPE_STAT		0x00040	/* user sees STATS requests */
 #define TYPE_WARN		0x00080	/* user sees clone reports */
 #define TYPE_INVS		0x00100	/* user is invisible to STATS p list */
 #define TYPE_PENDING		0x00200
@@ -229,13 +229,12 @@ extern int tcm_list_index;
 #define TYPE_ADMIN		0x00800 /* user is an adminstrator */
 #define TYPE_INVM		0x01000 /* user is invisible to STATS p list */
 #define TYPE_DLINE		0x02000 /* user has .dline privs */
-#define TYPE_LINK		0x04000 /* user sees link requests */
-#define TYPE_MOTD		0x08000 /* user sees MOTD requests */
+#define TYPE_SPY		0x04000 /* links, motd, info requests */
 #define TYPE_ECHO		0x10000 /* user is echo'ed */
 #define TYPE_KLINE		0x20000 /* user see's klines/unklines */
 #define TYPE_SUSPENDED		0x40000 /* user is suspended */
 #ifdef ENABLE_W_FLAG
-#define TYPE_OPERWALL		0x80000 /* user can see OPERWALL */
+#define TYPE_WALLOPS		0x80000 /* user can see OPERWALL */
 #endif
 
 int isoper(char *user, char *host);

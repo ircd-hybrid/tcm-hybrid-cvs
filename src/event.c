@@ -25,7 +25,7 @@
  *
  *  Original never had a GPL, so GPL removed WITH PLEASURE. -db
  *
- *  $Id: event.c,v 1.4 2002/05/24 04:04:22 db Exp $
+ *  $Id: event.c,v 1.5 2002/05/24 14:13:57 leeh Exp $
  */
 
 /*
@@ -43,6 +43,7 @@
 #include "tcm.h"
 #include "event.h"
 #include "stdcmds.h"
+#include "tcm_io.h"
 
 static const char *last_event_ran = NULL;
 struct ev_entry event_table[MAX_EVENTS];

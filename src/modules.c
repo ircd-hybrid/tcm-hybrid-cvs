@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.31 2002/05/24 04:04:23 db Exp $B
+ * $Id: modules.c,v 1.32 2002/05/24 14:13:57 leeh Exp $B
  *
  */
 
@@ -91,8 +91,8 @@ void mod_add_cmd(struct TcmMessage *msg)
 
   if ((msg_hash_table[msgindex].cmd = (char *)malloc(MAX_BUFF)) == NULL)
     {
-      sendtoalldcc(incoming_connnum,
-		   SEND_ALL_USERS, "Ran out of memory in mod_add_cmd");
+      sendtoalldcc(incoming_connnum, SEND_ALL,
+		   "Ran out of memory in mod_add_cmd");
       exit(1);
     }
 
@@ -197,8 +197,8 @@ int load_a_module(char *name, int log)
 #ifdef DEBUGMODE
       printf("Error loading module %s\n", err);
 #endif
-      sendtoalldcc(incoming_connnum,
-		   SEND_ADMIN_ONLY, "Error loading module %s: %s", name, err);
+      sendtoalldcc(incoming_connnum, SEND_ADMINS,
+		   "Error loading module %s: %s", name, err);
       return -1;
     }
 
@@ -209,7 +209,7 @@ int load_a_module(char *name, int log)
 #ifdef DEBUGMODE
       printf("Module %s has no _modinit() function\n", name);
 #endif
-      sendtoalldcc(incoming_connnum, SEND_ADMIN_ONLY,
+      sendtoalldcc(incoming_connnum, SEND_ADMINS,
 		   "Module %s has no _modinit() function", name);
       dlclose(modpointer);
       return -1;
@@ -223,7 +223,7 @@ int load_a_module(char *name, int log)
   for (i=0;i<max_mods;++i) if (!modlist[i].name) break;
   if (modlist[i].name)
     {
-      sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+      sendtoalldcc(incoming_connnum, SEND_ALL,
 		   "Too many modules loaded");
       return -1;
     }
@@ -231,7 +231,7 @@ int load_a_module(char *name, int log)
   modlist[i].version = ver;
   if (!(modlist[i].name = (char *)malloc(30)))
     {
-      sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+      sendtoalldcc(incoming_connnum, SEND_ALL,
 		   "Ran out of memory in load_a_module");
       exit(1);
     }
@@ -240,7 +240,7 @@ int load_a_module(char *name, int log)
   
   if (log)
     {
-      sendtoalldcc(incoming_connnum, SEND_ADMIN_ONLY,
+      sendtoalldcc(incoming_connnum, SEND_ADMINS,
 		   "Module %s [version: %s] loaded at 0x%lx",
                   (modlist[i].name == unknown_ver) ? name : modlist[i].name,
                    modlist[i].version, (long)modlist[i].address);
@@ -273,7 +273,7 @@ int unload_a_module(char *name, int log)
   modlist[modindex].address = NULL;
 
   if (log)
-    sendtoalldcc(incoming_connnum, SEND_ADMIN_ONLY,
+    sendtoalldcc(incoming_connnum, SEND_ADMINS,
 		 "Module %s unloaded", name);
   return 0;
 }
@@ -282,7 +282,7 @@ void m_modload (int connnum, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (load_a_module(argv[1], 1) != -1)
-    sendtoalldcc(incoming_connnum, SEND_ADMIN_ONLY,
+    sendtoalldcc(incoming_connnum, SEND_ADMINS,
 		 "Loaded by %s", connections[connnum].nick);
   else
     print_to_socket(connections[connnum].socket, "Load of %s failed\n", argv[1]);
@@ -292,7 +292,7 @@ void m_modunload (int connnum, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (unload_a_module(argv[1], 1) != -1)
-    sendtoalldcc(incoming_connnum, SEND_ADMIN_ONLY,
+    sendtoalldcc(incoming_connnum, SEND_ADMINS,
 		 "Loaded by %s", connections[connnum].nick);
 }
 
@@ -302,7 +302,7 @@ void m_modreload (int connnum, int argc, char *argv[])
   if (unload_a_module(argv[1], 0) != -1)
     {
       if (load_a_module(argv[1], 1))
-        sendtoalldcc(incoming_connnum, SEND_ADMIN_ONLY,
+        sendtoalldcc(incoming_connnum, SEND_ADMINS,
 		     "Reloaded by %s", connections[connnum].nick);
     }
   else

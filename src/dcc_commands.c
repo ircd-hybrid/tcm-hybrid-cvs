@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.67 2002/05/24 04:04:19 db Exp $ */
+/* $Id: dcc_commands.c,v 1.68 2002/05/24 14:13:54 leeh Exp $ */
 
 #include "setup.h"
 
@@ -154,21 +154,21 @@ void m_killlist(int connnum, int argc, char *argv[])
 #ifdef HAVE_REGEX_H
   if (strcasecmp(argv[1], "-r"))
   {
-    sendtoalldcc(incoming_connnum,
-		 SEND_OPERS_ONLY, "*** killlist %s :%s by %s", argv[1],
+    sendtoalldcc(incoming_connnum, SEND_ALL,
+		 "*** killlist %s :%s by %s", argv[1],
                  reason, connections[connnum].registered_nick);
     kill_list_users(connections[connnum].socket, argv[1], reason, NO);
   }
   else
   {
-    sendtoalldcc(incoming_connnum,
-		 SEND_OPERS_ONLY, "*** killlist %s :%s by %s", argv[2],
+    sendtoalldcc(incoming_connnum, SEND_ALL,
+		 "*** killlist %s :%s by %s", argv[2],
                  reason, connections[connnum].registered_nick);
     kill_list_users(connections[connnum].socket, argv[2], reason, YES);
   }
 #else
-  sendtoalldcc(incoming_connnum,
-	       SEND_OPERS_ONLY, "*** killlist %s :%s by %s", argv[1],
+  sendtoalldcc(incoming_connnum, SEND_ALL,
+	       "*** killlist %s :%s by %s", argv[1],
                reason, connections[connnum].registered_nick);
   kill_list_users(connections[connnum].socket, argv[1], reason, NO);
 #endif
@@ -233,8 +233,8 @@ void m_kill(int connnum, int argc, char *argv[])
   {
     expand_args(reason, sizeof(reason)-1, argc-2, argv+2);
   }
-  sendtoalldcc(incoming_connnum,
-	       SEND_KLINE_NOTICES_ONLY, "*** kill %s :%s by %s",
+  sendtoalldcc(incoming_connnum, SEND_KLINE_NOTICES,
+	       "*** kill %s :%s by %s",
                argv[1], reason, connections[connnum].registered_nick);
   log_kline("KILL", argv[1], 0, connections[connnum].registered_nick, reason);
   if (!(connections[connnum].type & (TYPE_INVS|TYPE_INVM)))
@@ -624,8 +624,8 @@ void m_op(int connnum, int argc, char *argv[])
 void m_cycle(int connnum, int argc, char *argv[])
 {
   leave(config_entries.defchannel);
-  sendtoalldcc(incoming_connnum,
-	       SEND_OPERS_ONLY, "I'm cycling.  Be right back.\n");
+  sendtoalldcc(incoming_connnum, SEND_ALL,
+	       "I'm cycling.  Be right back.\n");
   sleep(1);
   /* probably on a cycle, we'd want the tcm to set
    * the key as well...
@@ -637,8 +637,8 @@ void m_cycle(int connnum, int argc, char *argv[])
 
 void m_die(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(incoming_connnum,
-	       SEND_ALL_USERS, "I've been ordered to quit irc, goodbye.");
+  sendtoalldcc(incoming_connnum, SEND_ALL,
+	       "I've been ordered to quit irc, goodbye.");
   print_to_server("QUIT :Dead by request!");
   log("DIEd by oper %s\n", connections[connnum].registered_nick);
   exit(1);
@@ -646,8 +646,8 @@ void m_die(int connnum, int argc, char *argv[])
 
 void m_restart(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(incoming_connnum,
-	       SEND_ALL_USERS, "I've been ordered to restart.");
+  sendtoalldcc(incoming_connnum, SEND_ALL,
+	       "I've been ordered to restart.");
   print_to_server("QUIT :Restart by request!");
   log("RESTART by oper %s", connections[connnum].registered_nick);
   sleep(1);
@@ -699,8 +699,8 @@ void m_unkline(int connnum, int argc, char *argv[])
   {
     log("UNKLINE %s attempted by oper %s", argv[1],
         connections[connnum].registered_nick);
-    sendtoalldcc(incoming_connnum,
-		 SEND_OPERS_ONLY, "UNKLINE %s attempted by oper %s", 
+    sendtoalldcc(incoming_connnum, SEND_KLINE_NOTICES,
+		 "UNKLINE %s attempted by oper %s", 
                  argv[1], connections[connnum].registered_nick);
     print_to_server("UNKLINE %s",argv[1]);
   }
@@ -742,8 +742,8 @@ void m_dline(int connnum, int argc, char *argv[])
     else
       log_kline("DLINE", argv[1], 0, connections[connnum].registered_nick,
                 reason);
-    sendtoalldcc(incoming_connnum,
-		 SEND_OPERS_ONLY, "*** dline %s :%s by %s", argv[1],
+    sendtoalldcc(incoming_connnum, SEND_ALL,
+		 "*** dline %s :%s by %s", argv[1],
                  reason, connections[connnum].registered_nick);
     if (!connections[connnum].type & (TYPE_INVS|TYPE_INVM))
     {
@@ -799,8 +799,8 @@ void m_nflood(int connnum, int argc, char *argv[])
 
 void m_rehash(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(incoming_connnum,
-	       SEND_ALL_USERS, "*** rehash requested by %s", 
+  sendtoalldcc(incoming_connnum, SEND_ALL,
+	       "*** rehash requested by %s", 
                connections[connnum].registered_nick[0] ?
                connections[connnum].registered_nick :
                connections[connnum].nick);
@@ -822,8 +822,8 @@ void m_rehash(int connnum, int argc, char *argv[])
 
 void m_trace(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(incoming_connnum,
-	       SEND_OPERS_ONLY, "Trace requested by %s",
+  sendtoalldcc(incoming_connnum, SEND_ALL,
+	       "Trace requested by %s",
                connections[connnum].registered_nick[0] ?
                connections[connnum].registered_nick :
                connections[connnum].nick);
@@ -994,7 +994,6 @@ dccproc(int connnum, int argc, char *argv[])
   char who_did_command[2*MAX_NICK];
   int len;
   int i;
-  int opers_only = SEND_ALL_USERS; 	/* Is it an oper only message ? */
   char *buffer, *p;
 
   if (argv[0][0] == '.')
@@ -1016,28 +1015,17 @@ dccproc(int connnum, int argc, char *argv[])
 
   who_did_command[0] = '\0';
 
-  if((buffer[0] == 'o' || buffer[0] == 'O') && buffer[1] == ':')
-  {
-    opers_only = SEND_OPERS_ONLY;
-    snprintf(dccbuff,sizeof(dccbuff) - 1,"O:<%s@%s> %s",
-             connections[connnum].nick, config_entries.dfltnick, buffer+2);
-  }
-  else
-    snprintf(dccbuff,sizeof(dccbuff) - 1,"<%s@%s> %s",
-             connections[connnum].nick, config_entries.dfltnick, buffer);
+  snprintf(dccbuff, sizeof(dccbuff) - 1,"<%s@%s> %s",
+           connections[connnum].nick, config_entries.dfltnick, buffer);
 
-  if(connections[connnum].type & TYPE_PARTYLINE )
-    sendtoalldcc(incoming_connnum,
-		 opers_only, "%s", dccbuff); /* Thanks Garfr, Talen */
+  if(connections[connnum].type & TYPE_PARTYLINE)
+    sendtoalldcc(incoming_connnum, SEND_ALL, "%s", dccbuff);
   else
   {
-    if(opers_only == SEND_OPERS_ONLY)
-      sendtoalldcc(incoming_connnum,
-		   opers_only, "%s", dccbuff);
-    else
-      print_to_socket(connections[connnum].socket,
-           "You are not +p, not sending to chat line");
+    print_to_socket(connections[connnum].socket,
+                    "You are not +p, not sending to chat line");
   }
+
   return;
 }
 
@@ -1156,8 +1144,7 @@ set_umode(int connnum, char *flags, char *registered_nick)
       case 'e': type = TYPE_ECHO; break;
       case 'i': type = TYPE_INVS; break;
       case 'k': type = TYPE_KLINE; break;
-      case 'l': type = TYPE_LINK; break;
-      case 'm': type = TYPE_MOTD; break;
+      case 'y': type = TYPE_SPY; break;
       case 'o': type = TYPE_LOCOPS; break;
       case 'p': type = TYPE_PARTYLINE; break;
       case 's': type = TYPE_STAT; break;
@@ -1252,8 +1239,7 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	  case 'e': type = TYPE_ECHO; break;
 	  case 'i': type = TYPE_INVS; break;
 	  case 'k': type = TYPE_KLINE; break;
-	  case 'l': type = TYPE_LINK; break;
-	  case 'm': type = TYPE_MOTD; break;
+          case 'y': type = TYPE_SPY; break;
 	  case 'o': type = TYPE_LOCOPS; break;
 	  case 'p': type = TYPE_PARTYLINE; break;
 	  case 's': type = TYPE_STAT; break;
@@ -1345,8 +1331,7 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	    case 'w': type = TYPE_WARN; break;
 	    case 'e': type = TYPE_ECHO; break;
 	    case 'i': type = TYPE_INVS; break;
-	    case 'l': type = TYPE_LINK; break;
-	    case 'm': type = TYPE_MOTD; break;
+            case 'y': type = TYPE_SPY; break;
 	    case 'o': type = TYPE_LOCOPS; break;
             case 'x': type = TYPE_SERVERS; break;
 	    case '-':
@@ -1402,9 +1387,8 @@ save_umodes(char *registered_nick, unsigned long type)
 
   if((fp = fopen(user_pref,"w")) == NULL)
   {
-    sendtoalldcc(incoming_connnum,
-		 SEND_ALL_USERS, "Couldn't open %s for write",
-		 user_pref );
+    sendtoalldcc(incoming_connnum, SEND_ALL,
+		 "Couldn't open %s for write", user_pref);
     return;
   }
 
@@ -1437,9 +1421,8 @@ load_umodes(int connect_id)
   {
     if((fp = fopen(user_pref,"w")) == NULL)
     {
-      sendtoalldcc(incoming_connnum,
-		   SEND_ALL_USERS, "Couldn't open %s for write",
-		   user_pref );
+      sendtoalldcc(incoming_connnum, SEND_ALL,
+		   "Couldn't open %s for write", user_pref);
       return;
     }
     type = connections[connect_id].type;
@@ -1602,9 +1585,8 @@ register_oper(int connnum, char *password, char *who_did_command)
       {
 	print_to_socket(connections[connnum].socket,
 	     "You are suspended");
-	sendtoalldcc(incoming_connnum,
-		     SEND_OPERS_ONLY,"%s is suspended",
-		     who_did_command);
+	sendtoalldcc(incoming_connnum, SEND_ALL,
+		     "%s is suspended", who_did_command);
 	if (connections[connnum].type &
 	    (TYPE_PENDING))
 	  connections[connnum].type &= ~TYPE_PENDING;
@@ -1613,10 +1595,8 @@ register_oper(int connnum, char *password, char *who_did_command)
       {
 	print_to_socket(connections[connnum].socket,
 	     "You are now registered");
-	sendtoalldcc(incoming_connnum,
-		     SEND_OPERS_ONLY,
-		     "%s has registered",
-		     who_did_command);
+	sendtoalldcc(incoming_connnum, SEND_ALL,
+		     "%s has registered", who_did_command);
 	if (connections[connnum].type &
 	    (TYPE_PENDING))
 	  connections[connnum].type &= ~TYPE_PENDING;
@@ -1625,10 +1605,8 @@ register_oper(int connnum, char *password, char *who_did_command)
     else
     {
       print_to_socket(connections[connnum].socket,"illegal password");
-      sendtoalldcc(incoming_connnum,
-		   SEND_OPERS_ONLY,
-		   "illegal password from %s",
-		   who_did_command);
+      sendtoalldcc(incoming_connnum, SEND_ALL,
+		   "illegal password from %s", who_did_command);
     }
   }
   else
@@ -1783,8 +1761,8 @@ static void
 handle_save(int sock,char *nick)
 {
   print_to_socket(sock, "Saving %s file", CONFIG_FILE);
-  sendtoalldcc(incoming_connnum,
-	       SEND_OPERS_ONLY, "%s is saving %s", nick, CONFIG_FILE);
+  sendtoalldcc(incoming_connnum, SEND_ALL,
+	       "%s is saving %s", nick, CONFIG_FILE);
   save_prefs();
 }
 

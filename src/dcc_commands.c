@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.112 2002/05/29 06:26:13 db Exp $ */
+/* $Id: dcc_commands.c,v 1.113 2002/05/30 01:49:48 leeh Exp $ */
 
 #include "setup.h"
 
@@ -36,7 +36,6 @@
 #include "bothunt.h"
 #include "userlist.h"
 #include "logging.h"
-#include "commands.h"
 #include "stdcmds.h"
 #include "modules.h"
 #include "tcm_io.h"
@@ -56,6 +55,52 @@ static void list_exemptions(int sock);
 static void handle_save(int sock,char *nick);
 static int  is_legal_pass(int connect_id,char *password);
 static void print_help(int sock,char *text);
+
+static void m_class(int connnum, int argc, char *argv[]);
+static void m_classt(int connnum, int argc, char *argv[]);
+static void m_killlist(int connnum, int argc, char *argv[]);
+static void m_kline(int connnum, int argc, char **argv);
+static void m_kclone(int connnum, int argc, char *argv[]);
+static void m_kflood(int connnum, int argc, char *argv[]);
+static void m_klink(int connnum, int argc, char *argv[]);
+static void m_kdrone(int connnum, int argc, char *argv[]);
+static void m_kbot(int connnum, int argc, char *argv[]);
+static void m_kill(int connnum, int argc, char *argv[]);
+static void m_use_kaction(int connnum, int argc, char *argv[]);
+static void m_kspam(int connnum, int argc, char *argv[]);
+static void m_register(int connnum, int argc, char *argv[]);
+static void m_opers(int connnum, int argc, char *argv[]);
+static void m_testline(int connnum, int argc, char *argv[]);
+static void m_actions(int connnum, int argc, char *argv[]);
+static void m_action(int connnum, int argc, char *argv[]);
+static void m_set(int connnum, int argc, char *argv[]);
+static void m_uptime(int connnum, int argc, char *argv[]);
+static void m_exemptions(int connnum, int argc, char *argv[]);
+static void m_connections(int connnum, int argc, char *argv[]);
+static void m_disconnect(int connnum, int argc, char *argv[]);
+static void m_help(int connnum, int argc, char *argv[]);
+static void m_motd(int connnum, int argc, char *argv[]);
+static void m_save(int connnum, int argc, char *argv[]);
+static void m_close(int connnum, int argc, char *argv[]);
+static void m_op(int connnum, int argc, char *argv[]);
+static void m_cycle(int connnum, int argc, char *argv[]);
+static void m_die(int connnum, int argc, char *argv[]);
+static void m_restart(int connnum, int argc, char *argv[]);
+static void m_info(int connnum, int argc, char *argv[]);
+static void m_locops(int connnum, int argc, char *argv[]);
+static void m_unkline(int connnum, int argc, char *argv[]);
+static void m_dline(int connnum, int argc, char *argv[]);
+static void m_quote(int connnum, int argc, char *argv[]);
+static void m_mem(int connnum, int argc, char *argv[]);
+static void m_nflood(int connnum, int argc, char *argv[]);
+static void m_rehash(int connnum, int argc, char *argv[]);
+static void m_trace(int connnum, int argc, char *argv[]);
+static void m_failures(int connnum, int argc, char *argv[]);
+static void m_domains(int connnum, int argc, char *argv[]);
+static void m_nfind(int connnum, int argc, char *argv[]);
+static void m_list(int connnum, int argc, char *argv[]);
+static void m_ulist(int connnum, int argc, char *argv[]);
+static void m_hlist(int connnum, int argc, char *argv[]);
 
 void
 m_class(int connnum, int argc, char *argv[])
@@ -153,7 +198,7 @@ m_kline(int connnum, int argc, char *argv[])
       }
       else
         snprintf(buff, sizeof(buff), "No reason");
-      do_a_kline("kline", kline_time, argv[2], buff, 
+      do_a_kline(kline_time, argv[2], buff, 
                  connections[connnum].registered_nick);
     }
     else
@@ -162,21 +207,10 @@ m_kline(int connnum, int argc, char *argv[])
       {
 	expand_args(buff, MAX_BUFF-1, argc-2, argv+2);
       }
-      do_a_kline("kline", 0, argv[1], buff,
+      do_a_kline(0, argv[1], buff,
 		 connections[connnum].registered_nick);
     }
   }
-}
-
-void
-m_kperm(int connnum, int argc, char *argv[])
-{
-  if (argc < 2)
-    print_to_socket(connections[connnum].socket,
-         "Usage: %s [time] <[nick]|[user@host]>", argv[0]);
-  else
-    do_a_kline("kperm", 0, argv[1], REASON_KPERM, 
-               connections[connnum].registered_nick);
 }
 
 void
@@ -215,62 +249,51 @@ m_kill(int connnum, int argc, char *argv[])
 void
 m_use_kaction(int connnum, int argc, char *argv[])
 {
-  print_to_socket(connections[connnum].socket,
-		  "%s is deprecated, please use .kaction", argv[0]);
-
-}
-
-void
-m_kaction(int connnum, int argc, char *argv[])
-{
+  char *userhost;
+  char *p;
+  int split;
   int actionid;
-  int kline_time = 0;
-  char *who, *host;
 
-  if (argc < 3)
-    {
-      print_to_socket(connections[connnum].socket,
-		      "Usage: %s action [time] <[nick]|[user@host]>",
-		      argv[0]);
-      return;
-    } 
+  if(argc < 2)
+  {
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s [time] <[nick]|[user@host]>", argv[0]);
+    return;
+  }
 
-  actionid = find_action(argv[1]);
-  if (actionid < 0)
+  /* skip past .k bit */
+  actionid = find_action(argv[0]+2);
+
+  if(argc == 2)
+  {
+    if((p = strchr(argv[1], '@')) != NULL)
     {
-      print_to_socket(connections[connnum].socket,
-		      "%s is not a valid action", argv[1]);
-      return;
+      *p++ = '\0';
+      userhost = get_method_userhost(actionid, NULL, argv[1], p);
     }
-  
-  if (argc == 4)
+    else
     {
-      if (actions[actionid].method & METHOD_TKLINE)
-	{
-	  kline_time = atoi(argv[2]);
-	  if (!kline_time)
-	    {
-	      print_to_socket(connections[connnum].socket,
-			      "%s is not a valid k-line time", argv[2]);
-	      return;
-	    }
-	}
-      else
-	{
-	  print_to_socket(connections[connnum].socket,
- "The %s action is not configured to use temporary k-lines, k-line time will be ignored\n", argv[1]);
-	}
-      who = argv[3];
+      userhost = get_method_userhost(actionid, argv[1], NULL, NULL);
     }
+
+    print_to_server("KLINE %s :%s", userhost, actions[actionid].reason);
+  }
   else
-    who = argv[2];
-  
-  if ((host = strchr(who, '@')))
-    *host++=0;
+  {
+    if((p = strchr(argv[1], '@')) != NULL)
+    {
+      *p++ = '\0';
+      userhost = get_method_userhost(actionid, NULL, argv[2], p);
+    }
+    else
+    {
+      userhost = get_method_userhost(actionid, argv[2], NULL, NULL);
+    }
 
-  handle_action(actionid, 0, host ? "" : who, host ? who : 0, host ? host : 0, 0, "Manually set");
+    print_to_server("KLINE %s %s :%s", 
+		    argv[1], userhost, actions[actionid].reason);
+  }
 }
-
 
 void
 m_register(int connnum, int argc, char *argv[])
@@ -1027,9 +1050,6 @@ struct dcc_command kclone_msgtab = {
 struct dcc_command kflood_msgtab = {
  "kflood", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
 };
-struct dcc_command kperm_msgtab = {
- "kperm", NULL, {m_unregistered, m_kperm, m_kperm}
-};
 struct dcc_command klink_msgtab = {
  "klink", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
 };
@@ -1041,9 +1061,6 @@ struct dcc_command kbot_msgtab = {
 };
 struct dcc_command kill_msgtab = {
  "kill", NULL, {m_unregistered, m_kill, m_kill}
-};
-struct dcc_command kaction_msgtab = {
- "kaction", NULL, {m_unregistered, m_kaction, m_kaction}
 };
 struct dcc_command kspam_msgtab = {
  "kspam", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
@@ -1170,12 +1187,10 @@ init_commands(void)
   add_dcc_handler(&kline_msgtab);
   add_dcc_handler(&kclone_msgtab);
   add_dcc_handler(&kflood_msgtab);
-  add_dcc_handler(&kperm_msgtab);
   add_dcc_handler(&klink_msgtab);
   add_dcc_handler(&kdrone_msgtab);
   add_dcc_handler(&kbot_msgtab);
   add_dcc_handler(&kill_msgtab);
-  add_dcc_handler(&kaction_msgtab);
   add_dcc_handler(&kspam_msgtab);
   add_dcc_handler(&register_msgtab);
   add_dcc_handler(&opers_msgtab);

@@ -1,7 +1,7 @@
 /* handler.c
  *
  * contains the code for the dcc and server command handlers
- * $Id: handler.c,v 1.1 2002/05/28 12:14:16 leeh Exp $
+ * $Id: handler.c,v 1.2 2002/05/30 01:49:48 leeh Exp $
  */
 
 #include <assert.h>
@@ -16,7 +16,6 @@
 #include "config.h"
 #include "tcm.h"
 #include "tcm_io.h"
-#include "commands.h"
 #include "bothunt.h"
 #include "modules.h"
 #include "stdcmds.h"

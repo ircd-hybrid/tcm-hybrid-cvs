@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.75 2002/05/29 18:47:48 db Exp $
+ * $Id: tcm_io.c,v 1.76 2002/05/30 01:49:49 leeh Exp $
  */
 
 #include <stdio.h>
@@ -41,7 +41,6 @@
 #include "event.h"
 #include "bothunt.h"
 #include "userlist.h"
-#include "commands.h"
 #include "modules.h"
 #include "tcm_io.h"
 #include "numeric.h"

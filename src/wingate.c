@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.49 2002/05/28 15:10:16 leeh Exp $ */
+/* $Id: wingate.c,v 1.50 2002/05/30 01:49:49 leeh Exp $ */
 
 
 #include <netdb.h>
@@ -13,7 +13,6 @@
 #include <string.h>
 #include "config.h"
 #include "tcm.h"
-#include "commands.h"
 #include "modules.h"
 #include "userlist.h"
 #include "parse.h"

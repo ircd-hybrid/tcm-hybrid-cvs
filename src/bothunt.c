@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.136 2002/05/29 06:26:12 db Exp $
+ * $Id: bothunt.c,v 1.137 2002/05/30 01:49:48 leeh Exp $
  */
 
 #include <stdio.h>
@@ -26,7 +26,6 @@
 #include "wild.h"
 #include "serno.h"
 #include "patchlevel.h"
-#include "commands.h"
 #include "modules.h"
 #include "tcm_io.h"
 #include "parse.h"

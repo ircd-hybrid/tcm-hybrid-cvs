@@ -1,5 +1,5 @@
 /*
- * $Id: modules.c,v 1.48 2002/05/29 06:26:13 db Exp $B
+ * $Id: modules.c,v 1.49 2002/05/30 01:49:48 leeh Exp $B
  *
  */
 
@@ -15,7 +15,6 @@
 #include "config.h"
 #include "tcm.h"
 #include "tcm_io.h"
-#include "commands.h"
 #include "bothunt.h"
 #include "modules.h"
 #include "stdcmds.h"

@@ -1,7 +1,7 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.4 2002/05/28 16:41:52 db Exp $ */
+/* $Id: actions.h,v 1.5 2002/05/30 01:49:44 leeh Exp $ */
 
 extern int act_sdrone;
 extern int act_sclone;
@@ -49,8 +49,6 @@ void handle_action(int actionid, int idented,
 
 /* Mask for the "if not idented" method */
 #define HOSTSTRIP_NOIDENT            0x0F00
-/* Use *~* */
-#define HOSTSTRIP_NOIDENT_UNIDENTED  0x0100 
 /* Use *username */
 #define HOSTSTRIP_NOIDENT_PREFIXED   0x0200
 /* Use * */
@@ -90,6 +88,8 @@ struct a_entry {
 
 
 char * get_method_names(int method);
+char *get_method_userhost(int, char *, char *, char *);
+
 int get_method_number(char * name);
 extern struct a_entry actions[MAX_ACTIONS+1];
 

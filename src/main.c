@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.100 2002/05/29 06:26:13 db Exp $ */
+/* $Id: main.c,v 1.101 2002/05/30 01:49:48 leeh Exp $ */
 
 #include "setup.h"
 
@@ -37,7 +37,6 @@
 #include "event.h"
 #include "userlist.h"
 #include "bothunt.h"
-#include "commands.h"
 #include "modules.h"
 #include "stdcmds.h"
 #include "wild.h"

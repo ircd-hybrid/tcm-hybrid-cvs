@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.82 2002/05/29 06:26:14 db Exp $ */
+/* $Id: stdcmds.c,v 1.83 2002/05/30 01:49:49 leeh Exp $ */
 
 #include "setup.h"
 
@@ -183,8 +183,7 @@ print_motd(int sock)
 /*
  * do_a_kline()
  *
- * inputs       - command used i.e. ".kline", ".kclone" etc.
- *              - kline_time if non-zero its HYBRID and its a tkline
+ * inputs       - kline_time if non-zero its HYBRID and its a tkline
  *              - pattern (i.e. nick or user@host)
  *              - reason
  *              - who asked for this (oper)
@@ -195,8 +194,8 @@ print_motd(int sock)
  */
 
 void
-do_a_kline(char *command_name,int kline_time, char *pattern,
-	   char *reason,char *who_did_command)
+do_a_kline(int kline_time, char *pattern,
+	   char *reason, char *who_did_command)
 {
   if(pattern == NULL)
     return;
@@ -205,12 +204,12 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
     return;
 
   /* Removed *@ prefix from kline parameter -tlj */
-
+#if 0
   if(config_entries.hybrid)
     {
       if(kline_time)
         send_to_all(FLAGS_ALL,
-                     "%s %d %s :%s added by oper %s",
+                     "kline %d %s :%s added by oper %s",
                      command_name,
                      kline_time,
                      pattern,
@@ -233,6 +232,7 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
                    format_reason(reason),
                    who_did_command);
     }
+#endif
   /* If the kline doesn't come from the local tcm
    * and tcm has been compiled to restrict remote klines
    * then just ignore it

@@ -26,7 +26,7 @@
 
 /* actions.c
  *
- * $Id: actions.c,v 1.8 2002/05/30 01:45:30 db Exp $
+ * $Id: actions.c,v 1.9 2002/05/30 01:49:48 leeh Exp $
  */
 
 int act_sclone;
@@ -65,7 +65,7 @@ init_actions(void)
   set_action_strip(act_bot, HS_BOT);
   set_action_reason(act_bot, REASON_BOT);
 
-  act_spambot = add_action("spambot");
+  act_spambot = add_action("spam");
   set_action_strip(act_spambot, HS_SPAMBOT);
   set_action_reason(act_spambot, REASON_SPAMBOT);
 
@@ -94,9 +94,8 @@ void
 handle_action(int actionid, int idented, char *nick, char *user,
 	      char *host, char *ip, char * addcmt)
 {
-  char newhost[MAX_HOST];
-  char newuser[MAX_USER];
   char comment[MAX_BUFF];
+  char *userhost;
   char *p;
   struct hashrec * userptr;
 
@@ -148,96 +147,9 @@ handle_action(int actionid, int idented, char *nick, char *user,
       return;
     }
 
-  /* Use hoststrip to create a k-line mask.
-   * First the host
-   */
-  switch (actions[actionid].hoststrip & HOSTSTRIP_HOST)
-    {
-    case HOSTSTRIP_HOST_BLOCK:
-      if (inet_addr(host) == INADDR_NONE)
-	{
-	  p = host;
-	  while (*p && (*p != '.'))
-	    p++;
-	  if (!*p)
-	    {
-	      /* Host without dots?  */
-	      strncpy(newhost, host, sizeof(newhost));
-	      newhost[sizeof(newhost)-1] = 0;
-	      tcm_log(L_WARN,
-		      "handle_action(%s): '%s' appears to be a weird host\n",
-		      actions[actionid].name, host);
-	      return;
-	    }
-	  newhost[0] = '*';
-	  newhost[1] = '\0';
-	  strncat(newhost, host, sizeof(newhost));
-	}
-      else
-	{
-	  strncpy(newhost, host, sizeof(newhost)-3);
-	  /* This HAS to be useless, but oh well.*/
-	  newhost[sizeof(newhost)-4] = 0;
-	  p = strrchr(newhost, '.');
-	  if (*p)
-	    {
-	      p[1] = '*';
-	      p[2] = '\0';
-	    }
-	}
-      break;
-    case HOSTSTRIP_HOST_AS_IS:
-    default:
-      strncpy(newhost, host, sizeof(newhost));
-      newhost[sizeof(newhost)-1] = 0;
-      break;
-    }
+  userhost = get_method_userhost(actionid, nick, user, host);
 
-  if (idented)
-    {
-      switch(actions[actionid].hoststrip & HOSTSTRIP_IDENT)
-	{
-	case HOSTSTRIP_IDENT_PREFIXED:
-	  p = user;
-	  if (strlen(p)>8) 
-	    p += strlen(user)-8;
-	  strncpy(newuser+1, p, sizeof(newuser)-1);
-	  newuser[0] = '*';
-	  newuser[sizeof(newuser)-1] = 0;
-	  break;
-	case HOSTSTRIP_IDENT_ALL:
-	  strcpy(newuser, "*");
-	  break;
-	case HOSTSTRIP_IDENT_AS_IS:
-	default:
-	  strncpy(newuser, user, sizeof(newuser));
-	  newuser[sizeof(newuser)-1] = 0;
-	  break;
-	}
-    }
-  else
-    {
-      switch(actions[actionid].hoststrip & HOSTSTRIP_NOIDENT)
-	{
-	case HOSTSTRIP_NOIDENT_PREFIXED:
-	  p = user;
-	  if (strlen(p)>8)
-	    p += strlen(user)-8;
-	  strncpy(newuser+1, user, sizeof(newuser)-1);
-	  newuser[0] = '*';
-	  newuser[sizeof(newuser)-1] = 0;
-	  break;
-	case HOSTSTRIP_NOIDENT_ALL:
-	  strcpy(newuser, "~*");
-	  break;
-	case HOSTSTRIP_NOIDENT_UNIDENTED:
-	default:
-	  strcpy(newuser, "*~*");
-	  break;
-	}
-    }
   strcpy(comment, "No actions taken");
-
 
   if (!okhost(user[0] ? user : "*", host, actionid))
     {
@@ -249,21 +161,24 @@ handle_action(int actionid, int idented, char *nick, char *user,
 	    actions[actionid].klinetime = 60;
 	  else if (actions[actionid].klinetime>14400) 
 	    actions[actionid].klinetime = 14400;
-	  print_to_server("KLINE %d %s@%s :%s",
-		 actions[actionid].klinetime, newuser, newhost, 
+
+	  print_to_server("KLINE %d %s :%s",
+		 actions[actionid].klinetime, userhost,
 		 actions[actionid].reason ?
-		 actions[actionid].reason : "Automated temporary K-Line");    
+		 actions[actionid].reason : "Automated temporary K-Line");
+
 	  snprintf(comment, sizeof(comment),
-		   "%d minutes temporary k-line of %s@%s",
-		   actions[actionid].klinetime, newuser, newhost);
+		   "%d minutes temporary k-line of %s",
+		   actions[actionid].klinetime, userhost);
 	}
       else if (actions[actionid].method & METHOD_KLINE)
 	{
-	  print_to_server("KLINE %s@%s :%s", newuser, newhost, 
+	  print_to_server("KLINE %s :%s", userhost,
 		 actions[actionid].reason ? 
-		 actions[actionid].reason : "Automated K-Line");    
+		 actions[actionid].reason : "Automated K-Line");
+
 	  snprintf(comment, sizeof(comment),
-		   "Permanent k-line of %s@%s", newuser, newhost);
+		   "Permanent k-line of %s", userhost);
 	}
       else if (actions[actionid].method & METHOD_DLINE)
 	{
@@ -275,14 +190,16 @@ handle_action(int actionid, int idented, char *nick, char *user,
 		{
 		  /* We couldn't find one either, revert to a k-line */
 		  tcm_log(L_WARN,
-	  "handle_action(%s): Reverting to k-line, couldn't find IP for %s\n",
+	  "handle_action(%s): Reverting to k-line, couldn't find IP for %s",
 		      actions[actionid].name, host);
-		  actions[actionid].method |= METHOD_KLINE;
+
+                  actions[actionid].method |= METHOD_KLINE;
 		  handle_action(actionid, idented, nick, user, 
 				host, 0, addcmt);
 		  actions[actionid].method &= ~METHOD_KLINE;
 		  return;
 		}
+
 	      handle_action(actionid, idented, nick, user,
 			    host, userptr->ip_host, addcmt);
 	      return;
@@ -292,19 +209,22 @@ handle_action(int actionid, int idented, char *nick, char *user,
 	      /* Oks, passed host isn't in IP form.
 	       * Let's move the passed ip to newhost, then mask it if needed
 	       */
-	      strcpy(newhost, ip);
+	      strcpy(userhost, ip);
+
 	      if ((actions[actionid].hoststrip & HOSTSTRIP_HOST)
-		  == HOSTSTRIP_HOST_BLOCK) {
-		p = strrchr(newhost, '.');
+		  == HOSTSTRIP_HOST_BLOCK)
+	      {
+		p = strrchr(userhost, '.');
 		p++;
 		strcpy(p, "*");
 	      }
 	    }
 
-	  print_to_server("DLINE %s :%s", newhost, 
+	  print_to_server("DLINE %s :%s", userhost,
 		 actions[actionid].reason ?
 		 actions[actionid].reason : "Automated D-Line");    
-	  snprintf(comment, sizeof(comment), "D-line of %s", newhost);    
+
+	  snprintf(comment, sizeof(comment), "D-line of %s", userhost);
 	}
     }
   else
@@ -355,6 +275,124 @@ handle_action(int actionid, int idented, char *nick, char *user,
 		host, comment);
     }
 }
+
+char *
+get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
+{
+  struct hashrec *userptr;
+  static char newuserhost[MAX_USER+MAX_HOST+2]; /* one for @, one for \0 */
+  char *user;
+  char *host;
+  char *p;
+  char *s;
+  
+  /* nick */
+  if(nick != NULL)
+  {
+    /* non-existant nick */
+    if((userptr = find_nick(nick)) == NULL)
+      return NULL;
+
+    user = userptr->info->user;
+    host = userptr->info->host;
+  }
+  else
+  {
+    *p++ = '\0';
+    user = m_user;
+    host = m_host;
+  }
+
+  p = newuserhost;
+
+  if(user[0] == '~')
+  {
+    switch(actions[actionid].hoststrip & HOSTSTRIP_NOIDENT)
+    {
+      case HOSTSTRIP_NOIDENT_PREFIXED:
+        s = user;
+
+	if(strlen(user) > MAX_USER-1)
+          s++;
+
+        snprintf(p, MAX_USER, "*%s", s);
+	p += strlen(p);
+	break;
+
+      case HOSTSTRIP_NOIDENT_ALL:
+      default:
+	strcpy(p, "~*");
+	p += 2;
+	break;
+    }
+  }
+  else
+  {
+    switch(actions[actionid].hoststrip & HOSTSTRIP_IDENT)
+    {
+      case HOSTSTRIP_IDENT_PREFIXED:
+        s = user;
+
+	if(strlen(user) > MAX_USER-1)
+          s++;
+
+	snprintf(p, MAX_USER+1, "*%s", s);
+	p += strlen(p);
+	break;
+
+      case HOSTSTRIP_IDENT_ALL:
+	*p++ = '*';
+	break;
+
+      case HOSTSTRIP_IDENT_AS_IS:
+      default:
+	strncpy(p, user, MAX_USER);
+	p += strlen(p);
+	break;
+    }
+  }
+
+  *p++ = '@';
+
+  switch(actions[actionid].hoststrip & HOSTSTRIP_HOST)
+  {
+    case HOSTSTRIP_HOST_BLOCK:
+      /* its a host */
+      if (inet_addr(host) == INADDR_NONE)
+      {
+        s = strchr(host, '.');
+
+	/* XXX - host without dots, fixme for ipv6 */
+	if(s == NULL)
+          return NULL;
+
+	snprintf(p, MAX_HOST+1, "*%s", s);
+      }
+
+      /* IP */
+      else
+      {
+        s = strrchr(host, '.');
+
+	if(s == NULL)
+          return NULL;
+
+	*s == '\0';
+	snprintf(p, MAX_HOST+1, "%s.*", host);
+      }
+      break;
+
+    case HOSTSTRIP_HOST_AS_IS:
+    default:
+      strncpy(p, host, MAX_HOST);
+      break;
+  }
+
+  newuserhost[sizeof(newuserhost) - 1] = '\0';
+
+  return newuserhost;
+}
+
 
 int
 get_method_number (char * methodname)

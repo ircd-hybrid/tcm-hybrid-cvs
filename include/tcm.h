@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.48 2002/05/29 01:19:29 leeh Exp $ */
+/* $Id: tcm.h,v 1.49 2002/05/30 01:49:45 leeh Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -53,11 +53,10 @@ extern unsigned long totalmem;
 extern unsigned long numalloc;
 extern unsigned long numfree;
 
-/* XXX - this is in clones.c */
+/* XXX - these will be modular later */
 void init_clones(void);
-
-/* XXX - this is in vclones.c */
 void init_vclones(void);
+void init_commands(void);
 
 /* Fixes for broken operating systems */
 #ifndef HAVE_STRLCAT
@@ -71,6 +70,10 @@ size_t strlcpy(char *, const char *, size_t);
 #ifdef SERVICES
 void init_services(void);
 void check_services(void *);
+#endif
+
+#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
+extern void init_wingates(void);
 #endif
 
 void *xmalloc(size_t);

@@ -44,12 +44,13 @@
 #include "stdcmds.h"
 #include "commands.h"
 #include "wild.h"
+#include "include/serno.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.2 2000/09/02 04:45:31 lusky Exp $";
+static char *version="$Id: serverif.c,v 1.3 2000/09/02 04:50:47 lusky Exp $";
 
 extern int errno;          /* The Unix internal error number */
 

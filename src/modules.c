@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.14 2001/10/29 03:56:31 db Exp $
+ * $Id: modules.c,v 1.15 2001/11/10 15:55:47 wcampbel Exp $
  *
  */
 
@@ -463,6 +463,7 @@ void m_modlist (int connnum, int argc, char *argv[]) {
   prnt(connections[connnum].socket, "Done.\n");
 }
 
+/* XXX - Return value is ignored...use it or lose it... */
 int load_all_modules(int log)
 {
   DIR *module_dir;

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.38 2001/11/10 03:14:38 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.39 2001/11/10 15:55:47 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -612,7 +612,7 @@ void on_stats_i(int connnum, int argc, char *argv[])
 void onservnotice(int connnum, int argc, char *argv[])
 {
   int i = -1, a, b, c;
-  int action = -1;
+  int faction = -1;
   int len;
   struct plus_c_info userinfo;
   time_t current_time;
@@ -654,10 +654,10 @@ void onservnotice(int connnum, int argc, char *argv[])
   if (msgs_to_mon[i].msg_to_mon != NULL)
   {
     q = p+strlen(msgs_to_mon[i].msg_to_mon);
-    action = msgs_to_mon[i].action;
+    faction = msgs_to_mon[i].action;
   }
   else
-    action = IGNORE;
+    faction = IGNORE;
 
   if (strstr(p, "closed the connection") && (strncmp(p, "Server", 6) == 0)) 
   {
@@ -798,7 +798,7 @@ void onservnotice(int connnum, int argc, char *argv[])
     return;
   }
 
-  switch (action)
+  switch (faction)
   {
   case CONNECT:
     if ((q = strchr(argv[9], '@')) == NULL)

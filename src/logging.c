@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.16 2001/10/29 03:56:31 db Exp $
+ * $Id: logging.c,v 1.17 2001/11/10 15:55:47 wcampbel Exp $
  *
  * - db
  */
@@ -273,13 +273,15 @@ static FILE *initlog(void)
   time_t current_time;
   struct tm *broken_up_time;
   char filename[MAX_BUFF];
-  char command[MAX_BUFF];
   char last_filename[MAX_BUFF];
   char *p;
   FILE *last_log_fp;
+  FILE *l_fp;
+#ifdef HOW_TO_MAIL
   FILE *email_fp;
   FILE *log_to_email_fp;
-  FILE *l_fp;
+  char command[MAX_BUFF];
+#endif
 
 #ifdef LOGFILE
   last_filename[0] = '\0';

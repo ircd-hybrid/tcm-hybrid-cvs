@@ -1,7 +1,7 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.8 2001/10/29 00:12:13 wcampbel Exp $ */
+/* $Id: stdcmds.h,v 1.9 2001/11/10 15:55:46 wcampbel Exp $ */
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
@@ -32,6 +32,7 @@ void list_users(int sock,char *userhost);
 void suggest_action(int type, char *nick, char *user, char *host, int different, int identd);
 void initopers(void);
 void inithash(void);
+void prnt(int,char *,...);              /* - Hendrix (va'd by bill)*/
 
 struct s_testline
 {

@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.26 2001/11/08 20:39:52 bill Exp $ */
+/* $Id: stdcmds.c,v 1.27 2001/11/10 15:55:47 wcampbel Exp $ */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -152,15 +152,13 @@ toserv(char *format, ... )
  * side effects  - NONE
  */
 void
-prnt(int sock, ...)
+prnt(int sock, char *format, ...)
 {
   char msgbuf[MAX_BUFF];
-  char *format;
   va_list va;
 
-  va_start(va,sock);
+  va_start(va,format);
 
-  format = va_arg(va, char *);
   vsnprintf(msgbuf, sizeof(msgbuf)-2, format, va);
   if (msgbuf[strlen(msgbuf)-1] != '\n') strncat(msgbuf, "\n\0", 2);
   send(sock, msgbuf, strlen(msgbuf), 0);

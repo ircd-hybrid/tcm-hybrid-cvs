@@ -1,7 +1,7 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
-/* $Id: serverif.h,v 1.12 2001/11/02 16:53:08 db Exp $ */
+/* $Id: serverif.h,v 1.13 2001/11/10 15:55:46 wcampbel Exp $ */
 
 /* Time out for no response from the server 
  * 5 minutes should be plenty to receive a PING from the server
@@ -45,8 +45,6 @@ struct services_entry
   int    clones_displayed;
   int    kline_suggested;
 };
-
-void prnt(int,...);		/* - Hendrix (va'd by bill)*/
 
 void do_init(void);		
 int  bindsocket(char *);		

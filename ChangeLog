@@ -1,3 +1,15 @@
+db          2002/05/20 23:06:21 EDT	(20020521_2)
+
+  Modified files:
+    modules              serverif.c 
+  Log:
+  - ignore blank lines in parse_args()
+  
+  Revision  Changes    Path
+  1.70      +13 -4     tcm-hybrid/modules/serverif.c
+
+
+
 wcampbel    2002/05/20 22:12:59 EDT	(20020521_1)
 
   Modified files:

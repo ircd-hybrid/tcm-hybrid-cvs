@@ -1,3 +1,7 @@
+*** 20010906_1 by bill
+- fixed lag caused by many simultaneous SOCKS connection attempts
+
+
 *** 20010902_1 by bill
 - fixed threshold.. we have to -= 2 for some reason in all the report_?multi()s
 

@@ -1,3 +1,8 @@
+*** 20011030_2 by bill
+
+- added checking for SUN ld, -export-dynamic caused breakage on solaris
+
+
 *** 20011030_1 by bill
 
 - fixed parse error in .testline response.  k-line notice argv[] was off by 2

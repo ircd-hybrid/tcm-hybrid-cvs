@@ -1,3 +1,17 @@
+wcampbel    2002/05/20 17:51:16 EDT	(20020520_13)
+
+  Modified files:
+    modules              bothunt.c 
+  Log:
+  Massive cleanup to on_stats_o(), the other on_stats_*() need fixing as well,
+    but this is a start.  The semantics have changed, *@host ircd O: lines
+    are permitted, user@* and *@* are not.
+  
+  Revision  Changes    Path
+  1.75      +13 -62    tcm-hybrid/modules/bothunt.c
+
+
+
 wcampbel    2002/05/20 15:05:13 EDT	(20020520_12)
 
   Modified files:

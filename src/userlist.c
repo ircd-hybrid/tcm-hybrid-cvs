@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.122 2002/06/21 14:59:08 leeh Exp $
+ * $Id: userlist.c,v 1.123 2002/06/21 15:20:52 leeh Exp $
  *
  */
 
@@ -39,11 +39,11 @@
 #include "handler.h"
 
 struct auth_file_entry userlist[MAXUSERS];
-struct exception_entry hostlist[MAXHOSTS];
+struct exception_entry exempt_list[MAXHOSTS];
 char wingate_class_list[MAXWINGATE][MAX_CLASS];
 
 int	user_list_index;
-int	host_list_index;
+int	exempt_list_index;
 int	wingate_class_list_index;
 
 static void load_a_user(char *);
@@ -917,20 +917,20 @@ add_an_oper(int argc, char *argv[])
 void
 add_exemption(char *user, char *host, int type)
 {
-  if(host_list_index >= (MAXHOSTS-1))
+  if(exempt_list_index >= (MAXHOSTS-1))
     return;
 
-  strlcpy(hostlist[host_list_index].user, user,
-          sizeof(hostlist[host_list_index].user));
-  strlcpy(hostlist[host_list_index].host, host,
-          sizeof(hostlist[host_list_index].host));
+  strlcpy(exempt_list[exempt_list_index].user, user,
+          sizeof(exempt_list[exempt_list_index].user));
+  strlcpy(exempt_list[exempt_list_index].host, host,
+          sizeof(exempt_list[exempt_list_index].host));
 
   if(type)
-    hostlist[host_list_index].type = type;
+    exempt_list[exempt_list_index].type = type;
   else
-    hostlist[host_list_index].type = 0xFFFFFFFF;
+    exempt_list[exempt_list_index].type = 0xFFFFFFFF;
 
-  host_list_index++;
+  exempt_list_index++;
 }
 
 static void
@@ -940,7 +940,7 @@ load_e_line(char *line)
   unsigned int type=0, i;
   /* E:actionmask[ actionmask]:user@hostmask */
 
-  if(host_list_index >= (MAXHOSTS-1))
+  if(exempt_list_index >= (MAXHOSTS-1))
     return;
 
   if ((p = strchr(line, ':')) == NULL)
@@ -988,11 +988,11 @@ void
 clear_userlist()
 {
   user_list_index = 0;
-  host_list_index = 0;
+  exempt_list_index = 0;
   wingate_class_list_index = 0;
 
   memset((void *)userlist, 0, sizeof(userlist));
-  memset((void *)hostlist, 0, sizeof(hostlist));
+  memset((void *)exempt_list, 0, sizeof(exempt_list));
   memset((void *)wingate_class_list, 0, sizeof(wingate_class_list));
 }
 
@@ -1035,28 +1035,28 @@ ok_host(char *user,char *host, int type)
 {
   int i, ok;
 
-  for(i=0;hostlist[i].user[0];i++)
+  for(i=0;exempt_list[i].user[0];i++)
     {
       ok = 0;
       if (strchr(user, '?') || strchr(user, '*'))
       {
-        if (!wldwld(hostlist[i].user, user))
+        if (!wldwld(exempt_list[i].user, user))
           ok++;
       }
       else
-        if (!wldcmp(hostlist[i].user, user))
+        if (!wldcmp(exempt_list[i].user, user))
           ok++;
 
       if (strchr(host, '?') || strchr(host, '*'))
       {
-        if (!wldwld(hostlist[i].host, host))
+        if (!wldwld(exempt_list[i].host, host))
           ok++;
       }
       else
-        if (!wldcmp(hostlist[i].host, host))
+        if (!wldcmp(exempt_list[i].host, host))
           ok++;
 
-      if (ok == 2 && (hostlist[i].type & (1 << type)))
+      if (ok == 2 && (exempt_list[i].type & (1 << type)))
         return(YES);
     }
   return(NO);
@@ -1157,10 +1157,10 @@ exemption_summary()
     printf("%s:", actions[i].name);
     for (j=0;j<MAXHOSTS;++j)
     {
-      if (hostlist[j].user[0] == '\0')
+      if (exempt_list[j].user[0] == '\0')
         break;
-      if (hostlist[j].type & i)
-        printf(" %s@%s", hostlist[j].user, hostlist[j].host);
+      if (exempt_list[j].type & i)
+        printf(" %s@%s", exempt_list[j].user, exempt_list[j].host);
     }
     printf("\n");
   }

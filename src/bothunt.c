@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.170 2002/06/21 14:59:08 leeh Exp $
+ * $Id: bothunt.c,v 1.171 2002/06/21 15:20:51 leeh Exp $
  */
 
 #include <stdio.h>
@@ -199,10 +199,6 @@ on_stats_e(int argc, char *argv[])
 
   expand_args(body, MAX_BUFF, argc, argv);
 
-/* No point if I am maxed out going any further */
-  if (host_list_index >= (MAXHOSTS - 1))
-    return;
-
   if ((strtok(body," ") == NULL) )		/* discard this field */
     return;
 
@@ -217,13 +213,7 @@ on_stats_e(int argc, char *argv[])
   if ((user = strtok(NULL," ")) == NULL)	/* NOW user */
     return;
 
-  strlcpy(hostlist[host_list_index].user, user,
-	  sizeof(hostlist[host_list_index].user));
-
-  strlcpy(hostlist[host_list_index].host, host,
-	  sizeof(hostlist[host_list_index].host));
-
-  host_list_index++;
+  add_exemption(user, host, 0);
 }
 
 /* 
@@ -241,10 +231,6 @@ on_stats_i(int argc, char *argv[])
   char *host;
   char *p;
   int set_exempt = 0;
-
-  /* No point if I am maxed out going any further */
-  if (host_list_index >= (MAXHOSTS - 1))
-    return;
 
   /* N.B. get_user_host modifies argv[6] */
   if (get_user_host(&user, &host, argv[6]) == 0)

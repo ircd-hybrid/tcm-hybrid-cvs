@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.127 2002/06/21 14:16:28 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.128 2002/06/21 15:20:51 leeh Exp $ */
 
 #include "setup.h"
 
@@ -839,13 +839,16 @@ list_exemptions(int sock)
 
   for (i=0; i<MAXHOSTS; i++)
   {
-    if(hostlist[i].host[0] == 0)
+    if(exempt_list[i].host[0] == 0)
       break;
-    sprintf(buf, "%s@%s is exempted for:", hostlist[i].user, hostlist[i].host);
+
+    sprintf(buf, "%s@%s is exempted for:", exempt_list[i].user, exempt_list[i].host);
+
     for (n=0;actions[n].name[0];n++)
-      if((1 << n) & hostlist[i].type)
+      if((1 << n) & exempt_list[i].type)
 	snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " %s", actions[n].name);
-    print_to_socket(sock,"%s", buf);
+
+    print_to_socket(sock, "%s", buf);
   }
 }
 

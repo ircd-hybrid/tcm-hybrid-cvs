@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.53 2002/06/07 11:20:10 leeh Exp $ */
+/* $Id: tcm.h,v 1.54 2002/06/07 11:22:02 leeh Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -31,7 +31,7 @@ extern time_t current_time;
 #define MAX_CHANNEL	80
 #define MAX_USER	11
 #define MAX_HOST	80	
-#define MAX_USERHOST	MAX_USER + MAX_HOST + 1 /* +1 for @ */
+#define MAX_USERHOST	MAX_USER + MAX_HOST
 #define MAX_REASON	120	/* should be quite long enough */
 #define MAX_IP		20
 #define MAX_CLASS       50

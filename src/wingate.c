@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.31 2002/05/24 19:31:28 db Exp $ */
+/* $Id: wingate.c,v 1.32 2002/05/24 20:52:44 leeh Exp $ */
 
 
 #include <netdb.h>
@@ -802,11 +802,6 @@ void report_open_squid(int i)
 void init_wingates(void)
 {
   int i;
-  add_common_function(F_RELOAD, _reload_wingate);
-  add_common_function(F_USER_SIGNON, _user_signon);
-  add_common_function(F_CONTINUOUS, _continuous);
-  add_common_function(F_SCONTINUOUS, _scontinuous);
-  add_common_function(F_CONFIG, _config);
 #ifdef DEBUGMODE
   mod_add_cmd(&proxy_msgtab);
 #endif

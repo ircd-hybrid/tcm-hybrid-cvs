@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.92 2002/05/24 18:29:21 leeh Exp $
+ * $Id: bothunt.c,v 1.93 2002/05/24 20:52:43 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1610,7 +1610,6 @@ static void
 adduserhost(char *nick, struct plus_c_info *userinfo,int fromtrace,int is_oper)
 {
   struct userentry *newuser;
-  struct common_function *temp;
   char *par[5];
   char *domain;
 #ifdef VIRTUAL
@@ -1623,8 +1622,8 @@ adduserhost(char *nick, struct plus_c_info *userinfo,int fromtrace,int is_oper)
   par[2] = userinfo->host;
   par[3] = userinfo->ip;
   par[4] = userinfo->class;
-  for (temp=user_signon;temp;temp=temp->next)
-    temp->function(doingtrace, 5, par);
+
+  _user_signon(doingtrace, 5, par);
 
   newuser = (struct userentry *)malloc(sizeof(struct userentry));
   if (newuser == NULL)

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.58 2002/05/24 18:50:51 leeh Exp $ */
+/* $Id: main.c,v 1.59 2002/05/24 20:52:43 leeh Exp $ */
 
 #include "setup.h"
 
@@ -59,7 +59,6 @@ extern struct a_entry actions[MAX_ACTIONS+1];
 extern int load_all_modules(int log);
 extern void init_tokenizer(void);
 extern void modules_init(void);
-extern void add_common_function(int type, void *function);
 
 #ifdef SERVICES
 extern int act_drone, act_sclone;
@@ -84,8 +83,6 @@ void write_debug();
 
 static void init_debug(int sig);
 
-void init_hash_tables(void);
-
 int add_action(char *name);
 void set_action_reason(int action, char *reason);
 void set_action_method(int action, int method);
@@ -95,30 +92,6 @@ void set_action_time(int action, int klinetime);
 #ifdef HAVE_SETRLIMIT
 static void setup_corefile(void);
 #endif
-
-/*
- * init_hash_tables
- *
- * inputs       - none
- * output       - none
- * side effects -
- */
-void
-init_hash_tables(void)
-{
-  if (user_signon)
-    memset(user_signon,0,sizeof(struct common_function));
-  if (user_signoff)
-    memset(user_signoff,0,sizeof(struct common_function));
-  if (continuous)
-    memset(continuous,0,sizeof(struct common_function));
-  if (scontinuous)
-    memset(scontinuous,0,sizeof(struct common_function));
-  if (config)
-    memset(config,0,sizeof(struct common_function));
-  if (reload)
-    memset(reload,0,sizeof(struct common_function));
-}
 
 /*
  * bindsocket()
@@ -377,7 +350,6 @@ main(int argc, char *argv[])
 #ifdef HAVE_SETRLIMIT
   setup_corefile();
 #endif
-  init_hash_tables();		/* clear those suckers out */
   init_tokenizer();		/* in token.c */
   init_userlist();
   eventInit();			/* event.c stolen from ircd */
@@ -422,9 +394,6 @@ main(int argc, char *argv[])
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
   init_wingates();
 #endif
-
-  /* XXX - these used to be in the modules, need to be done properly */
-  add_common_function(F_RELOAD, _reload_bothunt);
 
 #ifdef GLINES
   mod_add_cmd(&gline_msgtab);

@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.31 2002/05/24 15:01:26 db Exp $ */
+/* $Id: tcm.h,v 1.32 2002/05/24 20:52:40 leeh Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -75,7 +75,6 @@ void m_not_oper(int connnum, int argc, char *argv[]);
 void m_not_admin(int connnum, int argc, char *argv[]);
 #endif
 
-void init_hash_tables(void);
 int add_action(char *name);
 void set_action_time(int action, int klinetime);
 void set_action_reason(int action, char *reason);

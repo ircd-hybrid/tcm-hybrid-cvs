@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.66 2002/05/24 18:29:22 leeh Exp $
+ * $Id: userlist.c,v 1.67 2002/05/24 20:52:44 leeh Exp $
  *
  */
 
@@ -106,7 +106,6 @@ load_config_file(char *file_name)
   char *p;
   char *q;
   int error_in_config;		/* flag if error was found in config file */
-  struct common_function * temp;
 
   error_in_config = NO;
 
@@ -279,9 +278,7 @@ load_config_file(char *file_name)
       break;
 
     default:
-      for (temp=config;temp;temp=temp->next)
-	temp->function(0, argc, argv);
-      break;
+      _config(0, argc, argv);
     }
   }
 
@@ -864,12 +861,12 @@ char *type_show(unsigned long type)
 
 void reload_user_list(int sig)
 {
-  struct common_function *temp;
   if(sig != SIGHUP)     /* should never happen */
     return;
 
-  for (temp=reload; temp; temp=temp->next)
-    temp->function(sig, 0, NULL);
+  _reload_bothunt(sig, 0, NULL);
+  _reload_wingate(sig, 0, NULL);
+
   if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
     {
       print_to_server("STATS I");

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.74 2002/05/24 18:50:51 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.75 2002/05/24 20:52:43 leeh Exp $ */
 
 #include "setup.h"
 
@@ -2013,7 +2013,6 @@ init_commands(void)
     msg_hash_table[i].next = NULL;
   }
 
-  add_common_function(F_DCC, dccproc);
   mod_add_cmd(&vlist_msgtab);
   mod_add_cmd(&class_msgtab);
   mod_add_cmd(&classt_msgtab);

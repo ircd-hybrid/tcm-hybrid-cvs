@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.34 2002/05/24 18:19:30 leeh Exp $B
+ * $Id: modules.c,v 1.35 2002/05/24 20:52:43 leeh Exp $B
  *
  */
 
@@ -100,70 +100,12 @@ void mod_del_cmd(struct TcmMessage *msg)
   free(msg_hash_table[msgindex].msg);
 }
 
-void add_common_function(int type, void *function)
-{
-  struct common_function **temp, *new;
-
-  switch (type)
-    {
-      case F_USER_SIGNON:
-        temp = &user_signon;
-        break;
-      case F_USER_SIGNOFF:
-        temp = &user_signoff;
-        break;
-      case F_DCC:
-        temp = &dcc;
-        break;
-      case F_CONTINUOUS:
-        temp = &continuous;
-        break;
-      case F_SCONTINUOUS:
-        temp = &scontinuous;
-        break;
-      case F_CONFIG:
-        temp = &config;
-        break;
-      case F_RELOAD:
-        temp = &reload;
-        break;
-      default:
-        return;
-        break;
-    }
-
-  new = (struct common_function *) malloc(sizeof(struct common_function));
-  new->type = type;
-  new->function = function;
-  new->next = (struct common_function *) NULL;
-  while (*temp)
-    temp = &(*temp)->next;
-  *temp = new;
-}
-
 void modules_init(void)
 {
   mod_add_cmd(&modload_msgtab);
   mod_add_cmd(&modunload_msgtab);
   mod_add_cmd(&modreload_msgtab);
   mod_add_cmd(&modlist_msgtab);
-
-/*
-  if (dcc == NULL)
-    dcc = (struct common_function *) malloc(sizeof(struct common_function));
-  if (user_signon == NULL)
-    user_signon = (struct common_function *) malloc(sizeof(struct common_function));
-  if (user_signoff == NULL)
-    user_signoff = (struct common_function *) malloc(sizeof(struct common_function));
-  if (continuous == NULL)
-    continuous = (struct common_function *) malloc(sizeof(struct common_function));
-  if (scontinuous == NULL)
-    scontinuous = (struct common_function *) malloc(sizeof(struct common_function));
-  if (config == NULL)
-    config = (struct common_function *) malloc(sizeof(struct common_function));
-  if (reload == NULL)
-    reload = (struct common_function *) malloc(sizeof(struct common_function));
-*/
 }
 
 int load_a_module(char *name, int log)

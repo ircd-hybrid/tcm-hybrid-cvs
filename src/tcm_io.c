@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.15 2002/05/24 18:29:22 leeh Exp $
+ * $Id: tcm_io.c,v 1.16 2002/05/24 20:52:44 leeh Exp $
  */
 
 #include <stdio.h>
@@ -93,7 +93,6 @@ read_packet(void)
   int i;
   int server_time_out;
   struct timeval read_time_out;
-  struct common_function *temp;
 
   if (pingtime)
   {
@@ -129,8 +128,8 @@ read_packet(void)
     }
 
     FD_ZERO (&readfds);
-    for (temp=continuous;temp;temp=temp->next)
-      temp->function(0, 0, NULL);
+
+    _continuous(0, 0, NULL);
 
     for (i = 0; i < maxconns; i++)
       if (connections[i].socket != INVALID)
@@ -160,8 +159,8 @@ read_packet(void)
                               initiated_dcc_socket);
         initiated_dcc_socket = (-1);
       }
-      for (temp = scontinuous; temp; temp=temp->next)
-        temp->function(0, 0, NULL);
+
+      _scontinuous(0, 0, NULL);
 
       for (i=0; i < maxconns; i++)
       {

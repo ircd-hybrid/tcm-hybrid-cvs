@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.13 2002/05/24 18:19:30 leeh Exp $
+ * $Id: parse.c,v 1.14 2002/05/24 20:52:44 leeh Exp $
  */
 
 #include <stdio.h>
@@ -136,7 +136,6 @@ void
 parse_client(int i, int argc, char *argv[])
 {
   int j;
-  struct common_function *temp;
 
   for (j = 0; j < MAX_MSG_HASH; j++)
     {
@@ -154,8 +153,8 @@ parse_client(int i, int argc, char *argv[])
             }
         }
     }
-  for (temp=dcc;temp;temp=temp->next)
-    temp->function(i, argc, argv);
+
+  dccproc(i, argc, argv);
 }
 
 /*

@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.19 2002/05/31 02:06:34 wcampbel Exp $
+ * $Id: actions.c,v 1.20 2002/06/02 02:20:44 db Exp $
  */
 
 #include "setup.h"
@@ -319,9 +319,9 @@ handle_action(int actionid, int idented, char *nick, char *user,
   char *p;
   struct user_entry *userptr;
 
-  if (!user && !host && nick)
+  if ((user != NULL) && (host != NULL) && (nick != NULL))
     {
-      if ((userptr = find_nick(nick)) != NULL)
+      if ((userptr = find_nick_or_host(nick, FIND_NICK)) != NULL)
 	{
 	  user = userptr->user;
 	  host = userptr->host;
@@ -405,7 +405,7 @@ handle_action(int actionid, int idented, char *nick, char *user,
 	  if ((inet_addr(host) == INADDR_NONE) && (!ip))
 	    {
 	      /* We don't have any IP, so look it up from our tables */
-	      userptr = find_host(host);
+	      userptr = find_nick_or_host(host, FIND_HOST);
 	      if (!userptr || !userptr->ip_host[0])
 		{
 		  /* We couldn't find one either, revert to a k-line */
@@ -539,7 +539,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
   if(nick != NULL)
   {
     /* non-existant nick */
-    if((userptr = find_nick(nick)) == NULL)
+    if((userptr = find_nick_or_host(nick, FIND_NICK)) == NULL)
       return NULL;
 
     user = userptr->user;

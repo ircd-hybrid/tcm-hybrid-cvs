@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.22 2002/06/01 19:43:13 db Exp $
+ * $Id: hash.c,v 1.23 2002/06/02 02:20:44 db Exp $
  */
 
 #include <stdio.h>
@@ -131,54 +131,35 @@ freehash(void)
 }
 
 /*
- * find_nick
+ * find_nick_or_host
  *
- * Returns an user_entry for the given nick, or NULL if not found
+ * Returns an user_entry for the given nick, host, or NULL if not found
  *
  */
 
 struct user_entry *
-find_nick(const char *nick)
+find_nick_or_host(const char *find, int find_nick)
 {
   int i;
   struct hash_rec *ptr;
 
-  if (nick == NULL)
+  if (find == NULL)
     return (NULL);
 
   for (i=0; i<HASHTABLESIZE; ++i)
     {
       for (ptr = domain_table[i]; ptr; ptr = ptr->next)
 	{
-	  if (!wldcmp((char *)nick, ptr->info->nick))
-	    return (ptr->info);
-	}
-    }
-  return (NULL);
-}
-
-/*
- * find_host
- *
- * Returns first user_entry for the given host, or NULL if not found
- *
- */
-
-struct user_entry *
-find_host(const char *host)
-{
-  int i;
-  struct hash_rec *ptr;
-
-  if (host == NULL)
-    return (NULL);
-
-  for (i=0; i<HASHTABLESIZE; ++i)
-    {
-      for (ptr = domain_table[i]; ptr; ptr = ptr->next)
-	{
-	  if (!wldcmp((char *)host, ptr->info->host))
-	    return (ptr->info);
+	  if (find_nick)
+	    {
+	      if (!wldcmp((char *)find, ptr->info->nick))
+		return (ptr->info);
+	    }
+	  else
+	    {
+	      if (!wldcmp((char *)find, ptr->info->host))
+		return (ptr->info);
+	    }
 	}
     }
   return (NULL);

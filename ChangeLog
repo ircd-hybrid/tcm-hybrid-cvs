@@ -1,3 +1,7 @@
+*** 20010201_4 by wcampbel
+Massive Cleanup, part 2
+
+
 *** 20010201_3 by wcampbel
 Don't remove the .pref's and logs on a make clean...
 use make cleandata for that...

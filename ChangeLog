@@ -1,3 +1,8 @@
+*** 20011016_1 by bill
+- first step of major comit -- updated to correct action names
+                            -- updated user flags (and added +e/+p to userlist)
+
+
 *** 20011013_4 by bill
 - document updates
 - connection flooders always klined ident@<whatever> even if there is no ident

@@ -1,3 +1,25 @@
+leeh        2002/05/28 21:19:35 EDT	(20020529_2)
+
+  Modified files:
+    include              commands.h hash.h tcm.h 
+    src                  Makefile.in commands.c hash.c main.c 
+  Added files:
+    src                  vclones.c 
+  Log:
+  - split virtual stuff into vclones.c
+  
+  Revision  Changes    Path
+  1.19      +0 -3      tcm-hybrid/include/commands.h
+  1.8       +0 -6      tcm-hybrid/include/hash.h
+  1.48      +3 -0      tcm-hybrid/include/tcm.h
+  1.27      +1 -0      tcm-hybrid/src/Makefile.in
+  1.110     +0 -56     tcm-hybrid/src/commands.c
+  1.5       +0 -192    tcm-hybrid/src/hash.c
+  1.99      +1 -0      tcm-hybrid/src/main.c
+  1.1       +287 -0    tcm-hybrid/src/vclones.c (new)
+
+
+
 leeh        2002/05/28 20:59:30 EDT	(20020529_1)
 
   Modified files:

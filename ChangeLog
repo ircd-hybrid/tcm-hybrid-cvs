@@ -1,3 +1,17 @@
+db          2002/05/26 03:13:13 EDT	(20020526_14)
+
+  Modified files:
+    src                  tcm_io.c wingate.c 
+  Log:
+  - This should re-enable squid detection
+    UNTESTED
+  
+  Revision  Changes    Path
+  1.41      +2 -0      tcm-hybrid/src/tcm_io.c
+  1.38      +56 -48    tcm-hybrid/src/wingate.c
+
+
+
 db          2002/05/26 02:57:33 EDT	(20020526_13)
 
   Modified files:

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.190 2002/08/08 18:10:38 bill Exp $
+ * $Id: bothunt.c,v 1.191 2002/08/08 19:00:45 bill Exp $
  */
 
 #include <stdio.h>
@@ -593,13 +593,13 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Link with test.server[bill@255.255.255.255] established: (TS) link */ 
   case LINKWITH:
-    ++q;
+    q+=10;
     send_to_all(NULL, FLAGS_SERVERS, "Link with %s", q);
     break;
 
   /* Received SQUIT test.server from bill[bill@ummm.E] (this is a test) */
   case SQUITOF:
-    ++q;
+    q+=15;
     if ((p = strchr(q, ' ')) == NULL)
       return;
     *p = '\0';
@@ -609,7 +609,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* motd requested by bill (bill@ummm.E) [irc.bill.eagan.mn.us] */
   case MOTDREQ:
-    ++q;
+    q+=18;
     send_to_all(NULL, FLAGS_SPY, "[MOTD requested by %s]", q);
     break;
 
@@ -618,7 +618,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Flooder bill [bill@ummm.E] on irc.intranaut.com target: #clone */ 
   case FLOODER:
-    ++q;
+    q+=8;
     if ((p = strchr(q,' ')) == NULL)
       break;
 
@@ -651,7 +651,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* User bill (bill@ummm.E) is a possible spambot */
   /* User bill (bill@ummm.E) trying to join #tcm is a possible spambot */
   case SPAMBOT:
-    ++q;
+    q+=5;
     if ((p = strchr(q,' ')) == NULL)
       return;
     *p++ = '\0';
@@ -674,8 +674,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* I-line is full for bill[bill@ummm.E] (127.0.0.1). */
   case ILINEFULL:
-    /* XXX */
-    nick = q+1; /* XXX confirm */
+    nick = q+19;
     connect_flood_notice(nick, "I line full");
     break;
 
@@ -693,8 +692,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* Possible Drone Flooder bill [bill@ummm.E] on irc.intranaut.com target:
      #clone */
   case DRONE:
-    ++q;
-    nick = q;
+    nick = q + 23;
 
     if ((q = strchr(nick, ' ')) == NULL)
       return;
@@ -723,6 +721,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* X-line Rejecting [Bill Jonus] [just because] user bill[bill@ummm.E] */
   case XLINEREJ:
+    q+=17;
     if ((nick = strrchr(q, ' ')) == NULL)
       return;
     ++nick;
@@ -731,20 +730,20 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Quarantined nick [bill] from user aa[bill@ummm.E] */
   case QUARANTINE:
-    nick = q+2;
+    nick = q+18; 
     connect_flood_notice(nick, "Quarantined nick");
     break;
 
   /* Invalid username: bill (!@$@&&&.com) */
   case INVALIDUH:
-    nick = q+1;
+    nick = q+18;
     connect_flood_notice(nick, "Invalid user@host");
     break;
 
   /* Server ircd.flamed.net split from ircd.secsup.org */
   /* Server irc.intranaut.com being introduced by ircd.secsup.org */
   case SERVER:
-    ++q;
+    q += 7;
     if (strstr(q, "split"))
     {
       nick = q;
@@ -766,8 +765,9 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     }
     break;
 
+  /* Failed OPER attempt by bill (bill@holier.than.thou) */
   case FAILEDOPER:
-    nick = q+4;
+    nick = q+23;
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
@@ -778,7 +778,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* info requested by bill (bill@ummm.e) [irc.bill.eagan.mn.us] */
   case INFOREQUESTED:
-    nick = q+1;
+    nick = q+18;
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
@@ -1281,7 +1281,7 @@ stats_notice(char *snotice)
   char *p;
   int stat;
 
-  stat = *snotice;
+  stat = *(snotice + 6);
 
   if ((nick = strstr(snotice,"by")) == NULL)
     return;

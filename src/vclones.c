@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.2 2002/05/30 01:45:30 db Exp $
+ * $Id: vclones.c,v 1.3 2002/05/30 02:21:54 db Exp $
  */
 
 #include <assert.h>
@@ -114,8 +114,9 @@ report_multi_virtuals(int sock,int nclones)
   if(!nclones)
     nclones = 5;
 
-  nclones-=1;
-  for (i=0;i<HASHTABLESIZE;++i)
+  nclones--;
+
+  for (i=0; i<HASHTABLESIZE; ++i)
     {
       for (top = userptr = iptable[i]; userptr; userptr = userptr->next)
         {
@@ -169,14 +170,12 @@ report_vbots(int sock,int nclones)
   int foundany = NO;
 
   nclones-=2;  /* ::sigh:: I have no idea */
-  for (i=0;i<HASHTABLESIZE;++i)
+  for (i=0; i<HASHTABLESIZE; ++i)
     {
-      for(top = userptr = iptable[i]; userptr;
-          userptr = userptr->next)
+      for (top = userptr = iptable[i]; userptr; userptr = userptr->next)
         {
           /* Ensure we haven't already checked this user & domain */
-          for(temp = top, numfound = 0; temp != userptr;
-              temp = temp->next)
+          for (temp = top, numfound = 0; temp != userptr; temp = temp->next)
             {
               if (!strcmp(temp->user,userptr->user) &&
                   !strcmp(temp->ip_class_c,userptr->ip_class_c))
@@ -192,7 +191,7 @@ report_vbots(int sock,int nclones)
                     numfound++; /* - zaph & Dianora :-) */
                 }
 
-              if ( numfound > nclones )
+              if (numfound > nclones)
                 {
                   if (!foundany)
                     {
@@ -255,7 +254,7 @@ list_virtual_users(int sock,char *userhost,int regex)
 
   for (i=0; i < HASHTABLESIZE; ++i)
   {
-    for(ipptr = iptable[i]; ipptr; ipptr = ipptr->next)
+    for (ipptr = iptable[i]; ipptr; ipptr = ipptr->next)
     {
       snprintf(uhost, 1024, "%s@%s", ipptr->user, ipptr->ip_host);
 #ifdef HAVE_REGEX_H

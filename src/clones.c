@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.3 2002/05/30 01:45:30 db Exp $
+ * $Id: clones.c,v 1.4 2002/05/30 02:21:54 db Exp $
  */
 
 #include <assert.h>
@@ -138,8 +138,7 @@ check_clones(void *unused)
     for (top = userptr = domaintable[i]; userptr; userptr = userptr->next)
     {
       /* Ensure we haven't already checked this user & domain */
-      for(temp = top, numfound = 0; temp != userptr;
-          temp = temp->next)
+      for(temp = top, numfound = 0; temp != userptr; temp = temp->next)
       {
         if (!strcmp(temp->user, userptr->user) &&
             !strcmp(temp->domain, userptr->domain))
@@ -261,8 +260,7 @@ report_clones(int sock)
       for(top = userptr = hosttable[i]; userptr; userptr = userptr->next)
         {
           /* Ensure we haven't already checked this host */
-          for(temp = top, numfound = 0; temp != userptr;
-               temp = temp->next)
+	  for(temp = top, numfound = 0; temp != userptr; temp = temp->next)
             {
               if (!strcmp(temp->host,userptr->host))
                 break;
@@ -335,8 +333,7 @@ report_multi(int sock,int nclones)
   nclones-=2;  /* maybe someday i'll figure out why this is nessecary */
   for (i=0; i<HASHTABLESIZE; ++i)
     {
-      for(top = userptr = domaintable[i]; userptr;
-          userptr = userptr->next)
+      for(top = userptr = domaintable[i]; userptr; userptr = userptr->next)
         {
           /* Ensure we haven't already checked this user & domain */
           for(temp = top, numfound = 0; temp != userptr;
@@ -356,7 +353,7 @@ report_multi(int sock,int nclones)
                     numfound++; /* - zaph & Dianora :-) */
                 }
 
-              if ( numfound > nclones )
+              if (numfound > nclones)
                 {
                   if (!foundany)
                     {
@@ -402,10 +399,9 @@ report_multi_user(int sock, int nclones)
   int foundany = NO;
 
   nclones-=1;
-  for (i=0;i<HASHTABLESIZE;++i)
+  for (i=0; i<HASHTABLESIZE; ++i)
     {
-      for (top = userptr = usertable[i]; userptr;
-           userptr = userptr->next)
+      for (top = userptr = usertable[i]; userptr; userptr = userptr->next)
         {
           numfound = 0;
           /* Ensure we haven't already checked this user & domain */
@@ -484,7 +480,7 @@ void report_multi_host(int sock,int nclones)
                     numfound++; /* - zaph & Dianora :-) */
                 }
 
-              if ( numfound > nclones )
+              if (numfound > nclones)
                 {
                   if (!foundany)
                     {

@@ -26,7 +26,7 @@
 
 /* actions.c
  *
- * $Id: actions.c,v 1.9 2002/05/30 01:49:48 leeh Exp $
+ * $Id: actions.c,v 1.10 2002/05/30 02:21:54 db Exp $
  */
 
 int act_sclone;
@@ -293,8 +293,8 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
     if((userptr = find_nick(nick)) == NULL)
       return NULL;
 
-    user = userptr->info->user;
-    host = userptr->info->host;
+    user = userptr->user;
+    host = userptr->host;
   }
   else
   {

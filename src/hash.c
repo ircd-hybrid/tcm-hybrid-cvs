@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.7 2002/05/30 01:45:30 db Exp $
+ * $Id: hash.c,v 1.8 2002/05/30 02:21:54 db Exp $
  */
 
 #include <stdio.h>
@@ -67,7 +67,9 @@ free_hash_links(struct hashrec *ptr)
   while(ptr != NULL)
     {
       next_ptr = ptr->next;
-      xfree(ptr);
+      ptr->link_count--;
+      if (ptr->link_count == 0)
+	xfree(ptr);
       ptr = next_ptr;
     }
 }

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.19 2002/05/25 17:08:11 wcampbel Exp $
+ * $Id: parse.c,v 1.20 2002/05/25 19:10:09 leeh Exp $
  */
 
 #include <stdio.h>
@@ -268,6 +268,7 @@ parse_args(char *buffer, char *argv[])
 static
 void proc(char *source,char *fctn,char *param)
 {
+  struct serv_command *ptr;
     char *userhost;
     int numeric=0;      /* if its a numeric */
     int argc=0;
@@ -303,6 +304,13 @@ void proc(char *source,char *fctn,char *param)
         argv[argc++] = p;
     }
 
+    if((ptr = find_serv_handler(argv[1])))
+    {
+      for(; ptr; ptr = ptr->next_cmd)
+        ptr->handler(argc, argv);
+      return;
+    }
+		    
     numeric=0;
     if (strcmp(argv[1],"PRIVMSG") == 0)
     {

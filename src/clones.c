@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.24 2002/09/13 03:03:31 bill Exp $
+ * $Id: clones.c,v 1.25 2002/09/20 04:22:42 bill Exp $
  */
 
 #include <assert.h>
@@ -139,6 +139,14 @@ check_clones(void *unused)
   int num_found;
   int i;
   int notip=0;
+
+  /*
+   * if we are not operd, there is nothing we can do about these
+   * clones anyway.  we do not even know for sure that they are
+   * still connected.  so we do not continue if we are not operd.
+   */
+  if (tcm_status.am_opered == NO)
+    return;
 
   for (i=0; i < HASHTABLESIZE; i++)
   {

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.82 2002/06/28 00:53:49 db Exp $
+ * $Id: parse.c,v 1.83 2002/09/20 04:22:43 bill Exp $
  */
 
 #include <stdio.h>
@@ -394,7 +394,7 @@ process_server(struct source_client *source_p, char *function, char *param)
       else
          config_entries.hybrid = NO;
 
-      if (!tcm_status.am_opered)
+      if (tcm_status.am_opered == NO)
         do_init();
       break;
 

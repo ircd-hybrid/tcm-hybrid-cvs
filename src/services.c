@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.22 2002/06/28 00:53:49 db Exp $
+ * $Id: services.c,v 1.23 2002/09/20 04:22:43 bill Exp $
  */
 
 #include <stdio.h>
@@ -180,6 +180,10 @@ services_handler(struct source_client *source_p, int argc, char *argv[])
 void
 check_services(void *unused)
 {
+  /* no point in this unless we are operd */
+  if (tcm_status.am_opered == NO)
+    return;
+
   privmsg(SERVICES_NICK,"clones %d", SERVICES_CLONE_THRESHOLD);
 #ifdef SERVICES_DRONES
   privmsg(SERVICES_NICK,"drones %s", tcm_status.my_server);

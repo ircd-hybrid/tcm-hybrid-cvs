@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.56 2002/09/13 03:03:31 bill Exp $
+ * $Id: hash.c,v 1.57 2002/09/20 04:22:42 bill Exp $
  */
 
 #include <stdio.h>
@@ -314,7 +314,7 @@ add_user_host(struct user_entry *user_info, int fromtrace)
   /* Add it to the hash tables */
   add_to_hash_table(user_table, user_info->username, new_user);
   add_to_hash_table(host_table, user_info->host, new_user);
-  add_to_hash_table(domain_table, domain, new_user);
+  add_to_hash_table(domain_table, user_info->domain, new_user);
 
 #ifdef VIRTUAL
   if(new_user->ip_class_c[0])

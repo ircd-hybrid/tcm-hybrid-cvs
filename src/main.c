@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.128 2002/09/14 20:18:08 bill Exp $ */
+/* $Id: main.c,v 1.129 2002/09/20 04:22:43 bill Exp $ */
 
 #include "setup.h"
 
@@ -252,7 +252,7 @@ main(int argc, char *argv[])
   tcm_status.my_class[0] = '\0';
   tcm_status.my_nick[0] = '\0';
   tcm_status.my_server[0] = '\0';
-  tcm_status.am_opered = 0;
+  tcm_status.am_opered = NO;
   tcm_status.ping_time = 0;
   tcm_status.doing_trace = 0;
   tcm_status.n_of_fds_open=0;

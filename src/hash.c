@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.18 2002/06/01 03:40:49 db Exp $
+ * $Id: hash.c,v 1.19 2002/06/01 03:49:24 db Exp $
  */
 
 #include <stdio.h>
@@ -198,6 +198,7 @@ add_to_hash_table(struct hash_rec *table[],
   if ((new_hash = (struct hash_rec *)xmalloc(sizeof(struct hash_rec))) == NULL)
     exit(-1);
   new_hash->info = new_user;
+  new_hash->next = NULL;
 
   ind = hash_func(key);
   if (table[ind] == NULL)

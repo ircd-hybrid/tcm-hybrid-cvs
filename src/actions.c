@@ -1,7 +1,8 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.47 2003/02/02 20:57:04 wiz Exp $
+ * $Id: actions.c,v 1.48 2003/02/02 21:27:01 lusky Exp $
  */
+
 
 #include "setup.h"
 

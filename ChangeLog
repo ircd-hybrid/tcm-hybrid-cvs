@@ -1,3 +1,8 @@
+*** 20011023_1 by bill
+- found and fixed mem leak
+- fixed parse error in server link/unlink messages
+
+
 *** 20011020_1 by db
 - First pass of cleanups, if remote tcm is no longer supported
   all the code needed for that is not needed!

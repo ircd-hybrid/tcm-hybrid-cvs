@@ -1,3 +1,7 @@
+*** 20011008_2 by wcampbel
+Cosmetic cleanup of the help files
+
+
 *** 20011008_1 by wcampbel
 Fix for .help.  ".help    admin" still doesn't work, but it's not a big
 concern for right now.

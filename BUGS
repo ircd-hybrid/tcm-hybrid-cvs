@@ -13,3 +13,13 @@ Fri Mar  7 16:19:10 EST 1997
 
   - Dianora, Fri Mar  7 16:19:10 EST 1997
     db@db.net
+
+--
+
+tcm-hybrid known bugs
+
+1) Opers with spoofed hostnames issueing PRIVMSG tcm .chat, to have the TCM
+   initiate the DCC connection, require both the spoofed hostname and the
+   real hostname in the TCM O: lines, or else when the user issues .register,
+   TCM will core.  The reason why is still a mystery to us
+   - Hwy, Sun 14 Jan 2001

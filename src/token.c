@@ -5,7 +5,7 @@
  *
  * - Dianora db@db.net
  *
- * $Id: token.c,v 1.22 2001/11/26 20:50:34 bill Exp $
+ * $Id: token.c,v 1.23 2002/04/04 23:19:24 bill Exp $
  *
  */
 
@@ -46,70 +46,7 @@ struct command_hash  *command_hash_table[MAX_COMMAND_HASH+1];
 
 struct command_token command_table[] =
 {
-  {"clones",       K_CLONES},
-  {"nflood",       K_NFLOOD},
-  {"rehash",       K_REHASH},
-  {"trace",        K_TRACE},
-  {"failures",     K_FAILURES},
-  {"domains",      K_DOMAINS},
-  {"multi",        K_BOTS},
-  {"bots",         K_BOTS},
-  {"nfind",        K_NFIND},
-  {"list",         K_LIST},
-  {"killlist",     K_KILLLIST},
-  {"kl",           K_KILLLIST},
-  {"kline",        K_KLINE},
-  {"kclone",       K_KCLONE},
-  {"kflood",       K_KFLOOD},
-  {"kperm",        K_KPERM},
-  {"klink",        K_KLINK},
-  {"kbot",         K_KBOT},
-  {"kspam",	   K_KSPAM},
-  {"kdrone",	   K_KDRONE},
-  {"kill",         K_KILL},
-  {"register",     K_REGISTER},
-  {"identify",     K_REGISTER},
-  {"opers",        K_OPERS},
-  {"testline",	   K_TESTLINE},
-  {"exemptions",   K_EXEMPTIONS},
-  {"umode",	   K_UMODE},
-  {"connections",  K_CONNECTIONS},
-  {"who",	   K_CONNECTIONS},
-  {"whom",	   K_CONNECTIONS},
-  {"disconnect",   K_DISCONNECT},
-  {"kick",         K_DISCONNECT},
-  {"help",         K_HELP},
-  {"close",        K_CLOSE},
-  {"quit",         K_CLOSE},
-  {"op",           K_OP},
-  {"cycle",        K_CYCLE},
-  {"die",          K_DIE},
-  {"restart",      K_RESTART},
-  {"set",          K_SET},
-  {"unkline",      K_UNKLINE},
-  {"dkline",       K_DLINE},
-  {"dline",        K_DLINE},
-  {"class",	   K_CLASS},
-  {"classt",	   K_CLASST},
   {"chat",	   K_CHAT},
-  {"ban",	   K_BAN},
-  {"vbots",	   K_VBOTS},
-  {"vlist",	   K_VLIST},
-  {"hmulti",	   K_HMULTI},
-  {"umulti",	   K_UMULTI},
-  {"mem", 	   K_MEM},
-  {"action",	   K_ACTION},
-  {"actions",	   K_ACTION},
-  {"motd",	   K_MOTD},
-  {"save",	   K_SAVE},
-  {"locops",	   K_LOCOPS},
-  {"info",	   K_INFO},
-  {"vmulti",	   K_VMULTI},
-  {"uptime",	   K_UPTIME},
-#ifdef ENABLE_QUOTE
-  {"quote",        K_QUOTE},
-  {"raw",          K_QUOTE},
-#endif
   {NULL,	   0}
 };
 

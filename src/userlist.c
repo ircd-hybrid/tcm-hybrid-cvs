@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.45 2002/03/20 05:08:27 bill Exp $
+ * $Id: userlist.c,v 1.46 2002/04/04 23:19:24 bill Exp $
  *
  */
 
@@ -885,7 +885,9 @@ char *type_show(unsigned long type)
   if(type&TYPE_SUSPENDED)*p++ = 'S';
   if(type&TYPE_ADMIN)*p++ = 'M';
   if(type&TYPE_INVM)*p++ = 'I';
+#ifndef NO_D_LINE_SUPPORT
   if(type&TYPE_DLINE)*p++ = 'D';
+#endif
 #ifdef ENABLE_W_FLAG
   if(type&TYPE_OPERWALL)*p++ = 'W';
 #endif

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.39 2002/04/04 22:53:44 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.40 2002/04/04 23:19:22 bill Exp $ */
 
 #include "setup.h"
 
@@ -1147,12 +1147,14 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	  type = 0;
 	break;
 
+#ifndef NO_D_LINE_SUPPORT
       case 'D':
 	if (connections[connnum].type & TYPE_ADMIN)
 	  type = TYPE_DLINE ;
 	else
 	  type = 0;
 	break;
+#endif
 
       case 'G':
 	if (connections[connnum].type & TYPE_ADMIN)
@@ -1160,6 +1162,14 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	else
 	  type = 0;
 	break;
+
+#ifdef ENABLE_W_FLAG
+      case 'W':
+        if (connections[connnum].type & TYPE_ADMIN)
+          type = TYPE_OPERWALL ;
+        else
+          type = 0;
+#endif
 
       case '-':
 	type = 0;
@@ -1204,12 +1214,17 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	{
 	  switch(flags[i])
 	  {
+#ifndef NO_D_LINE_SUPPORT
 	  case 'D': type = TYPE_DLINE; break;
+#endif
 	  case 'G': type = TYPE_GLINE; break;
 	  case 'I': type = TYPE_INVM; break;
 	  case 'K': type = TYPE_REGISTERED; break;
 	  case 'O': type = TYPE_OPER; break;
 	  case 'S': type = TYPE_SUSPENDED; break;
+#ifdef ENABLE_W_FLAG
+          case 'W': type = TYPE_OPERWALL; break;
+#endif
 	  case 'e': type = TYPE_ECHO; break;
 	  case 'i': type = TYPE_INVS; break;
 	  case 'k': type = TYPE_KLINE; break;
@@ -1291,9 +1306,14 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	    case 'I': type = TYPE_INVM; break;
 	    case 'K': type = TYPE_REGISTERED; break;
 	    case 'G': type = TYPE_GLINE; break;
+#ifndef NO_D_LINE_SUPPORT
 	    case 'D': type = TYPE_DLINE; break;
+#endif
 	    case 'O': type = TYPE_OPER; break;
 	    case 'S': type = TYPE_SUSPENDED; break;
+#ifdef ENABLE_W_FLAG
+            case 'W': type = TYPE_OPERWALL; break;
+#endif
 	    case 'k': type = TYPE_KLINE; break;
 	    case 'p': type = TYPE_PARTYLINE; break;
 	    case 's': type = TYPE_STAT; break;

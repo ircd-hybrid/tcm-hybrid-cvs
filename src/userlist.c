@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.114 2002/06/07 11:20:15 leeh Exp $
+ * $Id: userlist.c,v 1.115 2002/06/08 21:54:54 db Exp $
  *
  */
 
@@ -231,8 +231,7 @@ set_umode(int user, int admin, const char *umode)
       plus = 1;
       continue;
     }
-
-    if(umode[i] == '-')
+    else if(umode[i] == '-')
     {
       plus = 0;
       continue;
@@ -346,7 +345,10 @@ get_umodes_from_prefs(int user)
   if ((fp = fopen(user_pref_filename, "r")) != NULL)
   {
     if ((fgets(type_string, SMALL_BUFF, fp)) == NULL)
-      return 0;
+      {
+	(void)fclose(fp);
+	return 0;
+      }
 
     (void)fclose(fp);
     if((p = strchr(type_string, '\n')) != NULL)

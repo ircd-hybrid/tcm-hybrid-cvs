@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.159 2002/06/08 14:13:34 db Exp $
+ * $Id: bothunt.c,v 1.160 2002/06/08 21:54:53 db Exp $
  */
 
 #include <stdio.h>
@@ -250,33 +250,14 @@ on_stats_i(int argc, char *argv[])
 
   /* if client is exempt, mark it as such in the exemption list */
 
-  switch(*user)
-    {
-      /* Check for flags that set some sort of exemption or protection from
-       * something on the ircd side, and not flags that set some sort of
-       * limitation.
-       */
-    case '^': /* K:/G: Protection (E:) */
-    case '&': /* Can run a bot, obsolete in H7, should just add bot flags */
-    case '>': /* Exempt from user limits (F:) */
-    case '_': /* Exempt from G: - XXX should this be here? */
-    case '<': /* Exempt from idle limitations - XXX should this be here? */
-    case '=': /* Spoof...reasoning:  if they're spoofed, they're likely
-               * trustworthy enough to be exempt from tcm's wrath
-               */
-      strlcpy(hostlist[host_list_index].user, 
-	      user, sizeof(hostlist[host_list_index].user));
+  if(isalnum((int)(*user)))
+    return;
 
-      strlcpy(hostlist[host_list_index].host,
-	      host, sizeof(hostlist[host_list_index].host));
-      hostlist[host_list_index].type = 0xFFFFFFFF;
+  strlcpy(hostlist[host_list_index].user, user, MAX_NICK);
+  strlcpy(hostlist[host_list_index].host, host, MAX_HOST);
+  hostlist[host_list_index].type = ~0;
 
-      host_list_index++;
-      return;
-      
-    default:
-      return;
-    }
+  host_list_index++;
 }
 
 /*

@@ -1,4 +1,4 @@
-/* $Id: setup.h.in,v 1.6 2002/05/22 12:38:11 wcampbel Exp $ */
+/* $Id: setup.h.in,v 1.7 2002/06/01 13:04:21 wcampbel Exp $ */
 /* include/setup.h.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define if you need to in order for stat and other things to work.  */
@@ -18,6 +18,9 @@
 
 /* Define if you have the <sys/resource.h> header file.  */
 #undef HAVE_SYS_RESOURCE_H
+
+/* Define if you have the <getopt.h> header file.  */
+#undef HAVE_GETOPT_H
 
 /* Define if you have the setrlimit function.  */
 #undef HAVE_SETRLIMIT

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.76 2002/05/30 01:49:49 leeh Exp $
+ * $Id: tcm_io.c,v 1.77 2002/06/01 13:04:25 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -686,7 +686,6 @@ connect_to_given_ip_port(struct sockaddr_in *socketname, int port)
   struct hostent *local_host;
   int optval;
   int flags;
-  int result;
 
   /* open an inet socket */
   if ((sock = socket (AF_INET, SOCK_STREAM, 0)) < 0)
@@ -745,7 +744,7 @@ connect_to_given_ip_port(struct sockaddr_in *socketname, int port)
 
   flags = fcntl(sock,F_GETFL,0);
   flags |= O_NONBLOCK;
-  result = fcntl(sock,F_SETFL,flags);
+  (void) fcntl(sock,F_SETFL,flags);
 
   connect (sock, (struct sockaddr *) socketname, sizeof *socketname);
   return (sock);

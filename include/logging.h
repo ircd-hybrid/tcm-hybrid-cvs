@@ -1,9 +1,8 @@
 #ifndef __LOGGING_H
 #define __LOGGING_H
 
-/* $Id: logging.h,v 1.13 2002/05/30 20:54:04 db Exp $ */
+/* $Id: logging.h,v 1.14 2002/06/01 13:04:21 wcampbel Exp $ */
 
-extern FILE *logging_fp; 
 extern FILE *outfile;
 
 extern time_t startup_time;

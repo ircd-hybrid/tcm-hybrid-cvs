@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.103 2002/05/31 01:54:18 wcampbel Exp $ */
+/* $Id: main.c,v 1.104 2002/06/01 13:04:25 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -24,6 +24,10 @@
 
 #ifdef HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
+#endif
+
+#ifdef HAVE_GETOPT_H
+# include <getopt.h>
 #endif
 
 #include <netinet/in.h>

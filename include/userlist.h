@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.61 2002/06/01 01:46:20 wcampbel Exp $ */
+/* $Id: userlist.h,v 1.62 2002/06/01 13:04:21 wcampbel Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -95,7 +95,6 @@ void load_userlist(void);
 void init_userlist_handlers(void);
 void load_config_file(char *);
 void clear_userlist(void);
-void ban_manipulate(int sock,char flag,char *userlist);
 void save_prefs(void);
 int  okhost(char *,char *,int);
 int  str2type(char *);
@@ -137,7 +136,6 @@ void exemption_summary();
 
 
 int  isoper(char *user, char *host);
-void init_userlist(void);
 void reload_user_list(int sig);
 
 struct config_list config_entries;

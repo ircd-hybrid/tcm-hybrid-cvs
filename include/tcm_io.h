@@ -2,14 +2,13 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.31 2002/05/29 18:47:46 db Exp $
+ * $Id: tcm_io.h,v 1.32 2002/06/01 13:04:21 wcampbel Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
 
 /* Dummy definition for now XXX */
 struct sockaddr_in;
-extern int maxconns;
 
 /*
  * This structure defines who is connected to this tcm.

@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.44 2002/05/30 18:59:35 db Exp $ */
+/* $Id: bothunt.h,v 1.45 2002/06/01 13:04:21 wcampbel Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -9,7 +9,6 @@ void print_motd(int);
 
 /* XXXX */
 void _config(int, int, char *argv[]);
-void _reload_wingate(int, int, char *argv[]);
 
 #define MSG_CLIENT_CONNECTING	"Client connecting: "
 #define MSG_CLIENT_EXITING	"Client exiting: "

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.144 2002/06/01 02:18:11 db Exp $
+ * $Id: bothunt.c,v 1.145 2002/06/01 13:04:25 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -509,6 +509,9 @@ on_server_notice(int argc, char *argv[])
 
   switch (faction)
   {
+    /* XXX - These are shadowed variables, should they be something else
+     *       or just use the prior definition of user and host?
+     */
     char *user;
     char *host;
 

@@ -1,3 +1,22 @@
+leeh        2002/06/21 19:20:21 EDT	(20020622_1)
+
+  Modified files:
+    include              tcm_io.h userlist.h 
+    src                  dcc.c dcc_commands.c tcm_io.c userlist.c 
+  Log:
+  - consistency.  use ->username everywhere instead of ->user some places
+    and ->username in others.
+  
+  Revision  Changes    Path
+  1.39      +1 -1      tcm-hybrid/include/tcm_io.h
+  1.78      +2 -2      tcm-hybrid/include/userlist.h
+  1.15      +7 -8      tcm-hybrid/src/dcc.c
+  1.133     +3 -3      tcm-hybrid/src/dcc_commands.c
+  1.90      +3 -3      tcm-hybrid/src/tcm_io.c
+  1.129     +8 -8      tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/21 19:14:07 EDT	(20020622_0)
 
   Modified files:

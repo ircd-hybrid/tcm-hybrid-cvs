@@ -1,3 +1,9 @@
+*** 20010403_1 by db
+- removed extra print to opers about cfloods
+- fixed spam warning to suggest .kspam
+
+
+
 *** 20010402_2 by db
 - action must specifically say "warn" or no warning is given at all
 

@@ -1,3 +1,22 @@
+*** 20010603_1 by db
+Submitted by Walter Campbell <wcampbel@botbay.net>
+
+My "commit" message:
+
+1.  Makes numerous commands that can give away information oper only
+2.  The oper only conf line is in tcm.cf, not userlist.cf
+3.  FLAGS on comstud servers was missing a +
+4.  Documentation cleanup
+5.  fixed a couple compiler errors when wingate checking is enabled
+6.  Fixed another small issue with the opers only option
+7.  Added a small piece of debug code to the tcm.cf conf parser
+8.  Fixed a MAJOR security hole in .action
+
+The 1st and 8th are big, and in my opinion should warrant a new
+release, with whatever bug fixes greg decides to throw in.
+
+
+
 *** 20010602_2 by greg
 .. this one got missed.
 

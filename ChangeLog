@@ -1,3 +1,7 @@
+*** 20010829_2 by bill
+ oopsie forget those were there ::smirk::
+
+
 *** 20010829_1 by bill
 - fixed an overshot buffer in the new i/o code
 - fixed a threshhold miscalc (you had to -1 to get the correct output)

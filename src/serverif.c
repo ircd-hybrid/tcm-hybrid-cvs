@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.26 2001/07/29 05:06:09 bill Exp $";
+static char *version="$Id: serverif.c,v 1.27 2001/08/15 22:56:09 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -1251,17 +1251,21 @@ static void serverproc()
   if(*buffer == ':')
     {
       source = buffer+1;
-      if( (p = strchr(buffer,' ')) )
-	*p = '\0';
-      p++;
-      fctn = p;
-
-      if( (p = strchr(fctn,' ')) )
+      if((p = strchr(buffer,' ')) != NULL)
 	{
 	  *p = '\0';
 	  p++;
-	  body = p;
+	  fctn = p;
+
+	  if( (p = strchr(fctn,' ')) )
+	    {
+	      *p = '\0';
+	      p++;
+	      body = p;
+	    }
 	}
+      else
+	return;
     }
   else
     {
@@ -1269,12 +1273,14 @@ static void serverproc()
 
       fctn = buffer;
 
-      if( (p = strchr(fctn,' ')) )
+      if((p = strchr(fctn,' ')) != NULL)
 	{
 	  *p = '\0';
 	  p++;
 	  body = p;
 	}
+      else
+	return;
     }
 
   if(config_entries.debug && outfile)

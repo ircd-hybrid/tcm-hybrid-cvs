@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.4 2002/05/23 09:50:59 leeh Exp $
+ * $Id: parse.c,v 1.5 2002/05/23 21:27:48 leeh Exp $
  */
 
 #include <stdio.h>
@@ -253,8 +253,7 @@ static void proc(char *source,char *fctn,char *param)
     }
     else if ((strcmp(argv[1],"WALLOPS")) == 0)
     {
-      for (temp = wallops; temp; temp=temp->next)
-	temp->function(0, argc, argv);
+      _wallops(0, argc, argv);
     }
     else if ((strcmp(argv[1],"JOIN")) == 0)
     {
@@ -339,24 +338,18 @@ static void proc(char *source,char *fctn,char *param)
         break;
       case RPL_TRACEOPERATOR:
       case RPL_TRACEUSER:
-        for (temp=ontraceuser;temp;temp=temp->next)
-          temp->function(0, argc, argv);
+	_ontraceuser(0, argc, argv);
         break;
       case RPL_TRACECLASS:
-        for (temp=ontraceclass;temp;temp=temp->next)
-          temp->function(0, argc, argv);
+	_ontraceclass(0, argc, argv);
         break;
       case RPL_STATSILINE:
-        for (temp=statsi;temp;temp=temp->next)
-          temp->function(0, argc, argv);
+	on_stats_i(0, argc, argv);
         break;
       case RPL_STATSKLINE:
-        for (temp=statsk;temp;temp=temp->next)
-          temp->function(0, argc, argv);
         break;
       case RPL_STATSOLINE:
-        for (temp=statso;temp;temp=temp->next)
-          temp->function(0, argc, argv);
+	on_stats_o(0, argc, argv);
         break;
       case RPL_ENDOFSTATS:
         break;
@@ -370,8 +363,7 @@ static void proc(char *source,char *fctn,char *param)
         break;
       case RPL_STATSELINE:
       case RPL_STATSFLINE:
-        for (temp=statse;temp;temp=temp->next)
-          temp->function(0, argc, argv);
+	on_stats_e(0, argc, argv);
         break;
       default:
         break;

@@ -1,7 +1,7 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.14 2002/05/23 13:38:12 db Exp $ */
+/* $Id: modules.h,v 1.15 2002/05/23 21:27:46 leeh Exp $ */
 
 struct module {
   char *name;
@@ -28,16 +28,9 @@ struct common_function *scontinuous;
 struct common_function *config;
 struct common_function *action;
 struct common_function *reload;
-struct common_function *wallops;
 struct common_function *onjoin;
 struct common_function *onctcp;
-struct common_function *ontraceuser;
-struct common_function *ontraceclass;
 struct common_function *server_notice;
-struct common_function *statsi;
-struct common_function *statsk;
-struct common_function *statse;
-struct common_function *statso;
 
 #define F_SIGNON		1
 #define F_SIGNOFF		2
@@ -53,16 +46,9 @@ struct common_function *statso;
 /*				12 */
 #define F_ACTION		13
 #define F_RELOAD		14
-#define F_WALLOPS		15
 #define F_ONJOIN		16
 #define F_ONCTCP		17
-#define F_ONTRACEUSER		18
-#define F_ONTRACECLASS		19
 #define F_SERVER_NOTICE		20
-#define F_STATSI		21
-#define F_STATSK		22
-#define F_STATSE		23
-#define F_STATSO		24
 
 extern void sendtoalldcc(int type,char *format,...);
 extern void report(int type, int channel_send_flag, char *format,...);

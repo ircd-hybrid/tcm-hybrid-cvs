@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.26 2002/05/23 13:38:17 db Exp $B
+ * $Id: modules.c,v 1.27 2002/05/23 21:27:48 leeh Exp $B
  *
  */
 
@@ -154,35 +154,14 @@ void add_common_function(int type, void *function)
       case F_RELOAD:
         temp = &reload;
         break;
-      case F_WALLOPS:
-        temp = &wallops;
-        break;
       case F_ONJOIN:
         temp = &onjoin;
         break;
       case F_ONCTCP:
         temp = &onctcp;
         break;
-      case F_ONTRACEUSER:
-        temp = &ontraceuser;
-        break;
-      case F_ONTRACECLASS:
-        temp = &ontraceclass;
-        break;
       case F_SERVER_NOTICE:
         temp = &server_notice;
-        break;
-      case F_STATSI:
-        temp = &statsi;
-        break;
-      case F_STATSK:
-        temp = &statsk;
-        break;
-      case F_STATSE:
-        temp = &statse;
-        break;
-      case F_STATSO:
-        temp = &statso;
         break;
       default:
         return;
@@ -231,26 +210,12 @@ void modules_init(void)
     action = (struct common_function *) malloc(sizeof(struct common_function));
   if (reload == NULL)
     reload = (struct common_function *) malloc(sizeof(struct common_function));
-  if (wallops == NULL)
-    wallops = (struct common_function *) malloc(sizeof(struct common_function));
   if (onjoin == NULL)
     onjoin = (struct common_function *) malloc(sizeof(struct common_function));
   if (onctcp == NULL)
     onctcp = (struct common_function *) malloc(sizeof(struct common_function));
-  if (ontraceuser == NULL)
-    ontraceuser = (struct common_function *) malloc(sizeof(struct common_function));
-  if (ontraceclass == NULL)
-    ontraceclass = (struct common_function *) malloc(sizeof(struct common_function));
   if (server_notice == NULL)
     server_notice = (struct common_function *) malloc(sizeof(struct common_function));
-  if (statsi == NULL)
-    statsi = (struct common_function *) malloc(sizeof(struct common_function));
-  if (statsk == NULL)
-    statsk = (struct common_function *) malloc(sizeof(struct common_function));
-  if (statse == NULL)
-    statse = (struct common_function *) malloc(sizeof(struct common_function));
-  if (statso == NULL)
-    statso = (struct common_function *) malloc(sizeof(struct common_function));
 */
 }
 

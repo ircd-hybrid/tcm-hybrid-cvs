@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.47 2002/05/23 08:53:48 einride Exp $ */
+/* $Id: main.c,v 1.48 2002/05/23 21:27:48 leeh Exp $ */
 
 #include "setup.h"
 
@@ -129,19 +129,12 @@ init_hash_tables(void)
     memset(action,0,sizeof(struct common_function));
   if (reload)
     memset(reload,0,sizeof(struct common_function));
-  if (wallops)
-    memset(wallops,0,sizeof(struct common_function));
   if (onjoin)
     memset(onjoin,0,sizeof(struct common_function));
   if (onctcp)
     memset(onctcp,0,sizeof(struct common_function));
-  if (ontraceuser) memset(ontraceuser,0,sizeof(struct common_function));
-  if (ontraceclass)
-    memset(ontraceclass,0,sizeof(struct common_function));
   if (server_notice)
     memset(server_notice,0,sizeof(struct common_function));
-  if (statsi)
-    memset(statsi,0,sizeof(struct common_function));
 }
 
 /*
@@ -550,16 +543,10 @@ main(int argc, char *argv[])
   /* XXX - these used to be in the modules, need to be done properly */
   add_common_function(F_SIGNON, _signon);
   add_common_function(F_SIGNOFF, linkclosed);
-  add_common_function(F_WALLOPS, _wallops);
   add_common_function(F_ONJOIN, _onjoin);
   add_common_function(F_RELOAD, _reload_bothunt);
   add_common_function(F_SERVER_NOTICE, onservnotice);
   add_common_function(F_ONCTCP, _onctcp);
-  add_common_function(F_ONTRACEUSER, _ontraceuser);
-  add_common_function(F_ONTRACECLASS, _ontraceclass);
-  add_common_function(F_STATSI, on_stats_i);
-  add_common_function(F_STATSE, on_stats_e);
-  add_common_function(F_STATSO, on_stats_o);
 
 #ifdef GLINES
   mod_add_cmd(&gline_msgtab);

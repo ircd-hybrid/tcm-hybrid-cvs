@@ -309,4 +309,7 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
  */
 #define MAX_ALLOW_SIZE 20
 
+/* Do not touch these unless you know what you are doing */
+#define SPATH DPATH "/bin/tcm"
+
 #endif

@@ -2,10 +2,11 @@
 ** copyright 1991, all rights reserved.
 ** You can use this code as long as my name stays with it.
 **
-** md5 patch by Walter Campbell <wcampbel@botbay.net>
+** md5 patch by W. Campbell <wcampbel@botbay.net>
 ** Modernization, getopt, etc for the Hybrid IRCD team
+** by W. Campbell
 **
-** $Id: mkpasswd.c,v 1.1 2001/06/19 16:05:26 wcampbel Exp $
+** $Id: mkpasswd.c,v 1.2 2001/10/18 01:24:48 wcampbel Exp $
 */
 #include <stdio.h>
 #include <string.h>
@@ -22,16 +23,13 @@
 extern char *getpass();
 extern char *crypt();
 
-
 char *make_des_salt();
 char *make_md5_salt(int);
 char *make_md5_salt_para(char *);
 void usage();
 static char saltChars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
 
-int main(argc, argv)
-int argc;
-char *argv[];
+int main(int argc, char *argv[])
 {
   char *plaintext = NULL;
   extern char *optarg;
@@ -76,28 +74,40 @@ char *argv[];
     }
   }
 
-  if (flag & FLAG_MD5) {
+  if (flag & FLAG_MD5)
+  {
     if (flag & FLAG_SALT)
       salt = make_md5_salt_para(saltpara);
     else
       salt = make_md5_salt(length);
-  } else {
-    if (flag & FLAG_SALT) {
-      if ((strlen(saltpara) == 2)) {
+  }
+  else
+  {
+    if (flag & FLAG_SALT)
+    {
+      if ((strlen(saltpara) == 2))
+      {
         salt = saltpara;
-      } else {
+      }
+      else
+      {
         printf("Invalid salt, please enter 2 alphanumeric characters\n");
         exit(1);
       }
-    } else {
+    }
+    else
+    {
       salt = make_des_salt();
     }
   }
 
-  if (flag & FLAG_PASS) {
+  if (flag & FLAG_PASS)
+  {
     if (!plaintext)
       printf("Please enter a valid password\n");
-  } else {
+  }
+  else
+  {
     plaintext = getpass("plaintext: ");
   }
 
@@ -108,20 +118,22 @@ char *argv[];
 char *make_des_salt()
 {
   static char salt[3];
-  char* saltptr=salt;
   salt[0] = saltChars[random() % 64];
   salt[1] = saltChars[random() % 64];
   salt[2] = '\0';
-  return saltptr;
+  return salt;
 }
 
 char *make_md5_salt_para(char *saltpara)
 {
   static char salt[21];
-  char* saltptr=salt;
-  if (saltpara && (strlen(saltpara) <= 16)) {
+  if (saltpara && (strlen(saltpara) <= 16))
+  {
+    /* sprintf used because of portability requirements, the length
+    ** is checked above, so it should not be too much of a concern
+    */
     sprintf(salt, "$1$%s$", saltpara);
-    return saltptr;
+    return salt;
   }
   printf("Invalid Salt, please use up to 16 random alphanumeric characters\n");
   exit(1);
@@ -134,8 +146,8 @@ char *make_md5_salt(int length)
 {
   static char salt[21];
   int i;
-  char* saltptr=salt;
-  if (length > 16) {
+  if (length > 16)
+  {
     printf("MD5 salt length too long\n");
     exit(0);
   }
@@ -146,7 +158,7 @@ char *make_md5_salt(int length)
     salt[i] = saltChars[random() % 64];
   salt[length+3] = '$';
   salt[length+4] = '\0';
-  return saltptr;
+  return salt;
 }
 
 void usage()

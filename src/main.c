@@ -59,7 +59,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.7 2001/10/17 02:26:12 bill Exp $";
+static char *version="$Id: main.c,v 1.8 2001/10/18 01:24:48 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -597,6 +597,13 @@ int main(int argc, char *argv[])
   extern char *optarg;
   extern int optind;
   struct common_function *temp;
+
+  /* chdir returns 0 on sucess, -1 on failure */
+  if (chdir(DPATH))
+  {
+    printf("Unable to chdir to DPATH\nFatal Error, exiting\n");
+    exit(1);
+  }
 
   init_hash_tables();		/* clear those suckers out */
   init_tokenizer();		/* in token.c */

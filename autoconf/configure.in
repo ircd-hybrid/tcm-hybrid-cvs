@@ -5,9 +5,12 @@ AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADER(include/setup.h)
 
 PACKAGE=tcm-hybrid
-VERSION=2.5.7
+VERSION=3.0.1
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
+
+DPATH=`pwd`
+AC_SUBST(DPATH)
 
 dnl Checks for programs.
 AC_PROG_CC

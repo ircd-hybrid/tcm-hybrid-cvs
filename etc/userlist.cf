@@ -51,7 +51,7 @@ O:bill@*.parodius.com:pro:notrealpassword:OKGi
 # db@*bsd.org has oper and remote kline but no gline privs
 #
 O:db@*bsd.org:diane:notrealpassword:OK
-#
+
 # ignore these users if they try to do a /dcc chat
 B:loser@*lamesite.com
 #
@@ -68,4 +68,3 @@ E:*:bill@*.parodius.com
 #
 # bill@*.ircd-hybrid.org is exempt from all cloning violations
 E:*clone*:bill@*.ircd-hybrid.org
-#

@@ -23,7 +23,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: token.c,v 1.13 2001/10/17 02:26:12 bill Exp $";
+static char *version="$Id: token.c,v 1.14 2001/10/18 01:24:48 wcampbel Exp $";
 
 static int hash_cmd(char *);
 
@@ -233,13 +233,4 @@ int occurance(char *string, char find)
     if (string[a] == find) ++found;
   return found;
 }
-
-
-
-
-
-
-
-
-
 

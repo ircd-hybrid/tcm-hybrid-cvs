@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.203 2002/09/20 06:37:23 bill Exp $
+ * $Id: bothunt.c,v 1.204 2002/11/15 00:09:51 bill Exp $
  */
 
 #include <stdio.h>
@@ -362,8 +362,8 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     return;
   }
 
-  /* *** Notice -- billy-jon!bill@aloha.from.hilo on irc.intranaut.com is
-         requesting gline for [this@is.a.test] [test test2] */
+  /* billy-jon!bill@aloha.from.hilo on irc.intranaut.com is
+     requesting gline for [this@is.a.test] [test test2] */
   if (strstr(p, "is requesting gline for "))
   {
     nick = p;
@@ -376,6 +376,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *q = '\0';
     q+=25;
+
     if ((p = strchr(q, ' ')) == NULL)
       return;
     p+=2;
@@ -626,13 +627,11 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Flooder bill [bill@ummm.E] on irc.intranaut.com target: #clone */ 
   case FLOODER:
-    q=p+8;
-    if ((p = strchr(q,' ')) == NULL)
-      break;
+    nick = p+8;
 
-    *p = '\0';
-    p++;
-    nick = q;
+    if ((p = strchr(nick, ' ')) == NULL)
+      break;
+    *p++ = '\0';
 
     if ((q = strchr(p, ' ')) == NULL)
       break;

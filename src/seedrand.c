@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2002 Bill Jonus
  *
- * $Id: seedrand.c,v 1.3 2002/09/26 16:17:48 bill Exp $
+ * $Id: seedrand.c,v 1.4 2002/11/15 00:09:51 bill Exp $
  */
 
 #include <assert.h>
@@ -24,6 +24,8 @@ struct dcc_command seedrand_msgtab = {
   "seedrand", NULL, {m_unregistered, m_seedrand, m_seedrand}
 };
 
+int uses[72]; /* the size of this must be updated as s_all is changed! */
+char *s_all		= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\\|^_-{[}]`";
 char *s_consonants	= "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ";
 char *s_left_brackets	= "{[";
 char *s_lower		= "abcdefghijklmnopqrstuvwxyz";
@@ -198,15 +200,21 @@ int score(char *string)
   int length;
   int lower;
   int numerics;
+  int offset;
   int retval;
   int right_brackets;
+  int unique;
   int upper; 
   int vowels;
-  char *w;
+  char *w, *x;
 
   assert (string != NULL);
 
-  consonants = hyphens = left_brackets = length = lower = numerics = retval = right_brackets = upper = vowels = 0;
+  for (offset = 0; offset < sizeof(uses); ++offset)
+    uses[offset] = 0;
+
+  consonants = hyphens = left_brackets = length = lower = numerics = offset = retval = right_brackets = unique = upper = vowels = 0;
+  w = x = NULL;
 
   length = strlen(string);
 
@@ -223,6 +231,19 @@ int score(char *string)
 #endif
   for (w = string; *w != '\0'; ++w)
   {
+    if ((x = strchr(s_all, *w)) == NULL)
+    {
+#ifdef DEBUGMODE
+      printf("Invalid character '%c' (asc:%d) in '%s'.  Skipping...\n",
+             *w, *w, string);
+#endif
+      return 0;
+    }
+
+    offset = x - s_all;
+    if (++uses[offset] == 1)
+      ++unique;
+
     if (IsConsonant(*w))
     {
       ++consonants;
@@ -265,6 +286,22 @@ int score(char *string)
 #endif
       retval += 400;
     }
+  }
+
+  if (strcasestr(string, "dcc") != NULL)
+  {
+#ifdef DEBUGMODE
+    printf("-1300\tdcc bot\n");
+#endif
+    retval -= 1300;
+  }
+
+  if ((float) unique/length <= 0.5)
+  {
+#ifdef DEBUGMODE
+    printf("-750\tsmall range of characters\n");
+#endif
+    retval -= 750;
   }
 
   if (consonants == length)

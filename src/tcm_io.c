@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.104 2002/10/06 15:56:32 bill Exp $
+ * $Id: tcm_io.c,v 1.105 2002/11/15 00:09:51 bill Exp $
  */
 
 #include <stdio.h>
@@ -261,6 +261,11 @@ get_line(char *in, int *len, struct connection *connections_p)
       connections_p->nbuf = 0;
       return(0);
     }
+
+  /* second sanity test.  we do not have to ignore the input in this case, however. */
+  if (connections_p->nbuf >= BUFFERSIZE)
+    connections_p->nbuf = 0;
+
 
   /* If there was an incomplete buffer, from last read,
    * continue from that point.

@@ -1,3 +1,25 @@
+leeh        2002/06/21 15:17:15 EDT	(20020621_20)
+
+  Modified files:
+    include              userlist.h 
+    src                  .depend bothunt.c dcc_commands.c main.c 
+                         userlist.c 
+  Log:
+  - unified all exception, exemption and exempt stuff under exempt
+  - merged list_opers with m_opers
+  - merged list_exceptions with m_exempts
+  - updated depend.
+  
+  Revision  Changes    Path
+  1.76      +3 -3      tcm-hybrid/include/userlist.h
+  1.28      +60 -50    tcm-hybrid/src/.depend
+  1.174     +2 -2      tcm-hybrid/src/bothunt.c
+  1.131     +38 -63    tcm-hybrid/src/dcc_commands.c
+  1.119     +1 -1      tcm-hybrid/src/main.c
+  1.127     +15 -18    tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/21 14:39:01 EDT	(20020621_19)
 
   Modified files:

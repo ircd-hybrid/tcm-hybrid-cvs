@@ -1,3 +1,25 @@
+leeh        2002/05/30 11:27:33 EDT	(20020530_5)
+
+  Modified files:
+    include              actions.h config.h 
+    src                  actions.c commands.c main.c services.c 
+                         userlist.c wingate.c 
+  Log:
+  - upped pingtime
+  - cleanups to actions (still unfinished)
+  
+  Revision  Changes    Path
+  1.6       +7 -1      tcm-hybrid/include/actions.h
+  1.64      +1 -1      tcm-hybrid/include/config.h
+  1.12      +207 -18   tcm-hybrid/src/actions.c
+  1.114     +16 -38    tcm-hybrid/src/commands.c
+  1.102     +0 -85     tcm-hybrid/src/main.c
+  1.11      +4 -0      tcm-hybrid/src/services.c
+  1.106     +1 -36     tcm-hybrid/src/userlist.c
+  1.51      +3 -9      tcm-hybrid/src/wingate.c
+
+
+
 leeh        2002/05/30 09:33:52 EDT	(20020530_4)
 
   Modified files:

@@ -1,3 +1,7 @@
+*** 20010815_1 by bill
+- more robust makefile to avoid problems if the binary is moved around
+
+
 *** 20010813_1 by leeh
 - updated make distclean to remove binaries
 

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.58 2002/04/25 02:24:44 bill Exp $ */
+/* $Id: bothunt.c,v 1.59 2002/04/27 06:18:38 bill Exp $ */
 
 #include "setup.h"
 
@@ -780,7 +780,7 @@ void onservnotice(int connnum, int argc, char *argv[])
   }
   else if (strstr(p, "clearing G-lines"))
   {
-    nick = q+1;
+    nick = p;
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
@@ -796,7 +796,7 @@ void onservnotice(int connnum, int argc, char *argv[])
   }
   else if (strstr(p, "garbage collecting"))
   {
-    nick = q+1;
+    nick = p;
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
@@ -805,7 +805,7 @@ void onservnotice(int connnum, int argc, char *argv[])
   }
   else if (strstr(p, "forcing re-reading of"))
   {
-    nick = q+1;
+    nick = p;
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';

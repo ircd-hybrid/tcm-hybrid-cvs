@@ -1,3 +1,17 @@
+db          2002/05/25 11:57:58 EDT	(20020525_14)
+
+  Modified files:
+    src                  commands.c modules.c userlist.c 
+  Log:
+  - style
+  
+  Revision  Changes    Path
+  1.81      +2 -10     tcm-hybrid/src/commands.c
+  1.41      +42 -20    tcm-hybrid/src/modules.c
+  1.71      +130 -106  tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/05/25 11:49:42 EDT	(20020525_13)
 
   Modified files:

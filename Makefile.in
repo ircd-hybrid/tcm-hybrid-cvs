@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.22 2002/05/23 21:59:42 bill Exp $
+# $Id: Makefile.in,v 1.23 2002/05/24 18:35:17 leeh Exp $
 CC = @CC@
 RM = @RM@
 MKDEP = ${CC} -MM
@@ -18,7 +18,8 @@ CFLAGS = @CFLAGS@
 
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
 
-SUBDIRS = src modules tools
+#SUBDIRS = src modules tools
+SUBDIRS = src tools
 
 OBJECTS = ${SOURCES:.c=.o}
 

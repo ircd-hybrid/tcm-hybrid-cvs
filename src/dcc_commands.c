@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.158 2004/06/03 20:15:25 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.159 2004/06/03 20:39:10 bill Exp $ */
 
 #include "setup.h"
 
@@ -144,7 +144,7 @@ m_killlist(struct connection *connection_p, int argc, char *argv[])
   int regex = NO, ro;
 
   reason[0] = list[0] = pattern[0] = c = '\0';
-  optreset = optind = 1;
+  optind = 1;
   ro = 1;
 
 #ifdef HAVE_REGEX_H
@@ -908,7 +908,7 @@ m_nfind(struct connection *connection_p, int argc, char *argv[])
   int regex = NO;
 
   list[0] = pattern[0] = c = '\0';
-  optreset = optind = 1;
+  optind = 1;
 
 #ifdef HAVE_REGEX_H
   usage = "Usage: %s [-r] [-l list] <pattern>";
@@ -963,7 +963,7 @@ m_list(struct connection *connection_p, int argc, char *argv[])
   int regex = NO;
 
   list[0] = pattern[0] = c = '\0';
-  optreset = optind = 1;
+  optind = 1;
 #ifdef HAVE_REGEX_H
   usage = "Usage: %s [-l list] <[-r regex]|[wildcarded userhost]>";
 
@@ -1020,7 +1020,7 @@ m_gecos(struct connection *connection_p, int argc, char *argv[])
   int regex = NO;
 
   list[0] = pattern[0] = c = '\0';
-  optreset = optind = 1;
+  optind = 1;
 #ifdef HAVE_REGEX_H 
   usage = "Usage: %s [-l list] <[-r regex]|[wildcarded gecos]>";
 
@@ -1243,7 +1243,7 @@ m_smartlist(struct connection *connection_p, int argc, char *argv[])
 
   nickp[0] = userp[0] = hostp[0] = ipp[0] = gecosp[0] = allp[0] = matchp[0] = list[0] = c = '\0';
   regex = NO;
-  optind = optreset = 1;
+  optind = 1;
 
 #ifdef HAVE_REGEX_H
   usage = "Usage: %s [-r] [-l list name] [-n nick pattern] [-u user pattern] [-h host pattern] [-i ip pattern] [-g gecos pattern] [-a nick!user@host|ip;gecos pattern] [-m matching pattern]";

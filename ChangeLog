@@ -1,3 +1,28 @@
+leeh        2002/05/27 17:47:14 EDT	(20020527_22)
+
+  Modified files:
+    include              bothunt.h userlist.h 
+    src                  .depend actions.c bothunt.c parse.c 
+                         services.c userlist.c wingate.c 
+  Log:
+  - on_stats_o -> add_an_oper -> userlist.c
+  - get_method_* -> actions.c
+  - moved m_umode above set_umode
+  - updated depend
+  
+  Revision  Changes    Path
+  1.38      +0 -1      tcm-hybrid/include/bothunt.h
+  1.47      +3 -0      tcm-hybrid/include/userlist.h
+  1.20      +15 -12    tcm-hybrid/src/.depend
+  1.3       +40 -1     tcm-hybrid/src/actions.c
+  1.119     +0 -74     tcm-hybrid/src/bothunt.c
+  1.36      +1 -2      tcm-hybrid/src/parse.c
+  1.6       +1 -0      tcm-hybrid/src/services.c
+  1.88      +116 -92   tcm-hybrid/src/userlist.c
+  1.46      +2 -0      tcm-hybrid/src/wingate.c
+
+
+
 db          2002/05/27 17:45:50 EDT	(20020527_21)
 
   Modified files:

@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.87 2004/04/22 08:32:13 bill Exp $
+ * $Id: config.h,v 1.88 2004/05/11 19:31:56 bill Exp $
  */
 
 /*
@@ -60,15 +60,12 @@
  * The default tcm config file, can be overridden with a file name
  * argument to tcm.
  */
-
-#define MODULE_DIRECTORY "modules/"
-
 #define CONFIG_FILE "etc/tcm.cf"
 #define USERLIST_FILE "etc/userlist.cf"
 
 #define HELP_PATH "help"        /* No / at the end */
 #define HELP_FILE "help"        /* Inside of HELP_PATH */
-#define MOTD_FILE "etc/motd.txt"
+#define MOTD_FILE "etc/tcm.motd"
 
 #define LOGFILE "logs/tcm.log"
 #define LAST_LOG_NAME "logs/last_log_name"

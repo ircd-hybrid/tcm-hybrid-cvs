@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.136 2004/04/22 08:32:16 bill Exp $ */
+/* $Id: main.c,v 1.137 2004/05/11 19:31:59 bill Exp $ */
 
 #include "setup.h"
 
@@ -41,7 +41,6 @@
 #include "event.h"
 #include "userlist.h"
 #include "bothunt.h"
-#include "modules.h"
 #include "stdcmds.h"
 #include "wild.h"
 #include "serno.h"
@@ -153,7 +152,6 @@ main(int argc, char *argv[])
 
   init_connections();
   init_hash();
-  modules_init();
   init_commands();
   init_userlist_handlers();
   init_clones();

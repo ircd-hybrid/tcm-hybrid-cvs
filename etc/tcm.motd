@@ -1,3 +1,6 @@
+$Id: tcm.motd,v 1.1 2004/05/11 19:31:53 bill Exp $
+
 tcm opers motd
 This is the distributed motd.txt file.
 REMEMBER all commands start with a '.' i.e. .bots etc.
+

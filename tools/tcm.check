@@ -1,9 +1,11 @@
 #!/bin/sh
 #
+# $Id: tcm.check,v 1.4 2004/05/11 19:32:02 bill Exp $
+#
 # Little shell script to reload tcm, should the box restart
 #
 #install in crontab using crontab -e the following line
-#1,16,31,46 * * * * /path/to/your/tcm/dir/run.check >/dev/null
+#1,16,31,46 * * * * /path/to/your/tcm/dir/tcm.check >/dev/null
 #
 ADMIN=`whoami`
 RUN_PATH="$HOME/tcm-hybrid"

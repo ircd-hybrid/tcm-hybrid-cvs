@@ -1,0 +1,27 @@
+$Id: README-csircd,v 1.1 2004/05/11 19:31:50 bill Exp $
+
+Special operating instructions for csircd:
+In order for tcm to work properly on csircd-1.13, a client's ip address
+must be part of the TRACE output.  A patch for csircd is included with
+this package in the tools/ directory
+
+You *must* have the following variables set:
+SET CLIENTCONNECT YES
+SET SHOW_NICKCHANGES YES
+
+The tcm should have the following flags in its oper {} block:
+cankline;
+canflood;
+canlocalkill;
+
+It should optionally have:
+cangline;	This will enable .gline (assuming its defined)
+
+If your opers have the hidehostname flag set in their class block,
+you *must* add O: lines in tcm's userlist.cf for your server operators.
+With the hidehostname flag set, tcm cannot import the ircd's oper blocks
+into it's memory.
+
+Note: If you give it the "local" flag, it will not be able to communicate
+      with efnet's services completely.  Specifically, it will not be able
+      to issue the "drones" command

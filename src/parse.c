@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.88 2003/06/01 01:19:05 bill Exp $
+ * $Id: parse.c,v 1.89 2004/05/11 19:31:59 bill Exp $
  */
 
 #include <stdio.h>
@@ -34,7 +34,6 @@
 #include "tcm_io.h"
 #include "serno.h"
 #include "patchlevel.h"
-#include "modules.h"
 #include "handler.h"
 #include "dcc.h"
 #ifdef HAVE_LIBCRYPTO

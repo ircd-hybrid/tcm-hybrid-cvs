@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.151 2004/04/22 08:32:16 bill Exp $
+ * $Id: userlist.c,v 1.152 2004/05/11 19:31:59 bill Exp $
  */
 
 #include <errno.h>
@@ -21,7 +21,6 @@
 #include "logging.h"
 #include "stdcmds.h"
 #include "wild.h"
-#include "modules.h"
 #include "match.h"
 #include "bothunt.h"
 #include "actions.h"

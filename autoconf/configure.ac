@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.53)
 
-AC_COPYRIGHT([$Id: configure.ac,v 1.1 2003/08/17 02:59:00 joshk Exp $])
+AC_COPYRIGHT([$Id: configure.ac,v 1.1 2004/05/11 19:31:51 bill Exp $])
 
 AC_INIT([tcm-hybrid],[3.1.0-pre])
 
@@ -103,4 +103,4 @@ if test "$error" = 1; then
   AC_MSG_ERROR([Missing some essential standard function - see output above for more details. Correct and retry.])
 fi
 
-AC_OUTPUT([Makefile src/Makefile tools/Makefile modules/Makefile])
+AC_OUTPUT([Makefile src/Makefile tools/Makefile])

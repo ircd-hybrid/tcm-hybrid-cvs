@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.21 2002/12/30 07:31:36 bill Exp $
+ * $Id: dcc.c,v 1.22 2004/05/11 19:31:58 bill Exp $
  */
 
 #include <stdio.h>
@@ -37,7 +37,6 @@
 #include "event.h"
 #include "bothunt.h"
 #include "userlist.h"
-#include "modules.h"
 #include "tcm_io.h"
 #include "dcc.h"
 #include "numeric.h"

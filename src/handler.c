@@ -1,7 +1,7 @@
 /* handler.c
  *
  * contains the code for the dcc and server command handlers
- * $Id: handler.c,v 1.9 2002/09/14 20:18:08 bill Exp $
+ * $Id: handler.c,v 1.10 2004/05/11 19:31:59 bill Exp $
  */
 
 #include <assert.h>
@@ -17,7 +17,6 @@
 #include "tcm.h"
 #include "tcm_io.h"
 #include "bothunt.h"
-#include "modules.h"
 #include "stdcmds.h"
 #include "wild.h"
 #include "parse.h"
@@ -254,3 +253,23 @@ hash_command(const char *p)
   return(hash_val % MAX_HASH);
 }
 
+/* m_unregistered()
+ *
+ * sent to an oper who needs to register to use a command
+ */
+void
+m_unregistered(struct connection *connection_p, int argc, char *argv[])
+{
+  send_to_connection(connection_p, "You have not registered");
+}
+
+/* m_not_admin()
+ *
+ * sent to an oper who tries to execute an admin only command
+ */
+void
+m_not_admin(struct connection *connection_p, int argc, char *argv[])
+{
+  send_to_connection(connection_p,
+                     "Only authorized admins may use this command");
+}

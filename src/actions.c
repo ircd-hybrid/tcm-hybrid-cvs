@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.52 2003/06/01 01:19:05 bill Exp $
+ * $Id: actions.c,v 1.53 2004/05/11 19:31:58 bill Exp $
  */
 
 
@@ -30,7 +30,6 @@
 #include "stdcmds.h"
 #include "wild.h"
 #include "hash.h"
-#include "modules.h"
 #include "skline.h"
 
 #define valid_string(x) (((x) != NULL) && (*(x) != '\0'))
@@ -45,7 +44,7 @@ static void set_action_reason(int action, char *reason);
 static void set_action_strip(int action, int hoststrip);
 
 struct dcc_command actions_msgtab = {
-  "actions", NULL, {m_action, m_action, m_action}
+  "actions", NULL, {m_unregistered, m_action, m_action}
 };
 struct dcc_command action_msgtab = {
   "action", NULL, {m_unregistered, m_action, m_action}

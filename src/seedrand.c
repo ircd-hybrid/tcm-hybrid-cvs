@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2002-2003 Bill Jonus
  *
- * $Id: seedrand.c,v 1.8 2004/04/22 08:32:16 bill Exp $
+ * $Id: seedrand.c,v 1.9 2004/05/11 19:31:59 bill Exp $
  */
 
 #include <assert.h>
@@ -16,7 +16,6 @@
 #include "tools.h"
 #include "handler.h"
 #include "hash.h"
-#include "modules.h"
 #include "match.h"
 #include "seedrand.h"
 

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.153 2003/04/14 09:30:19 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.154 2004/05/11 19:31:58 bill Exp $ */
 
 #include "setup.h"
 
@@ -37,7 +37,6 @@
 #include "userlist.h"
 #include "logging.h"
 #include "stdcmds.h"
-#include "modules.h"
 #include "tcm_io.h"
 #include "wild.h"
 #include "match.h"

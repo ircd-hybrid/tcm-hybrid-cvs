@@ -5,15 +5,8 @@ must run ./configure --prefix with the pathname following.  Example:
 
   ./configure --prefix=/usr/local/ircd/tcm
 
-WARNING:  If you are running this on the same box as an ircd-hybrid-7
-          server, do NOT make the tcm prefix the same as the ircd prefix.
-          This is due to the fact that tcm and hybrid-7 use the same
-          directories and extensions for their modules.  Hybrid-7 and tcm
-          would not be able to distinguish between their respective
-          modules.
-
   Read the config.h file. Its pretty self explanatory... the defaults
-should be fine to start. If you want to play with AUTO_KLINE etc.
+should be fine to start. If you want to play with these settings,
 this is all handled from the tcm.cf now. Read the .html docs which
 are also online at http://www.ircd-hybrid.org/tcm/tcm.html
 
@@ -22,4 +15,4 @@ the provided files for more information.
 
 - Dianora
 
-$Id: INSTALL,v 1.7 2003/08/17 02:59:00 joshk Exp $
+$Id: INSTALL,v 1.8 2004/05/11 19:31:48 bill Exp $

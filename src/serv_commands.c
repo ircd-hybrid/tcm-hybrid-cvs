@@ -1,4 +1,4 @@
-/* $Id: serv_commands.c,v 1.7 2002/12/30 07:31:36 bill Exp $ */
+/* $Id: serv_commands.c,v 1.8 2004/05/11 19:31:59 bill Exp $ */
 
 #include "setup.h"
 
@@ -24,7 +24,6 @@
 #include "userlist.h"
 #include "logging.h"
 #include "stdcmds.h"
-#include "modules.h"
 #include "tcm_io.h"
 #include "wild.h"
 #include "match.h"

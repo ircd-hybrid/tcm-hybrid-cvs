@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.26 2002/12/30 07:31:36 bill Exp $
+ * $Id: services.c,v 1.27 2004/05/11 19:31:59 bill Exp $
  */
 
 #include <stdio.h>
@@ -33,7 +33,6 @@
 #include "tcm_io.h"
 #include "serno.h"
 #include "patchlevel.h"
-#include "modules.h"
 #include "actions.h"
 #include "handler.h"
 

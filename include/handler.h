@@ -1,7 +1,7 @@
-#ifndef __NO_HANDLER_H
-#define __NO_HANDLER_H
+#ifndef __HANDLER_H
+#define __HANDLER_H
 
-/* $Id: handler.h,v 1.5 2002/06/24 00:40:15 db Exp $ */
+/* $Id: handler.h,v 1.6 2004/05/11 19:31:56 bill Exp $ */
 
 #define MAX_HASH 256
 
@@ -52,6 +52,8 @@ void del_numeric_handler(struct serv_numeric *);
 
 void add_serv_notice_handler(struct serv_command *);
 void del_serv_notice_handler(struct serv_command *);
-#endif
 
+void m_unregistered(struct connection *, int argc, char *argv[]);
+void m_not_admin(struct connection *, int argc, char *argv[]);
 
+#endif /* !__HANDLER_H_ */

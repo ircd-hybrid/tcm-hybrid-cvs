@@ -1,7 +1,7 @@
 /*
  * client_list.c: contains routines for managing lists of clients
  *
- * $Id: client_list.c,v 1.8 2004/04/22 08:32:15 bill Exp $
+ * $Id: client_list.c,v 1.9 2004/05/11 19:31:58 bill Exp $
  */
 
 #include <stdio.h>
@@ -16,7 +16,6 @@
 #include "hash.h"
 #include "client_list.h"
 #include "handler.h"
-#include "modules.h"
 #include "event.h"
 #include "match.h"
 

@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.28 2004/04/22 08:32:08 bill Exp $
+# $Id: Makefile.in,v 1.29 2004/05/11 19:31:48 bill Exp $
 CC = @CC@
 RM = @RM@
 CP = @CP@
@@ -17,7 +17,6 @@ prefix = @prefix@
 
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
 
-#SUBDIRS = src modules tools
 SUBDIRS = src tools
 
 OBJECTS = ${SOURCES:.c=.o}
@@ -43,20 +42,6 @@ install: tcm
 	mkdir -p $(prefix)/etc ; \
 	fi
 
-	-@if [ -x $(prefix)/modules-old ] ; then \
-	echo rm -rf $(prefix)/modules-old ; \
-	${RM} -rf $(prefix)/modules-old ; \
-	fi
-
-	-@if [ -x $(prefix)/modules ] ; then \
-	echo mv $(prefix)/modules $(prefix)/modules-old ; \
-	mv $(prefix)/modules $(prefix)/modules-old ; \
-	fi
-
-	-@if [ ! -x $(prefix)/modules ] ; then \
-	echo mkdir -p $(prefix)/modules ; \
-	mkdir -p $(prefix)/modules ; \
-	fi
 
 	-@if [ ! -x $(prefix)/help ] ; then \
 	echo mkdir -p $(prefix)/help ; \

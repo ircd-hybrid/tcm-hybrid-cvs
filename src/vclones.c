@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.19 2004/04/22 08:32:16 bill Exp $
+ * $Id: vclones.c,v 1.20 2004/05/11 19:31:59 bill Exp $
  */
 
 #include <assert.h>
@@ -17,7 +17,6 @@
 #include "tcm.h"
 #include "tcm_io.h"
 #include "bothunt.h"
-#include "modules.h"
 #include "stdcmds.h"
 #include "wild.h"
 #include "parse.h"

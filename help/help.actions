@@ -1,0 +1,3 @@
+.action [action name] [kline|skline|dline|ircwarn|dccwarn] [duration] [reason]
+
+	This command is used to dynamically configure the behavior of the tcm.

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.223 2004/04/22 08:32:15 bill Exp $
+ * $Id: bothunt.c,v 1.224 2004/05/11 19:31:58 bill Exp $
  */
 
 #include <stdio.h>
@@ -27,7 +27,6 @@
 #include "wild.h"
 #include "serno.h"
 #include "patchlevel.h"
-#include "modules.h"
 #include "tcm_io.h"
 #include "parse.h"
 #include "actions.h"

@@ -1,3 +1,20 @@
+leeh        2002/06/24 12:21:53 EDT	(20020624_7)
+
+  Modified files:
+    include              tcm_io.h 
+    src                  main.c tcm_io.c tools.c 
+  Log:
+  - fixed dlink delete logic
+  - memset connections struct.
+  
+  Revision  Changes    Path
+  1.44      +7 -0      tcm-hybrid/include/tcm_io.h
+  1.123     +1 -0      tcm-hybrid/src/main.c
+  1.95      +6 -0      tcm-hybrid/src/tcm_io.c
+  1.6       +3 -6      tcm-hybrid/src/tools.c
+
+
+
 leeh        2002/06/24 11:44:58 EDT	(20020624_6)
 
   Modified files:

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.30 2002/05/27 00:42:13 db Exp $
+ * $Id: parse.c,v 1.31 2002/05/27 02:46:08 db Exp $
  */
 
 #include <stdio.h>
@@ -41,8 +41,8 @@ static void proc(int conn_num, char *source, char *function, char *body);
 static void privmsgproc(char *nick,char *userhost, int argc, char *argv[]);
 static void send_umodes(char *nick);
 static void onkick(char *nick);
-static void onnick(char *old_nick, char *new_nick);
-static void onnicktaken(void);
+static void on_nick(char *old_nick, char *new_nick);
+static void on_nick_taken(void);
 static void cannotjoin(char *channel);
 
 int  maxconns = 0;
@@ -334,7 +334,7 @@ void proc(int conn_num, char *source,char *fctn,char *param)
     if (strncmp(argv[1], ":Closing Link: ", 15) == 0)
     {
       if (strstr(argv[1], "collision)"))
-        onnicktaken();
+        on_nick_taken();
       server_link_closed(conn_num);
     }
   }
@@ -353,7 +353,7 @@ void proc(int conn_num, char *source,char *fctn,char *param)
   }
   else if (strcmp(argv[1],"NICK") == 0)
   {
-    onnick(source,argv[2]);
+    on_nick(source,argv[2]);
   }
   else if (strcmp(fctn,"NOTICE") == 0)
   {
@@ -367,14 +367,6 @@ void proc(int conn_num, char *source,char *fctn,char *param)
      isdigit((int) fctn[2]))
     numeric = atoi(fctn);
 
-  if(numeric > 0)
-  {
-    struct serv_numeric *ptr;
-
-    for(ptr = serv_numeric_table; ptr; ptr = ptr->next)
-      ptr->handler(numeric, argc, argv);
-  }
-
   switch(numeric)
   {
     case RPL_STATSYLINE:
@@ -383,7 +375,7 @@ void proc(int conn_num, char *source,char *fctn,char *param)
       break;
 
     case ERR_NICKNAMEINUSE:
-      onnicktaken();
+      on_nick_taken();
       break;
 
     case  ERR_NOTREGISTERED:
@@ -620,7 +612,7 @@ onkick(char *nick)
 }
 
 /*
- * connick
+ * on_nick
  *
  * inputs       - old nick
  *		- new nick
@@ -629,7 +621,7 @@ onkick(char *nick)
  */
 
 static void
-onnick(char *old_nick,char *new_nick)
+on_nick(char *old_nick,char *new_nick)
 {
   char *p;
 
@@ -646,7 +638,7 @@ onnick(char *old_nick,char *new_nick)
 }
 
 /*
- * onnicktaken
+ * on_nick_taken
  *
  * inputs       - NONE
  * output       - NONE
@@ -654,11 +646,12 @@ onnick(char *old_nick,char *new_nick)
  */
 
 static void
-onnicktaken(void)
+on_nick_taken(void)
 {
   char randnick[MAX_NICK];
 
-  (void)snprintf(randnick,sizeof(randnick) - 1,"%s%1d",config_entries.dfltnick,
+  (void)snprintf(randnick,MAX_NICK,"%s%1d",
+		 config_entries.dfltnick,
                  (int) random() % 10);
 
   if (*mychannel == '\0')

@@ -1,3 +1,24 @@
+leeh        2002/05/26 12:10:30 EDT	(20020526_19)
+
+  Modified files:
+    etc                  userlist.cf 
+    include              bothunt.h tcm.h userlist.h 
+    src                  bothunt.c commands.c main.c userlist.c 
+  Log:
+  - ripped out glines
+  
+  Revision  Changes    Path
+  1.21      +4 -9      tcm-hybrid/etc/userlist.cf
+  1.34      +0 -12     tcm-hybrid/include/bothunt.h
+  1.42      +1 -0      tcm-hybrid/include/tcm.h
+  1.40      +0 -1      tcm-hybrid/include/userlist.h
+  1.110     +0 -202    tcm-hybrid/src/bothunt.c
+  1.92      +0 -9      tcm-hybrid/src/commands.c
+  1.80      +0 -4      tcm-hybrid/src/main.c
+  1.77      +0 -5      tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/26 11:26:02 EDT	(20020526_18)
 
   Modified files:

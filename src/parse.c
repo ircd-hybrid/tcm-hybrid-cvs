@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.72 2002/06/20 23:46:14 leeh Exp $
+ * $Id: parse.c,v 1.73 2002/06/21 01:07:43 leeh Exp $
  */
 
 #include <stdio.h>
@@ -508,8 +508,8 @@ send_umodes(char *nick)
 {
   if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
   {
-    print_to_server("MODE %s :+bcdfknrswxyzl");
-    print_to_server("STATS I", nick);
+    print_to_server("MODE %s :+bcdfknrswxyzl", nick);
+    print_to_server("STATS I");
   }
   else
   {

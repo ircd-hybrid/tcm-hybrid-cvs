@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.115 2002/06/08 21:54:54 db Exp $
+ * $Id: userlist.c,v 1.116 2002/06/21 01:07:44 leeh Exp $
  *
  */
 
@@ -726,7 +726,6 @@ save_prefs(void)
  * output	- NONE
  * side effects	- first part of oper list is loaded from file
  */
-
 void
 load_userlist()
 {

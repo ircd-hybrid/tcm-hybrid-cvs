@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.114 2002/06/07 11:20:14 leeh Exp $ */
+/* $Id: main.c,v 1.115 2002/06/21 01:07:43 leeh Exp $ */
 
 #include "setup.h"
 
@@ -176,7 +176,6 @@ main(int argc, char *argv[])
     load_config_file(config_entries.conffile);
   else
     load_config_file(CONFIG_FILE);
-  load_userlist();
 #ifdef DEBUGMODE
   exemption_summary();
 #endif

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.124 2002/06/07 11:20:14 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.125 2002/06/20 23:46:13 leeh Exp $ */
 
 #include "setup.h"
 
@@ -608,7 +608,6 @@ m_trace(int connnum, int argc, char *argv[])
 
   clear_hash();
   clear_bothunt();
-  print_to_server("STATS Y");
 }
 
 void

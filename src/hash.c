@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.31 2002/06/07 11:20:14 leeh Exp $
+ * $Id: hash.c,v 1.32 2002/06/20 23:46:13 leeh Exp $
  */
 
 #include <stdio.h>
@@ -90,8 +90,7 @@ free_hash_links(struct hash_rec *ptr)
  * output               - NONE
  * side effects         - clear all allocated memory hash tables
  *
-*/
-
+ */
 void 
 clear_hash(void)
 {
@@ -126,6 +125,10 @@ clear_hash(void)
 	}
 #endif
     }
+
+  tcm_status.doing_trace = YES;
+  print_to_server("STATS Y");
+  print_to_server("TRACE");
 }
 
 /*

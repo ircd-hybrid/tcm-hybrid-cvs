@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.71 2002/06/07 11:20:14 leeh Exp $
+ * $Id: parse.c,v 1.72 2002/06/20 23:46:14 leeh Exp $
  */
 
 #include <stdio.h>
@@ -406,9 +406,6 @@ process_server(struct source_client *source_p, char *function, char *param)
       oper_time = time(NULL);
       send_umodes(tcm_status.my_nick);
       clear_hash();
-      print_to_server("STATS Y");
-      tcm_status.doing_trace = YES;
-      print_to_server("TRACE");
       break;
 	
     case RPL_TRACEOPERATOR:
@@ -496,8 +493,6 @@ do_init(void)
   join();
   clear_bothunt();
   clear_hash();
-  tcm_status.doing_trace = YES;
-  print_to_server("TRACE");
 }
 
 /*

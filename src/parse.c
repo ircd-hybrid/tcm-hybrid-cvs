@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.10 2002/05/24 14:13:57 leeh Exp $
+ * $Id: parse.c,v 1.11 2002/05/24 14:35:21 leeh Exp $
  */
 
 #include <stdio.h>
@@ -519,13 +519,10 @@ privmsgproc(char *nick, char *userhost, int argc, char *argv[])
 
   token = get_token(argv[3]+1);
 
-  if (config_entries.opers_only)
+  if (!isoper(user,host))
   {
-    if (!isoper(user,host))
-    {
-      notice(nick,"You are not an operator");
-      return;
-    }
+    notice(nick,"You are not an operator");
+    return;
   }
 
   switch(token)

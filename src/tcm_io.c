@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.9 2002/05/24 14:13:58 leeh Exp $
+ * $Id: tcm_io.c,v 1.10 2002/05/24 14:35:21 leeh Exp $
  */
 
 #include <stdio.h>
@@ -474,7 +474,7 @@ connect_remote_client(char *nick,char *user,char *host,int sock)
   connections[i].type = 0;
   connections[i].type |= isoper(user,host);
 
-  if (config_entries.opers_only && !isoper(user,host))
+  if (!isoper(user,host))
   {
     notice(nick, "You are not an operator");
     return;

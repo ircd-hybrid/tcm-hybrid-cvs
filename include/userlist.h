@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.34 2002/05/24 14:13:51 leeh Exp $ */
+/* $Id: userlist.h,v 1.35 2002/05/24 14:35:18 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -130,7 +130,6 @@ struct hashrec {
 struct config_list {
   int  hybrid;
   int  hybrid_version;
-  int  opers_only;
   char tcm_pid_file[MAX_CONFIG];
   char username_config[MAX_CONFIG];
   char virtual_host_config[MAX_CONFIG];

@@ -1,3 +1,7 @@
+*** 20010722_14 by wcampbel
+Fixed the tcm.check crontab script
+
+
 *** 20010722_13 by wcampbel
 Add .quote/.raw commands.  They are disabled by default, and not
 saupported by the developers.

@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.21 2002/05/18 02:53:20 db Exp $
+ * $Id: logging.c,v 1.22 2002/05/20 01:29:30 db Exp $
  *
  * - db
  */
@@ -56,16 +56,9 @@ static char *durtn(double);
  *   is still pointed to by the original param.  Note that since [ is a
  *   valid char for both nicks and usernames, this is non-trivial.
  */
-/* Also, for digi servers, added form of "nick (user@host)" */
 
-/*
- * Due to the fact texas net irc servers changed the output of the /trace
- * command slightly, chopuh() was coring... I've made the code a bit
- * more robust - Dianora
- *
- */
-
-void chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
+void 
+chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
 {
   char *uh;
   char *p;
@@ -265,7 +258,8 @@ void chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
  *
  */
 
-static FILE *initlog(void)
+static FILE 
+*initlog(void)
 {
   time_t current_time;
   struct tm *broken_up_time;
@@ -351,7 +345,8 @@ static FILE *initlog(void)
  *
  */
 
-void timestamp_log(FILE *fp)
+void 
+timestamp_log(FILE *fp)
 {
   time_t current_time;
   struct tm *broken_up_time;
@@ -381,7 +376,8 @@ void timestamp_log(FILE *fp)
  * side effects	- log entry made
  */
 
-void log_kline(char *command_name,
+void 
+log_kline(char *command_name,
 	       char *pattern,
 	       int  kline_time,
 	       char *who_did_command,
@@ -448,7 +444,8 @@ void log_kline(char *command_name,
  * side effects -
  */
 
-void logfailure(char *nickuh,int botreject)
+void 
+logfailure(char *nickuh,int botreject)
 {
   struct plus_c_info userinfo;
   struct failrec *tmp, *hold = NULL;
@@ -512,7 +509,8 @@ void logfailure(char *nickuh,int botreject)
  *
  */
 
-void kline_report(char *server_notice)
+void 
+kline_report(char *server_notice)
 {
   FILE *fp_log;
   time_t current_time;
@@ -557,7 +555,8 @@ void kline_report(char *server_notice)
  * Thanks Thembones for bug fix (Brian Kraemer kraemer@u.washington.edu)
  */
 
-void kill_add_report(char *server_notice)
+void
+kill_add_report(char *server_notice)
 {
   char buff[MAX_BUFF], *p, *q;
   char *nick, *by, *reason;
@@ -614,7 +613,8 @@ void kill_add_report(char *server_notice)
  * side effects	- NONE
  */
 
-char *date_stamp(void)
+char *
+date_stamp(void)
 {
   time_t current_time;
   struct tm *broken_up_time;
@@ -646,17 +646,18 @@ char *date_stamp(void)
  * side effects	- log entry is made 
  */
 
-void log_problem(char *function_name,char *reason)
-  {
-    FILE *error_fp;
+void 
+log_problem(char *function_name,char *reason)
+{
+  FILE *error_fp;
 
-    if( (error_fp = fopen(ERROR_LOG,"a")) )
-      {
-	timestamp_log(error_fp);
-	(void)fprintf(error_fp,"%s - %s\n",function_name, reason);
-	(void)fclose(error_fp);
-      }
-  }
+  if( (error_fp = fopen(ERROR_LOG,"a")) )
+    {
+      timestamp_log(error_fp);
+      (void)fprintf(error_fp,"%s - %s\n",function_name, reason);
+      (void)fclose(error_fp);
+    }
+}
 
 /*
  * log()
@@ -667,7 +668,8 @@ void log_problem(char *function_name,char *reason)
  * side effects	- log entry is made 
  */
 
-void log(char *format,...)
+void
+log(char *format,...)
 {
   char msg[MAX_BUFF];
   FILE *l_fp;
@@ -694,7 +696,8 @@ void log(char *format,...)
  * side effects	- uptime of tcm and opered up time is printed to socket
  */
 
-void report_uptime(int sock)
+void 
+report_uptime(int sock)
 {
   prnt(sock, "*** tcm has been up for %s\n",
        durtn((double) time(NULL)-startup_time));
@@ -712,7 +715,8 @@ void report_uptime(int sock)
  * side effects	- uptime is formatted
  */
 
-static char *durtn(double a)
+static char *
+durtn(double a)
 {
  int seconds;
  int minutes;

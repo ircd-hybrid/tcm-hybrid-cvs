@@ -1,0 +1,17 @@
+Usage: .smartlist [-r] [-l list name] [-n pattern] [-u pattern] [-h pattern] [-i pattern] [-g pattern] [-a nick!user@host|ip;gecos pattern] [-m match]
+
+ Extremely useful tool for listing clients matching a broad possibility of patterns
+
+  -r   - the patterns provided are regular expressions (otherwise they are simple wildcard patterns)
+  -l   - the list you want to store the results in
+  -n   - pattern to be matched against nicknames
+  -u   - pattern to be matched against usernames
+  -h   - pattern to be matched against hostnames
+  -i   - pattern to be matched against ip addresses
+  -g   - pattern to be matched against gecos
+  -a   - pattern to be matched against the composition of all information
+         in the form nick!user@host|ip;gecos
+  -m   - specifies the match parameter, which dictates which fields should
+         be equal to one-another.  for example, a match parameter of 'ng'
+         would require all resulting clients to have matching nicknames and
+         gecos information

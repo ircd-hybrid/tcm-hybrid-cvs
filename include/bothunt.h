@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.32 2002/05/26 13:09:19 leeh Exp $ */
+/* $Id: bothunt.h,v 1.33 2002/05/26 15:25:57 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -133,6 +133,6 @@ extern void on_stats_i(int connnum, int argc, char *argv[]);
 extern void onservnotice(int connnum, int argc, char *argv[]);
 extern struct s_testline testlines;
 extern int doingtrace;
-extern char myclass[100]; /* XXX ewww */
+extern char myclass[MAX_CLASS]; /* XXX ewww */
 
 #endif

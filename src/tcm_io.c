@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.43 2002/05/26 07:30:54 db Exp $
+ * $Id: tcm_io.c,v 1.44 2002/05/26 15:26:00 db Exp $
  */
 
 #include <stdio.h>
@@ -125,7 +125,8 @@ read_packet(void)
 	if (connections[i].state != S_IDLE)
 	  {
 	    FD_SET(connections[i].socket, &readfds);
-	    FD_SET(connections[i].socket, &writefds);
+	    if(connections[i].io_write_function != NULL)
+	      FD_SET(connections[i].socket, &writefds);
 	  }
       }
 

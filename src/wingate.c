@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.40 2002/05/26 13:09:23 leeh Exp $ */
+/* $Id: wingate.c,v 1.41 2002/05/26 15:26:00 db Exp $ */
 
 
 #include <netdb.h>
@@ -295,9 +295,12 @@ read_squid(int i)
 /* ZZZ XXX */
 #if notyet
 #ifdef DETECT_SOCKS
+
 static void
 read_socks(int i)
 {
+  unsigned char tmp[SMALL_BUFF];
+
   switch (connections[i].user_state)
     {
     case SOCKS5_CONNECTING:
@@ -305,99 +308,81 @@ read_socks(int i)
       tmp[1] = 1; /* Number of supported auth methods */
       tmp[2] = 0; /* Auth method 0 (no auth) */
       tmp[3] = 0; /* EOF */
-      if (write(socks[i].socket, tmp, 4) != 4)
+      if (write(connections[i].socket, tmp, 4) != 4)
 	{
-	  close(socks[i].socket);
-#if 0
-
-	  socks_bindsocket(socks[i].nick, socks[i].user, socks[i].host, 4);
-	  connections[i].state = 0;
-	  connections[i].socket = INVALID;
-#endif
-
+	  close_connection(i);
 	  break;
 	} 
       connections[i].user_state = SOCKS5_SENTVERSION;
       break;
+
     case SOCKS5_SENTVERSION:
-      memset(tmp, 0, sizeof(tmp));
+      if (connections[i].buffer[0] != '\0')
+	{
+	  report_open_socks(i);
+	}
+      else
+	{
+	  if(config_entries.debug && outfile)
+	    {
+	      fprintf(outfile,
+		      "DEBUG: Socks 5 server at %s rejects login\n",
+		      connections[i].host);
+	    }
+	}
+      close_connection(i);
+      break;
+
+    case SOCKS4_CONNECTING:
+      tmp[0] = 4; /* socks v4 */
+      tmp[1] = 1; /* connect */
+
+      *((unsigned short *) (tmp+2)) =
+	htons(SOCKS_CHECKPORT); /* Connect to port */
+
+      *((unsigned int *) (tmp+4)) = 
+	inet_addr(SOCKS_CHECKIP); /* Connect to ip */
+
+      strcpy(tmp+8, "tcm"); /* Dummy username */
+      if (write(socks[i].socket, tmp, 12)!=12)
+	{
+	  close(socks[i].socket);
+	  break;
+	} 
+      if(config_entries.debug && outfile)
+	{
+	  fprintf(outfile,
+		  "DEBUG: Sent Socks 4 CONNECT to %s\n",
+		  socks[i].host);
+	}
+      connections[i].state=SOCKS4_SENTCONNECT;
+      break;
+
+    case SOCKS4_SENTCONNECT:
+      memset(tmp, 0xCC, sizeof(tmp));
+      close(connections[i].socket);
+      break;
+
+      if (tmp[1] != 90)
+	{
+	  if(config_entries.debug && outfile)
+	    {
+	      fprintf(outfile,
+		      "DEBUG: Socks 4 server at %s denies connect (0x%02hhx)\n",
+		      connections[i].host, tmp[1]);
+	    }
+	  close_connection(i);
+	  break;
+	}
       report_open_socks(i);
       close(connections[i].socket);
-      connections[i].state = 0;
-      connections[i].socket = INVALID;
+      break;
+    default:
       break;
     }
-  if(config_entries.debug && outfile)
-    {
-      fprintf(outfile,
-	      "DEBUG: Socks 5 server at %s rejects login\n",
-	      connections[i].host);
-    }
-
-  close(connections[i].socket);
-#if 0
-  socks_bindsocket(socks[i].nick, socks[i].user, socks[i].host, 4);
-#endif
-  connections[i].user_state = 0;
-  connections[i].socket = INVALID;
-  break;
- case SOCKS4_CONNECTING:
-   tmp[0] = 4; /* socks v4 */
-   tmp[1] = 1; /* connect */
-
-   *((unsigned short *) (tmp+2)) =
-     htons(SOCKS_CHECKPORT); /* Connect to port */
-
-   *((unsigned int *) (tmp+4)) = 
-     inet_addr(SOCKS_CHECKIP); /* Connect to ip */
-
-   strcpy(tmp+8, "tcm"); /* Dummy username */
-   if (write(socks[i].socket, tmp, 12)!=12) {
-     close(socks[i].socket);
-     socks[i].state = 0;
-     socks[i].socket = INVALID;
-     break;
-   } 
-   if(config_entries.debug && outfile)
-     {
-       fprintf(outfile,
-	       "DEBUG: Sent Socks 4 CONNECT to %s\n",
-	       socks[i].host);
-     }
-   connections[i].state=SOCKS4_SENTCONNECT;
-   break;
- case SOCKS4_SENTCONNECT:
-   memset(tmp, 0xCC, sizeof(tmp));
-   close(connections[i].socket);
-   connections[i].state = 0;
-   connections[i].socket = INVALID;
-   break;
-} 
-if (tmp[1] != 90)
-{
-  if(config_entries.debug && outfile)
-    {
-      fprintf(outfile,
-	      "DEBUG: Socks 4 server at %s denies connect (0x%02hhx)\n",
-	      connections[i].host, tmp[1]);
-    }
-  close(connections[i].socket);
-  connections[i].user_state = 0;
-  connections[i].socket = INVALID;
-  break;
 }
-report_open_socks(i);
-close(connections[i].socket);
-connections[i].user_state = 0;
-connections[i].socket = INVALID;
-break;
-default:
-break;
-}
-#endif
-}
-
-#endif
+#endif	/* #ifdef SOCKS */
+#endif	/* #if notyet */
 
 void
 _config(int connnum, int argc, char *argv[])

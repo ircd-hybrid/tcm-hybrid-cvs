@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.53 2002/06/03 11:03:06 leeh Exp $ */
+/* $Id: wingate.c,v 1.54 2002/06/03 20:22:28 db Exp $ */
 
 
 #include <netdb.h>
@@ -42,7 +42,7 @@
 #ifdef DETECT_WINGATE
 int act_wingate;
 static void report_open_wingate(int i);
-static void wingate_start_test(struct plus_c_info *info);
+static void wingate_start_test(struct user_entry *info);
 static void read_wingate(int i);
 static int n_open_wingate_fds=0;
 #endif
@@ -50,7 +50,7 @@ static int n_open_wingate_fds=0;
 #ifdef DETECT_SOCKS
 int act_socks;
 static void report_open_socks(int i);
-static void socks_start_test(struct plus_c_info *info_p, int socksversion);
+static void socks_start_test(struct user_entry *info_p, int socksversion);
 
 /* XXX */
 #if notyet
@@ -63,7 +63,7 @@ static int n_open_socks_fds=0;
 #ifdef DETECT_SQUID
 int act_squid;
 static void report_open_squid(int i);
-static void squid_start_test(struct plus_c_info *info_p, int port);
+static void squid_start_test(struct user_entry *info_p, int port);
 static void read_squid(int i);
 static int n_open_squid_fds=0;
 #endif
@@ -121,7 +121,7 @@ struct dcc_command proxy_msgtab = {
  * side effects	- Sets up a socket and connects to the given host
  */
 static void
-wingate_start_test(struct plus_c_info *info_p)
+wingate_start_test(struct user_entry *info_p)
 {
   int found_slot;
   struct sockaddr_in socketname;
@@ -134,15 +134,15 @@ wingate_start_test(struct plus_c_info *info_p)
 
   n_open_wingate_fds++;
 
-  strncpy(connections[found_slot].user,info_p->user,MAX_USER-1);
-  strncpy(connections[found_slot].host,info_p->host,MAX_HOST-1);
-  strncpy(connections[found_slot].nick,info_p->nick,MAX_NICK-1);
-  strncpy(connections[found_slot].ip,info_p->ip,MAX_IP-1);
+  strncpy(connections[found_slot].user, info_p->user, MAX_USER-1);
+  strncpy(connections[found_slot].host, info_p->host, MAX_HOST-1);
+  strncpy(connections[found_slot].nick, info_p->nick, MAX_NICK-1);
+  strncpy(connections[found_slot].ip, info_p->ip_host, MAX_IP-1);
   connections[found_slot].io_read_function = read_wingate;
   connections[found_slot].io_write_function = NULL;
   connections[found_slot].io_close_function = NULL;
 
-  if (inet_aton(info_p->ip, &socketname.sin_addr)) 
+  if (inet_aton(info_p->ip_host, &socketname.sin_addr)) 
     {
       connections[found_slot].socket =
 	connect_to_given_ip_port(&socketname, 23);
@@ -163,7 +163,7 @@ wingate_start_test(struct plus_c_info *info_p)
  * side effects	- Sets up a socket and connects to the given host
  */
 static void
-socks_start_test(struct plus_c_info *info_p, int socksversion)
+socks_start_test(struct user_entry *info_p, int socksversion)
 {
   int found_slot;
   struct sockaddr_in socketname;
@@ -188,8 +188,8 @@ return;
 
   strncpy(connections[found_slot].user, info_p->user, MAX_USER-1);
   strncpy(connections[found_slot].host, info_p->host, MAX_HOST-1);
-  strncpy(connections[found_slot].nick, info_p->nick,MAX_NICK-1);
-  strncpy(connections[found_slot].ip, info_p->ip,MAX_IP-1);
+  strncpy(connections[found_slot].nick, info_p->nick, MAX_NICK-1);
+  strncpy(connections[found_slot].ip, info_p->ip_host, MAX_IP-1);
   connections[found_slot].io_read_function = NULL;
   connections[found_slot].io_write_function = NULL;
   connections[found_slot].io_close_function = NULL;
@@ -206,7 +206,7 @@ return;
  * side effects	- Sets up a socket and connects to the given host
  */
 static void
-squid_start_test(struct plus_c_info *info_p, int port)
+squid_start_test(struct user_entry *info_p, int port)
 {
   int found_slot;
   struct sockaddr_in socketname;
@@ -223,11 +223,11 @@ squid_start_test(struct plus_c_info *info_p, int port)
   strncpy(connections[found_slot].user, info_p->user, MAX_USER-1);
   strncpy(connections[found_slot].host, info_p->host, MAX_HOST-1);
   strncpy(connections[found_slot].nick, info_p->nick, MAX_NICK-1);
-  strncpy(connections[found_slot].ip, info_p->ip, MAX_IP-1);
+  strncpy(connections[found_slot].ip, info_p->ip_host, MAX_IP-1);
   connections[found_slot].io_read_function = read_squid;
   connections[found_slot].io_write_function = NULL; 
   connections[found_slot].io_close_function = NULL;
-  if (inet_aton(info_p->ip, &socketname.sin_addr)) 
+  if (inet_aton(info_p->ip_host, &socketname.sin_addr)) 
     {
       connections[found_slot].socket =
 	connect_to_given_ip_port(&socketname, port);
@@ -405,7 +405,7 @@ read_socks(int i)
 #endif	/* #if notyet */
 
 void
-user_signon(struct plus_c_info *info_p)
+user_signon(struct user_entry *info_p)
 {
   if (wingate_class(info_p->class))
     {

@@ -1,16 +1,6 @@
-/* $Id: parse.h,v 1.16 2002/06/02 23:30:07 db Exp $ */
+/* $Id: parse.h,v 1.17 2002/06/03 20:22:25 db Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
-
-
-struct plus_c_info
-{
-  char *nick;
-  char *user;
-  char *host;
-  char class[MAX_CLASS+1];
-  char ip[MAX_IP+1];
-};
 
 void parse_server(int);
 void parse_client(int);

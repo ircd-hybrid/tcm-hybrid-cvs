@@ -1,3 +1,8 @@
+*** 20011109_2 by wcampbel
+Fix make lint
+Minor cleanups
+
+
 *** 20011109_1 by wcampbel
 Bunched all the SERVICES defines together, requested by paulsen
 

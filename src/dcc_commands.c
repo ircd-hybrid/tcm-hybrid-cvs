@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.95 2002/05/27 21:02:34 db Exp $ */
+/* $Id: dcc_commands.c,v 1.96 2002/05/27 21:55:19 leeh Exp $ */
 
 #include "setup.h"
 
@@ -1048,7 +1048,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
     {
       switch(flags[i])
       {
-      case 'e': type = TYPE_ECHO; break;
       case 'i': type = TYPE_INVS; break;
       case 'k': type = TYPE_VIEW_KLINES; break;
       case 'y': type = TYPE_SPY; break;
@@ -1133,7 +1132,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
 #ifdef ENABLE_W_FLAG
           case 'W': type = TYPE_WALLOPS; break;
 #endif
-	  case 'e': type = TYPE_ECHO; break;
 	  case 'i': type = TYPE_INVS; break;
 	  case 'k': type = TYPE_VIEW_KLINES; break;
           case 'y': type = TYPE_SPY; break;
@@ -1222,7 +1220,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	    case 'k': type = TYPE_VIEW_KLINES; break;
 	    case 'p': type = TYPE_PARTYLINE; break;
 	    case 'w': type = TYPE_WARN; break;
-	    case 'e': type = TYPE_ECHO; break;
 	    case 'i': type = TYPE_INVS; break;
             case 'y': type = TYPE_SPY; break;
 	    case 'o': type = TYPE_LOCOPS; break;

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.47 2002/05/27 21:47:07 leeh Exp $ */
+/* $Id: userlist.h,v 1.48 2002/05/27 21:55:16 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -69,7 +69,7 @@ struct auth_file_entry
   char host[MAX_HOST];
   char usernick[MAX_NICK];
   char password[MAX_CONFIG];
-  unsigned long type;
+  int type;
 };
 
 struct exception_entry
@@ -82,8 +82,8 @@ struct exception_entry
 int find_user_in_userlist(const char *);
 int find_user_in_connections(const char *);
 void init_userlist_handlers(void);
-unsigned long get_umodes_from_prefs(int);
-unsigned long get_umodes_current(int);
+int get_umodes_from_prefs(int);
+int get_umodes_current(int);
 
 void set_umode(int, int, const char *);
 void add_an_oper(int, char *argv[]);
@@ -123,7 +123,6 @@ void exemption_summary();
 #define TYPE_INVM		0x01000 /* user is invisible to STATS p list */
 #define TYPE_DLINE		0x02000 /* user has .dline privs */
 #define TYPE_SPY		0x04000 /* links, motd, info requests */
-#define TYPE_ECHO		0x10000 /* user is echo'ed */
 #define TYPE_VIEW_KLINES	0x20000 /* user see's klines/unklines */
 #define TYPE_SUSPENDED		0x40000 /* user is suspended */
 #ifdef ENABLE_W_FLAG

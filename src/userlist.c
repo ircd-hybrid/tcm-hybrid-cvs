@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.88 2002/05/27 21:47:11 leeh Exp $
+ * $Id: userlist.c,v 1.89 2002/05/27 21:55:19 leeh Exp $
  *
  */
 
@@ -92,7 +92,6 @@ static struct umode_struct umode_flags[] =
   { 'i', TYPE_INVS,		},
   { 'o', TYPE_LOCOPS,		},
   { 'p', TYPE_PARTYLINE,	},
-  { 'e', TYPE_ECHO,		},
   { 'x', TYPE_SERVERS,		},
   { (char)0, 0,			}
 };
@@ -278,20 +277,20 @@ find_user_in_connections(const char *username)
   return -1;
 }
 
-unsigned long
+int
 get_umodes_current(int user)
 {
   return(userlist[user].type);
 }
 
-unsigned long
+int
 get_umodes_from_prefs(int user)
 {
   FILE *fp;
-  unsigned long type;
   char user_pref_filename[MAX_BUFF+1];
   char type_string[SMALL_BUFF+1];
   char *p;
+  int type;
 
   snprintf(user_pref_filename,
 	   MAX_BUFF, "etc/%s.pref", userlist[user].usernick);
@@ -305,7 +304,7 @@ get_umodes_from_prefs(int user)
     if((p = strchr(type_string, '\n')) != NULL)
       *p = '\0';
 
-    sscanf(type_string, "%lu", &type);
+    type = atoi(type_string);
     return type;
   }
   

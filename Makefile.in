@@ -3,7 +3,7 @@ CC = @CC@
 RM = @RM@
 MKDEP = ${CC} -MM
 
-TCMLIBS = @LIBS@ -ldl
+TCMLIBS = @LIBS@
 INCLUDES = -I./include
 CPPFLAGS = ${INCLUDES} @CPPFLAGS@
 

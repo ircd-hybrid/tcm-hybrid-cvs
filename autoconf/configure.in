@@ -25,6 +25,8 @@ AC_CHECK_FUNC(res_mkquery,, AC_CHECK_LIB(resolv, res_mkquery))
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(descrypt, crypt,,AC_CHECK_LIB(crypt, crypt,,)))
 
+AC_CHECK_FUNC(dlopen,, AC_CHECK_LIB(dl, dlopen))
+
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/socketvar.h sys/stream.h crypt.h)

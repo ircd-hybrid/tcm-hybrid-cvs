@@ -1,3 +1,27 @@
+db          2002/05/19 21:59:57 EDT	(20020520_4)
+
+  Modified files:
+    include              serverif.h tcm.h 
+    modules              serverif.c 
+    src                  Makefile.in main.c 
+  Added files:
+    include              event.h 
+    src                  event.c 
+  Log:
+  - stole the event code from ircd-hybrid-7
+    it does not do anything useful yet but does get initialised at start
+  
+  Revision  Changes    Path
+  1.1       +47 -0     tcm-hybrid/include/event.h (new)
+  1.16      +0 -2      tcm-hybrid/include/serverif.h
+  1.26      +2 -0      tcm-hybrid/include/tcm.h
+  1.67      +11 -13    tcm-hybrid/modules/serverif.c
+  1.17      +1 -0      tcm-hybrid/src/Makefile.in
+  1.1       +271 -0    tcm-hybrid/src/event.c (new)
+  1.39      +20 -26    tcm-hybrid/src/main.c
+
+
+
 db          2002/05/19 21:29:32 EDT	(20020520_3)
 
   Modified files:

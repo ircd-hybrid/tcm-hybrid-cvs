@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.72 2002/05/25 16:21:07 leeh Exp $
+ * $Id: userlist.c,v 1.73 2002/05/25 17:08:12 wcampbel Exp $
  *
  */
 
@@ -34,6 +34,8 @@
 #include "commands.h"
 #include "modules.h"
 #include "match.h"
+#include "wingate.h"
+#include "bothunt.h"
 
 struct auth_file_entry userlist[MAXUSERS];
 struct exception_entry hostlist[MAXHOSTS];

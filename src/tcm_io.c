@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.25 2002/05/25 16:27:27 jmallett Exp $
+ * $Id: tcm_io.c,v 1.26 2002/05/25 17:08:12 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -10,7 +10,7 @@
 #include <ctype.h>
 #include <signal.h>
 #include <stdlib.h>
-#include <sys/errno.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -49,6 +49,7 @@
 #include "logging.h"
 #include "stdcmds.h"
 #include "wild.h"
+#include "wingate.h"
 #include "serno.h"
 #include "patchlevel.h"
 
@@ -865,7 +866,7 @@ connect_to_dcc_ip(const char *nick, const char *hostport)
   char server[MAX_HOST];
   char *p;
   unsigned long remoteaddr;
-  int port;
+  int port = 0;
 
   strcpy(server, hostport);
 

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.99 2002/05/25 16:21:06 leeh Exp $
+ * $Id: bothunt.c,v 1.100 2002/05/25 17:08:11 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -28,6 +28,8 @@
 #include "commands.h"
 #include "modules.h"
 #include "tcm_io.h"
+#include "parse.h"
+#include "wingate.h"
 
 static char* find_domain( char* domain );
 static void  check_nick_flood( char *snotice );

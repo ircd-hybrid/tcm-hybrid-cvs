@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.18 2002/05/25 16:21:07 leeh Exp $
+ * $Id: parse.c,v 1.19 2002/05/25 17:08:11 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -582,7 +582,6 @@ void on_services_notice(int argc, char *argv[])
 void
 privmsgproc(char *nick, char *userhost, int argc, char *argv[])
 {
-  int token;
   char *user;   /* user portion */
   char *host;   /* host portion */
   char *p;

@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.34 2002/05/25 12:34:23 leeh Exp $ */
+/* $Id: wingate.c,v 1.35 2002/05/25 17:08:12 wcampbel Exp $ */
 
 
 #include <netdb.h>
@@ -23,6 +23,8 @@
 #include <stdlib.h>   /* needed for atoi() */
 #include <errno.h>    /* needed for errno, obviously. */
 #endif
+
+#include "wingate.h"
 
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
 
@@ -123,12 +125,6 @@ struct dcc_command proxy_msgtab = {
  "proxy", NULL, {m_unregistered, m_not_admin, m_proxy}
 };
 #endif /* DEBUGMODE */
-
-void _scontinuous(int connnum, int argc, char *argv[]);
-void _continuous(int connnum, int argc, char *argv[]);
-void _user_signon(int connnum, int argc, char *argv[]);
-void _reload_wingate(int connnum, int argc, char *argv[]);
-void _config(int connnum, int argc, char * argv[]);
 
 #ifdef DETECT_WINGATE
 /*

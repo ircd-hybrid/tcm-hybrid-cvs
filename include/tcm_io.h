@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.11 2002/05/25 15:11:13 db Exp $
+ * $Id: tcm_io.h,v 1.12 2002/05/25 17:08:08 wcampbel Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -46,7 +46,7 @@ extern void print_to_socket(int, const char *, ...);
 extern void print_to_server(const char *, ...);
 void send_to_all(int type, const char *format,...);	/* - Hendrix (va'd by bill) */
 
-extern	int connect_to_server_or_dcc(const char *hostport);
+extern	int connect_to_server(const char *hostport);
 extern	int accept_dcc_connection(const char *hostport,
 				  const char *nick, char *userhost);
 extern	int connect_to_given_ip_port(struct sockaddr_in *, int );

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.85 2002/05/25 16:49:18 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.86 2002/05/25 17:08:11 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -42,6 +42,7 @@
 #include "tcm_io.h"
 #include "wild.h"
 #include "match.h"
+#include "parse.h"
 
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>

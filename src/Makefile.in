@@ -13,6 +13,9 @@ DEFINES =
 # -O for optimization.  Can't debug.  Use -g for debuggable code.
 CFLAGS = -g -O2
 
+# Debuggers CFLAGS
+# CFLAGS = -g -O -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations
+
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
 
 SOURCES = 	serverif.c\

@@ -18,7 +18,7 @@
 *   void newnick                                            *
 *   void invite                                             *
 *   void get_userhost                                       *
-*   void msg                                                *
+*   void privmsg                                            *
 ************************************************************/
 
 #include <stdio.h>
@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.1 2000/09/02 04:30:49 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.2 2001/02/01 14:33:02 wcampbel Exp $";
 
 
 /* The following are primitives that send messages to the server to perform
@@ -97,7 +97,7 @@ void notice(char *nick,...)
   va_end(va);
 }
 
-void msg(char *nick,...)
+void privmsg(char *nick,...)
 {
   va_list va;
   char msg[MAX_BUFF];

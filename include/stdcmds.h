@@ -9,7 +9,7 @@ void names(char *chan);
 void join(char *chan,char *key);
 void leave(char *chan);
 void notice(char *nick,...);
-void msg(char *nick,...);
+void privmsg(char *nick,...);
 void say(char *chan,...);
 void action(char *chan,char *msg);
 void newnick(char *nick);

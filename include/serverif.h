@@ -76,7 +76,7 @@ int  bindsocket(char *);
 void toserv(char *,...);	
 void sendtoalldcc(int type,...);	/* - Hendrix (va'd by pro) */
 void report(int type, int channel_report_flag, char *format, ... );
-void sighandlr(int signal);
+void sighandlr(int sig);
 void gracefuldie(int, char*, int);	
 char makeconn(char *,char *,char *);
 void closeconn(int);
@@ -97,7 +97,7 @@ int socks_bindsocket(char *,char *,char *,char *);
 extern struct wingates socks[];
 #endif
 
-void oper(char *mynick);
+void oper();
 void msg_mychannel(char *msg,...);
 
 /* types for sendtoalldcc */

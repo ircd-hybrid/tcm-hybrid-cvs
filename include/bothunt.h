@@ -11,9 +11,9 @@ void on_stats_o(char *);
 void on_stats_e(char *);	
 void on_stats_i(char *);	
 void on_stats_k(char *);	
-void kfind(int socket, char *pattern);
+void kfind(int sock, char *pattern);
 void onservnotice(char *);
-void print_help(int socket,char *help);
+void print_help(int sock,char *help);
 
 void onctcp(char *,char *,char *);
 void report_mem(int);
@@ -106,9 +106,9 @@ extern int maxconns;
 void list_nicks(int, char *);	
 void list_class(int, char *, int);	
 
-void kill_list_users(int socket, char *userhost, char *reason);
-void list_users(int socket,char *userhost);
-void list_virtual_users(int socket,char *);
+void kill_list_users(int sock, char *userhost, char *reason);
+void list_users(int sock,char *userhost);
+void list_virtual_users(int sock,char *);
 
 void check_clones(void);
 void report_clones(int);
@@ -136,11 +136,11 @@ void ontraceclass(void);
 void inithash(void);
 void init_link_look_table(void);
 
-void report_failures(int socket, int num);
-void report_domains(int socket, int num);
-void report_multi(int socket, int nclones);
-void report_multi_host(int socket, int nclones);
-void report_multi_user(int socket, int nclones);
-void report_multi_virtuals(int socket, int nclones);
+void report_failures(int sock, int num);
+void report_domains(int sock, int num);
+void report_multi(int sock, int nclones);
+void report_multi_host(int sock, int nclones);
+void report_multi_user(int sock, int nclones);
+void report_multi_virtuals(int sock, int nclones);
 
 #endif

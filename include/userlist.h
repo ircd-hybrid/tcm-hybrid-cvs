@@ -103,7 +103,7 @@ void load_userlist(void);
 void load_config_file(char *);
 void clear_userlist(void);
 int  wingate_class(int class);
-void ban_manipulate(int socket,char flag,char *userlist);
+void ban_manipulate(int sock,char flag,char *userlist);
 void load_prefs(void);
 void save_prefs(void);
 int  islegal_pass(int connect_id,char *password);
@@ -123,7 +123,7 @@ extern struct exception_entry hostlist[];	/* defined in userlist.c */
 extern int host_list_index;
 
 extern struct tcm_file_entry tcmlist[];
-extern tcm_list_index;
+extern int tcm_list_index;
 
 #define TYPE_OPER		0x00001	/* user has .bots privs etc. */
 #define TYPE_REGISTERED		0x00002	/* user has .kline privs etc. */

@@ -52,14 +52,14 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.8 2001/01/14 02:53:26 wcampbel Exp $";
+static char *version="$Id: serverif.c,v 1.9 2001/02/01 14:33:01 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
 static void send_umodes(char *mynick);
 static void onjoin(char *nick, char *mychannel);
 static void onkick(char *nick, char *channel);
-static void onnick(char *oldnick, char *newnick);
+static void onnick(char *old_nick, char *new_nick);
 static void onnicktaken(void);
 static void cannotjoin(char *channel);
 static void init_debug(int);
@@ -76,6 +76,9 @@ static void connect_remote_client(char *,char *,char *,int);
 static void check_services();
 static void on_services_notice(char *);
 #endif
+static void rdpt(void);
+static void signon(void);
+static void reload_user_list(int sig);
 
 char ourhostname[MAX_HOST];   /* This is our hostname with domainname */
 char serverhost[MAX_HOST];    /* Server tcm will use. */
@@ -149,7 +152,6 @@ int bindsocket(char *hostport)
   char *hold;
   int optval;
   unsigned long remoteaddr;
-  placed;
 
   /* Parse serverhost to look for port number */
   strcpy (server,hostport);
@@ -429,16 +431,15 @@ int socks_bindsocket(char *nick,char *user,char *host,char *ip)
 void prnt(int sock, ...)
 {
   char dccbuff[DCCBUFF_SIZE];
-  char msg[MAX_BUFF];
+  char msgbuf[MAX_BUFF];
   char *format;
   va_list va;
-  placed;
 
   va_start(va,sock);
 
   format = va_arg(va, char *);
-  vsnprintf(msg, sizeof(msg)-2, format, va);
-  if (msg[strlen(msg)-1] != '\n') strncat(msg, "\n\0", 2);
+  vsnprintf(msgbuf, sizeof(msgbuf)-2, format, va);
+  if (msgbuf[strlen(msgbuf)-1] != '\n') strncat(msgbuf, "\n\0", 2);
   if(route_entry.to_nick[0])
     {
       (void)sprintf(dccbuff,":%s@%s %s@%s %s",
@@ -446,20 +447,20 @@ void prnt(int sock, ...)
 		    route_entry.to_tcm,
 		    config_entries.dfltnick,
 		    config_entries.dfltnick,
-		    msg);
+		    msgbuf);
 
       send(sock, dccbuff, strlen(dccbuff), 0);
     }
   else
     {
-      send(sock, msg, strlen(msg), 0);
+      send(sock, msgbuf, strlen(msgbuf), 0);
     }
 
   if(config_entries.debug)
     {
-      (void)printf("-> %s",msg);	/* - zaph */
+      (void)printf("-> %s",msgbuf);	/* - zaph */
       if(outfile)
-	(void)fprintf(outfile,"%s",msg);
+	(void)fprintf(outfile,"%s",msgbuf);
     }
  va_end(va);
 }
@@ -475,19 +476,18 @@ void prnt(int sock, ...)
 
 void toserv(char *format, ... )
 {
-  char msg[MAX_BUFF];
+  char msgbuf[MAX_BUFF];
   va_list va;
-  placed;
   
   va_start(va,format);
 
   if (connections[0].socket != INVALID)
     {
-      vsnprintf(msg,sizeof(msg),format, va);
-      send(connections[0].socket, msg, strlen(msg), 0);
+      vsnprintf(msgbuf,sizeof(msgbuf),format, va);
+      send(connections[0].socket, msgbuf, strlen(msgbuf), 0);
     }
 #ifdef DEBUGMODE
-  printf("->%s", msg);
+  printf("->%s", msgbuf);
 #endif
 
   va_end(va);
@@ -507,13 +507,12 @@ void toserv(char *format, ... )
 void sendtoalldcc(int type,...)
 {
   va_list va;
-  char msg[MAX_BUFF];
+  char msgbuf[MAX_BUFF];
   char tcm_msg[MAX_BUFF];
   char *format;
   int i;
   int echo;
   int local_tcm = NO;	/* local tcm ? */
-  placed;
 
   /* what a hack...
    * each tcm prefixes its messages sent to each user
@@ -534,33 +533,33 @@ void sendtoalldcc(int type,...)
   va_start(va,type);
 
   format = va_arg(va, char *);
-  vsprintf(msg, format, va);
+  vsprintf(msgbuf, format, va);
 
   if(type != SEND_OPERS_PRIVMSG_ONLY)
     {
       /* If opers only message, it goes straight through */
-      if((msg[0] == 'o' || msg[0] == 'O')
-	 && msg[1] == ':')
+      if((msgbuf[0] == 'o' || msgbuf[0] == 'O')
+	 && msgbuf[1] == ':')
 	{
-	  (void)sprintf(tcm_msg,"%s\n",msg);
+	  (void)sprintf(tcm_msg,"%s\n",msgbuf);
 	}
       else
 	{
 	  /* command prefix, goes straight through */
 	  
-	  if(msg[0] == '.')
-	    (void)sprintf(tcm_msg,"%s\n",msg);
+	  if(msgbuf[0] == '.')
+	    (void)sprintf(tcm_msg,"%s\n",msgbuf);
 	  
 	  /* Missing a leading '<', we prepend the tcmnick as <tcmnick> */
-	  else if(msg[0] != '<')
+	  else if(msgbuf[0] != '<')
 	    {
-	      (void)sprintf(tcm_msg,"<%s> %s\n",config_entries.dfltnick,msg);
+	      (void)sprintf(tcm_msg,"<%s> %s\n",config_entries.dfltnick,msgbuf);
 	      local_tcm = YES;
 	    }
 
 	  /* anything else already has a leading "<" or "O:<" */
 	  else
-	    (void)sprintf(tcm_msg,"%s\n",msg);
+	    (void)sprintf(tcm_msg,"%s\n",msgbuf);
 	}
     }
 
@@ -580,52 +579,52 @@ void sendtoalldcc(int type,...)
 	    {
 	    case SEND_KLINE_NOTICES_ONLY:
 	      if (connections[i].type & TYPE_KLINE)
-		prnt(connections[i].socket, msg );
+		prnt(connections[i].socket, msgbuf );
 	      break;
 
 	    case SEND_MOTD_ONLY:
 	      if (connections[i].type & TYPE_MOTD)
-		prnt(connections[i].socket, msg );
+		prnt(connections[i].socket, msgbuf );
 	      break;
 
 	    case SEND_LINK_ONLY:
 	      if (connections[i].type & TYPE_LINK)
-		prnt(connections[i].socket, msg );
+		prnt(connections[i].socket, msgbuf );
 	      break;
 
 	    case SEND_WARN_ONLY:
 	      if (connections[i].type & TYPE_WARN)
-		prnt(connections[i].socket, msg );
+		prnt(connections[i].socket, msgbuf );
 	      break;
 	      
 	    case SEND_WALLOPS_ONLY:
 	    case SEND_LOCOPS_ONLY:
 	      if (connections[i].type & TYPE_LOCOPS)
-		prnt(connections[i].socket, msg );
+		prnt(connections[i].socket, msgbuf );
 	      break;
 	      
 	    case SEND_OPERS_STATS_ONLY:
 	      if(connections[i].type & TYPE_STAT)
-		prnt(connections[i].socket, msg );
+		prnt(connections[i].socket, msgbuf );
 	      break;
 
 	    case SEND_OPERS_ONLY:
 	      if(connections[i].type & TYPE_TCM)
 		prnt(connections[i].socket, "%s", tcm_msg );
 	      else if(connections[i].type & (TYPE_OPER | TYPE_WARN))
-		prnt(connections[i].socket, msg );
+		prnt(connections[i].socket, msgbuf );
 	      break;
 
 	    case SEND_OPERS_PRIVMSG_ONLY:
 	      if((connections[i].type & TYPE_OPER) &&
 		 (connections[i].set_modes & SET_PRIVMSG))
-		prnt(connections[i].socket, msg );
+		prnt(connections[i].socket, msgbuf );
 	      break;
 
 	    case SEND_OPERS_NOTICES_ONLY:
 	      if((connections[i].type & TYPE_OPER) &&
 		 (connections[i].set_modes & SET_NOTICES))
-		prnt(connections[i].socket, msg );
+		prnt(connections[i].socket, msgbuf );
 	      break;
 
 	    case SEND_ALL_USERS:
@@ -634,11 +633,11 @@ void sendtoalldcc(int type,...)
 	      else
 		{
 		  if(local_tcm)
-		    prnt(connections[i].socket, msg );
+		    prnt(connections[i].socket, msgbuf );
 		  else
 		    {
 		      if(connections[i].type & TYPE_PARTYLINE)
-			prnt(connections[i].socket, msg);
+			prnt(connections[i].socket, msgbuf);
 		    }
 		}
 	      break;
@@ -696,7 +695,6 @@ void rdpt(void)
   static time_t clones_last_check_time=(time_t)0;	/* clone check */
   static time_t remote_tcm_socket_setup_time=(time_t)0;
   time_t cur_time;
-  placed;
 
   cur_time = time((time_t *)NULL);
   last_ping_time = cur_time;
@@ -904,14 +902,17 @@ void rdpt(void)
 			  *connections[i].buffend = '\0';
 			  connections[i].buffend = connections[i].buffer;
 			  if (*connections[i].buffer)
+                          {
 			    if (i == 0)
+                            {
 			      serverproc();
-			    else
+			    } else
 			      {
 				if( (connections[i].type & TYPE_TCM) &&
 				    (connections[i].type & TYPE_PENDING))
+                                {
 				  connect_remote_tcm(i);
-				else
+				} else
 				  {
 				    connections[i].last_message_time =
 				      time((time_t *)NULL);
@@ -920,8 +921,10 @@ void rdpt(void)
 			      }
 			  continue;
 			}
-		      else
+		      } else
+                      {
 			++connections[i].buffend;
+                      }
 		    }
 		}
 	    }
@@ -1026,7 +1029,6 @@ static void report_open_socks(int i)
 static void check_services(void)
 {
   time_t cur_time;
-  placed;
 
   cur_time = time((time_t *)NULL);
 
@@ -1038,10 +1040,10 @@ static void check_services(void)
        route_entry.from_nick[0] = '\0';
        route_entry.from_tcm[0] = '\0';
 
-       msg(SERVICES_NICK,"clones %d\n", SERVICES_CLONE_THRESHOLD );
+       privmsg(SERVICES_NICK,"clones %d\n", SERVICES_CLONE_THRESHOLD );
 
 #ifdef SERVICES_DRONES
-       msg(SERVICES_NICK,"drones %s\n", config_entries.rserver_name);
+       privmsg(SERVICES_NICK,"drones %s\n", config_entries.rserver_name);
 #endif
 
      }
@@ -1064,7 +1066,6 @@ static void on_services_notice(char *body)
   int  identd;
   char *p;
   char *user, *host;
-  placed;
 
   while(*body == ' ')
     body++;
@@ -1136,7 +1137,7 @@ static void on_services_notice(char *body)
 
       strncpy(userathost,services.cloning_host,sizeof(userathost));
 
-      if ( host = strchr(userathost, '@'))
+      if ( (host = strchr(userathost, '@')) )
 	{
 	  user = userathost;
 	  *host = '\0';
@@ -1212,7 +1213,7 @@ static void serverproc(void)
   char *p;
   char *source;
   char *fctn;
-  char *body;
+  char *body = NULL;
 
   if(*buffer == ':')
     {
@@ -1263,8 +1264,6 @@ static void serverproc(void)
 */
 void signon()
 {
-    placed;
-
     connections[0].buffend = connections[0].buffer;
     if (!*mynick)
       strcpy (mynick,config_entries.dfltnick);
@@ -1283,7 +1282,6 @@ void signon()
 
 void do_init(void)
 {
-  placed;
   toserv("VERSION\n");
 
   if(config_entries.defchannel_key[0])
@@ -1292,7 +1290,7 @@ void do_init(void)
     join(config_entries.defchannel,(char *)NULL);
 
   initopers();
-  oper(mynick);
+  oper();
   inithash();
 }
 
@@ -1307,8 +1305,6 @@ void do_init(void)
 */
 static void linkclosed(char *reason)
 {
-  placed;
-
   (void)close(connections[0].socket);
   log_problem("linkclosed()", reason);
 
@@ -1337,7 +1333,6 @@ char makeconn(char *hostport,char *nick,char *userhost)
   char *type;
   char *user;
   char *host;
-  placed;
 
   for (i=1; i<MAXDCCCONNS+1; ++i)
     if (connections[i].socket == INVALID)
@@ -1461,10 +1456,9 @@ char makeconn(char *hostport,char *nick,char *userhost)
  * side effects	-
  */
 
-int add_connection(int socket,int tcm_entry)
+int add_connection(int sock,int tcm_entry)
 {
   int i;
-  placed;
 
   for( i=1; i<MAXDCCCONNS+1; ++i )
     {
@@ -1496,7 +1490,7 @@ int add_connection(int socket,int tcm_entry)
   strncpy(connections[i].host,tcmlist[tcm_entry].host,MAX_HOST-1);
   connections[i].user[MAX_HOST-1] = '\0';
 
-  connections[i].socket = socket;
+  connections[i].socket = sock;
   connections[i].type = TYPE_TCM|TYPE_OPER|TYPE_REGISTERED;
   return(i);
 }
@@ -1513,7 +1507,6 @@ void closeconn(int connnum)
 {
   int i;
   char *type;
-  placed;
 
   if (connections[connnum].socket != INVALID)
     close(connections[connnum].socket);
@@ -1579,7 +1572,6 @@ void privmsgproc(char *nick,char *userhost,char *body)
   char *host;	/* host portion */
   char *p;
   char *param1;
-  placed;
 
   user = userhost;
   if( !(p = strchr(userhost,'@')) )
@@ -1644,8 +1636,7 @@ static void initiate_dcc_chat(char *nick,char *user,char *host)
 {
   int dcc_port;				/* dcc port to use */
   struct sockaddr_in socketname;
-  int result;
-  placed;
+  int result = -1;
 
   notice(nick,"Chat requested");
   strncpy(initiated_dcc_nick,nick,MAX_NICK);
@@ -1694,7 +1685,7 @@ static void initiate_dcc_chat(char *nick,char *user,char *host)
       return;
     }
 
-  msg(nick,"\001DCC CHAT chat %lu %d\001\n",
+  privmsg(nick,"\001DCC CHAT chat %lu %d\001\n",
       local_ip(),dcc_port);
 
   if(config_entries.debug && outfile)
@@ -1717,8 +1708,7 @@ static void initiate_dcc_chat(char *nick,char *user,char *host)
 static unsigned long local_ip(void)
 {
   struct hostent *local_host;
-  unsigned long local_ip;
-  placed;
+  unsigned long l_ip;
 
   if(config_entries.virtual_host_config[0])
     {
@@ -1733,14 +1723,14 @@ static unsigned long local_ip(void)
 		      local_host->h_name);
 	    }
 
-          memcpy((void *)&local_ip,(void *)local_host->h_addr,
+          memcpy((void *)&l_ip,(void *)local_host->h_addr,
 		 sizeof(local_host->h_addr));
 
 	  if(config_entries.debug && outfile)
 	    {
-	      fprintf(outfile, "DEBUG: %lu %lX\n", local_ip,local_ip);
+	      fprintf(outfile, "DEBUG: %lu %lX\n", l_ip, l_ip);
 	    }
-	  return(htonl(local_ip));
+	  return(htonl(l_ip));
 	}
     }
   else
@@ -1753,14 +1743,14 @@ static unsigned long local_ip(void)
 		      local_host->h_name);
 	    }
 
-	  (void) memcpy((void *) &local_ip,(void *) local_host->h_addr,
+	  (void) memcpy((void *) &l_ip,(void *) local_host->h_addr,
 			sizeof(local_host->h_addr));
 
 	  if(config_entries.debug && outfile)
 	    {
-	      fprintf(outfile, "DEBUG: %lu %lX\n", local_ip,local_ip);
+	      fprintf(outfile, "DEBUG: %lu %lX\n", l_ip, l_ip);
 	    }
-	  return(htonl(local_ip));
+	  return(htonl(l_ip));
 	}
     }
   /* NOT REACHED */
@@ -1778,7 +1768,6 @@ static unsigned long local_ip(void)
 int already_have_tcm(char *tcmnick)
 {
   int i;
-  placed;
 
   if(config_entries.debug && outfile)
     {
@@ -1837,7 +1826,6 @@ static void proc(char *source,char *fctn,char *param)
     int numeric;		/* if its an numeric */
     char *p;
     char *q;
-    placed;
 
     if ( (userhost = strchr(source, '!') ) )
       {
@@ -2114,7 +2102,7 @@ static void wallops(char *source, char *params, char *body)
 **  to the channel, and loop through processing incoming server messages
 **  until tcm is told to quit, is killed, or gives up reconnecting.
 */
-main(argc,argv)
+int main(argc,argv)
 int argc;
 char *argv[];
 {
@@ -2259,6 +2247,8 @@ char *argv[];
     {
       fclose(outfile);
     }
+
+  return 0;
 }
 
 
@@ -2327,7 +2317,6 @@ static void connect_remote_tcm(int connnum)
   struct sockaddr_in incoming_addr;
   struct hostent *host_seen;
   int addrlen;
-  placed;
 
   if(remote_tcm_socket < 0)	/* extra paranoia, shouldn't be even here if this is true -db */
     return;
@@ -2473,13 +2462,12 @@ static void connect_remote_tcm(int connnum)
  * side effects	-
  */
 
-static void connect_remote_client(char *nick,char *user,char *host,int socket)
+static void connect_remote_client(char *nick,char *user,char *host,int sock)
 {
   int i;
   struct sockaddr_in incoming_addr;
   struct hostent *host_seen;
   int addrlen;
-  placed;
 
   for (i=1; i<MAXDCCCONNS+1; ++i)
     {
@@ -2494,17 +2482,17 @@ static void connect_remote_client(char *nick,char *user,char *host,int socket)
   if(i > MAXDCCCONNS)
     {
       notice(nick,"Max users on tcm, dcc chat rejected\n");
-      (void)close(socket);
+      (void)close(sock);
       return;
     }
 
   addrlen = sizeof(struct sockaddr);
-  if((connections[i].socket = accept(socket,
+  if((connections[i].socket = accept(sock,
 		     (struct sockaddr *)&incoming_addr,&addrlen)) < 0 )
     {
       notice(nick,"Error in dcc chat\n");
       (void)fprintf(stderr,"Error in remote tcm connect on accept\n");
-      (void)close(socket);
+      (void)close(sock);
       return;
     }
 
@@ -2556,7 +2544,6 @@ static void connect_remote_client(char *nick,char *user,char *host,int socket)
 void sendto_all_linkedbots(char *buffer)
 {
   int i;
-  placed;
 
   for( i = 1; i< maxconns; i++)
     {
@@ -2663,17 +2650,6 @@ void write_debug()
   write(x, buff, strlen(buff));
   close(x);
 }
-#else
-void add_placed ()
-{
-  /* should *NEVER* get here */
-  return;
-}
-void write_debug()
-{
-  /* OR HERE */
-  return;
-}
 #endif
 
 /*
@@ -2684,7 +2660,7 @@ void write_debug()
  * side effects	- With any luck, we oper this tcm *sigh*
  */
 
-void oper(char *mynick)
+void oper()
 {
   toserv("OPER %s %s\n",
 	  config_entries.oper_nick_config,
@@ -2699,9 +2675,9 @@ void oper(char *mynick)
  * side effects	- Hopefully, set proper umodes for this tcm
  */
 
-static void send_umodes(char *mynick)
+static void send_umodes(char *my_nick)
 {
-  toserv("MODE %s :+bcdfknrswxyz\n", mynick );
+  toserv("MODE %s :+bcdfknrswxyz\n", my_nick );
   toserv("FLAGS +SKILLS CLICONNECTS +CLIDISCONNECTS +NICKCHANGES +LWALLOPS +CONNECTS +SQUITS +OWALLOPS +STATSNOTICES\n");
 
   if(config_entries.hybrid && (config_entries.hybrid_version >= 6))
@@ -2745,13 +2721,13 @@ static void onkick(char *nick,char *channel)
     }
 }
 
-static void onnick(char *oldnick,char *newnick)
+static void onnick(char *old_nick,char *new_nick)
 {
-  if (*newnick == ':')
-    ++newnick;      /* 2.8 fix */
+  if (*new_nick == ':')
+    ++new_nick;      /* 2.8 fix */
 
-  if (!strcmp(oldnick,mynick))
-    strcpy(mynick,newnick);
+  if (!strcmp(old_nick,mynick))
+    strcpy(mynick,new_nick);
 }
 
 /*
@@ -2831,7 +2807,7 @@ void msg_mychannel(char *format, ...)
 
   vsprintf(message, format, va );
 
-  msg(mychannel,message);
+  privmsg(mychannel,message);
 
   va_end(va);
 }

@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.33 2002/05/24 15:17:48 db Exp $B
+ * $Id: modules.c,v 1.34 2002/05/24 18:19:30 leeh Exp $B
  *
  */
 
@@ -38,50 +38,37 @@ struct module modlist[MODS_INCREMENT];
 
 extern struct connection connections[];
 
-/*
- * I put this #ifdef here simply to show how I envision
- * implementing the loadable module support for insertion
- * directly into ircd-hybrid-7 in the future.
- */
-#ifdef IRCD_HYBRID
-/*
- * ircd-hybrid-7 loadable module code goes here.
- */
-#else
 struct TcmMessage modload_msgtab = {
  ".modload", 0, 1,
- {m_unregistered, m_not_oper, m_not_admin, m_modload}
+ {m_unregistered, m_not_admin, m_modload}
 };
 
 struct TcmMessage modunload_msgtab = {
  ".modunload", 0, 1,
- {m_unregistered, m_not_oper, m_not_admin, m_modunload}
+ {m_unregistered, m_not_admin, m_modunload}
 };
 
 struct TcmMessage modreload_msgtab = {
  ".modreload", 0, 1,
- {m_unregistered, m_not_oper, m_not_admin, m_modreload}
+ {m_unregistered, m_not_admin, m_modreload}
 };
 
 struct TcmMessage modlist_msgtab = {
  ".modlist", 0, 1,
- {m_unregistered, m_not_oper, m_not_admin, m_modlist}
+ {m_unregistered, m_not_admin, m_modlist}
 };
-#endif
 
 int findmodule(char *name)
 {
   int i;
-  for (i=0;i<max_mods;++i)
+
+  for (i=0; i < max_mods; ++i)
     if (!strcmp(modlist[i].name, name))
       return i;
 
   return -1;
 }
 
-#ifdef IRCD_HYBRID
-/* code goes here later */
-#else
 void mod_add_cmd(struct TcmMessage *msg)
 {
   int msgindex=0;
@@ -153,8 +140,6 @@ void add_common_function(int type, void *function)
     temp = &(*temp)->next;
   *temp = new;
 }
-
-#endif
 
 void modules_init(void)
 {

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.71 2002/05/24 15:38:30 db Exp $ */
+/* $Id: dcc_commands.c,v 1.72 2002/05/24 18:19:26 leeh Exp $ */
 
 #include "setup.h"
 
@@ -351,12 +351,13 @@ m_umulti(int connnum, int argc, char *argv[])
 void
 m_register(int connnum, int argc, char *argv[])
 {
-  if (connections[connnum].type & TYPE_REGISTERED)
+  if (connections[connnum].type & TYPE_OPER)
   {
     print_to_socket(connections[connnum].socket, 
 		    "You are already registered.");
     return;
   }
+
   if (argc != 2)
     print_to_socket(connections[connnum].socket,
 		    "Usage: %s <password>", argv[0]);
@@ -1153,7 +1154,7 @@ set_umode(int connnum, char *flags, char *registered_nick)
       {
       case 'e': type = TYPE_ECHO; break;
       case 'i': type = TYPE_INVS; break;
-      case 'k': type = TYPE_KLINE; break;
+      case 'k': type = TYPE_VIEW_KLINES; break;
       case 'y': type = TYPE_SPY; break;
       case 'o': type = TYPE_LOCOPS; break;
       case 'p': type = TYPE_PARTYLINE; break;
@@ -1240,15 +1241,14 @@ set_umode(int connnum, char *flags, char *registered_nick)
 #endif
 	  case 'G': type = TYPE_GLINE; break;
 	  case 'I': type = TYPE_INVM; break;
-	  case 'K': type = TYPE_REGISTERED; break;
-	  case 'O': type = TYPE_OPER; break;
+	  case 'K': type = TYPE_KLINE; break;
 	  case 'S': type = TYPE_SUSPENDED; break;
 #ifdef ENABLE_W_FLAG
           case 'W': type = TYPE_OPERWALL; break;
 #endif
 	  case 'e': type = TYPE_ECHO; break;
 	  case 'i': type = TYPE_INVS; break;
-	  case 'k': type = TYPE_KLINE; break;
+	  case 'k': type = TYPE_VIEW_KLINES; break;
           case 'y': type = TYPE_SPY; break;
 	  case 'o': type = TYPE_LOCOPS; break;
 	  case 'p': type = TYPE_PARTYLINE; break;
@@ -1325,17 +1325,16 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	    switch(flags[i])
 	    {
 	    case 'I': type = TYPE_INVM; break;
-	    case 'K': type = TYPE_REGISTERED; break;
+	    case 'K': type = TYPE_KLINE; break;
 	    case 'G': type = TYPE_GLINE; break;
 #ifndef NO_D_LINE_SUPPORT
 	    case 'D': type = TYPE_DLINE; break;
 #endif
-	    case 'O': type = TYPE_OPER; break;
 	    case 'S': type = TYPE_SUSPENDED; break;
 #ifdef ENABLE_W_FLAG
             case 'W': type = TYPE_OPERWALL; break;
 #endif
-	    case 'k': type = TYPE_KLINE; break;
+	    case 'k': type = TYPE_VIEW_KLINES; break;
 	    case 'p': type = TYPE_PARTYLINE; break;
 	    case 's': type = TYPE_STAT; break;
 	    case 'w': type = TYPE_WARN; break;
@@ -1585,33 +1584,34 @@ register_oper(int connnum, char *password, char *who_did_command)
 {
   if (password)
   {
-    if ( islegal_pass(connnum, password) )
+    if (islegal_pass(connnum, password))
     {
       load_umodes(connnum);
 	  
-      if ( connections[connnum].type & TYPE_SUSPENDED)
+      if (connections[connnum].type & TYPE_SUSPENDED)
       {
 	print_to_socket(connections[connnum].socket,
 	     "You are suspended");
-	send_to_all( SEND_ALL, "%s is suspended", who_did_command);
-	if (connections[connnum].type &
-	    (TYPE_PENDING))
+	send_to_all(SEND_ALL, "%s is suspended", who_did_command);
+	if (connections[connnum].type & TYPE_PENDING)
 	  connections[connnum].type &= ~TYPE_PENDING;
       }
       else
       {
 	print_to_socket(connections[connnum].socket,
-	     "You are now registered");
-	send_to_all( SEND_ALL, "%s has registered", who_did_command);
-	if (connections[connnum].type &
-	    (TYPE_PENDING))
+	                "You are now registered");
+	send_to_all(SEND_ALL, "%s has registered", who_did_command);
+
+	if (connections[connnum].type & TYPE_PENDING)
 	  connections[connnum].type &= ~TYPE_PENDING;
+
+	connections[connnum].type |= TYPE_OPER;
       }
     }
     else
     {
       print_to_socket(connections[connnum].socket,"illegal password");
-      send_to_all( SEND_ALL, "illegal password from %s", who_did_command);
+      send_to_all(SEND_ALL, "illegal password from %s", who_did_command);
     }
   }
   else
@@ -1725,9 +1725,8 @@ list_connections(int sock)
  */
 
 static void 
-handle_disconnect(int sock,char *nickname,char *who_did_command)
+handle_disconnect(int sock, char *nickname, char *who_did_command)
 {
-  char *type;
   int  i;
 
   if (nickname == NULL)
@@ -1737,17 +1736,9 @@ handle_disconnect(int sock,char *nickname,char *who_did_command)
     for (i=1; i<maxconns; i++)
       if (sock != INVALID && strcasecmp(nickname,connections[i].nick) == 0)
       {
-	type = "user";
-	if(connections[i].type & TYPE_OPER)
-	  type = "oper";
-
-	print_to_socket(sock,
-	     "Disconnecting %s %s",
-	     type,
-	     connections[i].nick);
-	print_to_socket(sock,
-	     "You have been disconnected by oper %s",
-	     who_did_command);
+	print_to_socket(sock, "Disconnecting oper %s", connections[i].nick);
+	print_to_socket(sock, "You have been disconnected by oper %s", 
+			who_did_command);
 	closeconn(i, 0, NULL);
       }
   }
@@ -1777,244 +1768,244 @@ handle_save(int sock,char *nick)
 #else
 struct TcmMessage vlist_msgtab = {
  ".vlist", 0, 0,
- {m_unregistered, m_not_oper, m_vlist, m_vlist}
+ {m_unregistered, m_vlist, m_vlist}
 };
 struct TcmMessage class_msgtab = {
  ".class", 0, 0,
- {m_unregistered, m_not_oper, m_class, m_class}
+ {m_unregistered, m_class, m_class}
 };
 struct TcmMessage classt_msgtab = {
  ".classt", 0, 0,
- {m_unregistered, m_not_oper, m_classt, m_classt}
+ {m_unregistered, m_classt, m_classt}
 };
 struct TcmMessage killlist_msgtab = {
  ".killlist", 0, 0,
- {m_unregistered, m_not_oper, m_killlist, m_killlist}
+ {m_unregistered, m_killlist, m_killlist}
 };
 struct TcmMessage kline_msgtab = {
  ".kline", 0, 0,
- {m_unregistered, m_not_oper, m_kline, m_kline}
+ {m_unregistered, m_kline, m_kline}
 };
 struct TcmMessage kclone_msgtab = {
  ".kclone", 0, 0,
- {m_unregistered, m_not_oper, m_use_kaction, m_use_kaction}
+ {m_unregistered, m_use_kaction, m_use_kaction}
 };
 struct TcmMessage kflood_msgtab = {
  ".kflood", 0, 0,
- {m_unregistered, m_not_oper, m_use_kaction, m_use_kaction}
+ {m_unregistered, m_use_kaction, m_use_kaction}
 };
 struct TcmMessage kperm_msgtab = {
  ".kperm", 0, 0,
- {m_unregistered, m_not_oper, m_kperm, m_kperm}
+ {m_unregistered, m_kperm, m_kperm}
 };
 struct TcmMessage klink_msgtab = {
  ".klink", 0, 0,
- {m_unregistered, m_not_oper, m_use_kaction, m_use_kaction}
+ {m_unregistered, m_use_kaction, m_use_kaction}
 };
 struct TcmMessage kdrone_msgtab = {
  ".kdrone", 0, 0,
- {m_unregistered, m_not_oper, m_use_kaction, m_use_kaction}
+ {m_unregistered, m_use_kaction, m_use_kaction}
 };
 struct TcmMessage kbot_msgtab = {
  ".kbot", 0, 0,
- {m_unregistered, m_not_oper, m_use_kaction, m_use_kaction}
+ {m_unregistered, m_use_kaction, m_use_kaction}
 };
 struct TcmMessage kill_msgtab = {
  ".kill", 0, 0,
- {m_unregistered, m_not_oper, m_kill, m_kill}
+ {m_unregistered, m_kill, m_kill}
 };
 struct TcmMessage kaction_msgtab = {
   ".kaction", 0, 0,
- {m_unregistered, m_not_oper, m_kaction, m_kaction}
+ {m_unregistered, m_kaction, m_kaction}
 };
 struct TcmMessage kspam_msgtab = {
  ".kspam", 0, 0,
- {m_unregistered, m_not_oper, m_use_kaction, m_use_kaction}
+ {m_unregistered, m_use_kaction, m_use_kaction}
 };
 struct TcmMessage hmulti_msgtab = {
  ".hmulti", 0, 0,
- {m_unregistered, m_not_oper, m_hmulti, m_hmulti}
+ {m_unregistered, m_hmulti, m_hmulti}
 };
 struct TcmMessage umulti_msgtab = {
  ".umulti", 0, 0,
- {m_unregistered, m_not_oper, m_umulti, m_umulti}
+ {m_unregistered, m_umulti, m_umulti}
 };
 struct TcmMessage register_msgtab = {
  ".register", 0, 0,
- {m_register, m_not_oper, m_register, m_register}
+ {m_register, m_register, m_register}
 };
 struct TcmMessage opers_msgtab = {
  ".opers", 0, 0,
- {m_unregistered, m_not_oper, m_opers, m_opers}
+ {m_unregistered, m_opers, m_opers}
 };
 struct TcmMessage testline_msgtab = {
  ".testline", 0, 0,
- {m_unregistered, m_not_oper, m_testline, m_testline}
+ {m_unregistered, m_testline, m_testline}
 };
 struct TcmMessage actions_msgtab = {
  ".actions", 0, 0,
- {m_actions, m_actions, m_actions, m_actions}
+ {m_actions, m_actions, m_actions}
 };
 struct TcmMessage action_msgtab = {
  ".action", 0, 0,
- {m_unregistered, m_not_oper, m_action, m_action}
+ {m_unregistered, m_action, m_action}
 };
 struct TcmMessage set_msgtab = {
  ".set", 0, 0,
- {m_unregistered, m_not_oper, m_set, m_set}
+ {m_unregistered, m_set, m_set}
 };
 struct TcmMessage uptime_msgtab = {
  ".uptime", 0, 0,
- {m_uptime, m_uptime, m_uptime, m_uptime}
+ {m_uptime, m_uptime, m_uptime}
 };
 struct TcmMessage exemptions_msgtab = {
  ".exemptions", 0, 0,
- {m_unregistered, m_not_oper, m_exemptions, m_exemptions}
+ {m_unregistered, m_exemptions, m_exemptions}
 };
 struct TcmMessage umode_msgtab = {
  ".umode", 0, 0,
- {m_unregistered, m_not_oper, m_umode, m_umode}
+ {m_unregistered, m_umode, m_umode}
 };
 struct TcmMessage connections_msgtab = {
  ".connections", 0, 0,
- {m_connections, m_connections, m_connections, m_connections}
+ {m_connections, m_connections, m_connections}
 };
 struct TcmMessage whom_msgtab = {
  ".whom", 0, 0,
- {m_connections, m_connections, m_connections, m_connections}
+ {m_connections, m_connections, m_connections}
 };
 struct TcmMessage who_msgtab = {
  ".who", 0, 0,
- {m_connections, m_connections, m_connections, m_connections}
+ {m_connections, m_connections, m_connections}
 };
 struct TcmMessage disconnect_msgtab = {
  ".disconnect", 0, 0,
- {m_unregistered, m_not_oper, m_not_admin, m_disconnect}
+ {m_unregistered, m_not_admin, m_disconnect}
 };
 struct TcmMessage quit_msgtab = {
  ".quit", 0, 0,
- {m_close, m_close, m_close, m_close}
+ {m_close, m_close, m_close}
 };
 struct TcmMessage help_msgtab = {
  ".help", 0, 0,
- {m_help, m_not_oper, m_help, m_help}
+ {m_help, m_help, m_help}
 };
 struct TcmMessage motd_msgtab = {
  ".motd", 0, 0,
- {m_motd, m_not_oper, m_motd, m_motd}
+ {m_motd, m_motd, m_motd}
 };
 struct TcmMessage save_msgtab = {
  ".save", 0, 0,
- {m_unregistered, m_not_oper, m_not_admin, m_save}
+ {m_unregistered, m_not_admin, m_save}
 };
 struct TcmMessage close_msgtab = {
  ".close", 0, 0,
- {m_close, m_close, m_close, m_close}
+ {m_close, m_close, m_close}
 };
 struct TcmMessage op_msgtab = {
  ".op", 0, 0,
- {m_unregistered, m_not_oper, m_op, m_op}
+ {m_unregistered, m_op, m_op}
 };
 struct TcmMessage cycle_msgtab = {
  ".cycle", 0, 0,
- {m_unregistered, m_not_oper, m_cycle, m_cycle}
+ {m_unregistered, m_cycle, m_cycle}
 };
 struct TcmMessage die_msgtab = {
  ".die", 0, 0,
- {m_unregistered, m_not_oper, m_not_admin, m_die}
+ {m_unregistered, m_not_admin, m_die}
 };
 struct TcmMessage restart_msgtab = {
  ".restart", 0, 0,
- {m_unregistered, m_not_oper, m_not_admin, m_restart}
+ {m_unregistered, m_not_admin, m_restart}
 };
 struct TcmMessage info_msgtab = {
  ".info", 0, 0,
- {m_info, m_not_oper, m_info, m_info}
+ {m_info, m_info, m_info}
 };
 struct TcmMessage locops_msgtab = {
  ".locops", 0, 0,
- {m_unregistered, m_not_oper, m_locops, m_locops}
+ {m_unregistered, m_locops, m_locops}
 };
 struct TcmMessage unkline_msgtab = {
  ".unkline", 0, 0,
- {m_unregistered, m_not_oper, m_unkline, m_unkline}
+ {m_unregistered, m_unkline, m_unkline}
 };
 struct TcmMessage vbots_msgtab = {
  ".vbots", 0, 0,
- {m_unregistered, m_not_oper, m_vbots, m_vbots}
+ {m_unregistered, m_vbots, m_vbots}
 };
 #ifndef NO_D_LINE_SUPPORT
 struct TcmMessage dline_msgtab = {
  ".dline", 0, 0,
- {m_unregistered, m_not_oper, m_dline, m_dline}
+ {m_unregistered, m_dline, m_dline}
 };
 #endif
 #ifdef ENABLE_QUOTE
 struct TcmMessage quote_msgtab = {
  ".quote", 0, 0,
- {m_unregistered, m_not_oper, m_not_admin, m_quote}
+ {m_unregistered, m_not_admin, m_quote}
 };
 #endif
 struct TcmMessage mem_msgtab = {
  ".mem", 0, 0,
- {m_unregistered, m_not_oper, m_not_admin, m_mem}
+ {m_unregistered, m_not_admin, m_mem}
 };
 struct TcmMessage clones_msgtab = {
  ".clones", 0, 0,
- {m_unregistered, m_not_oper, m_clones, m_clones}
+ {m_unregistered, m_clones, m_clones}
 };
 struct TcmMessage nflood_msgtab = {
  ".nflood", 0, 0,
- {m_unregistered, m_not_oper, m_nflood, m_nflood}
+ {m_unregistered, m_nflood, m_nflood}
 };
 struct TcmMessage rehash_msgtab = {
  ".rehash", 0, 0,
- {m_unregistered, m_not_oper, m_not_admin, m_rehash}
+ {m_unregistered, m_not_admin, m_rehash}
 };
 struct TcmMessage trace_msgtab = {
  ".trace", 0, 0,
- {m_unregistered, m_not_oper, m_trace, m_trace}
+ {m_unregistered, m_trace, m_trace}
 };
 struct TcmMessage failures_msgtab = {
  ".failures", 0, 0,
- {m_unregistered, m_not_oper, m_failures, m_failures}
+ {m_unregistered, m_failures, m_failures}
 };
 struct TcmMessage domains_msgtab = {
  ".domains", 0, 1,
- {m_unregistered, m_not_oper, m_domains, m_domains}
+ {m_unregistered, m_domains, m_domains}
 };
 struct TcmMessage bots_msgtab = {
  ".bots", 0, 1,
- {m_unregistered, m_not_oper, m_bots, m_bots}
+ {m_unregistered, m_bots, m_bots}
 };
 struct TcmMessage events_msgtab = {
  ".events", 0, 1,
- {m_unregistered, m_not_oper, m_events, m_events}
+ {m_unregistered, m_events, m_events}
 };
 #ifdef VIRTUAL
 struct TcmMessage vmulti_msgtab = {
  ".vmulti", 0, 1,
- {m_unregistered, m_not_oper, m_vmulti, m_vmulti}
+ {m_unregistered, m_vmulti, m_vmulti}
 };
 #endif
 struct TcmMessage nfind_msgtab = {
  ".nfind", 0, 1,
- {m_unregistered, m_not_oper, m_nfind, m_nfind}
+ {m_unregistered, m_nfind, m_nfind}
 };
 struct TcmMessage list_msgtab = {
  ".list", 0, 1,
- {m_unregistered, m_not_oper, m_list, m_list}
+ {m_unregistered, m_list, m_list}
 };
 #ifdef WANT_ULIST
 struct TcmMessage ulist_msgtab = {
  ".ulist", 0, 1,
- {m_unregistered, m_not_oper, m_ulist, m_ulist}
+ {m_unregistered, m_ulist, m_ulist}
 };
 #endif
 #ifdef WANT_HLIST
 struct TcmMessage hlist_msgtab = {
  ".hlist", 0, 1,
- {m_unregistered, m_not_oper, m_hlist, m_hlist}
+ {m_unregistered, m_hlist, m_hlist}
 };
 #endif
 #endif

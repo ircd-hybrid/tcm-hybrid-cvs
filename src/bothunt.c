@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.90 2002/05/24 15:17:48 db Exp $
+ * $Id: bothunt.c,v 1.91 2002/05/24 18:19:29 leeh Exp $
  */
 
 #include <stdio.h>
@@ -318,7 +318,7 @@ void on_stats_o(int connnum, int argc, char *argv[])
 	    sizeof(userlist[user_list_index].usernick));
 
     userlist[user_list_index].password[0] = '\0';
-    userlist[user_list_index].type = TYPE_OPER;
+    userlist[user_list_index].type = 0;
     user_list_index++;
   }
   /*
@@ -1225,7 +1225,7 @@ makeconn(char *hostport,char *nick,char *userhost)
   connections[i].user[MAX_USER-1] = '\0';
   strncpy(connections[i].host,host,MAX_HOST-1);
   connections[i].host[MAX_HOST-1] = '\0';
-  connections[i].type = isoper(user, host);
+  connections[i].type = 0;
 
   connections[i].last_message_time = time(NULL);
 
@@ -2998,7 +2998,7 @@ m_gline(int connnum, int argc, char *argv[])
 #else
 struct TcmMessage gline_msgtab = {
  ".gline", 0, 0,
- {m_unregistered, m_not_oper, m_gline, m_gline}
+ {m_unregistered, m_gline, m_gline}
 };
 #endif
 

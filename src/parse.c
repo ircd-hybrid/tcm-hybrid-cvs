@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.12 2002/05/24 15:17:48 db Exp $
+ * $Id: parse.c,v 1.13 2002/05/24 18:19:30 leeh Exp $
  */
 
 #include <stdio.h>
@@ -145,10 +145,8 @@ parse_client(int i, int argc, char *argv[])
           if (strcasecmp(msg_hash_table[j].cmd, argv[0]) == 0)
             {
               if (connections[i].type & TYPE_ADMIN)
-                msg_hash_table[j].msg->handlers[3](i, argc, argv);
-              else if (connections[i].type & TYPE_OPER)
                 msg_hash_table[j].msg->handlers[2](i, argc, argv);
-              else if (connections[i].type & TYPE_REGISTERED)
+              else if (connections[i].type & TYPE_OPER)
                 msg_hash_table[j].msg->handlers[1](i, argc, argv);
               else
                 msg_hash_table[j].msg->handlers[0](i, argc, argv);

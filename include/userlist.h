@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.35 2002/05/24 14:35:18 leeh Exp $ */
+/* $Id: userlist.h,v 1.36 2002/05/24 18:19:24 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -215,8 +215,8 @@ void exemption_summary();
 extern struct tcm_file_entry tcmlist[];
 extern int tcm_list_index;
 
-#define TYPE_OPER		0x00001	/* user has .bots privs etc. */
-#define TYPE_REGISTERED		0x00002	/* user has .kline privs etc. */
+#define TYPE_OPER		0x00001	/* user has registered as an oper */
+#define TYPE_KLINE		0x00002 /* user has .kline privs */
 #define TYPE_GLINE		0x00004	/* user has .gline privs */ 
 #define TYPE_SERVERS            0x00008 /* user sees server intro/quits */
 #define TYPE_PARTYLINE		0x00010	/* user wants to be on partyline */
@@ -230,7 +230,7 @@ extern int tcm_list_index;
 #define TYPE_DLINE		0x02000 /* user has .dline privs */
 #define TYPE_SPY		0x04000 /* links, motd, info requests */
 #define TYPE_ECHO		0x10000 /* user is echo'ed */
-#define TYPE_KLINE		0x20000 /* user see's klines/unklines */
+#define TYPE_VIEW_KLINES	0x20000 /* user see's klines/unklines */
 #define TYPE_SUSPENDED		0x40000 /* user is suspended */
 #ifdef ENABLE_W_FLAG
 #define TYPE_WALLOPS		0x80000 /* user can see OPERWALL */

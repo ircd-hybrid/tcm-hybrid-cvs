@@ -1,7 +1,7 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.18 2002/05/24 04:04:17 db Exp $ */
+/* $Id: modules.h,v 1.19 2002/05/24 18:19:24 leeh Exp $ */
 
 struct module
 {
@@ -33,7 +33,6 @@ struct common_function *reload;
 #define F_CONTINUOUS		9
 #define F_SCONTINUOUS		10
 #define F_CONFIG		11
-/*				12 */
 #define F_RELOAD		14
 
 extern void report(int type, int channel_send_flag, char *format,...);

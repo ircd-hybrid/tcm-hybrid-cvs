@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.13 2002/05/24 15:38:33 db Exp $
+ * $Id: tcm_io.c,v 1.14 2002/05/24 18:19:30 leeh Exp $
  */
 
 #include <stdio.h>
@@ -485,9 +485,8 @@ connect_remote_client(char *nick,char *user,char *host,int sock)
   print_motd(connections[i].socket);
   print_to_socket(connections[i].socket,
 		  "Connected.  Send '.help' for commands.");
-  report(SEND_ALL, CHANNEL_REPORT_ROUTINE, "%s %s (%s@%s) has connected\n",
-         connections[i].type & TYPE_OPER ? "Oper" : "User", connections[i].nick,
-         connections[i].user, connections[i].host);
+  report(SEND_ALL, CHANNEL_REPORT_ROUTINE, "Oper %s (%s@%s) has connected\n",
+         connections[i].nick, connections[i].user, connections[i].host);
 
   log("OPER DCC connection from %s!%s@%s",
       nick,
@@ -651,7 +650,7 @@ send_to_all(int type, const char *format,...)
 	  switch(type)
 	    {
 	    case SEND_KLINE_NOTICES:
-	      if (connections[i].type & TYPE_KLINE)
+	      if (connections[i].type & TYPE_VIEW_KLINES)
 		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 
@@ -683,14 +682,12 @@ send_to_all(int type, const char *format,...)
 	      break;
 
 	    case SEND_PRIVMSG:
-	      if((connections[i].type & TYPE_OPER) &&
-		 (connections[i].set_modes & SET_PRIVMSG))
+	      if(connections[i].set_modes & SET_PRIVMSG)
 		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 
 	    case SEND_NOTICES:
-	      if((connections[i].type & TYPE_OPER) &&
-		 (connections[i].set_modes & SET_NOTICES))
+	      if(connections[i].set_modes & SET_NOTICES)
 		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 

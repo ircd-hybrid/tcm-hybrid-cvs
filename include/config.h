@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.49 2002/05/24 14:32:29 leeh Exp $
+ * $Id: config.h,v 1.50 2002/05/24 18:19:24 leeh Exp $
  */
 
 /*
@@ -128,7 +128,6 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 #define REASON_DRONE   "Drones"
 #define REASON_SOCKS   "Open SOCKS Proxy"
 #define REASON_WINGATE "Open WinGate Proxy"
-#define REASON_SQUID   "Open Squid Proxy"
 
 /* .kperm */
 #define REASON_KPERM   "Permanent K-Line"
@@ -141,6 +140,8 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 
 /*
  * define this to flag wingates
+ *
+ * This must also be defined to detect SOCKS
  */
 #define DETECT_WINGATE
 
@@ -150,32 +151,14 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 #define DETECT_SOCKS
 
 /*
- * define this to flag open Squid proxies
- */
-#define DETECT_SQUID
-
-/*
  * define the ip and port you want a Socks 4 test to connect back to.
  * Suggest using the relevant irc servers ip for a proper check.
  * Do not use hostnames here.
- *
- * YOU MUST CHANGE THIS TO SOMETHING REAL.  You can setup a listen in inetd
- * if you'd like; it does not nessicarily have to connect to an ircd.
- *
- * Note: This same port and IP will be used in Squid detection, if defined.
  */
 #define SOCKS_CHECKPORT 6667
-#define SOCKS_CHECKIP "127.0.0.1"
+#define SOCKS_CHECKIP "10.0.0.1"
 
-/*
- * define this to the string to use to determine if a Squid is open or not
- * note: this is potentially inaccurate, if the server you are connecting
- * to is running an irc server on the port you are checking for a Squid proxy.
- * note2: csircd does not send this notice, for whatever reason, so you must
- * use something else.  newer versions of Squid will send a message:
- * "Connection Established" when they succesfully connect to their target.
- */
-#define SQUID_STRING "Looking up your hostname"
+
 
 /* undef if you don't want klines reported - Toast */
 #define REPORT_KLINES
@@ -215,9 +198,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 /* maximum number of hosts not to auto kline */
 #define MAXHOSTS 100
 
-/* max users of glines to support */
-#define MAXBANS 25
-
+#define MAXBANS 50
 /*
  * define this if you want services code at all
  */

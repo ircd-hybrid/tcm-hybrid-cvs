@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.28 2002/05/24 15:01:28 db Exp $ */
+/* $Id: wingate.c,v 1.29 2002/05/24 18:19:27 leeh Exp $ */
 
 
 #include <netdb.h>
@@ -134,7 +134,7 @@ void m_proxy(int connnum, int argc, char *argv[])
 #else
 struct TcmMessage proxy_msgtab = {
  ".proxy", 0, 0,
- {m_unregistered, m_not_oper, m_not_admin, m_proxy}
+ {m_unregistered, m_not_admin, m_proxy}
 };
 #endif
 #endif /* DEBUGMODE */

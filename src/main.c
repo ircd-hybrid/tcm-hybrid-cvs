@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.56 2002/05/24 15:17:48 db Exp $ */
+/* $Id: main.c,v 1.57 2002/05/24 18:19:30 leeh Exp $ */
 
 #include "setup.h"
 
@@ -269,8 +269,7 @@ closeconn(int connnum, int argc, char *argv[])
     }
     
   send_to_all(SEND_ALL,
-	       "%s %s (%s@%s) has disconnected",
-               connections[connnum].type & TYPE_OPER ? "Oper" : "User", 
+	       "Oper %s (%s@%s) has disconnected",
                connections[connnum].nick, connections[connnum].user,
                connections[connnum].host);
 

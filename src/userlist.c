@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.64 2002/05/24 15:17:49 db Exp $
+ * $Id: userlist.c,v 1.65 2002/05/24 18:19:30 leeh Exp $
  *
  */
 
@@ -587,7 +587,7 @@ static void load_a_user(char *line)
 		type_int |= TYPE_WARN;
 		break;
 	      case 'k':
-		type_int |= TYPE_KLINE;
+		type_int |= TYPE_VIEW_KLINES;
 		break;
 	      case 'i':
 		type_int |= TYPE_INVS;
@@ -618,14 +618,11 @@ static void load_a_user(char *line)
               case 'x':
                 type_int |= TYPE_SERVERS;
                 break;
-	      case 'O':
-		type_int |= TYPE_OPER;
-		break;
 	      case 'G':
-		type_int |= (TYPE_GLINE|TYPE_REGISTERED);
+		type_int |= TYPE_GLINE;
 		break;
 	      case 'K':
-		type_int |= TYPE_REGISTERED;
+		type_int |= TYPE_KLINE;
 		break;
 
 	      default:
@@ -738,7 +735,7 @@ void init_userlist()
  *
  * inputs	- user name
  * 		- host name
- * output	- TYPE_OPER if oper, 0 if not
+ * output	- 1 if oper, 0 if not
  * side effects	- NONE
  */
 
@@ -750,9 +747,9 @@ int isoper(char *user,char *host)
     {
       if ((!match(userlist[i].user,user)) &&
           (!wldcmp(userlist[i].host,host)))
-        return(TYPE_OPER);
+        return 1;
     }
-  return(0);
+  return 0;
 }
 
 /* Checks for ok hosts to block auto-kline - Phisher */
@@ -813,9 +810,9 @@ char *type_show(unsigned long type)
   memset(&type_string, 0, sizeof(type_string));
   p = type_string;
 
-  if(type & TYPE_OPER)
-    *p++ = 'O';
-  if(type & TYPE_REGISTERED)
+  *p++ = 'O';
+
+  if(type & TYPE_KLINE)
     *p++ = 'K';
   if(type & TYPE_GLINE)
     *p++ = 'G';
@@ -847,7 +844,7 @@ char *type_show(unsigned long type)
     *p++ = 'i';
   if(type & TYPE_LOCOPS)
     *p++ = 'o';
-  if(type & TYPE_KLINE)
+  if(type & TYPE_VIEW_KLINES)
     *p++ = 'k';
   if(type & TYPE_SPY)
     *p++ = 'y';

@@ -1,4 +1,4 @@
-# $Id: userlist.cf,v 1.18 2002/05/24 14:32:26 leeh Exp $
+# $Id: userlist.cf,v 1.19 2002/05/24 18:19:21 leeh Exp $
 # userlist.cf file
 #
 # each line is colon separated
@@ -16,43 +16,39 @@
 # a password.
 #
 # Flags:
-#   +/-O will give the user operator status
-#   +/-K will allow this user to request K-lines
-#   +/-M will give the user the ability to set dynamic flags for other users
+#   +/-M will give the user the admin privs
+#   +/-K will allows this oper to .kline
+#   +/-D will allows this oper to .dline
+#   +/-G will allows this oper to .gline
 #   +/-I will, if set, override the dyanmic i flag
-#   +/-G will allow user to .gline
-#   +/-D will give this user access to .dline
 #   +/-W will allow this user to see WALLOPS and OPERWALL (this is only used
 #         if ENABLE_W_FLAG is defined)
-#   +/-k will show this user K-lines
-#   +/-s will allow this user to see STAT requests made by users
+#   +/-k will show this user K-lines being set/unset
+#   +/-s will show this user STATS requests
+#   +/-y will show this user INFO, MOTD and LINKS requests.
 #   +/-w will show this user misc. warnings, such as clones detected and
 #         the like
 #   +/-i will make this user invisible to the list of tcm opers connected
 #         to our bot in a STATS p reply (this is only used if INVISIBLE_OPERS
 #	  is defined)
-#   +/-l will show this user link requests, both incoming and outgoing
-#   +/-m will show this user MOTD requests
 #   +/-o will show this user LOCOPs
 #   +/-p will give this user access to the party-line
 #   +/-e will echo a users party-line chat back
 #   +/-x will show server introductions and quits
 #
-#		-bill 5/2000
-#
 # Examples:
 #
 # db@*db.net has oper kline and gline privs
 #
-O:db@*.db.net:diane:notrealpassword:OKG
+O:db@*.db.net:diane:notrealpassword:KG
 #
 # bill@*.parodius.com has oper remote kline gline and is invisible to irc users
 #
-O:bill@*.parodius.com:pro:notrealpassword:OKGi
+O:bill@*.parodius.com:pro:notrealpassword:KGi
 #
 # db@*bsd.org has oper and remote kline but no gline privs
 #
-O:db@*bsd.org:diane:notrealpassword:OK
+O:db@*bsd.org:diane:notrealpassword:K
 
 # E-lines
 #  The format for these are as follows:

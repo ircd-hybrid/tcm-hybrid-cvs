@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.140 2002/05/30 18:59:37 db Exp $
+ * $Id: bothunt.c,v 1.141 2002/05/30 20:54:07 db Exp $
  */
 
 #include <stdio.h>
@@ -131,7 +131,7 @@ struct connect_flood_entry connect_flood[CONNECT_FLOOD_TABLE_SIZE];
 void
 on_trace_user(int argc, char *argv[])
 {
-  struct userentry userinfo;
+  struct user_entry userinfo;
   char *class_ptr;	/* pointer to class number */
   int  is_oper;
   char *ip_ptr;
@@ -307,7 +307,7 @@ on_server_notice(int argc, char *argv[])
 {
   int i = -1, a, b, c = -1;
   int faction = -1;
-  struct userentry userinfo;
+  struct user_entry userinfo;
   char *from_server;
   /* XXX - Verify these down below */
   char *nick = NULL;

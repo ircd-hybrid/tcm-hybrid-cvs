@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.10 2002/05/30 18:59:38 db Exp $
+ * $Id: hash.c,v 1.11 2002/05/30 20:54:07 db Exp $
  */
 
 #include <stdio.h>
@@ -47,10 +47,10 @@ static void make_ip_class_c(char *p);
 static void check_virtual_host_clones(char *);
 #endif
 
-struct hashrec *user_table[HASHTABLESIZE];
-struct hashrec *host_table[HASHTABLESIZE];
-struct hashrec *domain_table[HASHTABLESIZE];
-struct hashrec *ip_table[HASHTABLESIZE];
+struct hash_rec *user_table[HASHTABLESIZE];
+struct hash_rec *host_table[HASHTABLESIZE];
+struct hash_rec *domain_table[HASHTABLESIZE];
+struct hash_rec *ip_table[HASHTABLESIZE];
 
 /*
  * free_hash_links
@@ -60,9 +60,9 @@ struct hashrec *ip_table[HASHTABLESIZE];
  * side effects -
  */
 static void 
-free_hash_links(struct hashrec *ptr)
+free_hash_links(struct hash_rec *ptr)
 {
-  struct hashrec *next_ptr;
+  struct hash_rec *next_ptr;
 
   if (ptr == NULL)
     return;
@@ -93,7 +93,7 @@ free_hash_links(struct hashrec *ptr)
 void 
 freehash(void)
 {
-  struct hashrec *ptr;
+  struct hash_rec *ptr;
   int i;
 
   for (i=0; i<HASHTABLESIZE; i++)
@@ -123,15 +123,15 @@ freehash(void)
 /*
  * find_nick
  *
- * Returns an userentry for the given nick, or NULL if not found
+ * Returns an user_entry for the given nick, or NULL if not found
  *
  */
 
-struct userentry *
+struct user_entry *
 find_nick(const char *nick)
 {
   int i;
-  struct hashrec *user_ptr;
+  struct hash_rec *user_ptr;
 
   if (nick == NULL)
     return (NULL);
@@ -150,15 +150,15 @@ find_nick(const char *nick)
 /*
  * find_host
  *
- * Returns first userentry for the given host, or NULL if not found
+ * Returns first user_entry for the given host, or NULL if not found
  *
  */
 
-struct userentry *
+struct user_entry *
 find_host(const char *host)
 {
   int i;
-  struct hashrec * user_ptr;
+  struct hash_rec * user_ptr;
 
   if (host == NULL)
     return (NULL);
@@ -179,14 +179,14 @@ find_host(const char *host)
  *
  * inputs	- pointer to hash table
  *		- pointer to key being used for hash
- *		- pointer to userentry to add
+ *		- pointer to user_entry to add
  * output	- none
  * side effects	- 
  */
 
 void
-add_to_hash_table(struct hashrec *table[],
-		       const char *key, struct hashrec *hashptr)
+add_to_hash_table(struct hash_rec *table[],
+		       const char *key, struct hash_rec *hashptr)
 {
   int ind;
   
@@ -197,7 +197,7 @@ add_to_hash_table(struct hashrec *table[],
     }
   else
     {
-      ((struct hashrec *)table[ind])->next = hashptr;
+      ((struct hash_rec *)table[ind])->next = hashptr;
       hashptr->next = table[ind];
     }
 }
@@ -216,12 +216,12 @@ add_to_hash_table(struct hashrec *table[],
  */
 
 int
-remove_from_hash_table(struct hashrec *table[],
+remove_from_hash_table(struct hash_rec *table[],
 		       const char *key, const char *host_match,
 		       const char *user_match, const char *nick_match)
 {
-  struct hashrec *find;
-  struct hashrec *prev=NULL;
+  struct hash_rec *find;
+  struct hash_rec *prev=NULL;
   int ind;
 
   for (find = table[(ind = hash_func(key))]; find; find = find->next)
@@ -248,7 +248,7 @@ remove_from_hash_table(struct hashrec *table[],
 /*
  * add_user_host()
  * 
- * inputs	- pointer to struct userentry
+ * inputs	- pointer to struct user_entry
  * 		- from a trace YES or NO
  * 		- is this user an oper YES or NO
  * output	- NONE
@@ -257,10 +257,10 @@ remove_from_hash_table(struct hashrec *table[],
  */
 
 void
-add_user_host(struct userentry *user_info, int fromtrace, int is_oper)
+add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
 {
-  struct hashrec *new_hash;
-  struct userentry *new_user;
+  struct hash_rec *new_hash;
+  struct user_entry *new_user;
   char *domain;
 
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
@@ -268,8 +268,8 @@ add_user_host(struct userentry *user_info, int fromtrace, int is_oper)
     user_signon(user_info);
 #endif
 
-  new_hash = (struct hashrec *)xmalloc(sizeof(struct hashrec));
-  new_user = (struct userentry *)xmalloc(sizeof(struct userentry));
+  new_hash = (struct hash_rec *)xmalloc(sizeof(struct hash_rec));
+  new_user = (struct user_entry *)xmalloc(sizeof(struct user_entry));
   new_user->link_count = 0;
 
   strlcpy(new_user->nick, user_info->nick, MAX_NICK);
@@ -320,13 +320,13 @@ add_user_host(struct userentry *user_info, int fromtrace, int is_oper)
  * remove_user_host()
  * 
  * inputs	- nick
- * 		- pointer to struct userentry
+ * 		- pointer to struct user_entry
  * output	- NONE
  * side effects	- 
  */
 
 void
-remove_user_host(char *nick, struct userentry *user_info)
+remove_user_host(char *nick, struct user_entry *user_info)
 {
 #ifdef VIRTUAL
   char ip_class_c[MAX_IP];
@@ -551,7 +551,7 @@ find_domain(char* host)
 static void
 check_host_clones(char *host)
 {
-  struct hashrec *find;
+  struct hash_rec *find;
   int clonecount = 0;
   int reportedclones = 0;
   char *last_user="";
@@ -713,7 +713,7 @@ check_host_clones(char *host)
 static void
 check_virtual_host_clones(char *ip_class_c)
 {
-  struct hashrec *find;
+  struct hash_rec *find;
   int clonecount = 0;
   int reportedclones = 0;
   time_t now, lastreport, oldest;
@@ -867,7 +867,7 @@ check_virtual_host_clones(char *ip_class_c)
 void
 update_nick(char *nick1, char *nick2)
 {
-  struct hashrec *find;
+  struct hash_rec *find;
 
   for (find = domain_table[hash_func(nick1)]; find; find = find->next)
     {
@@ -897,7 +897,7 @@ kill_add_report(char *server_notice)
 {
   char buff[MAX_BUFF], *p, *q;
   char *nick, *by, *reason;
-  struct hashrec *userptr;
+  struct hash_rec *userptr;
   int i=0;
 
   if ((p = strstr(server_notice, ". From")) == NULL)
@@ -951,7 +951,7 @@ struct sortarray sort[MAXDOMAINS+1];
 void 
 report_domains(int sock,int num)
 {
-  struct hashrec *userptr;
+  struct hash_rec *userptr;
   int inuse = 0;
   int i;
   int j;
@@ -1029,7 +1029,7 @@ report_domains(int sock,int num)
 void 
 list_class(int sock,char *class_to_find,int total_only)
 {
-  struct hashrec *userptr;
+  struct hash_rec *userptr;
   int i;
   int num_found=0;
   int num_unknown=0;
@@ -1081,7 +1081,7 @@ list_class(int sock,char *class_to_find,int total_only)
 void 
 list_nicks(int sock,char *nick,int regex)
 {
-  struct hashrec *userptr;
+  struct hash_rec *userptr;
 #ifdef HAVE_REGEX_H
   regex_t reg;
   regmatch_t m[1];
@@ -1148,7 +1148,7 @@ list_nicks(int sock,char *nick,int regex)
 void 
 list_users(int sock,char *userhost,int regex)
 {
-  struct hashrec *ipptr;
+  struct hash_rec *ipptr;
 #ifdef HAVE_REGEX_H
   regex_t reg;
   regmatch_t m[1];
@@ -1209,7 +1209,7 @@ list_users(int sock,char *userhost,int regex)
 
 void kill_list_users(int sock, char *userhost, char *reason, int regex)
 {
-  struct hashrec *userptr;
+  struct hash_rec *userptr;
 #ifdef HAVE_REGEX_H
   regex_t reg;
   regmatch_t m[1];
@@ -1263,7 +1263,7 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
 void report_mem(int sock)
 {
   int i;
-  struct hashrec *current;
+  struct hash_rec *current;
   unsigned long total_host_table=0L;
   int count_host_table=0;
   unsigned long total_domain_table=0L;
@@ -1274,8 +1274,8 @@ void report_mem(int sock)
 #endif
   unsigned long total_user_table=0L;
   int count_user_table=0;
-  unsigned long total_userentry=0L;
-  int count_userentry=0;
+  unsigned long total_user_entry=0L;
+  int count_user_entry=0;
 
   /*  host_table,domain_table,ip_table */
 
@@ -1283,11 +1283,11 @@ void report_mem(int sock)
     {
       for (current = host_table[i]; current; current = current->next)
         {
-          total_host_table += sizeof(struct hashrec);
+          total_host_table += sizeof(struct hash_rec);
           count_host_table++;
 
-          total_userentry += sizeof(struct userentry);
-          count_userentry++;
+          total_user_entry += sizeof(struct user_entry);
+          count_user_entry++;
         }
     }
 
@@ -1295,7 +1295,7 @@ void report_mem(int sock)
     {
       for( current = domain_table[i]; current; current = current->next)
         {
-          total_domain_table += sizeof(struct hashrec);
+          total_domain_table += sizeof(struct hash_rec);
           count_domain_table++;
         }
     }
@@ -1305,7 +1305,7 @@ void report_mem(int sock)
     {
       for (current = ip_table[i]; current; current = current->next)
         {
-          total_ip_table += sizeof(struct hashrec);
+          total_ip_table += sizeof(struct hash_rec);
           count_ip_table++;
         }
     }
@@ -1315,7 +1315,7 @@ void report_mem(int sock)
     {
       for (current = user_table[i]; current; current = current->next)
         {
-          total_user_table += sizeof(struct hashrec);
+          total_user_table += sizeof(struct hash_rec);
           count_user_table++;
         }
     }
@@ -1333,11 +1333,11 @@ void report_mem(int sock)
 		  total_ip_table, count_ip_table);
 
   print_to_socket(sock, "Total user entry memory %lu/%d entries\n",
-		  total_userentry, count_userentry);
+		  total_user_entry, count_user_entry);
 
   print_to_socket(sock,"Total memory in use %lu\n",
 		  total_host_table + total_domain_table +
-		  total_ip_table + total_userentry );
+		  total_ip_table + total_user_entry );
 }
 
 void

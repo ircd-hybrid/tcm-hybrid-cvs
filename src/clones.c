@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.6 2002/05/30 18:22:15 db Exp $
+ * $Id: clones.c,v 1.7 2002/05/30 20:54:07 db Exp $
  */
 
 #include <assert.h>
@@ -125,9 +125,9 @@ m_clones(int connnum, int argc, char *argv[])
 void
 check_clones(void *unused)
 {
-  struct hashrec *userptr;
-  struct hashrec *top;
-  struct hashrec *temp;
+  struct hash_rec *userptr;
+  struct hash_rec *top;
+  struct hash_rec *temp;
   int numfound;
   int i;
   int notip;
@@ -242,9 +242,9 @@ check_reconnect_clones(char *host)
 void
 report_clones(int sock)
 {
-  struct hashrec *userptr;
-  struct hashrec *top;
-  struct hashrec *temp;
+  struct hash_rec *userptr;
+  struct hash_rec *top;
+  struct hash_rec *temp;
   int  numfound;
   int i;
   int j=0;
@@ -325,7 +325,7 @@ report_clones(int sock)
 void
 report_multi(int sock,int nclones)
 {
-  struct hashrec *userptr,*top,*temp;
+  struct hash_rec *userptr,*top,*temp;
   int numfound,i;
   int notip;
   int foundany = NO;
@@ -394,7 +394,7 @@ report_multi(int sock,int nclones)
 void
 report_multi_user(int sock, int nclones)
 {
-  struct hashrec *userptr,*top,*temp;
+  struct hash_rec *userptr,*top,*temp;
   int numfound;
   int i;
   int foundany = NO;
@@ -456,7 +456,7 @@ report_multi_user(int sock, int nclones)
  */
 void report_multi_host(int sock, int nclones)
 {
-  struct hashrec *userptr,*top,*temp;
+  struct hash_rec *userptr,*top,*temp;
   int numfound,i;
   int foundany = NO;
 

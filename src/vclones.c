@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.4 2002/05/30 18:22:15 db Exp $
+ * $Id: vclones.c,v 1.5 2002/05/30 20:54:08 db Exp $
  */
 
 #include <assert.h>
@@ -104,9 +104,9 @@ m_vlist(int connnum, int argc, char *argv[])
 void
 report_multi_virtuals(int sock,int nclones)
 {
-  struct hashrec *userptr;
-  struct hashrec *top;
-  struct hashrec *temp;
+  struct hash_rec *userptr;
+  struct hash_rec *top;
+  struct hash_rec *temp;
   int numfound;
   int i;
   int foundany = 0;
@@ -165,7 +165,7 @@ report_multi_virtuals(int sock,int nclones)
 void
 report_vbots(int sock, int nclones)
 {
-  struct hashrec *userptr,*top,*temp;
+  struct hash_rec *userptr,*top,*temp;
   int numfound,i;
   int foundany = NO;
 
@@ -228,7 +228,7 @@ report_vbots(int sock, int nclones)
 void
 list_virtual_users(int sock,char *userhost,int regex)
 {
-  struct hashrec *ipptr;
+  struct hash_rec *ipptr;
 #ifdef HAVE_REGEX_H
   regex_t reg;
   regmatch_t m[1];

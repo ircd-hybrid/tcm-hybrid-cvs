@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.43 2002/05/30 18:59:38 db Exp $
+ * $Id: logging.c,v 1.44 2002/05/30 20:54:07 db Exp $
  *
  * - db
  */
@@ -62,7 +62,7 @@ static char *duration(double);
  */
 
 void 
-chopuh(int istrace,char *nickuserhost,struct userentry *userinfo)
+chopuh(int istrace,char *nickuserhost,struct user_entry *userinfo)
 {
   char *uh;
   char *p;
@@ -468,7 +468,7 @@ logclear(void)
 void 
 logfailure(char *nickuh,int botreject)
 {
-  struct userentry userinfo;
+  struct user_entry userinfo;
   struct failrec *tmp, *hold = NULL;
 
   chopuh(YES,nickuh,&userinfo); /* use trace form of chopuh() */

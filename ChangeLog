@@ -1,3 +1,15 @@
+bill        2003/01/20 01:16:23 EST	(20030120_0)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  - fixed logging error in KLINE active for notices
+  
+  Revision  Changes    Path
+  1.210     +2 -3      tcm-hybrid/src/bothunt.c
+
+
+
 wiz         2003/01/18 20:18:41 EST	(20030119_0)
 
   Modified files:

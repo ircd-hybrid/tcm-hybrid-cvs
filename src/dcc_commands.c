@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.99 2002/05/27 23:49:12 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.100 2002/05/27 23:59:45 db Exp $ */
 
 #include "setup.h"
 
@@ -32,6 +32,7 @@
 #include "config.h"
 #include "tcm.h"
 #include "event.h"
+#include "hash.h"
 #include "bothunt.h"
 #include "userlist.h"
 #include "logging.h"
@@ -43,6 +44,7 @@
 #include "match.h"
 #include "parse.h"
 #include "actions.h"
+
 
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>

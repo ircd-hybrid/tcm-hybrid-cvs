@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.46 2002/05/27 21:47:11 leeh Exp $ */
+/* $Id: wingate.c,v 1.47 2002/05/27 23:59:47 db Exp $ */
 
 
 #include <netdb.h>
@@ -16,10 +16,12 @@
 #include "commands.h"
 #include "modules.h"
 #include "userlist.h"
+#include "hash.h"
 #include "logging.h"
 #include "stdcmds.h"
 #include "tcm_io.h"
 #include "actions.h"
+#include "hash.h"
 
 #ifdef DEBUGMODE
 #include <stdlib.h>   /* needed for atoi() */

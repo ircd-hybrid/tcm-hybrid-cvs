@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.6 2002/05/27 21:47:11 leeh Exp $
+ * $Id: services.c,v 1.7 2002/05/27 23:59:46 db Exp $
  */
 
 #include <stdio.h>
@@ -26,6 +26,7 @@
 #include "userlist.h"
 #include "parse.h"
 #include "numeric.h"
+#include "hash.h"
 #include "logging.h"
 #include "stdcmds.h"
 #include "commands.h"

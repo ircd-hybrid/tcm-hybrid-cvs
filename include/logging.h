@@ -1,7 +1,7 @@
 #ifndef __LOGGING_H
 #define __LOGGING_H
 
-/* $Id: logging.h,v 1.9 2002/05/27 21:02:30 db Exp $ */
+/* $Id: logging.h,v 1.10 2002/05/27 23:59:42 db Exp $ */
 
 extern FILE *logging_fp; 
 extern FILE *outfile;
@@ -15,6 +15,7 @@ char *date_stamp(void);
 char *format_reason(char *);
 void tcm_log(int level, const char *format,...);
 void report_uptime(int sock);
+void chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo);
 
 #define L_NORM	0
 #define L_WARN	1

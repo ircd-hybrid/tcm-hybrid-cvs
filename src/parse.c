@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.37 2002/05/27 23:39:58 leeh Exp $
+ * $Id: parse.c,v 1.38 2002/05/27 23:59:46 db Exp $
  */
 
 #include <stdio.h>
@@ -26,6 +26,7 @@
 #include "userlist.h"
 #include "parse.h"
 #include "numeric.h"
+#include "hash.h"
 #include "logging.h"
 #include "stdcmds.h"
 #include "commands.h"

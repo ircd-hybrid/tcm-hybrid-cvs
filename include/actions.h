@@ -1,8 +1,18 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.1 2002/05/27 21:02:30 db Exp $ */
+/* $Id: actions.h,v 1.2 2002/05/27 23:59:42 db Exp $ */
 
+extern int act_cflood;
+extern int act_vclone;
+extern int act_flood;
+extern int act_link;
+extern int act_bot;
+extern act_spambot;
+extern act_clone;
+extern int act_rclone;
+
+void init_actions(void);
 void handle_action(int actionid, int idented,
 		   char *nick, char *user, char *host, char *ip,
 		   char * addcmt);

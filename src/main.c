@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.87 2002/05/27 21:02:35 db Exp $ */
+/* $Id: main.c,v 1.88 2002/05/27 23:59:46 db Exp $ */
 
 #include "setup.h"
 
@@ -44,6 +44,7 @@
 #include "serno.h"
 #include "patchlevel.h"
 #include "parse.h"
+#include "hash.h"
 #include "logging.h"
 #include "actions.h"
 

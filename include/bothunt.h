@@ -1,20 +1,11 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.39 2002/05/27 22:03:21 db Exp $ */
+/* $Id: bothunt.h,v 1.40 2002/05/27 23:59:42 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
 
-/* XXX */
-struct plus_c_info
-{
-  char *nick;
-  char *user;
-  char *host;
-  char class[MAX_CLASS+1];
-  char ip[MAX_IP+1];
-};
 
 /* XXXX */
 void _config(int, int, char *argv[]);
@@ -93,7 +84,6 @@ extern int maxconns;
 
 void ilinemask(char *body);
 
-void chopuh(int,char *,struct plus_c_info *);
 
 #ifdef BOT_WARN
 void bot_report_kline(char *,char *);
@@ -113,8 +103,8 @@ void report(int type, int channel_send_flag, char *format,...);
 void report_mem(int sock);
 void report_clones(int sock);
 void report_failures(int sock,int num);
+void check_reconnect_clones(char *);
 
-void inithash(void);
 void init_link_look_table(void);
 void report_failures(int sock, int num);
 void report_domains(int sock, int num);
@@ -126,6 +116,7 @@ void report_domains(int sock,int num);
 void list_class(int sock,char *class_to_find,int total_only);
 
 extern void init_bothunt(void);
+extern void free_bothunt(void);
 extern void _reload_bothunt(int connnum, int argc, char *argv[]);
 extern void _ontraceuser(int connnum, int argc, char *argv[]);
 extern void _ontraceclass(int connnum, int argc, char *argv[]);

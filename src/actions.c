@@ -15,8 +15,8 @@
 #include "config.h"
 #include "tcm.h"
 #include "tcm_io.h"
-#include "logging.h"
 #include "hash.h"
+#include "logging.h"
 #include "bothunt.h"
 #include "userlist.h"
 #include "actions.h"
@@ -25,8 +25,53 @@
 
 /* actions.c
  *
- * $Id: actions.c,v 1.3 2002/05/27 21:47:10 leeh Exp $
+ * $Id: actions.c,v 1.4 2002/05/27 23:59:45 db Exp $
  */
+
+int act_cflood;
+int act_vclone;
+int act_flood;
+int act_link;
+int act_bot;
+int act_spambot;
+int act_clone;
+int act_rclone;
+
+void
+init_actions(void)
+{
+  act_cflood = add_action("cflood");
+  set_action_strip(act_cflood, HS_CFLOOD);
+  set_action_reason(act_cflood, REASON_CFLOOD);
+
+  act_vclone = add_action("vclone");
+  set_action_strip(act_vclone, HS_VCLONE);
+  set_action_reason(act_vclone, REASON_VCLONE);
+
+  act_flood = add_action("flood");
+  set_action_strip(act_flood, HS_FLOOD);
+  set_action_reason(act_flood, REASON_FLOOD);
+
+  act_link = add_action("link");
+  set_action_strip(act_link, HS_LINK);
+  set_action_reason(act_link, REASON_LINK);
+
+  act_bot = add_action("bot");
+  set_action_strip(act_bot, HS_BOT);
+  set_action_reason(act_bot, REASON_BOT);
+
+  act_spambot = add_action("spambot");
+  set_action_strip(act_spambot, HS_SPAMBOT);
+  set_action_reason(act_spambot, REASON_SPAMBOT);
+
+  act_clone = add_action("clone");
+  set_action_strip(act_clone, HS_CLONE);
+  set_action_reason(act_clone, REASON_CLONE);
+
+  act_rclone = add_action("rclone");
+  set_action_strip(act_rclone, HS_RCLONE);
+  set_action_reason(act_rclone, REASON_RCLONE);
+}
 
 /*
  * handle_action

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.55 2002/05/27 23:39:58 leeh Exp $
+ * $Id: tcm_io.c,v 1.56 2002/05/27 23:59:47 db Exp $
  */
 
 #include <stdio.h>
@@ -45,6 +45,7 @@
 #include "modules.h"
 #include "tcm_io.h"
 #include "numeric.h"
+#include "hash.h"
 #include "logging.h"
 #include "stdcmds.h"
 #include "wild.h"

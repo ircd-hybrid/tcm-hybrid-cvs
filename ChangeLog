@@ -1,3 +1,7 @@
+*** 20011017_4 by wcampbel
+Correction, that was .restart, not .rehash
+
+
 *** 20011017_3 by wcampbel
 Added .restart.  It works but does not properly clean up connections.
   Someone who knows current tcm code better will need to handle this.

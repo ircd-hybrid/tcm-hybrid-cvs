@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.80 2002/05/22 12:57:15 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.81 2002/05/22 15:08:42 db Exp $ */
 
 #include "setup.h"
 
@@ -422,18 +422,10 @@ on_stats_e(int connnum, int argc, char *argv[])
   char *user;
   char *host;
   char body[MAX_BUFF];
-  int i;
   char *p;
-  int len;
 
   p = body;
-  for (i = 0; i < argc; i++)
-  {
-    len = sprintf(p, "%s ", argv[i]);
-    p += len;
-  }
-  /* blow away last ' ' */
-  *--p = '\0';
+  expand_args(body, MAX_BUFF-1, argc, argv);
 
 /* No point if I am maxed out going any further */
   if (host_list_index == (MAXHOSTS - 1))
@@ -1413,9 +1405,17 @@ _onctcp(int connnum, int argc, char *argv[])
   }
 }
 
-int hash_func(char *string)
+/*
+ * hash_func()
+ *
+ * inputs	- string to hash
+ * output	- hash function result
+ * side effects	-
+ */
+int
+hash_func(char *string)
 {
-  long i;
+  int i;
 
   i = *(string++);
   if (*string)
@@ -1424,7 +1424,7 @@ int hash_func(char *string)
       i |= (*(string++) << 16);
       if (*string)
         i |= (*string << 24);
-  return i % HASHTABLESIZE;
+  return (i % HASHTABLESIZE);
 }
 
 /*
@@ -2230,10 +2230,17 @@ check_virtual_host_clones(char *ip_class_c)
 	  ++clonecount;
 	  tmrec = localtime(&find->info->connecttime);
 
-          if (user[0] == '\0') snprintf(user, sizeof(user), "%s", find->info->user);
-          if (strcasecmp(user, find->info->user)) different=YES;
-          if (find->info->user[0] == '~') ident = NO;
-          else ident = YES;
+          if (user[0] == '\0')
+	    snprintf(user, sizeof(user), "%s", find->info->user);
+
+          if (strcasecmp(user, find->info->user))
+	    different=YES;
+
+          if (find->info->user[0] == '~')
+	    ident = NO;
+          else
+	    ident = YES;
+
 	  if (clonecount == 1)
 	    {
 	      (void)snprintf(notice1,sizeof(notice1) - 1,
@@ -2259,8 +2266,12 @@ check_virtual_host_clones(char *ip_class_c)
 			    tmrec->tm_sec);
 	    }
 
-          /* apparantely we do not want to kline *@some.net.block.0/24 if the idents differ */
-          /* we do, however, if they differ w/o ident (ie ~clone1, ~clone2, ~clone3)        */
+          /* apparently we do not want to kline
+	   * *@some.net.block.0/24 if the idents differ
+	   *
+	   * we do, however, if they differ w/o ident
+	   * (ie ~clone1, ~clone2, ~clone3)        
+	   */
           if ((different == NO && ident == YES) || (ident == NO))
             {
 	      handle_action(act_vclone, ident,
@@ -2295,6 +2306,13 @@ check_virtual_host_clones(char *ip_class_c)
 }
 #endif
 
+/*
+ * connect_flood_notice
+ *
+ * input	- pointer to notice
+ * output	- none
+ * side effects	-
+ */
 static void
 connect_flood_notice(char *snotice)
 {
@@ -3037,8 +3055,11 @@ void _reload_bothunt(int connnum, int argc, char *argv[])
 void
 m_gline(int connnum, int argc, char *argv[])
 {
-  int a, c;
-  char *b, *d;
+  int i;
+  int number_nonwilds=0;
+  char *p;
+  char *hostname;
+  char gline_reason[MAX_REASON];
 
   if (!(connections[connnum].type & TYPE_GLINE))
   {
@@ -3048,94 +3069,81 @@ m_gline(int connnum, int argc, char *argv[])
 
   if (argc == 1)
   {
-    for (a=0;a<MAXBANS;++a)
+    for (i=0; i < MAXBANS; i++)
     { 
-      if (glines[a].user && glines[a].host)
-        prnt(connections[connnum].socket, "%d) %s@%s :%s -- %s\n", a+1,
-             glines[a].user, glines[a].host, glines[a].reason, glines[a].who);
+      if (glines[i].user[0] && glines[i].host[0])
+        prnt(connections[connnum].socket, "%d) %s@%s :%s -- %s\n", i+1,
+             glines[i].user, glines[i].host, glines[i].reason, glines[i].who);
     }
     return;
   }
+
   if (argc == 2)
   {
-    if ((a = atoi(argv[1])) && glines[a-1].user && glines[a-1].host)
+    if ((i = atoi(argv[1])) && glines[i-1].user[0] && glines[i-1].host[0])
     {
-      toserv("GLINE %s@%s :%s\n", glines[a-1].user, glines[a-1].host,
-             (glines[a-1].reason == NULL) ? "No reason" : glines[a-1].reason);
+      toserv("GLINE %s@%s :%s\n", glines[i-1].user, glines[i-1].host,
+             (glines[i-1].reason[0] == '\0') ? "No reason" : glines[i-1].reason);
       return;
     }
     else
     {
-      for (b=argv[1],a=0;*b;++b)
-        if (*b != '?' && *b != '*')
-          ++a;
-      if (a < 4)
+      for (p = argv[1], number_nonwilds=0; *p; p++)
+	{
+	  if (*p != '?' && *p != '*')
+	    number_nonwilds++;
+	}
+
+      if (number_nonwilds < 4)
       {
         prnt(connections[connnum].socket,
         "Please include at least 4 non-wildcard characters in the user@host\n");
         return;
       }
-      if ((b = strchr(argv[1], '@')) == NULL)
+
+      if ((hostname = strchr(argv[1], '@')) == NULL)
       {
         prnt(connections[connnum].socket,
              "Please include a \'@\' in the user@host\n");
         return;
       }
-      *b++ = '\0';
-      toserv("GLINE %s@%s :No reason\n", argv[1], b);
+      *hostname++ = '\0';
+      toserv("GLINE %s@%s :No reason\n", argv[1], hostname);
       return;
     }
   }
   else if (argc >= 3)
   {
-    if ((a = atoi(argv[1])) && glines[a-1].user && glines[a-1].host)
+    if ((i = atoi(argv[1])) && glines[i-1].user[0] && glines[i-1].host[0])
     {
-      if ((b = (char *)malloc(1024)) == NULL)
-      {
-        sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in m_gline()");
-        exit(0);
-      }
-      snprintf(b, 1024, "%s", argv[2]);
-      for (c=3;c<argc;++c)
-      {
-        strncat(b, " ", 1024-strlen(b));
-        strncat(b, argv[c], 1024-strlen(b));
-      }
-      toserv("GLINE %s@%s :%s\n", glines[a-1].user, glines[a-1].host,
-             (*b == ':') ? b+1 : b);
-      free(b);
+      expand_args(gline_reason, MAX_REASON, argc-2, argv+2);
+      toserv("GLINE %s@%s :%s\n", glines[i-1].user, glines[i-1].host,
+             (*gline_reason == ':') ? gline_reason+1 : gline_reason);
       return;
     }
     else
     {
-      for(b=argv[1],a=0;*b;++b)
-        if (*b != '?' && *b != '*')
-          ++a;
-      if (a < 4)
+      for(p = argv[1], number_nonwilds=0; *p; p++)
+        {
+          if (*p != '?' && *p != '*')
+            number_nonwilds++;
+        }
+
+      if (number_nonwilds < 4)
       {
         prnt(connections[connnum].socket,
       "Please include at least 4 non-wildcard characters with the user@host\n");
         return;
       }
-      if ((b = strchr(argv[1], '@')) == NULL)
+      if ((hostname = strchr(argv[1], '@')) == NULL)
       {
         prnt(connections[connnum].socket,
              "Please include a \'@\' with the user@host\n");
         return;
       }
-      if ((d = (char *)malloc(1024)) == NULL)
-      {
-        sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in m_gline()");
-        exit(0);
-      }
-      snprintf(d, 1024, "%s", argv[2]);
-      for(c=3;c<argc;++c)
-      {
-        strncat(d, " ", 1024-strlen(d));
-        strncat(d, argv[c], 1024-strlen(d));
-      }
-      toserv("GLINE %s@%s :%s\n", argv[1], b, (*d == ':') ? d+1 : d);
-      free(d);
+
+      expand_args(gline_reason, MAX_REASON, argc, argv);
+      toserv("GLINE %s@%s :%s\n", argv[1], hostname, gline_reason);
       return;
     }
   }
@@ -3208,3 +3216,4 @@ void _modinit()
     toserv("TRACE\n");
   }
 }
+

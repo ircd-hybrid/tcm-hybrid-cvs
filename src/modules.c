@@ -1,8 +1,8 @@
 /*
- * much of this code has been copied (though none ver batum)
+ * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.25 2002/05/22 22:03:34 leeh Exp $B
+ * $Id: modules.c,v 1.26 2002/05/23 13:38:17 db Exp $B
  *
  */
 
@@ -344,7 +344,8 @@ int unload_a_module(char *name, int log)
   return 0;
 }
 
-void m_modload (int connnum, int argc, char *argv[]) {
+void m_modload (int connnum, int argc, char *argv[])
+{
   if (argc != 2) return;
   if (load_a_module(argv[1], 1) != -1)
     sendtoalldcc(SEND_ADMIN_ONLY, "Loaded by %s", connections[connnum].nick);

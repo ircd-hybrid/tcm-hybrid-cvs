@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.25 2002/05/22 22:03:31 leeh Exp $ */
+/* $Id: wingate.c,v 1.26 2002/05/23 13:38:15 db Exp $ */
 
 
 #include <netdb.h>
@@ -72,7 +72,6 @@ struct wingates socks[MAXSOCKS];
 
 int wingate_class_list_index;
 
-extern time_t cur_time;
 
 void _scontinuous(int connnum, int argc, char *argv[]);
 void _continuous(int connnum, int argc, char *argv[]);
@@ -230,7 +229,7 @@ int socks_bindsocket(char *nick,char *user,char *host, int socksversion)
   socks[found_slot].socketname.sin_family = AF_INET;
   socks[found_slot].socketname.sin_port = htons (1080);
 
-  if ( !(remote_host = (struct hostent *)gethostbyname (host)) )
+  if (!(remote_host = (struct hostent *)gethostbyname (host)))
     {
       (void)close(plug);
       socks[found_slot].socket = INVALID;
@@ -274,7 +273,7 @@ void _scontinuous(int connnum, int argc, char *argv[])
               else
                 {
                   wingate[i].state = WINGATE_READING;
-                  wingate[i].connect_time = cur_time;
+                  wingate[i].connect_time = CurrentTime;
                 }
             }
         }
@@ -434,13 +433,13 @@ void _continuous(int connnum, int argc, char *argv[])
             FD_SET(wingate[i].socket,&writefds);
           else if( (wingate[i].state == WINGATE_READING))
             {
-              if (cur_time > (wingate[i].connect_time + 10))
+              if (CurrentTime > (wingate[i].connect_time + 10))
                 {
                   (void)close(wingate[i].socket);
                   wingate[i].socket = INVALID;
                   wingate[i].state = 0;
                 }
-              else if(cur_time > (wingate[i].connect_time + 1))
+              else if(CurrentTime > (wingate[i].connect_time + 1))
                 FD_SET(wingate[i].socket,&readfds);
             }
         }

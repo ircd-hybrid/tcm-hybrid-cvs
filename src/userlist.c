@@ -35,7 +35,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.18 2001/10/10 19:40:52 bill Exp $";
+static char *version="$Id: userlist.c,v 1.19 2001/10/10 19:46:32 bill Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct tcm_file_entry tcmlist[MAXTCMS];
@@ -149,9 +149,6 @@ void load_config_file(char *file_name)
           set_action_method(argv[1], argv[2]);
           if (argc >=3)
             set_action_reason(argv[1], argv[3]);
-          printf("%s -- %s :%s\n", actions[get_action(argv[1])].name, 
-                 actions[get_action(argv[1])].method,
-                 actions[get_action(argv[1])].reason);
           break;
 
 	case 'd':case 'D':

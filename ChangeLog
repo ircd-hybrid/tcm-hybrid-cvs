@@ -1,3 +1,23 @@
+leeh        2002/05/28 14:47:19 EDT	(20020528_23)
+
+  Modified files:
+    include              config.h tcm.h userlist.h 
+    src                  bothunt.c commands.c tcm_io.c userlist.c 
+  Log:
+  - ripped out set, replaced it with +mn
+  - gline fix
+  
+  Revision  Changes    Path
+  1.62      +1 -1      tcm-hybrid/include/config.h
+  1.46      +0 -5      tcm-hybrid/include/tcm.h
+  1.56      +2 -0      tcm-hybrid/include/userlist.h
+  1.132     +3 -1      tcm-hybrid/src/bothunt.c
+  1.107     +0 -52     tcm-hybrid/src/commands.c
+  1.68      +2 -2      tcm-hybrid/src/tcm_io.c
+  1.102     +2 -0      tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/28 14:18:30 EDT	(20020528_22)
 
   Modified files:

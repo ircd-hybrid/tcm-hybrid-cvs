@@ -1,3 +1,20 @@
+db          2002/05/19 21:29:32 EDT	(20020520_3)
+
+  Modified files:
+    modules              serverif.c 
+    src                  logging.c 
+  Log:
+  - reformatted logging.c so all function names start in first char
+  - fixed bug I introduced with "unknown commands"
+  
+    nearly done. just a bit more to go...
+  
+  Revision  Changes    Path
+  1.66      +3 -6      tcm-hybrid/modules/serverif.c
+  1.22      +33 -29    tcm-hybrid/src/logging.c
+
+
+
 db          2002/05/19 21:15:56 EDT	(20020520_2)
 
   Modified files:

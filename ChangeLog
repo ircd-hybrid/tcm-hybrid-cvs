@@ -1,3 +1,20 @@
+leeh        2002/06/05 10:43:40 EDT	(20020605_8)
+
+  Modified files:
+    include              actions.h 
+    src                  actions.c main.c services.c wingate.c 
+  Log:
+  - doh, we need to pass a pointer to the int to init_one_action
+  
+  Revision  Changes    Path
+  1.12      +1 -1      tcm-hybrid/include/actions.h
+  1.26      +12 -12    tcm-hybrid/src/actions.c
+  1.110     +2 -2      tcm-hybrid/src/main.c
+  1.16      +2 -2      tcm-hybrid/src/services.c
+  1.55      +3 -3      tcm-hybrid/src/wingate.c
+
+
+
 leeh        2002/06/05 10:15:55 EDT	(20020605_7)
 
   Modified files:

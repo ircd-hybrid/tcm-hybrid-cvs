@@ -1,3 +1,18 @@
+leeh        2002/05/24 22:16:53 EDT	(20020525_0)
+
+  Modified files:
+    include              modules.h 
+    src                  modules.c parse.c 
+  Log:
+  - first pass at the shiny new dcc handler code
+  
+  Revision  Changes    Path
+  1.21      +32 -0     tcm-hybrid/include/modules.h
+  1.36      +95 -26    tcm-hybrid/src/modules.c
+  1.15      +17 -0     tcm-hybrid/src/parse.c
+
+
+
 leeh        2002/05/24 18:40:01 EDT	(20020524_20)
 
   Modified files:

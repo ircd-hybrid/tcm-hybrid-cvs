@@ -1,3 +1,8 @@
+*** 20011114_1 by bill
+
+- fixed bug with server buffer initialization
+
+
 *** 20011110_3 by bill
 - set MAX_ARGV to 80 to account for extra long OPERWALLs
 - proc() cleanups

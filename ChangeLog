@@ -1,3 +1,16 @@
+leeh        2002/06/24 06:35:52 EDT	(20020624_4)
+
+  Modified files:
+    src                  userlist.c 
+  Log:
+  - we need save_umodes(), I just havent decided what I want to do with
+    it yet. :)
+  
+  Revision  Changes    Path
+  1.137     +27 -0     tcm-hybrid/src/userlist.c
+
+
+
 wcampbel    2002/06/23 22:35:59 EDT	(20020624_3)
 
   Modified files:

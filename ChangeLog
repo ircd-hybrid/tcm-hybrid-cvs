@@ -1,3 +1,22 @@
+bill        2002/04/02 18:58:12 EST	(20020402_1)
+
+  Modified files:
+    .                    Makefile.in configure 
+    autoconf             configure.in 
+    modules              Makefile.in 
+    src                  Makefile.in 
+  Log:
+  - fixed autoconf to properly do prefix
+  
+  Revision  Changes    Path
+  1.17      +1 -2      tcm-hybrid/Makefile.in
+  1.13      +1 -1      tcm-hybrid/autoconf/configure.in
+  1.13      +77 -76    tcm-hybrid/configure
+  1.7       +1 -1      tcm-hybrid/modules/Makefile.in
+  1.14      +2 -1      tcm-hybrid/src/Makefile.in
+
+
+
 bill        2002/04/02 18:24:32 EST	(20020402_0)
 
   Modified files:

@@ -1,3 +1,19 @@
+leeh        2002/06/22 05:21:52 EDT	(20020622_2)
+
+  Modified files:
+    include              userlist.h 
+    src                  dcc_commands.c userlist.c 
+  Log:
+  - made is_legal_pass return the relevant struct for their usermodes.
+  - got rid of ->changed in the oper_entry, made it ->type |= FLAGS_CHANGED;
+  
+  Revision  Changes    Path
+  1.79      +1 -1      tcm-hybrid/include/userlist.h
+  1.134     +10 -15    tcm-hybrid/src/dcc_commands.c
+  1.130     +7 -7      tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/21 19:20:21 EDT	(20020622_1)
 
   Modified files:

@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.83 2003/02/26 23:20:06 bill Exp $
+ * $Id: config.h,v 1.84 2003/03/29 00:22:54 bill Exp $
  */
 
 /*
@@ -183,6 +183,9 @@ for .kflood would be the #define for REASON_FLOOD etc. */
  * used to verify the HTTP proxy is open.
  */
 #define SQUID_STRING "Looking up your hostname..."
+
+/* undef if you don't want glines reported */
+#define REPORT_GLINES
 
 /* undef if you don't want klines reported - Toast */
 #define REPORT_KLINES

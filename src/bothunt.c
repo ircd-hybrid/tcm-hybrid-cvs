@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.217 2003/03/26 23:33:51 bill Exp $
+ * $Id: bothunt.c,v 1.218 2003/03/29 00:22:53 bill Exp $
  */
 
 #include <stdio.h>
@@ -432,6 +432,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     return;
   }
 
+#ifdef REPORT_GLINES
   /* billy-jon!bill@aloha.from.hilo on irc.intranaut.com is
      requesting gline for [this@is.a.test] [test test2] */
   if (strstr(p, "is requesting gline for "))
@@ -487,6 +488,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 		"GLINE for %s@%s triggered by %s: %s", user, host, nick, q);
     return;
   }
+#endif /* REPORT_GLINES */
 
   if (strstr(p, "is rehashing"))
   {

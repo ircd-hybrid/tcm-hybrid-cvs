@@ -1,3 +1,15 @@
+leeh        2002/05/25 20:45:29 EDT	(20020526_4)
+
+  Modified files:
+    include              config.h 
+  Log:
+  - must stop commiting config.h..
+  
+  Revision  Changes    Path
+  1.54      +25 -12    tcm-hybrid/include/config.h
+
+
+
 leeh        2002/05/25 20:44:22 EDT	(20020526_3)
 
   Modified files:

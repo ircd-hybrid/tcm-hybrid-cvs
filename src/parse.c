@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.33 2002/05/27 05:03:14 db Exp $
+ * $Id: parse.c,v 1.34 2002/05/27 21:02:35 db Exp $
  */
 
 #include <stdio.h>
@@ -737,65 +737,6 @@ on_ctcp(int connnum, int argc, char *argv[])
       notice(nick, "\001DCC REJECT CHAT chat\001");
       notice(nick,"DCC CHAT connection failed");
       return;
-    }
-  }
-}
-
-/*
- * check_clones
- *
- * inputs       - NONE
- * output       - NONE
- * side effects - check for "unseen" clones, i.e. ones that have
- *                crept onto the server slowly
- */
-
-void
-check_clones(void *unused)
-{
-  struct hashrec *userptr;
-  struct hashrec *top;
-  struct hashrec *temp;
-  int numfound;
-  int i;
-  int notip;
-
-  for (i=0; i < HASHTABLESIZE; i++)
-  {
-    for (top = userptr = domaintable[i]; userptr; userptr = userptr->collision)
-    {
-      /* Ensure we haven't already checked this user & domain */
-      for( temp = top, numfound = 0; temp != userptr;
-           temp = temp->collision )
-      {
-        if (!strcmp(temp->info->user,userptr->info->user) &&
-            !strcmp(temp->info->domain,userptr->info->domain))
-          break;
-      }
-
-      if (temp == userptr)
-      {
-        for( temp = temp->collision; temp; temp = temp->collision )
-        {
-          if (!strcmp(temp->info->user,userptr->info->user) &&
-              !strcmp(temp->info->domain,userptr->info->domain))
-            numfound++; /* - zaph & Dianora :-) */
-        }
-        if (numfound > MIN_CLONE_NUMBER)
-        {
-          notip = strncmp(userptr->info->domain,userptr->info->host,
-                          strlen(userptr->info->domain)) ||
-            (strlen(userptr->info->domain) ==
-             strlen(userptr->info->host));
-
-          send_to_all(SEND_WARN,
-                       "clones> %2d connections -- %s@%s%s {%s}",
-                       numfound,userptr->info->user,
-                       notip ? "*" : userptr->info->domain,
-                       notip ? userptr->info->domain : "*",
-                       userptr->info->class);
-        }
-      }
     }
   }
 }

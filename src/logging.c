@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.36 2002/05/27 02:24:46 db Exp $
+ * $Id: logging.c,v 1.37 2002/05/27 21:02:35 db Exp $
  *
  * - db
  */
@@ -552,69 +552,6 @@ kline_report(char *server_notice)
       (void)fclose(fp_log);
     }
 #endif
-}
-
-/*
- * kill_add_report
- *
- * input	- server notice
- * output	- none
- * side effects	- local kills are logged
- *
- *  Log only local kills though....
- *
- *** Notice -- Received KILL message for Newbie2. From Dianora_ Path:
- *  ts1-4.ottawa.net!Dianora_ (clone)
- * Thanks Thembones for bug fix (Brian Kraemer kraemer@u.washington.edu)
- */
-
-void
-kill_add_report(char *server_notice)
-{
-  char buff[MAX_BUFF], *p, *q;
-  char *nick, *by, *reason;
-  struct hashrec *userptr;
-  int i=0;
-
-  if ((p = strstr(server_notice, ". From")) == NULL)
-    return;
-  *p = '\0';
-  p+=7;
-  if ((nick = strrchr(server_notice, ' ')) == NULL)
-    return;
-  ++nick;
-  by = p;
-  if ((p = strchr(by, ' ')) == NULL)
-    return;
-  *p = '\0';
-  if (strchr(by, '.')) /* ignore kills by servers */
-    return;
-  p+=7;
-  if ((q = strchr(p, ' ')) == NULL)
-    return;
-  q+=2;
-  if ((p = strrchr(q, ')')) == NULL)
-    return;
-  *p = '\0';
-  reason = q;
-  for (i=0;i<HASHTABLESIZE;++i)
-  {
-    for (userptr = domaintable[i]; userptr; userptr = userptr->collision)
-    {
-      if (!strcasecmp(nick, userptr->info->nick))
-      {
-        i = -1;
-        break;
-      }
-    }
-    if (i == -1)
-      break;
-  }
-  if (i != -1)
-    return;
-  snprintf(buff, sizeof(buff), "%s killed by %s: %s", nick, by, reason);
-  kline_report(buff);
-  memset(&buff, 0, sizeof(buff));
 }
 
 /*

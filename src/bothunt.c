@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.115 2002/05/27 11:41:58 leeh Exp $
+ * $Id: bothunt.c,v 1.116 2002/05/27 21:02:34 db Exp $
  */
 
 #include <stdio.h>
@@ -18,6 +18,7 @@
 #include "config.h"
 #include "tcm.h"
 #include "stdcmds.h"
+#include "hash.h"
 #include "bothunt.h"
 #include "userlist.h"
 #include "logging.h"
@@ -29,21 +30,34 @@
 #include "tcm_io.h"
 #include "parse.h"
 #include "wingate.h"
+#include "actions.h"
+#include "match.h"
+
+#ifdef HAVE_REGEX_H
+#include <regex.h>
+#define REGCOMP_FLAGS REG_EXTENDED
+#define REGEXEC_FLAGS 0
+#endif
+
+#ifndef INADDR_NONE
+#define INADDR_NONE ((unsigned int) 0xffffffff)
+#endif
 
 static char* find_domain(char* domain );
-static void  check_nick_flood(char *snotice );
-static void  cs_nick_flood(char *snotice );
-static void  cs_clones(char *snotice );
-static void  link_look_notice(char *snotice );
-static void  connect_flood_notice(char *snotice );
-static void  add_to_nick_change_table(char *user_host, char *last_nick );
+static void  check_nick_flood(char *snotice);
+static void  cs_nick_flood(char *snotice);
+static void  cs_clones(char *snotice);
+static void  link_look_notice(char *snotice);
+static void  connect_flood_notice(char *snotice);
+static void  add_to_nick_change_table(char *user_host, char *last_nick);
 static void  adduserhost(struct plus_c_info *, int, int);
 static void  removeuserhost(char *, struct plus_c_info *);
 static void  updateuserhost(char *nick1, char *nick2, char *userhost);
 static void  updatehash(struct hashrec**,char *,char *,char *); 
 static void  stats_notice(char *snotice);
 static int hash_func(char *string);
-static void addtohash(struct hashrec *table[],char *key,struct userentry *item);
+static void addtohash(struct hashrec *table[],
+		      char *key,struct userentry *item);
 static int removefromhash(struct hashrec *table[], char *key, char *hostmatch,
 			  char *usermatch, char *nickmatch);
 static void check_host_clones(char *);
@@ -54,6 +68,23 @@ static void check_reconnect_clones(char *);
 
 struct s_testline testlines;
 char myclass[MAX_CLASS]; /* XXX */
+
+struct nick_change_entry
+{
+  char user_host[MAX_USER+MAX_HOST];
+  char last_nick[MAX_NICK];
+  int  nick_change_count;
+  time_t first_nick_change;
+  time_t last_nick_change;
+  int noticed;
+};
+
+
+static struct nick_change_entry nick_changes[NICK_CHANGE_TABLE_SIZE];
+static struct hashrec *usertable[HASHTABLESIZE];
+static struct hashrec *hosttable[HASHTABLESIZE];
+static struct hashrec *domaintable[HASHTABLESIZE];
+static struct hashrec *iptable[HASHTABLESIZE];
 
 int act_cflood, act_vclone, act_flood, act_link,
   act_bot, act_spambot, act_clone, act_rclone;
@@ -1107,7 +1138,7 @@ hash_func(char *string)
  * output	- NONE
  * side effects	- adds an entry to given hash table
  */
-void
+static void
 addtohash(struct hashrec *table[],char *key,struct userentry *item)
 {
   int ind;
@@ -2316,7 +2347,7 @@ check_nick_flood(char *snotice)
   char *nick2;
   char *user_host;
 
-  if ( !(p = strtok(snotice," ")) )	/* Throw away the "From" */
+  if ((p = strtok(snotice," ")) == NULL)	/* Throw away the "From" */
     return;
 
   if (strcasecmp(p,"From"))	/* This isn't an LT notice */
@@ -2692,5 +2723,1196 @@ void init_bothunt(void)
     doingtrace = YES;
     print_to_server("TRACE");
   }
+}
+
+
+/*
+ * kill_add_report
+ *
+ * input	- server notice
+ * output	- none
+ * side effects	- local kills are logged
+ *
+ *  Log only local kills though....
+ *
+ *** Notice -- Received KILL message for Newbie2. From Dianora_ Path:
+ *  ts1-4.ottawa.net!Dianora_ (clone)
+ * Thanks Thembones for bug fix (Brian Kraemer kraemer@u.washington.edu)
+ */
+
+void
+kill_add_report(char *server_notice)
+{
+  char buff[MAX_BUFF], *p, *q;
+  char *nick, *by, *reason;
+  struct hashrec *userptr;
+  int i=0;
+
+  if ((p = strstr(server_notice, ". From")) == NULL)
+    return;
+  *p = '\0';
+  p+=7;
+  if ((nick = strrchr(server_notice, ' ')) == NULL)
+    return;
+  ++nick;
+  by = p;
+  if ((p = strchr(by, ' ')) == NULL)
+    return;
+  *p = '\0';
+  if (strchr(by, '.')) /* ignore kills by servers */
+    return;
+  p+=7;
+  if ((q = strchr(p, ' ')) == NULL)
+    return;
+  q+=2;
+  if ((p = strrchr(q, ')')) == NULL)
+    return;
+  *p = '\0';
+  reason = q;
+  for (i=0;i<HASHTABLESIZE;++i)
+  {
+    for (userptr = domaintable[i]; userptr; userptr = userptr->collision)
+    {
+      if (!strcasecmp(nick, userptr->info->nick))
+      {
+        i = -1;
+        break;
+      }
+    }
+    if (i == -1)
+      break;
+  }
+  if (i != -1)
+    return;
+  snprintf(buff, sizeof(buff), "%s killed by %s: %s", nick, by, reason);
+  kline_report(buff);
+}
+
+
+/*
+ * check_clones
+ *
+ * inputs       - NONE
+ * output       - NONE
+ * side effects - check for "unseen" clones, i.e. ones that have
+ *                crept onto the server slowly
+ */
+
+void
+check_clones(void *unused)
+{
+  struct hashrec *userptr;
+  struct hashrec *top;
+  struct hashrec *temp;
+  int numfound;
+  int i;
+  int notip;
+
+  for (i=0; i < HASHTABLESIZE; i++)
+  {
+    for (top = userptr = domaintable[i]; userptr; userptr = userptr->collision)
+    {
+      /* Ensure we haven't already checked this user & domain */
+      for( temp = top, numfound = 0; temp != userptr;
+           temp = temp->collision )
+      {
+        if (!strcmp(temp->info->user,userptr->info->user) &&
+            !strcmp(temp->info->domain,userptr->info->domain))
+          break;
+      }
+
+      if (temp == userptr)
+      {
+        for( temp = temp->collision; temp; temp = temp->collision )
+        {
+          if (!strcmp(temp->info->user,userptr->info->user) &&
+              !strcmp(temp->info->domain,userptr->info->domain))
+            numfound++; /* - zaph & Dianora :-) */
+        }
+        if (numfound > MIN_CLONE_NUMBER)
+        {
+          notip = strncmp(userptr->info->domain,userptr->info->host,
+                          strlen(userptr->info->domain)) ||
+            (strlen(userptr->info->domain) ==
+             strlen(userptr->info->host));
+
+          send_to_all(SEND_WARN,
+                       "clones> %2d connections -- %s@%s%s {%s}",
+                       numfound,userptr->info->user,
+                       notip ? "*" : userptr->info->domain,
+                       notip ? userptr->info->domain : "*",
+                       userptr->info->class);
+        }
+      }
+    }
+  }
+}
+
+#ifdef VIRTUAL
+void
+report_vbots(int sock,int nclones)
+{
+  struct hashrec *userptr,*top,*temp;
+  int numfound,i;
+  int foundany = NO;
+
+  nclones-=2;  /* ::sigh:: I have no idea */
+  for (i=0;i<HASHTABLESIZE;++i)
+    {
+      for( top = userptr = iptable[i]; userptr;
+           userptr = userptr->collision )
+        {
+          /* Ensure we haven't already checked this user & domain */
+          for( temp = top, numfound = 0; temp != userptr;
+               temp = temp->collision )
+            {
+              if (!strcmp(temp->info->user,userptr->info->user) &&
+                  !strcmp(temp->info->ip_class_c,userptr->info->ip_class_c))
+                break;
+            }
+
+          if (temp == userptr)
+            {
+              for (temp = temp->collision; temp; temp = temp->collision)
+                {
+                  if (!strcmp(temp->info->user,userptr->info->user) &&
+                      !strcmp(temp->info->ip_class_c,userptr->info->ip_class_c))
+                    numfound++; /* - zaph & Dianora :-) */
+                }
+
+              if ( numfound > nclones )
+                {
+                  if (!foundany)
+                    {
+                      foundany = YES;
+                      print_to_socket(sock,
+                           "Multiple clients from the following userhosts:\n");
+                    }
+                  numfound++;   /* - zaph and next line*/
+                  print_to_socket(sock,
+                       " %s %2d connections -- %s@%s.* {%s}\n",
+                       (numfound-nclones > 2) ? "==>" :
+                       "   ",numfound,userptr->info->user,
+                       userptr->info->ip_class_c,
+                       userptr->info->class);
+                }
+            }
+        }
+    }
+  if (!foundany)
+    print_to_socket(sock, "No multiple logins found.\n");
+}
+#endif
+
+/*
+ * report_domains
+ * input        - sock
+ *              - num
+ * output       - NONE
+ * side effects -
+ */
+
+struct sortarray sort[MAXDOMAINS+1];
+
+void 
+report_domains(int sock,int num)
+{
+  struct hashrec *userptr;
+
+  int inuse = 0;
+  int i;
+  int j;
+  int maxx;
+  int found;
+  int foundany = NO;
+
+  for ( i = 0; i < HASHTABLESIZE; i++ )
+    {
+      for( userptr = hosttable[i]; userptr; userptr = userptr->collision )
+        {
+          for (j=0;j<inuse;++j)
+            {
+              if (!strcasecmp(userptr->info->domain,sort[j].domainrec->domain))
+                break;
+            }
+
+          if ((j == inuse) && (inuse < MAXDOMAINS))
+            {
+              sort[inuse].domainrec = userptr->info;
+              sort[inuse++].count = 1;
+            }
+          else
+            {
+              ++sort[j].count;
+            }
+        }
+    }
+  /* Print 'em out from highest to lowest */
+  FOREVER
+    {
+      maxx = num-1;
+      found = -1;
+      for (i=0;i<inuse;++i)
+        if (sort[i].count > maxx)
+          {
+            found = i;
+            maxx = sort[i].count;
+          }
+      if (found == -1)
+        break;
+      if (!foundany)
+        {
+          foundany = YES;
+          print_to_socket(sock,"Domains with most users on the server:\n");
+        }
+
+      print_to_socket(sock,"  %-40s %3d users\n",
+           sort[found].domainrec->domain,maxx);
+      sort[found].count = 0;
+    }
+
+  if (!foundany)
+    {
+      print_to_socket(sock, "No domains have %d or more users.\n",num);
+    }
+  else
+    {
+      print_to_socket(sock, "%d domains found\n", inuse);
+    }
+}
+
+/*
+ * free_hash_links
+ *
+ * inputs       - pointer to link list to free
+ * output       - none
+ * side effects -
+ */
+static void 
+free_hash_links(struct hashrec *ptr)
+{
+  struct hashrec *next_ptr;
+
+  while(ptr != NULL)
+    {
+      next_ptr = ptr->collision;
+
+      if(ptr->info->link_count > 0)
+        ptr->info->link_count--;
+
+      if(ptr->info->link_count == 0)
+        {
+          xfree(ptr->info);
+        }
+
+      xfree(ptr);
+      ptr = next_ptr;
+    }
+}
+
+/*
+ * freehash()
+ *
+ * inputs               - NONE
+ * output               - NONE
+ * side effects         - clear all allocated memory hash tables
+ *
+*/
+
+void 
+freehash(void)
+{
+  struct hashrec *ptr;
+  int i;
+
+  for (i=0;i<HASHTABLESIZE;i++)
+    {
+      ptr = usertable[i];
+      free_hash_links(ptr);
+      usertable[i] = NULL;
+
+      ptr = hosttable[i];
+      free_hash_links(ptr);
+      hosttable[i] = NULL;
+
+      ptr = domaintable[i];
+      free_hash_links(ptr);
+      domaintable[i] = NULL;
+
+#ifdef VIRTUAL
+      ptr = iptable[i];
+      free_hash_links(ptr);
+      iptable[i] = NULL;
+#endif
+    }
+
+  for(i = 0; i < NICK_CHANGE_TABLE_SIZE; i++)
+    {
+      nick_changes[i].user_host[0] = '\0';
+      nick_changes[i].noticed = NO;
+    }
+}
+
+/*
+ * find_nick
+ *
+ * Returns a hashrec for the given nick, or NULL if not found
+ *
+ */
+struct hashrec *
+find_nick(const char * nick)
+{
+  int i;
+  struct hashrec * userptr;
+  if (nick == NULL)
+    return (NULL);
+
+  for (i=0;i<HASHTABLESIZE;++i)
+    {
+      for( userptr = domaintable[i]; userptr; userptr = userptr->collision )
+	{
+	  if (!wldcmp(nick, userptr->info->nick))
+	    return userptr;
+	}
+    }
+  return (NULL);
+}
+
+/*
+ * find_host
+ *
+ * Returns first hashrec for the given host, or NULL if not found
+ *
+ */
+struct hashrec *
+find_host(char * host)
+{
+  int i;
+  struct hashrec * userptr;
+
+  if (host == NULL)
+    return (NULL);
+
+  for (i=0; i<HASHTABLESIZE; ++i)
+    {
+      for( userptr = domaintable[i]; userptr; userptr = userptr->collision )
+	{
+	  if (!wldcmp(host, userptr->info->host))
+	    return userptr;
+	}
+    }
+  return (NULL);
+}
+
+/*
+ * list_class()
+ *
+ * inputs       - integer socket to reply on
+ *              - integer class to search for
+ *              - integer show total only YES/NO
+ * output       - NONE
+ * side effects -
+ */
+
+void 
+list_class(int sock,char *class_to_find,int total_only)
+{
+  struct hashrec *userptr;
+  int i;
+  int num_found=0;
+  int num_unknown=0;
+
+  for ( i=0; i < HASHTABLESIZE; ++i )
+    {
+      for( userptr = domaintable[i]; userptr; userptr = userptr->collision )
+        {
+          if(!strcmp(userptr->info->class, "unknown"))
+            num_unknown++;
+
+          if (!strcasecmp(class_to_find, userptr->info->class))
+            {
+              if(!num_found++)
+                {
+                  if(!total_only)
+                    {
+                      print_to_socket(sock,
+                           "The following clients are in class %s\n",
+                           class_to_find);
+                    }
+                }
+              if(!total_only)
+                {
+                  print_to_socket(sock,
+                       "  %s (%s@%s)\n",
+                       userptr->info->nick,
+                       userptr->info->user,userptr->info->host);
+                }
+            }
+        }
+    }
+
+  if (num_found)
+    print_to_socket(sock,
+         "%d are in class %s\n", num_found, class_to_find );
+  else
+    print_to_socket(sock,
+         "Nothing found in class %s\n", class_to_find );
+  print_to_socket(sock,"%d unknown class\n", num_unknown);
+}
+
+/*
+ * list_nicks()
+ *
+ * inputs       - socket to reply on, nicks to search for,regexpression?
+ * output       - NONE
+ * side effects -
+ */
+
+void 
+list_nicks(int sock,char *nick,int regex)
+{
+  struct hashrec *userptr;
+#ifdef HAVE_REGEX_H
+  regex_t reg;
+  regmatch_t m[1];
+#endif
+  int i=0;
+  int numfound=0;
+
+#ifdef HAVE_REGEX_H
+  if (regex == YES && (i=regcomp((regex_t *)&reg, nick, 1)))
+  {
+    char errbuf[1024];
+    regerror(i, (regex_t *)&reg, errbuf, 1024); 
+    print_to_socket(sock, "Error compiling regular expression: %s\n", errbuf);
+    return;
+  }
+#endif
+
+  for (i=0;i<HASHTABLESIZE;++i)
+    {
+      for( userptr = domaintable[i]; userptr; userptr = userptr->collision )
+        {
+#ifdef HAVE_REGEX_H
+          if ((regex == YES &&
+               !regexec((regex_t *)&reg, userptr->info->nick,1,m,REGEXEC_FLAGS))
+              || (regex == NO && !match(nick, userptr->info->nick)))
+#else
+          if (!match(nick, userptr->info->nick))
+#endif
+            {
+              if(!numfound)
+                {
+                  print_to_socket(sock,
+				  "The following clients match %.150s:\n",nick);
+                }
+              numfound++;
+
+              print_to_socket(sock,
+                   "  %s (%s@%s) {%s}\n",
+                   userptr->info->nick,
+                   userptr->info->user,userptr->info->host,
+                   userptr->info->class);
+            }
+        }
+    }
+
+  if (numfound)
+    print_to_socket(sock,
+		    "%d matches for %s found\n",numfound,nick);
+  else
+    print_to_socket(sock,
+		    "No matches for %s found\n",nick);
+}
+
+/*
+ * list_users()
+ *
+ * inputs       - socket to reply on
+ *              - uhost to match on
+ *              - regex or no?
+ *		- list to save results to
+ * output       - NONE
+ * side effects -
+ */
+
+void 
+list_users(int sock,char *userhost,int regex)
+{
+  struct hashrec *ipptr;
+#ifdef HAVE_REGEX_H
+  regex_t reg;
+  regmatch_t m[1];
+#endif
+  char uhost[1024];
+  int i, numfound = 0;
+
+#ifdef HAVE_REGEX_H
+  if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
+  {
+    char errbuf[1024];
+    regerror(i, (regex_t *)&reg, errbuf, 1024); 
+    print_to_socket(sock, "Error compiling regular expression: %s\n",
+		    errbuf);
+    return;
+  }
+#endif
+  if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
+    {
+      print_to_socket(sock,
+"Listing all users is not recommended.  To do it anyway, use '.list ?*@*'.\n");
+      return;
+    }
+
+  for ( i=0; i < HASHTABLESIZE; ++i)
+  {
+    for( ipptr = iptable[i]; ipptr; ipptr = ipptr->collision )
+    {
+      snprintf(uhost, 1024, "%s@%s", ipptr->info->user, ipptr->info->host);
+#ifdef HAVE_REGEX_H
+      if ((regex == YES &&
+          !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS)) 
+          || (regex == NO && !match(userhost, uhost)))
+#else
+      if (!match(userhost, uhost))
+#endif 
+      {
+        if (!numfound++)
+          print_to_socket(sock, "The following clients match %s:\n", userhost);
+
+        if (ipptr->info->ip_host[0] > '9' || ipptr->info->ip_host[0] < '0')
+          print_to_socket(sock, "  %s (%s@%s) {%s}\n", ipptr->info->nick,
+               ipptr->info->user, ipptr->info->host, ipptr->info->class);
+        else
+          print_to_socket(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
+               ipptr->info->user, ipptr->info->host, ipptr->info->ip_host,
+               ipptr->info->class);
+      }
+    }
+  }
+  if (numfound > 0)
+    print_to_socket(sock, "%d match%sfor %s found\n", numfound,
+		    (numfound > 1 ? "es " : " "), userhost);
+  else
+    print_to_socket(sock, "No matches for %s found\n", userhost);
+}
+
+/*
+ * list_virtual_users()
+ *
+ * inputs       - socket to reply on
+ *              - ipblock to match on
+ *              - regex or no?
+ * output       - NONE
+ * side effects -
+ */
+
+void 
+list_virtual_users(int sock,char *userhost,int regex)
+{
+  struct hashrec *ipptr;
+#ifdef HAVE_REGEX_H
+  regex_t reg;
+  regmatch_t m[1];
+#endif
+  char uhost[1024];
+  int i,numfound = 0;
+
+#ifdef HAVE_REGEX_H
+  if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
+  {
+    char errbuf[REGEX_SIZE];
+    regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE); 
+    print_to_socket(sock, "Error compiling regular expression: %s\n",
+		    errbuf);
+    return;
+  }
+#endif
+  if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
+    {
+      print_to_socket(sock,
+"Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.\n");
+      return;
+    }
+
+  for ( i=0; i < HASHTABLESIZE; ++i)
+  {
+    for( ipptr = iptable[i]; ipptr; ipptr = ipptr->collision )
+    {
+      snprintf(uhost, 1024, "%s@%s", ipptr->info->user, ipptr->info->ip_host);
+#ifdef HAVE_REGEX_H
+      if ((regex == YES &&
+          !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS))
+          || (regex == NO && !match(userhost, uhost)))
+#else
+      if (!match(userhost, uhost))
+#endif 
+      {
+        if (!numfound++)
+          print_to_socket(sock, "The following clients match %s:\n", userhost);
+
+        print_to_socket(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
+             ipptr->info->user, ipptr->info->host, ipptr->info->ip_host,
+             ipptr->info->class);
+      }
+    }
+  }
+  if (numfound > 0)
+    print_to_socket(sock, "%d match%sfor %s found\n", numfound,
+         (numfound > 1 ? "es " : " "), userhost);
+  else
+    print_to_socket(sock, "No matches for %s found\n", userhost);
+}
+
+void kill_list_users(int sock, char *userhost, char *reason, int regex)
+{
+  struct hashrec *userptr;
+#ifdef HAVE_REGEX_H
+  regex_t reg;
+  regmatch_t m[1];
+#endif
+  char fulluh[MAX_USERHOST+1];
+  int i, numfound=0;
+
+#ifdef HAVE_REGEX_H
+  if (regex == YES && (i=regcomp((regex_t *)&reg, userhost, 1)))
+  {
+    char errbuf[REGEX_SIZE];
+    regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE);
+    print_to_socket(sock, "Error compiling regular expression: %s\n", errbuf);
+    return;
+  }
+#endif
+
+  for (i=0;i<HASHTABLESIZE;++i)
+  {
+    for (userptr = domaintable[i]; userptr; userptr = userptr->collision)
+    {
+      snprintf(fulluh, sizeof(fulluh), "%s@%s", userptr->info->user,
+               userptr->info->host);
+#ifdef HAVE_REGEX_H
+      if ((regex == YES &&
+           !regexec((regex_t *)&reg, fulluh, 1, m, REGEXEC_FLAGS))
+          || (regex == NO && !match(userhost, fulluh)))
+#else
+      if (!match(userhost, fulluh))
+#endif
+      {
+        if (!numfound++)
+          tcm_log(L_NORM, "killlisted %s\n", fulluh);
+        print_to_server("KILL %s :%s", userptr->info->nick, reason);
+      }
+    }
+  }
+  if (numfound > 0)
+    print_to_socket(sock, "%d matches for %s found\n", userhost);
+  else
+    print_to_socket(sock, "No matches for %s found\n", userhost);
+}
+
+/*
+ * report_multi_host()
+ *
+ * inputs       - socket to print out
+ * output       - NONE
+ * side effects -
+ */
+void report_multi_host(int sock,int nclones)
+{     
+  struct hashrec *userptr,*top,*temp;
+  int numfound,i;
+  int foundany = NO;
+
+  nclones-=1;
+  for (i = 0; i < HASHTABLESIZE; ++i)
+    {
+      for (top = userptr = hosttable[i]; userptr; userptr = userptr->collision)
+        {
+          /* Ensure we haven't already checked this user & domain */
+           
+          for( temp = top, numfound = 0; temp != userptr;
+               temp = temp->collision)
+            {
+              if (!strcmp(temp->info->host,userptr->info->host))
+                break;
+            }  
+    
+          if (temp == userptr)
+            {
+              for ( temp = userptr; temp; temp = temp->collision )
+                {
+                  if (!strcmp(temp->info->host,userptr->info->host))
+                    numfound++; /* - zaph & Dianora :-) */
+                }
+      
+              if ( numfound > nclones )
+                {
+                  if (!foundany)
+                    {   
+                      foundany = YES;
+                      print_to_socket(sock,
+                           "Multiple clients from the following userhosts:\n");
+                    }
+      
+                  print_to_socket(sock,
+                       " %s %2d connections -- *@%s {%s}\n",
+                       (numfound-nclones > 2) ? "==>" : "   ",
+                       numfound,
+                       userptr->info->host,
+                       userptr->info->class);
+                }
+            }
+
+        }
+    }
+  if (!foundany)
+    print_to_socket(sock, "No multiple logins found.\n");
+}
+
+/*
+ * report_multi()
+ *
+ * inputs       - socket to print out
+ * output       - NONE
+ * side effects -
+ */
+
+void report_multi(int sock,int nclones)
+{
+  struct hashrec *userptr,*top,*temp;
+  int numfound,i;
+  int notip;
+  int foundany = NO;
+
+  nclones-=2;  /* maybe someday i'll figure out why this is nessecary */
+  for (i=0;i<HASHTABLESIZE;++i)
+    {
+      for( top = userptr = domaintable[i]; userptr;
+           userptr = userptr->collision )
+        {
+          /* Ensure we haven't already checked this user & domain */
+          for( temp = top, numfound = 0; temp != userptr;
+               temp = temp->collision )
+            {
+              if (!strcmp(temp->info->user,userptr->info->user) &&
+                  !strcmp(temp->info->domain,userptr->info->domain))
+                break;
+            }
+
+          if (temp == userptr)
+            {
+              for( temp = temp->collision; temp; temp = temp->collision )
+                {
+                  if (!strcmp(temp->info->user,userptr->info->user) &&
+                      !strcmp(temp->info->domain,userptr->info->domain))
+                    numfound++; /* - zaph & Dianora :-) */
+                }
+
+              if ( numfound > nclones )
+                {
+                  if (!foundany)
+                    {
+                      foundany = YES;
+                      print_to_socket(sock,
+                           "Multiple clients from the following userhosts:\n");
+                    }
+                  notip = strncmp(userptr->info->domain,userptr->info->host,
+                                  strlen(userptr->info->domain)) ||
+                    (strlen(userptr->info->domain) ==
+                     strlen(userptr->info->host));
+                  numfound++;   /* - zaph and next line*/
+                  print_to_socket(sock,
+                       " %s %2d connections -- %s@%s%s {%s}\n",
+                       (numfound-nclones > 2) ? "==>" :
+                       "   ",numfound,userptr->info->user,
+                       notip ? "*." : userptr->info->domain,
+                       notip ? userptr->info->domain : ".*",
+                       userptr->info->class);
+                }
+            }
+        }
+    }
+  if (!foundany)
+    print_to_socket(sock, "No multiple logins found.\n");
+}
+
+/*
+ * report_multi_user()
+ *
+ * inputs       - socket to print out
+ * output       - NONE
+ * side effects -
+ */
+
+void report_multi_user(int sock,int nclones)
+{
+  struct hashrec *userptr,*top,*temp;
+  int numfound;
+  int i;
+  int foundany = NO;
+
+  nclones-=1;
+  for (i=0;i<HASHTABLESIZE;++i)
+    {
+      for( top = userptr = usertable[i]; userptr;
+           userptr = userptr->collision )
+        {
+          numfound = 0;
+          /* Ensure we haven't already checked this user & domain */
+
+          for( temp = top; temp != userptr; temp = temp->collision )
+            {
+              if (!match(temp->info->user,userptr->info->user))
+                break;
+            }
+
+          if (temp == userptr)
+            {
+              numfound=1;       /* fixed minor boo boo -bill */
+              for( temp = temp->collision; temp; temp = temp->collision )
+                {
+                  if (!match(temp->info->user,userptr->info->user))
+                    numfound++; /* - zaph & Dianora :-) */
+                }
+
+              if ( numfound > nclones )
+                {
+                  if (!foundany)
+                    {
+                      print_to_socket(sock,
+                           "Multiple clients from the following usernames:\n");
+                      foundany = YES;
+                    }
+
+                  print_to_socket(sock,
+                       " %s %2d connections -- %s@* {%s}\n",
+                       (numfound-nclones > 2) ? "==>" : "   ",
+                       numfound,userptr->info->user,
+                       userptr->info->class);
+                }
+            }
+        }
+    }
+
+  if (!foundany)
+    {
+      print_to_socket(sock, "No multiple logins found.\n");
+    }
+}
+
+/*
+ * report_multi_virtuals()
+ *
+ * inputs       - socket to print out
+ *              - number to consider as clone
+ * output       - NONE
+ * side effects -
+ */
+
+#ifdef VIRTUAL
+void report_multi_virtuals(int sock,int nclones)
+{
+  struct hashrec *userptr;
+  struct hashrec *top;
+  struct hashrec *temp;
+  int numfound;
+  int i;
+  int foundany = 0;
+
+  if(!nclones)
+    nclones = 5;
+
+  nclones-=1;
+  for (i=0;i<HASHTABLESIZE;++i)
+    {
+      for ( top = userptr = iptable[i]; userptr; userptr = userptr->collision )
+        {
+          numfound = 0;
+
+          for (temp = top; temp != userptr; temp = temp->collision)
+            {
+              if (!strcmp(temp->info->ip_class_c,userptr->info->ip_class_c))
+                break;
+            }
+
+          if (temp == userptr)
+            {
+              numfound=1;
+              for( temp = temp->collision; temp; temp = temp->collision )
+                {
+                  if (!strcmp(temp->info->ip_class_c,
+                              userptr->info->ip_class_c))
+                    numfound++; /* - zaph & Dianora :-) */
+                }
+
+              if (numfound > nclones)
+                {
+                  if (!foundany)
+                    {
+                      print_to_socket(sock,
+                           "Multiple clients from the following ip blocks:\n");
+                      foundany = YES;
+                    }
+
+                  print_to_socket(sock,
+                       " %s %2d connections -- %s.*\n",
+                       (numfound-nclones > 3) ? "==>" : "   ",
+                       numfound,
+                       userptr->info->ip_class_c);
+                }
+            }
+        }
+    }
+
+  if (!foundany)
+    print_to_socket(sock, "No multiple virtual logins found.\n");
+}
+#endif
+
+/*
+ * report_mem()
+ * inputs       - socket to report to
+ * output       - none
+ * side effects - rough memory usage is reported
+ */
+void report_mem(int sock)
+{
+  struct hashrec *current;
+  int i;
+  unsigned long total_hosttable=0L;
+  int count_hosttable=0;
+  unsigned long total_domaintable=0L;
+  int count_domaintable=0;
+  unsigned long total_iptable=0L;
+  int count_iptable=0;
+  unsigned long total_usertable=0L;
+  int count_usertable=0;
+  unsigned long total_userentry=0L;
+  int count_userentry=0;
+
+  /*  hosttable,domaintable,iptable */
+
+  for( i = 0; i < HASHTABLESIZE; i++ )
+    {
+      for( current = hosttable[i]; current; current = current->collision )
+        {
+          total_hosttable += sizeof(struct hashrec);
+          count_hosttable++;
+
+          total_userentry += sizeof(struct userentry);
+          count_userentry++;
+        }
+    }
+
+  for( i = 0; i < HASHTABLESIZE; i++ )
+    {
+      for( current = domaintable[i]; current; current = current->collision )
+        {
+          total_domaintable += sizeof(struct hashrec);
+          count_domaintable++;
+        }
+    }
+
+#ifdef VIRTUAL
+  for( i = 0; i < HASHTABLESIZE; i++ )
+    {
+      for( current = iptable[i]; current; current = current->collision )
+        {
+          total_iptable += sizeof(struct hashrec);
+          count_iptable++;
+        }
+    }
+#endif
+
+  for( i = 0; i < HASHTABLESIZE; i++ )
+    {
+      for( current = usertable[i]; current; current = current->collision )
+        {
+          total_usertable += sizeof(struct hashrec);
+          count_usertable++;
+        }
+    }
+
+  print_to_socket(sock,"Total hosttable memory %lu/%d entries\n",
+       total_hosttable,count_hosttable);
+
+  print_to_socket(sock,"Total usertable memory %lu/%d entries\n",
+       total_usertable,count_usertable);
+
+  print_to_socket(sock,"Total domaintable memory %lu/%d entries\n",
+       total_domaintable,count_domaintable);
+
+  print_to_socket(sock,"Total iptable memory %lu/%d entries\n",
+       total_iptable, count_iptable);
+
+  print_to_socket(sock,"Total user entry memory %lu/%d entries\n",
+       total_userentry, count_userentry);
+
+  print_to_socket(sock,"Total memory in use %lu\n",
+       total_hosttable + total_domaintable + total_iptable + total_userentry);
+
+  print_to_socket(sock,"Total memory allocated over time %lu\n", totalmem);
+  print_to_socket(sock,"Average memory allocated in %lu allocations %lu\n",
+	numalloc, totalmem/numalloc);
+  print_to_socket(sock,"Average allocated memory not freed %lu in %lu frees\n",
+	(totalmem/numalloc)*(numalloc-numfree), numfree);
+}
+
+/*
+ * report_clones
+ *
+ * inputs       - socket to report on
+ * output       - NONE
+ * side effects - NONE
+ */
+
+void 
+report_clones(int sock)
+{
+  struct hashrec *userptr;
+  struct hashrec *top;
+  struct hashrec *temp;
+  int  numfound;
+  int i;
+  int j=0;
+  int k;
+  int foundany = NO;
+  time_t connfromhost[MAXFROMHOST];
+
+  if(sock < 0)
+    return;
+
+  for ( i = 0; i < HASHTABLESIZE; ++i)
+    {
+      for( top = userptr = hosttable[i]; userptr; userptr = userptr->collision)
+        {
+          /* Ensure we haven't already checked this host */
+          for( temp = top, numfound = 0; temp != userptr;
+               temp = temp->collision )
+            {
+              if (!strcmp(temp->info->host,userptr->info->host))
+                break;
+            }
+
+          if (temp == userptr)
+            {
+              connfromhost[numfound++] = temp->info->connecttime;
+              for( temp = temp->collision; temp; temp = temp->collision )
+                {
+                  if (!strcmp(temp->info->host,userptr->info->host) &&
+                      numfound < MAXFROMHOST)
+                    connfromhost[numfound++] = temp->info->connecttime;
+                }
+
+              if (numfound > 2)
+                {
+                  for (k=numfound-1;k>1;--k)
+                    {
+                      for (j=0;j<numfound-k;++j)
+                        {
+                          if (connfromhost[j] &&
+                              connfromhost[j] - connfromhost[j+k] <= (k+1)
+                              * CLONEDETECTINC)
+                            goto getout;  /* goto rules! */
+                        }
+                    }
+                getout:
+
+                  if (k > 1)
+                    {
+                      if (!foundany)
+                        {
+                            print_to_socket(sock,
+                                 "Possible clonebots from the following hosts:\n");
+                          foundany = YES;
+                        }
+                        print_to_socket(sock,
+                             "  %2d connections in %3d seconds (%2d total) from %s\n",
+                             k+1,
+                             connfromhost[j] - connfromhost[j+k],
+                             numfound+1,
+                             userptr->info->host);
+                    }
+                }
+            }
+        }
+    }
+
+  if (!foundany)
+    {
+        print_to_socket(sock, "No potential clonebots found.\n");
+    }
+}
+
+/*
+ * report_nick_flooders
+ *
+ * inputs       - socket to use
+ * output       - NONE
+ * side effects - list of current nick flooders is reported
+ *
+ *  Read the comment in add_to_nick_change_table as well.
+ *
+ */
+
+void 
+report_nick_flooders(int sock)
+{
+  int i;
+  int reported_nick_flooder= NO;
+  time_t current_time;
+  time_t time_difference;
+  int time_ticks;
+
+  if(sock < 0)
+    return;
+
+  current_time = time((time_t *)NULL);
+
+  for( i = 0; i < NICK_CHANGE_TABLE_SIZE; i++ )
+    {
+      if( nick_changes[i].user_host[0] )
+        {
+          time_difference = current_time - nick_changes[i].last_nick_change;
+
+          /* is it stale ? */
+          if( time_difference >= NICK_CHANGE_T2_TIME )
+            {
+              nick_changes[i].user_host[0] = '\0';
+            }
+          else
+            {
+              /* how many 10 second intervals do we have? */
+              time_ticks = time_difference / NICK_CHANGE_T1_TIME;
+
+              /* is it stale? */
+              if(time_ticks >= nick_changes[i].nick_change_count)
+                {
+                  nick_changes[i].user_host[0] = '\0';
+                }
+              else
+                {
+                  /* just decrement 10 second units of nick changes */
+                  nick_changes[i].nick_change_count -= time_ticks;
+                  if( nick_changes[i].nick_change_count > 1 )
+                    {
+                      print_to_socket(sock,
+                           "user: %s (%s) %d in %d\n",
+                           nick_changes[i].user_host,
+                           nick_changes[i].last_nick,
+                           nick_changes[i].nick_change_count,
+                           nick_changes[i].last_nick_change  -
+                           nick_changes[i].first_nick_change);
+                      reported_nick_flooder = YES;
+                    }
+                }
+            }
+        }
+    }
+
+  if(!reported_nick_flooder)
+    {
+      print_to_socket(sock, "No nick flooders found\n" );
+    }
 }
 

@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.35 2002/05/27 05:03:11 db Exp $ */
+/* $Id: bothunt.h,v 1.36 2002/05/27 21:02:30 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -109,6 +109,10 @@ void init_link_look_table(void);
 void report_failures(int sock, int num);
 void report_domains(int sock, int num);
 void report_vbots(int sock,int nclones);
+void kill_add_report(char *);
+void report_vbots(int sock,int nclones);
+void report_domains(int sock,int num);
+void list_class(int sock,char *class_to_find,int total_only);
 
 extern void init_bothunt(void);
 extern void _reload_bothunt(int connnum, int argc, char *argv[]);
@@ -121,5 +125,5 @@ extern void onservnotice(int connnum, int argc, char *argv[]);
 extern struct s_testline testlines;
 extern int doingtrace;
 extern char myclass[MAX_CLASS]; /* XXX ewww */
-
+struct hashrec *find_nick(const char * nick);
 #endif

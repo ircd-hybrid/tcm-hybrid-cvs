@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.22 2002/05/26 15:25:59 db Exp $
+# $Id: Makefile.in,v 1.23 2002/05/27 21:02:34 db Exp $
 
 CC = @CC@
 RM = @RM@
@@ -16,7 +16,8 @@ LDFLAGS = @LDFLAGS@
 
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
 
-SOURCES =       bothunt.c       \
+SOURCES =       actions.c	\
+		bothunt.c       \
 		commands.c	\
                 event.c         \
                 logging.c       \

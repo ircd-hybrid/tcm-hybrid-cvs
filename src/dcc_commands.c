@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.94 2002/05/27 01:37:41 db Exp $ */
+/* $Id: dcc_commands.c,v 1.95 2002/05/27 21:02:34 db Exp $ */
 
 #include "setup.h"
 
@@ -42,6 +42,7 @@
 #include "wild.h"
 #include "match.h"
 #include "parse.h"
+#include "actions.h"
 
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.44 2002/05/27 20:15:37 leeh Exp $ */
+/* $Id: userlist.h,v 1.45 2002/05/27 21:02:30 db Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -11,90 +11,11 @@
 #define CLONEDETECTINC 15
 #define NICK_CHANGE_TABLE_SIZE 100
 
-
-/* Defines for an actions hoststrip field */
-
-/* Mask for the host-only method */
-#define HOSTSTRIP_HOST               0x000F
-/* Use the full host */
-#define HOSTSTRIP_HOST_AS_IS         0x0001 
-/* Replace first field of host (or last field of ip) with *   */
-#define HOSTSTRIP_HOST_BLOCK         0x0002 
-
-/* Mask for the "if idented" method */
-#define HOSTSTRIP_IDENT              0x00F0
-/* Use ident as is */
-#define HOSTSTRIP_IDENT_AS_IS        0x0010 
-/* Use ident as is but prefix with * */
-#define HOSTSTRIP_IDENT_PREFIXED     0x0020
-/* Replace ident with * */
-#define HOSTSTRIP_IDENT_ALL          0x0030
-
-/* Mask for the "if not idented" method */
-#define HOSTSTRIP_NOIDENT            0x0F00
-/* Use *~* */
-#define HOSTSTRIP_NOIDENT_UNIDENTED  0x0100 
-/* Use *username */
-#define HOSTSTRIP_NOIDENT_PREFIXED   0x0200
-/* Use * */
-#define HOSTSTRIP_NOIDENT_ALL        0x0300
-
-/* Methods of handling an event */
-#define METHOD_DCC_WARN              0x0001
-#define METHOD_IRC_WARN              0x0002
-#define METHOD_TKLINE                0x0004
-#define METHOD_KLINE                 0x0008
-#define METHOD_DLINE                 0x0010
-
-
-/* Default HOSTSTRIPs */
-#define HS_DEFAULT  (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_PREFIXED | HOSTSTRIP_NOIDENT_ALL)
-
-#define HS_CFLOOD   HS_DEFAULT
-#define HS_VCLONE   (HOSTSTRIP_HOST_BLOCK | HOSTSTRIP_IDENT_PREFIXED | HOSTSTRIP_NOIDENT_ALL)
-#define HS_FLOOD    (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
-#define HS_LINK     HS_DEFAULT
-#define HS_BOT      HS_DEFAULT
-#define HS_SPAMBOT  HS_DEFAULT
-#define HS_CLONE    HS_DEFAULT
-#define HS_RCLONE   HS_DEFAULT
-#define HS_SCLONE   HS_DEFAULT
-#define HS_DRONE    HS_DEFAULT
-#define HS_WINGATE  (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
-#define HS_SOCKS    (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
-#define HS_SQUID    (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
-
 struct f_entry {
   int type;
   char uhost[MAX_NICK+2+MAX_HOST];
   struct f_entry *next;
 };
-
-struct sortarray
-{
-  struct userentry *domainrec;
-  int count;
-};
-
-struct a_entry {
-  char name[MAX_CONFIG];
-  char reason[MAX_CONFIG];
-  int method;
-  int hoststrip, klinetime;
-};
-
-struct a_entry actions[MAX_ACTIONS+1];
-
-struct nick_change_entry
-{
-  char user_host[MAX_USER+MAX_HOST];
-  char last_nick[MAX_NICK];
-  int  nick_change_count;
-  time_t first_nick_change;
-  time_t last_nick_change;
-  int noticed;
-};
-struct nick_change_entry nick_changes[NICK_CHANGE_TABLE_SIZE];
 
 struct failrec
 {
@@ -106,26 +27,6 @@ struct failrec
 };
 struct failrec *failures;
 
-struct userentry {
-  char nick[MAX_NICK];
-  char user[MAX_USER];
-  char host[MAX_HOST];
-  char ip_host[MAX_IP];         /* host ip as string */
-#ifdef VIRTUAL
-  char ip_class_c[MAX_IP];      /* /24 of host ip as string */
-#endif
-  char domain[MAX_HOST];
-  char link_count;
-  char isoper;
-  char class[100];		/* -1 if unknown */
-  time_t connecttime;
-  time_t reporttime;
-};
-
-struct hashrec {
-  struct userentry *info;
-  struct hashrec *collision;
-};
 
 struct config_list {
   int  hybrid;
@@ -235,13 +136,9 @@ void exemption_summary();
 #endif
 
 int isoper(char *user, char *host);
-int islinkedbot(int connnum, char *botname, char *password);
+void init_userlist(void);
 void reload_user_list(int sig);
 
-struct hashrec *usertable[HASHTABLESIZE];
-struct hashrec *hosttable[HASHTABLESIZE];
-struct hashrec *domaintable[HASHTABLESIZE];
-struct hashrec *iptable[HASHTABLESIZE];
 struct config_list config_entries;
 
 /* channel_report flags */
@@ -259,8 +156,6 @@ struct config_list config_entries;
 #define CHANNEL_REPORT_CFLOOD	0x1000
 
 
-char * get_method_names(int method);
-int get_method_number(char * name);
 #endif
 
 

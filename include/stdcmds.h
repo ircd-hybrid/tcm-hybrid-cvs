@@ -1,7 +1,7 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.23 2002/05/26 17:43:58 leeh Exp $ */
+/* $Id: stdcmds.h,v 1.24 2002/05/27 21:02:30 db Exp $ */
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
@@ -26,26 +26,21 @@ void report(int type, int channel_send_flag, char *format,...);
 void report_mem(int sock);
 void report_clones(int sock);
 void report_nick_flooders(int sock);
-void report_vbots(int sock,int nclones);
-void report_domains(int sock,int num);
 void report_failures(int sock,int num);
 void do_a_kline(char *command_name,int kline_time, char *pattern, char *reason,
                 char *who_did_command);
-void list_class(int sock,char *class_to_find,int total_only);
-/*
-xxx_ void suggest_action(int type_s, char *nick, char *user, char *host,
-                    int different, int identd);
-*/
-void handle_action(int actionid, int idented, char *nick, char *user, char *host, char *ip, char * addcmt);
+
+
 void initopers(void);
 void inithash(void);
 void oper();
-void report(int type, int channel_report_flag, char *format, ... );
 
 struct s_testline
 {
   char umask[MAX_USER+MAX_HOST+2]; /* umask for TESTLINE */
-  int index;                       /* index in connections[] of who did command */
+  int index;                       /* index in connections[]
+				    * of who did command
+				    */
 };
 
 #endif

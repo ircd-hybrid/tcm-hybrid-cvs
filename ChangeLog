@@ -1,3 +1,22 @@
+leeh        2002/05/24 14:50:54 EDT	(20020524_17)
+
+  Modified files:
+    .                    Makefile.in 
+    include              commands.h 
+    src                  Makefile.in commands.c main.c wingate.c 
+  Log:
+  - byebye mr modules, you shall return soon.
+  
+  Revision  Changes    Path
+  1.24      +1 -1      tcm-hybrid/Makefile.in
+  1.12      +6 -0      tcm-hybrid/include/commands.h
+  1.20      +3 -1      tcm-hybrid/src/Makefile.in
+  1.74      +1 -31     tcm-hybrid/src/commands.c
+  1.58      +7 -0      tcm-hybrid/src/main.c
+  1.30      +1 -4      tcm-hybrid/src/wingate.c
+
+
+
 leeh        2002/05/24 14:35:21 EDT	(20020524_16)
 
   Modified files:

@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.5 2002/05/27 01:37:42 db Exp $
+ * $Id: services.c,v 1.6 2002/05/27 21:47:11 leeh Exp $
  */
 
 #include <stdio.h>
@@ -34,6 +34,7 @@
 #include "serno.h"
 #include "patchlevel.h"
 #include "modules.h"
+#include "actions.h"
 
 #ifdef SERVICES
 void services_handler(int argc, char *argv[]);

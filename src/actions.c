@@ -25,7 +25,7 @@
 
 /* actions.c
  *
- * $Id: actions.c,v 1.2 2002/05/27 21:19:26 db Exp $
+ * $Id: actions.c,v 1.3 2002/05/27 21:47:10 leeh Exp $
  */
 
 /*
@@ -305,4 +305,43 @@ handle_action(int actionid, int idented, char *nick, char *user,
 		host, comment);
     }
 }
-		  
+
+int
+get_method_number (char * methodname)
+{
+  if (!strcasecmp(methodname, "kline"))
+    return METHOD_KLINE;
+  else if (!strcasecmp(methodname, "tkline"))
+    return METHOD_TKLINE;
+  else if (!strcasecmp(methodname, "dline"))
+    return METHOD_DLINE;
+  else if (!strcasecmp(methodname, "ircwarn"))
+    return METHOD_IRC_WARN;
+  else if (!strcasecmp(methodname, "dccwarn"))
+    return METHOD_DCC_WARN;
+  else
+    return 0;
+}
+
+char *
+get_method_names(int method)
+{
+  static char namebuf[128];
+
+  namebuf[0]= '\0';
+
+  if (method & METHOD_IRC_WARN)
+    strcat(namebuf, "ircwarn ");
+  if (method & METHOD_DCC_WARN)
+    strcat(namebuf, "dccwarn ");
+  if (method & METHOD_TKLINE)
+    strcat(namebuf, "tkline ");
+  if (method & METHOD_KLINE)
+    strcat(namebuf, "kline ");
+  if (method & METHOD_DLINE)
+    strcat(namebuf, "dline ");
+  if (namebuf[0])
+    namebuf[strlen(namebuf)-1] = '\0';
+  return namebuf;
+}
+

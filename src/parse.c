@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.35 2002/05/27 21:25:12 leeh Exp $
+ * $Id: parse.c,v 1.36 2002/05/27 21:47:11 leeh Exp $
  */
 
 #include <stdio.h>
@@ -261,7 +261,6 @@ parse_args(char *buffer, char *argv[])
 static void
 process_server(int conn_num, char *source, char *function, char *param)
 {
-  struct serv_command *ptr;
   char *userhost;
   int numeric=0;      /* if its a numeric */
   int argc=0;
@@ -432,7 +431,7 @@ process_server(int conn_num, char *source, char *function, char *param)
       break;
 	
     case RPL_STATSOLINE:
-      on_stats_o(0, argc, argv);
+      add_an_oper(argc, argv);
       break;
 	
     case RPL_VERSION:

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.87 2002/05/27 21:02:35 db Exp $
+ * $Id: userlist.c,v 1.88 2002/05/27 21:47:11 leeh Exp $
  *
  */
 
@@ -104,58 +104,7 @@ init_userlist_handlers(void)
 }
 
 void
-set_umode(int user, int admin, const char *umode)
-{
-  /* default to 1 so we can call this from load_a_user */
-  int plus = 1;
-  int i;
-  int j;
-
-  for(i = 0; umode[i]; i++)
-  {
-    if(umode[i] == '+')
-    {
-      plus = 1;
-      continue;
-    }
-
-    if(umode[i] == '-')
-    {
-      plus = 0;
-      continue;
-    }
-
-    for(j = 0; umode_flags[j].umode; j++)
-    {
-      if(umode_flags[j].umode == umode[i])
-      {
-	if(plus)
-          userlist[user].type |= umode_flags[j].type;
-	else
-          userlist[user].type &= ~umode_flags[j].type;
-
-	break;
-      }
-    }
-
-    /* this allows us to set privs as well as flags */
-    if(admin)
-    {
-      for(j = 0; umode_privs[j].umode; j++)
-      {
-        if(umode_privs[j].umode == umode[i])
-	{
-          if(plus)
-            userlist[user].type |= umode_privs[j].type;
-	  else
-            userlist[user].type &= ~umode_privs[j].type;
-	}
-      }
-    }
-  }
-}
-
-void m_umode(int connnum, int argc, char *argv[])
+m_umode(int connnum, int argc, char *argv[])
 {
   int user;
 
@@ -247,6 +196,58 @@ void m_umode(int connnum, int argc, char *argv[])
   }
 }
       
+void
+set_umode(int user, int admin, const char *umode)
+{
+  /* default to 1 so we can call this from load_a_user */
+  int plus = 1;
+  int i;
+  int j;
+
+  for(i = 0; umode[i]; i++)
+  {
+    if(umode[i] == '+')
+    {
+      plus = 1;
+      continue;
+    }
+
+    if(umode[i] == '-')
+    {
+      plus = 0;
+      continue;
+    }
+
+    for(j = 0; umode_flags[j].umode; j++)
+    {
+      if(umode_flags[j].umode == umode[i])
+      {
+	if(plus)
+          userlist[user].type |= umode_flags[j].type;
+	else
+          userlist[user].type &= ~umode_flags[j].type;
+
+	break;
+      }
+    }
+
+    /* this allows us to set privs as well as flags */
+    if(admin)
+    {
+      for(j = 0; umode_privs[j].umode; j++)
+      {
+        if(umode_privs[j].umode == umode[i])
+	{
+          if(plus)
+            userlist[user].type |= umode_privs[j].type;
+	  else
+            userlist[user].type &= ~umode_privs[j].type;
+	}
+      }
+    }
+  }
+}
+
 int
 find_user_in_userlist(const char *username)
 {
@@ -311,45 +312,6 @@ get_umodes_from_prefs(int user)
   return 0;
 }
     
-int
-get_method_number (char * methodname)
-{
-  if (!strcasecmp(methodname, "kline"))
-    return METHOD_KLINE;
-  else if (!strcasecmp(methodname, "tkline"))
-    return METHOD_TKLINE;
-  else if (!strcasecmp(methodname, "dline"))
-    return METHOD_DLINE;
-  else if (!strcasecmp(methodname, "ircwarn"))
-    return METHOD_IRC_WARN;
-  else if (!strcasecmp(methodname, "dccwarn"))
-    return METHOD_DCC_WARN;
-  else
-    return 0;
-}
-
-char *
-get_method_names(int method)
-{
-  static char namebuf[128];
-
-  namebuf[0]= '\0';
-
-  if (method & METHOD_IRC_WARN)
-    strcat(namebuf, "ircwarn ");
-  if (method & METHOD_DCC_WARN)
-    strcat(namebuf, "dccwarn ");
-  if (method & METHOD_TKLINE)
-    strcat(namebuf, "tkline ");
-  if (method & METHOD_KLINE)
-    strcat(namebuf, "kline ");
-  if (method & METHOD_DLINE)
-    strcat(namebuf, "dline ");
-  if (namebuf[0])
-    namebuf[strlen(namebuf)-1] = '\0';
-  return namebuf;
-}
-
 /*
  * load_config_file
  * 
@@ -762,7 +724,6 @@ load_userlist()
  * output	- NONE
  * side effects	- userlist is updated
  */
-
 static void
 load_a_user(char *line)
 {
@@ -841,6 +802,69 @@ load_a_user(char *line)
     userlist[user_list_index].usernick[0] = 0;
     userlist[user_list_index].password[0] = 0;
     userlist[user_list_index].type = 0;
+}
+
+/* add_an_oper()
+ *
+ * input	- server message body (argc/argv)
+ * output	-
+ * side effects - user listed in RPL_STATSOLINE is added to userlist
+ */
+void
+add_an_oper(int argc, char *argv[])
+{
+  char *user_at_host;
+  char *user;
+  char *host;
+  char *nick;
+  char *p;
+
+  /* No point if I am maxed out going any further */
+  if ( user_list_index == (MAXUSERS - 1))
+    return;
+
+  user = user_at_host = argv[4];
+  nick = argv[6];
+
+  if ((p = strchr(user_at_host, '@')) != NULL)
+    {
+      *p++ = '\0';
+      host = p;
+    }
+  else
+    {
+      user = "*";
+      host = p;
+    }
+
+  /* Don't allow *@* or user@* O: lines */
+  if (strcmp(host, "*") == 0)
+    return;
+
+  /*
+   * If this user is already loaded due to userlist.load
+   * don't load them again.
+   */
+  if(isoper(user,host) == 0)
+  {
+    strncpy(userlist[user_list_index].user, user,
+            sizeof(userlist[user_list_index].user));
+
+    strncpy(userlist[user_list_index].host, host,
+            sizeof(userlist[user_list_index].host));
+
+    strncpy(userlist[user_list_index].usernick, nick,
+            sizeof(userlist[user_list_index].usernick));
+
+    userlist[user_list_index].password[0] = '\0';
+    userlist[user_list_index].type = 0;
+    user_list_index++;
+  }
+
+  strcpy(hostlist[host_list_index].user, user);
+  strcpy(hostlist[host_list_index].host, host);
+  hostlist[host_list_index].type = 0xFFFFFFFF;
+  ++host_list_index;
 }
 
 static void

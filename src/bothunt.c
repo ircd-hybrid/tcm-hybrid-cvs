@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.118 2002/05/27 21:45:48 db Exp $
+ * $Id: bothunt.c,v 1.119 2002/05/27 21:47:10 leeh Exp $
  */
 
 #include <stdio.h>
@@ -211,80 +211,6 @@ _ontraceclass(int connnum, int argc, char *argv[])
     set_modes(config_entries.defchannel, config_entries.defchannel_mode,
               config_entries.defchannel_key);
   }
-}
-
-/* 
- * on_stats_o()
- *
- * inputs	- body of server message
- * output	- none
- * side effects	- user list of tcm is built up from stats O of tcm server
- * 
- *   Some servers have some "interesting" O lines... lets
- * try and filter some of the worst ones out.. I have seen 
- * *@* used in a servers O line.. (I will not say which, to protect
- * the guilty)
- */
-
-void
-on_stats_o(int connnum, int argc, char *argv[])
-{
-  char *user_at_host;
-  char *user;
-  char *host;
-  char *nick;
-  char *p;		/* pointer used to scan for valid O line */
-
-/* No point if I am maxed out going any further */
-  if ( user_list_index == (MAXUSERS - 1))
-    return;
-
-  user = user_at_host = argv[4];
-  nick = argv[6];
-
-  if ((p = strchr(user_at_host, '@')) != NULL)
-    {
-      *p++ = '\0';
-      host = p;
-    }
-  else
-    {
-      user = "*";
-      host = p;
-    }
-
-  /* Don't allow *@* or user@* O: lines */
-  if (strcmp(host, "*") == 0)
-    return;
-
-  /*
-   * If this user is already loaded due to userlist.load
-   * don't load them again.
-   */
-
-  if (!isoper(user,host) )
-  {
-    strncpy(userlist[user_list_index].user, user, 
-	    sizeof(userlist[user_list_index].user));
-
-    strncpy(userlist[user_list_index].host, host, 
-	    sizeof(userlist[user_list_index].host));
-
-    strncpy(userlist[user_list_index].usernick, nick, 
-	    sizeof(userlist[user_list_index].usernick));
-
-    userlist[user_list_index].password[0] = '\0';
-    userlist[user_list_index].type = 0;
-    user_list_index++;
-  }
-  /*
-   * Really should exempt opers, as spoof I-Lines arent shown
-   * on stats I
-   */ 
-  strcpy(hostlist[host_list_index].user, user);
-  strcpy(hostlist[host_list_index].host, host);
-  hostlist[host_list_index].type = 0xFFFFFFFF;
-  ++host_list_index;
 }
 
 /* 

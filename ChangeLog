@@ -1,3 +1,20 @@
+db          2002/05/25 13:34:33 EDT	(20020525_25)
+
+  Modified files:
+    include              tcm_io.h 
+    src                  main.c tcm_io.c 
+  Log:
+  - partially done redoing all connects non-blocking...
+  
+  More to do
+  
+  Revision  Changes    Path
+  1.13      +10 -9     tcm-hybrid/include/tcm_io.h
+  1.71      +3 -3      tcm-hybrid/src/main.c
+  1.27      +44 -50    tcm-hybrid/src/tcm_io.c
+
+
+
 wcampbel    2002/05/25 13:10:31 EDT	(20020525_24)
 
   Added files:

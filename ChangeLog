@@ -1,3 +1,15 @@
+db          2002/05/31 22:18:12 EDT	(20020601_4)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  - simple formatting fixes.
+  
+  Revision  Changes    Path
+  1.144     +3 -2      tcm-hybrid/src/bothunt.c
+
+
+
 wcampbel    2002/05/31 22:00:10 EDT	(20020601_3)
 
   Modified files:

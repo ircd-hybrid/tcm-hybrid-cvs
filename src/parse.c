@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.6 2002/05/23 23:09:44 leeh Exp $
+ * $Id: parse.c,v 1.7 2002/05/23 23:26:59 leeh Exp $
  */
 
 #include <stdio.h>
@@ -186,7 +186,6 @@ static void proc(char *source,char *fctn,char *param)
     int argc=0;
     char *p, *q;
     char *argv[MAX_ARGV];
-    struct common_function *temp;
 
     if (source && *source)
       argv[argc++] = source;
@@ -225,8 +224,7 @@ static void proc(char *source,char *fctn,char *param)
         if ((userhost = strchr(argv[0], '!')) != NULL)
           *userhost++ = '\0';
         if (argv[3][0] == '\001')       /* it's a CTCP something */
-          for (temp=onctcp;temp;temp=temp->next)
-            temp->function(0, argc, argv);
+          _onctcp(0, argc, argv);
         else
           privmsgproc(source,userhost,argc,argv);
       }
@@ -257,8 +255,7 @@ static void proc(char *source,char *fctn,char *param)
     }
     else if ((strcmp(argv[1],"JOIN")) == 0)
     {
-      for (temp=onjoin;temp;temp=temp->next)
-	temp->function(0, argc, argv);
+      _onjoin(0, argc, argv);
     }
     else if ((strcmp(argv[1],"KICK")) == 0)
     {

@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.28 2002/05/23 23:09:44 leeh Exp $B
+ * $Id: modules.c,v 1.29 2002/05/23 23:26:59 leeh Exp $B
  *
  */
 
@@ -124,12 +124,6 @@ void add_common_function(int type, void *function)
       case F_USER_SIGNOFF:
         temp = &user_signoff;
         break;
-      case F_DCC_SIGNON:
-        temp = &dcc_signon;
-        break;
-      case F_DCC_SIGNOFF:
-        temp = &dcc_signoff;
-        break;
       case F_DCC:
         temp = &dcc;
         break;
@@ -142,17 +136,8 @@ void add_common_function(int type, void *function)
       case F_CONFIG:
         temp = &config;
         break;
-      case F_ACTION:
-        temp = &action;
-        break;
       case F_RELOAD:
         temp = &reload;
-        break;
-      case F_ONJOIN:
-        temp = &onjoin;
-        break;
-      case F_ONCTCP:
-        temp = &onctcp;
         break;
       default:
         return;
@@ -177,10 +162,7 @@ void modules_init(void)
   mod_add_cmd(&modreload_msgtab);
   mod_add_cmd(&modlist_msgtab);
 
-/*  if (dcc_signon == NULL)
-    dcc_signon = (struct common_function *) malloc(sizeof(struct common_function));
-  if (dcc_signoff == NULL)
-    dcc_signoff = (struct common_function *) malloc(sizeof(struct common_function));
+/*
   if (dcc == NULL)
     dcc = (struct common_function *) malloc(sizeof(struct common_function));
   if (user_signon == NULL)
@@ -193,14 +175,8 @@ void modules_init(void)
     scontinuous = (struct common_function *) malloc(sizeof(struct common_function));
   if (config == NULL)
     config = (struct common_function *) malloc(sizeof(struct common_function));
-  if (action == NULL)
-    action = (struct common_function *) malloc(sizeof(struct common_function));
   if (reload == NULL)
     reload = (struct common_function *) malloc(sizeof(struct common_function));
-  if (onjoin == NULL)
-    onjoin = (struct common_function *) malloc(sizeof(struct common_function));
-  if (onctcp == NULL)
-    onctcp = (struct common_function *) malloc(sizeof(struct common_function));
 */
 }
 

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.49 2002/05/23 23:09:44 leeh Exp $ */
+/* $Id: main.c,v 1.50 2002/05/23 23:26:59 leeh Exp $ */
 
 #include "setup.h"
 
@@ -107,10 +107,6 @@ static void setup_corefile(void);
 void
 init_hash_tables(void)
 {
-  if (dcc_signon)
-    memset(dcc_signon,0,sizeof(struct common_function));
-  if (dcc_signoff)
-    memset(dcc_signoff,0,sizeof(struct common_function));
   if (user_signon)
     memset(user_signon,0,sizeof(struct common_function));
   if (user_signoff)
@@ -121,14 +117,8 @@ init_hash_tables(void)
     memset(scontinuous,0,sizeof(struct common_function));
   if (config)
     memset(config,0,sizeof(struct common_function));
-  if (action)
-    memset(action,0,sizeof(struct common_function));
   if (reload)
     memset(reload,0,sizeof(struct common_function));
-  if (onjoin)
-    memset(onjoin,0,sizeof(struct common_function));
-  if (onctcp)
-    memset(onctcp,0,sizeof(struct common_function));
 }
 
 /*
@@ -530,13 +520,10 @@ main(int argc, char *argv[])
   memset(&actions, 0, sizeof(actions));
 
   modules_init();
-  add_common_function(F_DCC_SIGNOFF, closeconn);
   load_all_modules(YES);
 
   /* XXX - these used to be in the modules, need to be done properly */
-  add_common_function(F_ONJOIN, _onjoin);
   add_common_function(F_RELOAD, _reload_bothunt);
-  add_common_function(F_ONCTCP, _onctcp);
 
 #ifdef GLINES
   mod_add_cmd(&gline_msgtab);

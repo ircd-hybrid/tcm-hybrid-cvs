@@ -1,15 +1,17 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.16 2002/05/23 23:09:42 leeh Exp $ */
+/* $Id: modules.h,v 1.17 2002/05/23 23:26:54 leeh Exp $ */
 
-struct module {
+struct module
+{
   char *name;
   char *version;
   void *address;
 };
 
-struct common_function {
+struct common_function
+{
   int type;
   void (*function) (int connnum, int argc, char *argv[]);
   struct common_function *next;
@@ -17,32 +19,22 @@ struct common_function {
 
 struct common_function *user_signon;
 struct common_function *user_signoff;
-struct common_function *dcc_signon;
-struct common_function *dcc_signoff;
 struct common_function *dcc;
 struct common_function *upper_continuous;
 struct common_function *continuous;
 struct common_function *scontinuous;
 struct common_function *config;
-struct common_function *action;
 struct common_function *reload;
-struct common_function *onjoin;
-struct common_function *onctcp;
 
 #define F_USER_SIGNON		3
 #define F_USER_SIGNOFF		4
-#define F_DCC_SIGNON		5
-#define F_DCC_SIGNOFF		6
 #define F_DCC			7
 #define F_UPPER_CONTINUOUS	8
 #define F_CONTINUOUS		9
 #define F_SCONTINUOUS		10
 #define F_CONFIG		11
 /*				12 */
-#define F_ACTION		13
 #define F_RELOAD		14
-#define F_ONJOIN		16
-#define F_ONCTCP		17
 
 extern void sendtoalldcc(int type,char *format,...);
 extern void report(int type, int channel_send_flag, char *format,...);

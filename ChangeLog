@@ -1,3 +1,19 @@
+bill        2002/09/14 16:18:09 EDT	(20020914_0)
+
+  Modified files:
+    include              tcm.h 
+    src                  handler.c main.c 
+  Log:
+  - removed un-needed init_handlers()
+  - upped MAX_USER by 2, to allow for a '*' from handle_action() and for a '\0' from strlcat()
+  
+  Revision  Changes    Path
+  1.57      +1 -1      tcm-hybrid/include/tcm.h
+  1.9       +0 -13     tcm-hybrid/src/handler.c
+  1.128     +0 -1      tcm-hybrid/src/main.c
+
+
+
 bill        2002/09/13 14:35:05 EDT	(20020913_3)
 
   Modified files:

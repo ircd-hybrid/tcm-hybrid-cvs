@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.140 2002/06/26 12:21:35 leeh Exp $
+ * $Id: userlist.c,v 1.141 2002/06/27 14:39:24 leeh Exp $
  */
 
 #include <errno.h>
@@ -1155,7 +1155,7 @@ exempt_summary()
 
     printf("%s:", actions[i].name);
 
-    for(ptr = exempt_list; ptr; ptr = ptr->next)
+    for(ptr = exempt_list.head; ptr; ptr = ptr->next)
     {
       exempt = ptr->data;
 

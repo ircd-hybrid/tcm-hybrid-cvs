@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.139 2002/06/24 14:56:09 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.140 2002/06/27 14:39:23 leeh Exp $ */
 
 #include "setup.h"
 
@@ -72,6 +72,7 @@ static void m_connections(struct connection *connection_p, int argc,
 			  char *argv[]);
 static void m_disconnect(struct connection *connection_p, int argc,
 			 char *argv[]);
+static void m_events(struct connection *connection_p, int argc, char *argv[]);
 static void m_help(struct connection *connection_p, int argc, char *argv[]);
 static void m_motd(struct connection *connection_p, int argc, char *argv[]);
 static void m_save(struct connection *connection_p, int argc, char *argv[]);

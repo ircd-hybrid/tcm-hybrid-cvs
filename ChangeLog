@@ -1,3 +1,15 @@
+bill        2002/12/13 13:05:32 EST	(20021213_0)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  - updated tcm to deal with new nick [user@host] notices in hybrid7
+  
+  Revision  Changes    Path
+  1.206     +25 -10    tcm-hybrid/src/bothunt.c
+
+
+
 bill        2002/12/12 14:30:28 EST	(20021212_0)
 
   Modified files:

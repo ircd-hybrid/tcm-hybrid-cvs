@@ -1,3 +1,30 @@
+leeh        2002/05/28 20:59:30 EDT	(20020529_1)
+
+  Modified files:
+    include              commands.h hash.h tcm.h userlist.h 
+    src                  Makefile.in bothunt.c commands.c hash.c 
+                         main.c modules.c tcm_io.c 
+  Added files:
+    src                  clones.c 
+  Log:
+  - split the clone stuff out into clones.c
+  
+  Revision  Changes    Path
+  1.18      +0 -4      tcm-hybrid/include/commands.h
+  1.7       +12 -6     tcm-hybrid/include/hash.h
+  1.47      +2 -0      tcm-hybrid/include/tcm.h
+  1.57      +0 -1      tcm-hybrid/include/userlist.h
+  1.26      +1 -0      tcm-hybrid/src/Makefile.in
+  1.135     +0 -59     tcm-hybrid/src/bothunt.c
+  1.1       +511 -0    tcm-hybrid/src/clones.c (new)
+  1.109     +0 -69     tcm-hybrid/src/commands.c
+  1.4       +4 -339    tcm-hybrid/src/hash.c
+  1.98      +2 -0      tcm-hybrid/src/main.c
+  1.47      +6 -2      tcm-hybrid/src/modules.c
+  1.71      +4 -6      tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/28 19:57:23 EDT	(20020529_0)
 
   Modified files:

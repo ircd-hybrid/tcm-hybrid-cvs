@@ -1,3 +1,25 @@
+wcampbel    2002/05/25 13:08:15 EDT	(20020525_23)
+
+  Modified files:
+    include              tcm_io.h 
+    src                  .depend bothunt.c commands.c parse.c 
+                         tcm_io.c userlist.c wingate.c 
+  Log:
+  -Wall cleanups
+  Slow^H^H^Holaris cleanups
+  
+  Revision  Changes    Path
+  1.12      +1 -1      tcm-hybrid/include/tcm_io.h
+  1.16      +9 -5      tcm-hybrid/src/.depend
+  1.100     +2 -0      tcm-hybrid/src/bothunt.c
+  1.86      +1 -0      tcm-hybrid/src/commands.c
+  1.19      +0 -1      tcm-hybrid/src/parse.c
+  1.26      +3 -2      tcm-hybrid/src/tcm_io.c
+  1.73      +2 -0      tcm-hybrid/src/userlist.c
+  1.35      +2 -6      tcm-hybrid/src/wingate.c
+
+
+
 wcampbel    2002/05/25 12:49:19 EDT	(20020525_22)
 
   Modified files:

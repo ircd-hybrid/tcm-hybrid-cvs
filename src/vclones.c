@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.15 2002/12/29 09:41:20 bill Exp $
+ * $Id: vclones.c,v 1.16 2003/01/16 01:27:10 bill Exp $
  */
 
 #include <assert.h>
@@ -85,7 +85,7 @@ m_vlist(struct connection *connection_p, int argc, char *argv[])
 		       "Usage: %s <wildcarded/regexp ip>",
 		       argv[0]);
   else if (argc == 2)
-    report_vbots(connection_p, atoi(argv[1]), YES);
+    list_virtual_users(connection_p, argv[1], NO);
   else
     list_virtual_users(connection_p, argv[2], YES);
 #else

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.90 2002/06/21 23:20:18 leeh Exp $
+ * $Id: tcm_io.c,v 1.91 2002/06/22 18:21:47 leeh Exp $
  */
 
 #include <stdio.h>
@@ -517,11 +517,9 @@ send_to_all(int send_umode, const char *format,...)
   va_start(va,format);
   for(i = 0; i < maxconns; i++)
     {
-      if (connections[i].state == S_CLIENT)
-	{
-	  if (get_umode(i) & send_umode)
-	    va_print_to_socket(connections[i].socket, format, va);
-	}
+      if((connections[i].state == S_CLIENT) &&
+         (connections[i].type & send_umode))
+        va_print_to_socket(connections[i].socket, format, va);
     }
   va_end(va);
 }
@@ -547,7 +545,7 @@ send_to_partyline(int conn_num, const char *format,...)
     {
       if (connections[i].state == S_CLIENT)
 	{
-	  if (conn_num != i && has_umode(i, FLAGS_PARTYLINE))
+	  if (conn_num != i && connections[i].type & FLAGS_PARTYLINE)
 	    va_print_to_socket(connections[i].socket, format, va);
 	}
     }
@@ -791,11 +789,11 @@ show_stats_p(const char *nick)
 	continue;
 
       /* ignore invisible users/opers */
-      if(has_umode(i, FLAGS_INVS))
+      if(connections[i].type & FLAGS_INVS)
 	continue;
       
       /* display opers */
-      if(has_umode(i, FLAGS_OPER))
+      if(connections[i].type & FLAGS_OPER)
 	{
 #ifdef HIDE_OPER_HOST
 	  notice(nick, "%s - idle %lu",
@@ -825,11 +823,9 @@ show_stats_p(const char *nick)
  * output	- NONE
  * side effects	- active connections are listed to socket
  */
-
 void 
 list_connections(int sock)
 {
-  struct oper_entry *user;
   int i;
 
   for (i=0; i<maxconns; i++)
@@ -838,13 +834,10 @@ list_connections(int sock)
     {
       if(connections[i].registered_nick[0] != 0)
       {
-	user = find_user_in_userlist(connections[i].registered_nick);
-
-	if(user != NULL)
-  	  print_to_socket(sock,
+  	print_to_socket(sock,
 	       "%s/%s %s (%s@%s) is connected - idle: %ld",
 	       connections[i].nick, connections[i].registered_nick,
-	       type_show(user->type), connections[i].username,
+	       type_show(connections[i].type), connections[i].username,
 	       connections[i].host,
 	       time((time_t *)NULL)-connections[i].last_message_time);
       }

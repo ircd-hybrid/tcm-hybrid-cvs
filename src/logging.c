@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.49 2002/06/22 14:04:48 db Exp $
+ * $Id: logging.c,v 1.50 2002/06/22 18:21:47 leeh Exp $
  *
  * - db
  */
@@ -325,7 +325,7 @@ hour_minute_second(time_t time_val)
     broken_up_time = localtime(&time_val);
 
   (void)snprintf(time_string,
-		 sizeof(time_string) - 1,"%2.2d:%2.2d:%s.2d",
+		 sizeof(time_string) - 1,"%2.2d:%2.2d:%2.2d",
 		 broken_up_time->tm_hour,
 		 broken_up_time->tm_min,
 		 broken_up_time->tm_sec);

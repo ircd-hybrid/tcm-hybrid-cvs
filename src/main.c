@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.119 2002/06/21 19:17:12 leeh Exp $ */
+/* $Id: main.c,v 1.120 2002/06/22 18:21:47 leeh Exp $ */
 
 #include "setup.h"
 
@@ -170,8 +170,6 @@ main(int argc, char *argv[])
 #ifdef SERVICES
   init_services();
 #endif
-
-  eventAdd("save_umodes", save_umodes, NULL, UMODE_SAVE_TIME);
 
   if (config_entries.conffile)
     load_config_file(config_entries.conffile);

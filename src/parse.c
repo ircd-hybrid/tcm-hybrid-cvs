@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.77 2002/06/21 16:46:47 leeh Exp $
+ * $Id: parse.c,v 1.78 2002/06/22 18:21:47 leeh Exp $
  */
 
 #include <stdio.h>
@@ -137,9 +137,9 @@ parse_client(int i)
   {
     if((ptr = find_dcc_handler(argv[0] + 1)) != NULL)
     {
-      if(has_umode(i, FLAGS_ADMIN))
+      if(connections[i].type & FLAGS_ADMIN)
         ptr->handler[2](i, argc, argv);
-      else if(has_umode(i, FLAGS_OPER))
+      else if(connections[i].type & FLAGS_OPER)
         ptr->handler[1](i, argc, argv);
       else
         ptr->handler[0](i, argc, argv);
@@ -153,7 +153,7 @@ parse_client(int i)
   /* message to partyline */
   else
   {
-    if(has_umode(i, FLAGS_PARTYLINE))
+    if(connections[i].type & FLAGS_PARTYLINE)
     {
       char buff[MAX_BUFF];
 

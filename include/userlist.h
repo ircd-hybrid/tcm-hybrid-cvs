@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.80 2002/06/22 14:04:44 db Exp $ */
+/* $Id: userlist.h,v 1.81 2002/06/22 18:21:44 leeh Exp $ */
 
 #include "tools.h"
 
@@ -82,12 +82,8 @@ void get_umodes_from_prefs(struct oper_entry *);
 void list_connections(int sock);
 void show_stats_p(const char *nick);
 
-void save_umodes(void *);
 void set_umode(struct oper_entry *, int, const char *);
 void on_stats_o(int, char *argv[]);
-
-int has_umode(int, int);
-int get_umode(int);
 
 void add_exempt(char *, char *, int);
 

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.134 2002/06/22 09:21:49 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.135 2002/06/22 18:21:47 leeh Exp $ */
 
 #include "setup.h"
 
@@ -50,7 +50,7 @@
 #endif
 
 static void register_oper(int connnum, char *password, char *who_did_command);
-struct oper_entry *is_legal_pass(int connect_id,char *password);
+int is_legal_pass(int connect_id,char *password);
 static void print_help(int sock,char *text);
 
 static void m_class(int connnum, int argc, char *argv[]);
@@ -145,7 +145,7 @@ m_killlist(int connnum, int argc, char *argv[])
   else
     snprintf(reason, sizeof(reason), "No reason");
 
-  if(has_umode(connnum, FLAGS_INVS) == 0)
+  if((connections[connnum].type & FLAGS_INVS) == 0)
   {
     strncat(reason, " (requested by ", MAX_REASON - strlen(reason));
     strncat(reason, connections[connnum].registered_nick,
@@ -225,7 +225,7 @@ m_kill(int connnum, int argc, char *argv[])
               argv[1], reason, connections[connnum].registered_nick);
   log_kline("KILL", argv[1], 0, connections[connnum].registered_nick, reason);
 
-  if(has_umode(connnum, FLAGS_INVS) == 0)
+  if((connections[connnum].type & FLAGS_INVS) == 0)
   {
     strncat(reason, " (requested by ", MAX_REASON - 1 - strlen(reason));
     strncat(reason, connections[connnum].registered_nick,
@@ -287,7 +287,7 @@ m_kaction(int connnum, int argc, char *argv[])
 void
 m_register(int connnum, int argc, char *argv[])
 {
-  if(has_umode(connnum, FLAGS_OPER))
+  if(connections[connnum].type & FLAGS_OPER)
   {
     print_to_socket(connections[connnum].socket, 
 		    "You are already registered.");
@@ -416,7 +416,6 @@ m_save(int connnum, int argc, char *argv[])
   send_to_all(FLAGS_ALL, "%s is saving %s and preferences",
               connections[connnum].registered_nick, CONFIG_FILE);
   save_prefs();
-  save_umodes(NULL);
 }
 
 void
@@ -529,7 +528,7 @@ m_dline(int connnum, int argc, char *argv[])
   char *p, reason[MAX_BUFF];
   int i, len;
 
-  if(has_umode(connnum, FLAGS_DLINE) == 0)
+  if(connections[connnum].type & FLAGS_DLINE)
   {
     print_to_socket(connections[connnum].socket,
 		    "You do not have access to .dline");
@@ -554,7 +553,7 @@ m_dline(int connnum, int argc, char *argv[])
     send_to_all( FLAGS_ALL, "*** dline %s :%s by %s", argv[1],
                  reason, connections[connnum].registered_nick);
 
-    if(has_umode(connnum, FLAGS_INVS) == 0)
+    if((connections[connnum].type & FLAGS_INVS) == 0)
     {
       strncat(reason, " (requested by ", sizeof(reason)-strlen(reason));
       strncat(reason, connections[connnum].nick,
@@ -770,17 +769,13 @@ register_oper(int connnum, char *password, char *who_did_command)
 {
   if(password != NULL)
   {
-    struct oper_entry *user;
-
-    if((user = is_legal_pass(connnum, password)) != NULL)
+    if(is_legal_pass(connnum, password))
     {
       print_to_socket(connections[connnum].socket,
-		      "Set umodes from preferences");
-      print_to_socket(connections[connnum].socket,
-		      "Your current flags are now: %s",
-		      type_show(user->type));
+		      "Your current flags are: %s",
+		      type_show(connections[connnum].type));
 
-      if(has_umode(connnum, FLAGS_SUSPENDED))
+      if(connections[connnum].type & FLAGS_SUSPENDED)
       {
 	print_to_socket(connections[connnum].socket,
  	                "You are suspended");
@@ -793,7 +788,7 @@ register_oper(int connnum, char *password, char *who_did_command)
 	send_to_all(FLAGS_ALL, "%s has registered", who_did_command);
 
 	/* mark them as registered */
-	user->type |= FLAGS_OPER;
+	connections[connnum].type |= FLAGS_OPER;
       }
     }
     else
@@ -1015,8 +1010,7 @@ init_commands(void)
  * output       - oper type if legal 0 if not
  * side effects - NONE
  */
-
-struct oper_entry *
+int
 is_legal_pass(int connect_id, char *password)
 {
   slink_node *ptr;
@@ -1039,12 +1033,12 @@ is_legal_pass(int connect_id, char *password)
       {
         strlcpy(connections[connect_id].registered_nick, user->usernick, 
                 sizeof(connections[connect_id].registered_nick));
-	return user;
+	return YES;
       }
     }
   }
 
-  return NULL;
+  return NO;
 }
 
 /*

@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.30 2001/11/23 21:40:49 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.31 2001/11/25 02:58:37 bill Exp $ */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -1243,7 +1243,7 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
                reason);
 #else
       if(kline_time)
-        toserv("KLINE %d %s :%s [%s\\n",
+        toserv("KLINE %d %s :%s [%s]\n",
                kline_time,pattern,reason,
                who_did_command);
       else

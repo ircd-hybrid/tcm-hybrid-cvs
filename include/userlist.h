@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.20 2001/11/23 21:40:46 wcampbel Exp $ */
+/* $Id: userlist.h,v 1.21 2001/11/25 02:58:35 bill Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -168,7 +168,9 @@ extern int tcm_list_index;
 #define TYPE_ECHO		0x10000 /* user is echo'ed */
 #define TYPE_KLINE		0x20000 /* user see's klines/unklines */
 #define TYPE_SUSPENDED		0x40000 /* user is suspended */
+#ifdef ENABLE_W_FLAG
 #define TYPE_OPERWALL		0x80000 /* user can see OPERWALL */
+#endif
 
 int isoper(char *user, char *host);
 int islinkedbot(int connnum, char *botname, char *password);

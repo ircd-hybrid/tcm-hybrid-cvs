@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.22 2001/11/24 00:07:55 wcampbel Exp $ */
+/* $Id: main.c,v 1.23 2001/11/25 02:58:37 bill Exp $ */
 
 #include "setup.h"
 
@@ -327,10 +327,12 @@ void sendtoalldcc(int type,char *format,...)
 	      break;
 	      
             case SEND_OPERWALL_ONLY:
+	    case SEND_LOCOPS_ONLY:
+#ifdef ENABLE_W_FLAG
               if (!(connections[i].type & TYPE_OPERWALL))
                 break;
+#endif
 	    case SEND_WALLOPS_ONLY:
-	    case SEND_LOCOPS_ONLY:
 	      if (connections[i].type & TYPE_LOCOPS)
 		prnt(connections[i].socket, msgbuf);
 	      break;

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.30 2001/11/24 00:44:52 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.31 2001/11/25 02:58:36 bill Exp $ */
 
 #include "setup.h"
 
@@ -136,12 +136,12 @@ dccproc(int connnum, int argc, char *argv[])
     {
       if(connections[connnum].type & TYPE_PARTYLINE )
       {
-	sendtoalldcc(opers_only, dccbuff); /* Thanks Garfr, Talen */
+	sendtoalldcc(opers_only, "%s", dccbuff); /* Thanks Garfr, Talen */
       }
       else
       {
 	if(opers_only == SEND_OPERS_ONLY)
-	  sendtoalldcc(opers_only, dccbuff);
+	  sendtoalldcc(opers_only, "%s", dccbuff);
 	else
 	  prnt(connections[connnum].socket,
 	       "You are not +p, not sending to chat line\n");
@@ -333,10 +333,18 @@ dccproc(int connnum, int argc, char *argv[])
       if (argc < 3)
       {
 	prnt(connections[connnum].socket,
-	     "Usage: .kline [nick]|[user@host] reason\n");
+	     "Usage: .kline [time] <[nick]|[user@host]> [reason]\n");
 	return;
       }
-      do_a_kline("kline",kline_time,argv[1],argv[2],who_did_command);
+      p = buff+strlen(argv[0]);
+      if (*p == ':') ++p;
+      if (atoi(argv[1]))
+      {
+        kline_time = atoi(argv[1]);
+        do_a_kline("kline",kline_time,argv[2],p,who_did_command);
+      }
+      else
+        do_a_kline("kline",0,argv[1],p,who_did_command);
     }
     else
       prnt(connections[connnum].socket,"You aren't registered\n");

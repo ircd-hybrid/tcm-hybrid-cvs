@@ -1,3 +1,25 @@
+bill        2002/03/20 00:08:29 EST	(20020320_0)
+
+  Modified files:
+    include              patchlevel.h 
+    modules              commands.c serverif.c 
+    src                  userlist.c 
+  Log:
+  - finished replacing tokenizer with hash table
+  - fixed bug in .k<action> commands that caused core
+  - fixed bug in okhost() that caused performance drop
+  - fixed bug in suggest_action that ignored klines
+  - fixed bug in E: processing that mis-exempted cloning hosts
+  - uped patchlevel to 3.0.3
+  
+  Revision  Changes    Path
+  1.4       +2 -2      tcm-hybrid/include/patchlevel.h
+  1.37      +985 -841  tcm-hybrid/modules/commands.c
+  1.44      +0 -1      tcm-hybrid/modules/serverif.c
+  1.45      +49 -20    tcm-hybrid/src/userlist.c
+
+
+
 wcampbel    2002/03/19 18:54:35 EST	(20020319_0)
 
   Modified files:

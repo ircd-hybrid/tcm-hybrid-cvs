@@ -54,7 +54,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.7 2001/10/04 23:14:34 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.8 2001/10/09 16:41:51 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -179,7 +179,7 @@ void _ontraceuser(int connnum, int argc, char *argv[])
   if (!doingtrace)
     return;
 
-  if(argv[3][0] == 'O')
+  if (argv[3][0] == 'O')
     is_oper = YES;
   else
     is_oper = NO;
@@ -190,7 +190,7 @@ void _ontraceuser(int connnum, int argc, char *argv[])
 
   while(right_bracket_ptr != argv[6])
     {
-      if( *right_bracket_ptr == ')' )
+      if ( *right_bracket_ptr == ')' )
 	{
 	  *right_bracket_ptr = '\0';
 	  break;
@@ -258,7 +258,7 @@ void on_stats_o(int connnum, int argc, char *argv[])
   if (body[strlen(body)-1] == ' ') body[strlen(body)-1] = '\0';
 
 /* No point if I am maxed out going any further */
-  if( user_list_index == (MAXUSERS - 1))
+  if ( user_list_index == (MAXUSERS - 1))
     return;
 
   user_at_host = p = argv[4];
@@ -267,17 +267,17 @@ void on_stats_o(int connnum, int argc, char *argv[])
 
   while(*p)
     {
-      if(*p == '@')	/* Found the first part of "...@" ? */
+      if (*p == '@')	/* Found the first part of "...@" ? */
 	break;
 
-      if(*p != '*')	/* A non wild card found in the username? */
+      if (*p != '*')	/* A non wild card found in the username? */
 	non_lame_user_o = YES;	/* GOOD a non lame user O line */
       /* can't just break. I am using this loop to find the '@' too */
 
       p++;
     }
   
-  if(!non_lame_user_o)	/* LAME O line ignore it */
+  if (!non_lame_user_o)	/* LAME O line ignore it */
     return;
 
   p++;			/* Skip the '@' */
@@ -285,7 +285,7 @@ void on_stats_o(int connnum, int argc, char *argv[])
 
   while(*p)
     {
-      if(*p != '*')	/* A non wild card found in the hostname? */
+      if (*p != '*')	/* A non wild card found in the hostname? */
 	non_lame_host_o = YES;	/* GOOD a non lame host O line */
       p++;
     }
@@ -352,21 +352,21 @@ void on_stats_e(int connnum, int argc, char *argv[])
   if (body[strlen(body)-1] == ' ') body[strlen(body)-1] = '\0';
 
 /* No point if I am maxed out going any further */
-  if( host_list_index == (MAXHOSTS - 1))
+  if (host_list_index == (MAXHOSTS - 1))
     return;
 
-  if( !(strtok(body," ") == NULL) )		/* discard this field */
+  if ((strtok(body," ") == NULL) )		/* discard this field */
     return;
 
   /* should be 'E' */
     
-  if( !(host = strtok((char *)NULL," ")) )
+  if ((host = strtok(NULL," ")) == NULL)
     return;
 
-  if( !(strtok((char *)NULL," ") == NULL) )
+  if ((strtok(NULL," ") == NULL))
     return;
 
-  if( !(user = strtok((char *)NULL," ")) )	/* NOW user */
+  if ((user = strtok(NULL," ")) == NULL)	/* NOW user */
     return;
 
   strncpy(hostlist[host_list_index].user, user,
@@ -395,7 +395,7 @@ void on_stats_i(int connnum, int argc, char *argv[])
   char body[MAX_BUFF];
   int  alpha, ok=NO;
 
-  for (alpha=0;alpha<argc;++alpha)
+  for (alpha = 0; alpha < argc; ++alpha)
     {
       strncat(body, argv[alpha], sizeof(body)-strlen(body));
       strncat(body, " ", sizeof(body)-strlen(body));
@@ -404,10 +404,10 @@ void on_stats_i(int connnum, int argc, char *argv[])
   alpha = NO;
 
 /* No point if I am maxed out going any further */
-  if( host_list_index == (MAXHOSTS - 1))
+  if (host_list_index == (MAXHOSTS - 1))
     return;
 
-  if( !( p = strchr(argv[6],'@')) )	/* find the u@h part */
+  if ((p = strchr(argv[6],'@')) == NULL)	/* find the u@h part */
     return;
 
   *p = '\0';				/* blast the '@' */
@@ -431,7 +431,7 @@ void on_stats_i(int connnum, int argc, char *argv[])
 	  alpha = YES;
 	  break;
 	}
-      if(alpha)
+      if (alpha)
 	break;
     }
   user = p;
@@ -460,33 +460,30 @@ void on_stats_k(int connnum, int argc, char *argv[])
   char body[MAX_BUFF];
   int i;
 
-  for (i=0;i<argc;++i)
+  for (i = 0; i < argc; ++i)
     {
       strncat(body, argv[i], sizeof(body)-strlen(body));
       strncat(body, " ", sizeof(body)-strlen(body));
     }
   if (body[strlen(body)-1] == ' ') body[strlen(body)-1] = '\0';
 
-  if( !(p = strchr(body,' ')) )
+  if ((p = strchr(body,' ')) == NULL)
     return;
   p++;
 
   host = p;
-  if( !(p = strchr(host,' ')) )
+  if ((p = strchr(host,' ')) == NULL)
     return;
-  *p = '\0';
-  p++;
+  *p++ = '\0';
 
-  if( !(p = strchr(p, ' ')) )
+  if ((p = strchr(p, ' ')) == NULL)
     return;
   p++;
 
   user = p;
-  if( !(p = strchr(user, ' ')) )
+  if ((p = strchr(user, ' ')) == NULL)
     return;
-  *p = '\0';
-  ++p;
-
+  *p++ = '\0';
 }
 
 /*
@@ -512,18 +509,24 @@ void onservnotice(int connnum, int argc, char *argv[])
   placed;
 #endif
 
-  memset((char *)&message, 0, sizeof(message));
+  memset((void *)&message, 0, sizeof(message));
+
   for (i=3;i<argc;++i)
     {
       strcat((char *)&message, argv[i]);
       strcat((char *)&message, " ");
     }
+
   if (message[strlen(message)-1] == ' ') message[strlen(message)-1] = '\0';
-  if (message[0] == ':') p = message+1;
-  else p = message;
+
+  if (message[0] == ':')
+    p = message+1;
+  else
+    p = message;
 
   if (!strncasecmp(p, "*** Notice -- ", 14)) p+=14;
   i = -1;
+
   while (msgs_to_mon[++i])
     {
       if (!strncmp(p,msgs_to_mon[i],strlen(msgs_to_mon[i])))
@@ -565,7 +568,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 
     case UNAUTHORIZED:
       p = strstr(q,"from");
-      if(p)
+      if (p)
         {
 	  q = p+5;
 	}
@@ -641,7 +644,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 
     case FLOODER:
       ++q;
-      if(!(p = strchr(q,' ')))
+      if (!(p = strchr(q,' ')))
 	break;
 
       *p = '\0';
@@ -649,33 +652,33 @@ void onservnotice(int connnum, int argc, char *argv[])
       nick = q;
 
       user = p;
-      if(!(p = strchr(user,'[')))
+      if (!(p = strchr(user,'[')))
 	break;
       p++;
       user = p;
 
-      if(!(p = strchr(user,'@')))
+      if (!(p = strchr(user,'@')))
 	break;
       *p = '\0';
       p++;
 
       host = p;
-      if(!(p = strchr(host,']')))
+      if (!(p = strchr(host,']')))
 	break;
       *p = '\0';
       p++;
 
-      if(*p != ' ')
+      if (*p != ' ')
 	break;
       p++;
 
       /* p =should= be pointing at "on" */
-      if(!(p = strchr(p,' ')))
+      if (!(p = strchr(p,' ')))
 	break;
       p++;
 
       from_server = p;
-      if(!(p = strchr(from_server,' ')))
+      if (!(p = strchr(from_server,' ')))
 	break;
       *p = '\0';
       p++;
@@ -692,9 +695,9 @@ void onservnotice(int connnum, int argc, char *argv[])
 	  break;
 	}
 
-      if(!strcasecmp(config_entries.rserver_name,from_server))
+      if (!strcasecmp(config_entries.rserver_name,from_server))
 	{
-	  if(*user == '~')
+	  if (*user == '~')
 	    user++;
 	  suggest_action(get_action_type("ctcp"), nick, user, host, NO, YES);
 	}
@@ -703,7 +706,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 
     case SPAMBOT:
       ++q;
-      if(!(p = strchr(q,' ')))
+      if (!(p = strchr(q,' ')))
 	break;
 
       *p = '\0';
@@ -711,23 +714,23 @@ void onservnotice(int connnum, int argc, char *argv[])
       nick = q;
 
       user = p;
-      if(!(p = strchr(user,'(')))
+      if (!(p = strchr(user,'(')))
 	break;
       p++;
       user = p;
 
-      if(!(p = strchr(user,'@')))
+      if (!(p = strchr(user,'@')))
 	break;
       *p = '\0';
       p++;
 
       host = p;
-      if(!(p = strchr(host,')')))
+      if (!(p = strchr(host,')')))
 	break;
       *p = '\0';
       p++;
 
-      if(!strstr(p,"possible spambot"))
+      if (!strstr(p,"possible spambot"))
 	break;
 
       suggest_action(get_action_type("spambot"), nick, user, host, NO, YES);
@@ -770,7 +773,7 @@ char makeconn(char *hostport,char *nick,char *userhost)
   if (i > MAXDCCCONNS)
     return 0;
 
-  if( (p = strchr(userhost,'@')) )
+  if ( (p = strchr(userhost,'@')) )
     {
       user = userhost;
       *p = '\0';
@@ -783,12 +786,12 @@ char makeconn(char *hostport,char *nick,char *userhost)
       user = "*";
     }
 
-  if( (p = strchr(host,' ')) )
+  if ( (p = strchr(host,' ')) )
     *p = '\0';
 
-  if(config_entries.opers_only)
+  if (config_entries.opers_only)
     {
-      if(!isoper(user,host))
+      if (!isoper(user,host))
         {
           notice(nick,"You aren't an oper");
           return 0;
@@ -802,7 +805,7 @@ char makeconn(char *hostport,char *nick,char *userhost)
 
   connections[i].buffer = (char *)malloc(BUFFERSIZE);
   bzero(connections[i].buffer, BUFFERSIZE);
-  if(!connections[i].buffer)
+  if (!connections[i].buffer)
     {
       sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in makeconn\n");
       gracefuldie(0, __FILE__, __LINE__);
@@ -820,7 +823,7 @@ char makeconn(char *hostport,char *nick,char *userhost)
   connections[i].type = 0;
   connections[i].type |= isoper(user,host);
 
-  if( !(connections[i].type & TYPE_OPER) &&
+  if ( !(connections[i].type & TYPE_OPER) &&
       isbanned(user,host)) /* allow opers on */
     {
       prnt(connections[i].socket,
@@ -835,19 +838,19 @@ char makeconn(char *hostport,char *nick,char *userhost)
       return 0;
     }
 
-  connections[i].last_message_time = time((time_t *)NULL);
+  connections[i].last_message_time = time(NULL);
 
   print_motd(connections[i].socket);
 
-  if(config_entries.autopilot)
+  if (config_entries.autopilot)
     prnt(connections[i].socket,"autopilot is ON\n");
   else
     prnt(connections[i].socket,"autopilot is OFF\n");
 
   type = "User";
-  if(connections[i].type & TYPE_OPER)
+  if (connections[i].type & TYPE_OPER)
     type = "Oper";
-  if(connections[i].type & TYPE_TCM)
+  if (connections[i].type & TYPE_TCM)
     type = "Tcm";
 
   report(SEND_ALL_USERS,
@@ -904,7 +907,7 @@ void _onctcp(int connnum, int argc, char *argv[])
     }
   else if (!strcasecmp(argv[3],":\001DCC") && !strcasecmp(argv[4], "CHAT"))
     {
-      strcat((char *)&dccbuff, argv[6]);
+      snprintf(dccbuff, sizeof(dccbuff), "%s", argv[6]);
       if (atoi(argv[7]) < 1024)
         {
           notice(nick, "Invalid port specified for DCC CHAT. Not funny.");
@@ -944,7 +947,7 @@ void addtohash(struct hashrec *table[],char *key,struct userentry *item)
 
   ind = hash_func(key);
   newhashrec = (struct hashrec *)malloc(sizeof(struct hashrec));
-  if( !newhashrec )
+  if ( !newhashrec )
     {
       prnt(connections[0].socket,"Ran out of memory in addtohash\n");
       sendtoalldcc(SEND_ALL_USERS,"Ran out of memory in addtohash\n");
@@ -976,7 +979,7 @@ char removefromhash(struct hashrec *table[],
 
   ind = hash_func(key);
   find = table[ind];
-  prev = (struct hashrec *)NULL;
+  prev = NULL;
 
   while (find)
     {
@@ -989,10 +992,10 @@ char removefromhash(struct hashrec *table[],
 	  else
 	    table[ind] = find->collision;
 
-	  if(find->info->link_count > 0)
+	  if (find->info->link_count > 0)
 	    {
 	      find->info->link_count--;
-	      if(find->info->link_count == 0)
+	      if (find->info->link_count == 0)
 		{
 		  (void)free(find->info);
 		}
@@ -1023,7 +1026,7 @@ static void updateuserhost(char *nick1,char *nick2,char *userhost)
 {
   char *host;
 
-  if( !(host = strchr(userhost,'@')) )
+  if ( !(host = strchr(userhost,'@')) )
     return;
 
   *host = '\0';
@@ -1049,7 +1052,7 @@ static void updatehash(struct hashrec *table[],
 
   for( find = table[hash_func(key)]; find; find = find->collision )
     {
-      if( !strcmp(find->info->nick,nick1) )
+      if ( !strcmp(find->info->nick,nick1) )
 	{
 	  strncpy(find->info->nick,nick2,MAX_NICK);
 	}
@@ -1086,9 +1089,9 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
     if (!removefromhash(hosttable,
 			userinfo->host,
 			userinfo->host,
-			userinfo->user,(char *)NULL))
+			userinfo->user,NULL))
       {
-	if(config_entries.debug && outfile)
+	if (config_entries.debug && outfile)
 	  {
 	    fprintf(outfile,"*** Error removing %s!%s@%s from host table!\n",
 		    nick,
@@ -1106,9 +1109,9 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
 			domain,
 			userinfo->host,
 			userinfo->user,
-			(char *)NULL))
+			NULL))
       {
-	if(config_entries.debug && outfile)
+	if (config_entries.debug && outfile)
 	  {
 	    fprintf(outfile,"*** Error removing %s!%s@%s from domain table!\n",
 		    nick,
@@ -1126,9 +1129,9 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
 			userinfo->user,
 			userinfo->host,
 			userinfo->user,
-			(char *)NULL))
+			NULL))
       {
-	if(config_entries.debug && outfile)
+	if (config_entries.debug && outfile)
 	  {
 	    fprintf(outfile,"*** Error removing %s!%s@%s from user table!\n",
 		    nick,
@@ -1140,7 +1143,7 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
 
 #ifdef VIRTUAL
   /* well, no such thing as a class c , but it will do */
-  if(userinfo->ip)
+  if (userinfo->ip)
     strcpy(ip_class_c,userinfo->ip);
   else
     ip_class_c[0] = '\0';
@@ -1149,10 +1152,10 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
   found_dots = 0;
   while(*p)
     {
-      if(*p == '.')
+      if (*p == '.')
 	found_dots++;
 
-      if(found_dots == 3)
+      if (found_dots == 3)
 	{
 	  *p = '\0';
 	  break;
@@ -1160,7 +1163,7 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
       p++;
     }
 
-  if(config_entries.debug && outfile)
+  if (config_entries.debug && outfile)
     {
       fprintf(outfile,
 	      "about to removefromhash ip_class_c = [%s]\n", ip_class_c);
@@ -1178,9 +1181,9 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
 			ip_class_c,
 			userinfo->host,
 			userinfo->user,
-			(char *)NULL))
+			NULL))
       {
-	if(config_entries.debug && outfile)
+	if (config_entries.debug && outfile)
 	  {
 	    fprintf(outfile,
 		    "*** Error removing %s!%s@%s [%s] from iptable table!\n",
@@ -1229,7 +1232,7 @@ static void adduserhost(char *nick,
     temp->function(doingtrace, 5, par);
 
   newuser = (struct userentry *)malloc(sizeof(struct userentry));
-  if( !newuser )
+  if ( !newuser )
     {
       fprintf(outfile, "Ran out of memory in adduserhost\n");
       prnt(connections[0].socket,"QUIT :Ran out of memory in adduserhost\n");
@@ -1243,14 +1246,14 @@ static void adduserhost(char *nick,
   newuser->user[MAX_NICK] = '\0';
   strncpy(newuser->host,userinfo->host,MAX_HOST);
   newuser->host[MAX_HOST-1] = '\0';
-  if(userinfo->ip[0])
+  if (userinfo->ip[0])
     strncpy(newuser->ip_host,userinfo->ip,MAX_IP);
   else
     strcpy(newuser->ip_host,"0.0.0.0");
 
 #ifdef VIRTUAL
   /* well, no such thing as a class c , but it will do */
-  if(userinfo->ip)
+  if (userinfo->ip)
     strcpy(newuser->ip_class_c,userinfo->ip);
   else
     newuser->ip_class_c[0] = '\0';
@@ -1260,10 +1263,10 @@ static void adduserhost(char *nick,
   found_dots = 0;
   while(*p)
     {
-      if(*p == '.')
+      if (*p == '.')
 	found_dots++;
 
-      if(found_dots == 3)
+      if (found_dots == 3)
 	{
 	  *p = '\0';
 	  break;
@@ -1276,7 +1279,7 @@ static void adduserhost(char *nick,
   newuser->reporttime = 0;
 
 #ifdef VIRTUAL
-  if(newuser->ip_class_c[0])
+  if (newuser->ip_class_c[0])
     newuser->link_count = 4;
   else
     newuser->link_count = 3;
@@ -1299,7 +1302,7 @@ static void adduserhost(char *nick,
   addtohash(domaintable, domain, newuser);
 
 #ifdef VIRTUAL
-  if(newuser->ip_class_c[0])
+  if (newuser->ip_class_c[0])
     addtohash(iptable, newuser->ip_class_c, newuser);
 #endif
 
@@ -1337,20 +1340,20 @@ static char* find_domain(char* host)
       while (*ip_domain)
 	{
 	  iphold[i++] = *ip_domain;
-	  if( *ip_domain == '.' )
+	  if ( *ip_domain == '.' )
 	    found_dots++;
-	  else if(!isdigit(*ip_domain))
+	  else if (!isdigit(*ip_domain))
 	   {
 	     is_legal_ip = NO;
 	     break;
 	   }
 
-          if(found_dots == 3 )
+          if (found_dots == 3 )
             break;
 
 	  ip_domain++;
 
-          if( i > (MAX_IP-2))
+          if ( i > (MAX_IP-2))
             {
               is_legal_ip = NO;
               break;
@@ -1361,16 +1364,16 @@ static char* find_domain(char* host)
       ip_domain = iphold;
     }
 
-  if( (found_dots != 3) || !is_legal_ip)
+  if ( (found_dots != 3) || !is_legal_ip)
     {
       found_domain = host + (strlen(host) - 1);
 
       /* find tld "com" "net" "org" or two letter domain i.e. "ca" */
       while (found_domain != host)
 	{
-          if(*found_domain == '.')
+          if (*found_domain == '.')
 	    {
-	      if(found_domain[3] == '\0')
+	      if (found_domain[3] == '\0')
 		{
 		  two_letter_tld = YES;
 		}
@@ -1382,9 +1385,9 @@ static char* find_domain(char* host)
 
       while (found_domain != host)
 	{
-          if(*found_domain == '.')
+          if (*found_domain == '.')
 	    {
-	      if(!two_letter_tld)
+	      if (!two_letter_tld)
 		{
 		  found_domain++;
 		}
@@ -1397,11 +1400,11 @@ static char* find_domain(char* host)
 	  found_domain--;
 	}
 
-      if(two_letter_tld)
+      if (two_letter_tld)
 	{
 	  while (found_domain != host)
 	    {
-	      if(*found_domain == '.')
+	      if (*found_domain == '.')
 		{
 		  found_domain++;
 		  break;
@@ -1497,7 +1500,7 @@ void check_host_clones(char *host)
 	  ++clonecount;
 	  tmrec = localtime(&find->info->connecttime);
 
-	  if(clonecount == 1)
+	  if (clonecount == 1)
 	    {
 	      (void)snprintf(notice1,sizeof(notice1) - 1,
                             "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
@@ -1519,25 +1522,25 @@ void check_host_clones(char *host)
 	  current_identd = YES;
 	  different = NO;
 
-	  if(clonecount == 1)
+	  if (clonecount == 1)
 	    last_user = find->info->user;
-	  else if(clonecount == 2)
+	  else if (clonecount == 2)
 	    {
 	      char *current_user;
 
-	      if( *last_user == '~' )
+	      if ( *last_user == '~' )
 		{
 		  last_user++;
 		}
 
 	      current_user = find->info->user;
-	      if( *current_user == '~' )
+	      if ( *current_user == '~' )
 		{
 		  current_user++;
 		  current_identd = NO;
 		}
 
-	      if(strcmp(last_user,current_user) != 0 && current_identd)
+	      if (strcmp(last_user,current_user) != 0 && current_identd)
 		different = YES;
 
 	      suggest_action(get_action_type("clone"), find->info->nick, find->info->user,
@@ -1545,9 +1548,9 @@ void check_host_clones(char *host)
 	    }
 
 	  find->info->reporttime = now;
-	  if(clonecount == 1)
+	  if (clonecount == 1)
 	    ;
-	  else if(clonecount == 2)
+	  else if (clonecount == 2)
 	    {
 	      report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, notice1);
 	      log("%s", notice1);
@@ -1649,7 +1652,7 @@ void check_virtual_host_clones(char *ip_class_c)
 	  ++clonecount;
 	  tmrec = localtime(&find->info->connecttime);
 
-	  if(clonecount == 1)
+	  if (clonecount == 1)
 	    {
 	      (void)snprintf(notice1,sizeof(notice1) - 1,
                             "  %s is %s@%s [%s] (%2.2d:%2.2d:%2.2d)\n",
@@ -1678,9 +1681,9 @@ void check_virtual_host_clones(char *ip_class_c)
 	    }
 
 	  find->info->reporttime = now;
-	  if(clonecount == 1)
+	  if (clonecount == 1)
 	    ;
-	  else if(clonecount == 2)
+	  else if (clonecount == 2)
 	    {
 	      report(SEND_WARN_ONLY, CHANNEL_REPORT_VCLONES, notice1);
 	      log("%s", notice1);
@@ -1716,7 +1719,7 @@ static void connect_flood_notice(char *server_notice)
   int found_entry = NO;
   int i;
 
-  current_time = time((time_t *)NULL);
+  current_time = time(NULL);
   server_notice +=5;
 
   p=nick_reported=server_notice;
@@ -1834,16 +1837,16 @@ static void link_look_notice(char *server_notice)
   int found_entry = NO;
   int i;
 
-  current_time = time((time_t *)NULL);
+  current_time = time(NULL);
 
   p = strstr(server_notice,"requested by");
 
-  if(!p)
+  if (!p)
     return;
 
   nick_reported = p + 13;
 
-  if((p = strchr(nick_reported,' ')))
+  if ((p = strchr(nick_reported,' ')))
     *p = '\0';
   else
     return;
@@ -1854,16 +1857,16 @@ static void link_look_notice(char *server_notice)
  *  Lets try and get it right folks... [user@host] or (user@host)
  */
 
-  if(*user_host == '[')
+  if (*user_host == '[')
     {
       user_host++;
-      if( (p = strrchr(user_host,']')) )
+      if ( (p = strrchr(user_host,']')) )
 	*p = '\0';
     }
-  else if(*user_host == '(')
+  else if (*user_host == '(')
     {
       user_host++;
-      if( (p = strrchr(user_host,')')) )
+      if ( (p = strrchr(user_host,')')) )
 	*p = '\0';
     }
 
@@ -1872,11 +1875,11 @@ static void link_look_notice(char *server_notice)
   n = MAX_NICK;
   while(*s)
     {
-      if(*s == '@')
+      if (*s == '@')
 	break;
       *d++ = *s++;
       n--;
-      if(n == 0)
+      if (n == 0)
 	break;
     }
   *d = '\0';
@@ -1888,7 +1891,7 @@ static void link_look_notice(char *server_notice)
     {
       *d++ = *s++;
       n--;
-      if(n == 0)
+      if (n == 0)
 	break;
     }
   *d = '\0';
@@ -1901,7 +1904,7 @@ static void link_look_notice(char *server_notice)
 
   if ( isoper(user,host) )  
     {
-      if(config_entries.debug && outfile)
+      if (config_entries.debug && outfile)
 	{
 	  (void)fprintf(outfile, "DEBUG: is oper\n");
 	}
@@ -1911,9 +1914,9 @@ static void link_look_notice(char *server_notice)
 
   for(i = 0; i < MAX_LINK_LOOKS; i++ )
     {
-      if(link_look[i].user_host[0])
+      if (link_look[i].user_host[0])
 	{
-	  if(!strcasecmp(link_look[i].user_host,user_host))
+	  if (!strcasecmp(link_look[i].user_host,user_host))
 	    {
 	      found_entry = YES;
 	  
@@ -1921,14 +1924,14 @@ static void link_look_notice(char *server_notice)
 	       * (this should be very unlikely case)
 	       */
 
-	      if((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
+	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
 		{
 		  link_look[i].link_look_count = 0;
 		}
 
 	      link_look[i].link_look_count++;
 	      
-	      if(link_look[i].link_look_count >= MAX_LINK_LOOKS)
+	      if (link_look[i].link_look_count >= MAX_LINK_LOOKS)
 		{
 		  sendtoalldcc(SEND_WARN_ONLY,
 			       "possible LINK LOOKER nick [%s]\n", 
@@ -1939,7 +1942,7 @@ static void link_look_notice(char *server_notice)
 
 		  if ( !okhost(user,host) )
 		    {
-		      if(*user == '~')
+		      if (*user == '~')
 			suggest_action(get_action_type("link"), nick_reported, user+1, host,
 				       NO, NO);
 		      else
@@ -1957,7 +1960,7 @@ static void link_look_notice(char *server_notice)
 	    }
 	  else
 	    {
-	      if((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
+	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
 		{
 		  link_look[i].user_host[0] = '\0';
 		}
@@ -1965,7 +1968,7 @@ static void link_look_notice(char *server_notice)
 	}
       else
 	{
-	  if(first_empty_entry < 0)
+	  if (first_empty_entry < 0)
 	    first_empty_entry = i;
 	}
     }
@@ -1974,9 +1977,9 @@ static void link_look_notice(char *server_notice)
  *  If this is a new entry, then found_entry will still be NO
  */
 
-  if(!found_entry)
+  if (!found_entry)
     {
-      if(first_empty_entry >= 0)
+      if (first_empty_entry >= 0)
 	{
 	  /* XXX */
 	  strncpy(link_look[first_empty_entry].user_host,user_host,
@@ -2004,20 +2007,20 @@ void bot_report_kline(char *server_notice,char *type_of_bot)
   char *user;			/* user */
   char *host;			/* host */
 
-  if( !(nick = strtok(server_notice," ")) )
+  if ( !(nick = strtok(server_notice," ")) )
     return;
 
-  if( !(user_host = strtok((char *)NULL," ")) )
+  if ( !(user_host = strtok(NULL," ")) )
     return;
 
-  if(*user_host == '[')
+  if (*user_host == '[')
     *user_host++;
-  if( !(p = strrchr(user_host,']')) )
+  if ( !(p = strrchr(user_host,']')) )
     return;
   *p = '\0';		
 
   user = user_host;	
-  if( !(p = strchr(user_host,'@')) )
+  if ( !(p = strchr(user_host,'@')) )
     return;
   *p = '\0';
 
@@ -2055,26 +2058,26 @@ static void cs_nick_flood(char *server_notice)
   char *host;
   char *p;
 
-  if( !(nick_reported = strtok(server_notice," ")) )
+  if ( !(nick_reported = strtok(server_notice," ")) )
     return;
 
-  if( !(user_host = strtok((char *)NULL," ")) )
+  if ( !(user_host = strtok(NULL," ")) )
     return;
 
 /*
  * Lets try and get it right folks... [user@host] or (user@host)
  */
 
-  if(*user_host == '[')
+  if (*user_host == '[')
     {
       user_host++;
-      if( (p = strrchr(user_host,']')) )
+      if ( (p = strrchr(user_host,']')) )
 	*p = '\0';
     }
-  else if(*user_host == '(')
+  else if (*user_host == '(')
     {
       user_host++;
-      if( (p = strrchr(user_host,')')) )
+      if ( (p = strrchr(user_host,')')) )
 	*p = '\0';
     }
 
@@ -2083,15 +2086,15 @@ static void cs_nick_flood(char *server_notice)
   log("CS nick flood user_host = [%s]\n", user_host);
 
 
-  if( !(user = strtok(user_host,"@")) )
+  if ( !(user = strtok(user_host,"@")) )
     return;
 
-  if( !(host = strtok((char *)NULL,"")) )
+  if ( !(host = strtok(NULL,"")) )
     return;
 
   if ( (!okhost(user,host)) && (!isoper(user,host)) )  
     {
-      if(*user_host == '~')
+      if (*user_host == '~')
 	suggest_action(get_action_type("flood"), nick_reported, user, host, NO, NO);
       else
 	suggest_action(get_action_type("flood"), nick_reported, user, host, NO, YES);
@@ -2115,22 +2118,22 @@ static void cs_clones(char *server_notice)
   char *p;
   char *user_host;
 
-  if( !(strtok(server_notice," ") == NULL) )
+  if ( !(strtok(server_notice," ") == NULL) )
     return;
 
-  if( !(user_host = strtok((char *)NULL," ")) )
+  if ( !(user_host = strtok(NULL," ")) )
     return;
 
-  if(*user_host == '[')
+  if (*user_host == '[')
     {
       user_host++;
-      if( (p = strrchr(user_host,']')) )
+      if ( (p = strrchr(user_host,']')) )
 	*p = '\0';
     }
-  else if(*user_host == '(')
+  else if (*user_host == '(')
     {
       user_host++;
-      if( (p = strrchr(user_host,')')) )
+      if ( (p = strrchr(user_host,')')) )
 	*p = '\0';
     }
 
@@ -2139,13 +2142,13 @@ static void cs_clones(char *server_notice)
 
   user = user_host;
 
-  if(*user == '~')
+  if (*user == '~')
     {
       user++;
       identd = NO;
     }
 
-  if( !(host = strchr(user_host,'@')) )
+  if ( !(host = strchr(user_host,'@')) )
     return;
 
   *host = '\0';
@@ -2170,42 +2173,41 @@ static void check_nick_flood(char *server_notice)
   char *nick2;
   char *user_host;
 
-  if( !(p = strtok(server_notice," ")) )	/* Throw away the "From" */
+  if ( !(p = strtok(server_notice," ")) )	/* Throw away the "From" */
     return;
 
-  if(strcasecmp(p,"From"))	/* This isn't an LT notice */
+  if (strcasecmp(p,"From"))	/* This isn't an LT notice */
     {
       nick1 = p;	/* This _should_ be nick1 */
 
-      if( !(user_host = strtok((char *)NULL," ")) )	/* (user@host) */
+      if ( !(user_host = strtok(NULL," ")) )	/* (user@host) */
 	return;
 
-      if(*user_host == '(')
+      if (*user_host == '(')
 	user_host++;
 
-      if( (p = strrchr(user_host,')')) )
+      if ( (p = strrchr(user_host,')')) )
 	*p = '\0';
 
-      if( !(p = strtok((char *)NULL," ")) )
+      if ( !(p = strtok(NULL," ")) )
 	return;
 
-      if(strcmp(p,"now") != 0 )
+      if (strcmp(p,"now") != 0 )
 	return;
 
-      if( !(p = strtok((char *)NULL," ")) )
+      if ((p = strtok(NULL," ")) == NULL)
 	return;
 
-      if(strcmp(p,"known") != 0 )
+      if (strcmp(p,"known") != 0 )
 	return;
 
-      p = strtok((char *)NULL," ");
-      if(p == (char *)NULL)
+      if ((p = strtok(NULL," ")) == NULL)
 	return;
 
-      if(strcmp(p,"as"))
+      if (strcmp(p,"as"))
 	return;
 
-      if( !(nick2 = strtok((char *)NULL," ")) )
+      if ( !(nick2 = strtok(NULL," ")) )
 	return;
 
       add_to_nick_change_table(user_host,nick2);
@@ -2214,22 +2216,22 @@ static void check_nick_flood(char *server_notice)
       return;
     }
 
-  if( !(nick1 = strtok((char *)NULL," ")) )
+  if ( !(nick1 = strtok(NULL," ")) )
     return;
 
-  if( !(p = strtok((char *)NULL," ")) )	/* Throw away the "to" */
+  if ( !(p = strtok(NULL," ")) )	/* Throw away the "to" */
     return;
 
-  if( !(nick2 = strtok((char *)NULL," ")) )	/* This _should_ be nick2 */
+  if ( !(nick2 = strtok(NULL," ")) )	/* This _should_ be nick2 */
     return;
 
-  if( !(user_host = strtok((char *)NULL," ")) )	/* u@h  */
+  if ( !(user_host = strtok(NULL," ")) )	/* u@h  */
     return;
 
-  if(*user_host == '[')
+  if (*user_host == '[')
     user_host++;
 
-  if( (p = strrchr(user_host,']')) )
+  if ( (p = strrchr(user_host,']')) )
     *p = '\0';
 
 /* N.B.
@@ -2311,11 +2313,11 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
   time_t current_time;
   struct tm *tmrec;
 
-  current_time = time((time_t *)NULL);
+  current_time = time(NULL);
 
   for(i = 0; i < NICK_CHANGE_TABLE_SIZE; i++)
     {
-      if( nick_changes[i].user_host[0] )
+      if ( nick_changes[i].user_host[0] )
 	{
 	  time_t time_difference;
 	  int time_ticks;
@@ -2323,7 +2325,7 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
 	  time_difference = current_time - nick_changes[i].last_nick_change;
 
 	  /* is it stale ? */
-	  if( time_difference >= NICK_CHANGE_T2_TIME )
+	  if ( time_difference >= NICK_CHANGE_T2_TIME )
 	    {
 	      nick_changes[i].user_host[0] = '\0';
 	      nick_changes[i].noticed = NO;
@@ -2334,7 +2336,7 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
 	      time_ticks = time_difference / NICK_CHANGE_T1_TIME;
 
 	      /* is it stale? */
-	      if(time_ticks >= nick_changes[i].nick_change_count)
+	      if (time_ticks >= nick_changes[i].nick_change_count)
 		{
 		  nick_changes[i].user_host[0] = '\0';
 		  nick_changes[i].noticed = NO;
@@ -2344,7 +2346,7 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
 		  /* just decrement 10 second units of nick changes */
 		  nick_changes[i].nick_change_count -= time_ticks;
 
-		  if( !(strcasecmp(nick_changes[i].user_host,user_host)) )
+		  if ( !(strcasecmp(nick_changes[i].user_host,user_host)) )
 		    {
 		      nick_changes[i].last_nick_change = current_time;
 		      (void)strncpy(nick_changes[i].last_nick,
@@ -2354,7 +2356,7 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
 
 		  /* now, check for a nick flooder */
 	  
-		  if((nick_changes[i].nick_change_count >=
+		  if ((nick_changes[i].nick_change_count >=
 		      NICK_CHANGE_MAX_COUNT)
 		     && !nick_changes[i].noticed)
 		    {
@@ -2372,12 +2374,12 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
 				    tmrec->tm_sec);
 
 
-		      if( !(user = strtok(user_host,"@")) )
+		      if ( !(user = strtok(user_host,"@")) )
 			return;
-		      if( !(host = strtok((char *)NULL,"")) )
+		      if ( !(host = strtok(NULL,"")) )
 			return;
 		      
-		      if(*user_host == '~')
+		      if (*user_host == '~')
 			suggest_action(get_action_type("flood"), last_nick, user, host, NO, NO);
 		      else
 			suggest_action(get_action_type("flood"), last_nick, user, host, NO, YES);
@@ -2402,7 +2404,7 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
 	}
       else
 	{
-	  if( found_empty_entry < 0 )
+	  if ( found_empty_entry < 0 )
 	    found_empty_entry = i;
 	}
     }
@@ -2412,7 +2414,7 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
  * soon enough anyway... -db
  */
 
-  if(found_empty_entry > 0)
+  if (found_empty_entry > 0)
     {
       nick_changes[found_empty_entry].first_nick_change = current_time;
       nick_changes[found_empty_entry].last_nick_change = current_time;
@@ -2440,15 +2442,15 @@ static void bot_reject(char *text)
       if (strncmp("bot:",text,4) == 0)
 	generic = YES;
 
-      if( !(text = strchr(text,' ')) )
+      if ( !(text = strchr(text,' ')) )
 	return;
 
       p = strstr(text+1,"(Single");
-      if(p)
+      if (p)
 	{
 	  while(p != text)
 	    {
-	      if(*p == ']')
+	      if (*p == ']')
 		{
 		  p++;
 		  *p = '\0';
@@ -2459,7 +2461,7 @@ static void bot_reject(char *text)
 	}
       if (!generic)
 	{
-	  if( !(text = strchr(text+1,' ')) )
+	  if ( !(text = strchr(text+1,' ')) )
 	    return;
 	}
 
@@ -2489,20 +2491,20 @@ static void stats_notice(char *server_notice)
 
   stat = *server_notice;
 
-  if( !(nick = strstr(server_notice,"by")) )
+  if ( !(nick = strstr(server_notice,"by")) )
     return;
 
   nick += 3;
 
-  if( (p = strchr(nick, ' ')) )
+  if ( (p = strchr(nick, ' ')) )
     *p = '\0';
   p++;
 
   fulluh = p;
-  if(*fulluh == '(')
+  if (*fulluh == '(')
     fulluh++;
 
-  if( (p = strchr(fulluh, ')' )) )
+  if ( (p = strchr(fulluh, ')' )) )
     *p = '\0';
 
 #ifdef STATS_P
@@ -2523,28 +2525,28 @@ static void stats_notice(char *server_notice)
 	    continue;
 
 	  /* ignore tcm connections */
-	  if(connections[i].type & TYPE_TCM)
+	  if (connections[i].type & TYPE_TCM)
 	    continue;
 
 	  /* ignore invisible users/opers */
-	  if( connections[i].type & (TYPE_INVS|TYPE_INVM))
+	  if (connections[i].type & (TYPE_INVS|TYPE_INVM))
 	    continue;
 
 	  /* display opers */
-	  if( connections[i].type & TYPE_OPER)
+	  if (connections[i].type & TYPE_OPER)
 	    {
 #ifdef HIDE_OPER_HOST
               notice(nick,
                      "%s - idle %lu\n",
                      connections[i].nick,
-                     time((time_t *)NULL) - connections[i].last_message_time );
+                     time(NULL) - connections[i].last_message_time );
 #else 
 	      notice(nick,
 		     "%s (%s@%s) idle %lu\n",
 		     connections[i].nick,
 		     connections[i].user,
 		     connections[i].host,
-		     time((time_t *)NULL) - connections[i].last_message_time );
+		     time(NULL) - connections[i].last_message_time );
 #endif
 	    number_of_tcm_opers++;
 	    }

@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.10 2001/10/08 15:19:08 wcampbel Exp $";
+static char *version="$Id: stdcmds.c,v 1.11 2001/10/09 16:41:51 bill Exp $";
 
 int doingtrace = NO;
 
@@ -330,13 +330,14 @@ void report(int type, int channel_send_flag, char *format,...)
 }
 
 /*
- * char *suggest_host(char *host)
+ * char *suggest_host(char *host, int type)
  *
  * inputs       - raw hostname
+ *              - type of kline
  * output       - hostname stripped to klinable form
  * side effects - NONE
 */
-static char *suggest_host(char *host)
+static char *suggest_host(char *host, int type)
 {
   static char work_host[MAX_HOST];
   char *p = work_host;
@@ -358,7 +359,7 @@ static char *suggest_host(char *host)
   if (dots != 3)
     ip_number = NO;
 
-  if (ip_number)
+  if (ip_number && !(type & get_action_type("clone")))
     {
       while (*p != '.')
         if ((--p) == q)                 /* JUST in case */
@@ -370,6 +371,8 @@ static char *suggest_host(char *host)
 
       return q;
     }
+  else if (ip_number)
+    return q;
 
   if (dots > 1)
     {
@@ -443,27 +446,18 @@ void suggest_action(int type,
   if(okhost(user, host))
     return;
 
-  printf("suggest_action(%lx, \"%s\", \"%s\", \"%s\", %s, %s)\n", type, nick, user, host,
-         different ? "YES" : "NO", identd ? "YES" : "NO");
-  for (index=0;index<MAX_ACTIONS;++index)
-    if (actions[index].type == type) printf("name: \"%s\"\n", actions[index].name);
-
   if (strchr(host,'*'))
     return;
 
   if (strchr(host,'?'))
     return;
 
-  if(identd)
-    {
-      strcpy(suggested_user,"*");
-      strcat(suggested_user,user);
-    }
+  if (identd)
+    strcpy(suggested_user,user);
   else
-    {
-      strcpy(suggested_user,"~*");
-    }
-  suggested_host=suggest_host(host);
+    strcpy(suggested_user,"~*");
+
+  suggested_host=suggest_host(host, type);
 
   for (index=0;index<MAX_ACTIONS;++index)
     if (type == actions[index].type) break;
@@ -475,7 +469,10 @@ void suggest_action(int type,
   if (!strcasecmp(action, "warn")) return;
   if (!strncasecmp(action, "dline", 5)) toserv("%s %s :%s\n", action, host, reason);
   else toserv("%s %s@%s :%s\n", action, suggested_user, suggested_host, reason);
-  /* so as to avoid all confusion, it is now the responsibility of the calling
+
+
+  /* 
+   * so as to avoid all confusion, it is now the responsibility of the calling
    * function to inform the DCC users of the infraction.
    */
 }

@@ -1,3 +1,18 @@
+db          2002/05/30 16:58:53 EDT	(20020530_11)
+
+  Modified files:
+    include              hash.h 
+    src                  hash.c 
+  Log:
+  - more run together variables
+  - missed prototype fix
+  
+  Revision  Changes    Path
+  1.13      +5 -5      tcm-hybrid/include/hash.h
+  1.12      +4 -4      tcm-hybrid/src/hash.c
+
+
+
 db          2002/05/30 16:54:10 EDT	(20020530_10)
 
   Modified files:

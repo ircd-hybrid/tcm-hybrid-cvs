@@ -1,3 +1,26 @@
+bill        2002/03/05 02:10:57 EST	(20020305_0)
+
+  Modified files:
+    include              serverif.h 
+    modules              bothunt.c commands.c serverif.c 
+    src                  logging.c main.c modules.c userlist.c 
+  Log:
+  - miscellaneous code cleanups
+  - began migration from tokenizer to hash table compatible with ircd-hybrid-7
+  - continued groundwork for tcm.so
+  
+  Revision  Changes    Path
+  1.14      +9 -6      tcm-hybrid/include/serverif.h
+  1.47      +9 -2      tcm-hybrid/modules/bothunt.c
+  1.35      +156 -114  tcm-hybrid/modules/commands.c
+  1.40      +24 -20    tcm-hybrid/modules/serverif.c
+  1.18      +2 -1      tcm-hybrid/src/logging.c
+  1.24      +3 -1      tcm-hybrid/src/main.c
+  1.18      +6 -2      tcm-hybrid/src/modules.c
+  1.43      +2 -0      tcm-hybrid/src/userlist.c
+
+
+
 bill        2002/03/04 16:10:13 EST	(20020304_0)
 
   Modified files:

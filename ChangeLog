@@ -1,3 +1,7 @@
+*** 20010722_8 by wcampbel
+Directory /usr/cvsroot/tcm-hybrid/bin added to the repository
+
+
 *** 20010722_7 by wcampbel
 Made tcm work with getopt for command line arguments.
 This WILL break any installations that use ./tcm conf.file

@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.15 2001/11/10 15:55:47 wcampbel Exp $
+ * $Id: modules.c,v 1.16 2001/11/23 16:49:43 wcampbel Exp $
  *
  */
 
@@ -95,6 +95,7 @@ void mod_add_cmd(struct TcmMessage *msg)
   msg_hash_table[msgindex].msg->handlers[0] = msg->handlers[0];*/
 }
 
+/* XXX - Unused
 void mod_del_cmd(struct TcmMessage *msg)
 {
   int msgindex=0;
@@ -104,6 +105,7 @@ void mod_del_cmd(struct TcmMessage *msg)
   free(msg_hash_table[msgindex].cmd);
   free(msg_hash_table[msgindex].msg);
 }
+*/
 
 void add_common_function(int type, void *function)
 {

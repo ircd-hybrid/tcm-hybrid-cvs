@@ -1,7 +1,7 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.9 2001/11/10 15:55:46 wcampbel Exp $ */
+/* $Id: stdcmds.h,v 1.10 2001/11/23 16:49:40 wcampbel Exp $ */
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
@@ -14,15 +14,11 @@ void print_help(int sock,char *text);
 void print_motd(int sock);
 void list_nicks(int sock,char *nick);
 void list_virtual_users(int sock,char *userhost);
-void report_multi_host(int sock,int nclones);
 void report_mem(int sock);
 void report_clones(int sock);
 void report_nick_flooders(int sock);
 void report_vbots(int sock,int nclones);
 void report_domains(int sock,int num);
-void report_multi(int sock,int nclones);
-void report_multi_user(int sock,int nclones);
-void report_multi_virtuals(int sock,int nclones);
 void report_failures(int sock,int num);
 void do_a_kline(char *command_name,int kline_time, char *pattern, char *reason,
                 char *who_did_command);

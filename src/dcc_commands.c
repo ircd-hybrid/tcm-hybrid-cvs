@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.27 2001/10/31 04:50:03 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.28 2001/11/23 16:49:43 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -64,6 +64,10 @@ static void list_connections(int sock);
 static void list_exemptions(int sock);
 static void handle_disconnect(int sock,char *param2,char *who_did_command);
 static void handle_save(int sock,char *nick);
+static void report_multi(int sock, int nclones);
+static void report_multi_host(int sock, int nclones);
+static void report_multi_user(int sock, int nclones);
+static void report_multi_virtuals(int sock, int nclones);
 
 void _modinit();
 
@@ -1771,4 +1775,265 @@ void
 _modinit()
 {
   add_common_function(F_DCC, dccproc);
+}
+
+/*
+ * report_multi_host()
+ *
+ * inputs       - socket to print out
+ * output       - NONE
+ * side effects -
+ */
+
+static void report_multi_host(int sock,int nclones)
+{
+  struct hashrec *userptr,*top,*temp;
+  int numfound,i;
+  int foundany = NO;
+
+  nclones-=1;
+  for (i = 0; i < HASHTABLESIZE; ++i)
+    {
+      for (top = userptr = hosttable[i]; userptr; userptr = userptr->collision)
+        {
+          /* Ensure we haven't already checked this user & domain */
+
+          for( temp = top, numfound = 0; temp != userptr;
+               temp = temp->collision)
+            {
+              if (!strcmp(temp->info->host,userptr->info->host))
+                break;
+            }
+
+          if (temp == userptr)
+            {
+              for ( temp = userptr; temp; temp = temp->collision )
+                {
+                  if (!strcmp(temp->info->host,userptr->info->host))
+                    numfound++; /* - zaph & Dianora :-) */
+                }
+
+              if ( numfound > nclones )
+                {
+                  if (!foundany)
+                    {
+                      foundany = YES;
+                      prnt(sock,
+                           "Multiple clients from the following userhosts:\n");
+                    }
+
+                  prnt(sock,
+                       " %s %2d connections -- *@%s {%s}\n",
+                       (numfound-nclones > 2) ? "==>" : "   ",
+                       numfound,
+                       userptr->info->host,
+                       userptr->info->class);
+                }
+            }
+
+        }
+    }
+  if (!foundany)
+    prnt(sock, "No multiple logins found.\n");
+}
+
+/*
+ * report_multi()
+ *
+ * inputs       - socket to print out
+ * output       - NONE
+ * side effects -
+ */
+
+static void
+report_multi(int sock,int nclones)
+{
+  struct hashrec *userptr,*top,*temp;
+  int numfound,i;
+  int notip;
+  int foundany = NO;
+
+  nclones-=2;  /* maybe someday i'll figure out why this is nessecary */
+  for (i=0;i<HASHTABLESIZE;++i)
+    {
+      for( top = userptr = domaintable[i]; userptr;
+           userptr = userptr->collision )
+        {
+          /* Ensure we haven't already checked this user & domain */
+          for( temp = top, numfound = 0; temp != userptr;
+               temp = temp->collision )
+            {
+              if (!strcmp(temp->info->user,userptr->info->user) &&
+                  !strcmp(temp->info->domain,userptr->info->domain))
+                break;
+            }
+
+          if (temp == userptr)
+            {
+              for( temp = temp->collision; temp; temp = temp->collision )
+                {
+                  if (!strcmp(temp->info->user,userptr->info->user) &&
+                      !strcmp(temp->info->domain,userptr->info->domain))
+                    numfound++; /* - zaph & Dianora :-) */
+                }
+
+              if ( numfound > nclones )
+                {
+                  if (!foundany)
+                    {
+                      foundany = YES;
+                      prnt(sock,
+                           "Multiple clients from the following userhosts:\n");
+                    }
+                  notip = strncmp(userptr->info->domain,userptr->info->host,
+                                  strlen(userptr->info->domain)) ||
+                    (strlen(userptr->info->domain) ==
+                     strlen(userptr->info->host));
+                  numfound++;   /* - zaph and next line*/
+                  prnt(sock,
+                       " %s %2d connections -- %s@%s%s {%s}\n",
+                       (numfound-nclones > 2) ? "==>" :
+                       "   ",numfound,userptr->info->user,
+                       notip ? "*." : userptr->info->domain,
+                       notip ? userptr->info->domain : ".*",
+                       userptr->info->class);
+                }
+            }
+        }
+    }
+  if (!foundany)
+    prnt(sock, "No multiple logins found.\n");
+}
+
+/*
+ * report_multi_user()
+ *
+ * inputs       - socket to print out
+ * output       - NONE
+ * side effects -
+ */
+
+static void
+report_multi_user(int sock,int nclones)
+{
+  struct hashrec *userptr,*top,*temp;
+  int numfound;
+  int i;
+  int foundany = NO;
+
+  nclones-=1;
+  for (i=0;i<HASHTABLESIZE;++i)
+    {
+      for( top = userptr = usertable[i]; userptr;
+           userptr = userptr->collision )
+        {
+          numfound = 0;
+          /* Ensure we haven't already checked this user & domain */
+
+          for( temp = top; temp != userptr; temp = temp->collision )
+            {
+              if (!strcmp(temp->info->user,userptr->info->user))
+                break;
+            }
+
+          if (temp == userptr)
+            {
+              numfound=1;       /* fixed minor boo boo -bill */
+              for( temp = temp->collision; temp; temp = temp->collision )
+                {
+                  if (!strcmp(temp->info->user,userptr->info->user))
+                    numfound++; /* - zaph & Dianora :-) */
+                }
+
+              if ( numfound > nclones )
+                {
+                  if (!foundany)
+                    {
+                      prnt(sock,
+                           "Multiple clients from the following usernames:\n");
+                      foundany = YES;
+                    }
+
+                  prnt(sock,
+                       " %s %2d connections -- %s@* {%s}\n",
+                       (numfound-nclones > 2) ? "==>" : "   ",
+                       numfound,userptr->info->user,
+                       userptr->info->class);
+                }
+            }
+        }
+    }
+
+  if (!foundany)
+    {
+      prnt(sock, "No multiple logins found.\n");
+    }
+}
+
+/*
+ * report_multi_virtuals()
+ *
+ * inputs       - socket to print out
+ *              - number to consider as clone
+ * output       - NONE
+ * side effects -
+ */
+
+static void
+report_multi_virtuals(int sock,int nclones)
+{
+  struct hashrec *userptr;
+  struct hashrec *top;
+  struct hashrec *temp;
+  int numfound;
+  int i;
+  int foundany = 0;
+
+  if(!nclones)
+    nclones = 5;
+
+  nclones-=1;
+  for (i=0;i<HASHTABLESIZE;++i)
+    {
+      for ( top = userptr = iptable[i]; userptr; userptr = userptr->collision )
+        {
+          numfound = 0;
+
+          for (temp = top; temp != userptr; temp = temp->collision)
+            {
+              if (!strcmp(temp->info->ip_class_c,userptr->info->ip_class_c))
+                break;
+            }
+
+          if (temp == userptr)
+            {
+              numfound=1;
+              for( temp = temp->collision; temp; temp = temp->collision )
+                {
+                  if (!strcmp(temp->info->ip_class_c,
+                              userptr->info->ip_class_c))
+                    numfound++; /* - zaph & Dianora :-) */
+                }
+
+              if (numfound > nclones)
+                {
+                  if (!foundany)
+                    {
+                      prnt(sock,
+                           "Multiple clients from the following ip blocks:\n");
+                      foundany = YES;
+                    }
+
+                  prnt(sock,
+                       " %s %2d connections -- %s.*\n",
+                       (numfound-nclones > 3) ? "==>" : "   ",
+                       numfound,
+                       userptr->info->ip_class_c);
+                }
+            }
+        }
+    }
+
+  if (!foundany)
+    prnt(sock, "No multiple virtual logins found.\n");
 }

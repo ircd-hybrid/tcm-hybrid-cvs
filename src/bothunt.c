@@ -54,7 +54,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.8 2001/10/09 16:41:51 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.9 2001/10/10 00:03:44 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -888,7 +888,6 @@ void _onctcp(int connnum, int argc, char *argv[])
   ++hold;
   if (dccbuff[0] != '\0') memset(&dccbuff, 0, sizeof(dccbuff));
 
-  dccbuff[0] = '#';
   if (!strncasecmp(msg,"PING",4))
     {
       for (i=4;i<argc;++i)
@@ -907,7 +906,7 @@ void _onctcp(int connnum, int argc, char *argv[])
     }
   else if (!strcasecmp(argv[3],":\001DCC") && !strcasecmp(argv[4], "CHAT"))
     {
-      snprintf(dccbuff, sizeof(dccbuff), "%s", argv[6]);
+      snprintf(dccbuff, sizeof(dccbuff), "#%s", argv[6]);
       if (atoi(argv[7]) < 1024)
         {
           notice(nick, "Invalid port specified for DCC CHAT. Not funny.");

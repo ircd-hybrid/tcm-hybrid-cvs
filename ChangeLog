@@ -1,3 +1,25 @@
+wcampbel    2002/05/04 23:06:05 EDT	(20020505_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              patchlevel.h 
+  Added files:
+    .                    README.FIRST 
+  Log:
+  Revved the version to 3.1.0-pre.  The changes done to the action system
+    warrants a new version number.
+  Put in a warning about the new A: line format in etc/tcm.cf.  Hopefully
+    people will read it...
+  
+  Revision  Changes    Path
+  1.1       +16 -0     tcm-hybrid/README.FIRST (new)
+  1.14      +1 -1      tcm-hybrid/autoconf/configure.in
+  1.14      +81 -92    tcm-hybrid/configure
+  1.5       +1 -1      tcm-hybrid/include/patchlevel.h
+
+
+
 einride     2002/05/04 16:12:10 EDT	(20020504_0)
 
   Modified files:

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.85 2002/05/27 02:24:46 db Exp $ */
+/* $Id: main.c,v 1.86 2002/05/27 20:15:40 leeh Exp $ */
 
 #include "setup.h"
 
@@ -181,7 +181,7 @@ main(int argc, char *argv[])
 #ifdef HAVE_SETRLIMIT
   setup_corefile();
 #endif
-  init_userlist();
+  clear_userlist();
   eventInit();			/* event.c stolen from ircd */
 
   config_entries.conffile=NULL;

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.84 2002/05/27 17:32:20 db Exp $
+ * $Id: userlist.c,v 1.85 2002/05/27 20:15:40 leeh Exp $
  *
  */
 
@@ -41,9 +41,7 @@ struct exception_entry hostlist[MAXHOSTS];
 char wingate_class_list[MAXWINGATE][MAX_CLASS];
 
 int	user_list_index;
-int	tcm_list_index;
 int	host_list_index;
-int	ban_list_index;
 int	wingate_class_list_index;
 
 static void load_a_user(char *);
@@ -105,9 +103,10 @@ init_userlist_handlers(void)
 }
 
 void
-set_umode(int connnum, int admin, const char *umode)
+set_umode(int user, int admin, const char *umode)
 {
-  int plus;
+  /* default to 1 so we can call this from load_a_user */
+  int plus = 1;
   int i;
   int j;
 
@@ -130,9 +129,9 @@ set_umode(int connnum, int admin, const char *umode)
       if(umode_flags[j].umode == umode[i])
       {
 	if(plus)
-          connections[connnum].type |= umode_flags[j].type;
+          userlist[user].type |= umode_flags[j].type;
 	else
-          connections[connnum].type &= ~umode_flags[j].type;
+          userlist[user].type &= ~umode_flags[j].type;
 
 	break;
       }
@@ -146,9 +145,9 @@ set_umode(int connnum, int admin, const char *umode)
         if(umode_privs[j].umode == umode[i])
 	{
           if(plus)
-            connections[connnum].type |= umode_privs[j].type;
+            userlist[user].type |= umode_privs[j].type;
 	  else
-            connections[connnum].type &= ~umode_privs[j].type;
+            userlist[user].type &= ~umode_privs[j].type;
 	}
       }
     }
@@ -161,19 +160,29 @@ void m_umode(int connnum, int argc, char *argv[])
 
   if(argc < 2)
   {
+    user = find_user_in_userlist(connections[connnum].registered_nick);
+
     print_to_socket(connections[connnum].socket, 
 		    "Your current flags are: %s",
-		    type_show(get_umodes_from_conf(connnum)));
+		    type_show(get_umodes_current(user)));
     return;
   }
   else if(argc == 2)
   {
     if((argv[1][0] == '+') || (argv[1][0] == '-'))
     {
-      set_umode(connnum, 0, argv[1]);
+      user = find_user_in_userlist(connections[connnum].registered_nick);
+
+      /* admins can set what they want.. */
+      if(userlist[user].type & TYPE_ADMIN)
+        set_umode(user, 1, argv[1]);
+      else
+        set_umode(user, 0, argv[1]);
+
       print_to_socket(connections[connnum].socket,
 		      "Your flags are now: %s",
-		      type_show(connections[connnum].type));
+		      type_show(get_umodes_current(user)));
+      return;
     }
     else
     {
@@ -188,12 +197,9 @@ void m_umode(int connnum, int argc, char *argv[])
       
       if(user >= 0)
       {
-        unsigned long type;
-
-	type = get_umodes_from_conf(user);
 	print_to_socket(connections[connnum].socket,
-			"%s user flags are %s",
-			argv[1], type_show(type));
+			"User flags for %s are: %s",
+			argv[1], type_show(get_umodes_current(user)));
       }
       else
         print_to_socket(connections[connnum].socket,
@@ -202,6 +208,8 @@ void m_umode(int connnum, int argc, char *argv[])
   }
   else
   {
+    int user_conn;
+
     if((connections[connnum].type & TYPE_ADMIN) == 0)
     {
       print_to_socket(connections[connnum].socket,
@@ -209,14 +217,24 @@ void m_umode(int connnum, int argc, char *argv[])
       return;
     }
 
-    /* XXX - find_user doesnt return the right connnum */
+    user = find_user_in_userlist(argv[1]);
+    user_conn = find_user_in_connections(argv[1]);
+
     if((argv[2][0] == '+') || (argv[2][0] == '-'))
     {
-
-      user = find_user_in_connections(argv[1]);
-
-      if(user >= 0)
+      if(user_conn >= 0)
+      {
         set_umode(user, 1, argv[2]);
+
+	print_to_socket(connections[connnum].socket,
+			"User flags for %s are now: %s",
+			argv[1], type_show(get_umodes_current(user)));
+	print_to_socket(connections[user_conn].socket,
+			"Your flags are now: %s (changed by %s)",
+			type_show(get_umodes_current(user)),
+			connections[connnum].registered_nick);
+	return;
+      }
       else
         print_to_socket(connections[connnum].socket, 
 			"Can't find user [%s]", argv[1]);
@@ -258,11 +276,16 @@ find_user_in_connections(const char *username)
 }
 
 unsigned long
-get_umodes_from_conf(int user)
+get_umodes_current(int user)
+{
+  return(userlist[user].type);
+}
+
+unsigned long
+get_umodes_from_prefs(int user)
 {
   FILE *fp;
   unsigned long type;
-  unsigned long pref_type = 0;
   char user_pref_filename[MAX_BUFF+1];
   char type_string[SMALL_BUFF+1];
   char *p;
@@ -270,25 +293,20 @@ get_umodes_from_conf(int user)
   snprintf(user_pref_filename,
 	   MAX_BUFF, "etc/%s.pref", userlist[user].usernick);
 
-  type = userlist[user].type;
-  type &= ~TYPE_PENDING;
-
   if ((fp = fopen(user_pref_filename, "r")) != NULL)
   {
     if ((fgets(type_string, SMALL_BUFF, fp)) == NULL)
-      return(userlist[user].type);
+      return 0;
 
     (void)fclose(fp);
     if((p = strchr(type_string, '\n')) != NULL)
       *p = '\0';
 
-    sscanf(type_string, "%lu", &pref_type);
-    return (pref_type|type);
+    sscanf(type_string, "%lu", &type);
+    return type;
   }
-  else
-  {
-    return(type);
-  }
+  
+  return 0;
 }
     
 int
@@ -704,19 +722,6 @@ load_userlist()
       return;
     }
 
-/*
- * 
- * userlist.load looks like now
- * u@h:nick:password:ok o for opers, k for remote kline
- *
- * - or you can use a number 1 for opers, 2 for remote kline -
- * i.e.
- *  u@h:nick:password:3 for opers
- *
- * h:nick:password:ok o for opers, 2 for remote kline
- *
- */
-
   while (fgets(line, MAX_BUFF-1, userfile) )
     {
       char op_char;
@@ -733,10 +738,6 @@ load_userlist()
 	{
 	  switch(op_char)
 	    {
-            /* old user bans, now oper only so deprecated */
-            case 'B':
-	      break;
-
 	    case 'E':
 	      load_e_line(line+2);
 	      break;
@@ -762,7 +763,7 @@ load_userlist()
 
 static void
 load_a_user(char *line)
-  {
+{
     char *userathost;
     char *user;
     char *host;
@@ -824,68 +825,12 @@ load_a_user(char *line)
 
     type = strtok(NULL,":");
 
+    /* grab the usermodes from the conf */
     if(type != NULL)
-      {
-	unsigned long type_int;
-	char *q;
-	q = type;
+      set_umode(user_list_index, 1, type);
 
-	type_int = TYPE_ECHO;
-
-	while(*q)
-	  {
-	    switch(*q)
-	      {
-              case 'e':
-                type_int |= TYPE_ECHO;
-                break;
-	      case 'w':
-		type_int |= TYPE_WARN;
-		break;
-	      case 'k':
-		type_int |= TYPE_VIEW_KLINES;
-		break;
-	      case 'i':
-		type_int |= TYPE_INVS;
-		break;
-	      case 'o':
-		type_int |= TYPE_LOCOPS;
-		break;
-	      case 'M':
-		type_int |= TYPE_ADMIN;
-		break;
-	      case 'I':
-		type_int |= TYPE_INVM;
-		break;
-	      case 'D':
-		type_int |= TYPE_DLINE;
-		break;
-#ifdef ENABLE_W_FLAG
-              case 'W':
-                type_int |= TYPE_WALLOPS;
-                break;
-#endif
-	      case 'y':
-		type_int |= TYPE_SPY;
-		break;
-	      case 'p':
-		type_int |= TYPE_PARTYLINE;
-		break;
-              case 'x':
-                type_int |= TYPE_SERVERS;
-                break;
-	      case 'K':
-		type_int |= TYPE_KLINE;
-		break;
-
-	      default:
-		break;
-	      }
-	    q++;
-	  }
-
-	userlist[user_list_index].type = type_int;
-      }
+    /* and then grab the usermodes from <user>.prefs */
+    userlist[user_list_index].type |= get_umodes_from_prefs(user_list_index);
 
     user_list_index++;
 
@@ -955,7 +900,6 @@ load_e_line(char *line)
  * side effects - user list is cleared out prepatory to a userlist reload
  *
  */
-
 void
 clear_userlist()
 {
@@ -966,25 +910,6 @@ clear_userlist()
   memset((void *)userlist, 0, sizeof(userlist));
   memset((void *)hostlist, 0, sizeof(hostlist));
   memset((void *)wingate_class_list, 0, sizeof(wingate_class_list));
-}
-
-/*
- * init_userlist
- *
- * input	- NONE
- * output	- NONE
- * side effects -
- *	  user list is cleared 
- *
- */
-
-void
-init_userlist()
-{
-  tcm_list_index = 0;
-  ban_list_index = 0;
-
-  clear_userlist();
 }
 
 /*

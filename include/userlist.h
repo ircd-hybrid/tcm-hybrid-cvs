@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.43 2002/05/27 11:41:56 leeh Exp $ */
+/* $Id: userlist.h,v 1.44 2002/05/27 20:15:37 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -189,7 +189,8 @@ struct exception_entry
 int find_user_in_userlist(const char *);
 int find_user_in_connections(const char *);
 void init_userlist_handlers(void);
-unsigned long get_umodes_from_conf(int);
+unsigned long get_umodes_from_prefs(int);
+unsigned long get_umodes_current(int);
 
 void load_userlist(void);
 void load_config_file(char *);
@@ -207,18 +208,12 @@ unsigned long local_ip(char *ourhostname);
 extern struct auth_file_entry userlist[];
 extern int user_list_index;
 
-extern struct exception_entry banlist[];
-extern int ban_list_index;
-
 extern struct exception_entry hostlist[];	/* defined in userlist.c */
 extern int host_list_index;
 
 #ifdef DEBUGMODE
 void exemption_summary();
 #endif
-
-extern struct tcm_file_entry tcmlist[];
-extern int tcm_list_index;
 
 #define TYPE_OPER		0x00001	/* user has registered as an oper */
 #define TYPE_KLINE		0x00002 /* user has .kline privs */
@@ -241,7 +236,6 @@ extern int tcm_list_index;
 
 int isoper(char *user, char *host);
 int islinkedbot(int connnum, char *botname, char *password);
-void init_userlist(void);
 void reload_user_list(int sig);
 
 struct hashrec *usertable[HASHTABLESIZE];

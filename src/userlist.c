@@ -16,7 +16,6 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 #include "config.h"
 #include "token.h"
@@ -36,7 +35,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.20 2001/10/14 00:02:10 bill Exp $";
+static char *version="$Id: userlist.c,v 1.21 2001/10/14 00:53:01 bill Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct tcm_file_entry tcmlist[MAXTCMS];
@@ -292,10 +291,9 @@ void load_config_file(char *file_name)
 void save_prefs(void)
 {
   FILE *fp;
-  struct stat *buf;
   struct common_function *temp;
   char *argv[20], *frombuff, *tobuff, *p, *q, filename[80];
-  int argc=0, a, fd, mode;
+  int argc=0, a, fd;
 
   if (!(fp = fopen(CONFIG_FILE,"r")))
     {
@@ -326,16 +324,6 @@ void save_prefs(void)
       free(frombuff);
       gracefuldie(0, __FILE__, __LINE__);
     }
-  if ((stat(CONFIG_FILE, buf)) == -1)
-    {
-      sendtoalldcc(SEND_ALL_USERS, "stat() on %s failed: %s", CONFIG_FILE, strerror(errno));
-      fclose(fp);
-      close(fd);
-      free(frombuff);
-      free(tobuff);
-      gracefuldie(0, __FILE__, __LINE__);      
-    }
-  mode = buf->st_mode;
 
   while (!feof(fp))
     {
@@ -433,7 +421,7 @@ void save_prefs(void)
   if (rename(filename, CONFIG_FILE))
     sendtoalldcc(SEND_ALL_USERS, "Error renaming new config file.  Changes may be lost.  %s",
                  strerror(errno));
-  chmod(CONFIG_FILE, mode);
+  chmod(CONFIG_FILE, 0600);
 }
 
 /*

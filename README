@@ -26,6 +26,9 @@ II. What it needs
        get the info needed to monitor the bot has to be opered, despite
        how much I hate opered bots. (I agree with that -db)
 
+       Note that in Hybrid 7, local operators no longer exist.  Limit
+       the bots power by using the flags provided.
+
 III. How to use it
 
   Unzip it, untar it, read this file. :)  Then edit the config.h file,
@@ -43,6 +46,10 @@ III. How to use it
   open a DCC CHAT connection to the tcm, it will announce you and
   tell you about the help command.  Play around with any of the
   commands you want.
+
+  Note that the tcm will now allow you do issue /msg tcmnick .chat
+  and initiate the DCC CHAT.  This allows people behind restrictive
+  firewalls or NAT's to use TCM.
 
   If you have a DCC CHAT to the tcm open, it will automatically send
   you reports of possible clonebot connections and notices of any

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.56 2002/06/05 01:01:01 db Exp $
+ * $Id: parse.c,v 1.57 2002/06/05 01:10:43 db Exp $
  */
 
 #include <stdio.h>
@@ -310,7 +310,7 @@ process_server(struct source_client *source_p, char *function, char *param)
 
   numeric=0;
 
-  if (strcmp(argv[1],"PRIVMSG") == 0)
+  if (strcmp(function, "PRIVMSG") == 0)
   {
     if(strcasecmp(argv[2], tcm_status.my_nick) == 0)
     {
@@ -321,11 +321,11 @@ process_server(struct source_client *source_p, char *function, char *param)
     }
   }
 
-  else if (strcmp(argv[1], "PING") == 0)
+  else if (strcmp(function, "PING") == 0)
     print_to_server("PONG %s", argv[2]);
 
   /* error doesnt have a prefix either */
-  else if (strcmp(argv[1],"ERROR") == 0)
+  else if(strcmp(function, "ERROR") == 0)
   {
     if (strncmp(argv[2], ":Closing Link: ", 15) == 0)
     {
@@ -335,23 +335,23 @@ process_server(struct source_client *source_p, char *function, char *param)
     }
   }
 
-  else if ((strcmp(argv[1],"WALLOPS")) == 0)
+  else if ((strcmp(function, "WALLOPS")) == 0)
   {
     wallops(0, argc, argv);
   }
-  else if ((strcmp(argv[1],"JOIN")) == 0)
+  else if ((strcmp(function, "JOIN")) == 0)
   {
     on_join(argv[0], argv[2]);
   }
-  else if ((strcmp(argv[1],"KICK")) == 0)
+  else if ((strcmp(function, "KICK")) == 0)
   {
     on_kick(argv[3]);
   }
-  else if (strcmp(argv[1],"NICK") == 0)
+  else if (strcmp(function, "NICK") == 0)
   {
     on_nick(source_p->name, argv[2]);
   }
-  else if (strcmp(argv[1],"NOTICE") == 0)
+  else if (strcmp(function, "NOTICE") == 0)
   {
     if(strcasecmp(source_p->name, config_entries.rserver_name) == 0)
     {

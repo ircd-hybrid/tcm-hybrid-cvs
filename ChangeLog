@@ -1,3 +1,34 @@
+leeh        2002/05/28 08:14:20 EDT	(20020528_12)
+
+  Modified files:
+    include              hash.h modules.h 
+    src                  .depend Makefile.in bothunt.c commands.c 
+                         main.c modules.c parse.c services.c 
+                         userlist.c 
+  Added files:
+    include              handler.h 
+    src                  handler.c 
+  Log:
+  - moved handler code to its own file
+  - ripped on_cannot_join, if you cant join, big deal.
+  
+  Revision  Changes    Path
+  1.1       +50 -0     tcm-hybrid/include/handler.h (new)
+  1.5       +0 -1      tcm-hybrid/include/hash.h
+  1.28      +0 -40     tcm-hybrid/include/modules.h
+  1.21      +52 -34    tcm-hybrid/src/.depend
+  1.25      +1 -0      tcm-hybrid/src/Makefile.in
+  1.128     +0 -1      tcm-hybrid/src/bothunt.c
+  1.103     +1 -1      tcm-hybrid/src/commands.c
+  1.1       +318 -0    tcm-hybrid/src/handler.c (new)
+  1.90      +1 -0      tcm-hybrid/src/main.c
+  1.46      +1 -292    tcm-hybrid/src/modules.c
+  1.40      +2 -32     tcm-hybrid/src/parse.c
+  1.8       +1 -0      tcm-hybrid/src/services.c
+  1.96      +1 -0      tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/05/28 07:52:41 EDT	(20020528_11)
 
   Modified files:

@@ -1,4 +1,4 @@
-# $Id: tcm.cf,v 1.26 2002/05/24 14:32:26 leeh Exp $
+# $Id: tcm.cf,v 1.27 2002/05/27 01:08:31 db Exp $
 # Username for the bot
 U:db
 
@@ -83,10 +83,10 @@ M:For basic information, see http://www.ircd-hybrid.org/tcm/
 
 # email address
 # clone logs etc. will get e-mailed to this address
-#E:db@db.net
+#E:db@no.spam.net
 
 # Test this wingate if in this class only
-# NOTE:  This is EXPLICITELY needed, as Wingate and SOCKS checks
+# NOTE:  This is EXPLICITLY needed, as Wingate and SOCKS checks
 #        will ONLY be done in the classes listed here
 # Multiple entries are permitted
 #

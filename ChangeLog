@@ -1,3 +1,8 @@
+*** 20011024_1 by bill
+
+- minor bugfix in if() caused by unexpected disconnect
+
+
 *** 20011023_2 by bill
 - updated default M: to goto http://www.ircd-hybrid.org/tcm/
 

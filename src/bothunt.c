@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.36 2001/11/02 16:53:08 db Exp $ */
+/* $Id: bothunt.c,v 1.37 2001/11/08 20:39:51 bill Exp $ */
 
 #include "setup.h"
 
@@ -801,8 +801,36 @@ void onservnotice(int connnum, int argc, char *argv[])
   switch (action)
   {
   case CONNECT:
-    chopuh(NO,q,&userinfo);
-    adduserhost(q,&userinfo,NO,NO);
+    if ((q = strchr(argv[9], '@')) == NULL)
+    {
+      return;
+    }
+    *q = '\0';
+
+    userinfo.user = argv[9]+1;
+    userinfo.host = q+1;
+    if ((q = strchr(userinfo.host, ')')) == NULL)
+    {
+      return;
+    }
+    *q = '\0';
+
+    if ((q = strchr(argv[11], '}')) == NULL)
+    {
+      return;
+    }
+    *q = '\0';
+
+    if ((q = strchr(argv[10], ']')) == NULL)
+    {
+      return;
+    }
+    *q = '\0';
+
+    strcpy((char *)&userinfo.class, argv[11]+1);
+    strcpy((char *)&userinfo.ip, argv[10]+1);
+
+    adduserhost(argv[8],&userinfo,NO,NO);
     break;
 
   case EXITING:
@@ -1824,6 +1852,8 @@ void check_host_clones(char *host)
   struct tm *tmrec;
   int ind;
 
+  notice1[0] = '\0';
+  notice0[0] = '\0';
   oldest = now = time(NULL);
   lastreport = 0;
   ind = hash_func(host);
@@ -1854,7 +1884,7 @@ void check_host_clones(char *host)
 
   if (reportedclones)
   {
-    report(SEND_ALL_USERS,
+    report(SEND_WARN_ONLY,
 	   CHANNEL_REPORT_CLONES,
 	   "%d more possible clones (%d total) from %s:\n",
 	   clonecount, clonecount+reportedclones, host);
@@ -1864,7 +1894,7 @@ void check_host_clones(char *host)
   }
   else
   {
-    report(SEND_ALL_USERS,
+    report(SEND_WARN_ONLY,
 	   CHANNEL_REPORT_CLONES,
 	   "Possible clones from %s detected: %d connects in %d seconds\n",
 	   host, clonecount, now - oldest);
@@ -1893,6 +1923,7 @@ void check_host_clones(char *host)
       }
       else
       {
+        memset((char *)&notice0, 0, sizeof(notice0));
 	(void)snprintf(notice0,sizeof(notice0) - 1,
 		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
 		       find->info->nick,
@@ -1932,21 +1963,33 @@ void check_host_clones(char *host)
       find->info->reporttime = now;
       if (clonecount == 2)
       {
-	report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, "%s", notice1);
-	log("%s", notice1);
-
-	report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, "%s", notice0);
-	log("%s", notice0);
+        if (notice1[0])
+        {
+  	  report(SEND_WARN_ONLY, CHANNEL_REPORT_CLONES, "%s", notice1);
+	  log("%s", notice1);
+        }
+	/* I haven't figured out why all these are nessecary, but I know they are */
+	if (notice0[0])
+        {
+          report(SEND_WARN_ONLY, CHANNEL_REPORT_CLONES, "%s", notice0);
+  	  log("%s", notice0);
+        }
       }
       else if (clonecount < 5)
       {
-	report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, "%s", notice0);
-	log("%s", notice0);
+        if (notice0[0])
+        {
+	  report(SEND_WARN_ONLY, CHANNEL_REPORT_CLONES, "%s", notice0);
+	  log("%s", notice0);
+        }
       }
       else if (clonecount == 5)
       {
-	sendtoalldcc(SEND_ALL_USERS, "%s", notice0);
-	log("  [etc.]\n");
+        if (notice0[0])
+        {
+	  sendtoalldcc(SEND_WARN_ONLY, "%s", notice0);
+	  log("  [etc.]\n");
+        }
       }
     }
   }
@@ -2050,7 +2093,7 @@ void check_virtual_host_clones(char *ip_class_c)
 			    tmrec->tm_min,
 			    tmrec->tm_sec);
 	    }
-	  else if (different == 0)  /* apparantely we do not want to kline *@some.net.block.0/24 if the idents differ */
+          else
 	    {
 	      (void)snprintf(notice0,sizeof(notice0) - 1,
                             "  %s is %s@%s [%s] (%2.2d:%2.2d:%2.2d)\n",
@@ -2061,10 +2104,15 @@ void check_virtual_host_clones(char *ip_class_c)
 			    tmrec->tm_hour,
 			    tmrec->tm_min,
 			    tmrec->tm_sec);
-
-	      suggest_action(get_action_type("vclone"), find->info->nick, find->info->user,
-			     find->info->ip_host, different, ident);
 	    }
+
+          /* apparantely we do not want to kline *@some.net.block.0/24 if the idents differ */
+          /* we do, however, if they differ w/o ident (ie ~clone1, ~clone2, ~clone3)        */
+          if ((different == NO && ident == YES) || (ident == NO))
+            {
+              suggest_action(get_action_type("vclone"), find->info->nick, find->info->user,
+			     find->info->ip_host, different, ident);
+            }
 
 	  find->info->reporttime = now;
 	  if (clonecount == 1)

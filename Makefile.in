@@ -6,9 +6,10 @@ MKDEP = ${CC} -MM
 TCMLIBS = @LIBS@
 INCLUDES = -I./include
 CPPFLAGS = ${INCLUDES} @CPPFLAGS@
+DPATH = @DPATH@
 
 # Any other defines you need, add below.
-DEFINES = -DDPATH=\"@DPATH@\"
+DEFINES = -DDPATH=\"${DPATH}\"
 
 # -O for optimization.  Can't debug.  Use -g for debuggable code.
 CFLAGS = -g -O2
@@ -25,6 +26,66 @@ OBJECTS = ${SOURCES:.c=.o}
 all: tcm
 
 build: tcm
+
+install:
+	-@if [ ! -x bin/tcm ] ; then \
+	make all ; \
+	fi
+
+	@echo Installing...
+	-@if [ ! -x ${DPATH} ] ; then \
+	echo mkdir ${DPATH} ; \
+	mkdir ${DPATH} ; \
+	fi
+
+	-@if [ ! -x ${DPATH}/bin ] ; then \
+	echo mkdir ${DPATH}/bin ; \
+	mkdir ${DPATH}/bin ; \
+	fi
+
+	-@if [ ! -x ${DPATH}/etc ] ; then \
+	echo mkdir ${DPATH}/etc ; \
+	mkdir ${DPATH}/etc ; \
+	fi
+
+	-@if [ ! -x ${DPATH}/modules ] ; then \
+	echo mkdir ${DPATH}/modules ; \
+	mkdir ${DPATH}/modules ; \
+	fi
+
+	-@if [ ! -x ${DPATH}/help ] ; then \
+	echo mkdir ${DPATH}/help ; \
+	mkdir ${DPATH}/help ; \
+	fi
+
+	-@if [ ! -x ${DPATH}/logs ] ; then \
+	echo mkdir ${DPATH}/logs ; \
+	mkdir ${DPATH}/logs ; \
+	fi
+
+	-@if [ -e ${DPATH}/bin/mkpasswd ] ; then \
+	echo mv bin/tcm ${DPATH}/bin ; \
+	mv bin/tcm ${DPATH}/bin/ ; \
+	fi
+
+	-@if [ ! -e ${DPATH}/bin/mkpasswd ] ; then \
+	echo mv bin/tcm bin/mkpasswd ${DPATH}/bin/ ; \
+	mv bin/tcm bin/mkpasswd ${DPATH}/bin/ ; \
+	fi
+
+	-@if [ ! -e ${DPATH}/etc/tcm.cf ] ; then \
+	echo mv etc/tcm.cf ${DPATH}/etc/ ; \
+	mv -f etc/tcm.cf ${DPATH}/etc/ ; \
+	fi
+
+	-@if [ ! -e ${DPATH}/etc/userlist.cf ] ; then \
+	echo mv etc/userlist.cf ${DPATH}/etc/ ; \
+	mv -f etc/userlist.cf ${DPATH}/etc/ ; \
+	fi
+
+	cp modules/*.so ${DPATH}/modules/
+	cp help/help.* ${DPATH}/help/
+	@echo Done
 
 clean:
 	@${RM} -f DEBUG etc/tcm.pid tcm.core ktrace.out core

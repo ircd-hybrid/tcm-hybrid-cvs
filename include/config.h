@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.29 2001/11/08 02:21:55 wcampbel Exp $
+ * $Id: config.h,v 1.30 2001/11/08 20:39:51 bill Exp $
  */
 
 /*
@@ -186,7 +186,7 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
  * - The Hybrid team does not support the use of this option, and will
  *   take no responsibility for any damage it may cause.
  */
-#undef ENABLE_QUOTE
+#define ENABLE_QUOTE
 
 /* Define this to prevent tcm from forking() */
 #undef DEBUGMODE
@@ -202,6 +202,9 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 
 /* maximum number of hosts not to auto kline */
 #define MAXHOSTS 100
+
+/* limit connections to opers only */
+#define OPERS_ONLY
 
 /* maximum number of banned users on dcc connect,
    not used if OPERS_ONLY is defined */

@@ -9,7 +9,7 @@
 
 # Defaults:
 ac_help=
-ac_default_prefix=/usr/local
+ac_default_prefix=`pwd`
 # Any additions from configure.in:
 
 # Initialize some variables set by options.
@@ -22,7 +22,7 @@ host=NONE
 no_create=
 nonopt=NONE
 no_recursion=
-prefix=NONE
+prefix=`pwd`
 program_prefix=NONE
 program_suffix=NONE
 program_transform_name=s,x,x,
@@ -548,7 +548,7 @@ VERSION=3.0.1
 
 
 
-DPATH=`pwd`
+DPATH=${prefix}
 
 
 # Extract the first word of "gcc", so it can be a program name with args.

@@ -29,7 +29,7 @@ Note:  Opers as defined in this file are people with TCM O: lines (or
     domains with more than [min connections] users.
  - .nflood (OPERS ONLY)
     List nick flooders.
- - .vlist [IP mask] (OPERS ONLY)
+ - .vlist <[user@]ip mask> (OPERS ONLY)
     List all users matching the IP mask.
  - .vmulti (OPERS ONLY)
     List all virtual hosted multiple connections.

@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.18 2001/10/29 17:19:47 wcampbel Exp $ */
+/* $Id: main.c,v 1.19 2001/11/08 20:39:51 bill Exp $ */
 
 #include "setup.h"
 
@@ -257,10 +257,12 @@ int bindsocket(char *hostport)
 	if( config_entries.debug && outfile)
 	  {
 	    fprintf(outfile, "Error: connect %i\n", errno);
+#ifdef DEBUGMODE
+	    perror("connect()");
+#endif
 	  }
 	return (INVALID);
       }
-  
   return (plug);
 }
 
@@ -350,8 +352,7 @@ void sendtoalldcc(int type,char *format,...)
 	      break;
 
 	    case SEND_ALL_USERS:
-	      if(connections[i].type & TYPE_PARTYLINE)
-	        prnt(connections[i].socket, msgbuf);
+	      prnt(connections[i].socket, msgbuf);
 	      break;
 
 	    default:
@@ -391,6 +392,11 @@ void closeconn(int connnum, int argc, char *argv[])
       maxconns = i+1;
     }
     
+  sendtoalldcc(SEND_ALL_USERS, "%s %s (%s@%s) has disconnected",
+               connections[connnum].type & TYPE_OPER ? "Oper" : "User", 
+               connections[connnum].nick, connections[connnum].user,
+               connections[connnum].host);
+
   connections[connnum].user[0] = '\0';
   connections[connnum].host[0] = '\0';
   connections[connnum].nick[0] = '\0';
@@ -602,7 +608,6 @@ int main(int argc, char *argv[])
     printf("Unable to chdir to DPATH\nFatal Error, exiting\n");
     exit(1);
   }
-
   init_hash_tables();		/* clear those suckers out */
   init_tokenizer();		/* in token.c */
   init_userlist();
@@ -645,9 +650,6 @@ int main(int argc, char *argv[])
 
   modules_init();
   add_common_function(F_DCC_SIGNOFF, closeconn);
-/*  dcc_signoff->function = closeconn;
-  dcc_signoff->next = (struct common_function *)NULL;
-  dcc_signoff->type = F_DCC_SIGNOFF;*/
   load_all_modules(YES);
 
   if (config_entries.conffile)
@@ -742,7 +744,10 @@ int main(int argc, char *argv[])
 
   if( !connections[0].buffer )
     {
-      fprintf(stderr,"memory allocation error in main()\n");
+      fprintf(stderr,"Memory allocation error in main()\n");
+#ifdef DEBUGMODE
+      printf("Memory allocation error in main()\n");
+#endif
       exit(1);
     }
 

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.54 2002/05/19 16:11:34 wcampbel Exp $
+ * $Id: userlist.c,v 1.55 2002/05/20 01:15:54 db Exp $
  *
  */
 
@@ -13,6 +13,8 @@
 #include <errno.h>
 #include <ctype.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1031,3 +1033,64 @@ void exemption_summary()
   }
 }
 #endif
+
+
+/*
+ * local_ip()
+ *
+ * inputs               - NONE
+ * output               - ip of local host
+ * side effects - NONE
+ */
+unsigned long 
+local_ip(char *ourhostname)
+{
+  struct hostent *local_host;
+  unsigned long l_ip;
+
+  if(config_entries.virtual_host_config[0])
+    {
+      if ((local_host = gethostbyname (config_entries.virtual_host_config)))
+        {
+          if(config_entries.debug && outfile)
+            {
+              fprintf(outfile,
+                      "virtual host [%s]\n",
+                      config_entries.virtual_host_config);
+              fprintf(outfile, "found official name [%s]\n",
+                      local_host->h_name);
+            }
+
+          (void) memcpy((void *)&l_ip,(void *)local_host->h_addr,
+                 sizeof(local_host->h_addr));
+
+          if(config_entries.debug && outfile)
+            {
+              fprintf(outfile, "DEBUG: %lu %lX\n", l_ip, l_ip);
+            }
+          return(htonl(l_ip));
+        }
+    }
+  else
+    {
+      if ((local_host = gethostbyname (ourhostname)) )
+        {
+          if(config_entries.debug && outfile)
+            {
+              fprintf(outfile, "found official name [%s]\n",
+                      local_host->h_name);
+            }
+
+          (void) memcpy((void *) &l_ip,(void *) local_host->h_addr,
+                        sizeof(local_host->h_addr));
+
+          if(config_entries.debug && outfile)
+            {
+              fprintf(outfile, "DEBUG: %lu %lX\n", l_ip, l_ip);
+            }
+          return(htonl(l_ip));
+        }
+    }
+  /* NOT REACHED */
+  return 0L;
+}

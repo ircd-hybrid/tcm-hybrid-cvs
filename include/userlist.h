@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.30 2002/05/18 02:21:08 wcampbel Exp $ */
+/* $Id: userlist.h,v 1.31 2002/05/20 01:15:49 db Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -12,34 +12,34 @@
 #define NICK_CHANGE_TABLE_SIZE 100
 
 
-// Defines for an actions hoststrip field
+/* Defines for an actions hoststrip field */
 
-// Mask for the host-only method
+/* Mask for the host-only method */
 #define HOSTSTRIP_HOST               0x000F
-// Use the full host
+/* Use the full host */
 #define HOSTSTRIP_HOST_AS_IS         0x0001 
-// Replace first field of host (or last field of ip) with *
+/* Replace first field of host (or last field of ip) with *   */
 #define HOSTSTRIP_HOST_BLOCK         0x0002 
 
-// Mask for the "if idented" method
+/* Mask for the "if idented" method */
 #define HOSTSTRIP_IDENT              0x00F0
-// Use ident as is
+/* Use ident as is */
 #define HOSTSTRIP_IDENT_AS_IS        0x0010 
-// Use ident as is but prefix with *
+/* Use ident as is but prefix with * */
 #define HOSTSTRIP_IDENT_PREFIXED     0x0020
-// Replace ident with *
+/* Replace ident with * */
 #define HOSTSTRIP_IDENT_ALL          0x0030
 
-// Mask for the "if not idented" method
+/* Mask for the "if not idented" method */
 #define HOSTSTRIP_NOIDENT            0x0F00
-// Use *~*
+/* Use *~* */
 #define HOSTSTRIP_NOIDENT_UNIDENTED  0x0100 
-// Use *username
+/* Use *username */
 #define HOSTSTRIP_NOIDENT_PREFIXED   0x0200
-// Use *
+/* Use * */
 #define HOSTSTRIP_NOIDENT_ALL        0x0300
 
-// Methods of handling an event
+/* Methods of handling an event */
 #define METHOD_DCC_WARN              0x0001
 #define METHOD_IRC_WARN              0x0002
 #define METHOD_TKLINE                0x0004
@@ -47,7 +47,7 @@
 #define METHOD_DLINE                 0x0010
 
 
-// Default HOSTSTRIPs
+/* Default HOSTSTRIPs */
 #define HS_DEFAULT  (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_PREFIXED | HOSTSTRIP_NOIDENT_ALL)
 
 #define HS_CFLOOD   HS_DEFAULT
@@ -197,6 +197,9 @@ int  okhost(char *,char *,int);
 int  str2type(char *);
 char *type_show(unsigned long type);
 
+/* local_ip is clearly not going to be an unsigned long FIX THIS -db */
+unsigned long local_ip(char *ourhostname);
+
 extern struct auth_file_entry userlist[];
 extern int user_list_index;
 
@@ -258,6 +261,7 @@ struct config_list config_entries;
 #define CHANNEL_REPORT_BOT	0x0400
 #define CHANNEL_REPORT_SPAMBOT	0x0800
 #define CHANNEL_REPORT_CFLOOD	0x1000
+
 
 #endif
 

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.60 2002/05/19 21:13:29 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.61 2002/05/20 01:15:51 db Exp $ */
 
 #include "setup.h"
 
@@ -603,7 +603,10 @@ void m_disconnect(int connnum, int argc, char *argv[])
 
 void m_help(int connnum, int argc, char *argv[])
 {
-  print_help(connections[connnum].socket, argv[1]);
+  if (argc < 2)
+    prnt(connections[connnum].socket, "Usage: %s ?\n", argv[0]);
+  else
+    print_help(connections[connnum].socket, argv[1]);
 }
 
 void m_motd(int connnum, int argc, char *argv[])
@@ -626,10 +629,9 @@ void m_close(int connnum, int argc, char *argv[])
     temp->function(connnum, 0, NULL);
 }
 
-/* ParaGod smells like tunafish. */
 void m_op(int connnum, int argc, char *argv[])
 {
-  if (argc != 2)
+  if (argc < 2)
     prnt(connections[connnum].socket, "Usage: %s <nick>\n", argv[0]);
   else
     op(config_entries.defchannel, argv[1]);

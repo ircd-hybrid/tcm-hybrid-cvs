@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.28 2002/06/03 11:03:06 leeh Exp $
+ * $Id: hash.c,v 1.29 2002/06/05 15:10:25 leeh Exp $
  */
 
 #include <stdio.h>
@@ -967,21 +967,21 @@ report_domains(int sock,int num)
       if(!foundany)
         {
           foundany = YES;
-          print_to_socket(sock,"Domains with most users on the server:\n");
+          print_to_socket(sock,"Domains with most users on the server:");
         }
 
-      print_to_socket(sock,"  %-40s %3d users\n",
+      print_to_socket(sock,"  %-40s %3d users",
            sort[found].domain_rec->info->domain, maxx);
       sort[found].count = 0;
     }
 
   if(!foundany)
     {
-      print_to_socket(sock, "No domains have %d or more users.\n",num);
+      print_to_socket(sock, "No domains have %d or more users.",num);
     }
   else
     {
-      print_to_socket(sock, "%d domains found\n", inuse);
+      print_to_socket(sock, "%d domains found", inuse);
     }
 }
 
@@ -1019,11 +1019,11 @@ list_class(int sock,char *class_to_find,int total_only)
                     {
                       /* Simply the header to the list of clients */
                       print_to_socket(sock,
-                           "The following clients are in class %s\n",
+                           "The following clients are in class %s",
                            class_to_find);
                     }
 
-                    print_to_socket(sock, "  %s (%s@%s)\n", ptr->info->nick,
+                    print_to_socket(sock, "  %s (%s@%s)", ptr->info->nick,
                                     ptr->info->user, ptr->info->host);
                 }
 
@@ -1034,11 +1034,11 @@ list_class(int sock,char *class_to_find,int total_only)
 
   if(num_found != 0)
     print_to_socket(sock,
-         "%d are in class %s\n", num_found, class_to_find );
+         "%d are in class %s", num_found, class_to_find );
   else
     print_to_socket(sock,
-         "Nothing found in class %s\n", class_to_find);
-  print_to_socket(sock,"%d unknown class\n", num_unknown);
+         "Nothing found in class %s", class_to_find);
+  print_to_socket(sock,"%d unknown class", num_unknown);
 }
 
 /*
@@ -1065,7 +1065,7 @@ list_nicks(int sock,char *nick,int regex)
   {
     char errbuf[1024];
     regerror(i, (regex_t *)&reg, errbuf, 1024); 
-    print_to_socket(sock, "Error compiling regular expression: %s\n", errbuf);
+    print_to_socket(sock, "Error compiling regular expression: %s", errbuf);
     return;
   }
 #endif
@@ -1085,12 +1085,12 @@ list_nicks(int sock,char *nick,int regex)
               if(!numfound)
                 {
                   print_to_socket(sock,
-				  "The following clients match %.150s:\n",nick);
+				  "The following clients match %.150s:",nick);
                 }
               numfound++;
 
               print_to_socket(sock,
-			      "  %s (%s@%s) {%s}\n",
+			      "  %s (%s@%s) {%s}",
 			      ptr->info->nick, ptr->info->user,
 			      ptr->info->host, ptr->info->class);
             }
@@ -1099,10 +1099,10 @@ list_nicks(int sock,char *nick,int regex)
 
   if(numfound)
     print_to_socket(sock,
-		    "%d matches for %s found\n",numfound,nick);
+		    "%d matches for %s found",numfound,nick);
   else
     print_to_socket(sock,
-		    "No matches for %s found\n",nick);
+		    "No matches for %s found",nick);
 }
 
 /*
@@ -1134,7 +1134,7 @@ kill_or_list_users(int sock, char *userhost, int regex,
   {
     char errbuf[REGEX_SIZE];
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE); 
-    print_to_socket(sock, "Error compiling regular expression: %s\n",
+    print_to_socket(sock, "Error compiling regular expression: %s",
 		    errbuf);
     return;
   }
@@ -1142,7 +1142,7 @@ kill_or_list_users(int sock, char *userhost, int regex,
   if(!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
     {
       print_to_socket(sock,
-"Listing all users is not recommended.  To do it anyway, use '.list ?*@*'.\n");
+"Listing all users is not recommended.  To do it anyway, use '.list ?*@*'.");
       return;
     }
 
@@ -1172,15 +1172,15 @@ kill_or_list_users(int sock, char *userhost, int regex,
 	  {
 	    if(numfound == 0)
 	      print_to_socket(sock,
-			      "The following clients match %s:\n", userhost);
+			      "The following clients match %s:", userhost);
 
 	    numfound++;
 	    if(ptr->info->ip_host[0] > '9' || ptr->info->ip_host[0] < '0')
-	      print_to_socket(sock, "  %s (%s@%s) {%s}\n", ptr->info->nick,
+	      print_to_socket(sock, "  %s (%s@%s) {%s}", ptr->info->nick,
                ptr->info->user, ptr->info->host, ptr->info->class);
 	    else
 	      print_to_socket(sock,
-			      "  %s (%s@%s) [%s] {%s}\n", ptr->info->nick,
+			      "  %s (%s@%s) [%s] {%s}", ptr->info->nick,
 			      ptr->info->user, ptr->info->host,
 			      ptr->info->ip_host, ptr->info->class);
 	  }
@@ -1188,9 +1188,9 @@ kill_or_list_users(int sock, char *userhost, int regex,
     }
   }
   if(numfound > 0)
-    print_to_socket(sock, "%d matches for %s found\n", numfound, userhost);
+    print_to_socket(sock, "%d matches for %s found", numfound, userhost);
   else
-    print_to_socket(sock, "No matches for %s found\n", userhost);
+    print_to_socket(sock, "No matches for %s found", userhost);
 }
 
 
@@ -1261,22 +1261,22 @@ void report_mem(int sock)
         }
     }
 
-  print_to_socket(sock,"Total host_table memory %lu/%d entries\n",
+  print_to_socket(sock,"Total host_table memory %lu/%d entries",
 		  total_host_table, count_host_table);
 
-  print_to_socket(sock, "Total usertable memory %lu/%d entries\n",
+  print_to_socket(sock, "Total usertable memory %lu/%d entries",
 		  total_user_table, count_user_table);
 
-  print_to_socket(sock, "Total domaintable memory %lu/%d entries\n",
+  print_to_socket(sock, "Total domaintable memory %lu/%d entries",
 		  total_domain_table, count_domain_table);
 
-  print_to_socket(sock, "Total iptable memory %lu/%d entries\n",
+  print_to_socket(sock, "Total iptable memory %lu/%d entries",
 		  total_ip_table, count_ip_table);
 
-  print_to_socket(sock, "Total user entry memory %lu/%d entries\n",
+  print_to_socket(sock, "Total user entry memory %lu/%d entries",
 		  total_user_entry, count_user_entry);
 
-  print_to_socket(sock,"Total memory in use %lu\n",
+  print_to_socket(sock,"Total memory in use %lu",
 		  total_host_table + total_domain_table +
 		  total_ip_table + total_user_entry );
 }

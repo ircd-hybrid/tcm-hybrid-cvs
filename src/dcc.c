@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.9 2002/06/05 01:01:01 db Exp $
+ * $Id: dcc.c,v 1.10 2002/06/05 15:10:25 leeh Exp $
  */
 
 #include <stdio.h>
@@ -73,7 +73,7 @@ initiate_dcc_chat(struct source_client *source_p)
 
   if ((i = find_free_connection_slot()) < 0)
     {
-      notice(source_p->name, "Max users on tcm, dcc chat rejected\n");
+      notice(source_p->name, "Max users on tcm, dcc chat rejected");
       return;
     }
 
@@ -216,7 +216,7 @@ finish_outgoing_dcc_chat(int i)
     if (errno == EAGAIN)
       return;
 
-    notice(connections[i].nick, "Error in DCC chat\n");
+    notice(connections[i].nick, "Error in DCC chat");
     close_connection(i);
     return;
   }
@@ -242,7 +242,7 @@ finish_outgoing_dcc_chat(int i)
 static void
 timeout_dcc_chat(int i)
 {
-  notice(connections[i].nick, "DCC chat timedout\n");
+  notice(connections[i].nick, "DCC chat timedout");
   close_connection(i);
 }
 

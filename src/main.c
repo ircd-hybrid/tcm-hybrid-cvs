@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.110 2002/06/05 14:43:38 leeh Exp $ */
+/* $Id: main.c,v 1.111 2002/06/05 15:10:26 leeh Exp $ */
 
 #include "setup.h"
 
@@ -103,7 +103,8 @@ main(int argc, char *argv[])
   /* chdir returns 0 on sucess, -1 on failure */
   if (chdir(DPATH))
   {
-    printf("Unable to chdir to DPATH\nFatal Error, exiting\n");
+    printf("Unable to chdir to DPATH\n");
+    printf("Fatal Error, exiting\n");
     exit(1);
   }
 #ifdef HAVE_SETRLIMIT
@@ -129,8 +130,12 @@ main(int argc, char *argv[])
             /* NOT REACHED */
             break;
           case 'h':
-            printf("%s [-h|-v] [-d] [-n] [-f conffile]\n-h help\n", argv[0]);
-            printf("-v version\n-d debug\n-n nofork\n-f specify conf file\n");
+            printf("%s [-h|-v] [-d] [-n] [-f conffile]", argv[0]);
+	    printf("-h help\n");
+            printf("-v version");
+	    printf("-d debug\n");
+	    printf("-n nofork\n");
+	    printf("-f specify conf file\n");
             exit(0);
             /* NOT REACHED */
             break;
@@ -304,7 +309,7 @@ init_debug(int sig)
     {
       if ((outfile = fopen(DEBUG_LOGFILE, "w")) == NULL)
 	{
-	  fprintf(stderr, "Cannot creat %s\n", DEBUG_LOGFILE);
+	  fprintf(stderr, "Cannot create %s\n", DEBUG_LOGFILE);
 	  signal(sig, init_debug);
 	  return;
 	}

@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.89 2002/06/03 02:10:15 db Exp $ */
+/* $Id: stdcmds.c,v 1.90 2002/06/05 15:10:26 leeh Exp $ */
 
 #include "setup.h"
 
@@ -165,7 +165,7 @@ print_motd(int sock)
 
   if((userfile = fopen(MOTD_FILE,"r")) == NULL)
     {
-      print_to_socket(sock,"No MOTD\n");
+      print_to_socket(sock,"No MOTD");
       return;
     }
 
@@ -275,8 +275,8 @@ report_failures(int sock,int num)
       if(foundany == 0)
         {
 	  foundany++;
-          print_to_socket(sock, "Userhosts with most connect rejections:\n");
-          print_to_socket(sock," %5d rejections: %s@%s\n",
+          print_to_socket(sock, "Userhosts with most connect rejections:");
+          print_to_socket(sock," %5d rejections: %s@%s",
 			  found->failcount,
 			  (*found->user ? found->user : "<UNKNOWN>"),
 			  found->host);
@@ -286,7 +286,7 @@ report_failures(int sock,int num)
 
   if(foundany == 0)
     {
-      print_to_socket(sock,"No userhosts have %d or more rejections.\n",num);
+      print_to_socket(sock,"No userhosts have %d or more rejections.",num);
     }
 
   /* XXX what is this "Ugly, but it works" ? */

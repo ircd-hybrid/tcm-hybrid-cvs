@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.10 2002/06/01 19:43:14 db Exp $
+ * $Id: vclones.c,v 1.11 2002/06/05 15:10:26 leeh Exp $
  */
 
 #include <assert.h>
@@ -164,12 +164,12 @@ report_vbots(int sock, int nclones, int check_user)
 		      if (check_user)
 			{
 			  print_to_socket(sock,
-			  "Multiple clients from the following userhosts:\n");
+			  "Multiple clients from the following userhosts:");
 			}
 		      else
 			{
 			  print_to_socket(sock,
-			  "Multiple clients from the following ip blocks:\n");
+			  "Multiple clients from the following ip blocks:");
 			}
                       foundany = YES;
                     }
@@ -177,7 +177,7 @@ report_vbots(int sock, int nclones, int check_user)
 		  if (check_user)
 		    {
 		      print_to_socket(sock,
-				  " %s %2d connections -- %s@%s.* {%s}\n",
+				  " %s %2d connections -- %s@%s.* {%s}",
 				      (num_found-nclones > 2) ? "==>" :
 				      "   ", num_found, ptr->info->user,
 				      ptr->info->ip_class_c,
@@ -186,7 +186,7 @@ report_vbots(int sock, int nclones, int check_user)
 		    else
 		    {
 		      print_to_socket(sock,
-				      " %s %2d connections -- %s.*\n",
+				      " %s %2d connections -- %s.*",
 				      (num_found-nclones > 3) ? "==>" : "   ",
 				      num_found,
 				      ptr->info->ip_class_c);
@@ -198,7 +198,7 @@ report_vbots(int sock, int nclones, int check_user)
     }
 
   if (!foundany)
-    print_to_socket(sock, "No multiple virtual logins found.\n");
+    print_to_socket(sock, "No multiple virtual logins found.");
 }
 
 /*
@@ -228,7 +228,7 @@ list_virtual_users(int sock, char *userhost, int regex)
   {
     char errbuf[REGEX_SIZE];
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE);
-    print_to_socket(sock, "Error compiling regular expression: %s\n",
+    print_to_socket(sock, "Error compiling regular expression: %s",
                     errbuf);
     return;
   }
@@ -236,7 +236,7 @@ list_virtual_users(int sock, char *userhost, int regex)
   if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
     {
       print_to_socket(sock,
-"Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.\n");
+"Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.");
       return;
     }
 
@@ -255,19 +255,19 @@ list_virtual_users(int sock, char *userhost, int regex)
 #endif
       {
         if (num_found == 0)
-          print_to_socket(sock, "The following clients match %s:\n", userhost);
+          print_to_socket(sock, "The following clients match %s:", userhost);
 
 	num_found++;
-        print_to_socket(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
+        print_to_socket(sock, "  %s (%s@%s) [%s] {%s}", ipptr->info->nick,
              ipptr->info->user, ipptr->info->host, ipptr->info->ip_host,
              ipptr->info->class);
       }
     }
   }
   if (num_found > 0)
-    print_to_socket(sock, "%d matches for %s found\n", num_found, userhost);
+    print_to_socket(sock, "%d matches for %s found", num_found, userhost);
   else
-    print_to_socket(sock, "No matches for %s found\n", userhost);
+    print_to_socket(sock, "No matches for %s found", userhost);
 }
 
 #endif

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.151 2002/06/05 14:15:52 leeh Exp $
+ * $Id: bothunt.c,v 1.152 2002/06/05 15:10:25 leeh Exp $
  */
 
 #include <stdio.h>
@@ -618,7 +618,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* motd requested by bill (bill@ummm.E) [irc.bill.eagan.mn.us] */
   case MOTDREQ:
     ++q;
-    send_to_all(FLAGS_SPY, "[MOTD requested by %s]\n", q);
+    send_to_all(FLAGS_SPY, "[MOTD requested by %s]", q);
     break;
 
   case  IGNORE:
@@ -1613,7 +1613,7 @@ report_nick_flooders(int sock)
                   if( nick_changes[i].nick_change_count > 1 )
                     {
                       print_to_socket(sock,
-                           "user: %s (%s) %d in %d\n",
+                           "user: %s (%s) %d in %d",
                            nick_changes[i].user_host,
                            nick_changes[i].last_nick,
                            nick_changes[i].nick_change_count,
@@ -1628,7 +1628,7 @@ report_nick_flooders(int sock)
 
   if(!reported_nick_flooder)
     {
-      print_to_socket(sock, "No nick flooders found\n" );
+      print_to_socket(sock, "No nick flooders found" );
     }
 }
 

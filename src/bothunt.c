@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.102 2002/05/25 22:02:59 db Exp $
+ * $Id: bothunt.c,v 1.103 2002/05/25 23:11:10 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1202,7 +1202,8 @@ _onctcp(int connnum, int argc, char *argv[])
 
     strcat(dccbuff, ":");
     strcat(dccbuff, port);
-    if (accept_dcc_connection(dccbuff, nick, hold) < 0)
+
+    if (accept_dcc_connection(dccbuff, nick, hold) <= 0)
     {
       notice(nick, "\001DCC REJECT CHAT chat\001");
       notice(nick,"DCC CHAT connection failed");

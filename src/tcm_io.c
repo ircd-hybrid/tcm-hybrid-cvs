@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.31 2002/05/25 22:03:00 db Exp $
+ * $Id: tcm_io.c,v 1.32 2002/05/25 23:11:11 leeh Exp $
  */
 
 #include <stdio.h>
@@ -730,7 +730,7 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   if ((p = strchr(host,' ')) != NULL)
     *p = '\0';
 
-  if (!isoper(user,host))
+  if(isoper(user,host) == 0)
   {
     notice(nick,"You are not an operator");
     return (0);

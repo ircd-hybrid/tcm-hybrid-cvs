@@ -1,3 +1,9 @@
+*** 20010920_2 by bill
+- more work towards modularizing
+   info:  tcm now gets online.  working on ctcp/privmsg/notice handling to
+          get dcc chat working.
+
+
 *** 20010920_1 by bill
 - fixed modules
 - began to rewrite most functions to use connnum, argc, argv format

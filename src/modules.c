@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.35 2002/05/24 20:52:43 leeh Exp $B
+ * $Id: modules.c,v 1.36 2002/05/25 02:16:51 leeh Exp $B
  *
  */
 
@@ -36,28 +36,104 @@ const int max_mods = MODS_INCREMENT;
 static const char unknown_ver[] = "<unknown>";
 struct module modlist[MODS_INCREMENT];
 
+static int hash_command(const char *);
+
 extern struct connection connections[];
 
-struct TcmMessage modload_msgtab = {
- ".modload", 0, 1,
- {m_unregistered, m_not_admin, m_modload}
-};
+void modules_init(void)
+{
+  add_dcc_handler("modload", m_unregistered, m_not_admin, m_modload);
+  add_dcc_handler("modunload", m_unregistered, m_not_admin, m_modunload);
+  add_dcc_handler("modreload", m_unregistered, m_not_admin, m_modreload);
+  add_dcc_handler("modlist", m_unregistered, m_not_admin, m_modlist);
+}
 
-struct TcmMessage modunload_msgtab = {
- ".modunload", 0, 1,
- {m_unregistered, m_not_admin, m_modunload}
-};
+void init_hashtables(void)
+{
+  memset(dcc_command_table, 0, sizeof(struct dcc_command) * MAX_HASH);
+  memset(serv_command_table, 0, sizeof(struct serv_command) * MAX_HASH);
+}
 
-struct TcmMessage modreload_msgtab = {
- ".modreload", 0, 1,
- {m_unregistered, m_not_admin, m_modreload}
-};
+void add_dcc_handler(char *cmd, void *oper_handler,
+		     void *registered_oper_handler, void *admin_handler)
+{
+  struct dcc_command *ptr;
+  int hashval;
 
-struct TcmMessage modlist_msgtab = {
- ".modlist", 0, 1,
- {m_unregistered, m_not_admin, m_modlist}
-};
+  ptr = malloc(sizeof(struct dcc_command));
+  memset(ptr, 0, sizeof(struct dcc_command));
 
+  ptr->cmd = strdup(cmd);
+  ptr->handler[0] = oper_handler,
+  ptr->handler[1] = registered_oper_handler;
+  ptr->handler[2] = admin_handler;
+  
+  hashval = hash_command(cmd);
+
+  if(dcc_command_table[hashval])
+    ptr->next = dcc_command_table[hashval];
+  
+  dcc_command_table[hashval] = ptr;
+}
+
+void del_dcc_handler(char *cmd)
+{
+  struct dcc_command *ptr;
+  struct dcc_command *last_ptr = NULL;
+  int hashval;
+  
+  hashval = hash_command(cmd);
+
+  for(ptr = dcc_command_table[hashval]; ptr; ptr = ptr->next)
+  {
+    if(strcasecmp(cmd, ptr->cmd) == 0)
+      break;
+
+    last_ptr = ptr;
+  }
+
+  if(ptr)
+  {
+    if(last_ptr)
+      last_ptr->next = ptr->next;
+    else
+      dcc_command_table[hashval] = ptr->next;
+
+    free(ptr->cmd);
+    free(ptr);
+  }
+}
+
+struct dcc_command *
+find_dcc_handler(char *cmd)
+{
+  struct dcc_command *ptr;
+  int hashval;
+
+  hashval = hash_command(cmd);
+
+  for(ptr = dcc_command_table[hashval]; ptr; ptr = ptr->next)
+  {
+    if(strcasecmp(cmd, ptr->cmd) == 0)
+      return ptr;
+  }
+
+  return NULL;
+}
+
+static int hash_command(const char *p)
+{
+  int hash_val = 0;
+
+  while(*p)
+  {
+    hash_val += ((int)(*p)&0xDF);
+    p++;
+  }
+
+  return(hash_val % MAX_HASH);
+}
+	
 int findmodule(char *name)
 {
   int i;
@@ -100,13 +176,6 @@ void mod_del_cmd(struct TcmMessage *msg)
   free(msg_hash_table[msgindex].msg);
 }
 
-void modules_init(void)
-{
-  mod_add_cmd(&modload_msgtab);
-  mod_add_cmd(&modunload_msgtab);
-  mod_add_cmd(&modreload_msgtab);
-  mod_add_cmd(&modlist_msgtab);
-}
 
 int load_a_module(char *name, int log)
 {

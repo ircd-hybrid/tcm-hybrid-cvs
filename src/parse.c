@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.14 2002/05/24 20:52:44 leeh Exp $
+ * $Id: parse.c,v 1.15 2002/05/25 02:16:52 leeh Exp $
  */
 
 #include <stdio.h>
@@ -135,6 +135,7 @@ parse_server(void)
 void
 parse_client(int i, int argc, char *argv[])
 {
+  struct dcc_command *ptr;
   int j;
 
   for (j = 0; j < MAX_MSG_HASH; j++)
@@ -154,6 +155,22 @@ parse_client(int i, int argc, char *argv[])
         }
     }
 
+  if(argv[0][0] == '.')
+  {
+    if((ptr = find_dcc_handler(argv[0] + 1)))
+    {
+      if(connections[i].type & TYPE_ADMIN)
+        ptr->handler[2](i, argc, argv);
+      else if(connections[i].type & TYPE_OPER)
+        ptr->handler[1](i, argc, argv);
+      else
+        ptr->handler[0](i, argc, argv);
+
+      return;
+    }
+  }
+
+    
   dccproc(i, argc, argv);
 }
 

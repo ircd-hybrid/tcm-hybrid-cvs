@@ -1,3 +1,29 @@
+bill        2002/05/09 20:26:32 EDT	(20020510_1)
+
+  Modified files:
+    include              commands.h config.h stdcmds.h tcm.h 
+                         userlist.h 
+    modules              bothunt.c commands.c 
+    src                  stdcmds.c 
+  Log:
+  - misc code cleanups
+  - made sure various alterations of config.h did not result in unused variables
+  - fixed several local variables that "shadow" global declarations
+  - removed obsolete AUTO_DLINE from config.h, its goal can now be achieved by
+    specifying (or not specifying) dline for an action
+  
+  Revision  Changes    Path
+  1.9       +2 -0      tcm-hybrid/include/commands.h
+  1.39      +0 -5      tcm-hybrid/include/config.h
+  1.17      +7 -1      tcm-hybrid/include/stdcmds.h
+  1.25      +1 -1      tcm-hybrid/include/tcm.h
+  1.29      +2 -0      tcm-hybrid/include/userlist.h
+  1.69      +12 -1     tcm-hybrid/modules/bothunt.c
+  1.54      +13 -270   tcm-hybrid/modules/commands.c
+  1.54      +294 -40   tcm-hybrid/src/stdcmds.c
+
+
+
 bill        2002/05/09 19:42:02 EDT	(20020510_0)
 
   Modified files:

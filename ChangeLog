@@ -1,3 +1,15 @@
+bill        2002/11/26 21:41:14 EST	(20021127_0)
+
+  Modified files:
+    src                  stdcmds.c 
+  Log:
+  - if .kline fails, explain why
+  
+  Revision  Changes    Path
+  1.100     +6 -0      tcm-hybrid/src/stdcmds.c
+
+
+
 bill        2002/11/26 10:56:25 EST	(20021126_0)
 
   Modified files:

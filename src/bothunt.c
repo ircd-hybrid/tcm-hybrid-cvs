@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.31 2001/10/29 17:10:06 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.32 2001/10/30 01:43:48 bill Exp $ */
 
 #include "setup.h"
 
@@ -727,17 +727,20 @@ void onservnotice(int connnum, int argc, char *argv[])
 
   if (strstr(p, "is requesting gline for "))
     {
-      q = strchr(argv[10], '@');
+      if ((q = strchr(argv[13], '@')) == NULL)
+        return;                         /* how the hell did we get here? */
       *q = '\0';
-      user = argv[10]+1;
+      user = argv[13]+1;
       host = q+1;
 
-      if ((q=strrchr(host, ']')) != NULL)
-	*q = '\0';
+      if ((q=strrchr(host, ']')) == NULL)
+        return;
 
-      snprintf(message, sizeof(message), "%s", argv[11]+1);
+      *q = '\0';
 
-      for (a=12;a<argc;++a)
+      snprintf(message, sizeof(message), "%s", argv[14]+1);
+
+      for (a=15;a<argc;++a)
         {
           strcat((char *)&message, argv[a]);
           strcat((char *)&message, " ");
@@ -751,19 +754,19 @@ void onservnotice(int connnum, int argc, char *argv[])
       if (gline_request(user, host, message, (time_t *)current_time))
         {
           sendtoalldcc(SEND_KLINE_NOTICES_ONLY, "G-line for %s@%s requested by %s: %s", user, 
-                       host, argv[3], message);
+                       host, argv[6], message);
           return;
         }
     }
   else if (strstr(p, "has triggered gline for "))
     {
-      q = strchr(argv[10], '@');
+      q = strchr(argv[13], '@');
       *q = '\0';
       user = argv[10]+1;
       host = q+1;
       if ((q=strrchr(host, ']'))) *q = '\0';
-      snprintf(message, sizeof(message), "%s", argv[11]+1);
-      for (a=12;a<argc;++a)
+      snprintf(message, sizeof(message), "%s", argv[14]+1);
+      for (a=15;a<argc;++a)
         {
           strcat((char *)&message, argv[a]);
           strcat((char *)&message, " ");
@@ -771,7 +774,7 @@ void onservnotice(int connnum, int argc, char *argv[])
       if (message[strlen(message)-1] == ' ') message[strlen(message)-1] = '\0';
       if (message[strlen(message)-1] == ']') message[strlen(message)-1] = '\0';
       sendtoalldcc(SEND_KLINE_NOTICES_ONLY, "G-line for %s@%s triggered by %s: %s", user, 
-                   host, argv[3], message);
+                   host, argv[6], message);
       remove_gline(user, host);
       return;
     }

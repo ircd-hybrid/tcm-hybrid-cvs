@@ -1,3 +1,19 @@
+leeh        2002/05/28 12:06:00 EDT	(20020528_16)
+
+  Modified files:
+    include              userlist.h 
+    src                  commands.c userlist.c 
+  Log:
+  - get_umodes_current doesnt have much use anymore, reference the type
+    directly instead
+  
+  Revision  Changes    Path
+  1.54      +0 -1      tcm-hybrid/include/userlist.h
+  1.106     +1 -1      tcm-hybrid/src/commands.c
+  1.99      +6 -12     tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/05/28 12:01:59 EDT	(20020528_15)
 
   Modified files:

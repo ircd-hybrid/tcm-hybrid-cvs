@@ -1,3 +1,17 @@
+leeh        2002/05/27 17:25:13 EDT	(20020527_20)
+
+  Modified files:
+    include              userlist.h 
+    src                  parse.c 
+  Log:
+  - removed an unused struct
+  
+  Revision  Changes    Path
+  1.46      +0 -9      tcm-hybrid/include/userlist.h
+  1.35      +8 -0      tcm-hybrid/src/parse.c
+
+
+
 db          2002/05/27 17:19:28 EDT	(20020527_19)
 
   Modified files:

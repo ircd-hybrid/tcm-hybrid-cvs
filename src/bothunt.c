@@ -56,7 +56,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.20 2001/10/23 22:21:19 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.21 2001/10/26 23:41:01 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -666,14 +666,14 @@ void onservnotice(int connnum, int argc, char *argv[])
 
   if (!strcmp(argv[argc-1], "[IRC(o)p]"))
     {
-      sendtoalldcc(SEND_WARN_ONLY, "*** %s %s has just become an irc operator (o)", argv[3], 
-                   argv[4]);
+      sendtoalldcc(SEND_WARN_ONLY, "*** %s %s has just become an irc operator (o)", argv[6], 
+                   argv[7]);
       return;
     }
   else if (!strcmp(argv[argc-1], "[IRC(O)p]"))
     {
-      sendtoalldcc(SEND_WARN_ONLY, "*** %s %s has just become an irc operator (O)", argv[3],
-                   argv[4]);
+      sendtoalldcc(SEND_WARN_ONLY, "*** %s %s has just become an irc operator (O)", argv[6],
+                   argv[7]);
       return;
     }
 

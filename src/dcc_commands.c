@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.15 2001/10/17 02:26:12 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.16 2001/10/18 01:50:14 wcampbel Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -880,6 +880,19 @@ void dccproc(int connnum, int argc, char *argv[])
 	  not_authorized(connections[connnum].socket);
         break;
     /* End of stuff added by ParaGod */
+
+    case K_RESTART:
+        if (connections[connnum].type & TYPE_REGISTERED)
+          {
+             sendtoalldcc(SEND_ALL_USERS, "I've been ordered to restart.");
+             toserv("QUIT :Restart by request!\n");
+             log("RESTART by oper %s", who_did_command);
+             sleep(1);
+             execv(SPATH, NULL);
+          }
+        else
+          not_authorized(connections[connnum].socket);
+        break;
 
     case K_INFO:
       prnt(connections[connnum].socket, "real server name [%s]\n", config_entries.rserver_name);

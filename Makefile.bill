@@ -1,2 +1,0 @@
-all:
-	@echo "Run ./configure first, dumby"

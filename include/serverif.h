@@ -1,7 +1,7 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
-/* $Id: serverif.h,v 1.17 2002/05/20 05:30:57 db Exp $ */
+/* $Id: serverif.h,v 1.18 2002/05/22 01:34:24 wcampbel Exp $ */
 
 /*
  * default ping timeout time from server
@@ -88,5 +88,6 @@ void _modinit();
 #define SEND_KLINE_NOTICES_ONLY 10
 #define SEND_ADMIN_ONLY 11
 #define SEND_OPERWALL_ONLY 12
+#define SEND_SERVERS_ONLY 13
 
 #endif

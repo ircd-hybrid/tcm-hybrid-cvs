@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.77 2002/05/21 22:09:42 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.78 2002/05/22 01:34:27 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -1203,7 +1203,7 @@ void onservnotice(int connnum, int argc, char *argv[])
         return;
       *q = '\0';
       user = q+12;
-      sendtoalldcc(SEND_WARN_ONLY, "Server %s split from %s", nick, user);
+      sendtoalldcc(SEND_SERVERS_ONLY, "Server %s split from %s", nick, user);
     }
     else if (strstr(q, "being introduced"))
     {
@@ -1212,7 +1212,7 @@ void onservnotice(int connnum, int argc, char *argv[])
         return;
       *q = '\0';
       user = q+21;
-      sendtoalldcc(SEND_WARN_ONLY, "Server %s being introduced by %s", nick,
+      sendtoalldcc(SEND_SERVERS_ONLY, "Server %s being introduced by %s", nick,
                    user);
     }
     break;

@@ -12,6 +12,7 @@ To change umode for oneself
  +k see klines/kills/unklines
  +l see LINK notices
  +m see motd  
+ +x see server introduction/quits
  +W see OPERWALL/WALLOPS
 
 If you are an admin (Have M flag) you can change the flags of others

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.41 2002/05/20 18:42:26 wcampbel Exp $ */
+/* $Id: main.c,v 1.42 2002/05/22 01:34:30 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -349,6 +349,11 @@ sendtoalldcc(int type,char *format,...)
 		 (connections[i].set_modes & SET_NOTICES))
 		prnt(connections[i].socket, msgbuf);
 	      break;
+
+            case SEND_SERVERS_ONLY:
+              if(connections[i].type & (TYPE_OPER | TYPE_SERVERS))
+                prnt(connections[i].socket, msgbuf);
+              break;
 
 	    case SEND_ALL_USERS:
 	      prnt(connections[i].socket, msgbuf);

@@ -1,4 +1,4 @@
-# $Id: userlist.cf,v 1.16 2002/05/04 20:11:59 einride Exp $
+# $Id: userlist.cf,v 1.17 2002/05/22 01:34:20 wcampbel Exp $
 # userlist.cf file
 #
 # each line is colon separated
@@ -37,6 +37,7 @@
 #   +/-o will show this user LOCOPs
 #   +/-p will give this user access to the party-line
 #   +/-e will echo a users party-line chat back
+#   +/-x will show server introductions and quits
 #
 #		-bill 5/2000
 #

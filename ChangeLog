@@ -1,3 +1,28 @@
+wcampbel    2002/06/01 09:04:27 EDT	(20020601_10)
+
+  Modified files:
+    autoconf             configure.in 
+    include              bothunt.h dcc.h logging.h setup.h.in 
+                         tcm_io.h userlist.h wingate.h 
+    src                  bothunt.c main.c tcm_io.c 
+  Log:
+  More lint cleanups
+  
+  Revision  Changes    Path
+  1.19      +1 -1      tcm-hybrid/autoconf/configure.in
+  1.45      +0 -1      tcm-hybrid/include/bothunt.h
+  1.3       +0 -2      tcm-hybrid/include/dcc.h
+  1.14      +0 -1      tcm-hybrid/include/logging.h
+  1.7       +4 -1      tcm-hybrid/include/setup.h.in
+  1.32      +0 -1      tcm-hybrid/include/tcm_io.h
+  1.62      +0 -2      tcm-hybrid/include/userlist.h
+  1.4       +0 -1      tcm-hybrid/include/wingate.h
+  1.145     +3 -0      tcm-hybrid/src/bothunt.c
+  1.104     +4 -0      tcm-hybrid/src/main.c
+  1.77      +1 -2      tcm-hybrid/src/tcm_io.c
+
+
+
 wcampbel    2002/06/01 08:36:17 EDT	(20020601_9)
 
   Modified files:

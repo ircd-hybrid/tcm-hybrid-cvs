@@ -1,3 +1,15 @@
+db          2002/05/26 21:08:32 EDT	(20020527_5)
+
+  Modified files:
+    etc                  tcm.cf 
+  Log:
+  - fixed spelling mistake
+  
+  Revision  Changes    Path
+  1.27      +2 -2      tcm-hybrid/etc/tcm.cf
+
+
+
 db          2002/05/26 20:57:51 EDT	(20020527_4)
 
   Modified files:

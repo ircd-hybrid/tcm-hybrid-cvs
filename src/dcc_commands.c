@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.151 2003/03/30 00:27:27 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.152 2003/04/09 05:02:54 bill Exp $ */
 
 #include "setup.h"
 
@@ -58,7 +58,6 @@ static void print_help(struct connection *connection_p, char *text);
 
 static void m_class(struct connection *connection_p, int argc, char *argv[]);
 static void m_classt(struct connection *connection_p, int argc, char *argv[]);
-static void m_listdump(struct connection *connection_p, int argc, char *argv[]);
 static void m_killlist(struct connection *connection_p, int argc,
 		       char *argv[]);
 static void m_kline(struct connection *connection_p, int argc, char **argv);
@@ -137,18 +136,6 @@ m_classt(struct connection *connection_p, int argc, char *argv[])
     send_to_connection(connection_p, "Usage: %s <class name>", argv[0]);
   else
     list_class(connection_p, argv[1], YES, NULL);
-}
-
-void
-m_listdump(struct connection *connection_p, int argc, char *argv[])
-{
-  if (argc != 2)
-  {
-    send_to_connection(connection_p, "Usage: %s <list name>", argv[0]);
-    return;
-  }
-
-  print_list(connection_p, argv[1]);
 }
 
 void
@@ -383,6 +370,8 @@ m_kaction(struct connection *connection_p, int argc, char *argv[])
   /* skip past .k bit */
   actionid = find_action(argv[0]+2);
 
+  /* .kdrone bill@ummm.E */
+  /* .kdrone billy-jon */
   if(argc == 2)
   {
     if((p = strchr(argv[1], '@')) != NULL)
@@ -399,10 +388,12 @@ m_kaction(struct connection *connection_p, int argc, char *argv[])
   }
   else
   {
+    /* .kdrone -l drones */
+    /* .kdrone 1440 -l drones */
     if ((argc == 3 && !strcasecmp(argv[1], "-l")) ||
         (argc == 4 && !strcasecmp(argv[2], "-l")))
     {
-      if ((actionid = find_list(argv[argc - 2])) == -1)
+      if ((actionid = find_list(argv[argc - 1])) == -1)
       {
         send_to_connection(connection_p, "No such list.");
         return;
@@ -432,25 +423,30 @@ m_kaction(struct connection *connection_p, int argc, char *argv[])
                          argv[1], userhost, actions[actionid].reason);
       }
     }
-    if((p = strchr(argv[2], '@')) != NULL)
-    {
-      *p++ = '\0';
-      userhost = get_method_userhost(actionid, NULL, argv[2], p);
-    }
+    /* .kdrone 1440 bill@ummm.E */
+    /* .kdrone 1440 billy-jon */
     else
     {
-      userhost = get_method_userhost(actionid, argv[2], NULL, NULL);
-    }
+      if((p = strchr(argv[2], '@')) != NULL)
+      {
+        *p++ = '\0';
+        userhost = get_method_userhost(actionid, NULL, argv[2], p);
+      }
+      else
+      {
+        userhost = get_method_userhost(actionid, argv[2], NULL, NULL);
+      }
 
-    if (userhost == NULL)
-    {
-      send_to_connection(connection_p,
-                         "Error in get_method_userhost().  Aborting...");
-      return;
+      if (userhost == NULL)
+      {
+        send_to_connection(connection_p,
+                           "Error in get_method_userhost().  Aborting...");
+        return;
+      }
+
+      send_to_server("KLINE %s %s :%s", 
+		     argv[1], userhost, actions[actionid].reason);
     }
-                    
-    send_to_server("KLINE %s %s :%s", 
-		   argv[1], userhost, actions[actionid].reason);
   }
 }
 
@@ -1439,9 +1435,6 @@ struct dcc_command class_msgtab = {
 struct dcc_command classt_msgtab = {
  "classt", NULL, {m_unregistered, m_classt, m_classt}
 };
-struct dcc_command listdump_msgtab = {
- "listdump", NULL, {m_unregistered, m_listdump, m_listdump}
-};
 struct dcc_command killlist_msgtab = {
  "killlist", NULL, {m_unregistered, m_killlist, m_killlist}
 };
@@ -1607,7 +1600,6 @@ init_commands(void)
 {
   add_dcc_handler(&class_msgtab);
   add_dcc_handler(&classt_msgtab);
-  add_dcc_handler(&listdump_msgtab);
   add_dcc_handler(&killlist_msgtab);
   add_dcc_handler(&kline_msgtab);
   add_dcc_handler(&kclone_msgtab);

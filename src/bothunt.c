@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.220 2003/03/30 00:27:27 bill Exp $
+ * $Id: bothunt.c,v 1.221 2003/04/09 05:02:54 bill Exp $
  */
 
 #include <stdio.h>
@@ -412,21 +412,39 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     return;
   }
 
-  /* Kline notice requested by Toast */
-  if (strstr(p, "added K-Line for"))
+
+  if (strstr(p, "-Line for"))
   {
-    send_to_all(NULL, FLAGS_VIEW_KLINES, "%s", p);
+    if (strstr(p, "added") == NULL)
+      return;
+
+#ifndef REPORT_KLINES
+    if (strstr(p, "K-Line"))
+      return;
+    else
+#endif
+      send_to_all(NULL, FLAGS_VIEW_KLINES, "%s", p);
     tcm_log(L_NORM, "%s", p);
     return;
   }
   else if (strstr(p, "added temporary "))
   {
+#ifndef REPORT_KLINES
+    if (strstr(p, "K-Line"))
+      return;
+#endif
+
     send_to_all(NULL, FLAGS_VIEW_KLINES, "%s", p);
     tcm_log(L_NORM, "%s", p);
     return;
   }
   else if (strstr(p, "has removed the "))
   {
+#ifndef REPORT_KLINES
+    if (strstr(p, "K-Line"))
+      return;
+#endif
+
     send_to_all(NULL, FLAGS_VIEW_KLINES, "%s", p);
     tcm_log(L_NORM, "%s", p);
     return;
@@ -489,6 +507,27 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     return;
   }
 #endif /* REPORT_GLINES */
+
+  if ((q = strstr(p, " has placed a local RESV")))
+  {
+    *q = '\0';
+    q+=41;
+
+    send_to_all(NULL, FLAGS_VIEW_KLINES,
+                "RESV for %s by %s",
+                q, p);
+    return;
+  }
+  else if ((q = strstr(p, " has removed the local RESV")))
+  {
+    *q = '\0';
+    q+=41;
+
+    send_to_all(NULL, FLAGS_VIEW_KLINES,
+                "UNRESV for %s by %s",
+                q, p);
+    return;
+  }
 
   if (strstr(p, "is rehashing"))
   {

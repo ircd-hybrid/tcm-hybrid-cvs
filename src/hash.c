@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.66 2003/03/30 00:27:27 bill Exp $
+ * $Id: hash.c,v 1.67 2003/04/09 05:02:54 bill Exp $
  */
 
 #include <stdio.h>
@@ -1271,7 +1271,7 @@ list_nicks(struct connection *connection_p, char *nick, int regex, char *list_na
                                "  %s (%s@%s) [%s] {%s} [%s]",
                                ptr->info->nick, ptr->info->username,
                                ptr->info->host, ptr->info->ip_host,
-                               ptr->info->class);
+                               ptr->info->class, ptr->info->gecos);
         }
         else
         {

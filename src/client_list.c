@@ -1,7 +1,7 @@
 /*
  * client_list.c: contains routines for managing lists of clients
  *
- * $Id: client_list.c,v 1.3 2003/03/30 00:47:41 bill Exp $
+ * $Id: client_list.c,v 1.4 2003/04/09 05:02:54 bill Exp $
  */
 
 #include "tcm.h"
@@ -19,6 +19,7 @@ static void init_list(int index);
 #ifdef CLIENT_LIST_LIFE
 void expire_lists();
 #endif
+struct dcc_command listdump_msgtab;
 struct dcc_command remove_msgtab;
 
 static int
@@ -61,6 +62,7 @@ init_client_lists()
 #ifdef CLIENT_LIST_LIFE
   eventAdd("expire_lists", expire_lists, NULL, 60);
 #endif
+  add_dcc_handler(&listdump_msgtab);
   add_dcc_handler(&remove_msgtab);
 }
 
@@ -107,12 +109,12 @@ print_list(struct connection *connection_p, char *name)
 
 #ifndef AGGRESSIVE_GECOS
     if (user->gecos[0] == '\0')
-      send_to_connection(connection_p, " %s (%s@%s) [%s] {%s}",
+      send_to_connection(connection_p, "  %s (%s@%s) [%s] {%s}",
                          user->nick, user->username, user->host,
                          user->ip_host, user->class);
     else
 #endif
-      send_to_connection(connection_p, " %s (%s@%s) [%s] {%s} [%s]",
+      send_to_connection(connection_p, "  %s (%s@%s) [%s] {%s} [%s]",
                          user->nick, user->username, user->host,
                          user->ip_host, user->class, user->gecos);
   }
@@ -259,6 +261,18 @@ find_list(char *name)
 }
 
 void
+m_listdump(struct connection *connection_p, int argc, char *argv[])
+{
+  if (argc != 2)  
+  {
+    send_to_connection(connection_p, "Usage: %s <list name>", argv[0]);
+    return;      
+  }
+
+  print_list(connection_p, argv[1]);
+}
+
+void
 m_remove(struct connection *connection_p, int argc, char *argv[])
 {
   struct user_entry *user;
@@ -301,6 +315,9 @@ m_remove(struct connection *connection_p, int argc, char *argv[])
   }
 }
 
+struct dcc_command listdump_msgtab = {
+ "listdump", NULL, {m_unregistered, m_listdump, m_listdump}
+};
 struct dcc_command remove_msgtab = {
  "remove", NULL, {m_unregistered, m_remove, m_remove}
 };

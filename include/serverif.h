@@ -1,7 +1,7 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
-/* $Id: serverif.h,v 1.10 2001/10/29 00:12:13 wcampbel Exp $ */
+/* $Id: serverif.h,v 1.11 2001/10/29 17:19:47 wcampbel Exp $ */
 
 /* Time out for no response from the server 
  * 5 minutes should be plenty to receive a PING from the server
@@ -51,7 +51,7 @@ void prnt(int,...);		/* - Hendrix (va'd by bill)*/
 void do_init(void);		
 int  bindsocket(char *);		
 void toserv(char *,...);	
-void sendtoalldcc(int type,...);	/* - Hendrix (va'd by bill) */
+void sendtoalldcc(int type,char *format,...);	/* - Hendrix (va'd by bill) */
 void report(int type, int channel_report_flag, char *format, ... );
 void sighandlr(int sig);
 void gracefuldie(int, char*, int);	

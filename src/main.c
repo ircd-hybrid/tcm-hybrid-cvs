@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.17 2001/10/29 03:56:31 db Exp $ */
+/* $Id: main.c,v 1.18 2001/10/29 17:19:47 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -275,17 +275,15 @@ int bindsocket(char *hostport)
  *
  */
 
-void sendtoalldcc(int type,...)
+void sendtoalldcc(int type,char *format,...)
 {
   va_list va;
   char msgbuf[MAX_BUFF];
-  char *format;
   int i;
   int echo;
 
-  va_start(va,type);
+  va_start(va,format);
 
-  format = va_arg(va, char *);
   /* we needn't check for \n here because it is done already in prnt() */
   vsnprintf(msgbuf, sizeof(msgbuf), format, va);
 

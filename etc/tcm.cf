@@ -59,7 +59,7 @@ A:wingate:dline:Open Wingate
 A:socks:dline:Open SOCKS server
 
 # optional message to send to users who request STATS p
-M:For basic information, see www.db.net/~db/tcm.html
+M:For basic information, see http://www.ircd-hybrid.org/tcm/
 
 # email address
 # clone logs etc. will get e-mailed to this address

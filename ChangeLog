@@ -1,3 +1,26 @@
+leeh        2002/05/24 16:52:47 EDT	(20020524_19)
+
+  Modified files:
+    include              modules.h tcm.h 
+    src                  bothunt.c commands.c main.c modules.c 
+                         parse.c tcm_io.c userlist.c wingate.c 
+  Log:
+  - ripped out the last of that wierd handler code..
+  
+  Revision  Changes    Path
+  1.20      +0 -26     tcm-hybrid/include/modules.h
+  1.32      +0 -1      tcm-hybrid/include/tcm.h
+  1.93      +2 -3      tcm-hybrid/src/bothunt.c
+  1.75      +0 -1      tcm-hybrid/src/commands.c
+  1.59      +0 -31     tcm-hybrid/src/main.c
+  1.35      +0 -58     tcm-hybrid/src/modules.c
+  1.14      +2 -3      tcm-hybrid/src/parse.c
+  1.16      +4 -5      tcm-hybrid/src/tcm_io.c
+  1.67      +4 -7      tcm-hybrid/src/userlist.c
+  1.32      +0 -5      tcm-hybrid/src/wingate.c
+
+
+
 db          2002/05/24 15:31:29 EDT	(20020524_18)
 
   Modified files:

@@ -1,3 +1,15 @@
+leeh        2002/05/28 21:47:34 EDT	(20020529_3)
+
+  Modified files:
+    src                  commands.c 
+  Log:
+  - removed an #ifdef IRCD_GOATCHEESE
+  
+  Revision  Changes    Path
+  1.111     +0 -6      tcm-hybrid/src/commands.c
+
+
+
 leeh        2002/05/28 21:19:35 EDT	(20020529_2)
 
   Modified files:

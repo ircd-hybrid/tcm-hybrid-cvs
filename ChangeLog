@@ -1,3 +1,15 @@
+wcampbel    2002/05/30 22:02:41 EDT	(20020531_1)
+
+  Modified files:
+    src                  actions.c 
+  Log:
+  Lee said the p reference in the else can go, GONE :)
+  
+  Revision  Changes    Path
+  1.18      +0 -2      tcm-hybrid/src/actions.c
+
+
+
 wcampbel    2002/05/30 21:54:23 EDT	(20020531_0)
 
   Modified files:

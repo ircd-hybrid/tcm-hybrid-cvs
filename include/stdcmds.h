@@ -42,4 +42,11 @@ struct s_testline
   int index;                       /* index in connections[] of who did command */
 };
 
+/* Prevent implicit declarations - Hwy */
+void do_a_kline(char *command_name, int kline_time, char *pattern,
+                char *reason, char *who_did_command);
+void suggest_action(int type, char *nick, char *user, char *host,
+                    int different, int identd);
+void print_help(int sock,char *text);
+
 #endif

@@ -13,6 +13,7 @@
 #include "modules.h"
 #include "userlist.h"
 #include "logging.h"
+#include "stdcmds.h"
 
 #undef REPORT_WINGATES_TO_CHANNEL
 #undef REPORT_SOCKS_TO_CHANNEL
@@ -48,7 +49,6 @@ char *_version="20012009";
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
 char wingate_class_list[MAXWINGATES][100];
 int  wingate_class_list_index;
-static void load_a_wingate_class(char *class);
 extern fd_set writefds;
 #endif
 

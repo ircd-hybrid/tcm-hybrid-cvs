@@ -71,4 +71,16 @@ void m_not_oper(int connnum, int argc, char *argv[]);
 void m_not_admin(int connnum, int argc, char *argv[]);
 #endif
 
+void init_hash_tables(void);
+void add_action(char *name, char *method, char *reason, int report);
+void set_action_type(char *name, int type);
+void set_action_reason(char *name, char *reason);
+void set_action_method(char *name, char *method);
+int action_log(char *name);
+int get_action_type(char *name);
+int get_action(char *name);
+char *get_action_method(char *name);
+char *get_action_reason(char *name);
+unsigned long local_ip(void);
+
 #endif

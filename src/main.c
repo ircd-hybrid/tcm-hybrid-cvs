@@ -60,7 +60,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.10 2001/10/27 01:53:59 bill Exp $";
+static char *version="$Id: main.c,v 1.11 2001/10/27 02:45:27 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -70,7 +70,6 @@ extern void init_tokenizer(void);
 extern void modules_init(void);
 extern void add_common_function(int type, void *function);
 
-unsigned long local_ip(void);
 struct connection connections[MAXDCCCONNS+1]; /* plus 1 for the server, silly */
 struct s_testline testlines;
 

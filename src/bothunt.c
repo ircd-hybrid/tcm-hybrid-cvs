@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.22 2001/10/27 01:53:59 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.23 2001/10/27 02:45:27 wcampbel Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -73,8 +73,6 @@ static void  removeuserhost( char *, struct plus_c_info *);
 static void  updateuserhost( char *nick1, char *nick2, char *userhost);
 static void  updatehash(struct hashrec**,char *,char *,char *); 
 static void  stats_notice(char *server_notice);
-static char to_find_k_user[MAX_USER];
-static char to_find_k_host[MAX_HOST];
 static int hash_func(char *string);
 static void addtohash(struct hashrec *table[],char *key,struct userentry *item);
 static char removefromhash(struct hashrec *table[], char *key, char *hostmatch,
@@ -172,19 +170,31 @@ static int find_banned_host(char *user, char *host)
   for (a=0;a<MAXBANS;++a)
     {
       if (wld[0])
-        if (wldwld(user, glines[a].user)) match = NO;
+        {
+          if (wldwld(user, glines[a].user))
+            match = NO;
+        }
       else
-        if (wldcmp(user, glines[a].user)) match = NO;
+        {
+          if (wldcmp(user, glines[a].user))
+            match = NO;
+        }
       if (match == YES && wld[1])
-        if (wldwld(host, glines[a].host)) match = NO;
+        {
+          if (wldwld(host, glines[a].host))
+            match = NO;
+        }
       else if (match == YES)
-        if (wldcmp(host, glines[a].host)) match = NO;
-      if (match == YES) break;
+        {
+          if (wldcmp(host, glines[a].host))
+            match = NO;
+        }
+      if (match == YES)
+        return a;
     }
-  if (match == YES)
-    return a;
-  else
-    return -1;
+
+  /* There was no match above, so we KNOW match == NO - Hwy */
+  return -1;
 }
 
 static void remove_gline(char *user, char *host)
@@ -260,10 +270,7 @@ static int gline_request(char *user, char *host, char *reason, time_t *when)
 
 void _ontraceuser(int connnum, int argc, char *argv[])
 {
-  char *nuh;
   struct plus_c_info userinfo;
-  char *userhost;
-  char *p;		/* used to clean up trailing garbage */
   char *class_ptr;	/* pointer to class number */
   int  is_oper;
   char *ip_ptr;
@@ -593,11 +600,13 @@ void onservnotice(int connnum, int argc, char *argv[])
   struct plus_c_info userinfo;
   time_t current_time;
   char *from_server;
-  char *nick;
-  char *user;
-  char *host;
+  /* XXX - Verify these down below */
+  char *nick = NULL;
+  char *user = NULL;
+  char *host = NULL;
   char *target;
-  char *p, *q, *r;
+  char *p;
+  char *q = NULL;
   char message[1024];
 #ifdef DEBUGMODE
   placed;
@@ -991,7 +1000,7 @@ void onservnotice(int connnum, int argc, char *argv[])
                       user);
            else
              snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host), "%s@%s",
-                      user);
+                      user, host);
            connect_flood[c].connect_count = 0;
            connect_flood[c].last_connect = current_time;
          }
@@ -1002,7 +1011,7 @@ void onservnotice(int connnum, int argc, char *argv[])
       *p = '\0';
       user = argv[9]+1;
       host = p+1;
-      if (host[strlen(host)-1] = ')') host[strlen(host)-1] = '\0';
+      if ((host[strlen(host)-1] == ')')) host[strlen(host)-1] = '\0';
       snprintf(message, sizeof(message), "%s@%s", user, host);
       c = -1;
       for (a=0;a<MAX_CONNECT_FAILS;++a)
@@ -1018,12 +1027,14 @@ void onservnotice(int connnum, int argc, char *argv[])
                   if (!okhost(user, host, get_action_type("cflood")))
                     {
                       if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
-                        if (user[0] == '~')
-                          b = NO;
-                        else
-                          b = YES;
-                        suggest_action(get_action_type("cflood"), argv[8], user, host, NO, b);
-                        connect_flood[a].user_host[0] = '\0';
+                        {
+                          if (user[0] == '~')
+                            b = NO;
+                          else
+                            b = YES;
+                          suggest_action(get_action_type("cflood"), argv[8], user, host, NO, b);
+                          connect_flood[a].user_host[0] = '\0';
+                        }
                     }
                   else
                     connect_flood[a].last_connect = current_time;

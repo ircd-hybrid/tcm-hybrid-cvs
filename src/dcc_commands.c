@@ -39,34 +39,36 @@
 #include "commands.h"
 #include "stdcmds.h"
 #include "modules.h"
+#include "wild.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.17 2001/10/20 22:13:56 db Exp $";
+static char *version="$Id: dcc_commands.c,v 1.18 2001/10/27 02:45:27 wcampbel Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
 static void set_actions(int sock, char *key, char *act, int time, char *reason);
-static void send_to_nick(char *to_nick,char *buffer);
-static void setup_allow(char *nick);
+/* XXX - static void send_to_nick(char *to_nick,char *buffer); */
+/* XXX - static void setup_allow(char *nick); */
 static void save_umodes(char *registered_nick, unsigned long type);
 static void load_umodes(int connect_id);
 static unsigned long find_user_umodes(char *nick);
-static int  test_ignore(char *line);
+/* XXX - static int  test_ignore(char *line); */
 static void set_umode(int connnum, char *flags, char *registered_nick);
 static void show_user_umodes(int sock, char *registered_nick);
 static void not_authorized(int sock);
 static void register_oper(int connnum, char *password, char *who_did_command);
 static void list_opers(int sock);
-static void list_tcmlist(int sock);
+/* XXX - static void list_tcmlist(int sock); */
 static void list_connections(int sock);
 static void list_exemptions(int sock);
 static void handle_disconnect(int sock,char *param2,char *who_did_command);
 static void handle_save(int sock,char *nick);
-static void handle_gline(int sock,char *pattern,char *reason,
-			 char *who_did_command);
+/* XXX - static void handle_gline(int sock,char *pattern,char *reason,
+**                                char *who_did_command);
+*/
 
 extern struct connection connections[];
 extern struct s_testline testlines;
@@ -90,7 +92,6 @@ dccproc(int connnum, int argc, char *argv[])
   char buff[MAX_BUFF];
   char dccbuff[MAX_BUFF];
   char who_did_command[2*MAX_NICK];
-  char fulluh[MAX_HOST+MAX_DOMAIN];
   int i;
   int opers_only = SEND_ALL_USERS; 	/* Is it an oper only message ? */
   int ignore_bot = NO;
@@ -98,7 +99,6 @@ dccproc(int connnum, int argc, char *argv[])
   int kline_time;
   struct common_function *temp;
 #ifndef NO_D_LINE_SUPPORT
-  char *reason;
   char *pattern;  /* u@h or nick */
 #endif
 #ifdef DEBUGMODE
@@ -1040,6 +1040,12 @@ dccproc(int connnum, int argc, char *argv[])
     }
 }
 
+#if 0
+
+/* XXX - Not used, keep it here for now if'ed out...check it in a little bit
+**       and remove it for good if it will never be used again - Hwy
+*/
+
 /*
  * setup_allow()
  *
@@ -1107,6 +1113,13 @@ setup_allow(char *nick)
     }
   /* whoops. if first_free < 0 then.. I'll just ignore with nothing said */
 }
+#endif
+
+#if 0
+
+/* XXX - Not used, keep it here for now if'ed out...check it in a little bit
+**       and remove it for good if it will never be used again - Hwy
+*/
 
 /*
  * send_to_nick
@@ -1137,6 +1150,13 @@ send_to_nick(char *to_nick,char *buffer)
 	}
     }
 }
+#endif
+
+#if 0
+
+/* XXX - Not used, keep it here for now if'ed out...check it in a little bit
+**       and remove it for good if it will never be used again - Hwy
+*/
 
 /*
  * test_ignore()
@@ -1176,6 +1196,7 @@ test_ignore(char *line)
     }
   return(YES);
 }
+#endif
 
 /*
  * set_actions
@@ -1217,7 +1238,7 @@ set_actions(int sock, char *key, char *act, int time, char *reason)
                  if (time) snprintf(actions[index].method, sizeof(actions[index].method),
                                     "%s %d", act, time);
                  else snprintf(actions[index].method, sizeof(actions[index].method), "%s",
-                               act, time);
+                               act);
                }
              if (reason && reason[0]) snprintf(actions[index].reason, 
                                                sizeof(actions[index].reason), "%s", reason);
@@ -1799,6 +1820,12 @@ list_opers(int sock)
     }
 }
 
+#if 0
+
+/* XXX - Not used, keep it here for now if'ed out...check it in a little bit
+**       and remove it for good if it will never be used again - Hwy
+*/
+
 /*
  * list_tcmlist
  *
@@ -1819,6 +1846,8 @@ list_tcmlist(int sock)
       prnt(sock,"%s@%s\n", tcmlist[i].theirnick, tcmlist[i].host);
     }
 }
+
+#endif
 
 /*
  * list_exemptions
@@ -1944,6 +1973,11 @@ handle_save(int sock,char *nick)
   save_prefs();
 }
 
+#if 0
+
+/* XXX - Not used, keep it here for now if'ed out...check it in a little bit
+**       and remove it for good if it will never be used again - Hwy
+*/
 
 /*
  * handle_gline
@@ -1959,8 +1993,6 @@ static void
 handle_gline(int sock,char *pattern,char *reason,
 			 char *who_did_command)
 {
-  char dccbuff[MAX_BUFF];
-
   if(pattern)
     {
       if( reason )
@@ -1996,6 +2028,8 @@ handle_gline(int sock,char *pattern,char *reason,
 	   "missing nick/user@host \".kline [nick]|[user@host] reason\"\n");
     }
 }
+
+#endif
 
 /*
  * not_authorized

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.79 2002/06/03 02:10:15 db Exp $
+ * $Id: tcm_io.c,v 1.80 2002/06/03 14:57:33 db Exp $
  */
 
 #include <stdio.h>
@@ -781,10 +781,10 @@ find_user_in_connections(const char *username)
       continue;
 
     if(strcasecmp(connections[i].registered_nick, username) == 0)
-      return i;
+      return (i);
   }
 
-  return -1;
+  return (INVALID);
 }
 
 /*
@@ -803,8 +803,8 @@ show_stats_p(const char *nick)
 
   for (i=0;i<maxconns;++i)
     {
-      /* ignore bad sockets */
-      if (connections[i].socket == INVALID)
+      /* ignore non clients */
+      if (connections[i].state != S_CLIENT)
 	continue;
 
       /* ignore invisible users/opers */

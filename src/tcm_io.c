@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.22 2002/05/25 16:08:45 wcampbel Exp $
+ * $Id: tcm_io.c,v 1.23 2002/05/25 16:10:47 db Exp $
  */
 
 #include <stdio.h>
@@ -558,7 +558,7 @@ print_to_server(const char *format, ...)
 /*
  * notice
  *
- * inputs	- nick to privmsg
+ * inputs	- nick to notice
  *		- format string to use
  * 		- var args to send
  * output	- none

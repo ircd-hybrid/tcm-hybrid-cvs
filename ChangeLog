@@ -1,3 +1,20 @@
+bill        2002/09/20 02:37:24 EDT	(20020920_5)
+
+  Modified files:
+    include              bothunt.h config.h userlist.h 
+    src                  bothunt.c 
+  Log:
+  - made link looker detection more aggressive
+  - added banning of repeated juped channel join requests
+  
+  Revision  Changes    Path
+  1.60      +1 -1      tcm-hybrid/include/bothunt.h
+  1.77      +6 -13     tcm-hybrid/include/config.h
+  1.89      +2 -1      tcm-hybrid/include/userlist.h
+  1.203     +82 -5     tcm-hybrid/src/bothunt.c
+
+
+
 bill        2002/09/20 01:49:04 EDT	(20020920_4)
 
   Modified files:

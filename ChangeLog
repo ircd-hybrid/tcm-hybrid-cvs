@@ -1,3 +1,28 @@
+db          2002/05/24 11:17:52 EDT	(20020524_12)
+
+  Modified files:
+    include              tcm_io.h 
+    modules              commands.c 
+    src                  bothunt.c logging.c main.c modules.c 
+                         parse.c stdcmds.c tcm_io.c userlist.c 
+  Log:
+  - renamed sendtoalldcc -> send_to_all (naming convention change)
+    removed incoming_connnum, I will add a send_to_partyline() later
+  
+  Revision  Changes    Path
+  1.5       +2 -3      tcm-hybrid/include/tcm_io.h
+  1.70      +18 -33    tcm-hybrid/modules/commands.c
+  1.90      +30 -54    tcm-hybrid/src/bothunt.c
+  1.28      +2 -2      tcm-hybrid/src/logging.c
+  1.56      +2 -2      tcm-hybrid/src/main.c
+  1.33      +10 -20    tcm-hybrid/src/modules.c
+  1.12      +5 -9      tcm-hybrid/src/parse.c
+  1.65      +12 -18    tcm-hybrid/src/stdcmds.c
+  1.12      +2 -4      tcm-hybrid/src/tcm_io.c
+  1.64      +4 -6      tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/24 11:01:34 EDT	(20020524_11)
 
   Modified files:

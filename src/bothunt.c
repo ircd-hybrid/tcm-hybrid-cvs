@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.65 2002/05/06 12:50:53 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.66 2002/05/07 17:02:44 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -1134,12 +1134,16 @@ void onservnotice(int connnum, int argc, char *argv[])
   /* Quarantined nick [bill] from user aa[bill@ummm.E] */
   case QUARANTINE:
     nick = q+2;
-    if ((q = strchr(nick, ']')) == NULL)
+    /* [ and ] are valid in nicks... find the FIRST space */
+    if ((q = strchr(nick, ' ')) == NULL)
       return;
+    /* Now take us back to the ] */
+    q--;
     *q = '\0';
     user = q+15;
 
-    if ((p = strchr(user, ']')) == NULL)
+    /* Find the RIGHTMOST ] */
+    if ((p = strrchr(user, ']')) == NULL)
       return;
     *p = '\0';
     for (a=0;a<MAX_CONNECT_FAILS;++a)

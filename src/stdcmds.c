@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.84 2002/05/31 01:54:18 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.85 2002/06/01 19:43:13 db Exp $ */
 
 #include "setup.h"
 
@@ -190,8 +190,6 @@ print_motd(int sock)
  *              - who asked for this (oper)
  * output       - NONE
  * side effects - someone gets k-lined
- *
- *
  */
 
 void
@@ -204,79 +202,36 @@ do_a_kline(int kline_time, char *pattern,
   if(reason == NULL)
     return;
 
-  /* Removed *@ prefix from kline parameter -tlj */
-#if 0
-  if(config_entries.hybrid)
-    {
-      if(kline_time)
-        send_to_all(FLAGS_ALL,
-                     "kline %d %s :%s added by oper %s",
-                     command_name,
-                     kline_time,
-                     pattern,
-                     format_reason(reason),
-                     who_did_command);
-      else
-        send_to_all(FLAGS_ALL,
-                     "%s %s :%s added by oper %s",
-                     command_name,
-                     pattern,
-                     format_reason(reason),
-                     who_did_command);
-    }
-  else
-    {
-      send_to_all(FLAGS_ALL,
-                   "%s %s :%s added by oper %s",
-                   command_name,
-                   pattern,
-                   format_reason(reason),
-                   who_did_command);
-    }
-#endif
   /* If the kline doesn't come from the local tcm
    * and tcm has been compiled to restrict remote klines
    * then just ignore it
    */
 
-  log_kline("KLINE",
-            pattern,
-            kline_time,
-            who_did_command,
-            reason);
+  log_kline("KLINE", pattern, kline_time, who_did_command, reason);
 
   if(config_entries.hybrid)
     {
 #ifdef HIDE_OPER_IN_KLINES
       if(kline_time)
-        print_to_server("KLINE %d %s :%s",
-               kline_time,pattern,
-               reason);
+        print_to_server("KLINE %d %s :%s", kline_time, pattern, reason);
       else
-        print_to_server("KLINE %s :%s",
-               pattern,
-               reason);
+        print_to_server("KLINE %s :%s", pattern, reason);
 #else
       if(kline_time)
-        print_to_server("KLINE %d %s :%s [%s]",
-               kline_time,pattern,reason,
-               who_did_command);
+        print_to_server("KLINE %d %s :%s [%s]", kline_time, pattern,reason,
+			who_did_command);
       else
-        print_to_server("KLINE %s :%s [%s]",
-               pattern,reason,
-               who_did_command);
+        print_to_server("KLINE %s :%s [%s]", pattern, reason,
+			who_did_command);
 #endif
     }
   else
     {
 #ifdef HIDE_OPER_IN_KLINES
-      print_to_server("KLINE %s :%s",
-             pattern,
-             format_reason(reason));
+      print_to_server("KLINE %s :%s", pattern, format_reason(reason));
 #else
-      print_to_server("KLINE %s :%s [%s]",
-             pattern,format_reason(reason),
-             who_did_command);
+      print_to_server("KLINE %s :%s [%s]", pattern,format_reason(reason),
+		      who_did_command);
 #endif
     }
 }
@@ -312,7 +267,7 @@ report_failures(int sock,int num)
 {
   int maxx;
   int foundany = NO;
-  struct failrec *tmp;
+  struct failrec *ptr;
   struct failrec *found;
 
   /* Print 'em out from highest to lowest */
@@ -321,37 +276,41 @@ report_failures(int sock,int num)
       maxx = num-1;
       found = NULL;
 
-      for (tmp = failures; tmp; tmp = tmp->next)
+      for (ptr = failures; ptr; ptr = ptr->next)
         {
-          if (tmp->failcount > maxx)
+          if (ptr->failcount > maxx)
             {
-              found = tmp;
-              maxx = tmp->failcount;
+              found = ptr;
+              maxx = ptr->failcount;
             }
         }
 
       if (!found)
         break;
 
-      if (!foundany++)
+      if (foundany == 0)
         {
+	  foundany++;
           print_to_socket(sock, "Userhosts with most connect rejections:\n");
-          print_to_socket(sock," %5d rejections: %s@%s%s\n", found->failcount,
-               (*found->user ? found->user : "<UNKNOWN>"), found->host,
-               (found->botcount ? " <BOT>" : ""));
+          print_to_socket(sock," %5d rejections: %s@%s\n",
+			  found->failcount,
+			  (*found->user ? found->user : "<UNKNOWN>"),
+			  found->host);
         }
       found->failcount = -found->failcount;   /* Yes, this is horrible */
     }
 
-  if (!foundany)
+  if (foundany == 0)
     {
       print_to_socket(sock,"No userhosts have %d or more rejections.\n",num);
     }
 
-  for( tmp = failures; tmp; tmp = tmp->next )
+  /* XXX what is this "Ugly, but it works" ? */
+
+  for (ptr = failures; ptr; ptr = ptr->next)
     {
-      if (tmp->failcount < 0)
-        tmp->failcount = -tmp->failcount;   /* Ugly, but it works. */
+      if (ptr->failcount < 0)
+        ptr->failcount = -ptr->failcount;   /* Ugly, but it works. */
     }
 }
 

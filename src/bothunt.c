@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.145 2002/06/01 13:04:25 wcampbel Exp $
+ * $Id: bothunt.c,v 1.146 2002/06/01 19:43:13 db Exp $
  */
 
 #include <stdio.h>
@@ -377,17 +377,17 @@ on_server_notice(int argc, char *argv[])
   /* Kline notice requested by Toast */
   if (strstr(p, "added K-Line for"))
   {
-    kline_report(p);
+    tcm_log(L_NORM, "%s", p);
     return;
   }
   else if (strstr(p, "added temporary "))
   {
-    kline_report(p);
+    tcm_log(L_NORM, "%s", p);
     return;
   }
   else if (strstr(p, "has removed the "))
   {
-    kline_report(p);
+    tcm_log(L_NORM, "%s", p);
     return;
   }
 
@@ -565,7 +565,7 @@ on_server_notice(int argc, char *argv[])
     if ((q = strchr(p, ' ')) == NULL)
       return;
     *q = '\0';
-    logfailure(p,NO);
+    log_failure(p);
     break;
 
   /* Nick change: From bill to aa [bill@ummm.E] */
@@ -689,7 +689,7 @@ on_server_notice(int argc, char *argv[])
     send_to_all(FLAGS_ALL, "I am banned from %s.  Exiting..", 
 		 config_entries.rserver_name[0] ?
 		 config_entries.rserver_name : config_entries.server_name);
-    tcm_log(L_ERR, "onservnotice Banned from server.  Exiting.");
+    tcm_log(L_ERR, "%s", "onservnotice Banned from server.  Exiting.");
     exit(-1);
     /* NOT REACHED */
     break;
@@ -1192,7 +1192,7 @@ void cs_nick_flood(char *snotice)
     return;
 
   send_to_all(FLAGS_WARN, "CS nick flood user_host = [%s@%s]", user, host);
-  tcm_log(L_NORM, "CS nick flood user_host = [%s@%s]\n", user, host);
+  tcm_log(L_NORM, "%s", "CS nick flood user_host = [%s@%s]\n", user, host);
   handle_action(act_flood, (*user != '~'), nick_reported, user, host, 0, 0);
 }
 

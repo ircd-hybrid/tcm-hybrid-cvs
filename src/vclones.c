@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.9 2002/06/01 12:36:16 wcampbel Exp $
+ * $Id: vclones.c,v 1.10 2002/06/01 19:43:14 db Exp $
  */
 
 #include <assert.h>
@@ -219,7 +219,7 @@ list_virtual_users(int sock, char *userhost, int regex)
   regex_t reg;
   regmatch_t m[1];
 #endif
-  char uhost[1024];
+  char uhost[MAX_USERHOST];
   int i;
   int num_found = 0;
 
@@ -244,7 +244,8 @@ list_virtual_users(int sock, char *userhost, int regex)
   {
     for (ipptr = ip_table[i]; ipptr; ipptr = ipptr->next)
     {
-      snprintf(uhost, 1024, "%s@%s", ipptr->info->user, ipptr->info->ip_host);
+      snprintf(uhost, MAX_USERHOST,
+	       "%s@%s", ipptr->info->user, ipptr->info->ip_host);
 #ifdef HAVE_REGEX_H
       if ((regex == YES &&
           !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS))
@@ -253,9 +254,10 @@ list_virtual_users(int sock, char *userhost, int regex)
       if (!match(userhost, uhost))
 #endif
       {
-        if (!num_found++)
+        if (num_found == 0)
           print_to_socket(sock, "The following clients match %s:\n", userhost);
 
+	num_found++;
         print_to_socket(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
              ipptr->info->user, ipptr->info->host, ipptr->info->ip_host,
              ipptr->info->class);
@@ -263,8 +265,7 @@ list_virtual_users(int sock, char *userhost, int regex)
     }
   }
   if (num_found > 0)
-    print_to_socket(sock, "%d match%sfor %s found\n", num_found,
-         (num_found > 1 ? "es " : " "), userhost);
+    print_to_socket(sock, "%d matches for %s found\n", num_found, userhost);
   else
     print_to_socket(sock, "No matches for %s found\n", userhost);
 }

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.62 2002/06/01 13:04:21 wcampbel Exp $ */
+/* $Id: userlist.h,v 1.63 2002/06/01 19:43:10 db Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -22,7 +22,6 @@ struct failrec
 {
   char user[MAX_NICK+1];
   char host[MAX_HOST];
-  int botcount;
   int failcount;
   struct failrec *next;
 };

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.21 2002/06/01 04:46:31 db Exp $
+ * $Id: hash.c,v 1.22 2002/06/01 19:43:13 db Exp $
  */
 
 #include <stdio.h>
@@ -69,7 +69,7 @@ free_hash_links(struct hash_rec *ptr)
   if (ptr == NULL)
     return;
 
-  for(; ptr != NULL; ptr = next_ptr);
+  for(; next_ptr != NULL; ptr = next_ptr);
     {
       next_ptr = ptr->next;
 
@@ -100,22 +100,30 @@ freehash(void)
 
   for (i=0; i<HASHTABLESIZE; i++)
     {
-      ptr = user_table[i];
-      free_hash_links(ptr);
-      user_table[i] = NULL;
+      if ((ptr = user_table[i]) != NULL)
+	{
+	  free_hash_links(ptr);
+	  user_table[i] = NULL;
+	}
 
-      ptr = host_table[i];
-      free_hash_links(ptr);
-      host_table[i] = NULL;
+      if ((ptr = host_table[i]) != NULL)
+	{
+	  free_hash_links(ptr);
+	  host_table[i] = NULL;
+	}
 
-      ptr = domain_table[i];
-      free_hash_links(ptr);
-      domain_table[i] = NULL;
+      if ((ptr = domain_table[i]) != NULL)
+	{
+	  free_hash_links(ptr);
+	  domain_table[i] = NULL;
+	}
 
 #ifdef VIRTUAL
-      ptr = ip_table[i];
-      free_hash_links(ptr);
-      ip_table[i] = NULL;
+      if ((ptr = ip_table[i]) != NULL)
+	{
+	  free_hash_links(ptr);
+	  ip_table[i] = NULL;
+	}
 #endif
     }
 
@@ -222,7 +230,7 @@ add_to_hash_table(struct hash_rec *table[],
  *		- pointer to hostname to match
  *		- pointer to username to match
  *		- pointer to nickname to match
- * output	- 0 if found and removed, 1 if not found
+ * output	- 1 if found and removed, 0 if not found
  * side effects	- removes entry from hash_table if found
  */
 
@@ -255,11 +263,11 @@ remove_from_hash_table(struct hash_rec *table[],
 	    }
 	}
       free(find);
-      return (0);	/* Found the item, and deleted. */
+      return (1);	/* Found the item, and deleted. */
     }
     prev = find;
   }
-  return (1);
+  return (0);
 }
 
 /*
@@ -297,6 +305,7 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
     strlcpy(new_user->ip_host, user_info->ip_host, MAX_IP);
   else
     strcpy(new_user->ip_host,"0.0.0.0");
+  strlcpy(new_user->ip_class_c, new_user->ip_host, MAX_IP);
   make_ip_class_c(new_user->ip_class_c);
 #endif
 
@@ -362,9 +371,7 @@ remove_user_host(char *nick, struct user_entry *user_info)
 	  if (config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from host table!\n",
-		      nick,
-		      user_info->user,
-		      user_info->host);
+		      nick, user_info->user, user_info->host);
 	    }
 	}
     }
@@ -377,9 +384,7 @@ remove_user_host(char *nick, struct user_entry *user_info)
 	  if (config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from domain table!\n",
-		      nick,
-		      user_info->user,
-		      user_info->host);
+		      nick, user_info->user, user_info->host);
 	    }
 	}
     }
@@ -392,9 +397,7 @@ remove_user_host(char *nick, struct user_entry *user_info)
 	  if (config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from user table!\n",
-		      nick,
-		      user_info->user,
-		      user_info->host);
+		      nick, user_info->user, user_info->host);
 	    }
 	}
     }
@@ -415,10 +418,7 @@ remove_user_host(char *nick, struct user_entry *user_info)
 	    {
 	      fprintf(outfile,
 		      "*** Error removing %s!%s@%s [%s] from iptable table!\n",
-		      nick,
-		      user_info->user,
-		      user_info->host,
-		      ip_class_c);
+		      nick, user_info->user, user_info->host, ip_class_c);
 	    }
 	}
     }
@@ -470,7 +470,7 @@ find_domain(char* host)
  
   ip_domain = host;
 
-  if (isdigit((int) *ip_domain))
+  if (isdigit(*ip_domain))
   {
     while (*ip_domain)
     {
@@ -693,7 +693,7 @@ check_host_clones(char *host)
       }
       else if (clonecount < 5)
       {
-        if (notice0[0])
+        if (notice0[0] != '\0')
         {
 	  report(FLAGS_WARN, CHANNEL_REPORT_CLONES, "%s", notice0);
 	  tcm_log(L_NORM, "%s", notice0);
@@ -937,10 +937,10 @@ kill_add_report(char *server_notice)
 	{
 	  if (!strcasecmp(nick, ptr->info->nick))
 	    {
-/* XXX FIX THIS FAST */
-char hack[128];
-sprintf(hack,"%s killed by %s: %s", nick, by, reason); 
-kline_report(hack);
+	      send_to_all(FLAGS_VIEW_KLINES, "%s killed by %s: %s",
+			  nick, by, reason);
+	      tcm_log(L_NORM, "%s killed by %s: %s\n",
+		      nick, by, reason);
 	      break;
 	    }
 	}

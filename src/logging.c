@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.45 2002/06/01 01:12:28 wcampbel Exp $
+ * $Id: logging.c,v 1.46 2002/06/01 19:43:13 db Exp $
  *
  * - db
  */
@@ -374,17 +374,10 @@ timestamp_log(FILE *fp)
  */
 
 void 
-log_kline(char *command_name,
-	       char *pattern,
-	       int  kline_time,
-	       char *who_did_command,
-	       char *reason)
+log_kline(char *command_name, char *pattern, int  kline_time,
+	       char *who_did_command, char *reason)
 {
-  struct tm *broken_up_time;
   FILE *fp_log;
-
-  current_time = time(NULL);
-  broken_up_time = localtime(&current_time);
 
 #ifdef KILL_KLINE_LOG
   if( (fp_log = fopen(KILL_KLINE_LOG,"a")) )
@@ -392,38 +385,19 @@ log_kline(char *command_name,
       if(config_entries.hybrid)
 	{
 	  if(kline_time)
-	    fprintf(fp_log,"%02d/%02d/%4d %02d:%02d %s %d %s by %s for %s\n",
-		    (broken_up_time->tm_mon)+1,
-		    broken_up_time->tm_mday,
-		    broken_up_time->tm_year+1900,
-		    broken_up_time->tm_hour,
-		    broken_up_time->tm_min,
-		    command_name,
-		    kline_time,
-		    pattern,
-		    who_did_command,reason);
+	    fprintf(fp_log,"%s %s %d %s by %s for %s\n",
+		    date_stamp(), command_name, kline_time,
+		    pattern, who_did_command, reason);
 	  else
-	    fprintf(fp_log,"%02d/%02d/%4d %02d:%02d %s %s by %s for %s\n",
-		    (broken_up_time->tm_mon)+1,
-		    broken_up_time->tm_mday,
-		    broken_up_time->tm_year+1900,
-		    broken_up_time->tm_hour,
-		    broken_up_time->tm_min,
-		    command_name,
-		    pattern,
-		    who_did_command,reason);
+	    fprintf(fp_log,"%s %s %s by %s for %s\n",
+		    date_stamp(), command_name, pattern, who_did_command,
+		    reason);
 	}
       else
 	{
-	  fprintf(fp_log,"%02d/%02d/%4d %02d:%02d %s %s by %s for %s\n",
-		  (broken_up_time->tm_mon)+1,
-		  broken_up_time->tm_mday,
-		  broken_up_time->tm_year+1900,
-		  broken_up_time->tm_hour,
-		  broken_up_time->tm_min,
-		  command_name,
-		  pattern,
-		  who_did_command,reason);
+	  fprintf(fp_log,"%s %s %s by %s for %s\n",
+		  date_stamp(), command_name, pattern, who_did_command,
+		  reason);
 	}
 
       (void)fclose(fp_log);
@@ -455,102 +429,50 @@ logclear(void)
         
 
 /*
- * logfailure()
+ * log_failure()
  *
  * inputs       - pointer to nick!user@host
- *              - if a bot reject or not
  * output       - NONE
  * side effects -
  */
 
 void 
-logfailure(char *nickuh,int botreject)
+log_failure(char *nickuh)
 {
   struct user_entry userinfo;
-  struct failrec *tmp, *hold = NULL;
+  struct failrec *ptr;
+  struct failrec *hold = NULL;
 
   chopuh(YES,nickuh,&userinfo); /* use trace form of chopuh() */
 
-  tmp = failures;
-  while (tmp != NULL)
+  for (ptr = failures; ptr; ptr = ptr->next)
     {
-      if(!strcasecmp(tmp->user,userinfo.user)&&!strcasecmp(tmp->host,
-                                                           userinfo.host))
+      if(!strcasecmp(ptr->user, userinfo.user) && 
+	 !strcasecmp(ptr->host, userinfo.host))
         {
           /* For performance, move the most recent to the head of the queue */
           if (hold != NULL)
             {
-              hold->next = tmp->next;
-              tmp->next = failures;
-              failures = tmp;
+              hold->next = ptr->next;
+              ptr->next = failures;
+              failures = ptr;
             }
           break;
         }
-      hold = tmp;
-      tmp = tmp->next;
+      hold = ptr;
     }
 
-  if (tmp == NULL)
+  if (ptr == NULL)
     {
-      tmp = (struct failrec *)xmalloc(sizeof(struct failrec));
+      ptr = (struct failrec *)xmalloc(sizeof(struct failrec));
 
-      strncpy(tmp->user,userinfo.user,11);
-      tmp->user[10] = '\0';
-      strncpy(tmp->host,userinfo.host,MAX_HOST);
-      tmp->host[79] = '\0';
-      tmp->failcount = tmp->botcount = 0;
-      tmp->next = failures;
-      failures = tmp;
+      strlcpy(ptr->user, userinfo.user, MAX_USER);
+      strlcpy(ptr->host, userinfo.host, MAX_HOST);
+      ptr->failcount = 0;
+      ptr->next = failures;
+      failures = ptr;
     }
-  if (botreject)
-    ++tmp->botcount;
-  ++tmp->failcount;
-}
-
-
-/*
- * kline_report
- *
- * inputs	- rest of notice from server
- * output	- NONE
- * side effects	- Reports klines when added.
- *
- * >irc2.blackened.com NOTICE ToastMON :*** Notice -- ToastMON added K-Line for
- * [fake@another.test.kline]: remove me too by Toast 02/21/97
- * 
- * - Toast
- *
- */
-
-void 
-kline_report(char *server_notice)
-{
-  FILE *fp_log;
-  struct tm *broken_up_time;
-
-  broken_up_time = localtime(&current_time);
-  
-  send_to_all(FLAGS_VIEW_KLINES,
-	       "*** %s", server_notice);
-
-/* Probably don't need to log klines. --- Toast */
-/* I think we need to log everything JIC - Dianora */
-/* Logging klines is important -bill */
-
-#ifdef KILL_KLINE_LOG
-  if ((fp_log = fopen(KILL_KLINE_LOG,"a")) != NULL)
-    {
-      fprintf(fp_log,"%02d/%02d/%d %02d:%02d %s\n",
-	      (broken_up_time->tm_mon)+1,
-	      broken_up_time->tm_mday,
-	      broken_up_time->tm_year+1900,
-	      broken_up_time->tm_hour,
-	      broken_up_time->tm_min,
-	      server_notice);
-
-      (void)fclose(fp_log);
-    }
-#endif
+  ++ptr->failcount;
 }
 
 /*

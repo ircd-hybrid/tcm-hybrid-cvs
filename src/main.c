@@ -47,9 +47,9 @@
 #include "userlist.h"
 #include "bothunt.h"
 #include "modules.h"
+#include "stdcmds.h"
 /*#include "token.h"
 #include "logging.h"
-#include "stdcmds.h"
 #include "commands.h"
 #include "wild.h"*/
 #include "serno.h"
@@ -59,7 +59,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.6 2001/10/14 00:02:10 bill Exp $";
+static char *version="$Id: main.c,v 1.7 2001/10/17 02:26:12 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -68,6 +68,7 @@ extern int load_all_modules(int log);
 
 unsigned long local_ip(void);
 struct connection connections[MAXDCCCONNS+1]; /* plus 1 for the server, silly */
+struct s_testline testlines;
 
 char ourhostname[MAX_HOST];   /* This is our hostname with domainname */
 char serverhost[MAX_HOST];    /* Server tcm will use. */

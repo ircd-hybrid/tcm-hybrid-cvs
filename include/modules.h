@@ -67,7 +67,7 @@ extern void sendtoalldcc(int type,...);
 extern void log_kline(char *command_name, char *pattern, int  kline_time, char *who_did_command,
                       char *reason);
 extern void toserv(char *format, ... );
-extern int okhost(char *user,char *host);
+extern int okhost(char *user,char *host,int);
 extern void report(int type, int channel_send_flag, char *format,...);
 extern char *date_stamp(void);
 

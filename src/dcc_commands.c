@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.14 2001/10/14 00:14:03 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.15 2001/10/17 02:26:12 bill Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -70,6 +70,7 @@ static void handle_gline(int sock,char *pattern,char *reason,
 			 char *who_did_command);
 
 extern struct connection connections[];
+extern struct s_testline testlines;
 extern char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
 /*
@@ -202,7 +203,9 @@ void dccproc(int connnum, int argc, char *argv[])
       break;
 
     case K_REHASH:
-      sendtoalldcc(SEND_ALL_USERS,"rehash requested by %s\n",who_did_command);
+      notice("billy-jon", "HEY!\n");
+      sendtoalldcc(SEND_ALL_USERS,"Rehash requested by %s",who_did_command);
+
       if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
 	toserv("STATS I\n");
       else
@@ -550,8 +553,29 @@ void dccproc(int connnum, int argc, char *argv[])
       list_opers(connections[connnum].socket);
     break;
 
+    case K_TESTLINE:
+      if (!(connections[connnum].type & TYPE_OPER))
+        {
+          prnt(connections[connnum].socket, "You are not registered\n");
+          return;
+        }
+      if (argc < 2)
+        {
+          prnt(connections[connnum].socket, "Usage: %s <mask>\n", argv[0]);
+          return;
+        }
+      if (!strcasecmp(argv[1], testlines.umask))
+        {
+          prnt(connections[connnum].socket, "Already pending %s\n", argv[1]);
+          return;
+        }
+      snprintf(testlines.umask, sizeof(testlines.umask), "%s", argv[1]);
+      testlines.index = connnum;
+      toserv("TESTLINE %s\n", argv[1]);
+      break;
+
     case K_ACTION:
-      if( connections[connnum].type & TYPE_OPER )
+      if (connections[connnum].type & TYPE_OPER )
         {
 	  switch (argc)
             {
@@ -696,10 +720,6 @@ void dccproc(int connnum, int argc, char *argv[])
 	    prnt(connections[connnum].socket, "Usage: .set [NOTICES|NONOTICES]\n");
 	  }
       }
-    break;
-
-    case K_TCMLIST:
-      list_tcmlist(connections[connnum].socket);
     break;
 
     case K_EXEMPTIONS:

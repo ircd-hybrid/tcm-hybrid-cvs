@@ -126,6 +126,7 @@ struct exception_entry
 {
   char user[MAX_NICK+1];
   char host[MAX_HOST];
+  int type;
 };
 
 void load_userlist(void);
@@ -135,7 +136,7 @@ int  wingate_class(char *class);
 void ban_manipulate(int sock,char flag,char *userlist);
 void save_prefs(void);
 int  islegal_pass(int connect_id,char *password);
-int  okhost(char *,char *);
+int  okhost(char *,char *,int);
 int  str2type(char *);
 char *type_show(unsigned long type);
 

@@ -13,7 +13,7 @@
 #include <string.h>
 #include "wild.h"
 
-static char *version="$Id: wild.c,v 1.2 2001/02/02 03:27:38 wcampbel Exp $";
+static char *version="$Id: wild.c,v 1.3 2001/10/17 02:26:12 bill Exp $";
 
 /*
 ** wldcmp()
@@ -64,9 +64,6 @@ int wldcmp (char *wildexp, char *regstr)
       }
   return 1;
 }
-
-#if 0
-/* Currently not in use, won't be removed yet thoug */
 
 /*
 ** wldwld()
@@ -125,4 +122,3 @@ char *wild1,*wild2;
     }
     return 1;
 }
-#endif

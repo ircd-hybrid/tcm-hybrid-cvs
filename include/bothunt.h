@@ -12,6 +12,17 @@ struct plus_c_info
     char ip[16];
   };
 
+struct banned_info
+  {
+    char *user;
+    char *host;
+    char *reason;
+    time_t *when;
+    int pending;
+    int duration;
+    struct banned_info *next;
+  };
+
 /* The code uses the index into the msgs_to_mon[] table as the
  * token value to hand to the switch.
  */
@@ -47,6 +58,11 @@ struct plus_c_info
 #define ILINEMASK	28
 #define ILINEFULL	29
 #define BANNED		30
+#define DRONE		31
+#define XLINEREJ	32
+#define INVALIDUH	33
+#define SERVER		34
+#define FAILEDOPER	35
 
 #define CLONECONNECTCOUNT 3
 #define CLONECONNECTFREQ  30

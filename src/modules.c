@@ -10,8 +10,8 @@
 #include <dirent.h>
 #include <unistd.h>
 #include "config.h"
-#include "commands.h"
 #include "tcm.h"
+#include "commands.h"
 #include "modules.h"
 #include "serverif.h"
 

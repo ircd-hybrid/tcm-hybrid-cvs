@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.15 2001/10/14 00:14:03 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.16 2001/10/17 02:26:12 bill Exp $";
 
 int doingtrace = NO;
 
@@ -333,11 +333,12 @@ void report(int type, int channel_send_flag, char *format,...)
  * char *suggest_host(char *host, int type)
  *
  * inputs       - raw hostname
+ *		- ident?
  *              - type of kline
  * output       - hostname stripped to klinable form
  * side effects - NONE
 */
-static char *suggest_host(char *host, int type)
+static char *suggest_host(char *host, int ident, int type)
 {
   static char work_host[MAX_HOST];
   char *p = work_host;
@@ -358,6 +359,57 @@ static char *suggest_host(char *host, int type)
 
   if (dots != 3)
     ip_number = NO;
+
+  if (type & get_action_type("cflood"))
+    return q;
+  if (type & get_action_type("link"))
+    return q;
+  if (type & get_action_type("clone"))
+    return q;
+  if (type & get_action_type("sclone"))
+    return q;
+  if (type & get_action_type("drone"))
+    return q;
+  if (type & get_action_type("wingate"))
+    return q;
+  if (type & get_action_type("socks"))
+    return q;
+  if (type & get_action_type("vclone"))
+    {
+      if (ip_number)  /* note: if a vclone is passing a non-ip host to us, something's wrong */
+        {
+           while (*p != '.')
+            if ((--p) == q)                 /* JUST in case */
+              break;
+
+          *(p++) = '.';
+          *(p++) = '*';
+          *p = '\0';
+
+          return q;
+        }
+      /* if we are still here, hopefully the older part of suggset_host() will catch it */
+    }
+  if (type & get_action_type("flood"))
+    {
+      if (!ident)
+        return q;
+    }
+  if (type & get_action_type("bot"))
+    {
+      if (!ident)
+        return q;
+    }
+  if (type & get_action_type("ctcp"))
+    {
+      if (!ident)
+        return q;
+    }
+  if (type & get_action_type("spambot"))
+    {
+      if (!ident)
+        return q;
+    }
 
   if (ip_number && !(type & get_action_type("clone")))
     {
@@ -445,7 +497,7 @@ void suggest_action(int type,
   if (user != NULL && host != NULL)
     {
       /* Don't kill or kline exempted users */
-      if(okhost(user, host))
+      if(okhost(user, host, type))
         return;
 
       if (strchr(host,'*'))
@@ -454,12 +506,50 @@ void suggest_action(int type,
       if (strchr(host,'?'))
         return;
 
-      if (identd)
+      if (identd && !different)
         strcpy(suggested_user,user);
+      else if (identd && different)
+        strcpy(suggested_user, "*");
       else
         strcpy(suggested_user,"~*");
 
-      suggested_host=suggest_host(host, type);
+      if (type & get_action_type("clone"))
+        {
+          if (identd)
+            strcpy(suggested_user, "*");
+          else
+            strcpy(suggested_user, "~*");
+        }
+      else if (type & get_action_type("sclone"))
+        {
+          if (identd)
+            strcpy(suggested_user, "*");
+          else
+            strcpy(suggested_user, "~*");
+        }
+      else if (type & get_action_type("drone"))
+        {
+          if (identd)
+            strcpy(suggested_user, "*");
+          else
+            strcpy(suggested_user, "~*");
+        }
+      else if (type & get_action_type("wingate"))
+        {
+          if (identd)
+            strcpy(suggested_user, "*");
+          else
+            strcpy(suggested_user, "~*");
+        }
+      else if (type & get_action_type("socks"))
+        {
+          if (identd)
+            strcpy(suggested_user, "*");
+          else
+            strcpy(suggested_user, "~*");
+        }
+
+      suggested_host=suggest_host(host, identd, type);
     }
 
   for (index=0;index<MAX_ACTIONS;++index)

@@ -21,8 +21,8 @@
 #define K_KILL    	18
 #define K_REGISTER 	19
 #define K_OPERS   	20
-#define K_TCMLIST 	21
-#define K_TCMCONN 	22
+#define K_TESTLINE	21
+/*			22 */
 /*			23 */
 #define K_UMODE		24
 #define K_CONNECTIONS 	25

@@ -14,4 +14,10 @@ void say(char *chan,...);
 void newnick(char *nick);
 void invite(char *nick,char *chan);
 
+struct s_testline
+{
+  char umask[MAX_USER+MAX_HOST+2]; /* umask for TESTLINE */
+  int index;                       /* index in connections[] of who did command */
+};
+
 #endif

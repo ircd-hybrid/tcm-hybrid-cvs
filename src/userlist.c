@@ -35,7 +35,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.21 2001/10/14 00:53:01 bill Exp $";
+static char *version="$Id: userlist.c,v 1.22 2001/10/17 02:26:12 bill Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct tcm_file_entry tcmlist[MAXTCMS];
@@ -52,15 +52,7 @@ static void load_a_ban(char *);
 static void load_a_user(char *,int);
 static void load_a_tcm(char *);
 static void load_a_host(char *);
-static void load_f_line(char *);
-
-#if 0
-/* Not used currently */
-static int flags_by_userhost(char *user, char *host);
-static int f_lined(char *user, char *host, int type);
-#endif
-
-struct f_entry *flines;
+static void load_e_line(char *);
 
 /*
  * load_config_file
@@ -478,20 +470,8 @@ void load_userlist()
 	      load_a_ban(line+2);
 	      break;
 
-	    case 'C':
-	      load_a_tcm(line+2);
-	      break;
-
 	    case 'E':
-	      load_a_host(line+2);
-	      break;
-
-	    case 'F':
-	      load_f_line(line+2);
-	      break;
-
-	    case 'N':
-	      load_a_user(line+2,1);
+	      load_e_line(line+2);
 	      break;
 
 	    case 'O':
@@ -553,12 +533,6 @@ void load_a_ban(char *line)
  *		  link_tcm is 1 if its a linked tcm incoming
  * output	- NONE
  * side effects	- userlist is updated
- */
-
-/*
- * made this into a nice, pretty, less memory managing function
- * more efficient now, and a less chance of mem leaks.
- *	-bill
  */
 
 static void load_a_user(char *line,int link_tcm)
@@ -633,6 +607,9 @@ static void load_a_user(char *line,int link_tcm)
 	  {
 	    switch(*q)
 	      {
+              case 'e':
+                type_int |= TYPE_ECHO;
+                break;
 	      case 's':
 		type_int |= TYPE_STAT;
 		break;
@@ -674,13 +651,6 @@ static void load_a_user(char *line,int link_tcm)
 		break;
 	      case 'K':
 		type_int |= TYPE_REGISTERED;
-		break;
-	      case 'R':
-		type_int |= (TYPE_CAN_REMOTE|TYPE_REGISTERED);
-		break;
-	      case 'B':
-	      case 'T':
-		type_int |= TYPE_TCM;
 		break;
 
 	      default:
@@ -770,57 +740,39 @@ static void load_a_tcm(char *line)
   tcmlist[tcm_list_index].port = 0;
 }
 
-int str2type(char *vltn) {
-  int ret;
-  if (!(ret = get_action_type(vltn))) return 0;
-  return ret;
-}
-
-/*
- * NEW!  F lines
- *
- *	Quick description:	F lines are like E lines, except they are
- *				violation specific, say you want to make a
- *				host exempt from cloning, but not spamming,
- *				you would use an F line.
- *
- *	  -bill
- */
-
-static void load_f_line(char *line) {
+static void load_e_line(char *line) {
   char *vltn, *p, *uhost;
-  struct f_entry *temp, *f = flines, *old = NULL;
   int type=0;
 #ifdef DEBUGMODE
   placed;
 #endif
 
   if (!(p = strchr(line, ':'))) return;
-  if (!(temp = (struct f_entry *)malloc(sizeof(struct f_entry)))) return;
-  temp->next = NULL;
   vltn = line;
-  uhost = p+1;
   *p = '\0';
-  snprintf(temp->uhost, sizeof(temp->uhost), "%s", uhost);
-  if (!strcmp(vltn, "*")) temp->type = -1;
-  else {
-    while (occurance(vltn, ' ') || occurance(vltn, ',')) {
-      if (!(p = strchr(vltn, ' '))) p = strchr(vltn, ',');
-      if (p == NULL) break;
+  uhost = p+1;
+  while (occurance(vltn, ' ') || occurance(vltn, ','))
+    {
+      if (!(p = strchr(vltn, ' ')))
+        p = strchr(vltn, ',');
+      if (p == NULL)
+        break;
+
       uhost = p+1;
       *p = '\0';
-      type |= str2type(vltn);
+      type |= get_action_type(vltn);
       vltn = uhost;
     }
-    type |= str2type(vltn);
-    temp->type = type;
-  }
-  while (f != NULL) {
-    old = f;
-    f = f->next;
-  }
-  if (old != NULL) old->next = temp;
-  else flines = temp;
+  type |= get_action_type(vltn);
+
+  p = strchr(uhost, '@');
+  *p = '\0';
+  snprintf(hostlist[host_list_index].user, sizeof(hostlist[host_list_index].user), "%s", uhost);
+  snprintf(hostlist[host_list_index].host, sizeof(hostlist[host_list_index].host), "%s", p+1);
+  hostlist[host_list_index].type = type;
+  ++host_list_index;
+  hostlist[host_list_index].user[0] = '\0';
+  hostlist[host_list_index].host[0] = '\0';
 }
 
 
@@ -1185,18 +1137,20 @@ int f_lined(char *user, char *host, int type) {
  * 
  * inputs	- user
  * 		- host
+ *		- type
  * output	- if this user@host is in the exception list or not
  * side effects	- none
  */
 
-int okhost(char *user,char *host)
+int okhost(char *user,char *host, int type)
 {
   int i;
 
   for(i=0;hostlist[i].user[0];i++)
     {
       if ((!wldcmp(hostlist[i].user,user)) &&
-	  (!wldcmp(hostlist[i].host,host)))
+	  (!wldcmp(hostlist[i].host,host)) &&
+          hostlist[i].type & type)
       return(YES);
     }
   return(NO);

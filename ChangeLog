@@ -1,3 +1,10 @@
+*** 20011028_9 by db
+- removed placed
+- redid server message handling lookup table
+- redid argv[] catenation
+
+
+
 *** 20011028_8 by wcampbel
 Removed a little more crud
 Made a small change for correctness

@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.56 2002/06/07 10:58:07 leeh Exp $ */
+/* $Id: wingate.c,v 1.57 2002/06/09 02:10:27 wcampbel Exp $ */
 
 
 #include <netdb.h>
@@ -20,6 +20,7 @@
 #include "stdcmds.h"
 #include "tcm_io.h"
 #include "actions.h"
+#include "hash.h"
 
 #ifdef DEBUGMODE
 #include <stdlib.h>   /* needed for atoi() */

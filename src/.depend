@@ -94,4 +94,5 @@ wild.o: wild.c ../include/wild.h
 wingate.o: wingate.c ../include/config.h ../include/tcm.h \
  ../include/modules.h ../include/userlist.h ../include/parse.h \
  ../include/logging.h ../include/stdcmds.h ../include/tcm_io.h \
- ../include/actions.h ../include/bothunt.h ../include/wingate.h
+ ../include/actions.h ../include/hash.h ../include/bothunt.h \
+ ../include/wingate.h

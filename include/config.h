@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.66 2002/06/04 04:43:10 db Exp $
+ * $Id: config.h,v 1.67 2002/06/09 02:10:25 wcampbel Exp $
  */
 
 /*
@@ -146,7 +146,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
  *
  * This must also be defined to detect SOCKS
  */
-#undef DETECT_WINGATE
+#define DETECT_WINGATE
 
 /*
  * define this to flag open socks

@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.28 2002/05/29 18:47:48 db Exp $
+# $Id: Makefile.in,v 1.29 2002/06/01 01:12:27 wcampbel Exp $
 
 CC = @CC@
 RM = @RM@
@@ -48,13 +48,13 @@ distclean: clean
 	${RM} -f Makefile
 
 .c.o:
-	${CC} ${CPPFLAGS} ${CFLAGS} ${DEFINES} -c $<
+	${CC} ${INCLUDES} ${CFLAGS} ${DEFINES} -c $<
 
 build: ${OBJECTS}
 	${CC} ${CFLAGS} ${LDFLAGS} -o ../bin/tcm ${OBJECTS} ${TCMLIBS}
 
 lint:
-	lint -aacgprxhH $(CPPFLAGS) $(DEFINES) $(SOURCES) >../lint.out
+	lint -aacgprxhH $(INCLUDES) $(DEFINES) $(SOURCES) >../lint.out
 
 depend:
 	${MKDEP} ${INCLUDES} ${SOURCES} > .depend

@@ -1,7 +1,7 @@
 /* handler.c
  *
  * contains the code for the dcc and server command handlers
- * $Id: handler.c,v 1.3 2002/05/31 01:54:18 wcampbel Exp $
+ * $Id: handler.c,v 1.4 2002/06/01 01:12:27 wcampbel Exp $
  */
 
 #include <assert.h>
@@ -266,7 +266,7 @@ add_numeric_handler(struct serv_numeric *ptr)
 {
   ptr->next = serv_numeric_table;
   serv_numeric_table = ptr;
-};
+}
 
 /* del_numeric_handler()
  *

@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.44 2002/05/30 20:54:07 db Exp $
+ * $Id: logging.c,v 1.45 2002/06/01 01:12:28 wcampbel Exp $
  *
  * - db
  */
@@ -261,7 +261,6 @@ chopuh(int istrace,char *nickuserhost,struct user_entry *userinfo)
 static FILE 
 *initlog(void)
 {
-  time_t current_time;
   struct tm *broken_up_time;
   char filename[MAX_BUFF];
   char last_filename[MAX_BUFF];
@@ -381,7 +380,6 @@ log_kline(char *command_name,
 	       char *who_did_command,
 	       char *reason)
 {
-  time_t current_time;
   struct tm *broken_up_time;
   FILE *fp_log;
 

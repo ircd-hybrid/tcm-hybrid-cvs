@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.16 2002/05/31 06:12:16 db Exp $
+ * $Id: hash.c,v 1.17 2002/06/01 01:12:28 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -566,7 +566,6 @@ check_host_clones(char *host)
   int reportedclones = 0;
   char *last_user="";
   int current_identd;
-  int different;
   time_t now, lastreport, oldest;
   char notice1[MAX_BUFF];
   char notice0[MAX_BUFF];
@@ -650,7 +649,6 @@ check_host_clones(char *host)
       }
 
       current_identd = YES;
-      different = NO;
 
       if (clonecount == 1)
 	last_user = find->info->user;
@@ -668,9 +666,6 @@ check_host_clones(char *host)
 	  current_identd = YES;
 	else
 	  ++current_user;
-
-	if (strcmp(last_user, current_user) && current_identd)
-	  different = YES;
 
 	handle_action(act_clone, current_identd, 
 		      find->info->nick, find->info->user,

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.142 2002/05/31 01:54:17 wcampbel Exp $
+ * $Id: bothunt.c,v 1.143 2002/06/01 01:12:27 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -192,9 +192,7 @@ on_stats_e(int argc, char *argv[])
   char *user;
   char *host;
   char body[MAX_BUFF];
-  char *p;
 
-  p = body;
   expand_args(body, MAX_BUFF-1, argc, argv);
 
 /* No point if I am maxed out going any further */
@@ -836,6 +834,7 @@ on_server_notice(int argc, char *argv[])
       connect_flood[c].connect_count = 0;
       connect_flood[c].last_connect = current_time;
     }
+    break;
 
   /* Invalid username: bill (!@$@&&&.com) */
   case INVALIDUH:

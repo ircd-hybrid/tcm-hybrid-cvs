@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.107 2002/05/31 01:54:19 wcampbel Exp $
+ * $Id: userlist.c,v 1.108 2002/06/01 01:12:28 wcampbel Exp $
  *
  */
 
@@ -558,6 +558,7 @@ load_config_file(char *file_name)
 #if 0
       _config(0, argc, argv);
 #endif
+      break;
     }
   }
 
@@ -673,8 +674,8 @@ save_prefs(void)
 			  actions[a].reason);
 		  actions[a].method |= 0x80000000;
 		}
-	      break;
 	    }
+          break;
 	default:
 	  for (a=0; a < argc - 1; a++)
 	    {

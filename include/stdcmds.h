@@ -1,7 +1,7 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.27 2002/05/30 01:49:44 leeh Exp $ */
+/* $Id: stdcmds.h,v 1.28 2002/06/02 22:16:54 db Exp $ */
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
@@ -13,8 +13,8 @@ void print_motd(int sock);
 void do_a_kline(int kline_time, char *pattern, char *reason,
                 char *who_did_command);
 
-void initopers(void);
-void inithash(void);
+void init_opers(void);
+void init_hash(void);
 void oper();
 
 struct s_testline

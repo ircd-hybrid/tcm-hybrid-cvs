@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.2 2002/05/30 04:48:50 bill Exp $
+ * $Id: dcc.c,v 1.3 2002/06/02 22:16:58 db Exp $
  */
 
 #include <stdio.h>
@@ -174,7 +174,7 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   if ((p = strchr(host,' ')) != NULL)
     *p = '\0';
 
-  if(isoper(user,host) == 0)
+  if(is_an_oper(user,host) == 0)
   {
     notice(nick,"You are not an operator");
     return (-1);

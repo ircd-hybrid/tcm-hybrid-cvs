@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.45 2002/06/01 13:04:21 wcampbel Exp $ */
+/* $Id: bothunt.h,v 1.46 2002/06/02 22:16:54 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -124,17 +124,15 @@ void bot_report_kline(char *,char *);
 
 void report_nick_flooders(int sock);
 void report(int type, int channel_send_flag, char *format,...);
-
 void init_link_look_table(void);
-
-extern void init_bothunt(void);
-extern void free_bothunt(void);
-extern void reload_bothunt(void);
-extern void on_trace_user(int argc, char *argv[]);
-extern void on_stats_e(int argc, char *argv[]);
-extern void on_stats_i(int argc, char *argv[]);
-extern void on_server_notice(int argc, char *argv[]);
-int    get_user_host(char **user_p, char **host_p, char *user_host);
+void init_bothunt(void);
+void clear_bothunt(void);
+void reload_bothunt(void);
+void on_trace_user(int argc, char *argv[]);
+void on_stats_e(int argc, char *argv[]);
+void on_stats_i(int argc, char *argv[]);
+void on_server_notice(int argc, char *argv[]);
+int  get_user_host(char **user_p, char **host_p, char *user_host);
 extern struct s_testline testlines;
 extern int doingtrace;
 #endif

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.108 2002/06/01 01:12:28 wcampbel Exp $
+ * $Id: userlist.c,v 1.109 2002/06/02 22:16:59 db Exp $
  *
  */
 
@@ -887,7 +887,7 @@ add_an_oper(int argc, char *argv[])
    * If this user is already loaded due to userlist.load
    * don't load them again.
    */
-  if(isoper(user,host) == 0)
+  if(is_an_oper(user,host) == 0)
   {
     strncpy(userlist[user_list_index].user, user,
             sizeof(userlist[user_list_index].user));
@@ -981,7 +981,7 @@ clear_userlist()
 }
 
 /*
- * isoper()
+ * is_an_oper()
  *
  * inputs	- user name
  * 		- host name
@@ -990,7 +990,7 @@ clear_userlist()
  */
 
 int
-isoper(char *user,char *host)
+is_an_oper(char *user,char *host)
 {
   int i;
 
@@ -998,9 +998,9 @@ isoper(char *user,char *host)
     {
       if ((!match(userlist[i].user,user)) &&
           (!wldcmp(userlist[i].host,host)))
-        return 1;
+        return(YES);
     }
-  return 0;
+  return(NO);
 }
 
 /* Checks for ok hosts to block auto-kline - Phisher */
@@ -1015,7 +1015,7 @@ isoper(char *user,char *host)
  */
 
 int
-okhost(char *user,char *host, int type)
+ok_host(char *user,char *host, int type)
 {
   int i, ok;
 
@@ -1041,7 +1041,7 @@ okhost(char *user,char *host, int type)
           ok++;
 
       if (ok == 2 && (hostlist[i].type & (1 << type)))
-        return YES;
+        return(YES);
     }
   return(NO);
 }
@@ -1116,7 +1116,7 @@ reload_user_list(int sig)
       print_to_server("STATS Y");
     }
 
-  initopers();
+  init_opers();
 
   send_to_all(FLAGS_ALL, "*** Caught SIGHUP ***\n");
 }
@@ -1210,7 +1210,7 @@ local_ip(char *ourhostname)
         }
     }
   /* NOT REACHED */
-  return 0L;
+  return (0L);
 }
 
 /*
@@ -1230,7 +1230,7 @@ wingate_class(char *class)
     {
       if(strcasecmp(wingate_class_list[i], class) == 0)
         {
-          return YES;
+          return(YES);
         }
     }
   return(NO);

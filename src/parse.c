@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.48 2002/05/31 01:54:18 wcampbel Exp $
+ * $Id: parse.c,v 1.49 2002/06/02 22:16:59 db Exp $
  */
 
 #include <stdio.h>
@@ -414,8 +414,10 @@ process_server(int conn_num, char *source, char *function, char *param)
       tcm_status.am_opered = YES;
       oper_time = time(NULL);
       send_umodes(tcm_status.my_nick);
-      inithash();
+      clear_hash();
       print_to_server("STATS Y");
+      doingtrace = YES;
+      print_to_server("TRACE");
       break;
 	
     case RPL_TRACEOPERATOR:
@@ -486,7 +488,7 @@ process_privmsg(char *nick, char *userhost, int argc, char *argv[])
     return;
   }
 
-  if (!isoper(user,host))
+  if (!is_an_oper(user,host))
   {
     notice(nick,"You are not an operator");
     return;
@@ -510,9 +512,12 @@ static void
 do_init(void)
 {
   oper();
-
   print_to_server("VERSION");
   join();
+  clear_bothunt();
+  clear_hash();
+  doingtrace = YES;
+  print_to_server("TRACE");
 }
 
 /*
@@ -557,7 +562,7 @@ send_umodes(char *nick)
     print_to_server("MODE %s :+bcdfknrswxyzl\nSTATS I", nick );
   else
     print_to_server("FLAGS +ALL\nSTATS E\nSTATS F");
-  initopers();
+  init_opers();
 }
 
 /*

@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.20 2002/06/02 02:20:44 db Exp $
+ * $Id: actions.c,v 1.21 2002/06/02 22:16:58 db Exp $
  */
 
 #include "setup.h"
@@ -75,6 +75,7 @@ m_action(int connnum, int argc, char *argv[])
 void
 init_actions(void)
 {
+  memset(&actions, 0, sizeof(actions));
   add_dcc_handler(&actions_msgtab);
   add_dcc_handler(&action_msgtab);
   init_one_action(act_cflood, "cflood", HS_CFLOOD, REASON_CFLOOD);
@@ -371,7 +372,7 @@ handle_action(int actionid, int idented, char *nick, char *user,
 
   strcpy(comment, "No actions taken");
 
-  if (okhost(user[0] ? user : "*", host, actionid) == 0)
+  if (ok_host(user[0] ? user : "*", host, actionid) == 0)
     {
       /* Now process the event, we got the needed data */
       if (actions[actionid].method & METHOD_TKLINE)

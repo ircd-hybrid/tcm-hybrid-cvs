@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.85 2002/06/01 19:43:13 db Exp $ */
+/* $Id: stdcmds.c,v 1.86 2002/06/02 22:16:59 db Exp $ */
 
 #include "setup.h"
 
@@ -237,7 +237,7 @@ do_a_kline(int kline_time, char *pattern,
 }
 
 /*
- * initopers()
+ * init_opers()
  *
  * inputs       - NONE
  * output       - NONE
@@ -247,19 +247,11 @@ do_a_kline(int kline_time, char *pattern,
  */
 
 void
-initopers(void)
+init_opers(void)
 {
   clear_userlist();
   load_userlist();
   print_to_server("STATS O");
-}
-
-void
-inithash()
-{
-  freehash();
-  doingtrace = YES;
-  print_to_server("TRACE");
 }
 
 void

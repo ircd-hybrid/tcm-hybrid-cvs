@@ -1,7 +1,7 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.17 2002/06/02 02:20:41 db Exp $ */
+/* $Id: hash.h,v 1.18 2002/06/02 22:16:54 db Exp $ */
 
 #define HASHTABLESIZE 3001
 
@@ -46,7 +46,7 @@ void add_user_host(struct user_entry *, int, int);
 void remove_user_host(char *, struct user_entry *);
 void update_nick(char *nick1, char *nick2);
 
-void freehash(void);
+void clear_hash(void);
 
 struct user_entry *find_nick_or_host(const char *find, int type);
 #define FIND_NICK 1

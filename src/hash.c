@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.24 2002/06/02 21:23:19 wcampbel Exp $
+ * $Id: hash.c,v 1.25 2002/06/02 22:16:58 db Exp $
  */
 
 #include <stdio.h>
@@ -84,7 +84,7 @@ free_hash_links(struct hash_rec *ptr)
 }
 
 /*
- * freehash()
+ * clear_hash()
  *
  * inputs               - NONE
  * output               - NONE
@@ -93,7 +93,7 @@ free_hash_links(struct hash_rec *ptr)
 */
 
 void 
-freehash(void)
+clear_hash(void)
 {
   struct hash_rec *ptr;
   int i;
@@ -126,8 +126,6 @@ freehash(void)
 	}
 #endif
     }
-
-  free_bothunt();
 }
 
 /*

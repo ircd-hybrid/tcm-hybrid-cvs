@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.32 2002/06/01 13:04:21 wcampbel Exp $
+ * $Id: tcm_io.h,v 1.33 2002/06/02 22:16:54 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -68,7 +68,6 @@ void send_to_partyline(int conn_num, const char *format,...);
 void close_connection(int connect_id);
 int connect_to_server(const char *hostport);
 int connect_to_given_ip_port(struct sockaddr_in *, int );
-
 
 #define EOL(c) ((c=='\r')||(c=='\n'))
 

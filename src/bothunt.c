@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.146 2002/06/01 19:43:13 db Exp $
+ * $Id: bothunt.c,v 1.147 2002/06/02 22:16:58 db Exp $
  */
 
 #include <stdio.h>
@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <time.h>
+#include <assert.h>
 
 #include "setup.h"
 #include "config.h"
@@ -1551,16 +1552,18 @@ init_bothunt(void)
   memset(&reconnect_clone,0, sizeof(reconnect_clone));
   init_link_look_table();
   init_actions();
-
-  if (connections[0].socket)
-  {
-    doingtrace = YES;
-    print_to_server("TRACE");
-  }
 }
 
+/*
+ * clear_bothunt
+ *
+ * inputs       - NONE
+ * output       - NONE
+ * side effects - nick change table is cleared out
+ */
+
 void
-free_bothunt(void)
+clear_bothunt(void)
 {
   int i;
 
@@ -1579,7 +1582,6 @@ free_bothunt(void)
  * side effects - list of current nick flooders is reported
  *
  *  Read the comment in add_to_nick_change_table as well.
- *
  */
 
 void 
@@ -1587,14 +1589,10 @@ report_nick_flooders(int sock)
 {
   int i;
   int reported_nick_flooder= NO;
-  time_t current_time;
   time_t time_difference;
   int time_ticks;
 
-  if(sock < 0)
-    return;
-
-  current_time = time((time_t *)NULL);
+  assert(sock >= 0);
 
   for(i = 0; i < NICK_CHANGE_TABLE_SIZE; i++)
     {

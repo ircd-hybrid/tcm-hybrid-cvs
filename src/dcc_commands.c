@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.118 2002/06/01 04:46:31 db Exp $ */
+/* $Id: dcc_commands.c,v 1.119 2002/06/02 22:16:58 db Exp $ */
 
 #include "setup.h"
 
@@ -592,7 +592,7 @@ m_rehash(int connnum, int argc, char *argv[])
       print_to_server("STATS Y");
     }
 
-  initopers();
+  init_opers();
   logclear();
 }
 
@@ -605,7 +605,8 @@ m_trace(int connnum, int argc, char *argv[])
                connections[connnum].registered_nick :
                connections[connnum].nick);
 
-  inithash();
+  clear_hash();
+  clear_bothunt();
   print_to_server("STATS Y");
 }
 

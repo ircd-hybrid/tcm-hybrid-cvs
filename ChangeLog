@@ -1,3 +1,21 @@
+joshk       2003/08/12 22:43:32 EDT	(20030813_0)
+
+  Modified files:
+    src                  client_list.c event.c hash.c seedrand.c 
+  Log:
+  - client_list.c, event.c, hash.c, seedrand.c: Fix a bunch of warnings.
+  (First of many)
+  
+  Reviewed by:    db
+  
+  Revision  Changes    Path
+  1.7       +1 -0      tcm-hybrid/src/client_list.c
+  1.14      +1 -0      tcm-hybrid/src/event.c
+  1.70      +1 -1      tcm-hybrid/src/hash.c
+  1.7       +1 -1      tcm-hybrid/src/seedrand.c
+
+
+
 bill        2003/05/31 21:19:09 EDT	(20030601_0)
 
   Modified files:

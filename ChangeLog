@@ -1,3 +1,38 @@
+leeh        2002/05/24 14:19:33 EDT	(20020524_14)
+
+  Modified files:
+    etc                  userlist.cf 
+    include              commands.h config.h modules.h userlist.h 
+    modules              commands.c wingate.c 
+    src                  bothunt.c main.c modules.c parse.c 
+                         tcm_io.c userlist.c 
+  Log:
+  - ripped out the O flag, with users gone its deprecated.  if you need
+    to allow users to dcc, just dont give them flags.
+  - TYPE_KLINE -> TYPE_SHOW_KLINES
+  - why was TYPE_REGISTERED used to indicate they could kline? dumb.
+    TYPE_REGISTERED -> TYPE_KLINE
+  - set TYPE_OPER when someone registers, if they dont have it, they havent
+    registered.
+  - dropped down to three handlers, oper, registered oper, admin.
+  
+  Revision  Changes    Path
+  1.19      +10 -14    tcm-hybrid/etc/userlist.cf
+  1.11      +5 -65     tcm-hybrid/include/commands.h
+  1.50      +5 -24     tcm-hybrid/include/config.h
+  1.19      +0 -1      tcm-hybrid/include/modules.h
+  1.36      +3 -3      tcm-hybrid/include/userlist.h
+  1.72      +80 -89    tcm-hybrid/modules/commands.c
+  1.29      +1 -1      tcm-hybrid/modules/wingate.c
+  1.91      +3 -3      tcm-hybrid/src/bothunt.c
+  1.57      +1 -2      tcm-hybrid/src/main.c
+  1.34      +6 -21     tcm-hybrid/src/modules.c
+  1.13      +1 -3      tcm-hybrid/src/parse.c
+  1.14      +5 -8      tcm-hybrid/src/tcm_io.c
+  1.65      +10 -13    tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/24 11:38:35 EDT	(20020524_13)
 
   Modified files:

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.133 2002/06/21 23:20:18 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.134 2002/06/22 09:21:49 leeh Exp $ */
 
 #include "setup.h"
 
@@ -50,7 +50,7 @@
 #endif
 
 static void register_oper(int connnum, char *password, char *who_did_command);
-static int  is_legal_pass(int connect_id,char *password);
+struct oper_entry *is_legal_pass(int connect_id,char *password);
 static void print_help(int sock,char *text);
 
 static void m_class(int connnum, int argc, char *argv[]);
@@ -148,7 +148,7 @@ m_killlist(int connnum, int argc, char *argv[])
   if(has_umode(connnum, FLAGS_INVS) == 0)
   {
     strncat(reason, " (requested by ", MAX_REASON - strlen(reason));
-    strncat(reason, connections[connnum].nick,
+    strncat(reason, connections[connnum].registered_nick,
             MAX_REASON - strlen(reason));
     strncat(reason, ")", MAX_REASON - strlen(reason));
   }
@@ -157,14 +157,14 @@ m_killlist(int connnum, int argc, char *argv[])
   if (strcasecmp(argv[1], "-r") == 0)
   {
     send_to_all(FLAGS_ALL, "*** killlist %s :%s by %s", argv[2],
-                reason, connections[connnum].nick);
+                reason, connections[connnum].registered_nick);
     kill_or_list_users(connections[connnum].socket, argv[2], YES, YES, reason);
   }
   else
 #endif
   {
     send_to_all(FLAGS_ALL, "*** killlist %s :%s by %s", argv[1],
-                reason, connections[connnum].nick);
+                reason, connections[connnum].registered_nick);
     kill_or_list_users(connections[connnum].socket, argv[1], NO, YES, reason);
   }
 }
@@ -770,15 +770,10 @@ register_oper(int connnum, char *password, char *who_did_command)
 {
   if(password != NULL)
   {
-    if(is_legal_pass(connnum, password))
+    struct oper_entry *user;
+
+    if((user = is_legal_pass(connnum, password)) != NULL)
     {
-      struct oper_entry *user;
-
-      user = find_user_in_userlist(connections[connnum].registered_nick);
-
-      if(user == NULL)
-        return;
-
       print_to_socket(connections[connnum].socket,
 		      "Set umodes from preferences");
       print_to_socket(connections[connnum].socket,
@@ -1021,7 +1016,7 @@ init_commands(void)
  * side effects - NONE
  */
 
-static int
+struct oper_entry *
 is_legal_pass(int connect_id, char *password)
 {
   slink_node *ptr;
@@ -1044,12 +1039,12 @@ is_legal_pass(int connect_id, char *password)
       {
         strlcpy(connections[connect_id].registered_nick, user->usernick, 
                 sizeof(connections[connect_id].registered_nick));
-	return 1;
+	return user;
       }
     }
   }
 
-  return 0;
+  return NULL;
 }
 
 /*

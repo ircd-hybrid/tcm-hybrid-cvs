@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.78 2002/06/21 23:20:15 leeh Exp $ */
+/* $Id: userlist.h,v 1.79 2002/06/22 09:21:47 leeh Exp $ */
 
 #include "tools.h"
 
@@ -68,7 +68,6 @@ struct oper_entry
   char usernick[MAX_NICK];
   char password[MAX_CONFIG];
   int type;
-  int changed;
 };
 
 struct exempt_entry
@@ -134,6 +133,7 @@ void exempt_summary();
 #define FLAGS_WALLOPS		0x020000 /* user can see OPERWALL */
 
 #define FLAGS_VALID		0x200000 /* valid userfile */
+#define FLAGS_CHANGED		0x400000 /* changed and needs saving */
 
 int  is_an_oper(char *user, char *host);
 void reload_userlist(void);

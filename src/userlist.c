@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.129 2002/06/21 23:20:18 leeh Exp $
+ * $Id: userlist.c,v 1.130 2002/06/22 09:21:50 leeh Exp $
  *
  */
 
@@ -223,7 +223,7 @@ set_umode(struct oper_entry *user, int admin, const char *umode)
   int j;
 
   /* mark the file for saving */
-  user->changed = 1;
+  user->type |= FLAGS_CHANGED;
 
   for(i = 0; umode[i]; i++)
   {
@@ -386,27 +386,27 @@ save_umodes(void *unused)
 {
   FILE *fp;
   slink_node *ptr;
-  struct oper_entry *target;
+  struct oper_entry *user;
   char user_pref[MAX_BUFF];
 
   for(ptr = user_list; ptr; ptr = ptr->next)
   {
-    target = ptr->data;
+    user = ptr->data;
     
-    if(target->changed == 0)
+    if((user->type & FLAGS_CHANGED) == 0)
       continue;
 
-    snprintf(user_pref, MAX_BUFF, "etc/%s.pref", target->usernick);
+    snprintf(user_pref, MAX_BUFF, "etc/%s.pref", user->usernick);
 
     if((fp = fopen(user_pref, "w")) != NULL)
     {
-      fprintf(fp, "%d\n", (target->type|FLAGS_VALID));
+      fprintf(fp, "%d\n", (user->type|FLAGS_VALID));
       (void)fclose(fp);
     }
     else
       send_to_all(FLAGS_ALL, "Couldn't open %s for writing", user_pref);
 
-    target->changed = 0;
+    user->type &= ~FLAGS_CHANGED;
   }
 }
     

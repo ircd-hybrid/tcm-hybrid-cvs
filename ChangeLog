@@ -1,3 +1,7 @@
+*** 20011123_2 by wcampbel
+More code cleanup, more XXX's
+
+
 *** 20011123_1 by wcampbel
 TCM Cleanups.  Look at the XXX's for more details.
 Moved report_multi*() to be static functions in modules/commands.c,

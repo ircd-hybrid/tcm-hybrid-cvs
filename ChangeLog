@@ -1,3 +1,19 @@
+wcampbel    2002/05/17 19:35:35 EDT	(20020518_0)
+
+  Modified files:
+    include              config.h 
+    modules              serverif.c 
+  Log:
+  Move the define's for the DCC ports into config.h, with a note to
+  administrators so that they can configure tcm to run through firewalls
+  better.
+  
+  Revision  Changes    Path
+  1.42      +10 -0     tcm-hybrid/include/config.h
+  1.60      +0 -3      tcm-hybrid/modules/serverif.c
+
+
+
 wcampbel    2002/05/13 18:44:03 EDT	(20020513_2)
 
   Modified files:

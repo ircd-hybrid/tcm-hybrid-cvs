@@ -1,3 +1,18 @@
+db          2002/06/01 22:20:45 EDT	(20020602_0)
+
+  Modified files:
+    include              hash.h 
+    src                  actions.c hash.c 
+  Log:
+  - more bloat reduction
+  
+  Revision  Changes    Path
+  1.17      +3 -2      tcm-hybrid/include/hash.h
+  1.20      +4 -4      tcm-hybrid/src/actions.c
+  1.23      +14 -33    tcm-hybrid/src/hash.c
+
+
+
 db          2002/06/01 15:43:16 EDT	(20020601_12)
 
   Modified files:

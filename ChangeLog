@@ -1,3 +1,18 @@
+leeh        2002/06/20 19:46:16 EDT	(20020621_0)
+
+  Modified files:
+    src                  dcc_commands.c hash.c parse.c 
+  Log:
+  - make clear_hash() send "STATS Y" and "TRACE" instead of having them
+    all over.
+  
+  Revision  Changes    Path
+  1.125     +0 -1      tcm-hybrid/src/dcc_commands.c
+  1.32      +5 -2      tcm-hybrid/src/hash.c
+  1.72      +0 -5      tcm-hybrid/src/parse.c
+
+
+
 wcampbel    2002/06/15 14:36:15 EDT	(20020615_0)
 
   Modified files:

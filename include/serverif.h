@@ -14,7 +14,7 @@ struct connection {
   char *buffer;
   char *buffend;
   int  socket;
-  int  type;			/* why was this a char? -pro */
+  int  type;			/* why was this a char? -bill */
   int  set_modes;		/* for set options */
   char user[MAX_USER];
   char host[MAX_HOST];
@@ -69,12 +69,12 @@ struct services_entry
   int    kline_suggested;
 };
 
-void prnt(int,...);		/* - Hendrix (va'd by pro)*/
+void prnt(int,...);		/* - Hendrix (va'd by bill)*/
 
 void do_init(void);		
 int  bindsocket(char *);		
 void toserv(char *,...);	
-void sendtoalldcc(int type,...);	/* - Hendrix (va'd by pro) */
+void sendtoalldcc(int type,...);	/* - Hendrix (va'd by bill) */
 void report(int type, int channel_report_flag, char *format, ... );
 void sighandlr(int sig);
 void gracefuldie(int, char*, int);	

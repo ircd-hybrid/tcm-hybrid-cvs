@@ -40,7 +40,7 @@
 #include "bothunt.h"
 #include "logging.h"
 
-static char *version="$Id: logging.c,v 1.8 2001/07/23 18:33:44 wcampbel Exp $";
+static char *version="$Id: logging.c,v 1.9 2001/07/29 00:37:13 bill Exp $";
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file
@@ -319,7 +319,7 @@ void kline_add_report(char *server_notice)
 
 /* Probably don't need to log klines. --- Toast */
 /* I think we need to log everything JIC - Dianora */
-/* Logging klines is important - pro */
+/* Logging klines is important -bill */
 
 #ifdef KILL_KLINE_LOG
   if( (fp_log = fopen(KILL_KLINE_LOG,"a")) )

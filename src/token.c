@@ -17,13 +17,13 @@
 #include "config.h"
 #include "tcm.h"
 #include "token.h"
-#include "bothunt.h"	/* pro */
+#include "bothunt.h"	/* bill */
 
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: token.c,v 1.6 2001/07/22 20:10:02 wcampbel Exp $";
+static char *version="$Id: token.c,v 1.7 2001/07/29 00:37:13 bill Exp $";
 
 static int hash_cmd(char *);
 

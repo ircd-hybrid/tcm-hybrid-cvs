@@ -38,7 +38,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.13 2001/07/23 18:33:42 wcampbel Exp $";
+static char *version="$Id: abuse.c,v 1.14 2001/07/29 00:37:11 bill Exp $";
 
 /*
  * do_a_kline()
@@ -167,7 +167,7 @@ void do_a_kline(char *command_name,int kline_time, char *pattern,
  * silly as I have had to split them elsewhere. 
  *
  *	- Dianora 
- *		Changes by pro, 6/2000.
+ *		Changes by bill, 6/2000.
  */
 
 void suggest_kill_kline(int reason,
@@ -184,7 +184,7 @@ void suggest_kill_kline(int reason,
   if(okhost(user, host))
     return;
 
-  if( (strchr(host,'*') == NULL) )
+  if( (strchr(host,'*') != NULL) )
     {
       report(SEND_ALL_USERS,
 	     CHANNEL_REPORT_SPOOF,
@@ -193,7 +193,7 @@ void suggest_kill_kline(int reason,
       return;
     }
 
-  if( (strchr(host,'?') == NULL) )
+  if( (strchr(host,'?') != NULL) )
     {
       report(SEND_ALL_USERS,
 	     CHANNEL_REPORT_SPOOF,
@@ -214,7 +214,7 @@ void suggest_kill_kline(int reason,
   suggested_host=suggest_host(host);
 /* 
  * Completely redone to conform to A: in config.
- * 	-pro 6/2000
+ * 	-bill 6/2000
  */
  switch (reason)
    {
@@ -494,10 +494,9 @@ void suggest_kill_kline(int reason,
 			nick,
 			suggested_user, suggested_host);
 
-	   toserv("%s %s@%s :%s\n",
+	   toserv("%s *@%s :%s\n",
 		  config_entries.wingate_act,
-		  suggested_user, suggested_host,
-		  config_entries.wingate_reason);
+		  host, config_entries.wingate_reason);
 	 }
        else if(strncasecmp(config_entries.wingate_act,"warn",4) == 0)
 	 {

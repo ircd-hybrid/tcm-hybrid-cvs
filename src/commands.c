@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.16 2001/07/23 18:33:43 wcampbel Exp $";
+static char *version="$Id: commands.c,v 1.17 2001/07/29 00:37:12 bill Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -2599,7 +2599,7 @@ static void set_umode(int connnum, char *flags, char *registered_nick)
   unsigned long type;
   unsigned long new_type;
 
-  /* UMODE! -pro */
+  /* UMODE! -bill */
   
   if(!registered_nick)
     {

@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.24 2001/07/23 18:33:44 wcampbel Exp $";
+static char *version="$Id: serverif.c,v 1.25 2001/07/29 00:37:13 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -375,7 +375,7 @@ int socks_bindsocket(char *nick,char *user,char *host,char *ip)
 
   if(found_slot == INVALID)
     return INVALID;
-
+  log("a\n");
   /* open an inet socket */
   if ((plug = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -710,9 +710,9 @@ time_t last_ping_time = 0;
 void rdpt(void)
 {
   int select_result;
-  int lnth;
+  int lnth, lnth2;
   int i;
-  char dccbuff[DCCBUFF_SIZE];
+  char dccbuff[DCCBUFF_SIZE], incomingbuff[BUFFERSIZE], *p, *q;
   struct timeval server_time_out;
   static time_t clones_last_check_time=(time_t)0;	/* clone check */
   static time_t remote_tcm_socket_setup_time=(time_t)0;
@@ -811,7 +811,6 @@ void rdpt(void)
 	    {
 	      char buffer[256];
 	      int nread;
-	      char *p;
 
 	      if(wingate[i].socket != INVALID)
 		{
@@ -837,15 +836,16 @@ void rdpt(void)
 		{
 		  int open_wingate = NO;
 
-		  if (FD_ISSET(wingate[i].socket, &readfds))
+		  if (FD_ISSET(wingate[i].socket, &writefds) || wingate[i].state == WINGATE_READING)
 		    {
+		      sleep(1);
 		      nread = read(wingate[i].socket,buffer,256);
 		      if(nread > 0)
 			{
 			  buffer[nread] = '\0';
 			  if( (p = strchr(buffer,'W')) )
 			    {
-			      if(strncasecmp(p,"wingate>",9) == 0)
+			      if(strncasecmp(p,"Wingate>",9) == 0)
 				{
 				  open_wingate = YES;
 				}
@@ -894,7 +894,7 @@ void rdpt(void)
 	      if (connections[i].socket != INVALID)
 		{
 		 /* Timeouts should only be for TCMs, not unregistered opers
-		     -pro */
+		     -bill */
 		  if( (connections[i].type & TYPE_PENDING & TYPE_TCM) &&
 		      ((connections[i].last_message_time + TCM_REMOTE_TIMEOUT)
 		       < time((time_t *)NULL)) )
@@ -903,53 +903,54 @@ void rdpt(void)
 		      continue;
 		    }
 
+		  /*
+		   * the code that was here, believe it or not, read from the socket
+		   * a byte at a time.  this had to be changed. 
+		   *
+		   * for those of you who notice this could is... less than perfect:
+		   * good for you, here's a cookie.
+		   *	-bill 7/28/01 
+		   */
+
 		  if( FD_ISSET(connections[i].socket, &readfds))
 		    {
-		      incoming_connnum = i;
-
-		      lnth =recv(connections[i].socket,connections[i].buffend,
-				 1,0);
-
-		      if (lnth == 0)
-			{
-			  if (i == 0)
-			    linkclosed("EOF from server");
-			  else
-			    closeconn(i);
-			  continue;
+			incoming_connnum = i;
+			bzero((char *)&incomingbuff, sizeof(incomingbuff));
+			lnth=read(connections[i].socket, incomingbuff, sizeof(incomingbuff));
+			if (!lnth) {
+			 if (i == 0) linkclosed("EOF from server");
+			 else closeconn(i);
+			 continue;
 			}
+			q = incomingbuff;
 
-		      if (*connections[i].buffend == '\n' ||
-			  *connections[i].buffend == '\r' ||
-			  connections[i].buffend - connections[i].buffer
-			  == BUFFERSIZE -1)
-			{
-			  *connections[i].buffend = '\0';
-			  connections[i].buffend = connections[i].buffer;
-			  if (*connections[i].buffer)
-                          {
-			    if (i == 0)
-                            {
-			      serverproc();
-			    } else
-			      {
-				if( (connections[i].type & TYPE_TCM) &&
-				    (connections[i].type & TYPE_PENDING))
-                                {
-				  connect_remote_tcm(i);
-				} else
-				  {
-				    connections[i].last_message_time =
-				      time((time_t *)NULL);
-				    dccproc(i);
-				  }
-			      }
-			  continue;
+			while ((p = strchr(q, '\n'))) {
+			  *p = '\0';
+			  if (lnth > (strlen(q)+1)) ++p;
+			  if (q[strlen(q)-1] == '\r')
+			    q[strlen(q)-1] = '\0';
+
+			  /* we'd rather lose data than segfault...  I think. */
+			  if (connections[i].buffer[0]) {
+			    strncat(connections[i].buffer, q, 
+				    BUFFERSIZE-strlen(connections[i].buffer));
+			    lnth2=1;
+			  } else strncpy(connections[i].buffer, q, BUFFERSIZE);
+#ifdef DEBUGMODE
+			  printf("<- %s\n", connections[i].buffer);
+#endif
+			  if (i == 0) serverproc();
+			  else if (connections[i].type & (TYPE_TCM | TYPE_PENDING))
+			    connect_remote_tcm(i);
+			  else {
+			    connections[i].last_message_time = time((time_t *)NULL);
+			    dccproc(i);
+			  }
+			  if (lnth2) bzero(connections[i].buffer, BUFFERSIZE);
+			  if (*p) q = p;
+			  else break;
 			}
-		      } else
-                      {
-			++connections[i].buffend;
-                      }
+			if (p == NULL) strncpy(connections[i].buffer, q, BUFFERSIZE);
 		    }
 		}
 	    }
@@ -1239,7 +1240,7 @@ static void on_services_notice(char *body)
  * side effects	- process server message
  */
 
-static void serverproc(void)
+static void serverproc()
 {
   char *buffer = connections[0].buffer;
   char *p;
@@ -1894,7 +1895,7 @@ static void proc(char *source,char *fctn,char *param)
     if ( (body = strchr(param,' ')) )
       {
 	*(body++) = '\0';
-	while (*body == ' ') ++body;	/* ircd-comstud wants to make it hard for us. -pro */
+	while (*body == ' ') ++body;	/* ircd-comstud wants to make it hard for us. -bill */
 	if (*body == ':')
 	  ++body;
       }
@@ -2402,7 +2403,7 @@ void init_remote_tcm_listen(void)
 /*
  * connect_remote_tcm()
  *
- * inputs	- INVALID or a connection number
+ * inputs	- INVALID or a connection number, buffer
  * output	- NONE
  * side effects	-
  */

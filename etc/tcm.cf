@@ -7,7 +7,7 @@
 #  If you do not do these commands, the tcm will not know when clients
 #  connect, and it will not know when they change nicknames.
 #
-#		-pro (proggy@earthling.net) 11/10/2000
+#		-bill (proggy@earthling.net) 11/10/2000
 
 # Username for the bot
 U:db

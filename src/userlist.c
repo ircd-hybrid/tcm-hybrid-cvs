@@ -32,7 +32,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.11 2001/07/23 02:34:09 wcampbel Exp $";
+static char *version="$Id: userlist.c,v 1.12 2001/07/29 00:37:14 bill Exp $";
 
 struct config_list config_entries;
 struct auth_file_entry userlist[MAXUSERS];
@@ -920,7 +920,7 @@ void load_a_ban(char *line)
 /*
  * made this into a nice, pretty, less memory managing function
  * more efficient now, and a less chance of mem leaks.
- *	-pro
+ *	-bill
  */
 
 static void load_a_user(char *line,int link_tcm)
@@ -1173,7 +1173,7 @@ int str2type(char *vltn) {
  *				host exempt from cloning, but not spamming,
  *				you would use an F line.
  *
- *	  -pro
+ *	  -bill
  */
 
 static void load_f_line(char *line) {

@@ -63,15 +63,15 @@
 #define MOTD_FILE "etc/motd.txt"
 #define PREF_FILE "etc/tcm.pref"
 
-#define LOGFILE "logs/log"
-#define LAST_LOG_NAME "logs/last_log_name"
+#define LOGFILE "log/tcm.log"
+#define LAST_LOG_NAME "log/last_log_name"
 
 /* Where nasty errors are logged */
-#define ERROR_LOG "logs/error.log"
+#define ERROR_LOG "log/error.log"
 
-#define KILL_KLINE_LOG "logs/kills_klines.log"
+#define KILL_KLINE_LOG "log/kills_klines.log"
 
-#define DEBUG_LOGFILE "logs/tcm.log"
+#define DEBUG_LOGFILE "log/tcm.log"
 
 /* How to email, sendmail would work too */
 /* This is obviously a SUNos ism */
@@ -172,7 +172,7 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
  *	  because it will try to gethostbyname() every client you have.
  *	  This will lag your tcm considerably, and may even cause it to
  *	  ping timeout.
- *		-pro (pro@oc12.net)
+ *		-bill (proggy@earthling.net)
  */
 #undef DETECT_DNS_SPOOFERS
 
@@ -181,7 +181,7 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
  *
  * This must also be defined to detect SOCKS
  */
-#define DETECT_WINGATE
+#undef DETECT_WINGATE
 
 /*
  * define this to flag open socks

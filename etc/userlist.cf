@@ -35,7 +35,7 @@
 #   +/-m will show this user MOTD requests
 #   +/-o will show this user LOCOPs
 #
-#		-pro 5/2000
+#		-bill 5/2000
 #
 # NOTE:	flags are now (as of tcm-hybrid 1.0.0) CASE SENSITIVE!!
 #	Also, flags which are lower case are dyanmic (meaning they can be
@@ -58,9 +58,9 @@ N:*.yoursite.com:lametcm:notrealpassword:OK
 #
 O:db@*.db.net:diane:notrealpassword:OKG
 #
-# pro@*.oc12.net has oper remote kline gline and is invisible to irc users
+# pro@*.parodius.com has oper remote kline gline and is invisible to irc users
 #
-O:pro@*.oc12.net:pro:notrealpassword:OKGi
+O:pro@*.parodius.com:pro:notrealpassword:OKGi
 #
 # db@*bsd.org has oper and remote kline but no gline privs
 #
@@ -80,10 +80,10 @@ E:*@*varner.com
 # Using a wildcard for the violation is the same as an E-line
 F:*:p@inept.rh.rit.edu
 
-# This will allow pro@oc12.net to run a bot
+# This will allow pro@parodius.com to run a bot
 
-F:bots:pro@oc12.net
-#  -bill (pro@oc12.net)
+F:bots:pro@parodius.com
+#  -bill (proggy@earthling.net)
 #
 # ignore these users if they try to do a /dcc chat
 B:loser@*lamesite.com

@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.46 2002/06/02 22:16:54 db Exp $ */
+/* $Id: bothunt.h,v 1.47 2002/06/04 21:30:11 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -112,15 +112,10 @@ struct link_look_entry link_look[LINK_LOOK_TABLE_SIZE];
 struct connect_flood_entry
 {
   char user_host[MAX_USER+MAX_HOST+2];
-  char ip[18];
+  char ip[MAX_IP];
   int  connect_count;
   time_t last_connect;
 };
-
-
-#ifdef BOT_WARN
-void bot_report_kline(char *,char *);
-#endif
 
 void report_nick_flooders(int sock);
 void report(int type, int channel_send_flag, char *format,...);
@@ -134,5 +129,4 @@ void on_stats_i(int argc, char *argv[]);
 void on_server_notice(int argc, char *argv[]);
 int  get_user_host(char **user_p, char **host_p, char *user_host);
 extern struct s_testline testlines;
-extern int doingtrace;
 #endif

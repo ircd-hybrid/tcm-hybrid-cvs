@@ -56,7 +56,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.18 2001/10/17 02:26:12 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.19 2001/10/17 13:38:12 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -993,9 +993,9 @@ void onservnotice(int connnum, int argc, char *argv[])
       break;
 
     case INVALIDUH:
-      p = strchr(argv[6], '@');
+      p = strchr(argv[9], '@');
       *p = '\0';
-      user = argv[6]+1;
+      user = argv[9]+1;
       host = p+1;
       if (host[strlen(host)-1] = ')') host[strlen(host)-1] = '\0';
       snprintf(message, sizeof(message), "%s@%s", user, host);
@@ -1017,7 +1017,7 @@ void onservnotice(int connnum, int argc, char *argv[])
                           b = NO;
                         else
                           b = YES;
-                        suggest_action(get_action_type("cflood"), argv[5], user, host, NO, b);
+                        suggest_action(get_action_type("cflood"), argv[8], user, host, NO, b);
                         connect_flood[a].user_host[0] = '\0';
                     }
                   else

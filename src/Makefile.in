@@ -12,7 +12,7 @@ DEFINES = -DDPATH=\"@DPATH@\"
 
 # -O for optimization.  Can't debug.  Use -g for debuggable code.
 CFLAGS = -g -O2
-LDFLAGS = -Wl,-export-dynamic
+LDFLAGS = @LDFLAGS@
 
 # Debuggers CFLAGS
 # CFLAGS = -g -O -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations

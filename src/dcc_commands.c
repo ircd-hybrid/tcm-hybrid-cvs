@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.24 2001/10/29 03:56:30 db Exp $ */
+/* $Id: dcc_commands.c,v 1.25 2001/10/29 04:12:41 db Exp $ */
 
 #include "setup.h"
 
@@ -91,21 +91,18 @@ dccproc(int connnum, int argc, char *argv[])
   char *pattern;  /* u@h or nick */
 #endif
 
-  if (buff[0]) memset(&buff, 0, sizeof(buff));
-  for (i=0;i<argc;++i)
-    {
-      strncat(buff, argv[i], sizeof(buff)-strlen(buff));
-      strncat(buff, " ", sizeof(buff)-strlen(buff));
-    }
-  if (buff[strlen(buff)-1] == ' ') buff[strlen(buff)-1] = '\0';
+  p = buff;
+  for (i = 0; i < argc; i++)
+  {
+    len = sprintf(p, "%s ", argv[i]);
+    p += len;
+  }
+  /* blow away last ' ' */
+  *--p = '\0';
+
   buffer=buff;
 
   who_did_command[0] = '\0';
-
-  /* remote message, either to a tcm command parser,
-     or from a user meant to be sent on to another remote tcm,
-     or, its from a remote tcm to be passed onto another tcm
-  */
 
   (void)snprintf(who_did_command,sizeof(who_did_command) - 1, "%s@%s",
 	         connections[connnum].nick,config_entries.dfltnick);
@@ -556,7 +553,7 @@ dccproc(int connnum, int argc, char *argv[])
       prnt(connections[connnum].socket, "Usage: %s <mask>\n", argv[0]);
       return;
     }
-    if (!strcasecmp(argv[1], testlines.umask))
+    if (strcasecmp(argv[1], testlines.umask) == 0)
     {
       prnt(connections[connnum].socket, "Already pending %s\n", argv[1]);
       return;
@@ -1067,48 +1064,52 @@ static void
 set_actions(int sock, char *key, char *act, int duration, char *reason)
 {
   int i;
-  if (!key)
+
+  if (key == NULL)
+  {
+    prnt(sock, "Current actions:\n");
+    for (i=0; i<MAX_ACTIONS; i++)
     {
-      prnt(sock, "Current actions:\n");
-      for (i=0;i<MAX_ACTIONS;++i)
-        {
-          if (actions[i].name[0])
-            {
-              if (!strcasecmp(actions[i].method, "warn"))
-                prnt(sock, "%s action: %s\n", actions[i].name, actions[i].method);
-              else
-                prnt(sock, "%s action: %s :%s\n", actions[i].name, actions[i].method,
-                     actions[i].reason);
-              if (actions[i].report)
-                prnt(sock, " Reported to channel\n");
-            }
-        }
+      if (actions[i].name[0])
+      {
+	if (strcasecmp(actions[i].method, "warn") == 0)
+	  prnt(sock, "%s action: %s\n", actions[i].name, actions[i].method);
+	else
+	  prnt(sock, "%s action: %s :%s\n", actions[i].name, actions[i].method,
+	       actions[i].reason);
+	if (actions[i].report != 0)
+	  prnt(sock, " Reported to channel\n");
+      }
     }
+  }
   else
+  {
+    for (i=0; i<MAX_ACTIONS; i++)
     {
-      for (i=0;i<MAX_ACTIONS;++i)
-        {
-          if (!wldcmp(key, actions[i].name) && actions[i].name[0])
-            {
-             if (act)
-               {
-                 if (duration) snprintf(actions[i].method, sizeof(actions[i].method),
-                                        "%s %d", act, duration);
-                 else snprintf(actions[i].method, sizeof(actions[i].method), "%s",
-                               act);
-               }
-             if (reason && reason[0]) snprintf(actions[i].reason, 
-                                               sizeof(actions[i].reason), "%s", reason);
-             if (!strcasecmp(actions[i].method, "warn"))
-                prnt(sock, "%s action: %s\n", actions[i].name, actions[i].method);
-              else
-                prnt(sock, "%s action: %s :%s\n", actions[i].name, actions[i].method,
-                     actions[i].reason);
-              if (actions[i].report)
-                prnt(sock, " Reported to channel\n");
-            }
-        }
+      if (!wldcmp(key, actions[i].name) && actions[i].name[0])
+      {
+	if (act)
+	  {
+	    if (duration) snprintf(actions[i].method,
+				   sizeof(actions[i].method),
+				   "%s %d", act, duration);
+	    else snprintf(actions[i].method, sizeof(actions[i].method), "%s",
+			  act);
+	  }
+	if (reason && reason[0]) snprintf(actions[i].reason, 
+					  sizeof(actions[i].reason),
+					  "%s", reason);
+
+	if (strcasecmp(actions[i].method, "warn") == 0)
+	  prnt(sock, "%s action: %s\n", actions[i].name, actions[i].method);
+	else
+	  prnt(sock, "%s action: %s :%s\n", actions[i].name, actions[i].method,
+	       actions[i].reason);
+	if (actions[i].report != 0)
+	  prnt(sock, " Reported to channel\n");
+      }
     }
+  }
 }
 
 /*
@@ -1141,7 +1142,7 @@ is_kline_time(char *p)
    * as a return value of non-zero is used to flag it as a temporary kline
    */
 
-  if(!result)
+  if(result == 0)
     result = 1;
   return(result);
 }
@@ -1169,218 +1170,215 @@ set_umode(int connnum, char *flags, char *registered_nick)
   /* UMODE! -bill */
   
   if(!registered_nick)
+  {
+    for( i=0; flags[i]; i++ )
     {
-      for( i=0; flags[i]; i++ )
+      switch(flags[i])
+      {
+      case 'e': type = TYPE_ECHO; break;
+      case 'i': type = TYPE_INVS; break;
+      case 'k': type = TYPE_KLINE; break;
+      case 'l': type = TYPE_LINK; break;
+      case 'm': type = TYPE_MOTD; break;
+      case 'o': type = TYPE_LOCOPS; break;
+      case 'p': type = TYPE_PARTYLINE; break;
+      case 's': type = TYPE_STAT; break;
+      case 'w': type = TYPE_WARN; break;
+
+      case 'I':
+	if (connections[connnum].type & TYPE_ADMIN)
+	  type = TYPE_INVM ;
+	else
+	  type = 0;
+	break;
+
+      case 'D':
+	if (connections[connnum].type & TYPE_ADMIN)
+	  type = TYPE_DLINE ;
+	else
+	  type = 0;
+	break;
+
+      case 'G':
+	if (connections[connnum].type & TYPE_ADMIN)
+	  type = TYPE_GLINE ;
+	else
+	  type = 0;
+	break;
+
+      case '-':
+	type = 0;
+	reversing=YES;
+	break;
+
+      case '+':
+	type = 0;
+	reversing=NO;
+	break;
+
+      default:
+	type = 0;
+	break;
+      }
+
+      if (reversing)
+	connections[connnum].type &= ~type;
+      else
+	connections[connnum].type |= type;
+    }
+
+    prnt(connections[connnum].socket,
+	 "Your flags are now: +%s\n",
+	 type_show(connections[connnum].type));
+
+    save_umodes(connections[connnum].registered_nick,
+		connections[connnum].type);
+  }
+  else /* only called if ADMIN */
+  {
+    for(z=0;z<MAXDCCCONNS;++z)
+    {
+      if(found)
+	break;
+
+      if (strcasecmp(registered_nick, connections[z].registered_nick) == 0)
+      {
+	found = YES;
+	
+	for(i=0; flags[i] ;i++)
 	{
 	  switch(flags[i])
+	  {
+	  case 'D': type = TYPE_DLINE; break;
+	  case 'G': type = TYPE_GLINE; break;
+	  case 'I': type = TYPE_INVM; break;
+	  case 'K': type = TYPE_REGISTERED; break;
+	  case 'O': type = TYPE_OPER; break;
+	  case 'S': type = TYPE_SUSPENDED; break;
+	  case 'e': type = TYPE_ECHO; break;
+	  case 'i': type = TYPE_INVS; break;
+	  case 'k': type = TYPE_KLINE; break;
+	  case 'l': type = TYPE_LINK; break;
+	  case 'm': type = TYPE_MOTD; break;
+	  case 'o': type = TYPE_LOCOPS; break;
+	  case 'p': type = TYPE_PARTYLINE; break;
+	  case 's': type = TYPE_STAT; break;
+	  case 'w': type = TYPE_WARN; break;
+	  case '-':
+	    reversing=YES;
+	    type = 0;
+	    break;
+	  case '+':
+	    reversing=NO;
+	    type = 0;
+	    break;
+	  default:
+	    type = 0;
+	    break;
+	  }
+
+	  /* don't let an admin suspend an admin */
+	  
+	  if( (connections[z].type & TYPE_ADMIN) &&
+	      (type&TYPE_SUSPENDED))
+	    continue;
+
+	  if(type)
+	  {
+	    if (!reversing)
+	      connections[z].type |= type;
+	    else
+	      connections[z].type &= ~type;
+	  }
+	}
+
+	prnt(connections[connnum].socket,
+	     "Flags for %s are now: +%s\n",
+	     registered_nick, type_show(connections[z].type));
+
+	prnt(connections[z].socket,
+	     "Flags for you changed by %s are now: +%s\n",
+	     connections[connnum].nick,
+	     type_show(connections[z].type));
+      }
+    }
+
+    if(!found)
+    {
+      new_type=0;
+
+      for(z=0;userlist[z].user[0];z++)
+      {
+	if(found)
+	  break;
+
+	if (strcasecmp(registered_nick, userlist[z].usernick) == 0)
+	{
+	  found = YES;
+
+	  new_type = userlist[z].type;
+
+	  /* default them to partyline */
+	  new_type |= TYPE_PARTYLINE;
+
+	  /* Only use user.pref if they exist */
+	  if( (type = find_user_umodes(registered_nick)) )
+	  {
+	    new_type &= TYPE_ADMIN;
+	    new_type |= type;
+	    type = 0;
+	  }
+
+	  for(i=0; flags[i] ;i++)
+	  {
+	    switch(flags[i])
 	    {
-	    case 'e': type = TYPE_ECHO; break;
-	    case 'i': type = TYPE_INVS; break;
+	    case 'I': type = TYPE_INVM; break;
+	    case 'K': type = TYPE_REGISTERED; break;
+	    case 'G': type = TYPE_GLINE; break;
+	    case 'D': type = TYPE_DLINE; break;
+	    case 'O': type = TYPE_OPER; break;
+	    case 'S': type = TYPE_SUSPENDED; break;
 	    case 'k': type = TYPE_KLINE; break;
-	    case 'l': type = TYPE_LINK; break;
-	    case 'm': type = TYPE_MOTD; break;
-	    case 'o': type = TYPE_LOCOPS; break;
 	    case 'p': type = TYPE_PARTYLINE; break;
 	    case 's': type = TYPE_STAT; break;
 	    case 'w': type = TYPE_WARN; break;
-
-	    case 'I':
-	      if (connections[connnum].type & TYPE_ADMIN)
-		type = TYPE_INVM ;
-	      else
-		type = 0;
-	      break;
-
-	    case 'D':
-	      if (connections[connnum].type & TYPE_ADMIN)
-		type = TYPE_DLINE ;
-	      else
-		type = 0;
-	      break;
-
-	    case 'G':
-	      if (connections[connnum].type & TYPE_ADMIN)
-		type = TYPE_GLINE ;
-	      else
-		type = 0;
-	      break;
-
+	    case 'e': type = TYPE_ECHO; break;
+	    case 'i': type = TYPE_INVS; break;
+	    case 'l': type = TYPE_LINK; break;
+	    case 'm': type = TYPE_MOTD; break;
+	    case 'o': type = TYPE_LOCOPS; break;
 	    case '-':
-	      type = 0;
 	      reversing=YES;
-	      break;
-
-	    case '+':
 	      type = 0;
-	      reversing=NO;
 	      break;
-
+	    case '+':
+	      reversing=NO;
+	      type = 0;
+	      break;
 	    default:
 	      type = 0;
 	      break;
 	    }
-
-	  if (reversing)
-	    connections[connnum].type &= ~type;
-	  else
-	    connections[connnum].type |= type;
-	}
-
-      prnt(connections[connnum].socket,
-	   "Your flags are now: +%s\n",
-	   type_show(connections[connnum].type));
-
-      save_umodes(connections[connnum].registered_nick,
-		  connections[connnum].type);
-    }
-  else /* only called if ADMIN */
-    {
-      for(z=0;z<MAXDCCCONNS;++z)
-	{
-	  if(found)
-	    break;
-
-	  if (!strcasecmp(registered_nick, connections[z].registered_nick))
-	    {
-	      found = YES;
-
-	      for(i=0; flags[i] ;i++)
-		{
-		  switch(flags[i])
-		    {
-		    case 'D': type = TYPE_DLINE; break;
-		    case 'G': type = TYPE_GLINE; break;
-		    case 'I': type = TYPE_INVM; break;
-		    case 'K': type = TYPE_REGISTERED; break;
-		    case 'O': type = TYPE_OPER; break;
-		    case 'S': type = TYPE_SUSPENDED; break;
-		    case 'e': type = TYPE_ECHO; break;
-		    case 'i': type = TYPE_INVS; break;
-		    case 'k': type = TYPE_KLINE; break;
-		    case 'l': type = TYPE_LINK; break;
-		    case 'm': type = TYPE_MOTD; break;
-		    case 'o': type = TYPE_LOCOPS; break;
-		    case 'p': type = TYPE_PARTYLINE; break;
-		    case 's': type = TYPE_STAT; break;
-		    case 'w': type = TYPE_WARN; break;
-		    case '-':
-		      reversing=YES;
-		      type = 0;
-		      break;
-		    case '+':
-		      reversing=NO;
-		      type = 0;
-		      break;
-		    default:
-		      type = 0;
-		      break;
-		    }
-
-		  /* don't let an admin suspend an admin */
-
-		  if( (connections[z].type & TYPE_ADMIN) &&
-		      (type&TYPE_SUSPENDED))
-		    continue;
-
-		  if(type)
-		    {
-		      if (!reversing)
-			connections[z].type |= type;
-		      else
-			connections[z].type &= ~type;
-		    }
-		}
-
-	      prnt(connections[connnum].socket,
-		   "Flags for %s are now: +%s\n",
-		   registered_nick, type_show(connections[z].type));
-
-	      prnt(connections[z].socket,
-		   "Flags for you changed by %s are now: +%s\n",
-		   connections[connnum].nick,
-		   type_show(connections[z].type));
-
-	    }
-	}
-
-      if(!found)
-	{
-	  new_type=0;
-
-	  for(z=0;userlist[z].user[0];z++)
-	    {
-	      if(found)
-		break;
-
-	      if (!strcasecmp(registered_nick, userlist[z].usernick))
-		{
-		  found = YES;
-
-		  new_type = userlist[z].type;
-
-		  /* default them to partyline */
-		  new_type |= TYPE_PARTYLINE;
-
-		  /* Only use user.pref if they exist */
-		  if( (type = find_user_umodes(registered_nick)) )
-		    {
-		      new_type &= TYPE_ADMIN;
-		      new_type |= type;
-		      type = 0;
-		    }
-
-		  for(i=0; flags[i] ;i++)
-		    {
-		      switch(flags[i])
-			{
-			case 'I': type = TYPE_INVM; break;
-			case 'K': type = TYPE_REGISTERED; break;
-			case 'G': type = TYPE_GLINE; break;
-			case 'D': type = TYPE_DLINE; break;
-			case 'O': type = TYPE_OPER; break;
-			case 'S': type = TYPE_SUSPENDED; break;
-			case 'k': type = TYPE_KLINE; break;
-			case 'p': type = TYPE_PARTYLINE; break;
-			case 's': type = TYPE_STAT; break;
-			case 'w': type = TYPE_WARN; break;
-			case 'e': type = TYPE_ECHO; break;
-			case 'i': type = TYPE_INVS; break;
-			case 'l': type = TYPE_LINK; break;
-			case 'm': type = TYPE_MOTD; break;
-			case 'o': type = TYPE_LOCOPS; break;
-			case '-':
-			  reversing=YES;
-			  type = 0;
-			  break;
-			case '+':
-			  reversing=NO;
-			  type = 0;
-			  break;
-			default:
-			  type = 0;
-			  break;
-			}
 		      
-		      if( (new_type & TYPE_ADMIN) &&
-			  (type&TYPE_SUSPENDED))
-			continue;
+	    if( (new_type & TYPE_ADMIN) &&
+		(type&TYPE_SUSPENDED))
+	      continue;
 
-		      if (!reversing)
-			new_type |= type;
-		      else
-			new_type &= ~type;
-		    }
-
-		  prnt(connections[connnum].socket,
-		       "Startup flags for %s are now: +%s\n",
-		       registered_nick, type_show(new_type));
-
-		  save_umodes(registered_nick, new_type);
-
-		}
-	    }
+	    if (!reversing)
+	      new_type |= type;
+	    else
+	      new_type &= ~type;
+	  }
+	  
+	  prnt(connections[connnum].socket,
+	       "Startup flags for %s are now: +%s\n",
+	       registered_nick, type_show(new_type));
+	  save_umodes(registered_nick, new_type);
 	}
+      }
     }
+  }
 }
 
 /*
@@ -1398,14 +1396,15 @@ save_umodes(char *registered_nick, unsigned long type)
   FILE *fp;
   char user_pref[MAX_BUFF];
 
-  (void)snprintf(user_pref,sizeof(user_pref) - 1,"etc/%s.pref",registered_nick);
+  (void)snprintf(user_pref,sizeof(user_pref) - 1,
+		 "etc/%s.pref",registered_nick);
 
-  if(!(fp = fopen(user_pref,"w")))
-    {
-      sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s for write\n",
-		   user_pref );
-      return;
-    }
+  if((fp = fopen(user_pref,"w")) == NULL)
+  {
+    sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s for write\n",
+		 user_pref );
+    return;
+  }
 
   fprintf(fp,"%lu\n",
 	  type & ~(TYPE_ADMIN|TYPE_PENDING));
@@ -1432,26 +1431,25 @@ load_umodes(int connect_id)
   (void)snprintf(user_pref,sizeof(user_pref) - 1,"etc/%s.pref",
                 connections[connect_id].registered_nick);
 
-  if(!(fp = fopen(user_pref,"r")))
+  if((fp = fopen(user_pref,"r")) == NULL)
+  {
+    if((fp = fopen(user_pref,"w")) == NULL)
     {
-      if(!(fp = fopen(user_pref,"w")))
-	{
-	  sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s for write\n",
-		       user_pref );
-	  return;
-	}
-      type = connections[connect_id].type;
-      fprintf(fp,"%lu\n",
-	      type & ~(TYPE_ADMIN|TYPE_PENDING));
-      (void)fclose(fp);
+      sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s for write\n",
+		   user_pref );
       return;
     }
+    type = connections[connect_id].type;
+    fprintf(fp,"%lu\n", type & ~(TYPE_ADMIN|TYPE_PENDING));
+    (void)fclose(fp);
+    return;
+  }
 
   fgets(type_string,30,fp);
   (void)fclose(fp);
 
-  if( (p = strchr(type_string,'\n')) )
-     *p = '\0';
+  if((p = strchr(type_string,'\n')) != NULL)
+    *p = '\0';
   
   sscanf(type_string,"%lu",&type);
   type &= ~(TYPE_ADMIN|TYPE_PENDING);
@@ -1460,9 +1458,9 @@ load_umodes(int connect_id)
   connections[connect_id].type |= type;
 
   if( type & TYPE_SUSPENDED )
-    {
-      type = type & TYPE_SUSPENDED;
-    }
+  {
+    type = type & TYPE_SUSPENDED;
+  }
 
   prnt(connections[connect_id].socket, "Set umodes from %s\n", user_pref );
   prnt(connections[connect_id].socket, "Your current flags are now: %s\n",
@@ -1486,23 +1484,24 @@ find_user_umodes(char *registered_nick)
   char *p;
   int  unsigned long type;
 
-  (void)snprintf(user_pref,sizeof(user_pref) - 1,"etc/%s.pref",registered_nick);
+  (void)snprintf(user_pref,sizeof(user_pref) - 1,
+		 "etc/%s.pref",registered_nick);
 
-  if(!(fp = fopen(user_pref,"r")))
-    {
-      return 0L;
-    }
+  if ((fp = fopen(user_pref,"r")) == NULL)
+  {
+    return 0L;
+  }
 
-  if( !(fgets(type_string,30,fp)) )
-    {
-      (void)fclose(fp);
-      return 0L;
-    }
+  if ((fgets(type_string,30,fp)) == NULL)
+  {
+    (void)fclose(fp);
+    return 0L;
+  }
 
   (void)fclose(fp);
 
-  if( (p = strchr(type_string,'\n')) )
-     *p = '\0';
+  if((p = strchr(type_string,'\n')) != NULL)
+    *p = '\0';
 
   sscanf(type_string,"%lu",&type);
 
@@ -1532,38 +1531,39 @@ show_user_umodes(int sock, char *registered_nick)
   int  found = NO;
 
   for(i=0; userlist[i].user[0]; i++)
+  {
+    if (strcasecmp(registered_nick, userlist[i].usernick) == 0)
     {
-      if (!strcasecmp(registered_nick, userlist[i].usernick))
-	{
-	  type = userlist[i].type;
-	  found = YES;
-	  break;
-	}
+      type = userlist[i].type;
+      found = YES;
+      break;
     }
+  }
 
   if(!found)
-    {
-      prnt(sock,"Can't find user [%s]\n", registered_nick );
-      return;
-    }
+  {
+    prnt(sock,"Can't find user [%s]\n", registered_nick );
+    return;
+  }
      
-  (void)snprintf(user_pref,sizeof(user_pref) - 1,"etc/%s.pref",registered_nick);
+  (void)snprintf(user_pref,sizeof(user_pref) - 1,
+		 "etc/%s.pref",registered_nick);
 
-  if(!(fp = fopen(user_pref,"r")))
-    {
-      prnt(sock,"%s user flags are %s\n", 
-	   registered_nick,
-	   type_show(type));
-      return;
-    }
+  if((fp = fopen(user_pref,"r")) == NULL)
+  {
+    prnt(sock,"%s user flags are %s\n", 
+	 registered_nick,
+	 type_show(type));
+    return;
+  }
 
   type &= TYPE_ADMIN ;
 
   fgets(type_string,30,fp);
   (void)fclose(fp);
 
-  if( (p = strchr(type_string,'\n')) )
-     *p = '\0';
+  if((p = strchr(type_string,'\n')) != NULL)
+    *p = '\0';
 
   sscanf(type_string,"%lu",&pref_type);
 
@@ -1587,46 +1587,46 @@ show_user_umodes(int sock, char *registered_nick)
 static void
 register_oper(int connnum, char *password, char *who_did_command)
 {
-  if(password)
+  if (password)
+  {
+    if ( islegal_pass(connnum, password) )
     {
-      if( islegal_pass(connnum, password) )
-	{
-	  load_umodes(connnum);
+      load_umodes(connnum);
 	  
-	  if( connections[connnum].type & TYPE_SUSPENDED)
-	    {
-	      prnt(connections[connnum].socket,
-		   "You are suspended\n");
-	      sendtoalldcc(SEND_OPERS_ONLY,"%s is suspended\n",
-			   who_did_command);
-	      if (connections[connnum].type &
-		  (TYPE_PENDING))
-		connections[connnum].type &= ~TYPE_PENDING;
-	    }
-	  else
-	    {
-	      prnt(connections[connnum].socket,
-		   "You are now registered\n");
-	      sendtoalldcc(SEND_OPERS_ONLY,
-			   "%s has registered\n",
-			   who_did_command);
-	      if (connections[connnum].type &
-		  (TYPE_PENDING))
-		connections[connnum].type &= ~TYPE_PENDING;
-	    }
-	}
+      if ( connections[connnum].type & TYPE_SUSPENDED)
+      {
+	prnt(connections[connnum].socket,
+	     "You are suspended\n");
+	sendtoalldcc(SEND_OPERS_ONLY,"%s is suspended\n",
+		     who_did_command);
+	if (connections[connnum].type &
+	    (TYPE_PENDING))
+	  connections[connnum].type &= ~TYPE_PENDING;
+      }
       else
-	{
-	  prnt(connections[connnum].socket,"illegal password\n");
-	  sendtoalldcc(SEND_OPERS_ONLY,
-		       "illegal password from %s\n",
-		       who_did_command);
-	}
+      {
+	prnt(connections[connnum].socket,
+	     "You are now registered\n");
+	sendtoalldcc(SEND_OPERS_ONLY,
+		     "%s has registered\n",
+		     who_did_command);
+	if (connections[connnum].type &
+	    (TYPE_PENDING))
+	  connections[connnum].type &= ~TYPE_PENDING;
+      }
     }
-  else
+    else
     {
-      prnt(connections[connnum].socket,"missing password\n");
+      prnt(connections[connnum].socket,"illegal password\n");
+      sendtoalldcc(SEND_OPERS_ONLY,
+		   "illegal password from %s\n",
+		   who_did_command);
     }
+  }
+  else
+  {
+    prnt(connections[connnum].socket,"missing password\n");
+  }
 }
 
 /*
@@ -1642,18 +1642,18 @@ list_opers(int sock)
 {
   int i;
   
-  for(i=0;i<MAXUSERS;i++)
-    {
-      if(!userlist[i].user[0])
-	break;
+  for (i=0; i<MAXUSERS; i++)
+  {
+    if(userlist[i].user[0] == 0)
+      break;
 
-      prnt(sock,
-           "(%s) %s@%s %s\n",
-           (userlist[i].usernick) ? userlist[i].usernick:"unknown",
-           userlist[i].user,
-           userlist[i].host,
-           type_show(userlist[i].type));
-    }
+    prnt(sock,
+	 "(%s) %s@%s %s\n",
+	 (userlist[i].usernick) ? userlist[i].usernick:"unknown",
+	 userlist[i].user,
+	 userlist[i].host,
+	 type_show(userlist[i].type));
+  }
 }
 
 /*
@@ -1669,12 +1669,12 @@ list_exemptions(int sock)
 {
   int i;
 
-  for(i=0;i<MAXHOSTS;i++)
-    {
-      if(!hostlist[i].host[0])
-	break;
-      prnt(sock,"%s@%s\n", hostlist[i].user, hostlist[i].host);
-    }
+  for (i=0; i<MAXHOSTS; i++)
+  {
+    if(hostlist[i].host[0] == 0)
+      break;
+    prnt(sock,"%s@%s\n", hostlist[i].user, hostlist[i].host);
+  }
 }
 
 /*
@@ -1690,33 +1690,33 @@ list_connections(int sock)
 {
   int i;
 
-  for (i=1;i<maxconns;i++)
+  for (i=1; i<maxconns; i++)
+  {
+    if (connections[i].socket != INVALID)
     {
-      if (connections[i].socket != INVALID)
-	{
-	  if(connections[i].registered_nick[0])
-	    {
-	      prnt(sock,
-		   "%s/%s %s (%s@%s) is connected - idle: %ld\n",
-		   connections[i].nick,
-		   connections[i].registered_nick,
-		   type_show(connections[i].type),
-		   connections[i].user,
-		   connections[i].host,
-		   time((time_t *)NULL)-connections[i].last_message_time );
-	    }
-	  else
-	    {
-	      prnt(sock,
-		   "%s %s (%s@%s) is connected - idle: %ld\n",
-		   connections[i].nick,
-		   type_show(connections[i].type),
-		   connections[i].user,
-		   connections[i].host,
-		   time((time_t *)NULL)-connections[i].last_message_time  );
-	    }
-	}
+      if(connections[i].registered_nick[0] != 0)
+      {
+	prnt(sock,
+	     "%s/%s %s (%s@%s) is connected - idle: %ld\n",
+	     connections[i].nick,
+	     connections[i].registered_nick,
+	     type_show(connections[i].type),
+	     connections[i].user,
+	     connections[i].host,
+	     time((time_t *)NULL)-connections[i].last_message_time );
+      }
+      else
+      {
+	prnt(sock,
+	     "%s %s (%s@%s) is connected - idle: %ld\n",
+	     connections[i].nick,
+	     type_show(connections[i].type),
+	     connections[i].user,
+	     connections[i].host,
+	     time((time_t *)NULL)-connections[i].last_message_time  );
+      }
     }
+  }
 }
 
 /*
@@ -1735,30 +1735,28 @@ handle_disconnect(int sock,char *nickname,char *who_did_command)
   int  i;
   struct common_function *temp;
 
-  if (!nickname)
-    prnt(sock,
-	 "Usage: disconnect <nickname>\n");
+  if (nickname == NULL)
+    prnt(sock, "Usage: disconnect <nickname>\n");
   else
-    {
-      for (i=1;i<maxconns;++i)
-	if (sock != INVALID &&
-	    !strcasecmp(nickname,connections[i].nick))
-	  {
-	    type = "user";
-	    if(connections[i].type & TYPE_OPER)
-	      type = "oper";
+  {
+    for (i=1; i<maxconns; i++)
+      if (sock != INVALID && strcasecmp(nickname,connections[i].nick) == 0)
+      {
+	type = "user";
+	if(connections[i].type & TYPE_OPER)
+	  type = "oper";
 
-	    prnt(sock,
-		 "Disconnecting %s %s\n",
-		 type,
-		 connections[i].nick);
-	    prnt(sock,
-		 "You have been disconnected by oper %s\n",
-		 who_did_command);
-            for (temp=dcc_signoff;temp;temp=temp->next)
-              temp->function(i, 0, NULL);
-	  }
-    }
+	prnt(sock,
+	     "Disconnecting %s %s\n",
+	     type,
+	     connections[i].nick);
+	prnt(sock,
+	     "You have been disconnected by oper %s\n",
+	     who_did_command);
+	for (temp=dcc_signoff;temp;temp=temp->next)
+	  temp->function(i, 0, NULL);
+      }
+  }
 }
 
 /*

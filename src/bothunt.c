@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.196 2002/08/11 19:46:07 bill Exp $
+ * $Id: bothunt.c,v 1.197 2002/08/11 22:46:30 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -502,6 +502,11 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
         return;
       *p = '\0';
       strlcpy(userinfo.gecos, q, MAX_GECOS);
+    }
+    else
+    {
+      /* Force it to be null */
+      userinfo.gecos[0] = '\0';
     }
 
     add_user_host(&userinfo, NO);

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.51 2002/08/11 19:46:08 bill Exp $
+ * $Id: hash.c,v 1.52 2002/08/11 22:46:30 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -284,7 +284,6 @@ add_user_host(struct user_entry *user_info, int fromtrace)
   strlcpy(new_user->username, user_info->username, MAX_USER);
   strlcpy(new_user->host, user_info->host, MAX_HOST);
   strlcpy(new_user->class, user_info->class, MAX_CLASS);
-  strlcpy(new_user->gecos, user_info->gecos, MAX_GECOS);
 
 #ifdef VIRTUAL
   if(user_info->ip_host[0] != '\0')
@@ -304,8 +303,16 @@ add_user_host(struct user_entry *user_info, int fromtrace)
    * to those that connect after the tcm has succesfully oper'd on its
    * server.
    */
+#if 0
+  /* XXX - Note to Bill, it was previously memset above, move the set
+  ** down here
+  */
   if (fromtrace == YES)
     memset(new_user->gecos, 0, MAX_GECOS);
+  else
+#endif
+  if (fromtrace == NO)
+    strlcpy(new_user->gecos, user_info->gecos, MAX_GECOS);
 
   /* Determine the domain name */
   domain = find_domain(user_info->host);
@@ -1314,7 +1321,8 @@ list_gecos(struct connection *connection_p, char *u_gecos, int regex)
 #endif
   if (!strcmp(u_gecos,"*") || !strcmp(u_gecos,"*@*"))
   {
-    send_to_connection(connection_p, "Listing all users is not recommended.  To do it anyway, use '.gecos ?**'.");
+    send_to_connection(connection_p, "Listing all users is not recommended.  "
+                       "To do it anyway, use '.gecos ?*'.");
     return;
   }
 

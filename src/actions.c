@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.24 2002/06/03 11:03:06 leeh Exp $
+ * $Id: actions.c,v 1.25 2002/06/03 21:41:29 leeh Exp $
  */
 
 #include "setup.h"
@@ -30,6 +30,8 @@
 #include "wild.h"
 #include "hash.h"
 #include "modules.h"
+
+#define valid_string(x) (((x) != NULL) && (*(x) != '\0'))
 
 int act_sclone;
 int act_drone;
@@ -382,7 +384,16 @@ handle_action(int actionid, char *nick, char *user,
   if (ok_host(user[0] ? user : "*", host, actionid) == 0)
     {
       /* Now process the event, we got the needed data */
-      if (actions[actionid].method & METHOD_TKLINE)
+      if (actions[actionid].method & METHOD_KLINE)
+	{
+	  print_to_server("KLINE %s :%s", userhost,
+		 actions[actionid].reason ? 
+		 actions[actionid].reason : "Automated K-Line");
+
+	  snprintf(comment, sizeof(comment),
+		   "Permanent k-line of %s", userhost);
+	}
+      else if (actions[actionid].method & METHOD_TKLINE)
 	{    
 	  /* In case the actions temp k-line time isnt set, set a default */
 	  if (actions[actionid].klinetime <= 0) 
@@ -399,21 +410,13 @@ handle_action(int actionid, char *nick, char *user,
 		   "%d minutes temporary k-line of %s",
 		   actions[actionid].klinetime, userhost);
 	}
-      else if (actions[actionid].method & METHOD_KLINE)
-	{
-	  print_to_server("KLINE %s :%s", userhost,
-		 actions[actionid].reason ? 
-		 actions[actionid].reason : "Automated K-Line");
-
-	  snprintf(comment, sizeof(comment),
-		   "Permanent k-line of %s", userhost);
-	}
       else if (actions[actionid].method & METHOD_DLINE)
 	{
 	  if ((inet_addr(host) == INADDR_NONE) && (!ip))
 	    {
 	      /* We don't have any IP, so look it up from our tables */
 	      userptr = find_nick_or_host(host, FIND_HOST);
+
 	      if (!userptr || !userptr->ip_host[0])
 		{
 		  /* We couldn't find one either, revert to a k-line */
@@ -421,17 +424,15 @@ handle_action(int actionid, char *nick, char *user,
 	  "handle_action(%s): Reverting to k-line, couldn't find IP for %s",
 		      actions[actionid].name, host);
 
-                  actions[actionid].method |= METHOD_KLINE;
-		  handle_action(actionid, nick, user, 
-				host, 0, addcmt);
-		  actions[actionid].method &= ~METHOD_KLINE;
+		  print_to_server("KLINE *@%s :%s", host,
+				  actions[actionid].reason ?
+				  actions[actionid].reason : "Automated K-Line");
 		  return;
 		}
 
-	      handle_action(actionid, nick, user,
-			    host, userptr->ip_host, addcmt);
-	      return;
+	      userhost = userptr->ip_host;
 	    }
+
 	  if (inet_addr(host) == INADDR_NONE)
 	    {
 	      /* Oks, passed host isn't in IP form.
@@ -543,10 +544,13 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
   char *p;
   char *s;
   
-  /* nick */
-  if(nick != NULL)
+  if(valid_string(m_user) && valid_string(m_host))
   {
-    /* non-existant nick */
+    user = m_user;
+    host = m_host;
+  }
+  else if(valid_string(nick))
+  {
     if((userptr = find_nick_or_host(nick, FIND_NICK)) == NULL)
       return NULL;
 
@@ -554,10 +558,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
     host = userptr->host;
   }
   else
-  {
-    user = m_user;
-    host = m_host;
-  }
+    return NULL;
 
   p = newuserhost;
 

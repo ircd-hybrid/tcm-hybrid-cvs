@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.84 2002/05/25 16:27:27 jmallett Exp $ */
+/* $Id: dcc_commands.c,v 1.85 2002/05/25 16:49:18 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -907,7 +907,6 @@ m_list(int connnum, int argc, char *argv[])
 #endif
 }
 
-#ifdef WANT_ULIST
 void
 m_ulist(int connnum, int argc, char *argv[])
 {
@@ -939,9 +938,7 @@ m_ulist(int connnum, int argc, char *argv[])
   }
 #endif
 }
-#endif
 
-#ifdef WANT_HLIST
 void
 m_hlist(int connnum, int argc, char *argv[])
 {
@@ -973,7 +970,6 @@ m_hlist(int connnum, int argc, char *argv[])
   }
 #endif
 }
-#endif
 
 /*
  * set_actions
@@ -1872,16 +1868,12 @@ struct dcc_command nfind_msgtab = {
 struct dcc_command list_msgtab = {
  "list", NULL, {m_unregistered, m_list, m_list}
 };
-#ifdef WANT_ULIST
 struct dcc_command ulist_msgtab = {
  "ulist", NULL, {m_unregistered, m_ulist, m_ulist}
 };
-#endif
-#ifdef WANT_HLIST
 struct dcc_command hlist_msgtab = {
  "hlist", NULL, {m_unregistered, m_hlist, m_hlist}
 };
-#endif
 #endif
 
 void 
@@ -1947,12 +1939,8 @@ init_commands(void)
 #endif
   add_dcc_handler(&nfind_msgtab);
   add_dcc_handler(&list_msgtab);
-#ifdef WANT_ULIST
   add_dcc_handler(&ulist_msgtab);
-#endif
-#ifdef WANT_HLIST
   add_dcc_handler(&hlist_msgtab);
-#endif
   add_dcc_handler(&uptime_msgtab);
 }
 

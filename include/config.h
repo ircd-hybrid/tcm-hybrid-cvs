@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.51 2002/05/24 18:29:16 leeh Exp $
+ * $Id: config.h,v 1.52 2002/05/25 16:49:15 wcampbel Exp $
  */
 
 /*
@@ -185,12 +185,6 @@ for .kflood would be the #define for REASON_FLOOD etc. */
  * user flag.
  */
 #undef ENABLE_W_FLAG
-
-/* Define this to enable the .ulist command, as in old tcm */
-#define WANT_ULIST
-
-/* Define this to enable the .hlist command, as in old tcm */
-#define WANT_HLIST
 
 /*
  * Define this to allow people with admin privileges on the tcm to

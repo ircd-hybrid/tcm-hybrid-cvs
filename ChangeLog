@@ -1,3 +1,15 @@
+leeh        2002/06/11 18:45:17 EDT	(20020611_0)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  - we've fixed tcm wrt trace for '[' in hyb7, kludge it for hyb6.
+  
+  Revision  Changes    Path
+  1.163     +24 -10    tcm-hybrid/src/bothunt.c
+
+
+
 db          2002/06/09 12:23:20 EDT	(20020609_5)
 
   Modified files:

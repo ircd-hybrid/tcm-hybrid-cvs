@@ -1,3 +1,17 @@
+db          2002/05/27 18:03:23 EDT	(20020527_24)
+
+  Modified files:
+    include              bothunt.h stdcmds.h 
+  Log:
+  - removal of duplicate function definitions
+  - moved function definitions from stdcmds.h into bothunt.h
+  
+  Revision  Changes    Path
+  1.39      +15 -4     tcm-hybrid/include/bothunt.h
+  1.25      +0 -17     tcm-hybrid/include/stdcmds.h
+
+
+
 leeh        2002/05/27 17:55:21 EDT	(20020527_23)
 
   Modified files:

@@ -1,3 +1,9 @@
+*** 20010920_1 by bill
+- fixed modules
+- began to rewrite most functions to use connnum, argc, argv format
+- hooray, only busy work until completion
+
+
 *** 20010919_4 by bill
 - thanks to larne for advice regarding compiling modules.  they now load
   semi-succesfully

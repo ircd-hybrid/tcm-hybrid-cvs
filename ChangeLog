@@ -1,3 +1,28 @@
+leeh        2002/06/21 19:14:07 EDT	(20020622_0)
+
+  Modified files:
+    include              config.h tools.h userlist.h 
+    src                  dcc.c dcc_commands.c tcm_io.c tools.c 
+                         userlist.c 
+  Log:
+  - added slink_add_tail
+  - added code so we actually *set* connections[i].registered_nick.
+  - moved the userlist stuff to an slinked list
+  
+    did I mention tcm was evil?
+  
+  Revision  Changes    Path
+  1.71      +0 -3      tcm-hybrid/include/config.h
+  1.2       +2 -0      tcm-hybrid/include/tools.h
+  1.77      +5 -7      tcm-hybrid/include/userlist.h
+  1.14      +33 -0     tcm-hybrid/src/dcc.c
+  1.132     +36 -44    tcm-hybrid/src/dcc_commands.c
+  1.89      +11 -9     tcm-hybrid/src/tcm_io.c
+  1.3       +22 -0     tcm-hybrid/src/tools.c
+  1.128     +137 -132  tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/21 15:17:15 EDT	(20020621_20)
 
   Modified files:

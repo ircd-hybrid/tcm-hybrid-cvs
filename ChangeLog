@@ -1,3 +1,16 @@
+db          2002/05/26 20:56:11 EDT	(20020527_3)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - more tidy ups and bug fixes
+    make sure an error on a fd is properly dealt with
+  
+  Revision  Changes    Path
+  1.49      +21 -20    tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/26 20:42:16 EDT	(20020527_2)
 
   Modified files:

@@ -1,3 +1,64 @@
+bill        2004/05/11 15:32:03 EDT	(20040511_0)
+
+  Modified files:
+    .                    INSTALL Makefile.in 
+    include              config.h handler.h 
+    src                  .depend Makefile.in actions.c bothunt.c 
+                         client_list.c clones.c dcc.c 
+                         dcc_commands.c handler.c main.c parse.c 
+                         seedrand.c serv_commands.c services.c 
+                         tcm_io.c userlist.c vclones.c 
+    tools                tcm.check 
+  Added files:
+    HISTORY              README-csircd 
+    autoconf             configure.ac 
+    etc                  tcm.motd 
+    help                 help.actions 
+  Removed files:
+    .                    README.FIRST configure.ac 
+    etc                  motd.txt 
+    include              modules.h 
+    src                  modules.c 
+  Log:
+  - updated some documentation
+  - first step at removing dynamic module support
+  - style related cleanups
+  
+  Revision  Changes    Path
+  1.1       +27 -0     tcm-hybrid/HISTORY/README-csircd (new)
+  1.8       +1 -8      tcm-hybrid/INSTALL
+  1.29      +0 -15     tcm-hybrid/Makefile.in
+  1.2       +0 -16     tcm-hybrid/README.FIRST (dead)
+  1.1       +106 -0    tcm-hybrid/autoconf/configure.ac (new)
+  1.2       +0 -106    tcm-hybrid/configure.ac (dead)
+  1.3       +0 -3      tcm-hybrid/etc/motd.txt (dead)
+  1.1       +6 -0      tcm-hybrid/etc/tcm.motd (new)
+  1.1       +3 -0      tcm-hybrid/help/help.actions (new)
+  1.88      +1 -4      tcm-hybrid/include/config.h
+  1.6       +5 -3      tcm-hybrid/include/handler.h
+  1.30      +0 -30     tcm-hybrid/include/modules.h (dead)
+  1.41      +0 -121    tcm-hybrid/src/.depend
+  1.40      +0 -1      tcm-hybrid/src/Makefile.in
+  1.53      +1 -2      tcm-hybrid/src/actions.c
+  1.224     +0 -1      tcm-hybrid/src/bothunt.c
+  1.9       +0 -1      tcm-hybrid/src/client_list.c
+  1.28      +0 -1      tcm-hybrid/src/clones.c
+  1.22      +0 -1      tcm-hybrid/src/dcc.c
+  1.154     +0 -1      tcm-hybrid/src/dcc_commands.c
+  1.10      +20 -1     tcm-hybrid/src/handler.c
+  1.137     +0 -2      tcm-hybrid/src/main.c
+  1.54      +0 -281    tcm-hybrid/src/modules.c (dead)
+  1.89      +0 -1      tcm-hybrid/src/parse.c
+  1.9       +0 -1      tcm-hybrid/src/seedrand.c
+  1.8       +0 -1      tcm-hybrid/src/serv_commands.c
+  1.27      +0 -1      tcm-hybrid/src/services.c
+  1.108     +0 -1      tcm-hybrid/src/tcm_io.c
+  1.152     +0 -1      tcm-hybrid/src/userlist.c
+  1.20      +0 -1      tcm-hybrid/src/vclones.c
+  1.4       +3 -1      tcm-hybrid/tools/tcm.check
+
+
+
 bill        2004/04/22 04:32:18 EDT	(20040422_0)
 
   Modified files:

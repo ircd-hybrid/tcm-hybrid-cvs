@@ -1,3 +1,16 @@
+leeh        2002/05/25 19:11:13 EDT	(20020526_1)
+
+  Modified files:
+    src                  bothunt.c tcm_io.c 
+  Log:
+  - < to <=
+  
+  Revision  Changes    Path
+  1.103     +2 -1      tcm-hybrid/src/bothunt.c
+  1.32      +1 -1      tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/25 19:06:01 EDT	(20020526_0)
 
   Modified files:

@@ -1,3 +1,15 @@
+wcampbel    2002/05/20 14:15:44 EDT	(20020520_10)
+
+  Modified files:
+    modules              .depend 
+  Log:
+  Update dependencies for the addition of numeric.h
+  
+  Revision  Changes    Path
+  1.11      +3 -3      tcm-hybrid/modules/.depend
+
+
+
 db          2002/05/20 12:58:58 EDT	(20020520_9)
 
   Modified files:

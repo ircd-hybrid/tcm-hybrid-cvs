@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.101 2002/05/30 01:49:48 leeh Exp $ */
+/* $Id: main.c,v 1.102 2002/05/30 15:27:30 leeh Exp $ */
 
 #include "setup.h"
 
@@ -71,82 +71,9 @@ void write_debug();
 
 static void init_debug(int sig);
 
-int add_action(char *name);
-void set_action_reason(int action, char *reason);
-void set_action_method(int action, int method);
-void set_action_strip(int action, int hoststrip);
-void set_action_time(int action, int klinetime);
-
 #ifdef HAVE_SETRLIMIT
 static void setup_corefile(void);
 #endif
-
-int
-add_action(char *name)
-{
-  int i;
-
-  if (name == NULL)
-    return -1;
-
-  for (i=0;i<MAX_ACTIONS;++i)
-    {
-      if ((!actions[i].name[0]) || (!strcasecmp(actions[i].name, name)))
-	break;
-    }
-  if (i == MAX_ACTIONS)
-    {
-      fprintf(outfile, "add_action() failed to find free space\n");
-      return -1;
-    }
-  if (!actions[i].name[0]) {
-    snprintf(actions[i].name, sizeof(actions[i].name), "%s", name);
-    actions[i].method = METHOD_IRC_WARN | METHOD_DCC_WARN;
-    actions[i].klinetime = 60;
-    actions[i].hoststrip = HS_DEFAULT;
-  }
-  return i;
-}
-
-void
-set_action_time(int action, int klinetime)
-{
-  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name[0]))
-    actions[action].klinetime = klinetime;
-}
-
-void
-set_action_strip(int action, int hoststrip)
-{
-  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name[0]))
-    actions[action].hoststrip = hoststrip;
-}
-
-void
-set_action_method(int action, int method)
-{
-  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name[0]))
-    actions[action].method = method;    
-}
-
-void
-set_action_reason(int action, char *reason)
-{
-  if ((action>=0) && (action < MAX_ACTIONS) &&
-      (actions[action].name[0]) && reason && reason[0])
-    snprintf(actions[action].reason,
-	     sizeof(actions[action].reason), "%s", reason);
-}
-
-int
-find_action(char *name)
-{
-  int i;
-  for (i=0 ; i<MAX_ACTIONS ; ++i)
-    if (!strcasecmp(name, actions[i].name)) 
-      return i;
-  return -1;
-}
 
 /*
  * main()
@@ -235,18 +162,6 @@ main(int argc, char *argv[])
   init_bothunt();
 
   eventAdd("save_umodes", save_umodes, NULL, UMODE_SAVE_TIME);
-
-#ifdef SERVICES
-  act_sclone = add_action("sclone");
-  set_action_strip(act_sclone, HS_SCLONE);
-  set_action_reason(act_sclone, REASON_SCLONE);
-
-#ifdef SERVICES_DRONES
-  act_drone = add_action("drone");
-  set_action_strip(act_drone, HS_DRONE);
-  set_action_reason(act_drone, REASON_DRONE);
-#endif
-#endif
 
   if (config_entries.conffile)
     load_config_file(config_entries.conffile);

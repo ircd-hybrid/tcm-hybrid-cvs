@@ -26,7 +26,7 @@
 
 /* actions.c
  *
- * $Id: actions.c,v 1.11 2002/05/30 13:33:50 leeh Exp $
+ * $Id: actions.c,v 1.12 2002/05/30 15:27:29 leeh Exp $
  */
 
 int act_sclone;
@@ -42,22 +42,20 @@ int act_clone;
 int act_rclone;
 struct a_entry actions[MAX_ACTIONS+1];
 
-static void set_action(int *, char *, int, char *);
-
 void
 init_actions(void)
 {
-  set_action(&act_cflood, "cflood", HS_CFLOOD, REASON_CFLOOD);
-  set_action(&act_vclone, "vclone", HS_VCLONE, REASON_VCLONE);
-  set_action(&act_flood, "flood", HS_FLOOD, REASON_FLOOD);
-  set_action(&act_link, "link", HS_LINK, REASON_LINK);
-  set_action(&act_bot, "bot", HS_BOT, REASON_BOT);
-  set_action(&act_spambot, "spam", HS_SPAMBOT, REASON_SPAMBOT);
-  set_action(&act_clone, "clone", HS_CLONE, REASON_CLONE);
-  set_action(&act_rclone, "rclone", HS_RCLONE, REASON_RCLONE);
+  init_one_action(act_cflood, "cflood", HS_CFLOOD, REASON_CFLOOD);
+  init_one_action(act_vclone, "vclone", HS_VCLONE, REASON_VCLONE);
+  init_one_action(act_flood, "flood", HS_FLOOD, REASON_FLOOD);
+  init_one_action(act_link, "link", HS_LINK, REASON_LINK);
+  init_one_action(act_bot, "bot", HS_BOT, REASON_BOT);
+  init_one_action(act_spambot, "spam", HS_SPAMBOT, REASON_SPAMBOT);
+  init_one_action(act_clone, "clone", HS_CLONE, REASON_CLONE);
+  init_one_action(act_rclone, "rclone", HS_RCLONE, REASON_RCLONE);
 }
 
-/* set_action()
+/* init_one_action()
  *
  * input	- action to set for
  * 		- name of action
@@ -66,11 +64,173 @@ init_actions(void)
  * outputs	- 
  * side effects -
  */
-void set_action(int *actionid, char *action, int hoststrip, char *reason)
+void
+init_one_action(int actionid, char *action, int hoststrip, char *reason)
 {
-  *actionid = add_action(action);
-  set_action_strip(*actionid, hoststrip);
-  set_action_reason(*actionid, reason);
+  actionid = add_action(action);
+  set_action_strip(actionid, hoststrip);
+  set_action_reason(actionid, reason);
+}
+
+/* add_action()
+ *
+ * inputs	- action name
+ * outputs	-
+ * side effects - specified action is added to table
+ */
+int
+add_action(char *name)
+{
+  int i;
+
+  for(i = 0; i < MAX_ACTIONS; i++)
+  {
+    if(strcasecmp(actions[i].name, name) == 0)
+      return i;
+
+    if(actions[i].name[0] == '\0')
+      break;
+  }
+
+  if(i == MAX_ACTIONS)
+    return -1;
+
+  strlcpy(actions[i].name, name, sizeof(actions[i].name));
+  actions[i].method = METHOD_IRC_WARN | METHOD_DCC_WARN;
+  actions[i].klinetime = 0;
+  actions[i].hoststrip = HS_DEFAULT;
+
+  return i;
+}
+
+/* set_action()
+ *
+ * inputs	- argc and argv
+ * outputs	- 
+ * side effects - sets action based on input
+ */
+void
+set_action(int argc, char *argv[])
+{
+  char *p;
+  char *q;
+  int actionid;
+  int method;
+
+  if(argc < 3)
+    return;
+
+  if((actionid = find_action(argv[1])) < 0)
+    return;
+
+  actions[actionid].method = 0;
+  actions[actionid].klinetime = 0;
+
+  p = argv[2];
+
+  while(p != NULL)
+  {
+    q = strchr(p, ' ');
+
+    if(q)
+      *q++ = '\0';
+
+    if(actions[actionid].klinetime == 0 && atoi(p))
+      actions[actionid].klinetime = atoi(p);
+    else if((method = get_method_number(p)))
+      actions[actionid].method |= method;
+
+    p = q;
+  }
+
+  /* reason as well */
+  if(argc >= 4)
+    set_action_reason(actionid, argv[3]);
+}
+
+void
+set_action_time(int actionid, int time)
+{
+  if(actions[actionid].name[0] != '\0')
+    actions[actionid].klinetime = time;
+}
+
+void
+set_action_strip(int actionid, int hoststrip)
+{
+  if(actions[actionid].name[0] != '\0')
+    actions[actionid].hoststrip = hoststrip;
+}
+
+void
+set_action_method(int actionid, int method)
+{
+  if(actions[actionid].name[0] != '\0')
+    actions[actionid].method = method;
+}
+
+void
+set_action_reason(int actionid, char *reason)
+{
+  if(actions[actionid].name[0] != '\0' && reason[0] != '\0')
+    strlcpy(actions[actionid].reason, reason,
+            sizeof(actions[actionid].reason));
+}
+
+/* list_actions()
+ *
+ * inputs	- socket to list to
+ * outputs	-
+ * side effects - client is shown list of actions
+ */
+void
+list_actions(int conn_num)
+{
+  int i;
+
+  print_to_socket(connections[conn_num].socket,
+		  "Listing actions..");
+
+  for(i = 0; i < MAX_ACTIONS; i++)
+  {
+    if(actions[i].name[0])
+      list_one_action(conn_num, i);
+  }
+}
+
+/* list_one_action()
+ *
+ * inputs	- socket to list to
+ * 		- actionid to list
+ * outputs	-
+ * side effects - specified action info is shown
+ */
+void
+list_one_action(int conn_num, int actionid)
+{
+  if(actionid < 0)
+  {
+    print_to_socket(connections[conn_num].socket,
+		    "No matching action found");
+    return;
+  }
+
+  if(actions[actionid].name == '\0')
+    return;
+
+  if(actions[actionid].klinetime > 0)
+    print_to_socket(connections[conn_num].socket,
+		    "%s action: %s %d, reason '%s'",
+		    actions[actionid].name, 
+		    get_method_names(actions[actionid].method),
+		    actions[actionid].klinetime,
+		    actions[actionid].reason);
+  else
+    print_to_socket(connections[conn_num].socket,
+		    "%s action: %s, reason '%s'",
+		    actions[actionid].name,
+		    get_method_names(actions[actionid].method),
+		    actions[actionid].reason);
 }
 
 /*
@@ -146,15 +306,15 @@ handle_action(int actionid, int idented, char *nick, char *user,
 
   strcpy(comment, "No actions taken");
 
-  if (!okhost(user[0] ? user : "*", host, actionid))
+  if (okhost(user[0] ? user : "*", host, actionid) == 0)
     {
       /* Now process the event, we got the needed data */
       if (actions[actionid].method & METHOD_TKLINE)
 	{    
 	  /* In case the actions temp k-line time isnt set, set a default */
-	  if (actions[actionid].klinetime<=0) 
+	  if (actions[actionid].klinetime <= 0) 
 	    actions[actionid].klinetime = 60;
-	  else if (actions[actionid].klinetime>14400) 
+	  else if (actions[actionid].klinetime > 14400) 
 	    actions[actionid].klinetime = 14400;
 
 	  print_to_server("KLINE %d %s :%s",
@@ -271,6 +431,35 @@ handle_action(int actionid, int idented, char *nick, char *user,
     }
 }
 
+/* find_action()
+ *
+ * inputs	- name of action to search for
+ * outputs	-
+ * side effects - actionid is returned, -1 if not found
+ */
+int
+find_action(char *name)
+{
+  int i;
+
+  for(i = 0; i < MAX_ACTIONS; i++)
+  {
+    if(strcasecmp(name, actions[i].name) == 0)
+      return i;
+  }
+
+  return -1;
+}
+
+/* get_method_userhost()
+ *
+ * inputs	- actionid
+ * 		- optional nick to search for
+ * 		- user to parse
+ * 		- host to parse
+ * outputs	-
+ * side effects - the correct user@host for specified action is returned
+ */
 char *
 get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
 {

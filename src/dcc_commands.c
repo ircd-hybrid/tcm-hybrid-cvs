@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.113 2002/05/30 01:49:48 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.114 2002/05/30 15:27:29 leeh Exp $ */
 
 #include "setup.h"
 
@@ -340,32 +340,30 @@ m_testline(int connnum, int argc, char *argv[])
 void
 m_actions(int connnum, int argc, char *argv[])
 {
-  print_to_socket(connections[connnum].socket,
-		  "%s is deprecated, use .action", argv[0]);
+  list_actions(connnum);
 }
 
 void
 m_action(int connnum, int argc, char *argv[])
 {
-  int kline_time, i;
-  char methods[MAX_BUFF], reason[MAX_BUFF];
+  /* .action */
+  if(argc == 1)
+    list_actions(connnum);
 
-  switch (argc)
+  /* .action clone */
+  else if(argc == 2)
+    list_one_action(connnum, find_action(argv[1]));
+
+  /* changing an action */
+  else
   {
-    /* .action */
-    case 1:
-      set_actions(connections[connnum].socket, NULL, NULL, 0, NULL);
-      break;
-    /* .action clone */
-    /* .action *c* */
-    case 2:
-      set_actions(connections[connnum].socket, argv[1], NULL, 0, NULL);
-      break;
+    int kline_time, i;
+    char methods[MAX_BUFF], reason[MAX_BUFF];
+
     /* .action clone :Cloning is prohibited */
     /* .action clone kline */
     /* .action clone kline :Cloning */
     /* .action clone kline 1440 ircwarn dccwarn :Cloning is prohibited*/        
-    default:
       /* Scan up to first ':' (extracting first found number if any)
 	 and make two strings; methods & reason */
       kline_time = 0;
@@ -403,7 +401,6 @@ m_action(int connnum, int argc, char *argv[])
 		  methods[0] ? methods : NULL, 
 		  kline_time, 
 		  reason[0] ? reason : NULL);
-      break;
   }
 }
 
@@ -836,7 +833,6 @@ set_actions(int sock, char *key, char *methods, int duration, char *reason)
   int i;
   char * p;
   int newmethods = 0;
-  int changing = (methods || duration || reason);
 
   while (methods)
     {
@@ -859,14 +855,8 @@ set_actions(int sock, char *key, char *methods, int duration, char *reason)
 
   if (key == NULL)
     key = "*";
-  if (changing)
-    {
-      print_to_socket(sock, "Updating actions matching '%s'", key);
-    }
-  else
-    {
-      print_to_socket(sock, "Listing actions matching '%s'", key);
-    }
+
+  print_to_socket(sock, "Updating actions matching '%s'", key);
 
   for (i=0; i<MAX_ACTIONS; i++)
     {
@@ -881,8 +871,6 @@ set_actions(int sock, char *key, char *methods, int duration, char *reason)
 	      if (duration)
 		set_action_time(i, duration);
 	
-	      if (changing)
-		{
 		  print_to_socket(
 				  sock,
 			  "%s action now: %s, duration %d, reason '%s'",
@@ -890,17 +878,6 @@ set_actions(int sock, char *key, char *methods, int duration, char *reason)
 				  get_method_names(actions[i].method),
 				  actions[i].klinetime,
 				  actions[i].reason);
-		}
-	      else
-		{
-		  print_to_socket(
-				  sock,
-				  "%s action: %s, duration %d, reason '%s'",
-				  actions[i].name,
-				  get_method_names(actions[i].method),
-				  actions[i].klinetime,
-				  actions[i].reason);
-		}
 	    }
 	}
     }
@@ -1195,6 +1172,7 @@ init_commands(void)
   add_dcc_handler(&register_msgtab);
   add_dcc_handler(&opers_msgtab);
   add_dcc_handler(&testline_msgtab);
+  add_dcc_handler(&actions_msgtab);
   add_dcc_handler(&action_msgtab);
   add_dcc_handler(&exemptions_msgtab);
   add_dcc_handler(&connections_msgtab);

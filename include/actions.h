@@ -1,7 +1,7 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.5 2002/05/30 01:49:44 leeh Exp $ */
+/* $Id: actions.h,v 1.6 2002/05/30 15:27:26 leeh Exp $ */
 
 extern int act_sdrone;
 extern int act_sclone;
@@ -17,12 +17,18 @@ extern act_clone;
 extern int act_rclone;
 
 void init_actions(void);
-int add_action(char *name);
+void init_one_action(int, char *, int, char *);
+
+void set_action(int argc, char *argv[]);
 void set_action_time(int action, int klinetime);
 void set_action_reason(int action, char *reason);
 void set_action_method(int action, int method);
 void set_action_strip(int action, int hoststrip);
+
 int find_action(char *name);
+
+void list_actions(int);
+void list_one_action(int, int);
 
 void handle_action(int actionid, int idented,
 		   char *nick, char *user, char *host, char *ip,

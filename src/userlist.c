@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.105 2002/05/30 01:49:49 leeh Exp $
+ * $Id: userlist.c,v 1.106 2002/05/30 15:27:30 leeh Exp $
  *
  */
 
@@ -467,42 +467,7 @@ load_config_file(char *file_name)
     switch(argv[0][0])
     {
     case 'a':case 'A':
-      {
-	int act, met, klinetime=0;
-	/* A:name:methods:reason */
-	/* A:clone:tkline 360 ircwarn dccwarn:No clones kthx */
-	if (argc < 3)
-	  break;
-	act = find_action(argv[1]);
-	if (act<0)
-	  break;
-	actions[act].method = 0;
-	actions[act].reason[0] = 0;
-	actions[act].klinetime = 120;
-	p = argv[2];
-	q = p;
-	while (p) {
-	  q = strchr(p, ' ');
-	  if (q)
-	    *q++ = 0;
-	  if (!klinetime && atoi(p))
-	    klinetime = atoi(p);
-	  else {
-	    met = get_method_number(p);
-	    if (met) 
-	      actions[act].method |= met;
-	  }
-	  p=q;
-	}
-	if (klinetime)
-	  actions[act].klinetime = klinetime;
-	if (argc>=4)
-	  set_action_reason(act, argv[3]);
-      }
-      break;
-
-    /* deprecated option oper only */
-    case 'd':case 'D':
+      set_action(argc, argv);
       break;
 
     case 'e':case 'E':

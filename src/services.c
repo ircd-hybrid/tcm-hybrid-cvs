@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.10 2002/05/30 01:49:49 leeh Exp $
+ * $Id: services.c,v 1.11 2002/05/30 15:27:30 leeh Exp $
  */
 
 #include <stdio.h>
@@ -59,6 +59,10 @@ init_services(void)
 {
   add_serv_handler(&services_msgtab);
   eventAdd("check_services", check_services, NULL, SERVICES_CHECK_TIME);
+  init_one_action(act_sclone, "sclone", HS_SCLONE, REASON_SCLONE);
+#ifdef SERVICES_DRONES
+  init_one_action(act_drone, "drone", HS_DRONE, REASON_DRONE);
+#endif
 }
 
 void

@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.50 2002/05/30 01:49:49 leeh Exp $ */
+/* $Id: wingate.c,v 1.51 2002/05/30 15:27:30 leeh Exp $ */
 
 
 #include <netdb.h>
@@ -456,19 +456,13 @@ void init_wingates(void)
   add_dcc_handler(&proxy_msgtab);
 #endif
 #ifdef DETECT_WINGATE
-  act_wingate = add_action("wingate");
-  set_action_strip(act_wingate, HS_WINGATE);
-  set_action_reason(act_wingate, REASON_WINGATE);
+  init_one_action(act_wingate, "wingate", HS_WINGATE, REASON_WINGATE);
 #endif
 #ifdef DETECT_SOCKS
-  act_socks = add_action("socks");
-  set_action_strip(act_socks, HS_SOCKS);
-  set_action_reason(act_socks, REASON_SOCKS);  
+  init_one_action(act_socks, "socks", HS_SOCKS, REASON_SOCKS);
 #endif
 #ifdef DETECT_SQUID
-  act_squid = add_action("squid");
-  set_action_strip(act_squid, HS_SQUID);
-  set_action_reason(act_squid, REASON_SQUID);
+  init_one_action(act_squid, "squid", HS_SQUID, REASON_SQUID);
 #endif
 }
 

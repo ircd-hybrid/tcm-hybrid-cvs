@@ -1,3 +1,17 @@
+wcampbel    2002/06/08 21:49:32 EDT	(20020609_0)
+
+  Modified files:
+    autoconf             configure.in 
+    include              setup.h.in 
+  Log:
+  Updates/cleanup to autoconf, next to rebuild configure on 2.13
+  
+  Revision  Changes    Path
+  1.21      +1 -2      tcm-hybrid/autoconf/configure.in
+  1.9       +1 -4      tcm-hybrid/include/setup.h.in
+
+
+
 db          2002/06/08 17:54:56 EDT	(20020608_3)
 
   Modified files:

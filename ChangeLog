@@ -1,3 +1,15 @@
+leeh        2002/06/23 14:09:54 EDT	(20020623_2)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  - added something thats easy to break on.
+  
+  Revision  Changes    Path
+  1.39      +14 -4     tcm-hybrid/src/hash.c
+
+
+
 db          2002/06/23 13:18:05 EDT	(20020623_1)
 
   Modified files:

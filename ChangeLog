@@ -1,3 +1,31 @@
+db          2002/05/25 21:28:23 EDT	(20020526_5)
+
+  Modified files:
+    include              parse.h serverif.h tcm_io.h 
+    src                  commands.c main.c parse.c tcm_io.c 
+  Log:
+  - added io functions.
+  - removed used of INVALID socket, use state == S_IDLE instead please
+  
+    I/O is now handled through a indirection function per client. This means
+  adding callbacks for wingates/socks/squid whatever can be added. This also means
+  we can hide the I/O more.
+  
+    Still need time outs on dcc connections.
+  
+    MORE to go
+  
+  Revision  Changes    Path
+  1.6       +8 -8      tcm-hybrid/include/parse.h
+  1.26      +0 -1      tcm-hybrid/include/serverif.h
+  1.16      +10 -9     tcm-hybrid/include/tcm_io.h
+  1.89      +2 -2      tcm-hybrid/src/commands.c
+  1.76      +2 -47     tcm-hybrid/src/main.c
+  1.25      +3 -2      tcm-hybrid/src/parse.c
+  1.34      +108 -52   tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/25 20:45:29 EDT	(20020526_4)
 
   Modified files:

@@ -1,3 +1,23 @@
+db          2002/05/25 22:12:48 EDT	(20020526_7)
+
+  Modified files:
+    include              parse.h tcm_io.h 
+    src                  main.c parse.c tcm_io.c 
+  Log:
+  - IO handlers now only take one arg, their connection id.
+  - parse_client now calls parse_args itself
+  
+    This means, no special casing in the main I/O loop
+  
+  Revision  Changes    Path
+  1.7       +2 -3      tcm-hybrid/include/parse.h
+  1.17      +1 -1      tcm-hybrid/include/tcm_io.h
+  1.78      +0 -1      tcm-hybrid/src/main.c
+  1.26      +9 -33     tcm-hybrid/src/parse.c
+  1.35      +42 -24    tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/25 22:06:49 EDT	(20020526_6)
 
   Modified files:

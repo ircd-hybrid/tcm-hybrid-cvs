@@ -1,3 +1,25 @@
+bill        2002/08/14 12:59:39 EDT	(20020814_0)
+
+  Modified files:
+    help                 help.umode 
+    include              bothunt.h 
+    src                  actions.c bothunt.c hash.c userlist.c 
+  Log:
+  - fixed bug in .umode handling
+  - updated usermode documentation
+  - added logging to FLAGS_SPY of K/G/D "active for" notices
+  - fixed core in reconnect clone detection
+  
+  Revision  Changes    Path
+  1.4       +2 -5      tcm-hybrid/help/help.umode
+  1.57      +7 -0      tcm-hybrid/include/bothunt.h
+  1.38      +6 -0      tcm-hybrid/src/actions.c
+  1.199     +16 -2     tcm-hybrid/src/bothunt.c
+  1.53      +0 -8      tcm-hybrid/src/hash.c
+  1.144     +4 -6      tcm-hybrid/src/userlist.c
+
+
+
 bill        2002/08/12 20:39:44 EDT	(20020813_0)
 
   Modified files:

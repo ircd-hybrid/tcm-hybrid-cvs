@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.62 2002/05/24 14:13:58 leeh Exp $
+ * $Id: userlist.c,v 1.63 2002/05/24 14:32:35 leeh Exp $
  *
  */
 
@@ -42,7 +42,6 @@
 
 struct auth_file_entry userlist[MAXUSERS];
 struct exception_entry hostlist[MAXHOSTS];
-struct exception_entry banlist[MAXBANS];
 extern struct connection connections[];
 
 int  user_list_index;
@@ -50,10 +49,8 @@ int  tcm_list_index;
 int  host_list_index;
 int  ban_list_index;
 
-static void load_a_ban(char *);
 static void load_a_user(char *);
 static void load_e_line(char *);
-
 
 int get_method_number (char * methodname) {
   if (!strcasecmp(methodname, "kline"))
@@ -115,8 +112,6 @@ load_config_file(char *file_name)
 
   config_entries.hybrid = NO;
   config_entries.hybrid_version = 0;
-
-  config_entries.opers_only = YES;
 
   config_entries.tcm_pid_file[0] = '\0';
   config_entries.username_config[0] = '\0';
@@ -200,13 +195,9 @@ load_config_file(char *file_name)
 	  set_action_reason(act, argv[3]);
       }
       break;
+
+    /* deprecated option oper only */
     case 'd':case 'D':
-      if (config_entries.debug && outfile)
-	(void)fprintf(outfile, "opers_only = [%s]\n", argv[1]);
-      if (strcasecmp(argv[1],"YES") == 0)
-	config_entries.opers_only = YES;
-      else
-	config_entries.opers_only = NO;
       break;
 
     case 'e':case 'E':
@@ -486,8 +477,8 @@ void load_userlist()
 	{
 	  switch(op_char)
 	    {
-	    case 'B':		/* ban this host from tcmconn */
-	      load_a_ban(line+2);
+            /* old user bans, now oper only so deprecated */
+            case 'B':
 	      break;
 
 	    case 'E':
@@ -504,47 +495,6 @@ void load_userlist()
 	}
       
     }
-}
-
-/*
- * load_a_ban()
- * inputs	- rest of line past the 'B:' or 'b:'
- * output	- NONE
- * side effects	- banlist is updated
- */
-
-void load_a_ban(char *line)
-  {
-    char *host;
-    char *user;
-    char *p;
-
-    if(config_entries.debug && outfile)
-      {
-	fprintf(outfile, "load_a_ban() line =[%s]\n",line);
-      }
-
-    if( ban_list_index == (MAXBANS - 1))
-	return;
-    
-    if((p = strchr(line,'\n')) != NULL)
-      *p = '\0';
-
-    if((user = strtok(line,"@")) == NULL)
-      return;
-    
-    if((host = strtok((char *)NULL,"")) == NULL)
-      return;
-
-    strncpy(banlist[ban_list_index].user, user,
-	    sizeof(banlist[ban_list_index].user));
-
-    strncpy(banlist[ban_list_index].host, host,
-	     sizeof(banlist[ban_list_index].host));
-
-    ban_list_index++;
-    banlist[ban_list_index].user[0] = '\0';
-    banlist[ban_list_index].host[0] = '\0';
 }
 
 /*
@@ -763,7 +713,6 @@ void clear_userlist()
 
   memset((void *)userlist, 0, sizeof(userlist));
   memset((void *)hostlist, 0, sizeof(hostlist));
-  memset((void *)banlist, 0, sizeof(banlist));
 
 }
 
@@ -807,99 +756,6 @@ int isoper(char *user,char *host)
     }
   return(0);
 }
-
-/*
- * isbanned()
- * 
- * inputs	- user name
- * 		- host name
- * output	- 1 if banned, 0 if not
- * side effects	- NONE
- */
-
-#ifndef OPERS_ONLY
-int isbanned(char *user,char *host)
-{
-  int i;
-
-  for(i=0;banlist[i].user[0];i++)
-    {
-      if ((!match(banlist[i].user,user)) &&
-	  (!wldcmp(banlist[i].host,host)))
-	return(1);
-    }
-  return(0);
-}
-
-/*
- * ban_manipulate()
- *
- * inputs	- socket to return result on
- *		- add or delete flag
- *		- user@host to add or delete
- * output	- NONE
- * side effects
- */
-
-void ban_manipulate(int sock,char flag,char *userhost)
-{
-  char *user;
-  char *host;
-  int  i;
-
-  if((user = strtok(userhost,"@")) == NULL)
-    return;
-
-  if((host = strtok((char *)NULL,"")) == NULL)
-    return;
-
-  if(flag == '+')
-    {
-      if(isbanned(user,host))
-	{
-	  print_to_socket(sock,"%s@%s is already banned.\n",user,host);
-	  return;
-	}
-      for(i=0; i < MAXBANS; i++)
-	{
-	  if(!banlist[i].host[0])
-	    break;
-	  if(!banlist[i].user[0])
-	    break;
-
-	  if(banlist[i].user[0] == '\0')
-	    {
-	      banlist[i].user[0] = 0;
-	      if(banlist[i].host) banlist[i].host[0] = 0;
-	      break;
-	    }
-	}
-
-      if(i < MAXBANS)
-	{
-	  strncpy(banlist[i].user, user, sizeof(banlist[i].user));
-	  strncpy(banlist[i].host, host, sizeof(banlist[i].host));
-	}
-
-      print_to_socket(sock,"%s@%s now banned.\n", user, host);
-    }
-  else
-    {
-      for(i=0; i < MAXBANS; i++)
-	{
-	  if(!banlist[i].host[0]) break;
-	  if(!banlist[i].user[0]) break;
-	  if((!match(banlist[i].user,user)) &&
-	     (!wldcmp(banlist[i].host,host)))
-	    {
-	      banlist[i].user[0] = 0;
-	      banlist[i].host[0] = 0;
-	      print_to_socket(sock, "%s@%s is removed.\n", user, host);
-	    }
-	}
-    }
-}
-#endif
 
 /* Checks for ok hosts to block auto-kline - Phisher */
 /*

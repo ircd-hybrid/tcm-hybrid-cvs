@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.87 2002/05/24 14:13:57 leeh Exp $
+ * $Id: bothunt.c,v 1.88 2002/05/24 14:32:34 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1188,7 +1188,6 @@ makeconn(char *hostport,char *nick,char *userhost)
 {
   int  i;               /* index variable */
   char *p;              /* scratch pointer used for parsing */
-  char *type;
   char *user;
   char *host;
 
@@ -1221,14 +1220,12 @@ makeconn(char *hostport,char *nick,char *userhost)
   if ((p = strchr(host,' ')) != NULL)
     *p = '\0';
 
-  if (config_entries.opers_only)
+  if (!isoper(user,host))
   {
-    if (!isoper(user,host))
-    {
-      notice(nick,"You are not an operator");
-      return (0);
-    }
+    notice(nick,"You are not an operator");
+    return (0);
   }
+
   connections[i].socket = bindsocket(hostport);
 
   if (connections[i].socket == INVALID)
@@ -1244,39 +1241,15 @@ makeconn(char *hostport,char *nick,char *userhost)
   connections[i].user[MAX_USER-1] = '\0';
   strncpy(connections[i].host,host,MAX_HOST-1);
   connections[i].host[MAX_HOST-1] = '\0';
-  connections[i].type = 0;
-  connections[i].type |= isoper(user,host);
-
-  if (!(connections[i].type & TYPE_OPER)
-#ifndef OPERS_ONLY
-      && isbanned(user,host)
-#endif
-       ) /* allow opers on */
-  {
-    print_to_socket(connections[i].socket,
-	 "Sorry, you are banned.");
-    (void)close(connections[i].socket);
-    connections[i].socket = INVALID;
-    connections[i].nick[0] = '\0';
-    connections[i].registered_nick[0] = '\0';
-    connections[i].user[0] = '\0';
-    connections[i].type = 0;
-    (void)free(connections[i].buffer);
-    return (0);
-  }
+  connections[i].type = isoper(user, host);
 
   connections[i].last_message_time = time(NULL);
 
   print_motd(connections[i].socket);
 
-  type = "User";
-  if (connections[i].type & TYPE_OPER)
-    type = "Oper";
-
   report(SEND_ALL,
          CHANNEL_REPORT_ROUTINE,
-         "%s %s (%s@%s) has connected\n",
-         type,
+         "Oper %s (%s@%s) has connected\n",
          connections[i].nick,
          connections[i].user,
          connections[i].host);

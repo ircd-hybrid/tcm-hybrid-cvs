@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.48 2002/05/24 12:24:45 leeh Exp $
+ * $Id: config.h,v 1.49 2002/05/24 14:32:29 leeh Exp $
  */
 
 /*
@@ -215,11 +215,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 /* maximum number of hosts not to auto kline */
 #define MAXHOSTS 100
 
-/* limit connections to opers only */
-#define OPERS_ONLY
-
-/* maximum number of banned users on dcc connect,
-   not used if OPERS_ONLY is defined */
+/* max users of glines to support */
 #define MAXBANS 25
 
 /*

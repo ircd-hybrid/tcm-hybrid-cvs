@@ -1,10 +1,9 @@
-# $Id: userlist.cf,v 1.17 2002/05/22 01:34:20 wcampbel Exp $
+# $Id: userlist.cf,v 1.18 2002/05/24 14:32:26 leeh Exp $
 # userlist.cf file
 #
 # each line is colon separated
 #
 # O: line is for an oper or remote connecting tcm
-# B: line is a banned user from dcc chat to the tcm
 #
 # O line format:
 # O:hostmask:nick:password:flags
@@ -55,9 +54,6 @@ O:bill@*.parodius.com:pro:notrealpassword:OKGi
 #
 O:db@*bsd.org:diane:notrealpassword:OK
 
-# ignore these users if they try to do a /dcc chat
-B:loser@*lamesite.com
-#
 # E-lines
 #  The format for these are as follows:
 #  E:<violation>:<user@host mask>

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.68 2002/05/24 14:13:54 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.69 2002/05/24 14:32:31 leeh Exp $ */
 
 #include "setup.h"
 
@@ -505,32 +505,6 @@ void m_exemptions(int connnum, int argc, char *argv[])
 {
   list_exemptions(connections[connnum].socket);
 }
-
-#ifndef OPERS_ONLY
-void m_ban(int connnum, int argc, char *argv[])
-{
-  int j;
-
-  if (argc >= 2)
-  {
-    if (argv[1][0] == '+')
-      ban_manipulate(connections[connnum].socket, '+', argv[1]+1);
-    else
-      ban_manipulate(connections[connnum].socket, '-', argv[1]+1);
-  }
-  else
-  {
-    print_to_socket(connections[connnum].socket, "Current bans:");
-    for (j=0; j < MAXBANS; ++j)
-    {
-      if (!banlist[j].host[0]) break;
-      if (!banlist[j].user[0]) break;
-      print_to_socket(connections[connnum].socket, "%s@%s", banlist[j].user,
-           banlist[j].host);
-    }
-  }
-}
-#endif
 
 void m_umode(int connnum, int argc, char *argv[])
 {
@@ -1867,12 +1841,6 @@ struct TcmMessage exemptions_msgtab = {
  ".exemptions", 0, 0,
  {m_unregistered, m_not_oper, m_exemptions, m_exemptions}
 };
-#ifndef OPERS_ONLY
-struct TcmMessage ban_msgtab = {
- ".ban", 0, 0,
- {m_unregistered, m_not_oper, m_not_admin, m_ban}
-};
-#endif
 struct TcmMessage umode_msgtab = {
  ".umode", 0, 0,
  {m_unregistered, m_not_oper, m_umode, m_umode}
@@ -2055,9 +2023,6 @@ _modinit()
   mod_add_cmd(&action_msgtab);
   mod_add_cmd(&set_msgtab);
   mod_add_cmd(&exemptions_msgtab);
-#ifndef OPERS_ONLY
-  mod_add_cmd(&ban_msgtab);
-#endif
   mod_add_cmd(&umode_msgtab);
   mod_add_cmd(&connections_msgtab);
   mod_add_cmd(&whom_msgtab);

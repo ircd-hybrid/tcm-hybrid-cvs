@@ -1,16 +1,18 @@
 #ifndef __NO_HANDLER_H
 #define __NO_HANDLER_H
 
-/* $Id: handler.h,v 1.2 2002/06/04 21:21:41 leeh Exp $ */
+/* $Id: handler.h,v 1.3 2002/06/05 11:43:50 leeh Exp $ */
 
 #define MAX_HASH 256
+
+struct source_client;
 
 struct dcc_command *dcc_command_table[MAX_HASH];
 struct serv_command *serv_command_table[MAX_HASH];
 struct serv_numeric *serv_numeric_table;
 
 typedef void (*dcc_handler)(int connnum, int argc, char *argv[]);
-typedef void (*serv_handler)(int argc, char *argv[]);
+typedef void (*serv_handler)(struct source_client *, int argc, char *argv[]);
 typedef void (*serv_numeric_handler)(int numeric, int argc, char *argv[]);
 
 struct dcc_command

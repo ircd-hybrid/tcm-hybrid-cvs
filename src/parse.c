@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.57 2002/06/05 01:10:43 db Exp $
+ * $Id: parse.c,v 1.58 2002/06/05 11:43:53 leeh Exp $
  */
 
 #include <stdio.h>
@@ -43,11 +43,7 @@ static void process_server(struct source_client *,
 static void process_privmsg(struct source_client *,
 			    int argc, char *argv[]);
 static void send_umodes(char *nick);
-static void on_join(char *nick, char *channel);
-static void on_kick(char *nick);
-static void on_nick(char *old_nick, char *new_nick);
 static void on_ctcp(struct source_client *source_p, int argc, char *argv[]);
-static void wallops(int connnum, int argc, char *argv[]);
 static void on_nick_taken(void);
 
 struct t_tcm_status tcm_status;
@@ -270,6 +266,7 @@ parse_args(char *buffer, char *argv[])
 static void
 process_server(struct source_client *source_p, char *function, char *param)
 {
+  struct serv_command *ptr;
   char *userhost;
   int numeric=0;      /* if its a numeric */
   int argc=0;
@@ -310,6 +307,12 @@ process_server(struct source_client *source_p, char *function, char *param)
 
   numeric=0;
 
+  if((ptr = find_serv_handler(function)) != NULL)
+  {
+    ptr->handler(source_p, argc, argv);
+    return;
+  }
+
   if (strcmp(function, "PRIVMSG") == 0)
   {
     if(strcasecmp(argv[2], tcm_status.my_nick) == 0)
@@ -335,22 +338,6 @@ process_server(struct source_client *source_p, char *function, char *param)
     }
   }
 
-  else if ((strcmp(function, "WALLOPS")) == 0)
-  {
-    wallops(0, argc, argv);
-  }
-  else if ((strcmp(function, "JOIN")) == 0)
-  {
-    on_join(argv[0], argv[2]);
-  }
-  else if ((strcmp(function, "KICK")) == 0)
-  {
-    on_kick(argv[3]);
-  }
-  else if (strcmp(function, "NICK") == 0)
-  {
-    on_nick(source_p->name, argv[2]);
-  }
   else if (strcmp(function, "NOTICE") == 0)
   {
     if(strcasecmp(source_p->name, config_entries.rserver_name) == 0)
@@ -515,33 +502,6 @@ do_init(void)
 }
 
 /*
- * wallops()
- * inputs       - source, params, body as char string pointers
- * outputs      - sends messages to appropriate DCC users
- * side effects -
- */
-
-void
-wallops(int connnum, int argc, char *argv[])
-{
-  char *nick=argv[0], *p;
-
-  if ((p = strchr(nick, '!')) == NULL)
-    return;
-  *p = '\0';
-
-  if (*nick == ':')
-    ++nick;
-
-  if (!strncmp(argv[2], ":OPERWALL - ", 12))
-    send_to_all(FLAGS_WALLOPS, "OPERWALL %s -> %s", nick, argv[2]+12);
-  else if (!strncmp(argv[2], ":LOCOPS - ", 9))
-    send_to_all(FLAGS_LOCOPS, "LOCOPS %s -> %s", nick, argv[2]+9);
-  else
-    send_to_all(FLAGS_WALLOPS, "WALLOPS %s -> %s", nick, argv[2]+11);
-}
-
-/*
  * send_umodes()
  *
  * inputs       - Nick to change umodes for
@@ -557,73 +517,6 @@ send_umodes(char *nick)
   else
     print_to_server("FLAGS +ALL\nSTATS E\nSTATS F");
   init_opers();
-}
-
-/*
- * on_join()
- *
- * inputs       - nick, channel, as char string pointers
- * output       - NONE
- * side effects -
- */
-
-void
-on_join(char *nick, char *channel)
-{
-  char *p;
-
-  if (*channel == ':')
-    ++channel;
-  if (*nick == ':')
-    ++nick;
-  if ((p = strchr(nick, '!')) == NULL)
-    return;
-  *p = '\0';
-  if (strcmp(tcm_status.my_nick, nick) == 0)
-  {
-    strlcpy(tcm_status.my_channel,channel,MAX_CHANNEL);
-  }
-}
-
-/*
- * on_kick
- *
- * inputs       - nick being kicked
- * output       - none
- * side effects - note kicked off of channel if it is us
- */
-
-static void
-on_kick(char *nick)
-{
-  if (strcmp(tcm_status.my_nick, nick) == 0)
-    join();
-}
-
-/*
- * on_nick
- *
- * inputs       - old nick
- *		- new nick
- * output       - none
- * side effects - change nick
- */
-
-static void
-on_nick(char *old_nick,char *new_nick)
-{
-  char *p;
-
-  if (*new_nick == ':')
-    ++new_nick;
-  if (*old_nick == ':')
-    ++old_nick;
-
-  if ((p = strchr(old_nick, '!')) != NULL)
-    *p = '\0';
-
-  if (strcmp(old_nick, tcm_status.my_nick) == 0)
-    strcpy(tcm_status.my_nick, new_nick);
 }
 
 /*

@@ -1,4 +1,4 @@
-/* $Id: serv_commands.c,v 1.1 2002/06/03 21:49:36 leeh Exp $ */
+/* $Id: serv_commands.c,v 1.2 2002/06/05 11:43:53 leeh Exp $ */
 
 #include "setup.h"
 
@@ -16,14 +16,6 @@
 #include <stdarg.h>
 #include <time.h>
 
-#ifdef HAVE_SYS_STREAM_H
-# include <sys/stream.h>
-#endif
-
-#ifdef HAVE_SYS_SOCKETVAR_H
-# include <sys/socketvar.h>
-#endif
-
 #include "config.h"
 #include "tcm.h"
 #include "event.h"
@@ -40,3 +32,69 @@
 #include "handler.h"
 #include "hash.h"
 
+static void ms_nick(struct source_client *, int, char **);
+static void ms_join(struct source_client *, int, char **);
+static void ms_kick(struct source_client *, int, char **);
+static void ms_wallops(struct source_client *, int, char **);
+
+struct serv_command wallops_msgtab = {
+  "WALLOPS", NULL, ms_wallops
+};
+struct serv_command nick_msgtab = {
+  "NICK", NULL, ms_nick
+};
+struct serv_command join_msgtab = {
+  "JOIN", NULL, ms_join
+};
+struct serv_command kick_msgtab = {
+  "KICK", NULL, ms_kick
+};
+
+void
+init_serv_commands(void)
+{
+  add_serv_handler(&nick_msgtab);
+  add_serv_handler(&join_msgtab);
+  add_serv_handler(&kick_msgtab);
+  add_serv_handler(&wallops_msgtab);
+}
+
+void
+ms_nick(struct source_client *source_p, int argc, char *argv[])
+{
+  if(*argv[2] == ':')
+    argv[2]++;
+
+  if(strcmp(source_p->name, tcm_status.my_nick) == 0)
+    strcpy(tcm_status.my_nick, source_p->name);
+}
+
+void
+ms_join(struct source_client *source_p, int argc, char *argv[])
+{
+  if(*argv[2] == ':')
+    argv[2]++;
+
+  if(strcmp(tcm_status.my_nick, source_p->name) == 0)
+    strlcpy(tcm_status.my_channel, argv[2], MAX_CHANNEL);
+}
+
+void
+ms_kick(struct source_client *source_p, int argc, char *argv[])
+{
+  if(strcmp(tcm_status.my_nick, argv[3]) == 0)
+    join();
+}
+
+void
+ms_wallops(struct source_client *source_p, int argc, char *argv[])
+{
+  if(strncmp(argv[2], ":OPERWALL - ", 12) == 0)
+    send_to_all(FLAGS_WALLOPS, "OPERWALL %s -> %s", source_p->name, argv[2]+12);
+  else if(strncmp(argv[2], ":LOCOPS - ", 9) == 0)
+    send_to_all(FLAGS_LOCOPS, "LOCOPS %s -> %s", source_p->name, argv[2]+9);
+  else
+    send_to_all(FLAGS_WALLOPS, "OPERWALL %s -> %s", source_p->name, argv[2]+12);
+}
+
+  

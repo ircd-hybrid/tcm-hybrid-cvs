@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.108 2002/06/04 05:54:04 db Exp $ */
+/* $Id: main.c,v 1.109 2002/06/05 11:43:53 leeh Exp $ */
 
 #include "setup.h"
 
@@ -153,6 +153,7 @@ main(int argc, char *argv[])
   init_userlist_handlers();
   init_clones();
   init_vclones();
+  init_serv_commands();
 
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
   init_wingates();

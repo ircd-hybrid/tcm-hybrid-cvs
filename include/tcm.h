@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.51 2002/05/31 01:54:14 wcampbel Exp $ */
+/* $Id: tcm.h,v 1.52 2002/06/05 11:43:50 leeh Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -54,6 +54,7 @@ extern unsigned long numfree;
 void init_clones(void);
 void init_vclones(void);
 void init_commands(void);
+void init_serv_commands(void);
 
 /* Fixes for broken operating systems */
 #ifndef HAVE_STRLCAT

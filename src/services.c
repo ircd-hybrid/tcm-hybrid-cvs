@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.13 2002/06/04 21:21:44 leeh Exp $
+ * $Id: services.c,v 1.14 2002/06/05 11:43:53 leeh Exp $
  */
 
 #include <stdio.h>
@@ -38,7 +38,7 @@
 #include "handler.h"
 
 #ifdef SERVICES
-void services_handler(int argc, char *argv[]);
+void services_handler(struct source_client *source_p, int argc, char *argv[]);
 
 struct serv_command services_msgtab = {
   "NOTICE", NULL, services_handler
@@ -68,7 +68,7 @@ init_services(void)
 }
 
 void
-services_handler(int argc, char *argv[])
+services_handler(struct source_client *source_p, int argc, char *argv[])
 {
   char userathost[MAX_HOST];
   char *user;
@@ -76,7 +76,7 @@ services_handler(int argc, char *argv[])
   char *nick;
   char *p;
 
-  if(strcasecmp(argv[0], SERVICES_NAME))
+  if(strcasecmp(source_p->name, SERVICES_NAME))
     return;
 
 #ifdef SERVICES_DRONES

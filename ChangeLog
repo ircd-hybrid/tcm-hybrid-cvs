@@ -1,3 +1,7 @@
+*** 20011013_3 by bill
+- stat() caused core.  to hell with it.
+
+
 *** 20011013_2 by bill
 - changed around .vbots and .vmulti to maintain format of .bots and .hmulti
 

@@ -1,3 +1,15 @@
+bill        2002/04/04 18:46:18 EST	(20020404_3)
+
+  Modified files:
+    modules              bothunt.c 
+  Log:
+  - that stupid NOTICE AUTH :*** nonsense caused an off-by-one .. cored dax-mon
+  
+  Revision  Changes    Path
+  1.52      +3 -3      tcm-hybrid/modules/bothunt.c
+
+
+
 bill        2002/04/04 18:19:26 EST	(20020404_2)
 
   Modified files:

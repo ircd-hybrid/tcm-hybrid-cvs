@@ -1,3 +1,22 @@
+db          2002/05/28 00:32:27 EDT	(20020528_9)
+
+  Modified files:
+    include              bothunt.h hash.h 
+    src                  bothunt.c parse.c userlist.c 
+  Log:
+  - make names readable *grumble*
+  - added get_user_host() function to bothunt.c cleaned bothunt.c up a bit
+  - moved prototypes from bothunt.h to hash.h
+  
+  Revision  Changes    Path
+  1.41      +6 -10     tcm-hybrid/include/bothunt.h
+  1.4       +3 -0      tcm-hybrid/include/hash.h
+  1.125     +102 -107  tcm-hybrid/src/bothunt.c
+  1.39      +5 -5      tcm-hybrid/src/parse.c
+  1.95      +1 -1      tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/27 23:27:00 EDT	(20020528_8)
 
   Modified files:

@@ -1,3 +1,18 @@
+bill        2002/05/08 16:55:39 EDT	(20020508_4)
+
+  Modified files:
+    modules              commands.c 
+    src                  stdcmds.c 
+  Log:
+  - fixed misleading error message in .hlist and .ulist
+  - removed pointless variable in list_users and list_virtual_users
+  
+  Revision  Changes    Path
+  1.52      +2 -2      tcm-hybrid/modules/commands.c
+  1.52      +12 -32    tcm-hybrid/src/stdcmds.c
+
+
+
 einride     2002/05/08 16:45:05 EDT	(20020508_3)
 
   Modified files:

@@ -1,3 +1,20 @@
+db          2002/05/28 13:57:12 EDT	(20020528_20)
+
+  Modified files:
+    include              parse.h 
+    src                  bothunt.c main.c parse.c tcm_io.c 
+  Log:
+  - cleaned up code to use tcm_status , moved my_class into tcm_status
+  
+  Revision  Changes    Path
+  1.14      +6 -4      tcm-hybrid/include/parse.h
+  1.131     +3 -4      tcm-hybrid/src/bothunt.c
+  1.95      +7 -6      tcm-hybrid/src/main.c
+  1.44      +16 -16    tcm-hybrid/src/parse.c
+  1.65      +6 -6      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/28 13:32:06 EDT	(20020528_19)
 
   Modified files:

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.131 2002/05/28 17:57:09 db Exp $
+ * $Id: bothunt.c,v 1.132 2002/05/28 18:47:15 leeh Exp $
  */
 
 #include <stdio.h>
@@ -432,8 +432,10 @@ on_server_notice(int argc, char *argv[])
                  "GLINE for %s@%s by %s [%s]: %s", user, host, nick, target, q);
     return;
   }
-  else if ((q = strstr(p, "has triggered gline for ")) != NULL)
+  else if (strstr(p, "has triggered gline for "))
   {
+    q = strstr(p, "has triggered");
+
     q += 24;
     get_user_host(&user, &host, q);
     if ((p = strchr(message+14, ' ')) != NULL)

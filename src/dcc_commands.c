@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.106 2002/05/28 16:05:58 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.107 2002/05/28 18:47:16 leeh Exp $ */
 
 #include "setup.h"
 
@@ -442,54 +442,6 @@ m_action(int connnum, int argc, char *argv[])
 		  kline_time, 
 		  reason[0] ? reason : NULL);
       break;
-  }
-}
-
-void
-m_set(int connnum, int argc, char *argv[])
-{
-  if (argc < 2)
-  {
-    if (connections[connnum].set_modes & SET_PRIVMSG)
-      print_to_socket(connections[connnum].socket, "MESSAGES");
-    else
-      print_to_socket(connections[connnum].socket, "NOMESSAGES");
-    if (connections[connnum].set_modes & SET_NOTICES)
-      print_to_socket(connections[connnum].socket, "NOTICES");
-    else
-      print_to_socket(connections[connnum].socket, "NONOTICES");
-    return;
-  }
-  if ((strcasecmp(argv[1],"MESSAGES")) == 0)
-  {
-    connections[connnum].set_modes |= SET_PRIVMSG;
-    print_to_socket(connections[connnum].socket,
-		    "You will see privmsgs sent to tcm");
-  }
-  else if ((strcasecmp(argv[1],"NOMESSAGES")) == 0)
-  {
-    connections[connnum].set_modes &= ~SET_PRIVMSG;
-    print_to_socket(connections[connnum].socket,
-		    "You will not see privmsgs sent to tcm");
-  }
-  else if ((strcasecmp(argv[1],"NOTICES")) == 0)
-  {
-    connections[connnum].set_modes |= SET_NOTICES;
-    print_to_socket(connections[connnum].socket,
-		    "You will see selected server notices");
-  }
-  else if ((strcasecmp(argv[1],"NONOTICES")) == 0)
-  {
-    connections[connnum].set_modes &= ~SET_NOTICES;
-    print_to_socket(connections[connnum].socket,
-		    "You will not see server notices");
-  }
-  else
-  {
-    print_to_socket(connections[connnum].socket,
-		    "Usage: .set [MESSAGES|NOMESSAGES]");
-    print_to_socket(connections[connnum].socket,
-		    "Usage: .set [NOTICES|NONOTICES]");
   }
 }
 
@@ -1280,9 +1232,6 @@ struct dcc_command actions_msgtab = {
 struct dcc_command action_msgtab = {
  "action", NULL, {m_unregistered, m_action, m_action}
 };
-struct dcc_command set_msgtab = {
- "set", NULL, {m_unregistered, m_set, m_set}
-};
 struct dcc_command uptime_msgtab = {
  "uptime", NULL, {m_uptime, m_uptime, m_uptime}
 };
@@ -1419,7 +1368,6 @@ init_commands(void)
   add_dcc_handler(&opers_msgtab);
   add_dcc_handler(&testline_msgtab);
   add_dcc_handler(&action_msgtab);
-  add_dcc_handler(&set_msgtab);
   add_dcc_handler(&exemptions_msgtab);
   add_dcc_handler(&connections_msgtab);
   add_dcc_handler(&whom_msgtab);

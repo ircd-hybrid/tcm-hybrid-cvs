@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.61 2002/05/28 15:10:13 leeh Exp $
+ * $Id: config.h,v 1.62 2002/05/28 18:47:12 leeh Exp $
  */
 
 /*
@@ -187,7 +187,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 #undef ENABLE_QUOTE
 
 /* Define this to prevent tcm from forking() */
-#undef DEBUGMODE
+#define DEBUGMODE
 
 /* Define this for dmalloc malloc debugging package */
 #undef DMALLOC

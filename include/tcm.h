@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.45 2002/05/28 16:41:52 db Exp $ */
+/* $Id: tcm.h,v 1.46 2002/05/28 18:47:12 leeh Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -47,12 +47,7 @@ extern time_t current_time;
 #define YES 1
 #define NO 0
 
-#define SET_PRIVMSG	1	/* See privmsg's to the tcm */
-#define SET_NOTICES	2	/* See some server notices, for remote users */
-
-
 #define FOREVER for(;;)	
-
 
 extern unsigned long totalmem;
 extern unsigned long numalloc;

@@ -1,3 +1,16 @@
+einride     2001/12/15 20:33:22 EST	(20011216_1)
+
+  Modified files:
+    modules              wingate.c 
+  Log:
+  Fixed overdetection of open SOCKS. Tested on production network, should be
+  ok now.
+  
+  Revision  Changes    Path
+  1.17      +3 -1      tcm-hybrid/modules/wingate.c
+
+
+
 einride     2001/12/15 19:28:28 EST	(20011216_0)
 
   Modified files:

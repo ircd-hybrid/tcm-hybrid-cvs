@@ -1,3 +1,24 @@
+bill        2002/09/13 14:35:05 EDT	(20020913_3)
+
+  Modified files:
+    include              patchlevel.h 
+    src                  Makefile.in handler.c main.c 
+  Added files:
+    src                  seedrand.c 
+  Log:
+  - added .seedrand [wildcard nick] [score threshold] -- expiremental randomness seeding
+  - fixed potential core in dcc_handler and serv_handler initialization
+  - set patchlevel to 3.1.1-pre
+  
+  Revision  Changes    Path
+  1.6       +1 -1      tcm-hybrid/include/patchlevel.h
+  1.32      +1 -0      tcm-hybrid/src/Makefile.in
+  1.8       +0 -2      tcm-hybrid/src/handler.c
+  1.127     +1 -3      tcm-hybrid/src/main.c
+  1.1       +335 -0    tcm-hybrid/src/seedrand.c (new)
+
+
+
 bill        2002/09/12 23:38:19 EDT	(20020913_2)
 
   Modified files:

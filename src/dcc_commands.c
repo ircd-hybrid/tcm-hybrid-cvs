@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.40 2002/04/04 23:19:22 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.41 2002/04/17 22:09:23 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -2341,7 +2341,7 @@ static int islegal_pass(int connect_id,char *password)
 
   for(i=0;userlist[i].user && userlist[i].user[0];i++)
     {
-      if ((!wldcmp(userlist[i].user,connections[connect_id].user)) &&
+      if ((!match(userlist[i].user,connections[connect_id].user)) &&
           (!wldcmp(userlist[i].host,connections[connect_id].host)))
         {
           if(userlist[i].password)

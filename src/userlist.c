@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.46 2002/04/04 23:19:24 bill Exp $
+ * $Id: userlist.c,v 1.47 2002/04/17 22:09:27 wcampbel Exp $
  *
  */
 
@@ -31,6 +31,7 @@
 #include "wild.h"
 #include "commands.h"
 #include "modules.h"
+#include "match.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
@@ -722,7 +723,7 @@ int isoper(char *user,char *host)
 
   for(i=0; userlist[i].user[0]; i++)
     {
-      if ((!wldcmp(userlist[i].user,user)) &&
+      if ((!match(userlist[i].user,user)) &&
           (!wldcmp(userlist[i].host,host)))
         return(TYPE_OPER);
     }
@@ -745,7 +746,7 @@ int isbanned(char *user,char *host)
 
   for(i=0;banlist[i].user[0];i++)
     {
-      if ((!wldcmp(banlist[i].user,user)) &&
+      if ((!match(banlist[i].user,user)) &&
 	  (!wldcmp(banlist[i].host,host)))
 	return(1);
     }
@@ -810,7 +811,7 @@ void ban_manipulate(int sock,char flag,char *userhost)
 	{
 	  if(!banlist[i].host[0]) break;
 	  if(!banlist[i].user[0]) break;
-	  if((!wldcmp(banlist[i].user,user)) &&
+	  if((!match(banlist[i].user,user)) &&
 	     (!wldcmp(banlist[i].host,host)))
 	    {
 	      banlist[i].user[0] = 0;

@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.43 2002/04/16 21:33:00 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.44 2002/04/17 22:09:27 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -655,7 +655,7 @@ list_nicks(int sock,char *nick,int regex)
   regex_t reg;
   regmatch_t m[1];
 #endif
-  int i=0, a;
+  int i=0;
   int numfound=0;
 
 #ifdef HAVE_REGEX_H
@@ -777,9 +777,9 @@ list_users(int sock,char *userhost,int regex)
 #ifdef HAVE_REGEX_H
       if ((regex == YES &&
           !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS)) 
-          || (regex == NO && !wldcmp(uhostmatch, uhost)))
+          || (regex == NO && !match(uhostmatch, uhost)))
 #else
-      if (!wldcmp(uhostmatch, uhost))
+      if (!match(uhostmatch, uhost))
 #endif 
       {
         if (!numfound++)
@@ -869,9 +869,9 @@ list_virtual_users(int sock,char *userhost,int regex)
 #ifdef HAVE_REGEX_H
       if ((regex == YES &&
           !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS))
-          || (regex == NO && !wldcmp(uhostmatch, uhost)))
+          || (regex == NO && !match(uhostmatch, uhost)))
 #else
-      if (!wldcmp(uhostmatch, uhost))
+      if (!match(uhostmatch, uhost))
 #endif 
       {
         if (!numfound++)
@@ -927,9 +927,9 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
 #ifdef HAVE_REGEX_H
       if ((regex == YES &&
            !regexec((regex_t *)&reg, fulluh, 1, m, REGEXEC_FLAGS))
-          || (regex == NO && !wldcmp(userhost, fulluh)))
+          || (regex == NO && !match(userhost, fulluh)))
 #else
-      if (!wldcmp(userhost, fulluh))
+      if (!match(userhost, fulluh))
 #endif
       {
         if (!numfound++)

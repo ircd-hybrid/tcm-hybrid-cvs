@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.77 2002/09/20 06:37:21 bill Exp $
+ * $Id: config.h,v 1.78 2002/11/27 04:31:16 bill Exp $
  */
 
 /*
@@ -215,10 +215,10 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 #define REASON_DRONES "Auto-kline drones"
 
 /* whom to message for a global clone report */
-#define SERVICES_NICK "services@services.us"
+#define SERVICES_NICK "services@services.xo"
 
 /* name to expect services reply from */
-#define SERVICES_NAME "services.us"
+#define SERVICES_NAME "services.xo"
 
 /* EFnet will be moving SERVICES to services.int some
 ** time in the future.  It has (to my knowledge) passed

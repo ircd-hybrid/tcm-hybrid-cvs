@@ -1,3 +1,23 @@
+bill        2002/04/22 18:32:10 EDT	(20020422_0)
+
+  Modified files:
+    modules              bothunt.c 
+    src                  stdcmds.c 
+  Added files:
+    .                    README-csircd 
+    tools                csircd-tcm.diff 
+  Log:
+  - added documentation for csircd, complete with a patch to make it work properly
+  - added support for faulty british language that has polluted hybrid-7
+  
+  Revision  Changes    Path
+  1.1       +22 -0     tcm-hybrid/README-csircd (new)
+  1.57      +2 -0      tcm-hybrid/modules/bothunt.c
+  1.45      +8 -2      tcm-hybrid/src/stdcmds.c
+  1.1       +33 -0     tcm-hybrid/tools/csircd-tcm.diff (new)
+
+
+
 leeh        2002/04/21 16:14:38 EDT	(20020421_0)
 
   Modified files:

@@ -23,7 +23,7 @@
  *  developed and/or copyrighted by other sources.  Please see the
  *  CREDITS file for full details.
  *
- *  $Id: event.c,v 1.12 2002/09/20 05:15:29 db Exp $
+ *  $Id: event.c,v 1.13 2002/09/20 05:49:03 bill Exp $
  */
 
 /*
@@ -62,6 +62,9 @@ void
 eventAdd(const char *name, EVH *func, void *arg, time_t when)
 {
   int i;
+
+  if (func == NULL)
+    return;
   
   /* find first inactive index, or use next index */
   for (i = 0; i < MAX_EVENTS; i++)
@@ -77,14 +80,15 @@ eventAdd(const char *name, EVH *func, void *arg, time_t when)
 
       if ((event_table[i].when < event_time_min) || (event_time_min == -1))
 	event_time_min = event_table[i].when;
+
       return;
     }
   }
 
-  /* XXX If get here, then never found a free slot. 
-   * probably should be reported.
-   * - Dianora
-   */
+  if (name == NULL || *name == '\0')
+    send_to_all(NULL, FLAGS_ADMIN, "*** Error adding 0x%lx to event table, the table is full", func);
+  else
+    send_to_all(NULL, FLAGS_ADMIN, "*** Error adding %s to event table, the table is full", name);
 }
 
 /*

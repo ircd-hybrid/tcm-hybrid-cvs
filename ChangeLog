@@ -1,3 +1,16 @@
+einride     2002/03/06 14:20:42 EST	(20020306_5)
+
+  Modified files:
+    modules              wingate.c 
+  Log:
+  WinGate/Socks detection working. Socks detection now checks whether a proxy
+  actually is open, not just that it exists.
+  
+  Revision  Changes    Path
+  1.20      +118 -21   tcm-hybrid/modules/wingate.c
+
+
+
 einride     2002/03/06 06:06:42 EST	(20020306_4)
 
   Modified files:

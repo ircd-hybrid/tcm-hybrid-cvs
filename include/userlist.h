@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.52 2002/05/28 12:48:29 leeh Exp $ */
+/* $Id: userlist.h,v 1.53 2002/05/28 16:01:54 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -10,6 +10,8 @@
 #define MAXFROMHOST    50
 #define CLONEDETECTINC 15
 #define NICK_CHANGE_TABLE_SIZE 100
+
+#define UMODE_SAVE_TIME 30*60
 
 struct f_entry {
   int type;
@@ -68,6 +70,7 @@ struct auth_file_entry
   char usernick[MAX_NICK];
   char password[MAX_CONFIG];
   int type;
+  int changed;
 };
 
 struct exception_entry
@@ -82,6 +85,7 @@ int find_user_in_connections(const char *);
 int get_umodes_from_prefs(int);
 int get_umodes_current(int);
 
+void save_umodes(void *);
 void set_umode(int, int, const char *);
 void add_an_oper(int, char *argv[]);
 

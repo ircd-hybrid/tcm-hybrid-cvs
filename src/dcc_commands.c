@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.104 2002/05/28 12:48:32 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.105 2002/05/28 16:01:56 leeh Exp $ */
 
 #include "setup.h"
 
@@ -50,7 +50,6 @@
 #endif
 
 static void set_actions(int sock, char *key, char *act, int duration, char *reason);
-static void save_umodes(char *registered_nick, unsigned long type);
 static void register_oper(int connnum, char *password, char *who_did_command);
 static void list_opers(int sock);
 static void list_connections(int sock);
@@ -1013,35 +1012,6 @@ set_actions(int sock, char *key, char *methods, int duration, char *reason)
 	    }
 	}
     }
-}
-
-/*
- * save_umodes
- *
- * inputs	- registered nick
- *		- flags to save
- * output	- none
- * side effect	- 
- */
-
-static void 
-save_umodes(char *registered_nick, unsigned long type)
-{
-  FILE *fp;
-  char user_pref[MAX_BUFF];
-
-  (void)snprintf(user_pref,sizeof(user_pref) - 1,
-		 "etc/%s.pref",registered_nick);
-
-  if((fp = fopen(user_pref,"w")) == NULL)
-  {
-    send_to_all( SEND_ALL, "Couldn't open %s for write", user_pref);
-    return;
-  }
-
-  fprintf(fp,"%lu\n",
-	  type & ~TYPE_ADMIN);
-  (void)fclose(fp);
 }
 
 /*

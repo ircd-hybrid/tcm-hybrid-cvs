@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.91 2002/05/28 12:48:33 leeh Exp $ */
+/* $Id: main.c,v 1.92 2002/05/28 16:01:57 leeh Exp $ */
 
 #include "setup.h"
 
@@ -236,6 +236,8 @@ main(int argc, char *argv[])
 #endif
 
   init_bothunt();
+
+  eventAdd("save_umodes", save_umodes, NULL, UMODE_SAVE_TIME);
 
 #ifdef SERVICES
   act_sclone = add_action("sclone");

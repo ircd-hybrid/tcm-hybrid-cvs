@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.97 2002/05/28 12:48:33 leeh Exp $
+ * $Id: userlist.c,v 1.98 2002/05/28 16:01:57 leeh Exp $
  *
  */
 
@@ -103,6 +103,14 @@ init_userlist_handlers(void)
   add_dcc_handler(&umode_msgtab);
 }
 
+/* m_umode()
+ *
+ * input	- connection number of client doing .umode
+ * 		- argc
+ * 		- argv
+ * output	-
+ * side effects - clients umode is listed or changed
+ */
 void
 m_umode(int connnum, int argc, char *argv[])
 {
@@ -195,7 +203,15 @@ m_umode(int connnum, int argc, char *argv[])
 		      ".umode [user] [flags] | [user] | [flags]");
   }
 }
-      
+
+/* set_umode()
+ *
+ * input	- user in userlist to change umode for
+ * 		- admin, whether we can set privs as well as flags
+ * 		- the umode change
+ * output	-
+ * side effects - clients usermode is changed.
+ */
 void
 set_umode(int user, int admin, const char *umode)
 {
@@ -203,6 +219,9 @@ set_umode(int user, int admin, const char *umode)
   int plus = 1;
   int i;
   int j;
+
+  /* mark the file for saving */
+  userlist[user].changed = 1;
 
   for(i = 0; umode[i]; i++)
   {
@@ -248,6 +267,13 @@ set_umode(int user, int admin, const char *umode)
   }
 }
 
+/* has_umode()
+ *
+ * input	- connection number of client to test
+ * 		- umode to test for
+ * output	-
+ * side effects - returns 1 if client has umode, else 0
+ */
 int
 has_umode(int conn_num, int type)
 {
@@ -261,6 +287,12 @@ has_umode(int conn_num, int type)
   return 0;
 }
 
+/* find_user_in_userlist()
+ *
+ * input	- username to search for
+ * output	-
+ * side effects - return place in userlist, or -1 if not found
+ */
 int
 find_user_in_userlist(const char *username)
 {
@@ -275,6 +307,12 @@ find_user_in_userlist(const char *username)
   return (-1);
 }
 
+/* find_user_in_connections()
+ *
+ * input	- username to search for
+ * output	-
+ * side effects - returns place in connections, or -1 if not found
+ */
 int
 find_user_in_connections(const char *username)
 {
@@ -297,6 +335,12 @@ get_umodes_current(int user)
   return(userlist[user].type);
 }
 
+/* get_umodes_from_prefs()
+ *
+ * input	- user to get prefs for
+ * output	-
+ * side effects - usermodes from preferences are returned
+ */
 int
 get_umodes_from_prefs(int user)
 {
@@ -324,6 +368,41 @@ get_umodes_from_prefs(int user)
   
   return 0;
 }
+
+/* save_umodes()
+ *
+ * input	-
+ * output	- usermodes are saved to prefs file
+ * side effects -
+ */
+void
+save_umodes(void *unused)
+{
+  FILE *fp;
+  char user_pref[MAX_BUFF];
+  int i;
+
+  for(i = 0; i < user_list_index; i++)
+  {
+    if(userlist[i].changed == 0)
+      continue;
+
+    snprintf(user_pref, MAX_BUFF, 
+             "etc/%s.pref", userlist[i].usernick);
+
+    if((fp = fopen(user_pref, "w")) != NULL)
+    {
+      fprintf(fp, "%d\n", get_umodes_current(i));
+      (void)fclose(fp);
+    }
+    else
+      send_to_all(SEND_ALL, "Couldn't open %s for writing", user_pref);
+
+    userlist[i].changed == 0;
+  }
+}
+    
+    
     
 /*
  * load_config_file

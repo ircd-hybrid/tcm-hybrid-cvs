@@ -1,3 +1,15 @@
+wcampbel    2002/06/08 22:11:29 EDT	(20020609_3)
+
+  Modified files:
+    include              config.h 
+  Log:
+  Oops missed switching back this define
+  
+  Revision  Changes    Path
+  1.68      +1 -1      tcm-hybrid/include/config.h
+
+
+
 wcampbel    2002/06/08 22:10:29 EDT	(20020609_2)
 
   Modified files:

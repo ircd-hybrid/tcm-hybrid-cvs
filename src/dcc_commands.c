@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.49 2002/05/07 22:02:25 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.50 2002/05/08 20:39:17 bill Exp $ */
 
 #include "setup.h"
 
@@ -232,40 +232,6 @@ void m_kline(int connnum, int argc, char *argv[])
   }
 }
 
-extern int act_clone;
-void m_kclone(int connnum, int argc, char *argv[])
-{
-  int kline_time=0;
-
-  if (argc < 2)
-    prnt(connections[connnum].socket,
-         "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
-  else
-  {
-    if (!(kline_time = atoi(argv[1])))
-      toserv("KLINE %s :%s\n", argv[1], actions[act_clone].reason);
-    else
-      toserv("KLINE %d %s :%s\n", kline_time, argv[2], actions[act_clone].reason);
-  }
-}
-
-extern int act_flood;
-void m_kflood(int connnum, int argc, char *argv[])
-{
-  int kline_time;
-
-  if (argc < 2)
-    prnt(connections[connnum].socket,
-         "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
-  else
-  {
-    if (!(kline_time=atoi(argv[1])))
-      toserv("KLINE %s :%s\n", argv[1], actions[act_flood].reason);
-    else
-      toserv("KLINE %d %s :%s\n", kline_time, argv[2], actions[act_flood].reason);
-  }
-}
-
 void m_kperm(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
@@ -274,57 +240,6 @@ void m_kperm(int connnum, int argc, char *argv[])
   else
     do_a_kline("kperm", 0, argv[1], REASON_KPERM, 
                connections[connnum].registered_nick);
-}
-
-extern int act_link;
-void m_klink(int connnum, int argc, char *argv[])
-{
-  int kline_time;
-
-  if (argc < 2)
-    prnt(connections[connnum].socket,
-         "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
-  else
-  {
-    if (!(kline_time=atoi(argv[1])))
-      toserv("KLINE %s :%s\n", argv[1], actions[act_link].reason);
-    else
-      toserv("KLINE %d %s :%s\n", kline_time, argv[2], actions[act_link].reason);
-  }
-}
-
-extern int act_drone;
-void m_kdrone(int connnum, int argc, char *argv[])
-{
-  int kline_time;
-
-  if (argc < 2)
-    prnt(connections[connnum].socket,
-         "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
-  else
-  {
-    if (!(kline_time=atoi(argv[1])))
-      toserv("KLINE %s :%s\n", argv[1], actions[act_drone].reason);
-    else
-      toserv("KLINE %d %s :%s\n", kline_time, argv[2], actions[act_drone].reason);
-  }
-}
-
-extern int act_bot;
-void m_kbot(int connnum, int argc, char *argv[])
-{
-  int kline_time;
-
-  if (argc < 2)
-    prnt(connections[connnum].socket,
-         "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
-  else
-  {
-    if (!(kline_time=atoi(argv[1])))
-      toserv("KLINE %s :%s\n", argv[1], actions[act_bot].reason);
-    else
-      toserv("KLINE %d %s :%s\n", kline_time, argv[2], actions[act_bot].reason);
-  }
 }
 
 void m_kill(int connnum, int argc, char *argv[])
@@ -2073,7 +1988,7 @@ void
 _modinit()
 {
   int i;
-  for (i=0;i<sizeof(msg_hash_table);++i)
+  for (i=0;i<MAX_MSG_HASH;++i)
   {
     msg_hash_table[i].cmd = NULL;
     msg_hash_table[i].msg = NULL;

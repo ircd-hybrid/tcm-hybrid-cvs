@@ -1,4 +1,4 @@
-/* $Id: serv_commands.c,v 1.2 2002/06/05 11:43:53 leeh Exp $ */
+/* $Id: serv_commands.c,v 1.3 2002/06/05 14:15:52 leeh Exp $ */
 
 #include "setup.h"
 
@@ -32,11 +32,15 @@
 #include "handler.h"
 #include "hash.h"
 
+static void ms_notice(struct source_client *, int, char **);
 static void ms_nick(struct source_client *, int, char **);
 static void ms_join(struct source_client *, int, char **);
 static void ms_kick(struct source_client *, int, char **);
 static void ms_wallops(struct source_client *, int, char **);
 
+struct serv_command notice_msgtab = {
+  "NOTICE", NULL, ms_notice
+};
 struct serv_command wallops_msgtab = {
   "WALLOPS", NULL, ms_wallops
 };
@@ -53,10 +57,20 @@ struct serv_command kick_msgtab = {
 void
 init_serv_commands(void)
 {
+  add_serv_handler(&notice_msgtab);
   add_serv_handler(&nick_msgtab);
   add_serv_handler(&join_msgtab);
   add_serv_handler(&kick_msgtab);
   add_serv_handler(&wallops_msgtab);
+}
+
+void
+ms_notice(struct source_client *source_p, int argc, char *argv[])
+{
+  struct serv_command *ptr;
+
+  for(ptr = serv_notice_table; ptr; ptr = ptr->next)
+    ptr->handler(source_p, argc, argv);
 }
 
 void

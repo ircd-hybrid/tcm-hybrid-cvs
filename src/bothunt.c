@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.150 2002/06/04 13:24:30 wcampbel Exp $
+ * $Id: bothunt.c,v 1.151 2002/06/05 14:15:52 leeh Exp $
  */
 
 #include <stdio.h>
@@ -33,6 +33,7 @@
 #include "wingate.h"
 #include "actions.h"
 #include "match.h"
+#include "handler.h"
 #include "hash.h"
 
 #ifdef HAVE_REGEX_H
@@ -49,6 +50,9 @@ static void connect_flood_notice(char *snotice);
 static void add_to_nick_change_table(char *user_host, char *last_nick);
 static void stats_notice(char *snotice);
 
+struct serv_command servnotice_msgtab = {
+  "NOTICE", NULL, on_server_notice
+};
 
 struct s_testline testlines;
 
@@ -298,7 +302,7 @@ on_stats_i(int argc, char *argv[])
  * side effects	-
  */
 void
-on_server_notice(int argc, char *argv[])
+on_server_notice(struct source_client *source_p, int argc, char *argv[])
 {
   int i = -1, a, c = -1;
   int faction = -1;
@@ -311,6 +315,9 @@ on_server_notice(int argc, char *argv[])
   char *target;
   char *p, *message;
   char *q = NULL;
+
+  if(strcasecmp(source_p->name, config_entries.rserver_name) != 0)
+    return;
 
   p = message = argv[argc-1];
 
@@ -1527,6 +1534,7 @@ reload_bothunt(void)
     oper();
 }
 
+
 void
 init_bothunt(void)
 {
@@ -1534,6 +1542,7 @@ init_bothunt(void)
   memset(&reconnect_clone,0, sizeof(reconnect_clone));
   init_link_look_table();
   init_actions();
+  add_serv_notice_handler(&servnotice_msgtab);
 }
 
 /*

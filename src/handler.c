@@ -1,7 +1,7 @@
 /* handler.c
  *
  * contains the code for the dcc and server command handlers
- * $Id: handler.c,v 1.5 2002/06/04 21:21:44 leeh Exp $
+ * $Id: handler.c,v 1.6 2002/06/05 14:15:52 leeh Exp $
  */
 
 #include <assert.h>
@@ -39,6 +39,7 @@ init_handlers(void)
   memset(dcc_command_table, 0, sizeof(struct dcc_command) * MAX_HASH);
   memset(serv_command_table, 0, sizeof(struct serv_command) * MAX_HASH);
   serv_numeric_table = NULL;
+  serv_notice_table = NULL;
 }
 
 /* add_dcc_handler()
@@ -233,6 +234,34 @@ del_numeric_handler(struct serv_numeric *ptr)
     last_ptr->next = ptr->next;
   else
     serv_numeric_table = ptr->next;
+}
+
+void
+add_serv_notice_handler(struct serv_command *ptr)
+{
+  ptr->next = serv_notice_table;
+  serv_notice_table = ptr;
+}
+
+void
+del_serv_notice_handler(struct serv_command *ptr)
+{
+  struct serv_command *temp_ptr;
+  struct serv_command *last_ptr = NULL;
+
+  for(temp_ptr = serv_notice_table; temp_ptr;
+      temp_ptr = temp_ptr->next)
+  {
+    if(temp_ptr == ptr)
+      break;
+
+    last_ptr = temp_ptr;
+  }
+
+  if(last_ptr != NULL)
+    last_ptr->next = ptr->next;
+  else
+    serv_notice_table = ptr->next;
 }
 
 /* hash_command()

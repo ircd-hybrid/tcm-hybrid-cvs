@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.59 2002/06/05 12:29:05 leeh Exp $
+ * $Id: parse.c,v 1.60 2002/06/05 14:15:52 leeh Exp $
  */
 
 #include <stdio.h>
@@ -337,6 +337,7 @@ process_server(struct source_client *source_p, char *function, char *param)
     }
   }
 
+#if 0
   else if (strcmp(function, "NOTICE") == 0)
   {
     if(strcasecmp(source_p->name, config_entries.rserver_name) == 0)
@@ -344,6 +345,7 @@ process_server(struct source_client *source_p, char *function, char *param)
       on_server_notice(argc, argv);
     }
   }
+#endif
 
   if(isdigit((int) function[0]) && isdigit((int) function[1]) &&
      isdigit((int) function[2]))

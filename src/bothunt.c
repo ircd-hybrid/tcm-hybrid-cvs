@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.209 2002/12/30 07:31:36 bill Exp $
+ * $Id: bothunt.c,v 1.210 2003/01/20 06:16:22 bill Exp $
  */
 
 #include <stdio.h>
@@ -836,12 +836,11 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* K-line active for bill[bill@ummm.E] */
   /* note this also works for glines/dlines .. notices are the same */
   case ACTIVE:
-    if ((q = strrchr(p, ' ')) == NULL)
+    if ((q = strstr(p, "active for")) == NULL)
       return;
-    ++q;
+    q+=11;
 
     send_to_all(NULL, FLAGS_VIEW_KLINES, "*** Active for %s", q);
-
     break;
 
   default:

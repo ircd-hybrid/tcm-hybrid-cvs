@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.148 2002/06/02 23:13:18 db Exp $
+ * $Id: bothunt.c,v 1.149 2002/06/03 11:03:06 leeh Exp $
  */
 
 #include <stdio.h>
@@ -644,7 +644,7 @@ on_server_notice(int argc, char *argv[])
       send_to_all(FLAGS_WARN,
 		   "*** Flooder %s (%s@%s) target: %s",
 		   nick, user, host, target);
-      handle_action(act_flood, (*user != '~'), nick, user, host, 0, 0);
+      handle_action(act_flood, nick, user, host, 0, 0);
     }
 
     break;
@@ -670,7 +670,7 @@ on_server_notice(int argc, char *argv[])
 
     send_to_all(FLAGS_ALL, "Spambot: %s (%s@%s)", nick, user, host);
 
-    handle_action(act_spambot, 0, nick, user, host, 0, 0);
+    handle_action(act_spambot, nick, user, host, 0, 0);
     break;
 
   /* I-line is full for bill[bill@ummm.E] (127.0.0.1). */
@@ -750,7 +750,7 @@ on_server_notice(int argc, char *argv[])
 
 	  if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
 	    {
-	      handle_action(act_cflood, (*user != '~'), nick, user, host, 0, "X-Line rejections");
+	      handle_action(act_cflood, nick, user, host, 0, "X-Line rejections");
 	      connect_flood[a].user_host[0] = '\0';
 	    }
 	  else
@@ -808,7 +808,7 @@ on_server_notice(int argc, char *argv[])
 
 	  if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
             {
-	      handle_action(act_cflood, (*user != '~'), nick, user, host, 0, "Quarantined nick");
+	      handle_action(act_cflood, nick, user, host, 0, "Quarantined nick");
               connect_flood[a].user_host[0] = '\0';
             }
             else
@@ -865,7 +865,7 @@ on_server_notice(int argc, char *argv[])
           *(host-1) = '\0';
 	    if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
 	    {
-	      handle_action(act_cflood, (*user != '~'), 
+	      handle_action(act_cflood, 
 			    nick, user, host, 0, "Invalid user@host");
 	      connect_flood[a].user_host[0] = '\0';
 	    }
@@ -1025,7 +1025,7 @@ connect_flood_notice(char *snotice)
 	      else
 		ident = 1;
 	      if (connect_flood[i].connect_count >= MAX_CONNECT_FAILS)
-		handle_action(act_cflood, ident, nick_reported, user, host, 0, 0);
+		handle_action(act_cflood, nick_reported, user, host, 0, 0);
 	    }
 	  else if ((connect_flood[i].last_connect + MAX_CONNECT_TIME)
 		   < current_time) {
@@ -1115,7 +1115,6 @@ link_look_notice(char *snotice)
 	      if (link_look[i].link_look_count >= MAX_LINK_LOOKS)
 		{
 		  handle_action(act_link,
-				(*user != '~'),
 				nick_reported, user, host, 0, 0);
 		  /* the client is dead now */
 		  link_look[i].user_host[0] = '\0';
@@ -1188,7 +1187,7 @@ void cs_nick_flood(char *snotice)
 
   send_to_all(FLAGS_WARN, "CS nick flood user_host = [%s@%s]", user, host);
   tcm_log(L_NORM, "%s", "CS nick flood user_host = [%s@%s]\n", user, host);
-  handle_action(act_flood, (*user != '~'), nick_reported, user, host, 0, 0);
+  handle_action(act_flood, nick_reported, user, host, 0, 0);
 }
 
 /*
@@ -1203,7 +1202,6 @@ void cs_nick_flood(char *snotice)
 static void
 cs_clones(char *snotice)
 {
-  int identd = YES;
   char *nick_reported;
   char *user_host;
   char *user;
@@ -1222,13 +1220,7 @@ cs_clones(char *snotice)
   send_to_all(FLAGS_WARN, "CS clones user_host = [%s]", user_host);
   tcm_log(L_NORM, "CS clones = [%s]\n", user_host);
 
-  if (*user == '~')
-    {
-      user++;
-      identd = NO;
-    }
-
-  handle_action(act_clone, identd, "", user, host, 0, 0);
+  handle_action(act_clone, "", user, host, 0, 0);
 }
 
 /*
@@ -1441,7 +1433,7 @@ add_to_nick_change_table(char *user_host,char *last_nick)
 	    if ((host = strtok(NULL,"")) == NULL)
 	      return;
 		      
-	    handle_action(act_flood, (*user_host != '~'), last_nick, user, host, 0, 0);
+	    handle_action(act_flood, last_nick, user, host, 0, 0);
 	    tcm_log(L_NORM,
 		"nick flood %s (%s) %d in %d seconds (%02d/%02d/%d %2.2d:%2.2d:%2.2d)\n",
 		nick_changes[i].user_host,

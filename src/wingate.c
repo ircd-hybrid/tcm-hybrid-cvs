@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.52 2002/06/02 05:26:40 db Exp $ */
+/* $Id: wingate.c,v 1.53 2002/06/03 11:03:06 leeh Exp $ */
 
 
 #include <netdb.h>
@@ -441,7 +441,7 @@ static void report_open_wingate(int i)
   if (config_entries.debug && outfile)
     fprintf(outfile, "Found wingate open\n");
 
-  handle_action(act_wingate, 0,
+  handle_action(act_wingate,
 		connections[i].nick, connections[i].user,
 		connections[i].host, connections[i].ip, 0);
   tcm_log(L_NORM, "Open Wingate %s!%s@%s\n",
@@ -457,7 +457,7 @@ void report_open_squid(int i)
     fprintf(outfile, "DEBUG: Found open squid proxy at %s\n",
 	    connections[i].host);
 
-  handle_action(act_squid, 0, connections[i].nick, connections[i].user,
+  handle_action(act_squid, connections[i].nick, connections[i].user,
 		connections[i].host, connections[i].ip, 0);
   tcm_log(L_NORM, "Open squid proxy %s\n", connections[i].host);
 }
@@ -471,7 +471,7 @@ void report_open_socks(int i)
     fprintf(outfile, "DEBUG: Found open socks proxy at %s\n", 
 	    connections[i].host);
 
-  handle_action(act_socks, 0, connections[i].nick, connections[i].user,
+  handle_action(act_socks, connections[i].nick, connections[i].user,
 		connections[i].host, connections[i].ip, 0);
   tcm_log(L_NORM, "Open socks proxy %s\n", connections[i].host);
 }

@@ -1,7 +1,7 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.10 2002/06/03 10:49:56 leeh Exp $ */
+/* $Id: actions.h,v 1.11 2002/06/03 11:03:03 leeh Exp $ */
 
 #define MAX_ACTIONS	16
 
@@ -25,7 +25,7 @@ void set_action(int argc, char *argv[]);
 
 int find_action(char *name);
 
-void handle_action(int actionid, int idented,
+void handle_action(int actionid,
 		   char *nick, char *user, char *host, char *ip,
 		   char * addcmt);
 

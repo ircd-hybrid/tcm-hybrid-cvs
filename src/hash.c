@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.27 2002/06/02 23:41:33 db Exp $
+ * $Id: hash.c,v 1.28 2002/06/03 11:03:06 leeh Exp $
  */
 
 #include <stdio.h>
@@ -548,8 +548,6 @@ check_host_clones(char *host)
   struct hash_rec *find;
   int clonecount = 0;
   int reportedclones = 0;
-  char *last_user="";
-  int current_identd;
   time_t now, lastreport, oldest;
   char notice1[MAX_BUFF];
   char notice0[MAX_BUFF];
@@ -632,26 +630,9 @@ check_host_clones(char *host)
 		       tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
       }
 
-      current_identd = YES;
-
-      if(clonecount == 1)
-	last_user = find->info->user;
-      else if(clonecount == 2)
+      if(clonecount == 2)
       {
-	char *current_user;
-	
-	if(*last_user == '~')
-	{
-	  last_user++;
-	}
-
-	current_user = find->info->user;
-	if(*current_user != '~')
-	  current_identd = YES;
-	else
-	  ++current_user;
-
-	handle_action(act_clone, current_identd, 
+	handle_action(act_clone, 
 		      find->info->nick, find->info->user,
 		      find->info->host, find->info->ip_host, 0);
       }
@@ -812,7 +793,7 @@ check_virtual_host_clones(char *ip_class_c)
 	   */
           if((different == NO && ident == YES) || (ident == NO))
             {
-	      handle_action(act_vclone, ident,
+	      handle_action(act_vclone,
 			    find->info->nick, find->info->user,
 			    find->info->ip_host, find->info->ip_host, 0);
 	    }

@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.11 2002/05/30 15:27:30 leeh Exp $
+ * $Id: services.c,v 1.12 2002/06/03 11:03:06 leeh Exp $
  */
 
 #include <stdio.h>
@@ -99,7 +99,7 @@ services_handler(int argc, char *argv[])
     send_to_all(FLAGS_ALL, "%s reports drone %s", SERVICES_NAME, nick);
     privmsg(config_entries.defchannel, "%s reports drone %s", SERVICES_NAME, nick);
 
-    handle_action(act_drone, 1, nick, user, host, 0, 0);
+    handle_action(act_drone, nick, user, host, 0, 0);
     tcm_log(L_NORM,
 	    "%s reports drone %s [%s@%s]", SERVICES_NAME, nick, user, host);
     return;
@@ -167,7 +167,7 @@ services_handler(int argc, char *argv[])
 
     if(services.kline_suggested == NO)
     {
-      handle_action(act_sclone, (*user != '~'), nick, user, host, 0, 0);
+      handle_action(act_sclone, nick, user, host, 0, 0);
       services.kline_suggested = YES;
     }
   }

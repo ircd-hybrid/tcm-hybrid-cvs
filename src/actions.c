@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.23 2002/06/03 10:49:58 leeh Exp $
+ * $Id: actions.c,v 1.24 2002/06/03 11:03:06 leeh Exp $
  */
 
 #include "setup.h"
@@ -181,6 +181,13 @@ set_action(int argc, char *argv[])
     set_action_reason(actionid, argv[3]);
 }
 
+/* update_action()
+ *
+ * input	- connection changing the action
+ * 		- argc and argv
+ * output	-
+ * side effects - action specified is changed to user params
+ */
 void
 update_action(int conn_num, int argc, char *argv[])
 {
@@ -312,7 +319,7 @@ list_one_action(int conn_num, int actionid)
  */
 
 void
-handle_action(int actionid, int idented, char *nick, char *user,
+handle_action(int actionid, char *nick, char *user,
 	      char *host, char *ip, char * addcmt)
 {
   char comment[MAX_BUFF];
@@ -415,13 +422,13 @@ handle_action(int actionid, int idented, char *nick, char *user,
 		      actions[actionid].name, host);
 
                   actions[actionid].method |= METHOD_KLINE;
-		  handle_action(actionid, idented, nick, user, 
+		  handle_action(actionid, nick, user, 
 				host, 0, addcmt);
 		  actions[actionid].method &= ~METHOD_KLINE;
 		  return;
 		}
 
-	      handle_action(actionid, idented, nick, user,
+	      handle_action(actionid, nick, user,
 			    host, userptr->ip_host, addcmt);
 	      return;
 	    }

@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.14 2002/06/02 23:13:18 db Exp $
+ * $Id: clones.c,v 1.15 2002/06/03 11:03:06 leeh Exp $
  */
 
 #include <assert.h>
@@ -205,7 +205,7 @@ check_reconnect_clones(char *host)
       if ((reconnect_clone[i].count > CLONERECONCOUNT) &&
           (now - reconnect_clone[i].first <= CLONERECONFREQ))
       {
-        handle_action(act_rclone, 0, "", "", host, 0, 0);
+        handle_action(act_rclone, "", "", host, 0, 0);
         reconnect_clone[i].host[0] = '\0';
         reconnect_clone[i].count = 0;
         reconnect_clone[i].first = 0;

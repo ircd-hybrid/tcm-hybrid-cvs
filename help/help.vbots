@@ -1,0 +1,3 @@
+Usage: .vbots [threshold]
+
+ Shows multiple user@/24 connections above the given threshold

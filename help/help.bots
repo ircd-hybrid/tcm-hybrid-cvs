@@ -1,0 +1,3 @@
+Usage: .bots [threshold]
+
+ Shows multiple user@*.domain connections above the given threshold

@@ -1,0 +1,3 @@
+Usage: .vmulti [min users]
+
+ Gives statistics about /24 blocks with at least min users connected

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.227 2004/06/02 02:00:43 bill Exp $
+ * $Id: bothunt.c,v 1.228 2004/06/03 20:15:25 bill Exp $
  */
 
 #include <stdio.h>
@@ -1648,7 +1648,7 @@ report_nick_flooders(struct connection *connection_p)
         }
     }
 
-  if(!reported_nick_flooder)
+  if(reported_nick_flooder == NO)
     {
       send_to_connection(connection_p, "No nick flooders found" );
     }

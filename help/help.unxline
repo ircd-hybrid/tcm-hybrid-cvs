@@ -1,0 +1,3 @@
+Usage: .unxline <pattern>
+
+ Removes a given XLINE from the server

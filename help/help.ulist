@@ -1,0 +1,7 @@
+Usage: .list [-l list name] [-r] <pattern>
+
+ Matches the given pattern against the user@host of all known clients
+
+  -l     - specifies the list to append to (see .help lists for more information)
+  -r     - specifies the given pattern is a regular expression
+

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.157 2004/06/03 02:51:37 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.158 2004/06/03 20:15:25 bill Exp $ */
 
 #include "setup.h"
 
@@ -102,6 +102,7 @@ static void m_list(struct connection *connection_p, int argc, char *argv[]);
 static void m_gecos(struct connection *connection_p, int argc, char *argv[]);
 static void m_ulist(struct connection *connection_p, int argc, char *argv[]);
 static void m_hlist(struct connection *connection_p, int argc, char *argv[]);
+static void m_smartlist(struct connection *connection_p, int argc, char *argv[]);
 #ifdef DEBUGMODE
 static void m_sysnotice(struct connection *connection_p, int argc, char *argv[]);
 #endif
@@ -1066,10 +1067,13 @@ m_gecos(struct connection *connection_p, int argc, char *argv[])
   list_gecos(connection_p, pattern[0] ? pattern : NULL, regex, list[0] ? list : NULL);
 }
 
+/* DEPRECATED */
 void
 m_ulist(struct connection *connection_p, int argc, char *argv[])
 {
   char buf[MAX_BUFF];
+
+  send_to_connection(connection_p, "%s is deprecated.  Use .list instead.", argv[0]);
 
 #ifdef HAVE_REGEX_H
   if(!(argc >= 2) || !(argc <= 5) ||
@@ -1145,10 +1149,13 @@ m_ulist(struct connection *connection_p, int argc, char *argv[])
 
 }
 
+/* DEPRECATED */
 void
 m_hlist(struct connection *connection_p, int argc, char *argv[])
 {
   char buf[MAX_BUFF];
+
+  send_to_connection(connection_p, "%s is deprecated.  Use .list instead.", argv[0]);
 
 #ifdef HAVE_REGEX_H
   if(!(argc >= 2) || !(argc <= 5) ||
@@ -1222,6 +1229,142 @@ m_hlist(struct connection *connection_p, int argc, char *argv[])
   }
 #endif /* HAVE_REGEX_H */
 
+}
+
+static void
+m_smartlist(struct connection *connection_p, int argc, char *argv[])
+{
+  char nickp[BUFFERSIZE],  userp[BUFFERSIZE], hostp[BUFFERSIZE],
+         ipp[BUFFERSIZE], gecosp[BUFFERSIZE],  allp[BUFFERSIZE], c;
+  char matchp[6]; /* nick + user + host + ip + gecos + \0 = 6 */
+  char list[BUFFERSIZE];
+  const char *usage;
+  int regex;
+
+  nickp[0] = userp[0] = hostp[0] = ipp[0] = gecosp[0] = allp[0] = matchp[0] = list[0] = c = '\0';
+  regex = NO;
+  optind = optreset = 1;
+
+#ifdef HAVE_REGEX_H
+  usage = "Usage: %s [-r] [-l list name] [-n nick pattern] [-u user pattern] [-h host pattern] [-i ip pattern] [-g gecos pattern] [-a nick!user@host|ip;gecos pattern] [-m matching pattern]";
+
+  while ((c = getopt(argc, argv, "rn:u:h:i:g:a:m:")) != -1)
+#else
+  usage = "Usage: %s [-l list name] [-n nick pattern] [-u user pattern] [-h host pattern] [-i ip pattern] [-g gecos pattern] [-a nick!user@host|ip;gecos pattern] [-m matching pattern]";
+
+  while ((c = getopt(argc, argv, "n:u:h:i:g:a:m:")) != -1)
+#endif
+  {
+    switch (c)
+    {
+#ifdef HAVE_REGEX_H
+      case 'r':
+        regex = YES;
+        break;
+#endif
+
+      case 'l':
+        if (optarg == NULL)
+        {
+          send_to_connection(connection_p, usage, argv[0]);
+          return;
+        }
+
+        strlcpy(list, optarg, sizeof(list));
+        break;
+
+      case 'n':
+        if (optarg == NULL)
+        {
+          send_to_connection(connection_p, usage, argv[0]);
+          return;
+        }
+
+        strlcpy(nickp, optarg, sizeof(nickp));
+        break;
+
+      case 'u':
+        if (optarg == NULL)
+        {
+          send_to_connection(connection_p, usage, argv[0]);
+          return;
+        }
+
+        strlcpy(userp, optarg, sizeof(userp));
+        break;
+
+      case 'h':
+        if (optarg == NULL)
+        {
+          send_to_connection(connection_p, usage, argv[0]);
+          return;
+        }
+
+        strlcpy(hostp, optarg, sizeof(hostp));
+        break;
+
+      case 'i':
+        if (optarg == NULL)
+        {
+          send_to_connection(connection_p, usage, argv[0]);
+          return;
+        }
+
+        strlcpy(ipp, optarg, sizeof(ipp));
+        break;
+
+      case 'g':
+        if (optarg == NULL)
+        {
+          send_to_connection(connection_p, usage, argv[0]);
+          return;
+        }
+
+        strlcpy(gecosp, optarg, sizeof(gecosp));
+        break;
+
+      case 'a':
+        if (optarg == NULL)
+        {
+          send_to_connection(connection_p, usage, argv[0]);
+          return;
+        }
+
+        strlcpy(allp, optarg, sizeof(allp));
+        break;
+
+      case 'm':
+        if (optarg == NULL)
+        {
+          send_to_connection(connection_p, usage, argv[0]);
+          return;
+        }
+
+        strlcpy(matchp, optarg, sizeof(matchp));
+        break;
+
+      case '?':
+      default:
+        send_to_connection(connection_p, usage, argv[0]);
+        return;
+    }
+  }
+
+  if (argc < 2)
+  {
+    send_to_connection(connection_p, usage, argv[0]);
+    return;
+  }
+
+  list_smart(connection_p, regex,
+             nickp[0]  ? nickp  : NULL,
+             userp[0]  ? userp  : NULL,
+             hostp[0]  ? hostp  : NULL,
+             ipp[0]    ? ipp    : NULL,
+             gecosp[0] ? gecosp : NULL,
+             allp[0]   ? allp   : NULL,
+             matchp[0] ? matchp : NULL,
+             list[0]   ? list   : NULL);
 }
 
 #ifdef DEBUGMODE
@@ -1583,6 +1726,9 @@ struct dcc_command ulist_msgtab = {
 struct dcc_command hlist_msgtab = {
  "hlist", NULL, {m_unregistered, m_hlist, m_hlist}
 };
+struct dcc_command smartlist_msgtab = {
+ "smartlist", NULL, {m_unregistered, m_smartlist, m_smartlist}
+};
 #ifdef DEBUGMODE
 struct dcc_command sysnotice_msgtab = {
  "sysnotice", NULL, {m_unregistered, m_not_admin, m_sysnotice}
@@ -1652,6 +1798,7 @@ init_commands(void)
   add_dcc_handler(&gecos_msgtab);
   add_dcc_handler(&ulist_msgtab);
   add_dcc_handler(&hlist_msgtab);
+  add_dcc_handler(&smartlist_msgtab);
 #ifdef DEBUGMODE
   add_dcc_handler(&sysnotice_msgtab);
 #endif

@@ -1,0 +1,5 @@
+Usage: .seedrand [pattern] [threshold]
+
+ Uses randomness seeding to detect psuedo-random nicknames, useful for drone hunting.
+ The specified pattern matches against nicknames, and the specified threshold is a
+ minimum for the client's score required to be reported.

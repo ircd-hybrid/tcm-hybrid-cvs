@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.73 2004/06/02 20:05:55 bill Exp $
+ * $Id: hash.c,v 1.74 2004/06/03 20:15:25 bill Exp $
  */
 
 #include <stdio.h>
@@ -1561,7 +1561,263 @@ list_gecos(struct connection *connection_p, char *u_gecos, int regex, char *list
   else
     send_to_connection(connection_p, "No matches for %s found", u_gecos);
 }
-   
+
+static int
+client_info_match(struct user_entry *user, const char *matchp, int case_sensitive)
+{
+  const char *p, *str = NULL;
+
+  for (p = matchp; p && *p; p++)
+  {
+    switch (*p)
+    {
+      case 'n': case 'N':
+        if (str == NULL)
+          str = user->nick;
+        else if (case_sensitive && strcmp(user->nick, str))
+          return NO;
+        else if (!case_sensitive && strcasecmp(user->nick, str))
+          return NO;
+        break;
+
+      case 'u': case 'U':
+        if (str == NULL)
+          str = user->username;
+        else if (case_sensitive && strcmp(user->username, str))
+          return NO;
+        else if (!case_sensitive && strcasecmp(user->username, str))
+          return NO;
+        break;
+
+      case 'h': case 'H':
+        if (str == NULL)
+          str = user->host;
+        else if (case_sensitive && strcmp(user->host, str))
+          return NO;
+        else if (!case_sensitive && strcasecmp(user->host, str))
+          return NO;
+        break;
+
+      case 'i': case 'I':
+        if (str == NULL)
+          str = user->ip_host;
+        else if (case_sensitive && strcmp(user->ip_host, str))
+          return NO;
+        else if (!case_sensitive && strcasecmp(user->ip_host, str))
+          return NO;
+        break;
+
+      case 'g': case 'G':
+        if (str == NULL)
+          str = user->gecos;
+        else if (case_sensitive && strcmp(user->gecos, str))
+          return NO;
+        else if (!case_sensitive && strcasecmp(user->gecos, str))
+          return NO;
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  return YES;
+}
+
+void
+list_smart(struct connection *connection_p, int regex,
+           char *nickp, char *userp, char *hostp, char *ipp,
+           char *gecosp, char *allp, char *matchp, char *list)
+{
+  char client[MAX_NICK + 1 + MAX_USER + 1 + MAX_HOST + 1 + MAX_IP + 1 + MAX_GECOS + 1];
+  char format[100];
+  struct hash_rec *ptr;
+  int i, numfound = 0, idx = -1;
+
+#ifdef HAVE_REGEX_H
+  regex_t reg[6];
+  regmatch_t m[1];
+  char errbuf[BUFFERSIZE];
+
+  if(regex == YES)
+  {
+    errbuf[0] = '\0';
+
+    if (!BadPtr(nickp) && (i = regcomp((regex_t *)&reg[0], nickp, 1)))
+    {
+      regerror(i, (regex_t *)&reg[0], errbuf, sizeof(errbuf));
+      send_to_connection(connection_p, "Error compiling regular expression (n): %s",
+                         errbuf);
+    }
+
+    if (!BadPtr(userp) && (i = regcomp((regex_t *)&reg[1], userp, 1)))
+    {
+      regerror(i, (regex_t *)&reg[1], errbuf, sizeof(errbuf));
+      send_to_connection(connection_p, "Error compiling regular expression (u): %s",
+                         errbuf);
+    }
+
+    if (!BadPtr(hostp) && (i = regcomp((regex_t *)&reg[2], hostp, 1)))
+    {
+      regerror(i, (regex_t *)&reg[2], errbuf, sizeof(errbuf));
+      send_to_connection(connection_p, "Error compiling regular expression (h): %s",
+                         errbuf);
+    }
+
+    if (!BadPtr(ipp) && (i = regcomp((regex_t *)&reg[3], ipp, 1)))
+    {
+      regerror(i, (regex_t *)&reg[3], errbuf, sizeof(errbuf));
+      send_to_connection(connection_p, "Error compiling regular expression (i): %s",
+                         errbuf);
+    }
+
+    if (!BadPtr(gecosp) && (i = regcomp((regex_t *)&reg[4], gecosp, 1)))
+    {
+      regerror(i, (regex_t *)&reg[4], errbuf, sizeof(errbuf));
+      send_to_connection(connection_p, "Error compiling regular expression (g): %s",
+                         errbuf);
+    }
+
+    if (!BadPtr(matchp) && (i = regcomp((regex_t *)&reg[5], matchp, 1)))
+    {
+      regerror(i, (regex_t *)&reg[5], errbuf, sizeof(errbuf));
+      send_to_connection(connection_p, "Error compiling regular expression (a): %s",
+                         errbuf);
+    }
+
+    if (errbuf[0] != '\0')
+      return;
+  }
+#endif
+
+  if (!BadPtr(list))
+  {
+    if ((idx = find_list(list)) == -1 &&
+        create_list(connection_p, list) == NULL)
+    {
+      send_to_connection(connection_p, "Error creating list!");
+      return;
+    }
+
+    idx = find_list(list);
+  }
+
+  for (i = 0; i < HASHTABLESIZE; ++i)
+  {
+    for (ptr = domain_table[i]; ptr; ptr = ptr->next)
+    {
+      snprintf(client, sizeof(client), "%s!%s@%s|%s;%s",
+               ptr->info->nick, ptr->info->username,
+               ptr->info->host, ptr->info->ip_host,
+               ptr->info->gecos);
+
+#ifdef HAVE_REGEX_H
+      if (!BadPtr(nickp) &&
+          !(regex == YES && !regexec((regex_t *)&reg[0], ptr->info->nick, 1, m, REGEXEC_FLAGS)) &&
+          !(regex == NO  && !match(nickp, ptr->info->nick)))
+#else
+      if (!BadPtr(nickp) && 
+          match(nickp, ptr->info->nick))
+#endif
+        continue;
+
+#ifdef HAVE_REGEX_H
+      if (!BadPtr(userp) &&
+          !(regex == YES && !regexec((regex_t *)&reg[1], ptr->info->username, 1, m, REGEXEC_FLAGS)) &&
+          !(regex == NO  && !match(userp, ptr->info->username)))
+#else
+      if (!BadPtr(userp) && 
+          match(userp, ptr->info->username))
+#endif
+        continue;
+
+#ifdef HAVE_REGEX_H
+      if (!BadPtr(hostp) &&
+          !(regex == YES && !regexec((regex_t *)&reg[2], ptr->info->host, 1, m, REGEXEC_FLAGS)) &&
+          !(regex == NO  && !match(hostp, ptr->info->host)))
+#else
+      if (!BadPtr(hostp) && 
+          match(hostp, ptr->info->host))
+#endif
+        continue;
+
+#ifdef HAVE_REGEX_H
+      if (!BadPtr(ipp) &&
+          !(regex == YES && !regexec((regex_t *)&reg[3], ptr->info->ip_host, 1, m, REGEXEC_FLAGS)) &&
+          !(regex == NO  && !match(ipp, ptr->info->ip_host)))
+#else
+      if (!BadPtr(ipp) && 
+          match(ipp, ptr->info->ip_host))
+#endif
+        continue;
+
+#ifdef HAVE_REGEX_H
+      if (!BadPtr(gecosp) &&
+#ifndef AGGRESSIVE_GECOS
+          (gecos[0] != '\0') &&
+#endif
+          !(regex == YES && !regexec((regex_t *)&reg[4], ptr->info->gecos, 1, m, REGEXEC_FLAGS)) &&
+          !(regex == NO  && !match(gecosp, ptr->info->gecos)))
+#else
+      if (!BadPtr(gecosp) && 
+          match(gecosp, ptr->info->gecos))
+#endif
+        continue;
+
+#ifdef HAVE_REGEX_H
+      if (!BadPtr(allp) &&
+          !(regex == YES && !regexec((regex_t *)&reg[5], client, 1, m, REGEXEC_FLAGS)) &&
+          !(regex == NO  && !match(allp, client)))
+#else
+      if (!BadPtr(allp) && 
+          match(allp, client))
+#endif
+        continue;
+
+      if (!BadPtr(matchp) && !client_info_match(ptr->info, matchp, NO))
+        continue;
+
+      if (numfound++ == 0)
+      {
+        if (idx == -1)
+          send_to_connection(connection_p, "The following clients match the specified pattern:");
+        else
+          send_to_connection(connection_p, "Adding matches to list %s", list);
+      }
+
+      if (idx == -1)
+      {
+#ifndef AGGRESSIVE_GECOS
+        if (ptr->info->gecos[0] == '\0')
+          snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s}",
+                     MAX_NICK);
+        else
+#endif
+            snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s} [%%s]",
+                     MAX_NICK);
+
+          send_to_connection(connection_p, format,
+                             ptr->info->nick, ptr->info->username,
+                             ptr->info->host, ptr->info->ip_host,
+                             ptr->info->class, ptr->info->gecos);
+      }
+      else if (!add_client_to_list(ptr->info, idx))
+      {
+        send_to_connection(connection_p, "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                           ptr->info->nick, ptr->info->username, ptr->info->host,
+                           ptr->info->ip_host, ptr->info->class);
+        continue;
+      }
+    }
+  }
+
+  if (numfound > 0)
+    send_to_connection(connection_p, "%d match%s found",
+                       numfound, numfound > 1 ? "es" : "");
+  else
+    send_to_connection(connection_p, "No matches found");
+}
+
 /*
  * report_mem()
  * inputs       - pointer to connection

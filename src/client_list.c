@@ -1,7 +1,7 @@
 /*
  * client_list.c: contains routines for managing lists of clients
  *
- * $Id: client_list.c,v 1.9 2004/05/11 19:31:58 bill Exp $
+ * $Id: client_list.c,v 1.10 2004/06/03 20:15:25 bill Exp $
  */
 
 #include <stdio.h>
@@ -269,9 +269,12 @@ find_list(char *name)
   return -1;
 }
 
+/* DEPRECATED */
 static void
 m_listdump(struct connection *connection_p, int argc, char *argv[])
 {
+  send_to_connection(connection_p, "%s is deprecated.  Use .list -l instead.", argv[0]);
+
   if (argc != 2)  
   {
     send_to_connection(connection_p, "Usage: %s <list name>", argv[0]);

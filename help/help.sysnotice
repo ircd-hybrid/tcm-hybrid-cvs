@@ -1,0 +1,3 @@
+Usage: .sysnotice <notice>
+
+ Simulates the receival of a notice from the server, used for debug purposes

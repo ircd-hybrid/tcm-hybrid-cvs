@@ -1,0 +1,3 @@
+Usage: .domains [min users]
+
+ Gives statistics about domains with at least min users connected

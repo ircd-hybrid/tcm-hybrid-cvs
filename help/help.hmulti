@@ -1,0 +1,3 @@
+Usage: .hmulti [threshold]
+
+ Shows multiple *@host connections above the given threshold

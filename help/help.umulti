@@ -1,0 +1,3 @@
+Usage: .umulti [threshold]
+
+ Shows multiple user@* connections above the given threshold

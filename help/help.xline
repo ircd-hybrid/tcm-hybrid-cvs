@@ -1,0 +1,3 @@
+Usage: .xline <pattern>
+
+ Places an XLINE on the server matching the given pattern

@@ -1,0 +1,3 @@
+Usage: .quote <message>
+
+ Sends a raw message directly to the server

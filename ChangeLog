@@ -1,3 +1,7 @@
+*** 20010722_1 by wcampbel
+Split out the version info into patchlevel.h
+
+
 *** 20010721_4 by wcampbel
 Made tcm work with the repo-move to src/
 I believe it's good to go now

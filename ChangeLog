@@ -1,3 +1,9 @@
+*** 20011001_1 by bill
+
+- fixed to run on fbsd
+- dcc chat works 50/50, some problem with makeconn() getting the proper address
+
+
 *** 20010922_5 by wcampbel
 Fixed FreeBSD compiles, I'll test on Linux in a minute, then test to make
 sure that two tcm's on both platforms will work

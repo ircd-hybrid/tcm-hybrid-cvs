@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.120 2002/05/27 23:10:00 leeh Exp $
+ * $Id: bothunt.c,v 1.121 2002/05/27 23:39:58 leeh Exp $
  */
 
 #include <stdio.h>
@@ -2563,7 +2563,7 @@ stats_notice(char *snotice)
 	continue;
 
       /* ignore invisible users/opers */
-      if (connections[i].type & TYPE_INVS)
+      if(has_umode(i, TYPE_INVS))
 	continue;
 
       /* display opers */

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.54 2002/05/27 17:42:07 db Exp $
+ * $Id: tcm_io.c,v 1.55 2002/05/27 23:39:58 leeh Exp $
  */
 
 #include <stdio.h>
@@ -571,30 +571,30 @@ send_to_all(int type, const char *format,...)
 	  switch(type)
 	    {
 	    case SEND_KLINE_NOTICES:
-	      if (connections[i].type & TYPE_VIEW_KLINES)
+	      if(has_umode(i, TYPE_VIEW_KLINES))
 		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 
 	    case SEND_SPY:
-	      if(connections[i].type & TYPE_SPY)
+	      if(has_umode(i, TYPE_SPY))
                 va_print_to_socket(connections[i].socket, format, va);
 
 	      break;
 
 	    case SEND_WARN:
-	      if (connections[i].type & TYPE_WARN)
+	      if(has_umode(i, TYPE_WARN))
 		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 	      
             case SEND_WALLOPS:
 #ifdef ENABLE_W_FLAG
-              if (connections[i].type & TYPE_WALLOPS)
+              if(has_umode(i, TYPE_WALLOPS))
                 va_print_to_socket(connections[i].socket, format, va);
 #endif
               break;
 
 	    case SEND_LOCOPS:
-	      if (connections[i].type & TYPE_LOCOPS)
+	      if(has_umode(i, TYPE_LOCOPS))
 		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 	      
@@ -609,12 +609,12 @@ send_to_all(int type, const char *format,...)
 	      break;
 
             case SEND_SERVERS:
-              if(connections[i].type & TYPE_SERVERS)
+              if(has_umode(i, TYPE_SERVERS))
                 va_print_to_socket(connections[i].socket, format, va);
               break;
 
 	    case SEND_ADMINS:
-	      if(connections[i].type & TYPE_ADMIN)
+	      if(has_umode(i, TYPE_ADMIN))
                 va_print_to_socket(connections[i].socket, format, va);
 	      break;
 
@@ -651,7 +651,7 @@ send_to_partyline(int conn_num, const char *format,...)
     {
       if (connections[i].state == S_CLIENT)
 	{
-	  if (conn_num != i)
+	  if (conn_num != i && has_umode(i, TYPE_PARTYLINE))
 	    va_print_to_socket(connections[i].socket, format, va);
 	}
     }

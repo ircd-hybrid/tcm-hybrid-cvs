@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.91 2002/05/27 23:10:01 leeh Exp $
+ * $Id: userlist.c,v 1.92 2002/05/27 23:39:59 leeh Exp $
  *
  */
 
@@ -134,7 +134,7 @@ m_umode(int connnum, int argc, char *argv[])
     }
     else
     {
-      if((connections[connnum].type & TYPE_ADMIN) == 0)
+      if(has_umode(connnum, TYPE_ADMIN) == 0)
       {
         print_to_socket(connections[connnum].socket,
 			"You aren't an admin");
@@ -158,7 +158,7 @@ m_umode(int connnum, int argc, char *argv[])
   {
     int user_conn;
 
-    if((connections[connnum].type & TYPE_ADMIN) == 0)
+    if(has_umode(connnum, TYPE_ADMIN) == 0)
     {
       print_to_socket(connections[connnum].socket,
 		      "You aren't an admin");

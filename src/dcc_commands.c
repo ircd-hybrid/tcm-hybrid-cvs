@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.97 2002/05/27 23:10:01 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.98 2002/05/27 23:39:58 leeh Exp $ */
 
 #include "setup.h"
 
@@ -139,7 +139,7 @@ m_killlist(int connnum, int argc, char *argv[])
   else
     snprintf(reason, sizeof(reason), "No reason");
 
-  if((connections[connnum].type & TYPE_INVS) == 0)
+  if(has_umode(connnum, TYPE_INVS) == 0)
   {
     strncat(reason, " (requested by ", MAX_REASON - strlen(reason));
     strncat(reason, connections[connnum].registered_nick,
@@ -229,7 +229,8 @@ m_kill(int connnum, int argc, char *argv[])
   send_to_all(SEND_KLINE_NOTICES, "*** kill %s :%s by %s",
               argv[1], reason, connections[connnum].registered_nick);
   log_kline("KILL", argv[1], 0, connections[connnum].registered_nick, reason);
-  if (!(connections[connnum].type & TYPE_INVS))
+
+  if(has_umode(connnum, TYPE_INVS) == 0)
   {
     strncat(reason, " (requested by ", MAX_REASON - 1 - strlen(reason));
     strncat(reason, connections[connnum].registered_nick,
@@ -671,7 +672,7 @@ m_dline(int connnum, int argc, char *argv[])
   char *p, reason[MAX_BUFF];
   int i, len;
 
-  if (!(connections[connnum].type & TYPE_DLINE))
+  if(has_umode(connnum, TYPE_DLINE) == 0)
   {
     print_to_socket(connections[connnum].socket,
 		    "You do not have access to .dline");
@@ -695,7 +696,8 @@ m_dline(int connnum, int argc, char *argv[])
                 reason);
     send_to_all( SEND_ALL, "*** dline %s :%s by %s", argv[1],
                  reason, connections[connnum].registered_nick);
-    if (!connections[connnum].type & TYPE_INVS)
+
+    if(has_umode(connnum, TYPE_INVS) == 0)
     {
       strncat(reason, " (requested by ", sizeof(reason)-strlen(reason));
       strncat(reason, connections[connnum].nick,
@@ -1018,237 +1020,6 @@ set_actions(int sock, char *key, char *methods, int duration, char *reason)
 	}
     }
 }
-
-#if 0
-/*
- * set_umode
- *
- * inputs	- connection number
- * 		- flags as string
- * 		- nick to change, or NULL if self
- * output	- NONE
- * side effects	-
- */
-
-static void 
-set_umode(int connnum, char *flags, char *registered_nick)
-{
-  int i;
-  int reversing = NO;
-  int z;
-  int found = NO;
-  unsigned long type;
-  unsigned long new_type;
-
-  /* UMODE! -bill */
-  
-  if(!registered_nick)
-  {
-    for( i=0; flags[i]; i++ )
-    {
-      switch(flags[i])
-      {
-      case 'i': type = TYPE_INVS; break;
-      case 'k': type = TYPE_VIEW_KLINES; break;
-      case 'y': type = TYPE_SPY; break;
-      case 'o': type = TYPE_LOCOPS; break;
-      case 'p': type = TYPE_PARTYLINE; break;
-      case 'w': type = TYPE_WARN; break;
-      case 'x': type = TYPE_SERVERS; break;
-
-#ifndef NO_D_LINE_SUPPORT
-      case 'D':
-	if (connections[connnum].type & TYPE_ADMIN)
-	  type = TYPE_DLINE ;
-	else
-	  type = 0;
-	break;
-#endif
-
-#ifdef ENABLE_W_FLAG
-      case 'W':
-        if (connections[connnum].type & TYPE_ADMIN)
-          type = TYPE_WALLOPS ;
-        else
-          type = 0;
-#endif
-
-      case '-':
-	type = 0;
-	reversing=YES;
-	break;
-
-      case '+':
-	type = 0;
-	reversing=NO;
-	break;
-
-      default:
-	type = 0;
-	break;
-      }
-
-      if (reversing)
-	connections[connnum].type &= ~type;
-      else
-	connections[connnum].type |= type;
-    }
-
-    print_to_socket(connections[connnum].socket,
-	 "Your flags are now: +%s",
-	 type_show(connections[connnum].type));
-
-    save_umodes(connections[connnum].registered_nick,
-		connections[connnum].type);
-  }
-  else /* only called if ADMIN */
-  {
-    for(z=0;z<MAXDCCCONNS;++z)
-    {
-      if(found)
-	break;
-
-      if (strcasecmp(registered_nick, connections[z].registered_nick) == 0)
-      {
-	found = YES;
-	
-	for(i=0; flags[i] ;i++)
-	{
-	  switch(flags[i])
-	  {
-#ifndef NO_D_LINE_SUPPORT
-	  case 'D': type = TYPE_DLINE; break;
-#endif
-	  case 'K': type = TYPE_KLINE; break;
-	  case 'S': type = TYPE_SUSPENDED; break;
-#ifdef ENABLE_W_FLAG
-          case 'W': type = TYPE_WALLOPS; break;
-#endif
-	  case 'i': type = TYPE_INVS; break;
-	  case 'k': type = TYPE_VIEW_KLINES; break;
-          case 'y': type = TYPE_SPY; break;
-	  case 'o': type = TYPE_LOCOPS; break;
-	  case 'p': type = TYPE_PARTYLINE; break;
-	  case 'w': type = TYPE_WARN; break;
-          case 'x': type = TYPE_SERVERS; break;
-	  case '-':
-	    reversing=YES;
-	    type = 0;
-	    break;
-	  case '+':
-	    reversing=NO;
-	    type = 0;
-	    break;
-	  default:
-	    type = 0;
-	    break;
-	  }
-
-	  /* don't let an admin suspend an admin */
-	  
-	  if( (connections[z].type & TYPE_ADMIN) &&
-	      (type&TYPE_SUSPENDED))
-	    continue;
-
-	  if(type)
-	  {
-	    if (!reversing)
-	      connections[z].type |= type;
-	    else
-	      connections[z].type &= ~type;
-	  }
-	}
-
-	print_to_socket(connections[connnum].socket,
-			"Flags for %s are now: +%s",
-			registered_nick, type_show(connections[z].type));
-
-	print_to_socket(connections[z].socket,
-			"Flags for you changed by %s are now: +%s",
-			connections[connnum].nick,
-			type_show(connections[z].type));
-      }
-    }
-
-    if(!found)
-    {
-      new_type=0;
-
-      for(z=0;userlist[z].user[0];z++)
-      {
-	if(found)
-	  break;
-
-	if (strcasecmp(registered_nick, userlist[z].usernick) == 0)
-	{
-	  found = YES;
-
-	  new_type = userlist[z].type;
-
-	  /* default them to partyline */
-	  new_type |= TYPE_PARTYLINE;
-
-	  /* Only use user.pref if they exist */
-	  if( (type = find_user_umodes(registered_nick)) )
-	  {
-	    new_type &= TYPE_ADMIN;
-	    new_type |= type;
-	    type = 0;
-	  }
-
-	  for(i=0; flags[i] ;i++)
-	  {
-	    switch(flags[i])
-	    {
-	    case 'K': type = TYPE_KLINE; break;
-#ifndef NO_D_LINE_SUPPORT
-	    case 'D': type = TYPE_DLINE; break;
-#endif
-	    case 'S': type = TYPE_SUSPENDED; break;
-#ifdef ENABLE_W_FLAG
-            case 'W': type = TYPE_WALLOPS; break;
-#endif
-	    case 'k': type = TYPE_VIEW_KLINES; break;
-	    case 'p': type = TYPE_PARTYLINE; break;
-	    case 'w': type = TYPE_WARN; break;
-	    case 'i': type = TYPE_INVS; break;
-            case 'y': type = TYPE_SPY; break;
-	    case 'o': type = TYPE_LOCOPS; break;
-            case 'x': type = TYPE_SERVERS; break;
-	    case '-':
-	      reversing=YES;
-	      type = 0;
-	      break;
-	    case '+':
-	      reversing=NO;
-	      type = 0;
-	      break;
-	    default:
-	      type = 0;
-	      break;
-	    }
-		      
-	    if( (new_type & TYPE_ADMIN) &&
-		(type&TYPE_SUSPENDED))
-	      continue;
-
-	    if (!reversing)
-	      new_type |= type;
-	    else
-	      new_type &= ~type;
-	  }
-	  
-	  print_to_socket(connections[connnum].socket,
-	       "Startup flags for %s are now: +%s",
-	       registered_nick, type_show(new_type));
-	  save_umodes(registered_nick, new_type);
-	}
-      }
-    }
-  }
-}
-#endif
-
 
 /*
  * save_umodes

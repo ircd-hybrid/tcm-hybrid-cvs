@@ -52,7 +52,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.6 2000/12/01 05:16:16 bill Exp $";
+static char *version="$Id: serverif.c,v 1.7 2000/12/02 04:54:12 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -2702,7 +2702,7 @@ void oper(char *mynick)
 static void send_umodes(char *mynick)
 {
   toserv("MODE %s :+bcdfknrswxyz\n", mynick );
-  toserv("FLAGS +SKILLS CLICONNECTS +CLIDISCONNECTS +NICKCHANGES +LWALLOPS +CONNECTS +SQUITS +OWALLOPS\n");
+  toserv("FLAGS +SKILLS CLICONNECTS +CLIDISCONNECTS +NICKCHANGES +LWALLOPS +CONNECTS +SQUITS +OWALLOPS +STATSNOTICES\n");
 
   if(config_entries.hybrid && (config_entries.hybrid_version >= 6))
     {

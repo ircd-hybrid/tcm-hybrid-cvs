@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.28 2001/08/29 22:12:02 bill Exp $";
+static char *version="$Id: serverif.c,v 1.29 2001/08/30 02:27:42 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -712,6 +712,7 @@ void rdpt(void)
   int lnth, lnth2;
   int i;
   char dccbuff[DCCBUFF_SIZE], incomingbuff[BUFFERSIZE], *p, *q;
+  char sillybuf[1];  /* fstat() isnt good enough for some OSs, we'll try to read a byte */
   struct timeval server_time_out;
   static time_t clones_last_check_time=(time_t)0;	/* clone check */
   static time_t remote_tcm_socket_setup_time=(time_t)0;
@@ -878,8 +879,7 @@ void rdpt(void)
 		{
 		  if(FD_ISSET(socks[i].socket, &writefds))
 		    {
-		      struct stat buf;
-		      if(fstat(socks[i].socket,&buf) >= 0) report_open_socks(i);
+		      if (read(socks[i].socket, (char *)&sillybuf, 1) >= 0) report_open_socks(i);
 		      (void)close(socks[i].socket);
 		      socks[i].state = 0;
 		      socks[i].socket = INVALID;
@@ -945,7 +945,7 @@ void rdpt(void)
 			    connections[i].last_message_time = time((time_t *)NULL);
 			    dccproc(i);
 			  }
-			  if (lnth2) connections[i].buffer[0] = '\0';
+			  if (lnth2 && connections[i].buffer) connections[i].buffer[0] = '\0';
 			  if (*p) q = p;
 			  else break;
 			}
@@ -1430,6 +1430,7 @@ char makeconn(char *hostport,char *nick,char *userhost)
   connections[i].set_modes = 0;
 
   connections[i].buffer = (char *)malloc(BUFFERSIZE);
+  bzero(connections[i].buffer, BUFFERSIZE);
   if(!connections[i].buffer)
     {
       sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in makeconn\n");

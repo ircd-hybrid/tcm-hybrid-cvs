@@ -63,15 +63,15 @@
 #define MOTD_FILE "etc/motd.txt"
 #define PREF_FILE "etc/tcm.pref"
 
-#define LOGFILE "log/tcm.log"
-#define LAST_LOG_NAME "log/last_log_name"
+#define LOGFILE "logs/tcm.log"
+#define LAST_LOG_NAME "logs/last_log_name"
 
 /* Where nasty errors are logged */
-#define ERROR_LOG "log/error.log"
+#define ERROR_LOG "logs/error.log"
 
-#define KILL_KLINE_LOG "log/kills_klines.log"
+#define KILL_KLINE_LOG "logs/kills_klines.log"
 
-#define DEBUG_LOGFILE "log/tcm.log"
+#define DEBUG_LOGFILE "logs/tcm.log"
 
 /* How to email, sendmail would work too */
 /* This is obviously a SUNos ism */

@@ -38,7 +38,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.14 2001/07/29 00:37:11 bill Exp $";
+static char *version="$Id: abuse.c,v 1.15 2001/08/30 02:27:42 bill Exp $";
 
 /*
  * do_a_kline()
@@ -501,7 +501,7 @@ void suggest_kill_kline(int reason,
        else if(strncasecmp(config_entries.wingate_act,"warn",4) == 0)
 	 {
 	   sendtoalldcc(SEND_WARN_ONLY,
-			"*** Open socks detected detected from %s!%s@%s.\n.kline %s@%s\n",
+			"*** Open wingate detected detected from %s!%s@%s.\n.kline %s@%s\n",
 			nick,
 			suggested_user, suggested_host,
 			suggested_user, suggested_host);

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.25 2001/10/29 04:12:41 db Exp $ */
+/* $Id: dcc_commands.c,v 1.26 2001/10/31 04:01:42 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -1016,7 +1016,7 @@ dccproc(int connnum, int argc, char *argv[])
 #endif
     }
     else
-      prnt(connections[connnum].socket, "Usage: .dline [nick]|[user@host] reason\"\n");
+      prnt(connections[connnum].socket, "Usage: .dline [nick]|[user@host] reason\n");
     break;
 #endif
 

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.74 2002/05/20 05:30:59 db Exp $ */
+/* $Id: bothunt.c,v 1.75 2002/05/20 21:51:14 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -359,86 +359,37 @@ void _ontraceclass(int connnum, int argc, char *argv[])
  * try and filter some of the worst ones out.. I have seen 
  * *@* used in a servers O line.. (I will not say which, to protect
  * the guilty)
- *
- *
- * Thinking about this.. I think perhaps this code should just go away..
- * Certainly, if you have REMOTE_KLINE etc. defined... You will need
- * to add users to userlist.cf anyway.
- *
- * REMOTE_KLINE is gone - Hwy
- * 
  */
 
 void on_stats_o(int connnum, int argc, char *argv[])
 {
-  char body[MAX_BUFF];
   char *user_at_host;
   char *user;
   char *host;
   char *nick;
-  int non_lame_user_o;	/* If its not a wildcarded user O line... */
-  int non_lame_host_o;	/* If its not a wildcarded host O line... */
-  int i;
   char *p;		/* pointer used to scan for valid O line */
-  int len;
-
-  p = body;
-  for (i = 0; i < argc; i++)
-  {
-    len = sprintf(p, "%s ", argv[i]);
-    p += len;
-  }
-  /* blow away last ' ' */
-  *--p = '\0';
 
 /* No point if I am maxed out going any further */
   if ( user_list_index == (MAXUSERS - 1))
     return;
 
-  user_at_host = p = argv[4];
+  user = user_at_host = argv[4];
   nick = argv[6];
-  non_lame_user_o = NO;
 
-  while(*p)
-  {
-    if (*p == '@')	/* Found the first part of "...@" ? */
-      break;
-
-    if (*p != '*')	/* A non wild card found in the username? */
-      non_lame_user_o = YES;	/* GOOD a non lame user O line */
-    /* can't just break. I am using this loop to find the '@' too */
-
-    p++;
-  }
-  
-  if (!non_lame_user_o)	/* LAME O line ignore it */
-    return;
-
-  p++;			/* Skip the '@' */
-  non_lame_host_o = NO;
-
-  while(*p)
-  {
-    if (*p != '*')	/* A non wild card found in the hostname? */
-      non_lame_host_o = YES;	/* GOOD a non lame host O line */
-    p++;
-  }
-
-  if (!non_lame_host_o)
-    return;
-  user = user_at_host;
-
-  if ((p = strchr(user_at_host,'@')) != NULL)
-  {
-    *p = '\0';
-    p++;
-    host = p;
-  }
+  if ((p = strchr(user_at_host, '@')) != NULL)
+    {
+      *p++ = '\0';
+      host = p;
+    }
   else
-  {
-    user = "*";
-    host = user_at_host;
-  }
+    {
+      user = "*";
+      host = p;
+    }
+
+  /* Don't allow *@* or user@* O: lines */
+  if (strcmp(host, "*") == 0)
+    return;
 
   /*
    * If this user is already loaded due to userlist.load

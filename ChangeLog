@@ -1,3 +1,17 @@
+einride     2002/05/08 16:45:05 EDT	(20020508_3)
+
+  Modified files:
+    modules              bothunt.c commands.c serverif.c 
+  Log:
+  Fixed dependancy on module load order.
+  
+  Revision  Changes    Path
+  1.68      +1 -2      tcm-hybrid/modules/bothunt.c
+  1.51      +2 -1      tcm-hybrid/modules/commands.c
+  1.59      +2 -2      tcm-hybrid/modules/serverif.c
+
+
+
 bill        2002/05/08 16:39:19 EDT	(20020508_2)
 
   Modified files:

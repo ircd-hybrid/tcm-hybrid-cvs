@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.31 2002/05/27 02:46:08 db Exp $
+ * $Id: parse.c,v 1.32 2002/05/27 02:59:27 db Exp $
  */
 
 #include <stdio.h>
@@ -37,13 +37,15 @@
 
 
 static void do_init(void);
-static void proc(int conn_num, char *source, char *function, char *body);
+static void process_server(int conn_num,
+			   char *source, char *function, char *body);
 static void privmsgproc(char *nick,char *userhost, int argc, char *argv[]);
 static void send_umodes(char *nick);
-static void onkick(char *nick);
+static void on_kick(const char *nick);
 static void on_nick(char *old_nick, char *new_nick);
+static void wallops(int connnum, int argc, char *argv[]);
 static void on_nick_taken(void);
-static void cannotjoin(char *channel);
+static void cannot_join(char *channel);
 
 int  maxconns = 0;
 
@@ -106,7 +108,7 @@ parse_server(int conn_num)
     fflush(outfile);
   }
 
-  proc(conn_num, source, function, body);
+  process_server(conn_num, source, function, body);
 }
 
 /*
@@ -242,12 +244,12 @@ parse_args(char *buffer, char *argv[])
 
 
 /*
- * proc()
+ * process_server()
  *   Parse server messages based on the function and handle them.
  *   Parameters:
- *     source - nick!user@host or server host that sent the message
- *     fctn - function for the server msgs (e.g. PRIVMSG, MODE, etc.)
- *     param - The remainder of the server message
+ *     source   - nick!user@host or server host that sent the message
+ *     function - function for the server msgs (e.g. PRIVMSG, MODE, etc.)
+ *     param    - The remainder of the server message
  *   Returns: void
  *
  *     If the source is in nick!user@host format, split the nickname off
@@ -255,14 +257,13 @@ parse_args(char *buffer, char *argv[])
  *     message.  The parameter is generally either our nickname or the
  *     nickname directly affected by this message.  You can kind of figure
  *     the rest of the giant 'if' statement out.  Occasionally we need to
- *     parse additional parameters out of the body.  To find out what all
- *     the numeric messages are, check out 'numeric.h' that comes with the
- *     server code.  ADDED: watch out for partial PRIVMSGs received from the
+ *     parse additional parameters out of the body.  
+ *     ADDED: watch out for partial PRIVMSGs received from the
  *     server... hold them up and make sure to stay synced with the timer
  *     signals that may be ongoing.
  */
-static
-void proc(int conn_num, char *source,char *fctn,char *param)
+static void
+process_server(int conn_num, char *source, char *function, char *param)
 {
   struct serv_command *ptr;
   char *userhost;
@@ -274,8 +275,8 @@ void proc(int conn_num, char *source,char *fctn,char *param)
 
   if (source && *source)
     argv[argc++] = source;
-  if (fctn && *fctn)
-    argv[argc++] = fctn;
+  if (function && *function)
+    argv[argc++] = function;
   
   p = param;
   if (*p == ':')
@@ -341,7 +342,7 @@ void proc(int conn_num, char *source,char *fctn,char *param)
 
   else if ((strcmp(argv[1],"WALLOPS")) == 0)
   {
-    _wallops(0, argc, argv);
+    wallops(0, argc, argv);
   }
   else if ((strcmp(argv[1],"JOIN")) == 0)
   {
@@ -349,13 +350,13 @@ void proc(int conn_num, char *source,char *fctn,char *param)
   }
   else if ((strcmp(argv[1],"KICK")) == 0)
   {
-    onkick(argv[3]);
+    on_kick(argv[3]);
   }
   else if (strcmp(argv[1],"NICK") == 0)
   {
     on_nick(source,argv[2]);
   }
-  else if (strcmp(fctn,"NOTICE") == 0)
+  else if (strcmp(function,"NOTICE") == 0)
   {
     if(strcasecmp(source,config_entries.rserver_name) == 0)
     {
@@ -363,9 +364,9 @@ void proc(int conn_num, char *source,char *fctn,char *param)
     }
   }
 
-  if(isdigit((int) fctn[0]) && isdigit((int) fctn[1]) &&
-     isdigit((int) fctn[2]))
-    numeric = atoi(fctn);
+  if(isdigit((int) function[0]) && isdigit((int) function[1]) &&
+     isdigit((int) function[2]))
+    numeric = atoi(function);
 
   switch(numeric)
   {
@@ -384,7 +385,7 @@ void proc(int conn_num, char *source,char *fctn,char *param)
 	
     case ERR_CHANNELISFULL: case ERR_INVITEONLYCHAN:
     case ERR_BANNEDFROMCHAN: case ERR_BADCHANNELKEY:
-      cannotjoin(argv[3]);
+      cannot_join(argv[3]);
       break;
 	
     case RPL_MYINFO:
@@ -526,7 +527,7 @@ do_init(void)
  */
 
 void
-_wallops(int connnum, int argc, char *argv[])
+wallops(int connnum, int argc, char *argv[])
 {
   char *nick=argv[0], *p;
 
@@ -593,7 +594,7 @@ _onjoin(int connnum, int argc, char *argv[])
 }
 
 /*
- * onkick
+ * on_kick
  *
  * inputs       - nick being kicked
  * output       - none
@@ -601,7 +602,7 @@ _onjoin(int connnum, int argc, char *argv[])
  */
 
 static void
-onkick(char *nick)
+on_kick(const char *nick)
 {
   if (strcmp(mynick,nick) == 0)
   {
@@ -672,15 +673,15 @@ on_nick_taken(void)
 }
 
 /*
- * cannotjoin
+ * cannot_join
  *
- * inputs       - channel
+ * inputs       - channel name
  * output       - none
  * side effects -
  */
 
 static void
-cannotjoin(char *channel)
+cannot_join(char *channel)
 {
   char newchan[MAX_CHANNEL];
   int i;

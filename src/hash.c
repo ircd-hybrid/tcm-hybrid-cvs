@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.62 2003/01/26 01:16:59 wiz Exp $
+ * $Id: hash.c,v 1.63 2003/02/03 09:02:16 wiz Exp $
  */
 
 #include <stdio.h>
@@ -590,6 +590,9 @@ find_domain(char* host)
  * side effects	- 
  */
 
+#define AFCLONECONFREQ(x) (strchr(x, ':') ? IPV6CLONECONNECTFREQ : CLONECONNECTFREQ)
+#define AFCLONECONCOUNT(x) (strchr(x, ':') ? IPV6CLONECONNECTCOUNT : CLONECONNECTCOUNT)
+
 static void
 check_host_clones(char *host)
 {
@@ -611,7 +614,7 @@ check_host_clones(char *host)
   for (find = host_table[ind]; find; find = find->next)
   {
     if((strcmp(find->info->host, host) == 0) &&
-	(now - find->info->connecttime < CLONECONNECTFREQ + 1))
+	(now - find->info->connecttime < AFCLONECONFREQ(host) + 1))
     {
       if(find->info->reporttime > 0)
       {
@@ -628,7 +631,7 @@ check_host_clones(char *host)
     }
   }
 
-  if((reportedclones == 0 && clonecount < CLONECONNECTCOUNT) ||
+  if((reportedclones == 0 && clonecount < AFCLONECONCOUNT(host)) ||
       now - lastreport < 10)
     return;
 
@@ -655,7 +658,7 @@ check_host_clones(char *host)
   for (find = host_table[ind],clonecount = 0; find; find = find->next)
   {
     if((strcmp(find->info->host, host) == 0) &&
-	(now - find->info->connecttime < CLONECONNECTFREQ + 1) &&
+	(now - find->info->connecttime < AFCLONECONFREQ(host) + 1) &&
 	find->info->reporttime == 0)
     {
       ++clonecount;
@@ -747,7 +750,7 @@ check_virtual_host_clones(char *ip_class_c)
   for (find = ip_table[ind]; find; find = find->next)
     {
       if(!strcmp(find->info->ip_class_c, ip_class_c) &&
-	  (now - find->info->connecttime < CLONECONNECTFREQ + 1))
+	  (now - find->info->connecttime < AFCLONECONFREQ(ip_class_c) + 1))
       {
 	if(find->info->reporttime > 0)
 	  {
@@ -764,7 +767,7 @@ check_virtual_host_clones(char *ip_class_c)
        }
     }
 
-  if(((reportedclones == 0) && (clonecount < CLONECONNECTCOUNT)) ||
+  if(((reportedclones == 0) && (clonecount < AFCLONECONCOUNT(ip_class_c))) ||
       (now - lastreport < 10))
     return;
 
@@ -797,7 +800,7 @@ check_virtual_host_clones(char *ip_class_c)
   for (find = ip_table[ind]; find; find = find->next)
     {
       if(!strcmp(find->info->ip_class_c, ip_class_c) &&
-	  (now - find->info->connecttime < CLONECONNECTFREQ + 1) &&
+	  (now - find->info->connecttime < AFCLONECONFREQ(ip_class_c) + 1) &&
 	  find->info->reporttime == 0)
 	{
           /*
@@ -845,7 +848,7 @@ check_virtual_host_clones(char *ip_class_c)
 	   * we do, however, if they differ w/o ident
 	   * (ie ~clone1, ~clone2, ~clone3)        
 	   */
-          if ((different == NO || ident == NO) && (clonecount >= CLONECONNECTCOUNT))
+	   if ((different == NO || ident == NO) && (clonecount >= AFCLONECONCOUNT(ip_class_c)))
             {
 	      handle_action(act_vclone,
 			    find->info->nick, find->info->username,

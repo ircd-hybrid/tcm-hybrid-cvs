@@ -1,7 +1,7 @@
 #ifndef __BOTHNUT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.61 2003/02/03 06:35:43 bill Exp $ */
+/* $Id: bothunt.h,v 1.62 2003/02/03 09:02:15 wiz Exp $ */
 
 
 struct source_client;
@@ -92,6 +92,9 @@ void _config(int, int, char *argv[]);
 
 #define CLONECONNECTCOUNT 3
 #define CLONECONNECTFREQ  30
+
+#define IPV6CLONECONNECTCOUNT 7
+#define IPV6CLONECONNECTFREQ  300
 
 #define CLONERECONCOUNT   5	/* this many reconnects */
 #define CLONERECONFREQ    15    /* in this many seconds */

@@ -1,3 +1,17 @@
+wiz         2003/01/25 20:17:00 EST	(20030126_0)
+
+  Modified files:
+    src                  actions.c hash.c 
+  Log:
+  - Changed some more vclone report warnings to distinguish
+    between ipv4 and ipv6 subnets.
+  
+  Revision  Changes    Path
+  1.45      +1 -1      tcm-hybrid/src/actions.c
+  1.62      +12 -10    tcm-hybrid/src/hash.c
+
+
+
 bill        2003/01/21 21:50:51 EST	(20030122_0)
 
   Modified files:

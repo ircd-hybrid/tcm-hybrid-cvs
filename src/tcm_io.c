@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.27 2002/05/25 17:34:32 db Exp $
+ * $Id: tcm_io.c,v 1.28 2002/05/25 17:52:04 db Exp $
  */
 
 #include <stdio.h>
@@ -156,29 +156,27 @@ read_packet(void)
 
       for (i=0; i < MAXDCCCONNS; i++)
       {
-        if (connections[i].socket != INVALID)
-        {
-	  if (i == 0)
-	    {
-	      if (connections[i].connecting)
-		{
-		  connections[i].connecting = 0;
-		  _signon(0, 0, NULL);
-		  continue;
-		}
-	    }
-	  else
-	    {
-	      if (connections[i].connecting)
-		{
-		  connections[i].connecting = 0;
-		  finish_accept_dcc_chat(i);
-		  continue;
-		}
-	    }
-
           if (FD_ISSET(connections[i].socket, &readfds))
           {
+	    if (i == 0)
+	      {
+		if (connections[i].connecting)
+		  {
+		    connections[i].connecting = 0;
+		    _signon(0, 0, NULL);
+		    continue;
+		  }
+	      }
+	    else
+	      {
+		if (connections[i].connecting)
+		  {
+		    connections[i].connecting = 0;
+		    finish_accept_dcc_chat(i);
+		    continue;
+		  }
+	      }
+
             incoming_connnum = i;
             nread = read(connections[i].socket,
                         incomingbuff, sizeof(incomingbuff));
@@ -229,7 +227,6 @@ read_packet(void)
               }
           }
         }
-      }
     }
     else /* -ve */
     {

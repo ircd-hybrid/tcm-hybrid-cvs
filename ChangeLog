@@ -1,3 +1,16 @@
+db          2002/06/03 10:57:35 EDT	(20020603_6)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - don't use connections[i].socket == INVALID use state == S_CLIENT
+  - other quick cleanups in style
+  
+  Revision  Changes    Path
+  1.80      +4 -4      tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/06/03 07:03:09 EDT	(20020603_5)
 
   Modified files:

@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.36 2002/05/26 05:48:05 db Exp $ */
+/* $Id: wingate.c,v 1.37 2002/05/26 06:57:31 db Exp $ */
 
 
 #include <netdb.h>
@@ -38,9 +38,6 @@
 /* Maximum pending connects for squid */
 #define MAXSQUID 400
 
-#define WINGATE_CONNECTING	1
-#define WINGATE_READING		2
-#define WINGATE_READ		3
 #define SOCKS5_CONNECTING	4
 #define SOCKS4_CONNECTING	5
 #define SOCKS5_SENTVERSION	6
@@ -122,21 +119,27 @@ static void
 wingate_start_test(struct plus_c_info *info_p)
 {
   int found_slot;
+  struct sockaddr_in socketname;
 
   found_slot = find_free_connection_slot(NULL);
   if (found_slot < 0)
     return;
 
-  connections[found_slot].user_state = WINGATE_CONNECTING;
   strncpy(connections[found_slot].user,info_p->user,MAX_USER-1);
   strncpy(connections[found_slot].host,info_p->host,MAX_HOST-1);
   strncpy(connections[found_slot].nick,info_p->nick,MAX_NICK-1);
-  
-#if 0
-  connections[found_slot].socket = connect_to_given_ip_port(&socketname,23);
-#endif
+  strncpy(connections[found_slot].ip,info_p->ip,MAX_IP-1);
   connections[found_slot].io_read_function = NULL;
   connections[found_slot].io_write_function = NULL;
+  if (inet_aton(info_p->ip, &socketname.sin_addr)) 
+    {
+      connections[found_slot].socket =
+	connect_to_given_ip_port(&socketname, 23);
+    }
+  else
+    {
+      close_connection(found_slot);
+    }
 }
 #endif
 
@@ -154,6 +157,7 @@ static void
 socks_start_test(struct plus_c_info *info_p, int socksversion)
 {
   int found_slot;
+  struct sockaddr_in socketname;
 
   found_slot = find_free_connection_slot(NULL);
   if (found_slot < 0)
@@ -169,9 +173,11 @@ socks_start_test(struct plus_c_info *info_p, int socksversion)
   strncpy(connections[found_slot].user, info_p->user, MAX_USER-1);
   strncpy(connections[found_slot].host, info_p->host, MAX_HOST-1);
   strncpy(connections[found_slot].nick, info_p->nick,MAX_NICK-1);
+  strncpy(connections[found_slot].ip, info_p->ip,MAX_IP-1);
   connections[found_slot].io_read_function = NULL;
   connections[found_slot].io_write_function = NULL;
 
+  connections[found_slot].socket = connect_to_given_ip_port(&socketname, 23);
 }
 #endif
 
@@ -187,6 +193,7 @@ static void
 squid_start_test(struct plus_c_info *info_p, int port)
 {
   int found_slot;
+  struct sockaddr_in socketname;
 
   found_slot = find_free_connection_slot(NULL);
   if (found_slot < 0)
@@ -199,162 +206,151 @@ squid_start_test(struct plus_c_info *info_p, int port)
 
   connections[found_slot].io_read_function = NULL;
   connections[found_slot].io_write_function = NULL;
-
-#if 0
-  connections[found_slot].socketname.sin_port = htons (port);
+  connections[found_slot].socket = connect_to_given_ip_port(&socketname, port);
+  return;
+}
 #endif
 
-  return;
+
+#ifdef DETECT_WINGATE
+static void
+read_wingate(int i)
+{
+  int open_wingate = NO;
+  struct stat buf;
+  char *p;
+
+  if (fstat(connections[i].socket,&buf) < 0)
+    {
+      close_connection(i);
+      return;
+    }
+  
+  if ((p = strchr(connections[i].buffer,'W')))
+    {
+      if (strncasecmp(p,"Wingate>", 8) == 0)
+	open_wingate = YES;
+    }
+  else if ((p = strchr(connections[i].buffer,'T')))
+    {
+      if (!strncasecmp(p, "Too many connected users - try again later",42))
+	open_wingate = YES;
+    }
+  /*
+   * the code used to only close the socket when a host was
+   * identified as a Wingate.  this is, of course, wrong.
+   * -bill.
+   */
+  if (open_wingate)
+    report_open_wingate(i);
+
+  close_connection(i);
+  connections[i].user_state = 0;
 }
 #endif
 
 /* ZZZ XXX */
 #if notyet
-void
-_scontinuous(int connnum, int argc, char *argv[])
-{
-  int i;
-
-#ifdef DETECT_WINGATE
-
-              if (fstat(wingate[i].socket,&buf) < 0)
-                {
-                  (void)close(wingate[i].socket);
-                  wingate[i].state = 0;
-                  wingate[i].socket = INVALID;
-                }
-              else
-                {
-                  wingate[i].state = WINGATE_READING;
-                  wingate[i].connect_time = current_time;
-                }
-
-      if (wingate[i].socket != INVALID)
-        {
-          int open_wingate = NO;
-
-	  if ((p = strchr(buffer,'W')))
-	    {
-	      if (strncasecmp(p,"Wingate>", 8) == 0)
-		open_wingate = YES;
-	    }
-	  else if( (p = strchr(buffer,'T')) )
-	    {
-	      if (!strncasecmp(p, "Too many connected users - try again later",42))
-		open_wingate = YES;
-	    }
-	  /*
-	   * the code used to only close the socket when a host was
-	   * identified as a Wingate.  this is, of course, wrong.
-	   * -bill.
-	   */
-	  if (open_wingate)
-	    report_open_wingate(i);
-
-	  (void)close(connections[i].socket);
-	  connections[i].user_state = 0;
-        }
-    }
-#endif
 #ifdef DETECT_SOCKS
-            {
-	      switch (connections[i].user_state)
-		{
-		case SOCKS5_CONNECTING:
-		  tmp[0] = 5; /* socks version */
-		  tmp[1] = 1; /* Number of supported auth methods */
-		  tmp[2] = 0; /* Auth method 0 (no auth) */
-		  tmp[3] = 0; /* EOF */
-		  if (write(socks[i].socket, tmp, 4)!=4) {
-		    close(socks[i].socket);
+static void
+read_socks(int i)
+{
+  switch (connections[i].user_state)
+    {
+    case SOCKS5_CONNECTING:
+      tmp[0] = 5; /* socks version */
+      tmp[1] = 1; /* Number of supported auth methods */
+      tmp[2] = 0; /* Auth method 0 (no auth) */
+      tmp[3] = 0; /* EOF */
+      if (write(socks[i].socket, tmp, 4) != 4)
+	{
+	  close(socks[i].socket);
 #if 0
 
-		  socks_bindsocket(socks[i].nick, socks[i].user, socks[i].host, 4);
-		  connections[i].state = 0;
-		  connections[i].socket = INVALID;
+	  socks_bindsocket(socks[i].nick, socks[i].user, socks[i].host, 4);
+	  connections[i].state = 0;
+	  connections[i].socket = INVALID;
 #endif
 
-		  break;
-		} 
-		connections[i].user_state = SOCKS5_SENTVERSION;
-		break;
-	      case SOCKS5_SENTVERSION:
-		memset(tmp, 0, sizeof(tmp));
-		  report_open_socks(i);
-		  close(connections[i].socket);
-		  connections[i].state = 0;
-		  connections[i].socket = INVALID;
-		  break;
-		}
-		if(config_entries.debug && outfile)
-		  {
-		    fprintf(outfile,
-			    "DEBUG: Socks 5 server at %s rejects login\n",
-			    connections[i].host);
-		  }
-
-		close(connections[i].socket);
-#if 0
-		socks_bindsocket(socks[i].nick, socks[i].user, socks[i].host, 4);
-#endif
-		connections[i].user_state = 0;
-		connections[i].socket = INVALID;
-		break;
-	      case SOCKS4_CONNECTING:
-		tmp[0] = 4; /* socks v4 */
-		tmp[1] = 1; /* connect */
-
-		*((unsigned short *) (tmp+2)) =
-		  htons(SOCKS_CHECKPORT); /* Connect to port */
-
-		*((unsigned int *) (tmp+4)) = 
-		  inet_addr(SOCKS_CHECKIP); /* Connect to ip */
-
-		strcpy(tmp+8, "tcm"); /* Dummy username */
-		if (write(socks[i].socket, tmp, 12)!=12) {
-		  close(socks[i].socket);
-		  socks[i].state = 0;
-		  socks[i].socket = INVALID;
-		  break;
-		} 
-		if(config_entries.debug && outfile)
-		  {
-		    fprintf(outfile,
-			    "DEBUG: Sent Socks 4 CONNECT to %s\n",
-			    socks[i].host);
-		  }
-		connections[i].state=SOCKS4_SENTCONNECT;
-		break;
-	      case SOCKS4_SENTCONNECT:
-		memset(tmp, 0xCC, sizeof(tmp));
-		  close(connections[i].socket);
-		  connections[i].state = 0;
-		  connections[i].socket = INVALID;
-		  break;
-		} 
-		if (tmp[1] != 90) {
-		  if(config_entries.debug && outfile)
-		    {
-		      fprintf(outfile,
-			      "DEBUG: Socks 4 server at %s denies connect (0x%02hhx)\n",
-			      connections[i].host, tmp[1]);
-		    }
-		  close(connections[i].socket);
-		  connections[i].user_state = 0;
-		  connections[i].socket = INVALID;
-		  break;
-		}
-		report_open_socks(i);
-		close(connections[i].socket);
-		connections[i].user_state = 0;
-		connections[i].socket = INVALID;
-		break;
-	      default:
-		break;
-	      }
-            }
-        }
+	  break;
+	} 
+      connections[i].user_state = SOCKS5_SENTVERSION;
+      break;
+    case SOCKS5_SENTVERSION:
+      memset(tmp, 0, sizeof(tmp));
+      report_open_socks(i);
+      close(connections[i].socket);
+      connections[i].state = 0;
+      connections[i].socket = INVALID;
+      break;
     }
+  if(config_entries.debug && outfile)
+    {
+      fprintf(outfile,
+	      "DEBUG: Socks 5 server at %s rejects login\n",
+	      connections[i].host);
+    }
+
+  close(connections[i].socket);
+#if 0
+  socks_bindsocket(socks[i].nick, socks[i].user, socks[i].host, 4);
+#endif
+  connections[i].user_state = 0;
+  connections[i].socket = INVALID;
+  break;
+ case SOCKS4_CONNECTING:
+   tmp[0] = 4; /* socks v4 */
+   tmp[1] = 1; /* connect */
+
+   *((unsigned short *) (tmp+2)) =
+     htons(SOCKS_CHECKPORT); /* Connect to port */
+
+   *((unsigned int *) (tmp+4)) = 
+     inet_addr(SOCKS_CHECKIP); /* Connect to ip */
+
+   strcpy(tmp+8, "tcm"); /* Dummy username */
+   if (write(socks[i].socket, tmp, 12)!=12) {
+     close(socks[i].socket);
+     socks[i].state = 0;
+     socks[i].socket = INVALID;
+     break;
+   } 
+   if(config_entries.debug && outfile)
+     {
+       fprintf(outfile,
+	       "DEBUG: Sent Socks 4 CONNECT to %s\n",
+	       socks[i].host);
+     }
+   connections[i].state=SOCKS4_SENTCONNECT;
+   break;
+ case SOCKS4_SENTCONNECT:
+   memset(tmp, 0xCC, sizeof(tmp));
+   close(connections[i].socket);
+   connections[i].state = 0;
+   connections[i].socket = INVALID;
+   break;
+} 
+if (tmp[1] != 90)
+{
+  if(config_entries.debug && outfile)
+    {
+      fprintf(outfile,
+	      "DEBUG: Socks 4 server at %s denies connect (0x%02hhx)\n",
+	      connections[i].host, tmp[1]);
+    }
+  close(connections[i].socket);
+  connections[i].user_state = 0;
+  connections[i].socket = INVALID;
+  break;
+}
+report_open_socks(i);
+close(connections[i].socket);
+connections[i].user_state = 0;
+connections[i].socket = INVALID;
+break;
+default:
+break;
+}
 #endif
 #ifdef DETECT_SQUID
   {
@@ -433,24 +429,21 @@ _reload_wingate(int connnum, int argc, char *argv[])
   int cnt;
 }
 
-/* XXX */
-#if notyet
 #ifdef DETECT_WINGATE
 static void report_open_wingate(int i)
 {
   if (config_entries.debug && outfile)
     fprintf(outfile, "Found wingate open\n");
-  
-  
+
   handle_action(act_wingate, 0,
 		connections[i].nick, connections[i].user,
 		connections[i].host, connections[i].ip, 0);
   log("Open Wingate %s!%s@%s\n",
       connections[i].nick, connections[i].user, connections[i].host);
 }
-
 #endif
 
+#if notyet
 #ifdef DETECT_SOCKS
 static
 void report_open_socks(int i)

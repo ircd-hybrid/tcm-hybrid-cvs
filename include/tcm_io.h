@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.20 2002/05/26 05:48:01 db Exp $
+ * $Id: tcm_io.h,v 1.21 2002/05/26 06:57:29 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -21,6 +21,7 @@ struct connection {
   int   state;
   void	(*io_read_function)(int connect_id);
   void	(*io_write_function)(int connect_id);
+  void	(*io_close_function)(int connect_id);
   int	user_state;
   int	type;			/* why was this a char? -bill */
   int	set_modes;		/* for set options */
@@ -28,6 +29,7 @@ struct connection {
   char	host[MAX_HOST];
   char	nick[MAX_NICK+2];	/* allow + 2 for incoming tcm names */
   char	registered_nick[MAX_NICK+2]; /* allow + 2  */
+  char	ip[MAX_IP];
   time_t last_message_time;
   /* XXX later */
 #if 0
@@ -46,6 +48,7 @@ extern	int initiated_dcc_socket;
 extern	time_t initiated_dcc_socket_time;
 extern	void initiate_dcc_chat(const char *, const char *, const char *);
 void	init_connections(void);
+void	close_connection(int connnum);
 
 void notice(const char *nick, const char *format, ...);
 void privmsg(const char *nick, const char *format, ...);

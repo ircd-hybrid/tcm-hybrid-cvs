@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.39 2002/05/26 05:48:05 db Exp $
+ * $Id: tcm_io.c,v 1.40 2002/05/26 06:57:31 db Exp $
  */
 
 #include <stdio.h>
@@ -58,6 +58,7 @@ static void va_print_to_socket(int sock, const char *format, va_list va);
 static void va_print_to_server(const char *format, va_list va);
 static void finish_accept_dcc_chat(int i);
 static void finish_dcc_chat(int i);
+static void close_dcc_connection(int connnum);
 static void signon_to_server(int unused);
 
 fd_set readfds;            /* file descriptor set for use with select */
@@ -179,7 +180,11 @@ read_packet(void)
                   }
                 else
                   {
+		    if (connections[i].io_close_function != NULL)
+		      (connections[i].io_close_function)(i);
+#if 0
                     close_connection(i);
+#endif
                   }
               }
             else if (nread > 0)
@@ -468,6 +473,7 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
   connections[i].state = S_CONNECTING;
   connections[i].io_read_function = finish_accept_dcc_chat;
   connections[i].io_write_function = NULL;
+  connections[i].io_close_function = close_connection;
   connections[i].last_message_time = current_time;
 }
 
@@ -733,7 +739,7 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   connections[i].state = S_CONNECTING;
   connections[i].io_read_function = finish_dcc_chat;
   connections[i].io_write_function = NULL;
-  FD_SET(connections[i].socket, &readfds);
+  connections[i].io_close_function = close_connection;
 
   return 1;
 }
@@ -797,7 +803,26 @@ finish_dcc_chat(int i)
 		  "Connected.  Send '.help' for commands.");
   connections[i].io_read_function = parse_client;
   connections[i].io_write_function = NULL;
+  connections[i].io_close_function = close_dcc_connection;
+}
 
+/*
+ * close_dcc_connection()
+ *
+ * inputs	- connection number
+ * output	- NONE
+ * side effects	- connection on connection number connnum is closed.
+ */
+
+static void
+close_dcc_connection(int connnum)
+{
+  send_to_all(SEND_ALL,
+	       "Oper %s (%s@%s) has disconnected",
+               connections[connnum].nick, connections[connnum].user,
+               connections[connnum].host);
+
+  close_connection(connnum);
 }
 
 /*
@@ -820,6 +845,7 @@ close_connection(int connnum)
   connections[connnum].state = S_IDLE;
   connections[connnum].io_read_function = NULL; /* blow up real good */
   connections[connnum].io_write_function = NULL; /* blow up real good */
+  connections[connnum].io_close_function = NULL; /* blow up real good */
 
   if ((connnum + 1) == maxconns)
     {
@@ -829,10 +855,6 @@ close_connection(int connnum)
       maxconns = i+1;
     }
     
-  send_to_all(SEND_ALL,
-	       "Oper %s (%s@%s) has disconnected",
-               connections[connnum].nick, connections[connnum].user,
-               connections[connnum].host);
 
   connections[connnum].user[0] = '\0';
   connections[connnum].host[0] = '\0';

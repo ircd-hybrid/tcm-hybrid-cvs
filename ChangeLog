@@ -1,3 +1,15 @@
+bill        2003/09/28 23:34:34 EDT	(20030929_0)
+
+  Modified files:
+    include              patchlevel.h 
+  Log:
+  - revved patchlevel to rc1
+  
+  Revision  Changes    Path
+  1.8       +1 -1      tcm-hybrid/include/patchlevel.h
+
+
+
 joshk       2003/08/16 22:59:10 EDT	(20030817_0)
 
   Modified files:

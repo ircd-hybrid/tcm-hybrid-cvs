@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.47 2002/03/05 07:10:51 bill Exp $ */
+/* $Id: bothunt.c,v 1.48 2002/03/06 05:16:21 bill Exp $ */
 
 #include "setup.h"
 
@@ -121,7 +121,7 @@ struct msg_to_action msgs_to_mon[] = {
   {"LINKS ", LINK_LOOK},
   {"KLINE ", IGNORE},  
   {"STATS ", STATS},
-
+  {"Got signal", SIGNAL},
   {"Nick collision on", IGNORE},
   {"Send message", IGNORE},
   {"Ghosted", IGNORE},
@@ -823,7 +823,10 @@ void onservnotice(int connnum, int argc, char *argv[])
     else if (strstr(p, "channels"))
       sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is cleaning up channels", argv[6]);
     else
+    {
       sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing config file", argv[6]);
+      toserv("STATS Y\n");
+    }
     return;
   }
 
@@ -905,6 +908,10 @@ void onservnotice(int connnum, int argc, char *argv[])
 
   case STATS:
     stats_notice(q);
+    break;
+
+  case SIGNAL:
+    toserv("STATS Y\n");
     break;
 
   case LINKWITH:

@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.19 2001/12/04 18:20:54 bill Exp $ */
+/* $Id: bothunt.h,v 1.20 2002/03/06 05:16:18 bill Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -39,22 +39,22 @@ struct banned_info
 #define LINK_LOOK	10
 #define KLINE_ADD_REPORT 11	/* Toast */
 #define STATS		12
-
-#define LINKWITH	13
-#define WRITEERR	14
-#define SQUITOF		15
-#define MOTDREQ		16
-#define FLOODER		17
-#define SPAMBOT		18
-#define ILINEMASK	19
-#define ILINEFULL	20
-#define BANNED		21
-#define DRONE		22
-#define XLINEREJ	23
-#define INVALIDUH	24
-#define SERVER		25
-#define FAILEDOPER	26
-#define INFOREQUESTED	27
+#define SIGNAL		13
+#define LINKWITH	14
+#define WRITEERR	15
+#define SQUITOF		16
+#define MOTDREQ		17
+#define FLOODER		18
+#define SPAMBOT		19
+#define ILINEMASK	20
+#define ILINEFULL	21
+#define BANNED		22
+#define DRONE		23
+#define XLINEREJ	24
+#define INVALIDUH	25
+#define SERVER		26
+#define FAILEDOPER	27
+#define INFOREQUESTED	28
 
 #define CLONECONNECTCOUNT 3
 #define CLONECONNECTFREQ  30

@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.24 2002/03/05 07:10:55 bill Exp $ */
+/* $Id: main.c,v 1.25 2002/03/06 05:16:25 bill Exp $ */
 
 #include "setup.h"
 
@@ -501,9 +501,14 @@ int get_action(char *name)
 
 int get_action_type(char *name)
 {
-  int i;
-  if ((i = get_action(name)) == -1) return 0;
-  else return actions[i].type;
+  int i, ret=0;
+
+  for (i=0 ; i<MAX_ACTIONS ; ++i)
+  {
+    if (!wldcmp(name, actions[i].name))
+      ret |= actions[i].type;
+  }
+  return ret;
 }
 
 #if 0

@@ -1,7 +1,7 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.11 2001/11/23 16:49:40 wcampbel Exp $ */
+/* $Id: modules.h,v 1.12 2002/03/06 05:16:18 bill Exp $ */
 
 struct module {
   char *name;
@@ -77,9 +77,7 @@ void m_modunload(int connnum, int argc, char *argv[]);
 void m_modreload(int connnum, int argc, char *argv[]);
 void m_modlist(int connnum, int argc, char *argv[]);
 void mod_add_cmd(struct TcmMessage *msg);
-/* XXX - unused
-** void mod_del_cmd(struct TcmMessage *msg);
-*/
+void mod_del_cmd(struct TcmMessage *msg);
 void add_common_function(int type, void *function);
 void modules_init(void);
 int findmodule(char *name);

@@ -1,8 +1,8 @@
 /*
- * much of this code has been copied (though none verbatim)
+ * much of this code has been copied (though none ver batum)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.18 2002/03/05 07:10:55 bill Exp $
+ * $Id: modules.c,v 1.19 2002/03/06 05:16:25 bill Exp $B
  *
  */
 
@@ -100,7 +100,6 @@ void mod_add_cmd(struct TcmMessage *msg)
   msg_hash_table[msgindex].msg->handlers[0] = msg->handlers[0];*/
 }
 
-/* XXX - Unused
 void mod_del_cmd(struct TcmMessage *msg)
 {
   int msgindex=0;
@@ -110,7 +109,6 @@ void mod_del_cmd(struct TcmMessage *msg)
   free(msg_hash_table[msgindex].cmd);
   free(msg_hash_table[msgindex].msg);
 }
-*/
 
 void add_common_function(int type, void *function)
 {

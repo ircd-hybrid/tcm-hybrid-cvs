@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.43 2002/03/05 07:10:55 bill Exp $
+ * $Id: userlist.c,v 1.44 2002/03/06 05:16:25 bill Exp $
  *
  */
 
@@ -827,8 +827,8 @@ int okhost(char *user,char *host, int type)
 
   for(i=0;hostlist[i].user[0];i++)
     {
-      if ((!wldcmp(hostlist[i].user,user)) &&
-	  (!wldcmp(hostlist[i].host,host)) &&
+      if ((!wldwld(hostlist[i].user,user)) &&
+	  (!wldwld(hostlist[i].host,host)) &&
           hostlist[i].type & type)
       return(YES);
     }
@@ -895,6 +895,7 @@ void reload_user_list(int sig)
     temp->function(sig, 0, NULL);
   clear_userlist();
   load_userlist();
+  toserv("STATS Y\n");
   sendtoalldcc(SEND_ALL_USERS, "*** Caught SIGHUP ***\n");
 }
 

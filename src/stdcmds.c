@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.35 2001/12/16 20:22:39 einride Exp $ */
+/* $Id: stdcmds.c,v 1.36 2002/03/06 05:16:25 bill Exp $ */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -519,6 +519,9 @@ suggest_action(int type_s,
       sprintf(suggested_user, "*");
       suggested_host=suggest_host(host, identd, type);
     }
+
+  if (okhost(suggested_user, suggested_host, type))
+    return;
 
   for (i = 0; i < MAX_ACTIONS; i++)
     if (type == actions[i].type) break;

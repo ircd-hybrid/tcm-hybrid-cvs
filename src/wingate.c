@@ -1,4 +1,6 @@
-/* $Id: wingate.c,v 1.17 2001/12/16 01:33:21 einride Exp $ */
+/* $Id: wingate.c,v 1.18 2002/03/06 05:16:22 bill Exp $ */
+
+#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
 
 #include <netdb.h>
 #include <unistd.h>
@@ -495,3 +497,5 @@ void _modinit()
     }
 #endif
 }
+
+#endif

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.35 2002/03/05 07:10:52 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.36 2002/03/06 05:16:21 bill Exp $ */
 
 #include "setup.h"
 
@@ -100,15 +100,15 @@ void m_nflood(int connnum, int argc, char *argv[])
 
 void m_rehash(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(SEND_ALL_USERS, "Rehash requested by %s", 
+  sendtoalldcc(SEND_ALL_USERS, "*** rehash requested by %s", 
                connections[connnum].registered_nick[0] ?
                connections[connnum].registered_nick :
                connections[connnum].nick);
 
   if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
-    toserv("STATS I\n");
+    toserv("STATS I\nSTATS Y\n");
   else
-    toserv("STATS E\nSTATS F\n");
+    toserv("STATS E\nSTATS F\nSTATS Y\n");
 
   initopers();
 }
@@ -1853,6 +1853,35 @@ void
 _modinit()
 {
   add_common_function(F_DCC, dccproc);
+  mod_add_cmd(&uptime_msgtab);
+  mod_add_cmd(&mem_msgtab);
+  mod_add_cmd(&clones_msgtab);
+  mod_add_cmd(&nflood_msgtab);
+  mod_add_cmd(&rehash_msgtab);
+  mod_add_cmd(&trace_msgtab);
+  mod_add_cmd(&failures_msgtab);
+  mod_add_cmd(&domains_msgtab);
+  mod_add_cmd(&bots_msgtab);
+  mod_add_cmd(&vmulti_msgtab);
+  mod_add_cmd(&nfind_msgtab);
+  mod_add_cmd(&list_msgtab);
+}
+
+void
+_moddeinit()
+{
+  mod_del_cmd(&uptime_msgtab);
+  mod_del_cmd(&mem_msgtab);
+  mod_del_cmd(&clones_msgtab);
+  mod_del_cmd(&nflood_msgtab);
+  mod_del_cmd(&rehash_msgtab);
+  mod_del_cmd(&trace_msgtab);
+  mod_del_cmd(&failures_msgtab);
+  mod_del_cmd(&domains_msgtab);
+  mod_del_cmd(&bots_msgtab);
+  mod_del_cmd(&vmulti_msgtab);
+  mod_del_cmd(&nfind_msgtab);
+  mod_del_cmd(&list_msgtab);
 }
 
 /*

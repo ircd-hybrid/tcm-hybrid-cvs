@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.42 2002/04/06 02:00:18 bill Exp $ */
+/* $Id: stdcmds.c,v 1.43 2002/04/16 21:33:00 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -35,6 +35,7 @@
 #include "stdcmds.h"
 #include "userlist.h"
 #include "wild.h"
+#include "match.h"
 
 #ifdef HAVE_REGEX_H
 #include <regex.h>
@@ -679,9 +680,9 @@ list_nicks(int sock,char *nick,int regex)
 #ifdef HAVE_REGEX_H
           if ((regex == YES &&
                !regexec((regex_t *)&reg, userptr->info->nick,1,m,REGEXEC_FLAGS))
-              || (regex == NO && !wldcmp(nick, userptr->info->nick)))
+              || (regex == NO && !match(nick, userptr->info->nick)))
 #else
-          if (!wldcmp(nick, userptr->info->nick))
+          if (!match(nick, userptr->info->nick))
 #endif
             {
               if(!numfound)

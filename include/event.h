@@ -6,11 +6,13 @@
  *
  *  The original never had a GPL REMOVED with pleasure -db
  *
- *  $Id: event.h,v 1.1 2002/05/20 01:59:49 db Exp $
+ *  $Id: event.h,v 1.2 2002/06/24 00:40:15 db Exp $
  */
 
 #ifndef __EVENT_H__
 #define __EVENT_H__
+
+struct connection;
 
 /*
  * How many event entries we need to allocate at a time in the block
@@ -42,6 +44,6 @@ extern void eventDelete(EVH *func, void *);
 extern int eventFind(EVH *func, void *);
 extern void set_back_events(time_t);
 
-extern void show_events(int sock);
+extern void show_events(struct connection *);
 
 #endif

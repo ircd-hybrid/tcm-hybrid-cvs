@@ -1,9 +1,11 @@
-/* $Id: parse.h,v 1.22 2002/06/05 22:46:32 leeh Exp $ */
+/* $Id: parse.h,v 1.23 2002/06/24 00:40:15 db Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
-void parse_server(int);
-void parse_client(int);
+struct connection;
+
+void parse_server(struct connection *);
+void parse_client(struct connection *);
 void expand_args(char *, int, int, char *argv[]);
 
 struct t_tcm_status {

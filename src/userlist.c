@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.133 2002/06/23 21:09:15 db Exp $
+ * $Id: userlist.c,v 1.134 2002/06/24 00:40:22 db Exp $
  *
  */
 
@@ -45,8 +45,8 @@ static void load_a_user(char *);
 static void load_e_line(char *);
 static void add_oper(char *, char *, char *, char *, char *);
 
-static void m_umode(int, int, char *argv[]);
-static void set_umode_connection(int, int, const char *);
+static void m_umode(struct connection *, int, char *argv[]);
+static void set_umode_connection(struct connection *, int, const char *);
 static void set_umode_userlist(char *, const char *);
 
 static void save_umodes(struct oper_entry *);
@@ -113,36 +113,35 @@ init_userlist_handlers(void)
  * side effects - clients umode is listed or changed
  */
 void
-m_umode(int connnum, int argc, char *argv[])
+m_umode(struct connection *connection_p, int argc, char *argv[])
 {
   struct oper_entry *user;
+  struct connection *user_conn;
 
   if(argc < 2)
   {
-    send_to_connection(connections[connnum].socket, 
- 		    "Your current flags are: %s",
-		    type_show(connections[connnum].type));
+    send_to_connection(connection_p,"Your current flags are: %s",
+		       type_show(connection_p->type));
     return;
   }
   else if(argc == 2)
   {
     if((argv[1][0] == '+') || (argv[1][0] == '-'))
     {
-      if(connections[connnum].type & FLAGS_ADMIN)
-        set_umode_connection(connnum, 1, argv[1]);
+      if(connection_p->type & FLAGS_ADMIN)
+        set_umode_connection(connection_p, 1, argv[1]);
       else
-        set_umode_connection(connnum, 0, argv[1]);
+        set_umode_connection(connection_p, 0, argv[1]);
 
-      send_to_connection(connections[connnum].socket,
-		      "Your flags are now: %s",
-		      type_show(connections[connnum].type));
+      send_to_connection(connection_p, "Your flags are now: %s",
+			 type_show(connection_p->type));
       return;
     }
     else
     {
-      if((connections[connnum].type & FLAGS_ADMIN) == 0)
+      if((connection_p->type & FLAGS_ADMIN) == 0)
       {
-        send_to_connection(connections[connnum].socket,
+        send_to_connection(connection_p,
 			"You aren't an admin");
 	return;
       }
@@ -151,23 +150,18 @@ m_umode(int connnum, int argc, char *argv[])
       
       if(user != NULL)
       {
-	send_to_connection(connections[connnum].socket,
-			"User flags for %s are: %s",
+	send_to_connection(connection_p, "User flags for %s are: %s",
 			argv[1], type_show(user->type));
       }
       else
-        send_to_connection(connections[connnum].socket,
-			"Can't find user [%s]", argv[1]);
+        send_to_connection(connection_p, "Can't find user [%s]", argv[1]);
     }
   }
   else
   {
-    int user_conn;
-
-    if((connections[connnum].type & FLAGS_ADMIN) == 0)
+    if((connection_p->type & FLAGS_ADMIN) == 0)
     {
-      send_to_connection(connections[connnum].socket,
-		      "You aren't an admin");
+      send_to_connection(connection_p, "You aren't an admin");
       return;
     }
 
@@ -176,31 +170,29 @@ m_umode(int connnum, int argc, char *argv[])
     if((argv[2][0] == '+') || (argv[2][0] == '-'))
     {
       /* user is currently connected.. */
-      if(user_conn)
+      if(user_conn != NULL)
       {
         set_umode_connection(user_conn, 1, argv[2]);
-        send_to_connection(connections[user_conn].socket,
-		        "Your flags are now: %s (changed by %s)",
-		        type_show(connections[user_conn].type),
-		        connections[connnum].registered_nick);
+        send_to_connection(user_conn,
+	  "Your flags are now: %s (changed by %s)",
+	  type_show(user_conn->type),
+	  connection_p->registered_nick);
       }
       else
       {
         set_umode_userlist(argv[1], argv[2]);
       }
 
-      send_to_connection(connections[connnum].socket,
- 	 	      "User flags for %s are now: %s",
-		      argv[1], type_show(connections[user_conn].type));
+      send_to_connection(connection_p, "User flags for %s are now: %s",
+			 argv[1], type_show(user_conn->type));
 
       {
-        send_to_connection(connections[connnum].socket, 
-			"Can't find user [%s]", argv[1]);
+        send_to_connection(connection_p, "Can't find user [%s]", argv[1]);
       }
     }
     else
-      send_to_connection(connections[connnum].socket,
-		      ".umode [user] [flags] | [user] | [flags]");
+      send_to_connection(connection_p,
+			 ".umode [user] [flags] | [user] | [flags]");
   }
 }
 
@@ -213,7 +205,8 @@ m_umode(int connnum, int argc, char *argv[])
  * side effects - clients usermode is changed.
  */
 void
-set_umode_connection(int conn_num, int admin, const char *umode)
+set_umode_connection(struct connection *user_conn,
+  int admin, const char *umode)
 {
   int plus = 1;
   int i;
@@ -237,9 +230,9 @@ set_umode_connection(int conn_num, int admin, const char *umode)
       if(umode_flags[j].umode == umode[i])
       {
 	if(plus)
-          connections[conn_num].type |= umode_flags[j].type;
+          user_conn->type |= umode_flags[j].type;
 	else
-          connections[conn_num].type &= ~umode_flags[j].type;
+          user_conn->type &= ~umode_flags[j].type;
 
 	break;
       }
@@ -254,13 +247,13 @@ set_umode_connection(int conn_num, int admin, const char *umode)
       if(umode_privs[j].umode == umode[i])
       {
         if(plus)
-          connections[conn_num].type |= umode_privs[j].type;
+          user_conn->type |= umode_privs[j].type;
         else
-          connections[conn_num].type &= ~umode_privs[j].type;
+          user_conn->type &= ~umode_privs[j].type;
       }
     }
   }
-  set_umode_userlist(connections[conn_num].registered_nick, umode);
+  set_umode_userlist(user_conn->registered_nick, umode);
 }
 
 void
@@ -318,6 +311,7 @@ set_umode_userlist(char *nick, const char *umode)
     }
   }
 }
+
 /* find_user_in_userlist()
  *
  * input	- username to search for

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.42 2002/06/23 21:09:14 db Exp $
+ * $Id: hash.c,v 1.43 2002/06/24 00:40:21 db Exp $
  */
 
 #include <stdio.h>
@@ -947,7 +947,7 @@ kill_add_report(char *server_notice)
 struct sort_array sort[MAXDOMAINS];
 
 void 
-report_domains(int sock,int num)
+report_domains(struct connection *connection_p, int num)
 {
   struct hash_rec *ptr;
   int inuse = 0;
@@ -995,21 +995,23 @@ report_domains(int sock,int num)
       if(!foundany)
         {
           foundany = YES;
-          send_to_connection(sock,"Domains with most users on the server:");
+          send_to_connection(connection_p,
+			     "Domains with most users on the server:");
         }
 
-      send_to_connection(sock,"  %-40s %3d users",
-           sort[found].domain_rec->info->domain, maxx);
+      send_to_connection(connection_p, "  %-40s %3d users",
+			 sort[found].domain_rec->info->domain, maxx);
       sort[found].count = 0;
     }
 
   if(!foundany)
     {
-      send_to_connection(sock, "No domains have %d or more users.",num);
+      send_to_connection(connection_p,
+			 "No domains have %d or more users.",num);
     }
   else
     {
-      send_to_connection(sock, "%d domains found", inuse);
+      send_to_connection(connection_p, "%d domains found", inuse);
     }
 }
 
@@ -1025,7 +1027,7 @@ report_domains(int sock,int num)
  */
 
 void 
-list_class(int sock,char *class_to_find,int total_only)
+list_class(struct connection *connection_p, char *class_to_find,int total_only)
 {
   struct hash_rec *ptr;
   int i;
@@ -1046,13 +1048,14 @@ list_class(int sock,char *class_to_find,int total_only)
                   if(num_found == 0)
                     {
                       /* Simply the header to the list of clients */
-                      send_to_connection(sock,
+                      send_to_connection(connection_p,
                            "The following clients are in class %s",
                            class_to_find);
                     }
 
-                    send_to_connection(sock, "  %s (%s@%s)", ptr->info->nick,
-                                    ptr->info->username, ptr->info->host);
+                    send_to_connection(connection_p,
+				       "  %s (%s@%s)", ptr->info->nick,
+				       ptr->info->username, ptr->info->host);
                 }
 
               num_found++;
@@ -1061,24 +1064,24 @@ list_class(int sock,char *class_to_find,int total_only)
     }
 
   if(num_found != 0)
-    send_to_connection(sock,
-         "%d are in class %s", num_found, class_to_find );
+    send_to_connection(connection_p,
+		       "%d are in class %s", num_found, class_to_find );
   else
-    send_to_connection(sock,
-         "Nothing found in class %s", class_to_find);
-  send_to_connection(sock,"%d unknown class", num_unknown);
+    send_to_connection(connection_p,
+		       "Nothing found in class %s", class_to_find);
+  send_to_connection(connection_p, "%d unknown class", num_unknown);
 }
 
 /*
  * list_nicks()
  *
- * inputs       - socket to reply on, nicks to search for,regexpression?
+ * inputs       - struct connection
  * output       - NONE
  * side effects -
  */
 
 void 
-list_nicks(int sock,char *nick,int regex)
+list_nicks(struct connection *connection_p, char *nick, int regex)
 {
   struct hash_rec *ptr;
 #ifdef HAVE_REGEX_H
@@ -1093,7 +1096,8 @@ list_nicks(int sock,char *nick,int regex)
   {
     char errbuf[1024];
     regerror(i, (regex_t *)&reg, errbuf, 1024); 
-    send_to_connection(sock, "Error compiling regular expression: %s", errbuf);
+    send_to_connection(connection_p,
+		       "Error compiling regular expression: %s", errbuf);
     return;
   }
 #endif
@@ -1112,31 +1116,32 @@ list_nicks(int sock,char *nick,int regex)
             {
               if(!numfound)
                 {
-                  send_to_connection(sock,
-				  "The following clients match %.150s:",nick);
+                  send_to_connection(connection_p,
+				     "The following clients match %.150s:",
+				     nick);
                 }
               numfound++;
 
-              send_to_connection(sock,
-			      "  %s (%s@%s) {%s}",
-			      ptr->info->nick, ptr->info->username,
-			      ptr->info->host, ptr->info->class);
+              send_to_connection(connection_p,
+				 "  %s (%s@%s) {%s}",
+				 ptr->info->nick, ptr->info->username,
+				 ptr->info->host, ptr->info->class);
             }
         }
     }
 
   if(numfound)
-    send_to_connection(sock,
-		    "%d matches for %s found",numfound,nick);
+    send_to_connection(connection_p,
+		       "%d matches for %s found",numfound,nick);
   else
-    send_to_connection(sock,
-		    "No matches for %s found",nick);
+    send_to_connection(connection_p,
+		       "No matches for %s found",nick);
 }
 
 /*
  * kill_or_list_users()
  *
- * inputs       - socket to reply on
+ * inputs       - struct connection pointer
  *              - uhost to match on
  *              - regex or no?
  *		- list to save results to
@@ -1145,7 +1150,7 @@ list_nicks(int sock,char *nick,int regex)
  */
 
 void 
-kill_or_list_users(int sock, char *userhost, int regex,
+kill_or_list_users(struct connection *connection_p, char *userhost, int regex,
 		   int kill_users, const char *reason)
 {
   struct hash_rec *ptr;
@@ -1162,14 +1167,14 @@ kill_or_list_users(int sock, char *userhost, int regex,
   {
     char errbuf[REGEX_SIZE];
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE); 
-    send_to_connection(sock, "Error compiling regular expression: %s",
-		    errbuf);
+    send_to_connection(connection_p, "Error compiling regular expression: %s",
+		       errbuf);
     return;
   }
 #endif
   if(!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
     {
-      send_to_connection(sock,
+      send_to_connection(connection_p,
 "Listing all users is not recommended.  To do it anyway, use '.list ?*@*'.");
       return;
     }
@@ -1185,7 +1190,7 @@ kill_or_list_users(int sock, char *userhost, int regex,
           !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS)) 
           || (regex == NO && !match(userhost, uhost)))
 #else
-      if(!match(userhost, uhost))
+      if(match(userhost, uhost) == 0)
 #endif 
       {
 	if(kill_users)
@@ -1200,37 +1205,40 @@ kill_or_list_users(int sock, char *userhost, int regex,
 	else
 	  {
 	    if(numfound == 0)
-	      send_to_connection(sock,
-			      "The following clients match %s:", userhost);
+	      send_to_connection(connection_p,
+				 "The following clients match %s:", userhost);
 
 	    numfound++;
 	    if(ptr->info->ip_host[0] > '9' || ptr->info->ip_host[0] < '0')
-	      send_to_connection(sock, "  %s (%s@%s) {%s}", ptr->info->nick,
-               ptr->info->username, ptr->info->host, ptr->info->class);
+	      send_to_connection(connection_p,
+				 "  %s (%s@%s) {%s}", ptr->info->nick,
+				 ptr->info->username,
+				 ptr->info->host, ptr->info->class);
 	    else
-	      send_to_connection(sock,
-			      "  %s (%s@%s) [%s] {%s}", ptr->info->nick,
-			      ptr->info->username, ptr->info->host,
-			      ptr->info->ip_host, ptr->info->class);
+	      send_to_connection(connection_p,
+				 "  %s (%s@%s) [%s] {%s}", ptr->info->nick,
+				 ptr->info->username, ptr->info->host,
+				 ptr->info->ip_host, ptr->info->class);
 	  }
       }
     }
   }
   if(numfound > 0)
-    send_to_connection(sock, "%d matches for %s found", numfound, userhost);
+    send_to_connection(connection_p,
+		       "%d matches for %s found", numfound, userhost);
   else
-    send_to_connection(sock, "No matches for %s found", userhost);
+    send_to_connection(connection_p, "No matches for %s found", userhost);
 }
 
 
 /*
  * report_mem()
- * inputs       - socket to report to
+ * inputs       - pointer to connection
  * output       - none
  * side effects - rough memory usage is reported
  */
 
-void report_mem(int sock)
+void report_mem(struct connection *connection_p)
 {
   int i;
   struct hash_rec *current;
@@ -1290,24 +1298,24 @@ void report_mem(int sock)
         }
     }
 
-  send_to_connection(sock,"Total host_table memory %lu/%d entries",
-		  total_host_table, count_host_table);
+  send_to_connection(connection_p,"Total host_table memory %lu/%d entries",
+		     total_host_table, count_host_table);
 
-  send_to_connection(sock, "Total usertable memory %lu/%d entries",
-		  total_user_table, count_user_table);
+  send_to_connection(connection_p, "Total usertable memory %lu/%d entries",
+		     total_user_table, count_user_table);
 
-  send_to_connection(sock, "Total domaintable memory %lu/%d entries",
-		  total_domain_table, count_domain_table);
+  send_to_connection(connection_p, "Total domaintable memory %lu/%d entries",
+		     total_domain_table, count_domain_table);
 
-  send_to_connection(sock, "Total iptable memory %lu/%d entries",
-		  total_ip_table, count_ip_table);
+  send_to_connection(connection_p, "Total iptable memory %lu/%d entries",
+		     total_ip_table, count_ip_table);
 
-  send_to_connection(sock, "Total user entry memory %lu/%d entries",
-		  total_user_entry, count_user_entry);
+  send_to_connection(connection_p, "Total user entry memory %lu/%d entries",
+		     total_user_entry, count_user_entry);
 
-  send_to_connection(sock,"Total memory in use %lu",
-		  total_host_table + total_domain_table +
-		  total_ip_table + total_user_entry );
+  send_to_connection(connection_p,"Total memory in use %lu",
+		     total_host_table + total_domain_table +
+		     total_ip_table + total_user_entry );
 }
 
 void

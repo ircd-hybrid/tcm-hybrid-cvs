@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.60 2002/06/23 21:09:16 db Exp $ */
+/* $Id: wingate.c,v 1.61 2002/06/24 00:40:22 db Exp $ */
 
 
 #include <netdb.h>
@@ -71,17 +71,16 @@ static int n_open_squid_fds=0;
 
 
 #ifdef DEBUGMODE
-void m_proxy(int connnum, int argc, char *argv[])
+void m_proxy(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc <= 2)
   {
 #ifdef DETECT_SQUID
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s <type> <host> [port]",
-                    argv[0]);
+    send_to_connection(connection_p,
+		       "Usage: %s <type> <host> [port]", argv[0]);
 #else
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s <type> <host>", argv[0]);
+    send_to_connection(connection_p,
+		       "Usage: %s <type> <host>", argv[0]);
 #endif
     return;
   }
@@ -96,9 +95,8 @@ void m_proxy(int connnum, int argc, char *argv[])
 #ifdef DETECT_SQUID
   if (argc != 4)
   {
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s squid <host> [port]",
-                    argv[0]);
+    send_to_connection(connection_p, "Usage: %s squid <host> [port]",
+		       argv[0]);
     return;
   }
   if (!strcasecmp(argv[1], "squid"))
@@ -124,33 +122,32 @@ struct dcc_command proxy_msgtab = {
 static void
 wingate_start_test(struct user_entry *info_p)
 {
-  int found_slot;
+  struct connection *found_slot;
   struct sockaddr_in socketname;
 
   if (n_open_wingate_fds >= MAXWINGATE)
     return;
 
-  if ((found_slot = find_free_connection_slot()) < 0)
+  if ((connection_p = find_free_connection()) == NULL)
     return;
 
   n_open_wingate_fds++;
 
-  strlcpy(connections[found_slot].username, info_p->username, MAX_USER);
-  strlcpy(connections[found_slot].host, info_p->host, MAX_HOST);
-  strlcpy(connections[found_slot].nick, info_p->nick, MAX_NICK);
-  strlcpy(connections[found_slot].ip, info_p->ip_host, MAX_IP);
-  connections[found_slot].io_read_function = read_wingate;
-  connections[found_slot].io_write_function = NULL;
-  connections[found_slot].io_close_function = NULL;
+  strlcpy(connection_p->pusername, info_p->username, MAX_USER);
+  strlcpy(connection_p->host, info_p->host, MAX_HOST);
+  strlcpy(connection_p->nick, info_p->nick, MAX_NICK);
+  strlcpy(connection_p->ip, info_p->ip_host, MAX_IP);
+  connection_p->io_read_function = read_wingate;
+  connection_p->io_write_function = NULL;
+  connection_p->io_close_function = NULL;
 
   if (inet_aton(info_p->ip_host, &socketname.sin_addr)) 
     {
-      connections[found_slot].socket =
-	connect_to_given_ip_port(&socketname, 23);
+      connection_p->socket = connect_to_given_ip_port(&socketname, 23);
     }
   else
     {
-      close_connection(found_slot);
+      close_connection(connection_p);
     }
 }
 #endif
@@ -166,7 +163,7 @@ wingate_start_test(struct user_entry *info_p)
 static void
 socks_start_test(struct user_entry *info_p, int socksversion)
 {
-  int found_slot;
+  struct connection *found_slot;
   struct sockaddr_in socketname;
 
   /* XXX disable until done */
@@ -175,7 +172,7 @@ return;
   if (n_open_socks_fds >= MAXSOCKS)
     return;
 
-  if ((found_slot = find_free_connection_slot()) < 0)
+  if ((found_slot = find_free_connection()) == NULL)
     return;
 
   n_open_socks_fds++;
@@ -285,31 +282,31 @@ read_squid(int i)
 {
   struct stat buf;
 
-  if (connections[i].curr_state != SQUID_READING)
+  if (connection_p->curr_state != SQUID_READING)
     {
-      if (fstat(connections[i].socket, &buf) < 0)
+      if (fstat(connection_p->socket, &buf) < 0)
 	{
-	  close_connection(i);
+	  close_connection(connection_p);
 	  if (n_open_squid_fds > 0)
 	    n_open_squid_fds--;
 	}
       else
 	{
-	  send_to_connection(connections[i].socket,
-			  "CONNECT %s:%d HTTP/1.0\r\n\r\n",
-			  SOCKS_CHECKIP, SOCKS_CHECKPORT);
-	  connections[i].curr_state = SQUID_READING;
+	  send_to_connection(connection_p,
+			     "CONNECT %s:%d HTTP/1.0\r\n\r\n",
+			     SOCKS_CHECKIP, SOCKS_CHECKPORT);
+	  connection_p->curr_state = SQUID_READING;
 	}
       return;
     }
 
-  if (strstr(connections[i].buffer, SQUID_STRING) != NULL)
+  if (strstr(connection_p->buffer, SQUID_STRING) != NULL)
     {
-      report_open_squid(i);
+      report_open_squid(connection_p);
     }
   if (n_open_squid_fds > 0)
     n_open_squid_fds--;
-  close_connection(i);
+  close_connection(connection_p);
 }
 #endif
 

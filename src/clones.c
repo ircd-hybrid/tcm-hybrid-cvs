@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.20 2002/06/23 21:09:14 db Exp $
+ * $Id: clones.c,v 1.21 2002/06/24 00:40:20 db Exp $
  */
 
 #include <assert.h>
@@ -28,14 +28,15 @@
 #include "event.h"
 #include "match.h"
 
-static void m_bots(int, int, char *argv[]);
-static void m_umulti(int, int, char *argv[]);
-static void m_hmulti(int, int, char *argv[]);
-static void m_clones(int, int, char *argv[]);
+static void m_bots(struct connection *, int, char *argv[]);
+static void m_umulti(struct connection *, int, char *argv[]);
+static void m_hmulti(struct connection *, int, char *argv[]);
+static void m_clones(struct connection *, int, char *argv[]);
 
 static void check_clones(void *);
-static void report_clones(int);
-static void report_multi_user_host_domain(struct hash_rec *table[], int, int);
+static void report_clones(struct connection *);
+static void report_multi_user_host_domain(struct hash_rec *table[], 
+					  struct connection *, int);
 static int is_an_ip(const char *host);
 
 struct dcc_command bots_msgtab = {
@@ -65,18 +66,18 @@ void init_clones(void)
 #define DOMAIN_CHECK	2
 
 void
-m_bots(int connnum, int argc, char *argv[])
+m_bots(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc >= 2)
-    report_multi_user_host_domain(domain_table, connections[connnum].socket,
+    report_multi_user_host_domain(domain_table, connection_p,
 				  atoi(argv[1]));
   else
-    report_multi_user_host_domain(domain_table, connections[connnum].socket,
+    report_multi_user_host_domain(domain_table, connection_p,
 				  3);
 }
 
 void
-m_umulti(int connnum, int argc, char *argv[])
+m_umulti(struct connection *connection_p, int argc, char *argv[])
 {
   int t;
 
@@ -84,19 +85,19 @@ m_umulti(int connnum, int argc, char *argv[])
   {
     if ((t = atoi(argv[1])) < 3)
     {
-      send_to_connection(connections[connnum].socket,
-           "Using a threshold less than 3 is forbidden, changed to 3");
+      send_to_connection(connection_p,
+		 "Using a threshold less than 3 is forbidden, changed to 3");
       t = 3;
     }
   }
   else
     t = 3;
 
-  report_multi_user_host_domain(user_table, connections[connnum].socket, t);
+  report_multi_user_host_domain(user_table, connection_p, t);
 }
 
 void
-m_hmulti(int connnum, int argc, char *argv[])
+m_hmulti(struct connection *connection_p, int argc, char *argv[])
 {
   int t;
 
@@ -104,21 +105,21 @@ m_hmulti(int connnum, int argc, char *argv[])
   {
     if ((t = atoi(argv[1])) < 3)
     {
-      send_to_connection(connections[connnum].socket,
-           "Using a threshold less than 3 is forbidden, changed to 3");
+      send_to_connection(connection_p,
+		 "Using a threshold less than 3 is forbidden, changed to 3");
       t = 3;
     }
   }
   else
     t = 3;
 
-  report_multi_user_host_domain(host_table, connections[connnum].socket, t);
+  report_multi_user_host_domain(host_table, connection_p, t);
 }
 
 void
-m_clones(int connnum, int argc, char *argv[])
+m_clones(struct connection *connection_p, int argc, char *argv[])
 {
-  report_clones(connections[connnum].socket);
+  report_clones(connection_p);
 }
 
 /*
@@ -240,12 +241,12 @@ check_reconnect_clones(char *host)
 /*
  * report_clones
  *
- * inputs       - socket to report on
+ * inputs       - pointer to connection struct
  * output       - NONE
  * side effects - NONE
  */
 void
-report_clones(int sock)
+report_clones(struct connection *connection_p)
 {
   struct hash_rec *ptr;
   struct hash_rec *top;
@@ -256,9 +257,6 @@ report_clones(int sock)
   int k;
   int foundany = NO;
   time_t connfromhost[MAXFROMHOST];
-
-  if(sock < 0)
-    return;
 
   for (i = 0; i < HASHTABLESIZE; ++i)
     {
@@ -298,11 +296,11 @@ report_clones(int sock)
                     {
                       if (!foundany)
                         {
-                            send_to_connection(sock,
+                            send_to_connection(connection_p,
                                  "Possible clonebots from the following hosts:");
                           foundany = YES;
                         }
-                        send_to_connection(sock,
+                        send_to_connection(connection_p,
                              "  %2d connections in %3d seconds (%2d total) from %s",
                              k+1,
                              connfromhost[j] - connfromhost[j+k],
@@ -316,7 +314,7 @@ report_clones(int sock)
 
   if (foundany == 0)
     {
-        send_to_connection(sock, "No potential clonebots found.");
+        send_to_connection(connection_p, "No potential clonebots found.");
     }
 }
 
@@ -325,12 +323,13 @@ report_clones(int sock)
  * report_multi_user_host_domain()
  *
  * inputs       - table either user_table or host_table or domain_table
- *		- socket to print out
+ *		- pointer to connection
  * output       - NONE
  * side effects -
  */
 void
-report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
+report_multi_user_host_domain(struct hash_rec *table[], 
+			      struct connection *connection_p, int nclones)
 {
   struct hash_rec *ptr;
   struct hash_rec *top;
@@ -407,17 +406,17 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
 		{
 		  if (check_type == USER_CHECK)
 		    {
-		      send_to_connection(sock,
-		      "Multiple clients from the following usernames:");
+		      send_to_connection(connection_p,
+			 "Multiple clients from the following usernames:");
 		    }
 		  else if(check_type == HOST_CHECK)
 		    {
-		      send_to_connection(sock,
+		      send_to_connection(connection_p,
                       "Multiple clients from the following userhosts:");
 		    }
 		  else if(check_type == DOMAIN_CHECK)
 		    {
-		      send_to_connection(sock,
+		      send_to_connection(connection_p,
 		      "Multiple clients from the following userhosts:");
 		    }
 		  foundany = YES;
@@ -425,31 +424,31 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
 
 	      if (check_type == USER_CHECK)
 		{
-		  send_to_connection(sock,
-				  " %s %2d connections -- %s@* {%s}",
-				  (num_found-nclones > 2) ? "==>" : "   ",
-				  num_found, ptr->info->username,
-                                  ptr->info->class);
+		  send_to_connection(connection_p,
+				     " %s %2d connections -- %s@* {%s}",
+				     (num_found-nclones > 2) ? "==>" : "   ",
+				     num_found, ptr->info->username,
+				     ptr->info->class);
 		}
 	      else if(check_type == HOST_CHECK)
 		{
-		  send_to_connection(sock,
-				  " %s %2d connections -- *@%s {%s}",
-				  (num_found-nclones > 2) ? "==>" : "   ",
-				  num_found,
-				  ptr->info->host,
-				  ptr->info->class);
+		  send_to_connection(connection_p,
+				     " %s %2d connections -- *@%s {%s}",
+				     (num_found-nclones > 2) ? "==>" : "   ",
+				     num_found,
+				     ptr->info->host,
+				     ptr->info->class);
 		}
 	      else if (check_type == DOMAIN_CHECK)
 		{
 		  is_ip = is_an_ip((const char *)ptr->info->domain);
-		  send_to_connection(sock,
-				  " %s %2d connections -- %s@%s%s {%s}",
-				  (num_found-nclones > 2) ? "==>" :
-				  "   ",num_found,ptr->info->username,
-				  is_ip ? ptr->info->domain : "*.",
-				  is_ip ? ".*" :ptr->info->domain,
-				  ptr->info->class);
+		  send_to_connection(connection_p,
+				     " %s %2d connections -- %s@%s%s {%s}",
+				     (num_found-nclones > 2) ? "==>" :
+				     "   ",num_found,ptr->info->username,
+				     is_ip ? ptr->info->domain : "*.",
+				     is_ip ? ".*" :ptr->info->domain,
+				     ptr->info->class);
 		}
 	    }
         }
@@ -457,7 +456,7 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
 
   if(foundany == 0)
     {
-      send_to_connection(sock, "No multiple logins found.");
+      send_to_connection(connection_p, "No multiple logins found.");
     }
 }
 

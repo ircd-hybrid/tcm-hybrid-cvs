@@ -23,7 +23,7 @@
  *  developed and/or copyrighted by other sources.  Please see the
  *  CREDITS file for full details.
  *
- *  $Id: event.c,v 1.8 2002/06/23 21:09:14 db Exp $
+ *  $Id: event.c,v 1.9 2002/06/24 00:40:21 db Exp $
  */
 
 /*
@@ -223,7 +223,7 @@ eventFind(EVH *func, void *arg)
 }
 
 /* 
- * void show_events(struct Client *source_p)
+ * void show_events(struct connection *)
  *
  * Input: Client requesting the event
  * Output: List of events
@@ -231,26 +231,27 @@ eventFind(EVH *func, void *arg)
  */
 
 void
-show_events(int sock)
+show_events(struct connection *connection_p)
 {
   int i;
 
   if (last_event_ran)
-    send_to_connection(sock, "*** Last event to run: %s", last_event_ran);
+    send_to_connection(connection_p,
+		       "*** Last event to run: %s", last_event_ran);
 
-  send_to_connection(sock, "*** Operation            Next Execution");
+  send_to_connection(connection_p, "*** Operation            Next Execution");
 
   for (i = 0; i < event_count; i++)
     {
       if (event_table[i].active)
         {
-          send_to_connection(sock,
+          send_to_connection(connection_p,
 		 "*** %-20s %-3d seconds",
 		 event_table[i].name,
 		 (int)(event_table[i].when - current_time));
         }
     }
-  send_to_connection(sock, "*** Finished");
+  send_to_connection(connection_p, "*** Finished");
 }
 
 /* 

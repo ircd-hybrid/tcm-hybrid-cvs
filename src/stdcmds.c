@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.96 2002/06/23 21:09:15 db Exp $ */
+/* $Id: stdcmds.c,v 1.97 2002/06/24 00:40:21 db Exp $ */
 
 #include "setup.h"
 
@@ -147,7 +147,7 @@ format_reason(char *reason)
 /*
  * print_motd()
  *
- * inputs       - socket
+ * inputs       - pointer to struct connection
  * output       - none
  * side effects - prints a message of the day to the connecting client
  *
@@ -156,20 +156,20 @@ format_reason(char *reason)
  */
 
 void 
-print_motd(int sock)
+print_motd(struct connection *connection_p)
 {
   FILE *userfile;
   char line[MAX_BUFF];
 
   if((userfile = fopen(MOTD_FILE,"r")) == NULL)
     {
-      send_to_connection(sock,"No MOTD");
+      send_to_connection(connection_p, "No MOTD");
       return;
     }
 
   while (fgets(line, MAX_BUFF-1, userfile))
     {
-      send_to_connection(sock, "%s", line);
+      send_to_connection(connection_p, "%s", line);
     }
   fclose(userfile);
 }
@@ -227,7 +227,7 @@ do_a_kline(int kline_time, char *pattern,
 }
 
 void
-report_failures(int sock,int num)
+report_failures(struct connection *connection_p, int num)
 {
   int maxx;
   int foundany = NO;
@@ -255,18 +255,20 @@ report_failures(int sock,int num)
       if(foundany == 0)
         {
 	  foundany++;
-          send_to_connection(sock, "Userhosts with most connect rejections:");
-          send_to_connection(sock," %5d rejections: %s@%s",
-			  found->failcount,
-			  (*found->username ? found->username : "<UNKNOWN>"),
-			  found->host);
+          send_to_connection(connection_p,
+			     "Userhosts with most connect rejections:");
+          send_to_connection(connection_p, " %5d rejections: %s@%s",
+			     found->failcount,
+			     (*found->username ? found->username : "<UNKNOWN>"),
+			     found->host);
         }
       found->failcount = -found->failcount;   /* Yes, this is horrible */
     }
 
   if(foundany == 0)
     {
-      send_to_connection(sock,"No userhosts have %d or more rejections.",num);
+      send_to_connection(connection_p,
+			 "No userhosts have %d or more rejections.",num);
     }
 
   /* XXX what is this "Ugly, but it works" ? */

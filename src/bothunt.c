@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.183 2002/06/23 21:09:13 db Exp $
+ * $Id: bothunt.c,v 1.184 2002/06/24 00:40:20 db Exp $
  */
 
 #include <stdio.h>
@@ -298,8 +298,11 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     ++q;
     *p = '\0';
+#if 0
+    /* XXX transition WRONG WRONG WRONG */
     send_to_connection(connections[testlines.index].socket,
 		    "%s has access to class %s", testlines.umask, q);
+#endif
     testlines.index = -1;
     memset(&testlines.umask, 0, sizeof(testlines.umask));
     return;
@@ -312,8 +315,10 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((p = strchr(q, ']')) == NULL)
       return;
     *p = '\0';
+#if 0
     send_to_connection(connections[testlines.index].socket, 
 	 "%s has been K-lined: %s", testlines.umask, q);
+#endif
     testlines.index = -1;
     memset(&testlines.umask, 0, sizeof(testlines.umask));
     return;
@@ -766,9 +771,11 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* No aconf found */
   case NOACONFFOUND:
+#if 0
     send_to_connection(connections[testlines.index].socket,
 		    "%s does not have access",
 		    testlines.umask);
+#endif
     testlines.index = -1;
     memset((char *)&testlines.umask, 0, sizeof(testlines.umask));
     break;
@@ -1324,14 +1331,12 @@ clear_bothunt(void)
  */
 
 void 
-report_nick_flooders(int sock)
+report_nick_flooders(struct connection *connection_p)
 {
   int i;
   int reported_nick_flooder= NO;
   time_t time_difference;
   int time_ticks;
-
-  assert(sock >= 0);
 
   for(i = 0; i < NICK_CHANGE_TABLE_SIZE; i++)
     {
@@ -1360,14 +1365,14 @@ report_nick_flooders(int sock)
                   nick_changes[i].nick_change_count -= time_ticks;
                   if( nick_changes[i].nick_change_count > 1 )
                     {
-                      send_to_connection(sock,
-				      "user: %s@%s (%s) %d in %d",
-				      nick_changes[i].user,
-				      nick_changes[i].host,
-				      nick_changes[i].last_nick,
-				      nick_changes[i].nick_change_count,
-				      nick_changes[i].last_nick_change  -
-				      nick_changes[i].first_nick_change);
+                      send_to_connection(connection_p,
+					 "user: %s@%s (%s) %d in %d",
+					 nick_changes[i].user,
+					 nick_changes[i].host,
+					 nick_changes[i].last_nick,
+					 nick_changes[i].nick_change_count,
+					 nick_changes[i].last_nick_change  -
+					 nick_changes[i].first_nick_change);
                       reported_nick_flooder = YES;
                     }
                 }
@@ -1377,7 +1382,7 @@ report_nick_flooders(int sock)
 
   if(!reported_nick_flooder)
     {
-      send_to_connection(sock, "No nick flooders found" );
+      send_to_connection(connection_p, "No nick flooders found" );
     }
 }
 

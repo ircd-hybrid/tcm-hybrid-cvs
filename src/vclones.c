@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.13 2002/06/23 21:09:16 db Exp $
+ * $Id: vclones.c,v 1.14 2002/06/24 00:40:22 db Exp $
  */
 
 #include <assert.h>
@@ -29,12 +29,12 @@
 
 #ifdef VIRTUAL
 
-static void m_vmulti(int, int, char *argv[]);
-static void m_vbots(int, int, char *argv[]);
-static void m_vlist(int, int, char *argv[]);
+static void m_vmulti(struct connection *, int, char *argv[]);
+static void m_vbots(struct connection *, int, char *argv[]);
+static void m_vlist(struct connection *, int, char *argv[]);
 
-static void report_vbots(int, int, int);
-static void list_virtual_users(int, char *, int);
+static void report_vbots(struct connection *, int, int);
+static void list_virtual_users(struct connection *, char *, int);
 
 struct dcc_command vmulti_msgtab = {
   "vmulti", NULL, {m_unregistered, m_vmulti, m_vmulti}
@@ -55,48 +55,48 @@ init_vclones(void)
 }
 
 void
-m_vmulti(int connnum, int argc, char *argv[])
+m_vmulti(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc >= 2)
-    report_vbots(connections[connnum].socket, atoi(argv[1]), NO);
+    report_vbots(connection_p, atoi(argv[1]), NO);
   else
-    report_vbots(connections[connnum].socket, 3, NO);
+    report_vbots(connection_p, 3, NO);
 }
 
 void
-m_vbots(int connnum, int argc, char *argv[])
+m_vbots(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc >= 2)
-    report_vbots(connections[connnum].socket, atoi(argv[1]), YES);
+    report_vbots(connection_p, atoi(argv[1]), YES);
   else
-    report_vbots(connections[connnum].socket, 3, YES);
+    report_vbots(connection_p, 3, YES);
 }
 
 void
-m_vlist(int connnum, int argc, char *argv[])
+m_vlist(struct connection *connection_p, int argc, char *argv[])
 {
 #ifdef HAVE_REGEX_H
   if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
-    send_to_connection(connections[connnum].socket,
-                    "Usage: %s <wildcarded/regexp ip>",
-                    argv[0]);
+    send_to_connection(connection_p,
+		       "Usage: %s <wildcarded/regexp ip>",
+		       argv[0]);
   else if (argc == 2)
-    report_vbots(connections[connnum].socket, atoi(argv[1]), YES);
+    report_vbots(connection_p, atoi(argv[1]), YES);
   else
-    list_virtual_users(connections[connnum].socket, argv[2], YES);
+    list_virtual_users(connection_p, argv[2], YES);
 #else
   if (argc < 2)
-    send_to_connection(connections[connnum].socket,
-                    "Usage %s <wildcarded ip>", argv[0]);
+    send_to_connection(connection_p,
+		       "Usage %s <wildcarded ip>", argv[0]);
   else
-    list_virtual_users(connections[connnum].socket, argv[1], NO);
+    list_virtual_users(connection_p, argv[1], NO);
 #endif
 }
 
 /*
  * report_vbots()
  *
- * inputs       - socket to print out
+ * inputs       - pointer to struct connection
  *              - number to consider as clone
  *		- check_user YES means check user name as well as IP block
  * output       - NONE
@@ -104,7 +104,7 @@ m_vlist(int connnum, int argc, char *argv[])
  */
 
 static void
-report_vbots(int sock, int nclones, int check_user)
+report_vbots(struct connection *connection_p, int nclones, int check_user)
 {
   struct hash_rec *ptr;
   struct hash_rec *top;
@@ -163,12 +163,12 @@ report_vbots(int sock, int nclones, int check_user)
                     {
 		      if (check_user)
 			{
-			  send_to_connection(sock,
+			  send_to_connection(connection_p,
 			  "Multiple clients from the following userhosts:");
 			}
 		      else
 			{
-			  send_to_connection(sock,
+			  send_to_connection(connection_p,
 			  "Multiple clients from the following ip blocks:");
 			}
                       foundany = YES;
@@ -176,7 +176,7 @@ report_vbots(int sock, int nclones, int check_user)
 
 		  if (check_user)
 		    {
-		      send_to_connection(sock,
+		      send_to_connection(connection_p,
 				  " %s %2d connections -- %s@%s.* {%s}",
 				      (num_found-nclones > 2) ? "==>" :
 				      "   ", num_found, ptr->info->username,
@@ -185,11 +185,11 @@ report_vbots(int sock, int nclones, int check_user)
 		    }
 		    else
 		    {
-		      send_to_connection(sock,
-				      " %s %2d connections -- %s.*",
-				      (num_found-nclones > 3) ? "==>" : "   ",
-				      num_found,
-				      ptr->info->ip_class_c);
+		      send_to_connection(connection_p,
+					 " %s %2d connections -- %s.*",
+					 (num_found-nclones > 3) ? "==>" : "   ",
+					 num_found,
+					 ptr->info->ip_class_c);
 		    }
 
                 }
@@ -198,13 +198,13 @@ report_vbots(int sock, int nclones, int check_user)
     }
 
   if (!foundany)
-    send_to_connection(sock, "No multiple virtual logins found.");
+    send_to_connection(connection_p, "No multiple virtual logins found.");
 }
 
 /*
  * list_virtual_users()
  *
- * inputs       - socket to reply on
+ * inputs       - pointer to struct connection
  *              - ipblock to match on
  *              - regex or no?
  * output       - NONE
@@ -212,7 +212,7 @@ report_vbots(int sock, int nclones, int check_user)
  */
 
 void
-list_virtual_users(int sock, char *userhost, int regex)
+list_virtual_users(struct connection *connection_p, char *userhost, int regex)
 {
   struct hash_rec *ipptr;
 #ifdef HAVE_REGEX_H
@@ -228,15 +228,15 @@ list_virtual_users(int sock, char *userhost, int regex)
   {
     char errbuf[REGEX_SIZE];
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE);
-    send_to_connection(sock, "Error compiling regular expression: %s",
-                    errbuf);
+    send_to_connection(connection_p, "Error compiling regular expression: %s",
+		       errbuf);
     return;
   }
 #endif
   if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
     {
-      send_to_connection(sock,
-"Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.");
+      send_to_connection(connection_p,
+ "Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.");
       return;
     }
 
@@ -255,19 +255,23 @@ list_virtual_users(int sock, char *userhost, int regex)
 #endif
       {
         if (num_found == 0)
-          send_to_connection(sock, "The following clients match %s:", userhost);
+          send_to_connection(connection_p,
+			     "The following clients match %s:", userhost);
 
 	num_found++;
-        send_to_connection(sock, "  %s (%s@%s) [%s] {%s}", ipptr->info->nick,
-             ipptr->info->username, ipptr->info->host, ipptr->info->ip_host,
-             ipptr->info->class);
+        send_to_connection(connection_p,
+			   "  %s (%s@%s) [%s] {%s}", ipptr->info->nick,
+			   ipptr->info->username, ipptr->info->host, ipptr->info->ip_host,
+			   ipptr->info->class);
       }
     }
   }
   if (num_found > 0)
-    send_to_connection(sock, "%d matches for %s found", num_found, userhost);
+    send_to_connection(connection_p,
+		       "%d matches for %s found", num_found, userhost);
   else
-    send_to_connection(sock, "No matches for %s found", userhost);
+    send_to_connection(connection_p, "No matches for %s found", userhost);
 }
 
 #endif
+

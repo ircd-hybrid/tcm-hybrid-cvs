@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.80 2002/06/23 21:09:15 db Exp $
+ * $Id: parse.c,v 1.81 2002/06/24 00:40:21 db Exp $
  */
 
 #include <stdio.h>
@@ -56,10 +56,10 @@ struct t_tcm_status tcm_status;
  */
 
 void
-parse_server(int conn_num)
+parse_server(struct connection *uplink_p)
 {
   struct source_client source_p;
-  char *buffer = connections[conn_num].buffer;
+  char *buffer = uplink_p->buffer;
   char *p;
   char *source = NULL;
   char *function;
@@ -115,7 +115,7 @@ parse_server(int conn_num)
 /*
  * parse_client
  *
- * inputs       - index into connections array
+ * inputs       - pointer to struct connection
  *              - integer argument count
  *              - array of pointers to split up argvs
  * output       - none
@@ -123,13 +123,13 @@ parse_server(int conn_num)
  */
 
 void
-parse_client(int i)
+parse_client(struct connection *connection_p)
 {
   struct dcc_command *ptr;
   int argc;
   char *argv[MAX_ARGV];
 
-  if ((argc = split_args(connections[i].buffer, argv)) == 0)
+  if ((argc = split_args(connection_p->buffer, argv)) == 0)
     return;
 
   /* command */
@@ -137,33 +137,33 @@ parse_client(int i)
   {
     if((ptr = find_dcc_handler(argv[0] + 1)) != NULL)
     {
-      if(connections[i].type & FLAGS_ADMIN)
-        ptr->handler[2](i, argc, argv);
-      else if(connections[i].type & FLAGS_OPER)
-        ptr->handler[1](i, argc, argv);
+      if(connection_p->type & FLAGS_ADMIN)
+        ptr->handler[2](connection_p, argc, argv);
+      else if(connection_p->type & FLAGS_OPER)
+        ptr->handler[1](connection_p, argc, argv);
       else
-        ptr->handler[0](i, argc, argv);
+        ptr->handler[0](connection_p, argc, argv);
     }
     /* command not found */
     else
-      send_to_connection(connections[i].socket,
-		      "Unknown command [%s]", argv[0] + 1);
+      send_to_connection(connection_p,
+			 "Unknown command [%s]", argv[0] + 1);
 
   }
   /* message to partyline */
   else
   {
-    if(connections[i].type & FLAGS_PARTYLINE)
+    if(connection_p->type & FLAGS_PARTYLINE)
     {
       char buff[MAX_BUFF];
 
       expand_args(buff, MAX_BUFF, argc, argv);
 
-      send_to_partyline(i, "<%s> %s", connections[i].nick, buff);
+      send_to_partyline(connection_p, "<%s> %s", connection_p->nick, buff);
     }
     else
-      send_to_connection(connections[i].socket,
-		      "You are not +p, not sending to chat line");
+      send_to_connection(connection_p,
+			 "You are not +p, not sending to chat line");
   }
 }
 
@@ -277,9 +277,7 @@ process_server(struct source_client *source_p, char *function, char *param)
     argv[argc++] = p;
   else
   {
-    q = strchr(p, ' ');
-
-    for (; (argc < MAX_ARGV-1) && q; q=strchr(p, ' '))
+    for (q = strchr(p, ' '); (argc < MAX_ARGV-1) && q; q=strchr(p, ' '))
     {
       *q++ = '\0';
       if (*q == ':')

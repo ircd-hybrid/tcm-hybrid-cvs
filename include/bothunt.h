@@ -1,10 +1,11 @@
-#ifndef __BOTHUNT_H
+#ifndef __BOTHNUT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.54 2002/06/23 19:50:14 db Exp $ */
+/* $Id: bothunt.h,v 1.55 2002/06/24 00:40:15 db Exp $ */
 
 
 struct source_client;
+struct connection;
 
 /* reconnect clone detect */
 
@@ -94,9 +95,7 @@ void _config(int, int, char *argv[]);
 #define CLONERECONCOUNT   5	/* this many reconnects */
 #define CLONERECONFREQ    15    /* in this many seconds */
 
-void report_mem(int sock);
-void print_motd(int sock);
-void report_nick_flooders(int sock);
+void report_nick_flooders(struct connection *);
 void init_link_look_table(void);
 void init_bothunt(void);
 void clear_bothunt(void);

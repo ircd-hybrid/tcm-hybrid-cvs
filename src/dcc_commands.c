@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.136 2002/06/23 21:09:14 db Exp $ */
+/* $Id: dcc_commands.c,v 1.137 2002/06/24 00:40:20 db Exp $ */
 
 #include "setup.h"
 
@@ -49,79 +49,84 @@
 #include <crypt.h>
 #endif
 
-static void register_oper(int connnum, char *password, char *who_did_command);
-int is_legal_pass(int connect_id,char *password);
-static void print_help(int sock,char *text);
+static void register_oper(struct connection *,
+			  char *password, char *who_did_command);
+int is_legal_pass(struct connection *, char *password);
+static void print_help(struct connection *connection_p, char *text);
 
-static void m_class(int connnum, int argc, char *argv[]);
-static void m_classt(int connnum, int argc, char *argv[]);
-static void m_killlist(int connnum, int argc, char *argv[]);
-static void m_kline(int connnum, int argc, char **argv);
-static void m_kill(int connnum, int argc, char *argv[]);
-static void m_kaction(int connnum, int argc, char *argv[]);
-static void m_register(int connnum, int argc, char *argv[]);
-static void m_opers(int connnum, int argc, char *argv[]);
-static void m_testline(int connnum, int argc, char *argv[]);
-static void m_uptime(int connnum, int argc, char *argv[]);
-static void m_exempts(int connnum, int argc, char *argv[]);
-static void m_connections(int connnum, int argc, char *argv[]);
-static void m_disconnect(int connnum, int argc, char *argv[]);
-static void m_help(int connnum, int argc, char *argv[]);
-static void m_motd(int connnum, int argc, char *argv[]);
-static void m_save(int connnum, int argc, char *argv[]);
-static void m_close(int connnum, int argc, char *argv[]);
-static void m_op(int connnum, int argc, char *argv[]);
-static void m_cycle(int connnum, int argc, char *argv[]);
-static void m_die(int connnum, int argc, char *argv[]);
-static void m_restart(int connnum, int argc, char *argv[]);
-static void m_info(int connnum, int argc, char *argv[]);
-static void m_locops(int connnum, int argc, char *argv[]);
-static void m_unkline(int connnum, int argc, char *argv[]);
-static void m_dline(int connnum, int argc, char *argv[]);
+static void m_class(struct connection *connection_p, int argc, char *argv[]);
+static void m_classt(struct connection *connection_p, int argc, char *argv[]);
+static void m_killlist(struct connection *connection_p, int argc,
+		       char *argv[]);
+static void m_kline(struct connection *connection_p, int argc, char **argv);
+static void m_kill(struct connection *connection_p, int argc, char *argv[]);
+static void m_kaction(struct connection *connection_p, int argc, char *argv[]);
+static void m_register(struct connection *connection_p, int argc,
+		       char *argv[]);
+static void m_opers(struct connection *connection_p, int argc, char *argv[]);
+static void m_testline(struct connection *connection_p, int argc,
+		       char *argv[]);
+static void m_uptime(struct connection *connection_p, int argc, char *argv[]);
+static void m_exempts(struct connection *connection_p, int argc, char *argv[]);
+static void m_connections(struct connection *connection_p, int argc,
+			  char *argv[]);
+static void m_disconnect(struct connection *connection_p, int argc,
+			 char *argv[]);
+static void m_help(struct connection *connection_p, int argc, char *argv[]);
+static void m_motd(struct connection *connection_p, int argc, char *argv[]);
+static void m_save(struct connection *connection_p, int argc, char *argv[]);
+static void m_close(struct connection *connection_p, int argc, char *argv[]);
+static void m_op(struct connection *connection_p, int argc, char *argv[]);
+static void m_cycle(struct connection *connection_p, int argc, char *argv[]);
+static void m_die(struct connection *connection_p, int argc, char *argv[]);
+static void m_restart(struct connection *connection_p, int argc, char *argv[]);
+static void m_info(struct connection *connection_p, int argc, char *argv[]);
+static void m_locops(struct connection *connection_p, int argc, char *argv[]);
+static void m_unkline(struct connection *connection_p, int argc, char *argv[]);
+static void m_dline(struct connection *connection_p, int argc, char *argv[]);
 #ifdef ENABLE_QUOTE
-static void m_quote(int connnum, int argc, char *argv[]);
+static void m_quote(struct connection *connection_p, int argc, char *argv[]);
 #endif
-static void m_mem(int connnum, int argc, char *argv[]);
-static void m_nflood(int connnum, int argc, char *argv[]);
-static void m_rehash(int connnum, int argc, char *argv[]);
-static void m_trace(int connnum, int argc, char *argv[]);
-static void m_failures(int connnum, int argc, char *argv[]);
-static void m_domains(int connnum, int argc, char *argv[]);
-static void m_nfind(int connnum, int argc, char *argv[]);
-static void m_list(int connnum, int argc, char *argv[]);
-static void m_ulist(int connnum, int argc, char *argv[]);
-static void m_hlist(int connnum, int argc, char *argv[]);
+static void m_mem(struct connection *connection_p, int argc, char *argv[]);
+static void m_nflood(struct connection *connection_p, int argc, char *argv[]);
+static void m_rehash(struct connection *connection_p, int argc, char *argv[]);
+static void m_trace(struct connection *connection_p, int argc, char *argv[]);
+static void m_failures(struct connection *connection_p, int argc,
+		       char *argv[]);
+static void m_domains(struct connection *connection_p, int argc, char *argv[]);
+static void m_nfind(struct connection *connection_p, int argc, char *argv[]);
+static void m_list(struct connection *connection_p, int argc, char *argv[]);
+static void m_ulist(struct connection *connection_p, int argc, char *argv[]);
+static void m_hlist(struct connection *connection_p, int argc, char *argv[]);
 
 void
-m_class(int connnum, int argc, char *argv[])
+m_class(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc < 2)
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s <class name>", argv[0]);
+    send_to_connection(connection_p, "Usage: %s <class name>", argv[0]);
   else
-    list_class(connections[connnum].socket, argv[1], NO);
+    list_class(connection_p, argv[1], NO);
 }
 
 void
-m_classt(int connnum, int argc, char *argv[])
+m_classt(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc < 2)
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s <class name>", argv[0]);
+    send_to_connection(connection_p, "Usage: %s <class name>", argv[0]);
   else
-    list_class(connections[connnum].socket, argv[1], YES);
+    list_class(connection_p, argv[1], YES);
 }
 
 void
-m_killlist(int connnum, int argc, char *argv[])
+m_killlist(struct connection *connection_p, int argc, char *argv[])
 {
   char reason[MAX_REASON];
 
 #ifdef HAVE_REGEX_H
   if ((argc < 2) || (argc < 4 && (strcasecmp(argv[1], "-r") == 0)))
   {
-    send_to_connection(connections[connnum].socket,
-		    "Usage: .killlist [-r] <wildcarded/regex userhost> <reason>");
+    send_to_connection(connection_p,
+		       "Usage: .killlist [-r] <wildcarded/regex userhost> <reason>");
     return;
   }
 
@@ -132,8 +137,9 @@ m_killlist(int connnum, int argc, char *argv[])
 #else
   if (argc < 2)
   {
-    send_to_connection(connections[connnum].socket,
-         "Usage: %s <wildcarded userhost> <reason>", argv[0]);
+    send_to_connection(connection_p,
+		       "Usage: %s <wildcarded userhost> <reason>",
+		       argv[0]);
     return;
   }
 
@@ -145,10 +151,10 @@ m_killlist(int connnum, int argc, char *argv[])
   else
     snprintf(reason, sizeof(reason), "No reason");
 
-  if((connections[connnum].type & FLAGS_INVS) == 0)
+  if((connection_p->type & FLAGS_INVS) == 0)
   {
     strncat(reason, " (requested by ", MAX_REASON - strlen(reason));
-    strncat(reason, connections[connnum].registered_nick,
+    strncat(reason, connection_p->registered_nick,
             MAX_REASON - strlen(reason));
     strncat(reason, ")", MAX_REASON - strlen(reason));
   }
@@ -157,27 +163,28 @@ m_killlist(int connnum, int argc, char *argv[])
   if (strcasecmp(argv[1], "-r") == 0)
   {
     send_to_all(FLAGS_ALL, "*** killlist %s :%s by %s", argv[2],
-                reason, connections[connnum].registered_nick);
-    kill_or_list_users(connections[connnum].socket, argv[2], YES, YES, reason);
+                reason, connection_p->registered_nick);
+    kill_or_list_users(connection_p, argv[2], YES, YES, reason);
   }
   else
 #endif
   {
     send_to_all(FLAGS_ALL, "*** killlist %s :%s by %s", argv[1],
-                reason, connections[connnum].registered_nick);
-    kill_or_list_users(connections[connnum].socket, argv[1], NO, YES, reason);
+                reason, connection_p->registered_nick);
+    kill_or_list_users(connection_p, argv[1], NO, YES, reason);
   }
 }
 
 void
-m_kline(int connnum, int argc, char *argv[])
+m_kline(struct connection *connection_p, int argc, char *argv[])
 {
   char buff[MAX_BUFF];
   int kline_time;
 
   if (argc < 3)
-    send_to_connection(connections[connnum].socket,
-         "Usage: %s [time] <[nick]|[user@host]> [reason]", argv[0]);
+    send_to_connection(connection_p,
+		       "Usage: %s [time] <[nick]|[user@host]> [reason]",
+		       argv[0]);
   else
   {
     if ((kline_time = atoi(argv[1])))
@@ -189,7 +196,7 @@ m_kline(int connnum, int argc, char *argv[])
       else
         snprintf(buff, sizeof(buff), "No reason");
       do_a_kline(kline_time, argv[2], buff, 
-                 connections[connnum].registered_nick);
+                 connection_p->registered_nick);
     }
     else
     {
@@ -198,20 +205,20 @@ m_kline(int connnum, int argc, char *argv[])
 	expand_args(buff, MAX_BUFF, argc-2, argv+2);
       }
       do_a_kline(0, argv[1], buff,
-		 connections[connnum].registered_nick);
+		 connection_p->registered_nick);
     }
   }
 }
 
 void
-m_kill(int connnum, int argc, char *argv[])
+m_kill(struct connection *connection_p, int argc, char *argv[])
 {
   char reason[MAX_REASON];
 
   if (argc < 2)
   {
-    send_to_connection(connections[connnum].socket,
-         "Usage: %s <nick|user@host> [reason]", argv[0]);
+    send_to_connection(connection_p,
+		       "Usage: %s <nick|user@host [reason]", argv[0]);
     return;
   }
   else if (argc == 2)
@@ -222,13 +229,13 @@ m_kill(int connnum, int argc, char *argv[])
   }
 
   send_to_all(FLAGS_VIEW_KLINES, "*** kill %s :%s by %s",
-              argv[1], reason, connections[connnum].registered_nick);
-  log_kline("KILL", argv[1], 0, connections[connnum].registered_nick, reason);
+              argv[1], reason, connection_p->registered_nick);
+  log_kline("KILL", argv[1], 0, connection_p->registered_nick, reason);
 
-  if((connections[connnum].type & FLAGS_INVS) == 0)
+  if((connection_p->type & FLAGS_INVS) == 0)
   {
     strncat(reason, " (requested by ", MAX_REASON - 1 - strlen(reason));
-    strncat(reason, connections[connnum].registered_nick,
+    strncat(reason, connection_p->registered_nick,
             MAX_REASON - 1 - strlen(reason));
     strncat(reason, ")", MAX_REASON - strlen(reason));
   }
@@ -237,7 +244,7 @@ m_kill(int connnum, int argc, char *argv[])
 }
 
 void
-m_kaction(int connnum, int argc, char *argv[])
+m_kaction(struct connection *connection_p, int argc, char *argv[])
 {
   char *userhost;
   char *p;
@@ -245,8 +252,8 @@ m_kaction(int connnum, int argc, char *argv[])
 
   if(argc < 2)
   {
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s [time] <[nick]|[user@host]>", argv[0]);
+    send_to_connection(connection_p,
+		       "Usage: %s [time] <[nick]|[user@host]>", argv[0]);
     return;
   }
 
@@ -280,28 +287,26 @@ m_kaction(int connnum, int argc, char *argv[])
     }
 
     send_to_server("KLINE %s %s :%s", 
-		    argv[1], userhost, actions[actionid].reason);
+		   argv[1], userhost, actions[actionid].reason);
   }
 }
 
 void
-m_register(int connnum, int argc, char *argv[])
+m_register(struct connection *connection_p, int argc, char *argv[])
 {
-  if(connections[connnum].type & FLAGS_OPER)
+  if(connection_p->type & FLAGS_OPER)
   {
-    send_to_connection(connections[connnum].socket, 
-		    "You are already registered.");
+    send_to_connection(connection_p, "You are already registered.");
     return;
   }
 
   if (argc != 2)
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s <password>", argv[0]);
+    send_to_connection(connection_p, "Usage: %s <password>", argv[0]);
   else
-    register_oper(connnum, argv[1], connections[connnum].nick);
+    register_oper(connection_p, argv[1], connection_p->nick);
 }
 
-void m_opers(int connnum, int argc, char *argv[])
+void m_opers(struct connection *connection_p, int argc, char *argv[])
 {
   slink_node *ptr;
   struct oper_entry *user;
@@ -310,39 +315,40 @@ void m_opers(int connnum, int argc, char *argv[])
   {
     user = ptr->data;
 
-    send_to_connection(connections[connnum].socket, "(%s) %s@%s %s",
-		    user->usernick, user->username, user->host,
-		    type_show(user->type));
+    send_to_connection(connection_p, "(%s) %s@%s %s",
+		       user->usernick, user->username, user->host,
+		       type_show(user->type));
   }
 }
 
 void
-m_testline(int connnum, int argc, char *argv[])
+m_testline(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc < 2)
   {
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s <mask>", argv[0]);
+    send_to_connection(connection_p, "Usage: %s <mask>", argv[0]);
     return;
   }
   if (strcasecmp(argv[1], testlines.umask) == 0)
   {
-    send_to_connection(connections[connnum].socket,
-		    "Already pending %s", argv[1]);
+    send_to_connection(connection_p, "Already pending %s", argv[1]);
     return;
   }
   snprintf(testlines.umask, sizeof(testlines.umask), "%s", argv[1]);
+#if 0
   testlines.index = connnum;
+#endif
   send_to_server("TESTLINE %s", argv[1]);
 }
 
 void
-m_uptime(int connnum, int argc, char *argv[])
+m_uptime(struct connection *connection_p, int argc, char *argv[])
 {
-  report_uptime(connections[connnum].socket);
+  report_uptime(connection_p);
 }
 
-void m_exempts(int connnum, int argc, char *argv[])
+void
+m_exempts(struct connection *connection_p, int argc, char *argv[])
 {
   slink_node *ptr;
   struct exempt_entry *exempt;
@@ -361,82 +367,82 @@ void m_exempts(int connnum, int argc, char *argv[])
                  " %s", actions[n].name);
     }
 
-    send_to_connection(connections[connnum].socket, "%s", buf);
+    send_to_connection(connection_p, "%s", buf);
   }
 }
 
 void
-m_connections(int connnum, int argc, char *argv[])
+m_connections(struct connection *connection_p, int argc, char *argv[])
 {
-  list_connections(connections[connnum].socket);
+  list_connections(connection_p);
 }
 
 void
-m_disconnect(int connnum, int argc, char *argv[])
+m_disconnect(struct connection *connection_p, int argc, char *argv[])
 {
+  struct connection *found_user;
+
   if (argc < 2)
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s <nick>", argv[0]);
+    send_to_connection(connection_p, "Usage: %s <nick>", argv[0]);
   else
   {
     int i;
 
-    i = find_user_in_connections(argv[1]);
+    found_user = find_user_in_connections(argv[1]);
 
-    if(i >= 0)
+    if(found_user != NULL)
     {
-      send_to_connection(connnum, "Disconnecting oper %s", connections[i].nick);
-      send_to_connection(connections[i].socket, 
-		      "You have been disconnected by oper %s",
-		      connections[connnum].registered_nick);
-      close_connection(i);
+      send_to_connection(connection_p,
+			 "Disconnecting oper %s", connection_p->nick);
+      send_to_connection(found_user,
+			 "You have been disconnected by oper %s",
+			 connection_p->registered_nick);
+      close_connection(found_user);
     }
   }
 }
 
 void
-m_help(int connnum, int argc, char *argv[])
+m_help(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc < 2)
-    send_to_connection(connections[connnum].socket, 
-		    "Usage: %s ?", argv[0]);
+    send_to_connection(connection_p, "Usage: %s ?", argv[0]);
   else
-    print_help(connections[connnum].socket, argv[1]);
+    print_help(connection_p, argv[1]);
 }
 
 void
-m_motd(int connnum, int argc, char *argv[])
+m_motd(struct connection *connection_p, int argc, char *argv[])
 {
-  print_motd(connections[connnum].socket);
+  print_motd(connection_p);
 }
 
 void
-m_save(int connnum, int argc, char *argv[])
+m_save(struct connection *connection_p, int argc, char *argv[])
 {
   send_to_all(FLAGS_ALL, "%s is saving %s and preferences",
-              connections[connnum].registered_nick, CONFIG_FILE);
+              connection_p->registered_nick, CONFIG_FILE);
   save_prefs();
 }
 
 void
-m_close(int connnum, int argc, char *argv[])
+m_close(struct connection *connection_p, int argc, char *argv[])
 {
-  send_to_connection(connections[connnum].socket, "Closing connection");
-  close_connection(connnum);
+  send_to_connection(connection_p, "Closing connection");
+  close_connection(connection_p);
 }
 
 void
-m_op(int connnum, int argc, char *argv[])
+m_op(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc < 2)
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s <nick>", argv[0]);
+    send_to_connection(connection_p, "Usage: %s <nick>", argv[0]);
   else
     op(config_entries.channel, argv[1]);
 }
 
 void
-m_cycle(int connnum, int argc, char *argv[])
+m_cycle(struct connection *connection_p, int argc, char *argv[])
 {
   leave(config_entries.channel);
   send_to_all( FLAGS_ALL, "I'm cycling.  Be right back.");
@@ -449,38 +455,38 @@ m_cycle(int connnum, int argc, char *argv[])
 }
 
 void
-m_die(int connnum, int argc, char *argv[])
+m_die(struct connection *connection_p, int argc, char *argv[])
 {
   send_to_all( FLAGS_ALL, "I've been ordered to quit irc, goodbye.");
   send_to_server("QUIT :Dead by request!");
-  tcm_log(L_ERR, "DIEd by oper %s", connections[connnum].registered_nick);
+  tcm_log(L_ERR, "DIEd by oper %s", connection_p->registered_nick);
   exit(1);
 }
 
 void
-m_restart(int connnum, int argc, char *argv[])
+m_restart(struct connection *connection_p, int argc, char *argv[])
 {
   send_to_all( FLAGS_ALL, "I've been ordered to restart.");
   send_to_server("QUIT :Restart by request!");
-  tcm_log(L_ERR, "RESTART by oper %s", connections[connnum].registered_nick);
+  tcm_log(L_ERR, "RESTART by oper %s", connection_p->registered_nick);
   sleep(1);
   execv(SPATH, NULL);
 }
 
 void
-m_info(int connnum, int argc, char *argv[])
+m_info(struct connection *connection_p, int argc, char *argv[])
 {
-  send_to_connection(connections[connnum].socket, "real server name [%s]",
-                  tcm_status.my_server);
+  send_to_connection(connection_p, "real server name [%s]",
+		     tcm_status.my_server);
   if (config_entries.hybrid)
-    send_to_connection(connections[connnum].socket, "Hybrid server version %d",
+    send_to_connection(connection_p, "Hybrid server version %d",
          config_entries.hybrid_version);
   else
-    send_to_connection(connections[connnum].socket, "Non hybrid server");
+    send_to_connection(connection_p, "Non hybrid server");
 }
 
 void
-m_locops(int connnum, int argc, char *argv[])
+m_locops(struct connection *connection_p, int argc, char *argv[])
 {
   char *p, dccbuff[MAX_BUFF];
   int i, len;
@@ -496,42 +502,40 @@ m_locops(int connnum, int argc, char *argv[])
     /* blow away last ' ' */
     *--p = '\0';
     if (dccbuff[0] == ':')
-      send_to_server("LOCOPS :(%s) %s", connections[connnum].nick, dccbuff+1);
+      send_to_server("LOCOPS :(%s) %s", connection_p->nick, dccbuff+1);
     else
-      send_to_server("LOCOPS :(%s) %s", connections[connnum].nick, dccbuff);
+      send_to_server("LOCOPS :(%s) %s", connection_p->nick, dccbuff);
   }
   else
-    send_to_connection(connections[connnum].socket,
-         "Really, it would help if you said something");
+    send_to_connection(connection_p,
+		       "Really, it would help if you said something");
 }
 
 void
-m_unkline(int connnum, int argc, char *argv[])
+m_unkline(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc < 2)
-    send_to_connection(connections[connnum].socket, 
-		    "Usage: %s <user@host>", argv[0]);
+    send_to_connection(connection_p, "Usage: %s <user@host>", argv[0]);
   else
   {
     tcm_log(L_NORM, "UNKLINE %s attempted by oper %s",
-            argv[1], connections[connnum].registered_nick);
+            argv[1], connection_p->registered_nick);
     send_to_all(FLAGS_VIEW_KLINES, "UNKLINE %s attempted by oper %s", 
-                 argv[1], connections[connnum].registered_nick);
+                 argv[1], connection_p->registered_nick);
     send_to_server("UNKLINE %s",argv[1]);
   }
 }
 
 #ifndef NO_D_LINE_SUPPORT
 void
-m_dline(int connnum, int argc, char *argv[])
+m_dline(struct connection *connection_p, int argc, char *argv[])
 {
   char *p, reason[MAX_BUFF];
   int i, len;
 
-  if(connections[connnum].type & FLAGS_DLINE)
+  if(connection_p->type & FLAGS_DLINE)
   {
-    send_to_connection(connections[connnum].socket,
-		    "You do not have access to .dline");
+    send_to_connection(connection_p, "You do not have access to .dline");
     return;
   }
   if(argc >= 3)
@@ -545,18 +549,18 @@ m_dline(int connnum, int argc, char *argv[])
     /* blow away last ' ' */
     *--p = '\0';
     if(reason[0] == ':')
-      log_kline("DLINE", argv[1], 0, connections[connnum].registered_nick, 
+      log_kline("DLINE", argv[1], 0, connection_p->registered_nick, 
                 reason+1);
     else
-      log_kline("DLINE", argv[1], 0, connections[connnum].registered_nick,
+      log_kline("DLINE", argv[1], 0, connection_p->registered_nick,
                 reason);
-    send_to_all( FLAGS_ALL, "*** dline %s :%s by %s", argv[1],
-                 reason, connections[connnum].registered_nick);
+    send_to_all(FLAGS_ALL, "*** dline %s :%s by %s", argv[1],
+		reason, connection_p->registered_nick);
 
-    if((connections[connnum].type & FLAGS_INVS) == 0)
+    if((connection_p->type & FLAGS_INVS) == 0)
     {
       strncat(reason, " (requested by ", sizeof(reason)-strlen(reason));
-      strncat(reason, connections[connnum].nick,
+      strncat(reason, connection_p->nick,
               sizeof(reason)-strlen(reason));
       strncat(reason, ")", sizeof(reason)-strlen(reason));
     }
@@ -567,15 +571,13 @@ m_dline(int connnum, int argc, char *argv[])
 
 #ifdef ENABLE_QUOTE
 void
-m_quote(int connnum, int argc, char *argv[])
+m_quote(struct connection *connection_p, int argc, char *argv[])
 {
   char dccbuff[MAX_BUFF];
 
   if(argc < 2)
   {
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s <server message>", 
-         argv[0]);
+    send_to_connection(connection_p, "Usage: %s <server message>", argv[0]);
     return;
   }
 
@@ -585,172 +587,168 @@ m_quote(int connnum, int argc, char *argv[])
 #endif
 
 void
-m_mem(int connnum, int argc, char *argv[])
+m_mem(struct connection *connection_p, int argc, char *argv[])
 {
-  report_mem(connections[connnum].socket);
+  report_mem(connection_p);
 }
 
-void m_nflood(int connnum, int argc, char *argv[])
+void m_nflood(struct connection *connection_p, int argc, char *argv[])
 {
-  report_nick_flooders(connections[connnum].socket);
+  report_nick_flooders(connection_p);
 }
 
 void
-m_rehash(int connnum, int argc, char *argv[])
+m_rehash(struct connection *connection_p, int argc, char *argv[])
 {
-  send_to_all( FLAGS_ALL,
-	       "*** rehash requested by %s", 
-               connections[connnum].registered_nick[0] ?
-               connections[connnum].registered_nick :
-               connections[connnum].nick);
+  send_to_all(FLAGS_ALL,
+	      "*** rehash requested by %s", 
+	      connection_p->registered_nick[0] ?
+	      connection_p->registered_nick :
+	      connection_p->nick);
 
   reload_userlist();
 }
 
 void
-m_trace(int connnum, int argc, char *argv[])
+m_trace(struct connection *connection_p, int argc, char *argv[])
 {
-  send_to_all( FLAGS_ALL,
-	       "Trace requested by %s",
-               connections[connnum].registered_nick[0] ?
-               connections[connnum].registered_nick :
-               connections[connnum].nick);
+  send_to_all(FLAGS_ALL,
+	      "Trace requested by %s",
+	      connection_p->registered_nick[0] ?
+	      connection_p->registered_nick :
+	      connection_p->nick);
 
   clear_hash();
   clear_bothunt();
 }
 
 void
-m_failures(int connnum, int argc, char *argv[])
+m_failures(struct connection *connection_p, int argc, char *argv[])
 {
   if(argc < 2)
-    report_failures(connections[connnum].socket, 7);
+    report_failures(connection_p, 7);
   else if(atoi(argv[1]) < 1)
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s [min failures]", argv[0]);
+    send_to_connection(connection_p, "Usage: %s [min failures]", argv[0]);
   else
-    report_failures(connections[connnum].socket, atoi(argv[1]));
+    report_failures(connection_p, atoi(argv[1]));
 }
 
 void
-m_domains(int connnum, int argc, char *argv[])
+m_domains(struct connection *connection_p, int argc, char *argv[])
 {
   if(argc < 2)
-    report_domains(connections[connnum].socket, 5);
+    report_domains(connection_p, 5);
   else if(atoi(argv[1]) < 1)
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s [min users]", argv[0]);
+    send_to_connection(connection_p, "Usage: %s [min users]", argv[0]);
   else
-    report_domains(connections[connnum].socket, atoi(argv[1]));
+    report_domains(connection_p, atoi(argv[1]));
 }
 
 void
-m_events(int connnum, int argc, char *argv[])
+m_events(struct connection *connection_p, int argc, char *argv[])
 {
-  show_events(connections[connnum].socket);
+  show_events(connection_p);
 }
 
 void
-m_nfind(int connnum, int argc, char *argv[])
+m_nfind(struct connection *connection_p, int argc, char *argv[])
 {
 #ifdef HAVE_REGEX_H
   if((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
-    send_to_connection(connections[connnum].socket,
+    send_to_connection(connection_p,
 		    "Usage: %s [-r] <wildcarded/regexp nick>", argv[0]);
   else if(argc == 2)
-    list_nicks(connections[connnum].socket, argv[1], NO);
+    list_nicks(connection_p, argv[1], NO);
   else
-    list_nicks(connections[connnum].socket, argv[2], YES);
+    list_nicks(connection_p, argv[2], YES);
 #else
   if(argc <= 2)
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s <wildcarded nick>", argv[0]);
+    send_to_connection(connection_p,
+		       "Usage: %s <wildcarded nick>", argv[0]);
   else
-    list_nicks(connections[connnum].socket, argv[1], NO);
+    list_nicks(connection_p, argv[1], NO);
 #endif
 } 
 
 void
-m_list(int connnum, int argc, char *argv[])
+m_list(struct connection *connection_p, int argc, char *argv[])
 {
 #ifdef HAVE_REGEX_H
   if((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
-    send_to_connection(connections[connnum].socket,
-         "Usage: %s [-r] <wildcarded/regex userhost>", argv[0]);
+    send_to_connection(connection_p,
+	"Usage: %s [-r] <wildcarded/regex userhost>", argv[0]);
   else if(argc == 2)
-    kill_or_list_users(connections[connnum].socket, argv[1], NO, NO, NULL);
+    kill_or_list_users(connection_p, argv[1], NO, NO, NULL);
   else
-    kill_or_list_users(connections[connnum].socket, argv[2], YES, NO, NULL);
+    kill_or_list_users(connection_p, argv[2], YES, NO, NULL);
 #else
   if(argc < 2)
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s <wildcarded userhost>",
+    send_to_connection(connection_p,
+		       "Usage: %s <wildcarded userhost>",
          argv[0]);
   else
-    kill_or_list_users(connections[connnum].socket, argv[1], NO, NO, NULL);
+    kill_or_list_users(connection_p, argv[1], NO, NO, NULL);
 #endif
 }
 
 void
-m_ulist(int connnum, int argc, char *argv[])
+m_ulist(struct connection *connection_p, int argc, char *argv[])
 {
   char buf[MAX_BUFF];
 
 #ifdef HAVE_REGEX_H
   if((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
-    send_to_connection(connections[connnum].socket,
-         "Usage: %s [-r] <wildcarded/regex username>", argv[0]);
+    send_to_connection(connection_p,
+		       "Usage: %s [-r] <wildcarded/regex username>", argv[0]);
   else if(argc == 2)
   {
     snprintf(buf, MAX_BUFF, "%s@*", argv[1]);
-    kill_or_list_users(connections[connnum].socket, buf, NO, NO, NULL);
+    kill_or_list_users(connection_p, buf, NO, NO, NULL);
   }
   else
   {
     snprintf(buf, MAX_BUFF, "%s@*", argv[2]);
-    kill_or_list_users(connections[connnum].socket, buf, YES, NO, NULL);
+    kill_or_list_users(connection_p, buf, YES, NO, NULL);
   }
 #else
   if(argc < 2)
-    send_to_connection(connections[connnum].socket,
-		    "Usage: %s <wildcarded username>",
+    send_to_connection(&connection_p, "Usage: %s <wildcarded username>",
          argv[0]);
   else
   {
     snprintf(buf, MAX_BUFF, "%s@*", argv[1]);
-    kill_or_list_users(connections[connnum].socket, argv[1], NO, NO, NULL);
+    kill_or_list_users(connection_p, argv[1], NO, NO, NULL);
   }
 #endif
 }
 
 void
-m_hlist(int connnum, int argc, char *argv[])
+m_hlist(struct connection *connection_p, int argc, char *argv[])
 {
   char buf[MAX_BUFF];
 
 #ifdef HAVE_REGEX_H
   if((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
-    send_to_connection(connections[connnum].socket,
-         "Usage: %s [-r] <wildcarded/regex host>", argv[0]);
+    send_to_connection(connection_p, "Usage: %s [-r] <wildcarded/regex host>",
+		       argv[0]);
   else if(argc == 2)
   {
     snprintf(buf, MAX_BUFF, "*@%s", argv[1]);
-    kill_or_list_users(connections[connnum].socket, buf, NO, NO, NULL);
+    kill_or_list_users(connection_p, buf, NO, NO, NULL);
   }
   else
   {
     snprintf(buf, MAX_BUFF, "*@%s", argv[2]);
-    kill_or_list_users(connections[connnum].socket, buf, YES, NO, NULL);
+    kill_or_list_users(connection_p, buf, YES, NO, NULL);
   }
 #else
   if(argc < 2)
-    send_to_connection(connections[connnum].socket, 
-		    "Usage: %s <wildcarded host>",
+    send_to_connection(connection_p, "Usage: %s <wildcarded host>",
          argv[0]);
   else
   {
     snprintf(buf, MAX_BUFF, "*@%s", argv[1]);
-    kill_or_list_users(connections[connnum].socket, argv[1], NO, NO, NULL);
+    kill_or_list_users(connection_p, argv[1], NO, NO, NULL);
   }
 #endif
 }
@@ -765,30 +763,29 @@ m_hlist(int connnum, int argc, char *argv[])
  * side effects	- user is warned they aren't an oper
  */
 static void
-register_oper(int connnum, char *password, char *who_did_command)
+register_oper(struct connection *connection_p, char *password,
+	      char *who_did_command)
 {
   if(password != NULL)
   {
-    if(is_legal_pass(connnum, password))
+    if(is_legal_pass(connection_p, password))
     {
-      send_to_connection(connections[connnum].socket,
-		      "Your current flags are: %s",
-		      type_show(connections[connnum].type));
+      send_to_connection(connection_p,
+			 "Your current flags are: %s",
+			 type_show(connection_p->type));
 
-      if(connections[connnum].type & FLAGS_SUSPENDED)
+      if(connection_p->type & FLAGS_SUSPENDED)
       {
-	send_to_connection(connections[connnum].socket,
- 	                "You are suspended");
+	send_to_connection(connection_p, "You are suspended");
 	send_to_all(FLAGS_ALL, "%s is suspended", who_did_command);
       }
       else
       {
-	send_to_connection(connections[connnum].socket,
-	                "You are now registered");
+	send_to_connection(connection_p, "You are now registered");
 	send_to_all(FLAGS_ALL, "%s has registered", who_did_command);
 
 	/* mark them as registered */
-	connections[connnum].type |= FLAGS_OPER;
+	connection_p->type |= FLAGS_OPER;
       }
     }
     else
@@ -798,7 +795,7 @@ register_oper(int connnum, char *password, char *who_did_command)
   }
   else
   {
-    send_to_connection(connections[connnum].socket, "missing password");
+    send_to_connection(connection_p, "missing password");
   }
 }
 
@@ -1003,15 +1000,13 @@ init_commands(void)
 /*
  * is_legal_pass()
  *
- * inputs       - user
- *              - host
+ * inputs       - pointer to struct connection
  *              - password
- *              - int connect id
  * output       - oper type if legal 0 if not
  * side effects - NONE
  */
 int
-is_legal_pass(int connect_id, char *password)
+is_legal_pass(struct connection *connection_p, char *password)
 {
   slink_node *ptr;
   struct oper_entry *user;
@@ -1020,8 +1015,8 @@ is_legal_pass(int connect_id, char *password)
   {
     user = ptr->data;
 
-    if((match(user->username, connections[connect_id].username) == 0) &&
-       (wldcmp(user->host, connections[connect_id].host) == 0) &&
+    if((match(user->username, connection_p->username) == 0) &&
+       (wldcmp(user->host, connection_p->host) == 0) &&
        (user->password[0] != '\0'))
     {
 #ifdef USE_CRYPT
@@ -1031,8 +1026,8 @@ is_legal_pass(int connect_id, char *password)
       if(strcmp(user->password, password) == 0)
 #endif
       {
-        strlcpy(connections[connect_id].registered_nick, user->usernick, 
-                sizeof(connections[connect_id].registered_nick));
+        strlcpy(connection_p->registered_nick, user->usernick, 
+                sizeof(connection_p->registered_nick));
 	return YES;
       }
     }
@@ -1044,13 +1039,13 @@ is_legal_pass(int connect_id, char *password)
 /*
  * print_help()
  *
- * inputs       - socket, help_text to use
+ * inputs       - pointer to connection to use
  * output       - none
  * side effects - prints help file to user
  */
 
 static void
-print_help(int sock,char *text)
+print_help(struct connection *connection_p, char *text)
 {
   FILE *userfile;
   char line[MAX_BUFF];
@@ -1060,7 +1055,7 @@ print_help(int sock,char *text)
     {
       if( (userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) == NULL )
         {
-          send_to_connection(sock,"Help is not currently available");
+          send_to_connection(connection_p,"Help is not currently available");
           return;
         }
     }
@@ -1073,7 +1068,8 @@ print_help(int sock,char *text)
         {
           if( (userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) == NULL )
             {
-              send_to_connection(sock,"Help is not currently available");
+              send_to_connection(connection_p,
+				 "Help is not currently available");
               return;
             }
         }
@@ -1082,7 +1078,7 @@ print_help(int sock,char *text)
                      HELP_PATH,HELP_FILE,text);
       if( (userfile = fopen(help_file,"r")) == NULL)
         {
-          send_to_connection(sock,
+          send_to_connection(connection_p,
 			  "Help for '%s' is not currently available",text);
           return;
         }
@@ -1090,7 +1086,7 @@ print_help(int sock,char *text)
 
   while (fgets(line, MAX_BUFF, userfile))
     {
-      send_to_connection(sock, "%s", line);
+      send_to_connection(connection_p, "%s", line);
     }
   fclose(userfile);
 }

@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.33 2002/06/23 21:09:13 db Exp $
+ * $Id: actions.c,v 1.34 2002/06/24 00:40:19 db Exp $
  */
 
 #include "setup.h"
@@ -47,11 +47,10 @@ int act_rclone;
 struct a_entry actions[MAX_ACTIONS];
 
 static int add_action(char *name);
-static void update_action(int connnum, int argc, char *argv[]);
-
-static void m_action(int connnum, int argc, char *argv[]);
-static void list_actions(int conn_num);
-static void list_one_action(int conn_num, int action);
+static void update_action(struct connection *, int argc, char *argv[]);
+static void m_action(struct connection *, int argc, char *argv[]);
+static void list_actions(struct connection *);
+static void list_one_action(struct connection *, int action);
 
 static void set_action_reason(int action, char *reason);
 static void set_action_strip(int action, int hoststrip);
@@ -64,14 +63,14 @@ struct dcc_command action_msgtab = {
 };
 
 void
-m_action(int connnum, int argc, char *argv[])
+m_action(struct connection *connection_p, int argc, char *argv[])
 {
   if(argc == 1)
-    list_actions(connnum);
+    list_actions(connection_p);
   else if(argc == 2)
-    list_one_action(connnum, find_action(argv[1]));
+    list_one_action(connection_p, find_action(argv[1]));
   else
-    update_action(connnum, argc, argv);
+    update_action(connection_p, argc, argv);
 }
 
 void
@@ -185,13 +184,13 @@ set_action(int argc, char *argv[])
 
 /* update_action()
  *
- * input	- connection changing the action
+ * input	- pointer to connection struct changing
  * 		- argc and argv
  * output	-
  * side effects - action specified is changed to user params
  */
 void
-update_action(int conn_num, int argc, char *argv[])
+update_action(struct connection *connection_p, int argc, char *argv[])
 {
   char reason[MAX_REASON];
   int actionid;
@@ -224,17 +223,16 @@ update_action(int conn_num, int argc, char *argv[])
   }
 
   if(actions[actionid].klinetime > 0)
-    send_to_connection(connections[conn_num].socket,
-		    "%s action now: %s %d, reason '%s'",
-		    actions[actionid].name,
-		    get_method_names(actions[actionid].method),
-		    actions[actionid].klinetime, actions[actionid].reason);
+    send_to_connection(connection_p, "%s action now: %s %d, reason '%s'",
+		       actions[actionid].name,
+		       get_method_names(actions[actionid].method),
+		       actions[actionid].klinetime, actions[actionid].reason);
   else
-    send_to_connection(connections[conn_num].socket,
-		    "%s action now: %s %d, reason '%s'",
-		    actions[actionid].name,
-		    get_method_names(actions[actionid].method),
-		    actions[actionid].reason);
+    send_to_connection(connection_p,
+		       "%s action now: %s %d, reason '%s'",
+		       actions[actionid].name,
+		       get_method_names(actions[actionid].method),
+		       actions[actionid].reason);
 }
 
 void
@@ -254,39 +252,37 @@ set_action_reason(int actionid, char *reason)
 
 /* list_actions()
  *
- * inputs	- socket to list to
- * outputs	-
+ * inputs	- pointer to struct connection to list to
+ * outputs	- none
  * side effects - client is shown list of actions
  */
 void
-list_actions(int conn_num)
+list_actions(struct connection *connection_p)
 {
   int i;
 
-  send_to_connection(connections[conn_num].socket,
-		  "Listing actions..");
+  send_to_connection(connection_p, "Listing actions..");
 
   for(i = 0; i < MAX_ACTIONS; i++)
   {
     if(actions[i].name[0])
-      list_one_action(conn_num, i);
+      list_one_action(connection_p, i);
   }
 }
 
 /* list_one_action()
  *
- * inputs	- socket to list to
+ * inputs	- pointer to struct connection to list to
  * 		- actionid to list
  * outputs	-
  * side effects - specified action info is shown
  */
 void
-list_one_action(int conn_num, int actionid)
+list_one_action(struct connection *connection_p, int actionid)
 {
   if(actionid < 0)
   {
-    send_to_connection(connections[conn_num].socket,
-		    "No matching action found");
+    send_to_connection(connection_p, "No matching action found");
     return;
   }
 
@@ -294,18 +290,18 @@ list_one_action(int conn_num, int actionid)
     return;
 
   if(actions[actionid].klinetime > 0)
-    send_to_connection(connections[conn_num].socket,
-		    "%s action: %s %d, reason '%s'",
-		    actions[actionid].name, 
-		    get_method_names(actions[actionid].method),
-		    actions[actionid].klinetime,
-		    actions[actionid].reason);
+    send_to_connection(connection_p,
+		       "%s action: %s %d, reason '%s'",
+		       actions[actionid].name, 
+		       get_method_names(actions[actionid].method),
+		       actions[actionid].klinetime,
+		       actions[actionid].reason);
   else
-    send_to_connection(connections[conn_num].socket,
-		    "%s action: %s, reason '%s'",
-		    actions[actionid].name,
-		    get_method_names(actions[actionid].method),
-		    actions[actionid].reason);
+    send_to_connection(connection_p,
+		       "%s action: %s, reason '%s'",
+		       actions[actionid].name,
+		       get_method_names(actions[actionid].method),
+		       actions[actionid].reason);
 }
 
 /*
@@ -401,9 +397,9 @@ handle_action(int actionid, char *nick, char *username,
 	    actions[actionid].klinetime = 14400;
 
 	  send_to_server("KLINE %d %s :%s",
-		 actions[actionid].klinetime, userhost,
-		 actions[actionid].reason ?
-		 actions[actionid].reason : "Automated temporary K-Line");
+			 actions[actionid].klinetime, userhost,
+			 actions[actionid].reason ?
+			 actions[actionid].reason : "Automated temporary K-Line");
 
 	  snprintf(comment, sizeof(comment),
 		   "%d minutes temporary k-line of %s",
@@ -424,8 +420,8 @@ handle_action(int actionid, char *nick, char *username,
 		      actions[actionid].name, host);
 
 		  send_to_server("KLINE *@%s :%s", host,
-				  actions[actionid].reason ?
-				  actions[actionid].reason : "Automated K-Line");
+				 actions[actionid].reason ?
+				 actions[actionid].reason : "Automated K-Line");
 		  return;
 		}
 
@@ -449,8 +445,8 @@ handle_action(int actionid, char *nick, char *username,
 	    }
 
 	  send_to_server("DLINE %s :%s", userhost,
-		 actions[actionid].reason ?
-		 actions[actionid].reason : "Automated D-Line");    
+			 actions[actionid].reason ?
+			 actions[actionid].reason : "Automated D-Line");    
 
 	  snprintf(comment, sizeof(comment), "D-line of %s", userhost);
 	}

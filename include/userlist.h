@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.82 2002/06/23 13:24:27 wcampbel Exp $ */
+/* $Id: userlist.h,v 1.83 2002/06/24 00:40:15 db Exp $ */
 
 #include "tools.h"
 
@@ -79,7 +79,6 @@ struct exempt_entry
 
 struct oper_entry *find_user_in_userlist(const char *);
 void get_umodes_from_prefs(struct oper_entry *);
-void list_connections(int sock);
 void show_stats_p(const char *nick);
 
 void set_umode(struct oper_entry *, int, const char *);

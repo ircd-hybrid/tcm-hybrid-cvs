@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.92 2002/06/23 21:09:15 db Exp $
+ * $Id: tcm_io.c,v 1.93 2002/06/24 00:40:22 db Exp $
  */
 
 #include <stdio.h>
@@ -53,9 +53,10 @@
 #include "patchlevel.h"
 
 static int get_line(char *inbuf,int *len, struct connection *connections_p);
-static void va_send_to_connection(int sock, const char *format, va_list va);
+static void va_send_to_connection(struct connection *,
+				  const char *format, va_list va);
 static void va_send_to_server(const char *format, va_list va);
-static void signon_to_server(int unused);
+static void signon_to_server(struct connection *uplink);
 static void reconnect(void);
 
 fd_set readfds;		/* file descriptor set for use with select */
@@ -63,7 +64,7 @@ fd_set writefds;	/* file descriptor set for use with select */
 
 struct connection connections[MAXDCCCONNS]; /*plus 1 for the server, silly*/
 int pingtime;
-static int server_id;
+static struct connection *server_p;
 static int maxconns;
 
 /*
@@ -101,11 +102,11 @@ read_packet(void)
                                 + connections[i].time_out))
 	      {
 		if(connections[i].io_timeout_function != NULL)
-                  (connections[i].io_timeout_function)(i);
+                  (connections[i].io_timeout_function)(&connections[i]);
 		else if(connections[i].io_close_function != NULL)
-		  (connections[i].io_close_function)(i);
+		  (connections[i].io_close_function)(&connections[i]);
 		else
-                  close_connection(i);
+                  close_connection(&connections[i]);
 		continue;	/* connections[i].socket is now invalid */
 	      } /* not sent a ping, and we've actually
 		 * connected to the server
@@ -148,7 +149,7 @@ read_packet(void)
 	    FD_ISSET(connections[i].socket, &writefds))
 	  {
 	    if (connections[i].io_write_function != NULL)
-	      (connections[i].io_write_function)(i);
+	      (connections[i].io_write_function)(&connections[i]);
 	  }
 
 	if (connections[i].state != S_IDLE &&
@@ -156,16 +157,16 @@ read_packet(void)
           {
 	    if (connections[i].state == S_CONNECTING)
 	      {
-		(connections[i].io_read_function)(i);
+		(connections[i].io_read_function)(&connections[i]);
 		continue;
 	      }
 
             nread = read(connections[i].socket,
-                        incomingbuff, sizeof(incomingbuff));
+			 incomingbuff, sizeof(incomingbuff));
 
             if (nread == 0)
               {
-		(connections[i].io_close_function)(i);
+		(connections[i].io_close_function)(&connections[i]);
               }
             else if (nread > 0)
               {
@@ -188,7 +189,7 @@ read_packet(void)
 		     */
 		    if (connections[i].io_read_function == NULL)
 		      break;
-		    (connections[i].io_read_function)(i);
+		    (connections[i].io_read_function)(&connections[i]);
 		    tscanned += nscanned;
                   }
               }
@@ -319,11 +320,9 @@ get_line(char *in, int *len, struct connection *connections_p)
  *   Close the old dead socket. Try to reconnect to server.
  */
 void
-server_link_closed(int unused)
+server_link_closed(struct connection *uplink_p)
 {
-  close_connection(server_id);
-  server_id = INVALID;
-
+  close_connection(uplink_p);
   tcm_log(L_ERR, "server_link_closed()");
   tcm_status.am_opered = NO;
   eventAdd("reconnect", (EVH *)reconnect, NULL, 30);
@@ -344,7 +343,7 @@ reconnect(void)
   eventDelete((EVH *)reconnect, NULL);
 
   if (connect_to_server(config_entries.server_name,
-			atoi(config_entries.server_port)) == INVALID)
+			atoi(config_entries.server_port)) == NULL)
     {
       /* This one is fatal folks */
       tcm_log(L_ERR, "server_link_closed() invalid socket quitting");
@@ -353,16 +352,16 @@ reconnect(void)
 }
 
 /*
- * find_free_connection_slot
+ * find_free_connection
  *
  * inputs       - none
  *              - host
  * output       - none
- * side effects - finds a free connection slot to use, -1 if none found
+ * side effects - finds a free connection to use, NULL if none found
  */
 
-int
-find_free_connection_slot(void)
+struct connection *
+find_free_connection(void)
 {
   int i;
 
@@ -378,10 +377,11 @@ find_free_connection_slot(void)
 
   if(i >= MAXDCCCONNS)
   {
-    return(-1);
+    return(NULL);
   }
 
-  return(i);
+  connections[i].conn_num = i;	/* XXX transition keep track of connum */
+  return(&connections[i]);
 }
 
 
@@ -394,11 +394,11 @@ find_free_connection_slot(void)
  * side effects	- NONE
  */
 void
-send_to_connection(int sock, const char *format, ...)
+send_to_connection(struct connection *connection_p, const char *format, ...)
 {
   va_list va;
   va_start(va,format);
-  va_send_to_connection(sock, format, va);
+  va_send_to_connection(connection_p, format, va);
   va_end(va);
 }
 
@@ -471,27 +471,28 @@ privmsg(const char *target, const char *format, ...)
 static void
 va_send_to_server(const char *format, va_list va)
 {
-  if (server_id != INVALID)
-    va_send_to_connection(connections[server_id].socket, format, va);
+  if (server_p != NULL)
+    va_send_to_connection(server_p, format, va);
 }
 
 /*
  * va_send_to_connection() (helper function for above two)
  *
- * inputs	- socket to output on
+ * inputs	- struct connection to use
  *		- format string to output
  * output	- NONE
  * side effects	- NONE
  */
 static void
-va_send_to_connection(int sock, const char *format, va_list va)
+va_send_to_connection(struct connection *connection_p,
+		      const char *format, va_list va)
 {
   char msgbuf[MAX_BUFF];
 
   vsnprintf(msgbuf, sizeof(msgbuf)-2, format, va);
   if (msgbuf[strlen(msgbuf)-1] != '\n')
     strcat(msgbuf, "\n");
-  send(sock, msgbuf, strlen(msgbuf), 0);
+  send(connection_p->socket, msgbuf, strlen(msgbuf), 0);
 #ifdef DEBUGMODE
   printf("-> %s", msgbuf);
 #endif
@@ -519,7 +520,7 @@ send_to_all(int send_umode, const char *format,...)
     {
       if((connections[i].state == S_CLIENT) &&
          (connections[i].type & send_umode))
-        va_send_to_connection(connections[i].socket, format, va);
+        va_send_to_connection(&connections[i], format, va);
     }
   va_end(va);
 }
@@ -527,7 +528,7 @@ send_to_all(int send_umode, const char *format,...)
 /*
  * send_to_partyline
  *
- * inputs	- connection id not to send message back to
+ * inputs	- pointer to struct connection not to send back to
  *		- message to send
  * output	- NONE
  * side effects	- message is sent on /dcc link to all connected users
@@ -535,7 +536,7 @@ send_to_all(int send_umode, const char *format,...)
  */
 
 void
-send_to_partyline(int conn_num, const char *format,...)
+send_to_partyline(struct connection *from_p, const char *format,...)
 {
   va_list va;
   int i;
@@ -545,8 +546,9 @@ send_to_partyline(int conn_num, const char *format,...)
     {
       if (connections[i].state == S_CLIENT)
 	{
-	  if (conn_num != i && connections[i].type & FLAGS_PARTYLINE)
-	    va_send_to_connection(connections[i].socket, format, va);
+	  if ((from_p != &connections[i])
+	      && connections[i].type & FLAGS_PARTYLINE)
+	    va_send_to_connection(&connections[i], format, va);
 	}
     }
   va_end(va);
@@ -555,25 +557,31 @@ send_to_partyline(int conn_num, const char *format,...)
 /*
  * close_connection()
  *
- * inputs	- connection number
+ * inputs	- struct connection pointer
  * output	- NONE
  * side effects	- connection on connection number connnum is closed.
  */
 
 void
-close_connection(int connnum)
+close_connection(struct connection *connection_p)
 {
   int i;
+  /* XXX transition */
+  int connnum=connection_p->conn_num;
 
-  if (connections[connnum].socket != INVALID)
-    close(connections[connnum].socket);
+  connnum = connection_p->socket;	/* XXX transition
+					 * socket should = connnum
+					 */
+
+  if (connection_p->socket != INVALID)
+    close(connection_p->socket);
 
   memset((void *)&connections[connnum], 0, sizeof(connections[connnum]));
 
   if ((connnum + 1) == maxconns)
     {
       for (i=maxconns;i>0;--i)
-	if (connections[i].state != S_IDLE)
+	if (connection_p->state != S_IDLE)
 	  break;
       maxconns = i+1;
     }
@@ -587,38 +595,38 @@ close_connection(int connnum)
  * output	- socket or -1 if no socket
  * side effects	- Sets up a socket and connects to the given host and port
  */
-int
+struct connection *
 connect_to_server(const char *server, const int port)
 {
   struct sockaddr_in socketname;
   struct hostent *remote_hostent;
 
-  if ((server_id = find_free_connection_slot()) < 0)
+  if ((server_p = find_free_connection()) == NULL)
     {
       tcm_log(L_ERR, "Could not find a free connection slot!");
-      return (INVALID);
+      return (NULL);
     }
 
   if ((remote_hostent = gethostbyname (server)) == NULL)
     {
       printf("error: unknown host: %s\n", server);
-      return (INVALID);
+      return (NULL);
     }
 
   memcpy ((void *) &socketname.sin_addr,
 	  (void *) remote_hostent->h_addr,
 	  remote_hostent->h_length);
 
-  connections[server_id].state = S_CONNECTING;
-  connections[server_id].io_read_function = signon_to_server;
-  connections[server_id].io_write_function = NULL;
-  connections[server_id].io_close_function = server_link_closed;
-  connections[server_id].io_timeout_function = server_link_closed;
-  connections[server_id].socket = connect_to_given_ip_port(&socketname, port);
-  connections[server_id].time_out = SERVER_TIME_OUT_CONNECT;
+  server_p->state = S_CONNECTING;
+  server_p->io_read_function = signon_to_server;
+  server_p->io_write_function = NULL;
+  server_p->io_close_function = server_link_closed;
+  server_p->io_timeout_function = server_link_closed;
+  server_p->socket = connect_to_given_ip_port(&socketname, port);
+  server_p->time_out = SERVER_TIME_OUT_CONNECT;
   current_time = time(NULL);
-  connections[server_id].last_message_time = current_time;
-  return(connections[server_id].socket);
+  server_p->last_message_time = current_time;
+  return(server_p);
 }
 
 /*
@@ -630,18 +638,18 @@ connect_to_server(const char *server, const int port)
  */
 
 static void
-signon_to_server (int unused)
+signon_to_server (struct connection *uplink_p)
 {
-  connections[server_id].io_read_function = parse_server;
-  connections[server_id].io_write_function = NULL;
-  connections[server_id].state = S_SERVER;
-  connections[server_id].nbuf = 0;
+  uplink_p->io_read_function = parse_server;
+  uplink_p->io_write_function = NULL;
+  uplink_p->state = S_SERVER;
+  uplink_p->nbuf = 0;
   tcm_status.ping_state = S_PINGSENT;
 
   if (tcm_status.ping_time != 0)
-    connections[server_id].time_out = tcm_status.ping_time;
+    uplink_p->time_out = tcm_status.ping_time;
   else
-    connections[server_id].time_out = SERVER_TIME_OUT;
+    uplink_p->time_out = SERVER_TIME_OUT;
 
   if (tcm_status.my_nick[0] == '\0')
     strcpy (tcm_status.my_nick, config_entries.dfltnick);
@@ -752,7 +760,7 @@ init_connections(void)
   memset((void *)connections, 0, sizeof(connections));
 }
 
-int
+struct connection *
 find_user_in_connections(const char *username)
 {
   int i;
@@ -762,10 +770,10 @@ find_user_in_connections(const char *username)
       continue;
 
     if(strcasecmp(connections[i].registered_nick, username) == 0)
-      return (i);
+      return (&connections[i]);
   }
 
-  return (INVALID);
+  return (NULL);
 }
 
 /*
@@ -824,7 +832,7 @@ show_stats_p(const char *nick)
  * side effects	- active connections are listed to socket
  */
 void 
-list_connections(int sock)
+list_connections(struct connection *connection_p)
 {
   int i;
 
@@ -834,19 +842,20 @@ list_connections(int sock)
     {
       if(connections[i].registered_nick[0] != 0)
       {
-  	send_to_connection(sock,
-	       "%s/%s %s (%s@%s) is connected - idle: %ld",
-	       connections[i].nick, connections[i].registered_nick,
-	       type_show(connections[i].type), connections[i].username,
-	       connections[i].host,
-	       time((time_t *)NULL)-connections[i].last_message_time);
+  	send_to_connection(connection_p,
+			   "%s/%s %s (%s@%s) is connected - idle: %ld",
+			   connections[i].nick, connections[i].registered_nick,
+			   type_show(connections[i].type), connections[i].username,
+			   connections[i].host,
+			   time((time_t *)NULL)-connections[i].last_message_time);
       }
       else
       {
-	send_to_connection(sock,
-	     "%s O (%s@%s) is connected - idle: %ld",
-	     connections[i].nick, connections[i].username, connections[i].host,
-	     time(NULL) - connections[i].last_message_time);
+	send_to_connection(connection_p,
+			   "%s O (%s@%s) is connected - idle: %ld",
+			   connections[i].nick, connections[i].username,
+			   connections[i].host,
+			   time(NULL) - connections[i].last_message_time);
       }
     }
   }

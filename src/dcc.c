@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.17 2002/06/23 21:09:14 db Exp $
+ * $Id: dcc.c,v 1.18 2002/06/24 00:40:20 db Exp $
  */
 
 #include <stdio.h>
@@ -49,11 +49,11 @@
 #include "serno.h"
 #include "patchlevel.h"
 
-static void finish_outgoing_dcc_chat(int i);
-static void finish_incoming_dcc_chat(int i);
-static void timeout_dcc_chat(int i);
-static void finish_dcc_chat(int i);
-static void close_dcc_connection(int connnum);
+static void finish_outgoing_dcc_chat(struct connection *);
+static void finish_incoming_dcc_chat(struct connection *);
+static void timeout_dcc_chat(struct connection *);
+static void finish_dcc_chat(struct connection *);
+static void close_dcc_connection(struct connection *);
 
 /*
  * initiate_dcc_chat
@@ -71,20 +71,20 @@ initiate_dcc_chat(struct source_client *source_p)
   struct sockaddr_in socketname;
   int	flags;
   int	result = -1;
-  int	i;
+  struct connection *new_conn;
 
-  if ((i = find_free_connection_slot()) < 0)
+  if ((new_conn = find_free_connection()) == NULL)
     {
       notice(source_p->name, "Max users on tcm, dcc chat rejected");
       return;
     }
 
   notice(source_p->name, "Chat requested");
-  strlcpy(connections[i].nick, source_p->name, MAX_NICK);
-  strlcpy(connections[i].username, source_p->username, MAX_USER);
-  strlcpy(connections[i].host, source_p->host, MAX_HOST);
+  strlcpy(new_conn->nick, source_p->name, MAX_NICK);
+  strlcpy(new_conn->username, source_p->username, MAX_USER);
+  strlcpy(new_conn->host, source_p->host, MAX_HOST);
 
-  if ((connections[i].socket = socket(PF_INET,SOCK_STREAM,0)) < 0)
+  if ((new_conn->socket = socket(PF_INET,SOCK_STREAM,0)) < 0)
   {
     notice(source_p->name, "Error on open");
     return;
@@ -97,25 +97,25 @@ initiate_dcc_chat(struct source_client *source_p)
     socketname.sin_addr.s_addr = INADDR_ANY;
     socketname.sin_port = htons(dcc_port);
 
-    if ((result = bind(connections[i].socket,(struct sockaddr *)&socketname,
+    if ((result = bind(new_conn->socket,(struct sockaddr *)&socketname,
                        sizeof(socketname)) >= 0))
       break;
   }
 
   if (result < 0)
   {
-    close(connections[i].socket);
+    close(new_conn->socket);
     notice(source_p->name, "Cannot DCC chat");
     return;
   }
 
-  flags = fcntl(connections[i].socket, F_GETFL, 0);
+  flags = fcntl(new_conn->socket, F_GETFL, 0);
   flags |= O_NONBLOCK;
-  (void) fcntl(connections[i].socket, F_SETFL, flags);
+  (void) fcntl(new_conn->socket, F_SETFL, flags);
 
-  if (listen(connections[i].socket,4) < 0)
+  if (listen(new_conn->socket,4) < 0)
   {
-    close(connections[i].socket);
+    close(new_conn->socket);
     notice(source_p->name, "Cannot DCC chat");
     return;
   }
@@ -124,17 +124,17 @@ initiate_dcc_chat(struct source_client *source_p)
 	   local_ip(tcm_status.my_hostname), dcc_port);
 
   if (config_entries.debug && outfile)
-      (void)fprintf(outfile, "DEBUG: dcc socket = %d\n",
-		    connections[i].socket);
+    (void)fprintf(outfile, "DEBUG: dcc socket = %d\n",
+		  new_conn->socket);
 
-  connections[i].state = S_CONNECTING;
-  connections[i].io_read_function = finish_outgoing_dcc_chat;
-  connections[i].io_write_function = NULL;
-  connections[i].io_close_function = close_connection;
-  connections[i].last_message_time = current_time;
-  connections[i].time_out = DCC_TIMEOUT;
-  connections[i].io_timeout_function = timeout_dcc_chat;
-  FD_SET(connections[i].socket, &readfds);
+  new_conn->state = S_CONNECTING;
+  new_conn->io_read_function = finish_outgoing_dcc_chat;
+  new_conn->io_write_function = NULL;
+  new_conn->io_close_function = close_connection;
+  new_conn->last_message_time = current_time;
+  new_conn->time_out = DCC_TIMEOUT;
+  new_conn->io_timeout_function = timeout_dcc_chat;
+  FD_SET(new_conn->socket, &readfds);
 }
 
 /*
@@ -153,38 +153,38 @@ accept_dcc_connection(struct source_client *source_p,
 {
   unsigned long remoteaddr;
   struct sockaddr_in socketname;
-  int  i;               /* index variable */
+  struct connection *new_conn;
 
-  if ((i = find_free_connection_slot()) < 0)
+  if ((new_conn = find_free_connection()) == NULL)
     {
       notice(source_p->name, "Max users on tcm, dcc chat rejected");
       return(-1);
     }
 
-  connections[i].set_modes = 0;
-  strlcpy(connections[i].nick, source_p->name, MAX_NICK);
-  strlcpy(connections[i].username, source_p->username, MAX_USER);
-  strlcpy(connections[i].host, source_p->host, MAX_HOST);
-  connections[i].last_message_time = current_time;
+  new_conn->set_modes = 0;
+  strlcpy(new_conn->nick, source_p->name, MAX_NICK);
+  strlcpy(new_conn->username, source_p->username, MAX_USER);
+  strlcpy(new_conn->host, source_p->host, MAX_HOST);
+  new_conn->last_message_time = current_time;
 
   (void)sscanf(host_ip, "%lu", &remoteaddr);
   /* Argh.  Didn't they teach byte order in school??? --cah */
 
   socketname.sin_addr.s_addr = htonl(remoteaddr);
-  connections[i].socket = connect_to_given_ip_port(&socketname, port);
-  if (connections[i].socket == INVALID)
+  new_conn->socket = connect_to_given_ip_port(&socketname, port);
+  if (new_conn->socket == INVALID)
     {
-      close_connection(i);
+      close_connection(new_conn);
       return (0);
     }
-  connections[i].state = S_CONNECTING;
-  connections[i].io_write_function = NULL;
-  connections[i].io_read_function = finish_incoming_dcc_chat;
-  connections[i].io_close_function = close_connection;
-  connections[i].last_message_time = current_time;
-  connections[i].time_out = DCC_TIMEOUT; 
-  connections[i].io_timeout_function = timeout_dcc_chat;
-  FD_SET(connections[i].socket, &readfds);
+  new_conn->state = S_CONNECTING;
+  new_conn->io_write_function = NULL;
+  new_conn->io_read_function = finish_incoming_dcc_chat;
+  new_conn->io_close_function = close_connection;
+  new_conn->last_message_time = current_time;
+  new_conn->time_out = DCC_TIMEOUT; 
+  new_conn->io_timeout_function = timeout_dcc_chat;
+  FD_SET(new_conn->socket, &readfds);
   return (1);
 }
 
@@ -197,36 +197,36 @@ accept_dcc_connection(struct source_client *source_p,
  */
 
 static void
-finish_outgoing_dcc_chat(int i)
+finish_outgoing_dcc_chat(struct connection *new_conn)
 {
   struct sockaddr_in incoming_addr;
   int addrlen;
-  int sock = connections[i].socket;
+  int sock = new_conn->socket;
   int accept_sock;
 
   addrlen = sizeof(struct sockaddr);
   errno=0;
 
-  if((accept_sock = accept(connections[i].socket,
+  if((accept_sock = accept(new_conn->socket,
 			   (struct sockaddr *)&incoming_addr,
 			   (socklen_t *)&addrlen)) < 0 )
   {
     if (errno == EAGAIN)
       return;
 
-    notice(connections[i].nick, "Error in DCC chat");
-    close_connection(i);
+    notice(new_conn->nick, "Error in DCC chat");
+    close_connection(new_conn);
     return;
   }
 
   /* close the listening socket, I've got a working socket now */
   close(sock);
 
-  connections[i].socket = accept_sock;
-  connections[i].last_message_time = current_time;
-  connections[i].io_write_function = finish_dcc_chat;
-  connections[i].nbuf = 0;
-  FD_SET(connections[i].socket, &writefds);
+  new_conn->socket = accept_sock;
+  new_conn->last_message_time = current_time;
+  new_conn->io_write_function = finish_dcc_chat;
+  new_conn->nbuf = 0;
+  FD_SET(new_conn->socket, &writefds);
 }
 
 /*
@@ -238,10 +238,10 @@ finish_outgoing_dcc_chat(int i)
  */
 
 static void
-timeout_dcc_chat(int i)
+timeout_dcc_chat(struct connection *new_conn)
 {
-  notice(connections[i].nick, "DCC chat timedout");
-  close_connection(i);
+  notice(new_conn->nick, "DCC chat timedout");
+  close_connection(new_conn);
 }
 
 /*
@@ -254,12 +254,12 @@ timeout_dcc_chat(int i)
  */
 
 static void
-finish_incoming_dcc_chat(int i)
+finish_incoming_dcc_chat(struct connection *new_conn)
 {
-  connections[i].io_write_function = finish_dcc_chat;
-  connections[i].io_read_function = NULL;
-  connections[i].state = S_CLIENT;
-  FD_SET(connections[i].socket, &writefds);
+  new_conn->io_write_function = finish_dcc_chat;
+  new_conn->io_read_function = NULL;
+  new_conn->state = S_CLIENT;
+  FD_SET(new_conn->socket, &writefds);
 }
 
 /*
@@ -271,39 +271,37 @@ finish_incoming_dcc_chat(int i)
  */
 
 static void
-finish_dcc_chat(int i)
+finish_dcc_chat(struct connection *new_conn)
 {
   slink_node *ptr;
   struct oper_entry *user;
 
   report(FLAGS_ALL,
          "Oper %s (%s@%s) has connected",
-         connections[i].nick, connections[i].username,
-         connections[i].host);
+         new_conn->nick, new_conn->username, new_conn->host);
 
   for(ptr = user_list; ptr; ptr = ptr->next)
   {
     user = ptr->data;
 
-    if((match(user->username, connections[i].username) == 0) &&
-       (wldcmp(user->host, connections[i].host) == 0))
+    if((match(user->username, new_conn->username) == 0) &&
+       (wldcmp(user->host, new_conn->host) == 0))
     {
-      strlcpy(connections[i].registered_nick, user->usernick,
-              sizeof(connections[i].registered_nick));
-      connections[i].type = (user->type|FLAGS_ALL);
+      strlcpy(new_conn->registered_nick, user->usernick,
+              sizeof(new_conn->registered_nick));
+      new_conn->type = (user->type|FLAGS_ALL);
       break;
     }
   }
 
-  connections[i].state = S_CLIENT;
-  connections[i].io_read_function = parse_client;
-  connections[i].io_write_function = NULL;
-  connections[i].io_close_function = close_dcc_connection;
-  connections[i].time_out = 0;
-  FD_SET(connections[i].socket, &readfds);
-  print_motd(connections[i].socket);
-  send_to_connection(connections[i].socket,
-                  "Connected.  Send '.help' for commands.");
+  new_conn->state = S_CLIENT;
+  new_conn->io_read_function = parse_client;
+  new_conn->io_write_function = NULL;
+  new_conn->io_close_function = close_dcc_connection;
+  new_conn->time_out = 0;
+  FD_SET(new_conn->socket, &readfds);
+  print_motd(new_conn);
+  send_to_connection(new_conn, "Connected.  Send '.help' for commands.");
 }
 
 /*
@@ -315,13 +313,12 @@ finish_dcc_chat(int i)
  */
 
 static void
-close_dcc_connection(int connnum)
+close_dcc_connection(struct connection *close_p)
 {
   report(FLAGS_ALL,
          "Oper %s (%s@%s) has disconnected",
-         connections[connnum].nick, connections[connnum].username,
-         connections[connnum].host);
+         close_p->nick, close_p->username, close_p->host);
 
-  close_connection(connnum);
+  close_connection(close_p);
 }
 

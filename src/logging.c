@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.52 2002/06/23 21:09:15 db Exp $
+ * $Id: logging.c,v 1.53 2002/06/24 00:40:21 db Exp $
  *
  * - db
  */
@@ -383,13 +383,13 @@ tcm_log(int level, const char *format,...)
  */
 
 void 
-report_uptime(int sock)
+report_uptime(struct connection *connection_p)
 {
-  send_to_connection(sock, "*** tcm has been up for %s",
-       duration((double) time(NULL)-startup_time));
+  send_to_connection(connection_p, "*** tcm has been up for %s",
+		     duration((double) time(NULL)-startup_time));
 
-  send_to_connection(sock, "*** tcm has been opered up for %s",
-       duration((double) time(NULL)-oper_time));
+  send_to_connection(connection_p, "*** tcm has been opered up for %s",
+		     duration((double) time(NULL)-oper_time));
 }
 
 

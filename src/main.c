@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.120 2002/06/22 18:21:47 leeh Exp $ */
+/* $Id: main.c,v 1.121 2002/06/24 00:40:21 db Exp $ */
 
 #include "setup.h"
 
@@ -251,7 +251,7 @@ main(int argc, char *argv[])
     }
 
   if(connect_to_server(config_entries.server_name,
-		       atoi(config_entries.server_port)) == INVALID)
+		       atoi(config_entries.server_port)) == NULL)
     {
       tcm_log(L_ERR, "Could not connect to server at startup");
       exit(1);

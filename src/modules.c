@@ -1,5 +1,5 @@
 /*
- * $Id: modules.c,v 1.50 2002/06/23 21:09:15 db Exp $B
+ * $Id: modules.c,v 1.51 2002/06/24 00:40:21 db Exp $B
  *
  */
 
@@ -64,9 +64,9 @@ modules_init(void)
  * sent to an oper who needs to register to use a command
  */
 void
-m_unregistered(int connnum, int argc, char *argv[])
+m_unregistered(struct connection *connection_p, int argc, char *argv[])
 {
-  send_to_connection(connections[connnum].socket, "You have not registered");
+  send_to_connection(connection_p, "You have not registered");
 }
 
 /* m_not_admin()
@@ -74,10 +74,10 @@ m_unregistered(int connnum, int argc, char *argv[])
  * sent to an oper who tries to execute an admin only command
  */
 void
-m_not_admin(int connnum, int argc, char *argv[])
+m_not_admin(struct connection *connection_p, int argc, char *argv[])
 {
-  send_to_connection(connections[connnum].socket,
-		  "Only authorized admins may use this command");
+  send_to_connection(connection_p,
+		     "Only authorized admins may use this command");
 }
 
 int
@@ -191,62 +191,62 @@ unload_a_module(char *name, int log)
 }
 
 void
-m_modload (int connnum, int argc, char *argv[])
+m_modload (struct connection *connection_p, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (load_a_module(argv[1], 1) != -1)
-    send_to_all(FLAGS_ADMIN, "Loaded by %s", connections[connnum].nick);
+    send_to_all(FLAGS_ADMIN, "Loaded by %s", connection_p->nick);
   else
-    send_to_connection(connections[connnum].socket,
-		    "Load of %s failed", argv[1]);
+    send_to_connection(connection_p,
+		       "Load of %s failed", argv[1]);
 }
 
 void
-m_modunload (int connnum, int argc, char *argv[])
+m_modunload (struct connection *connection_p, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (unload_a_module(argv[1], 1) != -1)
-    send_to_all(FLAGS_ADMIN, "Loaded by %s", connections[connnum].nick);
+    send_to_all(FLAGS_ADMIN, "Loaded by %s", connection_p->nick);
 }
 
 void
-m_modreload (int connnum, int argc, char *argv[])
+m_modreload (struct connection *connection_p, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (unload_a_module(argv[1], 0) != -1)
     {
       if (load_a_module(argv[1], 1))
-        send_to_all(FLAGS_ADMIN, "Reloaded by %s", connections[connnum].nick);
+        send_to_all(FLAGS_ADMIN, "Reloaded by %s", connection_p->nick);
     }
   else
-    send_to_connection(connections[connnum].socket,
-		    "Module %s is not loaded", argv[1]);
+    send_to_connection(connection_p,
+		       "Module %s is not loaded", argv[1]);
 }
 
 void
-m_modlist (int connnum, int argc, char *argv[])
+m_modlist (struct connection *connection_p, int argc, char *argv[])
 {
   int i;
 
   if (argc >= 2)
-    send_to_connection(connections[connnum].socket,
-		    "Listing all modules matching '%s'...", argv[1]);
+    send_to_connection(connection_p,
+		       "Listing all modules matching '%s'...", argv[1]);
   else
-    send_to_connection(connections[connnum].socket, "Listing all modules...");
+    send_to_connection(connection_p, "Listing all modules...");
 
   for (i=0;i<max_mods;++i)
    {
      if (modlist[i].name != NULL)
        {
          if (argc == 2 && !wldcmp(argv[1], modlist[i].name))
-           send_to_connection(connections[connnum].socket, "--- %s 0x%lx %s", 
+           send_to_connection(connection_p, "--- %s 0x%lx %s", 
                 modlist[i].name, modlist[i].address, modlist[i].version);
          else if (argc == 1)
-           send_to_connection(connections[connnum].socket, "--- %s 0x%lx %s", 
-                modlist[i].name, modlist[i].address, modlist[i].version);
+           send_to_connection(connection_p, "--- %s 0x%lx %s", 
+		      modlist[i].name, modlist[i].address, modlist[i].version);
        }
    }
-  send_to_connection(connections[connnum].socket, "Done.");
+  send_to_connection(connection_p, "Done.");
 }
 
 /* XXX - Return value is ignored...use it or lose it... */

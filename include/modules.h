@@ -1,7 +1,9 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.28 2002/05/28 12:14:13 leeh Exp $ */
+/* $Id: modules.h,v 1.29 2002/06/24 00:40:15 db Exp $ */
+
+struct connection;
 
 #define MAX_HASH 256
 
@@ -12,13 +14,13 @@ struct module
   void *address;
 };
 
-void m_unregistered(int connnum, int argc, char *argv[]);
-void m_not_admin(int connnum, int argc, char *argv[]);
+void m_unregistered(struct connection *, int argc, char *argv[]);
+void m_not_admin(struct connection *, int argc, char *argv[]);
 extern int load_all_modules(int log);
-void m_modload(int connnum, int argc, char *argv[]);
-void m_modunload(int connnum, int argc, char *argv[]);
-void m_modreload(int connnum, int argc, char *argv[]);
-void m_modlist(int connnum, int argc, char *argv[]);
+void m_modload(struct connection *, int argc, char *argv[]);
+void m_modunload(struct connection *, int argc, char *argv[]);
+void m_modreload(struct connection *, int argc, char *argv[]);
+void m_modlist(struct connection *, int argc, char *argv[]);
 void modules_init(void);
 int findmodule(char *name);
 int load_all_modules(int logit);

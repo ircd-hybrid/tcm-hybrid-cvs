@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.11 2002/05/30 20:54:07 db Exp $
+ * $Id: hash.c,v 1.12 2002/05/30 20:58:51 db Exp $
  */
 
 #include <stdio.h>
@@ -946,7 +946,7 @@ kline_report(hack);
  * side effects -
  */
 
-struct sortarray sort[MAXDOMAINS+1];
+struct sort_array sort[MAXDOMAINS+1];
 
 void 
 report_domains(int sock,int num)
@@ -966,13 +966,13 @@ report_domains(int sock,int num)
           for (j=0; j < inuse; ++j)
             {
               if (!strcasecmp(userptr->info->domain,
-			      sort[j].domainrec->info->domain))
+			      sort[j].domain_rec->info->domain))
                 break;
             }
 
           if ((j == inuse) && (inuse < MAXDOMAINS))
             {
-              sort[inuse].domainrec = userptr;
+              sort[inuse].domain_rec = userptr;
               sort[inuse++].count = 1;
             }
           else
@@ -1001,7 +1001,7 @@ report_domains(int sock,int num)
         }
 
       print_to_socket(sock,"  %-40s %3d users\n",
-           sort[found].domainrec->info->domain, maxx);
+           sort[found].domain_rec->info->domain, maxx);
       sort[found].count = 0;
     }
 

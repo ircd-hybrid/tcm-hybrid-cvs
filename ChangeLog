@@ -1,3 +1,35 @@
+bill        2004/06/02 22:51:38 EDT	(20040603_0)
+
+  Modified files:
+    help                 help.kill 
+    include              userlist.h 
+    src                  dcc_commands.c tcm_parser.y userlist.c 
+  Added files:
+    help                 help.connections help.disconnect 
+                         help.exempts help.opers help.register 
+                         help.testline help.uptime help.whom 
+  Log:
+  - fixed tcm oper flags being loaded
+  - fixed preference loading
+  - added more help files
+  
+  Revision  Changes    Path
+  1.1       +4 -0      tcm-hybrid/help/help.connections (new)
+  1.1       +3 -0      tcm-hybrid/help/help.disconnect (new)
+  1.1       +3 -0      tcm-hybrid/help/help.exempts (new)
+  1.2       +1 -0      tcm-hybrid/help/help.kill
+  1.1       +3 -0      tcm-hybrid/help/help.opers (new)
+  1.1       +4 -0      tcm-hybrid/help/help.register (new)
+  1.1       +3 -0      tcm-hybrid/help/help.testline (new)
+  1.1       +4 -0      tcm-hybrid/help/help.uptime (new)
+  1.1       +4 -0      tcm-hybrid/help/help.whom (new)
+  1.96      +1 -1      tcm-hybrid/include/userlist.h
+  1.157     +1 -2      tcm-hybrid/src/dcc_commands.c
+  1.2       +6 -6      tcm-hybrid/src/tcm_parser.y
+  1.156     +3 -2      tcm-hybrid/src/userlist.c
+
+
+
 bill        2004/06/02 16:06:33 EDT	(20040602_3)
 
   Added files:

@@ -1,3 +1,8 @@
+*** 20011011_2 by bill
+
+- minor typo in .vmulti
+
+
 *** 20011011_1 by bill
 
 - redid add_common_function() to properly initialize each linked list

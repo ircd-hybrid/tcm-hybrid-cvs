@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.23 2002/05/20 05:31:03 db Exp $
+ * $Id: logging.c,v 1.24 2002/05/22 01:40:11 db Exp $
  *
  * - db
  */
@@ -73,8 +73,8 @@ chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
  * bah. I added a flag -Dianora
  */
 
-  userinfo->user = (char *)NULL;
-  userinfo->host = (char *)NULL;
+  userinfo->user = NULL;
+  userinfo->host = NULL;
   memset(userinfo->ip,0,sizeof(userinfo->ip));
 
   /* ok, if its a hybrid server or modified server,
@@ -90,12 +90,12 @@ chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
       while(*p)
         p++;
 
-      right_square_bracket_pointer = (char *)NULL;
-      right_brace_pointer = (char *)NULL;
+      right_square_bracket_pointer = NULL;
+      right_brace_pointer = NULL;
 
-      while( p != nickuserhost )
+      while(p != nickuserhost)
         {
-          if(right_square_bracket_pointer == (char *)NULL)
+          if(right_square_bracket_pointer == NULL)
             if(*p == ']')       /* found possible [] IP field */
               right_square_bracket_pointer = p;
 
@@ -141,7 +141,7 @@ chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
                 }
               else if(*p == '@') /* nope. this isn't a +c line */
                 {
-                  p = (char *)NULL;
+                  p = NULL;
                   break;
                 }
               else
@@ -166,7 +166,7 @@ chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
               return;           /*screwy...prolly core in the caller*/
             }
 
-          if( (p = strrchr(uh,')')) )
+          if((p = strrchr(uh,')')))
             {
               *p = '\0';
             }
@@ -180,7 +180,7 @@ chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
               /* No ending ')' found, but lets try it anyway */
             }
           userinfo->user = uh+1;
-          if( (p = strchr(userinfo->user,'@')) )
+          if((p = strchr(userinfo->user,'@')))
             {
               *p = '\0';
               p++;
@@ -297,8 +297,8 @@ static FILE
 		(broken_up_time->tm_mon)+1,broken_up_time->tm_mday,
 		broken_up_time->tm_year + 1900);
 
-  if( (l_fp = fopen(filename,"a")) == (FILE *)NULL)
-    return (FILE *)NULL;
+  if( (l_fp = fopen(filename,"a")) == NULL)
+    return (NULL);
 
   if( !last_filename[0] )
     {
@@ -354,7 +354,7 @@ timestamp_log(FILE *fp)
   if(!fp)
     return;
 
-  current_time = time((time_t *)NULL);
+  current_time = time(NULL);
   broken_up_time = localtime(&current_time);
 
   (void)fprintf(fp,"%02d/%02d/%04d %02d:%02d\n",
@@ -387,7 +387,7 @@ log_kline(char *command_name,
   struct tm *broken_up_time;
   FILE *fp_log;
 
-  current_time = time((time_t *)NULL);
+  current_time = time(NULL);
   broken_up_time = localtime(&current_time);
 
 #ifdef KILL_KLINE_LOG
@@ -474,7 +474,7 @@ logfailure(char *nickuh,int botreject)
   if (!tmp)
     {
       tmp = (struct failrec *)malloc(sizeof(struct failrec));
-      if(tmp == (struct failrec *)NULL)
+      if(tmp == NULL)
         {
           prnt(connections[0].socket,"Ran out of memory in logfailure\n");
           sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in logfailure");
@@ -516,7 +516,7 @@ kline_report(char *server_notice)
   time_t current_time;
   struct tm *broken_up_time;
 
-  current_time = time((time_t *)NULL);
+  current_time = time(NULL);
   broken_up_time = localtime(&current_time);
   
   sendtoalldcc(SEND_KLINE_NOTICES_ONLY, "*** %s", server_notice);
@@ -620,7 +620,7 @@ date_stamp(void)
   struct tm *broken_up_time;
   static char date_stamp_string[SMALL_BUFF];
 
-  current_time = time((time_t *)NULL);
+  current_time = time(NULL);
   broken_up_time = localtime(&current_time);
 
 #ifdef CALVIN

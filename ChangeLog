@@ -1,3 +1,14 @@
+*** 20010918_2 by bill
+- first commit towards modularization
+  note: this tcm does *not* work, and yes I know it compiles
+
+TODO:
+  I need to finish updating the files in modules/ to work as (un)loadable
+  modules, and to work independently of one another.
+
+Please do not send this copy out.
+
+
 *** 20010918_1 by bill
 Directory /cvsroot/tcm-hybrid/modules added to the repository
 

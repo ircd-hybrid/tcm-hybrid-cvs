@@ -1,3 +1,20 @@
+db          2002/06/07 12:32:31 EDT	(20020607_7)
+
+  Modified files:
+    include              logging.h 
+    src                  bothunt.c logging.c 
+  Log:
+  - what on earth was chopuh doing in logging.c? moved back into bothunt.c
+    changed interface to log_failures, made chopuh static.
+    cleaned up more snprintfs that can be strlcpy. '\0' is a null byte not 0
+  
+  Revision  Changes    Path
+  1.16      +1 -2      tcm-hybrid/include/logging.h
+  1.157     +208 -14   tcm-hybrid/src/bothunt.c
+  1.47      +6 -203    tcm-hybrid/src/logging.c
+
+
+
 db          2002/06/07 08:58:30 EDT	(20020607_6)
 
   Modified files:

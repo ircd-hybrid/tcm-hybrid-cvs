@@ -1,3 +1,27 @@
+db          2002/05/25 19:27:57 EDT	(20020526_2)
+
+  Modified files:
+    include              commands.h modules.h parse.h stdcmds.h 
+                         tcm_io.h userlist.h 
+    src                  bothunt.c commands.c main.c stdcmds.c 
+  Log:
+  - DIE YOU HEATHEN EXTERNS! DIE DIE DIE!
+    MAY AN ELEPHANT PISS ON YOUR GRAVE!
+  
+  Revision  Changes    Path
+  1.15      +1 -0      tcm-hybrid/include/commands.h
+  1.27      +1 -4      tcm-hybrid/include/modules.h
+  1.4       +3 -1      tcm-hybrid/include/parse.h
+  1.21      +1 -0      tcm-hybrid/include/stdcmds.h
+  1.15      +2 -0      tcm-hybrid/include/tcm_io.h
+  1.38      +2 -0      tcm-hybrid/include/userlist.h
+  1.104     +2 -0      tcm-hybrid/src/bothunt.c
+  1.88      +0 -4      tcm-hybrid/src/commands.c
+  1.74      +1 -8      tcm-hybrid/src/main.c
+  1.73      +5 -2      tcm-hybrid/src/stdcmds.c
+
+
+
 leeh        2002/05/25 19:11:13 EDT	(20020526_1)
 
   Modified files:

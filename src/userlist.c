@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.116 2002/06/21 01:07:44 leeh Exp $
+ * $Id: userlist.c,v 1.117 2002/06/21 13:09:42 leeh Exp $
  *
  */
 
@@ -873,7 +873,7 @@ add_an_oper(int argc, char *argv[])
   char *p;
 
   /* No point if I am maxed out going any further */
-  if ( user_list_index == (MAXUSERS - 1))
+  if(user_list_index == (MAXUSERS - 1))
     return;
 
   user = user_at_host = argv[4];
@@ -914,6 +914,9 @@ add_an_oper(int argc, char *argv[])
     user_list_index++;
   }
 
+  if(host_list_index == (MAX_HOST-1))
+    return;
+
   strlcpy(hostlist[host_list_index].user, user, 
           sizeof(hostlist[host_list_index].user));
   strlcpy(hostlist[host_list_index].host, host,
@@ -928,7 +931,10 @@ load_e_line(char *line)
   char *vltn, *p, *uhost, *q;
   unsigned int type=0, i;
   /* E:actionmask[ actionmask]:user@hostmask */
-  
+
+  if(host_list_index == (MAX_HOST-1))
+    return;
+
   if ((p = strchr(line, ':')) == NULL)
     return;
   

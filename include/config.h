@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.68 2002/06/09 02:11:28 wcampbel Exp $
+ * $Id: config.h,v 1.69 2002/06/21 13:09:39 leeh Exp $
  */
 
 /*
@@ -202,7 +202,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 #define MAXSQUID 400
 
 /* maximum number of hosts not to auto kline */
-#define MAXHOSTS 100
+#define MAXHOSTS 200
 
 #define MAXBANS 50
 /*

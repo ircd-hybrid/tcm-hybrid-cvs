@@ -1,3 +1,7 @@
+*** 20000902_6 by lusky
+cleaned up Makefiles and converted to autoconf
+
+
 *** 20000902_5 by lusky
 fixed SERIALNUM
 started autoconf work

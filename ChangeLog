@@ -1,3 +1,20 @@
+jmallett    2002/05/25 13:45:17 EDT	(20020525_26)
+
+  Modified files:
+    include              tcm.h 
+    src                  bothunt.c logging.c main.c stdcmds.c 
+  Log:
+  xfree() ala xmalloc().  Use it for further useless average stats.
+  
+  Revision  Changes    Path
+  1.38      +3 -1      tcm-hybrid/include/tcm.h
+  1.101     +4 -4      tcm-hybrid/src/bothunt.c
+  1.32      +1 -1      tcm-hybrid/src/logging.c
+  1.72      +19 -1     tcm-hybrid/src/main.c
+  1.72      +4 -2      tcm-hybrid/src/stdcmds.c
+
+
+
 db          2002/05/25 13:34:33 EDT	(20020525_25)
 
   Modified files:

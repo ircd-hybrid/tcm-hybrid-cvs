@@ -1,3 +1,9 @@
+*** 20010921_1 by bill
+- modularization is almost finished
+  todo: make sure all actions have been correctly implemented
+        make sure wingate/socks detection still works
+
+
 *** 20010920_2 by bill
 - more work towards modularizing
    info:  tcm now gets online.  working on ctcp/privmsg/notice handling to

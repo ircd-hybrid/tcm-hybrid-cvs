@@ -1,3 +1,9 @@
+*** 20011028_7 by wcampbel
+Documentation update:
+Corrected an error in README-WINGATES
+Updated and remove specific values from README
+
+
 *** 20011028_6 by wcampbel
 TYPE_CAN_REMOTE is gone (BLOAT!)
 

@@ -181,12 +181,12 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
  *
  * This must also be defined to detect SOCKS
  */
-#undef DETECT_WINGATE
+#define DETECT_WINGATE
 
 /*
  * define this to flag open socks
  */
-#undef DETECT_SOCKS
+#define DETECT_SOCKS
 
 /* undef if you don't want klines reported - Toast */
 #define REPORT_KLINES

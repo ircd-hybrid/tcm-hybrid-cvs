@@ -32,7 +32,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.12 2001/07/29 00:37:14 bill Exp $";
+static char *version="$Id: userlist.c,v 1.13 2001/07/29 05:06:10 bill Exp $";
 
 struct config_list config_entries;
 struct auth_file_entry userlist[MAXUSERS];
@@ -52,11 +52,14 @@ int  ban_list_index;
 
 #ifdef DETECT_WINGATE
 extern struct wingates wingate[];
-static void load_a_wingate_class(char *class);
 #endif
 
 #ifdef DETECT_SOCKS
 extern struct wingates socks[];
+#endif
+
+#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
+static void load_a_wingate_class(char *class);
 #endif
 
 static void load_a_ban(char *);
@@ -309,7 +312,7 @@ void load_config_file(char *file_name)
 	  strncpy(config_entries.virtual_host_config,value,MAX_CONFIG-1);
 	  break;
 
-#ifdef DETECT_WINGATE
+#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
 	case 'w': case 'W':
 	  load_a_wingate_class(value);
 	  break;
@@ -1066,7 +1069,7 @@ static void load_a_user(char *line,int link_tcm)
     userlist[user_list_index].type = 0;
 }
 
-#ifdef DETECT_WINGATE
+#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
 
 /*
  * load_a_wingate_class()

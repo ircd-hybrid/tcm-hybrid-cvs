@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.25 2001/07/29 00:37:13 bill Exp $";
+static char *version="$Id: serverif.c,v 1.26 2001/07/29 05:06:09 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -115,7 +115,7 @@ int quit = NO;             /* When it is YES, quit */
 int remote_tcm_socket=-1;  /* listening socket */
 fd_set readfds;            /* file descriptor set for use with select */
 
-#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
+#if defined(DETECT_WINGATE)||defined(DETECT_SOCKS)
 fd_set writefds;	   /* file descriptor set for user with select */
 #endif
 
@@ -880,7 +880,7 @@ void rdpt(void)
 		  if(FD_ISSET(socks[i].socket, &writefds))
 		    {
 		      struct stat buf;
-		      if(fstat(socks[i].socket,&buf) > 0) report_open_socks(i);
+		      if(fstat(socks[i].socket,&buf) >= 0) report_open_socks(i);
 		      (void)close(socks[i].socket);
 		      socks[i].state = 0;
 		      socks[i].socket = INVALID;

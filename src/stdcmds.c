@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.45 2002/04/22 22:32:06 bill Exp $ */
+/* $Id: stdcmds.c,v 1.46 2002/04/27 10:46:57 leeh Exp $ */
 
 #include "setup.h"
 
@@ -802,8 +802,8 @@ list_users(int sock,char *userhost,int regex)
     }
   }
   if (numfound > 0)
-    prnt(sock, "%d matche%sfor %s found\n", numfound,
-         (numfound > 1 ? "s " : " "), uhostmatch);
+    prnt(sock, "%d match%sfor %s found\n", numfound,
+         (numfound > 1 ? "es " : " "), uhostmatch);
   else
     prnt(sock, "No matches for %s found\n", uhostmatch);
   free(uhost);
@@ -890,8 +890,8 @@ list_virtual_users(int sock,char *userhost,int regex)
     }
   }
   if (numfound > 0)
-    prnt(sock, "%d matche%sfor %s found\n", numfound,
-         (numfound > 1 ? "s " : " "), uhostmatch);
+    prnt(sock, "%d match%sfor %s found\n", numfound,
+         (numfound > 1 ? "es " : " "), uhostmatch);
   else
     prnt(sock, "No matches for %s found\n", uhostmatch);
   free(uhost);

@@ -1,3 +1,24 @@
+db          2002/06/02 19:13:22 EDT	(20020603_0)
+
+  Modified files:
+    include              parse.h 
+    src                  actions.c bothunt.c clones.c hash.c 
+                         main.c parse.c stdcmds.c 
+  Log:
+  - moved doingtrace into tcm_status.doing_trace
+  
+  Revision  Changes    Path
+  1.15      +1 -0      tcm-hybrid/include/parse.h
+  1.22      +5 -2      tcm-hybrid/src/actions.c
+  1.148     +2 -8      tcm-hybrid/src/bothunt.c
+  1.14      +14 -4     tcm-hybrid/src/clones.c
+  1.26      +1 -1      tcm-hybrid/src/hash.c
+  1.106     +2 -0      tcm-hybrid/src/main.c
+  1.50      +3 -3      tcm-hybrid/src/parse.c
+  1.87      +0 -2      tcm-hybrid/src/stdcmds.c
+
+
+
 wcampbel    2002/06/02 18:24:18 EDT	(20020602_4)
 
   Modified files:

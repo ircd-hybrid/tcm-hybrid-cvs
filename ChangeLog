@@ -1,3 +1,31 @@
+db          2002/05/19 20:21:36 EDT	(20020520_0)
+
+  Modified files:
+    include              serverif.h 
+    modules              bothunt.c serverif.c 
+    src                  main.c 
+  Log:
+  - renamed rdpkt as read_packet
+  - redid read_packet buffer reads completely
+    added separate function (get_line) to build buffer
+  - pre-allocate buffer space in struct connections, no more malloc for that
+  - removed the signal handler on SIGSEV all it ever did was make debugging
+    harder for us
+  - made core size unlimited as if old option FORCE_CORE always present
+  - re-did argv[] parser as separate function (parse_client)
+  - renamed serverproc as parse_server
+  - all events handled the same way at the same time in the I/O loop
+  
+    I have more to do, but this is a start.
+  
+  Revision  Changes    Path
+  1.15      +2 -2      tcm-hybrid/include/serverif.h
+  1.73      +0 -11     tcm-hybrid/modules/bothunt.c
+  1.64      +208 -144  tcm-hybrid/modules/serverif.c
+  1.37      +5 -24     tcm-hybrid/src/main.c
+
+
+
 wcampbel    2002/05/19 17:13:31 EDT	(20020519_3)
 
   Modified files:

@@ -1,3 +1,16 @@
+einride     2002/03/06 16:17:22 EST	(20020306_7)
+
+  Modified files:
+    modules              wingate.c 
+  Log:
+  Whoops.... little messup socks detection socket slots wasnt properly
+  marked as available.
+  
+  Revision  Changes    Path
+  1.21      +14 -14    tcm-hybrid/modules/wingate.c
+
+
+
 einride     2002/03/06 14:24:40 EST	(20020306_6)
 
   Modified files:

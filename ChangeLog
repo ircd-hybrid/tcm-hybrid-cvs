@@ -1,3 +1,15 @@
+leeh        2002/04/27 06:46:59 EDT	(20020427_1)
+
+  Modified files:
+    src                  stdcmds.c 
+  Log:
+  - "1 matche found!", fixed. :)
+  
+  Revision  Changes    Path
+  1.46      +4 -4      tcm-hybrid/src/stdcmds.c
+
+
+
 bill        2002/04/27 02:18:40 EDT	(20020427_0)
 
   Modified files:

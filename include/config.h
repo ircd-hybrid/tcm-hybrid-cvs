@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.32 2001/11/25 02:58:35 bill Exp $
+ * $Id: config.h,v 1.33 2002/03/06 19:24:38 einride Exp $
  */
 
 /*
@@ -164,6 +164,16 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
  * define this to flag open socks
  */
 #define DETECT_SOCKS
+
+/*
+ * define the ip and port you want a Socks 4 test to connect back to.
+ * Suggest using the relevant irc servers ip for a proper check.
+ * Do not use hostnames here.
+ */
+#define SOCKS_CHECKPORT 6667
+#define SOCKS_CHECKIP "10.0.0.1"
+
+
 
 /* undef if you don't want klines reported - Toast */
 #define REPORT_KLINES

@@ -1,3 +1,13 @@
+*** 20010729_1 by bill
+
+- fixed SOCKS detection
+- a problem on my hard-disk required me to touch * in the tcm-hybrid dir
+   (not all of these files were actually changed)
+- fixed #ifdefs for statically declared wingate_class type functions
+   (they only checked for DETECT_WINGATE, and not DETECT_SOCKS)
+
+
+
 *** 20010728_1 by bill
 
 - first step towards fixing proxy checking

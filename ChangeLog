@@ -1,3 +1,16 @@
+bill        2002/12/28 01:01:59 EST	(20021228_0)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  - updated on_trace_user() to handle new trace output from h7
+  - style and speed cleanups on chopuh()
+  
+  Revision  Changes    Path
+  1.207     +134 -155  tcm-hybrid/src/bothunt.c
+
+
+
 bill        2002/12/18 21:26:08 EST	(20021219_0)
 
   Modified files:

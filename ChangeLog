@@ -1,3 +1,21 @@
+db          2002/05/30 14:59:40 EDT	(20020530_9)
+
+  Modified files:
+    include              bothunt.h hash.h logging.h 
+    src                  bothunt.c hash.c logging.c 
+  Log:
+  - got rid of plus_c_info use struct userentry consistently now
+  
+  Revision  Changes    Path
+  1.44      +1 -0      tcm-hybrid/include/bothunt.h
+  1.11      +2 -2      tcm-hybrid/include/hash.h
+  1.12      +3 -1      tcm-hybrid/include/logging.h
+  1.140     +12 -9     tcm-hybrid/src/bothunt.c
+  1.10      +8 -8      tcm-hybrid/src/hash.c
+  1.43      +19 -22    tcm-hybrid/src/logging.c
+
+
+
 db          2002/05/30 14:22:18 EDT	(20020530_8)
 
   Modified files:

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.76 2002/05/21 02:12:57 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.77 2002/05/21 22:09:42 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -489,19 +489,7 @@ void on_stats_i(int connnum, int argc, char *argv[])
   char *user;
   char *host;
   char *p;
-  char body[MAX_BUFF];
   int  alpha, ok=NO;
-  int i;
-  int len;
-
-  p = body;
-  for (i = 0; i < argc; i++)
-  {
-    len = sprintf(p, "%s ", argv[i]);
-    p += len;
-  }
-  /* blow away last ' ' */
-  *--p = '\0';
 
   alpha = NO;
 
@@ -523,9 +511,18 @@ void on_stats_i(int connnum, int argc, char *argv[])
   {
     switch(*p)
     {
-    case '<':case '-':case '$':case '=':
-    case '%':case '^':case '&':case '>':
-    case '_':
+    /* Check for flags that set some sort of exemption or protection from
+     * something on the ircd side, and not flags that set some sort of
+     * limitation.
+     */
+    case '^': /* K:/G: Protection (E:) */
+    case '&': /* Can run a bot, obsolete in H7, should just add bot flags */
+    case '>': /* Exempt from user limits (F:) */
+    case '_': /* Exempt from G: - XXX should this be here? */
+    case '<': /* Exempt from idle limitations - XXX should this be here? */
+    case '=': /* Spoof...reasoning:  if they're spoofed, they're likely
+               * trustworthy enough to be exempt from tcm's wrath
+               */
       ok=YES;
       break;
       

@@ -1,3 +1,45 @@
+leeh        2002/05/29 21:49:54 EDT	(20020530_1)
+
+  Modified files:
+    include              actions.h stdcmds.h tcm.h 
+    src                  .depend actions.c bothunt.c commands.c 
+                         handler.c main.c modules.c parse.c 
+                         services.c stdcmds.c tcm_io.c userlist.c 
+                         wingate.c 
+  Removed files:
+    include              commands.h 
+  Log:
+  - removed channels.h, there are these wierd things called 'statics' and
+    as the handler code doesnt need to be able to reference these functions
+    directly, you can use this 'static' thing instead of making everything
+    extern.
+  - ripped m_kperm (use .kline), brought back m_kclones etc and ripped
+    m_kaction.
+  
+    of course, not having bills intelligence means I dont have any clue
+    what I just said..
+  
+  Revision  Changes    Path
+  1.5       +2 -2      tcm-hybrid/include/actions.h
+  1.20      +0 -63     tcm-hybrid/include/commands.h (dead)
+  1.27      +1 -1      tcm-hybrid/include/stdcmds.h
+  1.49      +6 -3      tcm-hybrid/include/tcm.h
+  1.22      +41 -35    tcm-hybrid/src/.depend
+  1.9       +144 -106  tcm-hybrid/src/actions.c
+  1.137     +0 -1      tcm-hybrid/src/bothunt.c
+  1.113     +82 -67    tcm-hybrid/src/commands.c
+  1.2       +0 -1      tcm-hybrid/src/handler.c
+  1.101     +0 -1      tcm-hybrid/src/main.c
+  1.49      +0 -1      tcm-hybrid/src/modules.c
+  1.47      +0 -1      tcm-hybrid/src/parse.c
+  1.10      +0 -1      tcm-hybrid/src/services.c
+  1.83      +6 -6      tcm-hybrid/src/stdcmds.c
+  1.76      +0 -1      tcm-hybrid/src/tcm_io.c
+  1.105     +0 -1      tcm-hybrid/src/userlist.c
+  1.50      +0 -1      tcm-hybrid/src/wingate.c
+
+
+
 db          2002/05/29 21:45:32 EDT	(20020530_0)
 
   Modified files:

@@ -1,3 +1,21 @@
+wcampbel    2002/05/19 10:27:31 EDT	(20020519_0)
+
+  Modified files:
+    modules              bothunt.c commands.c serverif.c 
+    src                  main.c stdcmds.c userlist.c 
+  Log:
+  Solaris fixes (headers, casts, INADDR_NONE kludge)
+  
+  Revision  Changes    Path
+  1.72      +2 -2      tcm-hybrid/modules/bothunt.c
+  1.58      +4 -0      tcm-hybrid/modules/commands.c
+  1.63      +2 -1      tcm-hybrid/modules/serverif.c
+  1.36      +1 -1      tcm-hybrid/src/main.c
+  1.57      +5 -1      tcm-hybrid/src/stdcmds.c
+  1.53      +2 -7      tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/17 22:53:22 EDT	(20020518_2)
 
   Modified files:

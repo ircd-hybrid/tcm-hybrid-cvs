@@ -1,3 +1,10 @@
+*** 20001204_1 by bill
+
+- added F lines (violation specific E lines)
+- fixed parsing error with SQUIT/server disconnect msgs
+- changed .locops source to (nick) rather than (nick@tcm)
+
+
 *** 20001201_3 by bill
 
 - more comstud stuff

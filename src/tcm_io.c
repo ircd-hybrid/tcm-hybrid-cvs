@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.16 2002/05/24 20:52:44 leeh Exp $
+ * $Id: tcm_io.c,v 1.17 2002/05/24 22:39:59 leeh Exp $
  */
 
 #include <stdio.h>
@@ -469,7 +469,6 @@ connect_remote_client(char *nick,char *user,char *host,int sock)
   connections[i].last_message_time = time(NULL);
   connections[i].nbuf = 0;
   connections[i].type = 0;
-  connections[i].type |= isoper(user,host);
 
   if (!isoper(user,host))
   {

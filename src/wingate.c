@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.51 2002/05/30 15:27:30 leeh Exp $ */
+/* $Id: wingate.c,v 1.52 2002/06/02 05:26:40 db Exp $ */
 
 
 #include <netdb.h>
@@ -44,6 +44,7 @@ int act_wingate;
 static void report_open_wingate(int i);
 static void wingate_start_test(struct plus_c_info *info);
 static void read_wingate(int i);
+static int n_open_wingate_fds=0;
 #endif
 
 #ifdef DETECT_SOCKS
@@ -55,6 +56,8 @@ static void socks_start_test(struct plus_c_info *info_p, int socksversion);
 #if notyet
 static void read_socks(int i);
 #endif
+
+static int n_open_socks_fds=0;
 #endif
 
 #ifdef DETECT_SQUID
@@ -62,6 +65,7 @@ int act_squid;
 static void report_open_squid(int i);
 static void squid_start_test(struct plus_c_info *info_p, int port);
 static void read_squid(int i);
+static int n_open_squid_fds=0;
 #endif
 
 
@@ -122,8 +126,13 @@ wingate_start_test(struct plus_c_info *info_p)
   int found_slot;
   struct sockaddr_in socketname;
 
+  if (n_open_wingate_fds >= MAXWINGATE)
+    return;
+
   if ((found_slot = find_free_connection_slot()) < 0)
     return;
+
+  n_open_wingate_fds++;
 
   strncpy(connections[found_slot].user,info_p->user,MAX_USER-1);
   strncpy(connections[found_slot].host,info_p->host,MAX_HOST-1);
@@ -159,8 +168,16 @@ socks_start_test(struct plus_c_info *info_p, int socksversion)
   int found_slot;
   struct sockaddr_in socketname;
 
+  /* XXX disable until done */
+return;
+
+  if (n_open_socks_fds >= MAXSOCKS)
+    return;
+
   if ((found_slot = find_free_connection_slot()) < 0)
     return;
+
+  n_open_socks_fds++;
 
   if (socksversion == 4)
     connections[found_slot].curr_state = SOCKS4_CONNECTING;
@@ -194,8 +211,13 @@ squid_start_test(struct plus_c_info *info_p, int port)
   int found_slot;
   struct sockaddr_in socketname;
 
+  if (n_open_squid_fds >= MAXSQUID)
+    return;
+
   if ((found_slot = find_free_connection_slot()) < 0)
     return;
+
+  n_open_squid_fds++;
 
   connections[found_slot].curr_state = SQUID_CONNECTING;
   strncpy(connections[found_slot].user, info_p->user, MAX_USER-1);
@@ -251,7 +273,8 @@ read_wingate(int i)
     report_open_wingate(i);
 
   close_connection(i);
-  connections[i].curr_state = 0;
+  if (n_open_wingate_fds > 0)
+    n_open_wingate_fds--;
 }
 #endif
 
@@ -266,6 +289,8 @@ read_squid(int i)
       if (fstat(connections[i].socket, &buf) < 0)
 	{
 	  close_connection(i);
+	  if (n_open_squid_fds > 0)
+	    n_open_squid_fds--;
 	}
       else
 	{
@@ -281,6 +306,8 @@ read_squid(int i)
     {
       report_open_squid(i);
     }
+  if (n_open_squid_fds > 0)
+    n_open_squid_fds--;
   close_connection(i);
 }
 #endif

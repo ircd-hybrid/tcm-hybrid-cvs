@@ -55,13 +55,13 @@
  *  argument to tcm
  */
 
-#define CONFIG_FILE "tcm.cf"
-#define USERLIST_FILE "userlist.cf"
+#define CONFIG_FILE "etc/tcm.cf"
+#define USERLIST_FILE "etc/userlist.cf"
 
 #define HELP_PATH "help"        /* No / at the end */
 #define HELP_FILE "help"        /* Inside of HELP_PATH */
-#define MOTD_FILE "motd.txt"
-#define PREF_FILE "tcm.pref"
+#define MOTD_FILE "etc/motd.txt"
+#define PREF_FILE "etc/tcm.pref"
 
 #define LOGFILE "log"
 #define LAST_LOG_NAME "last_log_name"

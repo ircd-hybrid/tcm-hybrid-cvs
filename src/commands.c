@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.12 2001/06/18 16:20:13 kreator Exp $";
+static char *version="$Id: commands.c,v 1.13 2001/07/22 04:31:59 wcampbel Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -2770,7 +2770,7 @@ static void save_umodes(char *registered_nick, unsigned long type)
   FILE *fp;
   char user_pref[MAX_BUFF];
 
-  (void)sprintf(user_pref,"%s.pref",registered_nick);
+  (void)sprintf(user_pref,"etc/%s.pref",registered_nick);
 
   if(!(fp = fopen(user_pref,"w")))
     {
@@ -2800,7 +2800,8 @@ static void load_umodes(int connect_id)
   char *p;
   unsigned long type;
 
-  (void)sprintf(user_pref,"%s.pref",connections[connect_id].registered_nick);
+  (void)sprintf(user_pref,"etc/%s.pref",
+                connections[connect_id].registered_nick);
 
   if(!(fp = fopen(user_pref,"r")))
     {
@@ -2855,7 +2856,7 @@ static unsigned long find_user_umodes(char *registered_nick)
   char *p;
   int  unsigned long type;
 
-  (void)sprintf(user_pref,"%s.pref",registered_nick);
+  (void)sprintf(user_pref,"etc/%s.pref",registered_nick);
 
   if(!(fp = fopen(user_pref,"r")))
     {
@@ -2918,7 +2919,7 @@ static void show_user_umodes(int sock, char *registered_nick)
       return;
     }
      
-  (void)sprintf(user_pref,"%s.pref",registered_nick);
+  (void)sprintf(user_pref,"etc/%s.pref",registered_nick);
 
   if(!(fp = fopen(user_pref,"r")))
     {

@@ -7,7 +7,7 @@ should be fine to start. If you want to play with AUTO_KLINE etc.
 this is all handled from the tcm.cf now. Read the .html docs which
 are also online at http://www.db.net/~db/tcm.html
 
-  The biggie is the tcm.cf file Its pretty straight forward
+  The biggie is the etc/tcm.cf file Its pretty straight forward
 
 # Username for the tcm
 U:db

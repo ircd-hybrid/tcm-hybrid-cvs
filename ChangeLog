@@ -1,3 +1,7 @@
+*** 20010922_3 by bill
+- already found a bug, heh.  this fixes cwd problem in *bsd
+
+
 *** 20010922_2 by bill
 
 - removed unneeded files

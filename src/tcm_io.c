@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.48 2002/05/27 00:42:13 db Exp $
+ * $Id: tcm_io.c,v 1.49 2002/05/27 00:56:09 db Exp $
  */
 
 #include <stdio.h>
@@ -78,15 +78,15 @@ static int server_id;
 void
 read_packet(void)
 {
-  int select_result;
-  int nscanned;                 /* number scanned from one get_line */
-  int tscanned;                 /* total scanned from successive get_line */
+  int  select_result;
+  int  nscanned;		/* number scanned from one get_line */
+  int  tscanned;		/* total scanned from successive get_line */
   char incomingbuff[BUFFERSIZE];
   char dccbuff[DCCBUFF_SIZE];
-  int nread=0;
+  int  nread=0;
   char *argv[MAX_ARGV];
-  int i;
-  int server_time_out;
+  int  i;
+  int  server_time_out;
   struct timeval read_time_out;
 
   if (pingtime)
@@ -227,7 +227,7 @@ static int
 get_line(char *in, int *len, struct connection *connections_p)
 {
   char *p;
-  int nscanned=0;
+  int  nscanned=0;
 
   /* sanity test. if length read is already 0 or worse, -ve, ignore input */
   if (*len <= 0)
@@ -373,10 +373,10 @@ find_free_connection_slot(void)
 void
 initiate_dcc_chat(const char *nick, const char *user, const char *host)
 {
-  int dcc_port;                         /* dcc port to use */
+  int    dcc_port;                         /* dcc port to use */
   struct sockaddr_in socketname;
-  int result = -1;
-  int i;
+  int	 result = -1;
+  int	 i;
 
   if ((i = find_free_connection_slot()) < 0)
     {
@@ -419,6 +419,7 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
 
   if (listen(connections[i].socket,4) < 0)
   {
+    close(connections[i].socket);
     notice(nick,"Cannot DCC chat");
     return;
   }
@@ -483,7 +484,7 @@ print_to_server(const char *format, ...)
 void
 notice(const char *nick, const char *format, ...)
 {
-  char command[MAX_BUFF];
+  char	command[MAX_BUFF];
   va_list va;
   snprintf(command, MAX_BUFF-1, "NOTICE %s :%s", nick, format);
   command[MAX_BUFF-1] = '\0';
@@ -507,6 +508,7 @@ privmsg(const char *target, const char *format, ...)
 {
   char command[MAX_BUFF];
   va_list va;
+
   snprintf(command, MAX_BUFF-1, "PRIVMSG %s :%s", target, format);
   command[MAX_BUFF-1] = '\0';
   va_start(va,format);
@@ -542,10 +544,8 @@ va_print_to_socket(int sock, const char *format, va_list va)
   char msgbuf[MAX_BUFF];
 
   vsnprintf(msgbuf, sizeof(msgbuf)-2, format, va);
-
   if (msgbuf[strlen(msgbuf)-1] != '\n')
     strcat(msgbuf, "\n");
-
   send(sock, msgbuf, strlen(msgbuf), 0);
 }
 
@@ -567,9 +567,9 @@ send_to_all(int type, const char *format,...)
   int i;
 
   va_start(va,format);
-  for(i = 1; i < maxconns; i++)
+  for(i = 0; i < maxconns; i++)
     {
-      if (connections[i].socket != INVALID)
+      if (connections[i].state == S_CLIENT)
 	{
 	  switch(type)
 	    {
@@ -714,12 +714,13 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   strncpy(connections[i].host,host,MAX_HOST-1);
   connections[i].host[MAX_HOST-1] = '\0';
   connections[i].type = 0;
-
   connections[i].last_message_time = time(NULL);
-
   connections[i].socket = connect_to_dcc_ip(nick, hostport);
   if (connections[i].socket == INVALID)
-    return (0);
+    {
+      close_connection(i);
+      return (0);
+    }
   connections[i].state = S_CONNECTING;
   connections[i].io_read_function = finish_dcc_chat;
   connections[i].io_write_function = NULL;
@@ -919,7 +920,7 @@ signon_to_server (int unused)
   if (*mynick == '\0')
     strcpy (mynick,config_entries.dfltnick);
 
-  if( config_entries.server_pass[0] )
+  if (config_entries.server_pass[0] != '\0')
     print_to_server("PASS %s", config_entries.server_pass);
 
   print_to_server("USER %s %s %s :%s",
@@ -1010,7 +1011,7 @@ connect_to_given_ip_port(struct sockaddr_in *socketname, int port)
   setsockopt(sock, SOL_SOCKET,SO_REUSEADDR, (char *)&optval, sizeof(optval));
 
   /* virtual host support  */
-  if(config_entries.virtual_host_config[0])
+  if (config_entries.virtual_host_config[0])
     {
       if ((local_host = gethostbyname (config_entries.virtual_host_config)) )
 	{

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.12 2002/05/30 20:58:51 db Exp $
+ * $Id: hash.c,v 1.13 2002/05/30 22:40:58 db Exp $
  */
 
 #include <stdio.h>
@@ -131,17 +131,17 @@ struct user_entry *
 find_nick(const char *nick)
 {
   int i;
-  struct hash_rec *user_ptr;
+  struct hash_rec *ptr;
 
   if (nick == NULL)
     return (NULL);
 
   for (i=0; i<HASHTABLESIZE; ++i)
     {
-      for(user_ptr = domain_table[i]; user_ptr; user_ptr = user_ptr->next)
+      for (ptr = domain_table[i]; ptr; ptr = ptr->next)
 	{
-	  if (!wldcmp((char *)nick, user_ptr->info->nick))
-	    return (user_ptr->info);
+	  if (!wldcmp((char *)nick, ptr->info->nick))
+	    return (ptr->info);
 	}
     }
   return (NULL);
@@ -158,17 +158,17 @@ struct user_entry *
 find_host(const char *host)
 {
   int i;
-  struct hash_rec * user_ptr;
+  struct hash_rec *ptr;
 
   if (host == NULL)
     return (NULL);
 
   for (i=0; i<HASHTABLESIZE; ++i)
     {
-      for (user_ptr = domain_table[i]; user_ptr; user_ptr = user_ptr->next)
+      for (ptr = domain_table[i]; ptr; ptr = ptr->next)
 	{
-	  if (!wldcmp((char *)host, user_ptr->info->host))
-	    return (user_ptr->info);
+	  if (!wldcmp((char *)host, ptr->info->host))
+	    return (ptr->info);
 	}
     }
   return (NULL);
@@ -287,7 +287,7 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
   new_user->reporttime = 0;
 
   new_user->isoper = is_oper;
-  strcpy(new_user->class, user_info->class);
+  strlcpy(new_user->class, user_info->class, MAX_CLASS);
 
   /* Determine the domain name */
   domain = find_domain(user_info->host);
@@ -897,7 +897,7 @@ kill_add_report(char *server_notice)
 {
   char buff[MAX_BUFF], *p, *q;
   char *nick, *by, *reason;
-  struct hash_rec *userptr;
+  struct hash_rec *ptr;
   int i=0;
 
   if ((p = strstr(server_notice, ". From")) == NULL)
@@ -923,9 +923,9 @@ kill_add_report(char *server_notice)
   reason = q;
   for (i=0;i<HASHTABLESIZE;++i)
     {
-      for (userptr = domain_table[i]; userptr; userptr = userptr->next)
+      for (ptr = domain_table[i]; ptr; ptr = ptr->next)
 	{
-	  if (!strcasecmp(nick, userptr->info->nick))
+	  if (!strcasecmp(nick, ptr->info->nick))
 	    {
 /* XXX FIX THIS FAST */
 char hack[128];
@@ -951,7 +951,7 @@ struct sort_array sort[MAXDOMAINS+1];
 void 
 report_domains(int sock,int num)
 {
-  struct hash_rec *userptr;
+  struct hash_rec *ptr;
   int inuse = 0;
   int i;
   int j;
@@ -961,18 +961,18 @@ report_domains(int sock,int num)
 
   for (i = 0; i < HASHTABLESIZE; i++)
     {
-      for (userptr = domain_table[i]; userptr; userptr = userptr->next)
+      for (ptr = domain_table[i]; ptr; ptr = ptr->next)
         {
           for (j=0; j < inuse; ++j)
             {
-              if (!strcasecmp(userptr->info->domain,
+              if (!strcasecmp(ptr->info->domain,
 			      sort[j].domain_rec->info->domain))
                 break;
             }
 
           if ((j == inuse) && (inuse < MAXDOMAINS))
             {
-              sort[inuse].domain_rec = userptr;
+              sort[inuse].domain_rec = ptr;
               sort[inuse++].count = 1;
             }
           else
@@ -1029,22 +1029,23 @@ report_domains(int sock,int num)
 void 
 list_class(int sock,char *class_to_find,int total_only)
 {
-  struct hash_rec *userptr;
+  struct hash_rec *ptr;
   int i;
   int num_found=0;
   int num_unknown=0;
 
   for (i=0; i < HASHTABLESIZE; ++i)
     {
-      for (userptr = domain_table[i]; userptr; userptr = userptr->next)
+      for (ptr = domain_table[i]; ptr; ptr = ptr->next)
         {
-          if(!strcmp(userptr->info->class, "unknown"))
+          if(strcmp(ptr->info->class, "unknown") == 0)
             num_unknown++;
 
-          if (!strcasecmp(class_to_find, userptr->info->class))
+          if (strcasecmp(class_to_find, ptr->info->class) == 0)
             {
-              if(!num_found++)
+              if (num_found == 0)
                 {
+		  num_found++;
                   if(!total_only)
                     {
                       print_to_socket(sock,
@@ -1054,14 +1055,14 @@ list_class(int sock,char *class_to_find,int total_only)
                 }
               if(!total_only)
                 {
-                  print_to_socket(sock, "  %s (%s@%s)\n", userptr->info->nick,
-				  userptr->info->user, userptr->info->host);
+                  print_to_socket(sock, "  %s (%s@%s)\n", ptr->info->nick,
+				  ptr->info->user, ptr->info->host);
                 }
             }
         }
     }
 
-  if (num_found)
+  if (num_found != 0)
     print_to_socket(sock,
          "%d are in class %s\n", num_found, class_to_find );
   else
@@ -1081,7 +1082,7 @@ list_class(int sock,char *class_to_find,int total_only)
 void 
 list_nicks(int sock,char *nick,int regex)
 {
-  struct hash_rec *userptr;
+  struct hash_rec *ptr;
 #ifdef HAVE_REGEX_H
   regex_t reg;
   regmatch_t m[1];
@@ -1101,14 +1102,14 @@ list_nicks(int sock,char *nick,int regex)
 
   for (i=0; i<HASHTABLESIZE; ++i)
     {
-      for (userptr = domain_table[i]; userptr; userptr = userptr->next)
+      for (ptr = domain_table[i]; ptr; ptr = ptr->next)
         {
 #ifdef HAVE_REGEX_H
           if ((regex == YES &&
-               !regexec((regex_t *)&reg, userptr->info->nick,1,m,REGEXEC_FLAGS))
-              || (regex == NO && !match(nick, userptr->info->nick)))
+               !regexec((regex_t *)&reg, ptr->info->nick,1,m,REGEXEC_FLAGS))
+              || (regex == NO && !match(nick, ptr->info->nick)))
 #else
-          if (!match(nick, userptr->info->nick))
+          if (!match(nick, ptr->info->nick))
 #endif
             {
               if(!numfound)
@@ -1120,8 +1121,8 @@ list_nicks(int sock,char *nick,int regex)
 
               print_to_socket(sock,
 			      "  %s (%s@%s) {%s}\n",
-			      userptr->info->nick, userptr->info->user,
-			      userptr->info->host, userptr->info->class);
+			      ptr->info->nick, ptr->info->user,
+			      ptr->info->host, ptr->info->class);
             }
         }
     }
@@ -1209,7 +1210,7 @@ list_users(int sock,char *userhost,int regex)
 
 void kill_list_users(int sock, char *userhost, char *reason, int regex)
 {
-  struct hash_rec *userptr;
+  struct hash_rec *ptr;
 #ifdef HAVE_REGEX_H
   regex_t reg;
   regmatch_t m[1];
@@ -1229,10 +1230,10 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
 
   for (i=0; i<HASHTABLESIZE; ++i)
     {
-      for (userptr = domain_table[i]; userptr; userptr=userptr->next)
+      for (ptr = domain_table[i]; ptr; ptr=ptr->next)
 	{
 	  snprintf(fulluh, sizeof(fulluh), "%s@%s",
-		   userptr->info->user, userptr->info->host);
+		   ptr->info->user, ptr->info->host);
 #ifdef HAVE_REGEX_H
 	  if ((regex == YES &&
 	       !regexec((regex_t *)&reg, fulluh, 1, m, REGEXEC_FLAGS))
@@ -1241,9 +1242,12 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
 	    if (!match(userhost, fulluh))
 #endif
 	      {
-		if (!numfound++)
-		  tcm_log(L_NORM, "killlisted %s\n", fulluh);
-		print_to_server("KILL %s :%s", userptr->info->nick, reason);
+		if (numfound == 0)
+		  {
+		    numfound++;
+		    tcm_log(L_NORM, "killlisted %s\n", fulluh);
+		  }
+		print_to_server("KILL %s :%s", ptr->info->nick, reason);
 	      }
 	}
     }

@@ -1,3 +1,17 @@
+db          2002/05/26 22:59:29 EDT	(20020527_11)
+
+  Modified files:
+    include              parse.h 
+    src                  parse.c 
+  Log:
+  - simple renames of function names, variables tidying up
+  
+  Revision  Changes    Path
+  1.9       +0 -1      tcm-hybrid/include/parse.h
+  1.32      +29 -28    tcm-hybrid/src/parse.c
+
+
+
 db          2002/05/26 22:46:10 EDT	(20020527_10)
 
   Modified files:

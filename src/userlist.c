@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.90 2002/05/27 22:40:41 leeh Exp $
+ * $Id: userlist.c,v 1.91 2002/05/27 23:10:01 leeh Exp $
  *
  */
 
@@ -73,7 +73,6 @@ static struct umode_struct umode_privs[] =
   { 'D', TYPE_DLINE,		},
 #endif
   { 'S', TYPE_SUSPENDED, 	},
-  { 'I', TYPE_INVM,		},
 #ifdef ENABLE_W_FLAG
   { 'W', TYPE_WALLOPS,		},
 #endif

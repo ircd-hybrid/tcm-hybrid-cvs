@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.96 2002/05/27 21:55:19 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.97 2002/05/27 23:10:01 leeh Exp $ */
 
 #include "setup.h"
 
@@ -139,7 +139,7 @@ m_killlist(int connnum, int argc, char *argv[])
   else
     snprintf(reason, sizeof(reason), "No reason");
 
-  if((connections[connnum].type & (TYPE_INVS|TYPE_INVM)) == 0)
+  if((connections[connnum].type & TYPE_INVS) == 0)
   {
     strncat(reason, " (requested by ", MAX_REASON - strlen(reason));
     strncat(reason, connections[connnum].registered_nick,
@@ -229,7 +229,7 @@ m_kill(int connnum, int argc, char *argv[])
   send_to_all(SEND_KLINE_NOTICES, "*** kill %s :%s by %s",
               argv[1], reason, connections[connnum].registered_nick);
   log_kline("KILL", argv[1], 0, connections[connnum].registered_nick, reason);
-  if (!(connections[connnum].type & (TYPE_INVS|TYPE_INVM)))
+  if (!(connections[connnum].type & TYPE_INVS))
   {
     strncat(reason, " (requested by ", MAX_REASON - 1 - strlen(reason));
     strncat(reason, connections[connnum].registered_nick,
@@ -695,7 +695,7 @@ m_dline(int connnum, int argc, char *argv[])
                 reason);
     send_to_all( SEND_ALL, "*** dline %s :%s by %s", argv[1],
                  reason, connections[connnum].registered_nick);
-    if (!connections[connnum].type & (TYPE_INVS|TYPE_INVM))
+    if (!connections[connnum].type & TYPE_INVS)
     {
       strncat(reason, " (requested by ", sizeof(reason)-strlen(reason));
       strncat(reason, connections[connnum].nick,
@@ -1056,13 +1056,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
       case 'w': type = TYPE_WARN; break;
       case 'x': type = TYPE_SERVERS; break;
 
-      case 'I':
-	if (connections[connnum].type & TYPE_ADMIN)
-	  type = TYPE_INVM ;
-	else
-	  type = 0;
-	break;
-
 #ifndef NO_D_LINE_SUPPORT
       case 'D':
 	if (connections[connnum].type & TYPE_ADMIN)
@@ -1126,7 +1119,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
 #ifndef NO_D_LINE_SUPPORT
 	  case 'D': type = TYPE_DLINE; break;
 #endif
-	  case 'I': type = TYPE_INVM; break;
 	  case 'K': type = TYPE_KLINE; break;
 	  case 'S': type = TYPE_SUSPENDED; break;
 #ifdef ENABLE_W_FLAG
@@ -1208,7 +1200,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	  {
 	    switch(flags[i])
 	    {
-	    case 'I': type = TYPE_INVM; break;
 	    case 'K': type = TYPE_KLINE; break;
 #ifndef NO_D_LINE_SUPPORT
 	    case 'D': type = TYPE_DLINE; break;

@@ -34,7 +34,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.5 2001/02/02 03:27:36 wcampbel Exp $";
+static char *version="$Id: abuse.c,v 1.6 2001/02/02 04:04:27 wcampbel Exp $";
 
 /*
  * do_a_kline()
@@ -53,7 +53,7 @@ static char *version="$Id: abuse.c,v 1.5 2001/02/02 03:27:36 wcampbel Exp $";
 void do_a_kline(char *command_name,int kline_time, char *pattern,
 		char *reason,char *who_did_command)
 {
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 

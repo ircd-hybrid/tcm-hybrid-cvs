@@ -52,7 +52,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.10 2001/02/02 03:03:15 wcampbel Exp $";
+static char *version="$Id: serverif.c,v 1.11 2001/02/02 04:04:28 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -152,7 +152,7 @@ int bindsocket(char *hostport)
   char *hold;
   int optval;
   unsigned long remoteaddr;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -437,7 +437,7 @@ void prnt(int sock, ...)
   char msgbuf[MAX_BUFF];
   char *format;
   va_list va;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -484,7 +484,7 @@ void toserv(char *format, ... )
 {
   char msgbuf[MAX_BUFF];
   va_list va;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
   
@@ -522,7 +522,7 @@ void sendtoalldcc(int type,...)
   int i;
   int echo;
   int local_tcm = NO;	/* local tcm ? */
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -707,7 +707,7 @@ void rdpt(void)
   static time_t clones_last_check_time=(time_t)0;	/* clone check */
   static time_t remote_tcm_socket_setup_time=(time_t)0;
   time_t cur_time;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -1044,7 +1044,7 @@ static void report_open_socks(int i)
 static void check_services(void)
 {
   time_t cur_time;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -1084,7 +1084,7 @@ static void on_services_notice(char *body)
   int  identd;
   char *p;
   char *user, *host;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -1285,7 +1285,7 @@ static void serverproc(void)
 */
 void signon()
 {
-#ifdef DEBUG
+#ifdef DEBUGMODE
     placed;
 #endif
 
@@ -1307,7 +1307,7 @@ void signon()
 
 void do_init(void)
 {
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -1334,7 +1334,7 @@ void do_init(void)
 */
 static void linkclosed(char *reason)
 {
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -1366,7 +1366,7 @@ char makeconn(char *hostport,char *nick,char *userhost)
   char *type;
   char *user;
   char *host;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -1495,7 +1495,7 @@ char makeconn(char *hostport,char *nick,char *userhost)
 int add_connection(int sock,int tcm_entry)
 {
   int i;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -1546,7 +1546,7 @@ void closeconn(int connnum)
 {
   int i;
   char *type;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -1614,7 +1614,7 @@ void privmsgproc(char *nick,char *userhost,char *body)
   char *host;	/* host portion */
   char *p;
   char *param1;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -1813,7 +1813,7 @@ static unsigned long local_ip(void)
 int already_have_tcm(char *tcmnick)
 {
   int i;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -1874,7 +1874,7 @@ static void proc(char *source,char *fctn,char *param)
     int numeric;		/* if its an numeric */
     char *p;
     char *q;
-#ifdef DEBUG
+#ifdef DEBUGMODE
     placed;
 #endif
 
@@ -2368,7 +2368,7 @@ static void connect_remote_tcm(int connnum)
   struct sockaddr_in incoming_addr;
   struct hostent *host_seen;
   int addrlen;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -2522,7 +2522,7 @@ static void connect_remote_client(char *nick,char *user,char *host,int sock)
   struct sockaddr_in incoming_addr;
   struct hostent *host_seen;
   int addrlen;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -2601,7 +2601,7 @@ static void connect_remote_client(char *nick,char *user,char *host,int sock)
 void sendto_all_linkedbots(char *buffer)
 {
   int i;
-#ifdef DEBUG
+#ifdef DEBUGMODE
   placed;
 #endif
 
@@ -2737,7 +2737,7 @@ void oper()
 
 static void send_umodes(char *my_nick)
 {
-  toserv("MODE %s :+bcdfknrswxyz\n", my_nick );
+  toserv("MODE %s :+bcdfknrswxyzl\n", my_nick );
   toserv("FLAGS +SKILLS CLICONNECTS +CLIDISCONNECTS +NICKCHANGES +LWALLOPS +CONNECTS +SQUITS +OWALLOPS +STATSNOTICES\n");
 
   if(config_entries.hybrid && (config_entries.hybrid_version >= 6))

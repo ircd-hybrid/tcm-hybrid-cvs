@@ -1,5 +1,5 @@
 *** 20011017_3 by wcampbel
-Added .rehash.  It works but does not properly clean up connections.
+Added .restart.  It works but does not properly clean up connections.
   Someone who knows current tcm code better will need to handle this.
 Removed the less than polite Makefile.  There is no reason for it...
   If people cannot run ./configure, they shouldn't be running the service
@@ -324,12 +324,12 @@ Directory /cvsroot/tcm-hybrid/modules added to the repository
 
 
 *** 20010826_2 by bill
-- still from Walter Campbell's patch
+- still from W. Campbell's patch
   forgot to remove extra space in kill message
 
 
 *** 20010826_1 by bill
-- added a modified patch by Walter Campbell:
+- added a modified patch by W. Campbell:
    fixes a few typos
    adds idle time to DCC .whom output
    replaces class_name in usage output to <class name> (it looks prettier, dunchya know?)
@@ -492,7 +492,7 @@ Migrated to the same mkpasswd we use in hyb7 and hyb6
 
 
 *** 20010603_3 by db
-patch sent in by Walter Campbell
+patch sent in by W. Campbell
 1.  Document that USE_CRYPT is enabled by default
 2.  Fix an issue where people could telnet to the tcm and not type
     anything.  Those people would see everything that an oper would.
@@ -506,7 +506,7 @@ Simple change of -1 to INVALID for consistency -db
 *** 20010603_2 by greg
 Two simple bugfixes.
 
-- (from Walter Campbell) oper before doing a /stats O; some servers may
+- (from W. Campbell) oper before doing a /stats O; some servers may
   make use of OLINES_OPER_ONLY, or similar.
 - (pointed out by KrON/ogre) fixed a nifty core where islegal_pass() fell
   off the edge of the userlist array.
@@ -517,7 +517,7 @@ b) a problem when a person uses .chat, but their oline is for their spoof)
 
 
 *** 20010603_1 by db
-Submitted by Walter Campbell <wcampbel@botbay.net>
+Submitted by W. Campbell <wcampbel@botbay.net>
 
 My "commit" message:
 

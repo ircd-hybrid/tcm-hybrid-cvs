@@ -1,3 +1,15 @@
+leeh        2002/05/23 12:05:53 EDT	(20020523_7)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - debugcode needs to be in the right place..
+  
+  Revision  Changes    Path
+  1.4       +3 -4      tcm-hybrid/src/tcm_io.c
+
+
+
 wcampbel    2002/05/23 10:10:59 EDT	(20020523_6)
 
   Modified files:

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.29 2002/06/05 15:10:25 leeh Exp $
+ * $Id: hash.c,v 1.30 2002/06/06 01:57:58 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -449,14 +449,14 @@ find_domain(char* host)
  
   ip_domain = host;
 
-  if(isdigit(*ip_domain))
+  if(isdigit((int)*ip_domain))
   {
     while (*ip_domain)
     {
       iphold[i++] = *ip_domain;
       if(*ip_domain == '.')
 	found_dots++;
-      else if(!isdigit(*ip_domain))
+      else if(!isdigit((int)*ip_domain))
 	{
 	  is_legal_ip = NO;
 	  break;

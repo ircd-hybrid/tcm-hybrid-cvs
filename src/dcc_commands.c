@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.57 2002/05/18 02:53:17 db Exp $ */
+/* $Id: dcc_commands.c,v 1.58 2002/05/19 14:27:25 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -44,6 +44,10 @@
 
 #ifdef DMALLOC
 #include "dmalloc.h"
+#endif
+
+#ifdef HAVE_CRYPT_H
+#include <crypt.h>
 #endif
 
 char *_version="20012009";

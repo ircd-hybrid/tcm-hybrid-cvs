@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.35 2002/05/18 02:53:20 db Exp $ */
+/* $Id: main.c,v 1.36 2002/05/19 14:27:28 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -673,7 +673,7 @@ int main(int argc, char *argv[])
 	}
     }
 
-  (void)fprintf(outfile,"%d\n", getpid());
+  (void)fprintf(outfile,"%d\n", (int) getpid());
   (void)fclose(outfile);
 
   if(config_entries.debug && outfile)

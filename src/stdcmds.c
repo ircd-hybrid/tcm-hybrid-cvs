@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.56 2002/05/18 02:21:14 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.57 2002/05/19 14:27:28 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -47,6 +47,10 @@
 
 #ifdef DMALLOC
 #include "dmalloc.h"
+#endif
+
+#ifndef INADDR_NONE
+#define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
 int doingtrace = NO;
@@ -1294,7 +1298,7 @@ report_clones(int sock)
   struct hashrec *temp;
   int  numfound;
   int i;
-  int j;
+  int j=0;
   int k;
   int foundany = NO;
   time_t connfromhost[MAXFROMHOST];

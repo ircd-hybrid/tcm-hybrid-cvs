@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.71 2002/05/18 02:21:11 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.72 2002/05/19 14:27:25 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -1896,14 +1896,14 @@ static char* find_domain(char* host)
  
   ip_domain = host;
 
-  if (isdigit(*ip_domain))
+  if (isdigit((int) *ip_domain))
   {
     while (*ip_domain)
     {
       iphold[i++] = *ip_domain;
       if (*ip_domain == '.')
 	found_dots++;
-      else if (!isdigit(*ip_domain))
+      else if (!isdigit((int) *ip_domain))
 	{
 	  is_legal_ip = NO;
 	  break;

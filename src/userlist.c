@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.52 2002/05/18 02:21:15 wcampbel Exp $
+ * $Id: userlist.c,v 1.53 2002/05/19 14:27:29 wcampbel Exp $
  *
  */
 
@@ -17,6 +17,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+/* Solaris needs this for bzero() */
+#include <strings.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -37,17 +39,10 @@
 #include "dmalloc.h"
 #endif
 
-#ifdef HAVE_CRYPT_H
-#include <crypt.h>
-#endif
-
 struct auth_file_entry userlist[MAXUSERS];
 struct exception_entry hostlist[MAXHOSTS];
 struct exception_entry banlist[MAXBANS];
 extern struct connection connections[];
-
-/* XXX - This is a kludge for Linux systems */
-extern char *crypt(const char *key, const char *salt);
 
 int  user_list_index;
 int  tcm_list_index;

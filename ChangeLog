@@ -1,3 +1,15 @@
+db          2002/06/23 13:18:05 EDT	(20020623_1)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  - tell me what kind of drugs this takes
+  
+  Revision  Changes    Path
+  1.178     +2 -3      tcm-hybrid/src/bothunt.c
+
+
+
 wcampbel    2002/06/23 09:24:35 EDT	(20020623_0)
 
   Modified files:

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.62 2002/05/20 05:30:59 db Exp $ */
+/* $Id: dcc_commands.c,v 1.63 2002/05/20 12:58:28 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -2182,7 +2182,7 @@ print_help(int sock,char *text)
   char line[MAX_BUFF];
   char help_file[MAX_BUFF];
 
-  if(!text || (*text == '\0'))
+  if(!text || (*text == '\0') || (*text == '?'))
     {
       if( (userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) == NULL )
         {
@@ -2195,7 +2195,7 @@ print_help(int sock,char *text)
       while(*text == ' ')
         text++;
 
-      if (*text == '\0')
+      if ((*text == '\0') || (*text == '?'))
         {
           if( (userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) == NULL )
             {

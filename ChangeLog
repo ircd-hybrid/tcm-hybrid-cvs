@@ -1,3 +1,18 @@
+wiz         2003/02/03 04:02:18 EST	(20030203_2)
+
+  Modified files:
+    include              bothunt.h 
+    src                  hash.c 
+  Log:
+  - Added seperate #define's (this should really be in the conf file)
+    for IPv6 vclone frequnecy settings, so it's not the same as IPv4.
+  
+  Revision  Changes    Path
+  1.62      +3 -0      tcm-hybrid/include/bothunt.h
+  1.63      +10 -7     tcm-hybrid/src/hash.c
+
+
+
 bill        2003/02/03 01:35:46 EST	(20030203_1)
 
   Modified files:

@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-#define VERSION "tcm-hybrid-v2.5.4"
+#define VERSION "tcm-hybrid-v2.5.5"
 
 /* Buffer sizes */
 

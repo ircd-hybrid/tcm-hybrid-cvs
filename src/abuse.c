@@ -34,7 +34,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.9 2001/04/02 05:34:54 db Exp $";
+static char *version="$Id: abuse.c,v 1.10 2001/04/03 04:41:13 db Exp $";
 
 /*
  * do_a_kline()
@@ -441,7 +441,7 @@ void suggest_kill_kline(int reason,
 	 else if(strncasecmp(config_entries.spambot_act,"warn",4) == 0)
 	   {
 	     sendtoalldcc(SEND_WARN_ONLY,
-			  "*** Spambot detected, coming from %s!%s@%s.\n.kline %s@%s\n",
+			  "*** Spambot detected, coming from %s!%s@%s.\n.kspam %s@%s\n",
 			  nick,
 			  suggested_user, suggested_host,
 			  suggested_user, suggested_host);

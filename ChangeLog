@@ -1,3 +1,8 @@
+*** 20010721_3 by wcampbel
+This is the code to support the help files in a subdirectory.
+The repo-move will be done as soon as I finish this commit
+
+
 *** 20010721_2 by wcampbel
 I did a repo-move for the *.h files into include/
 This is what else needed to be done to make it work...

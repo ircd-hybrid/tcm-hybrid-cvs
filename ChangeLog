@@ -1,3 +1,19 @@
+leeh        2002/06/03 17:49:37 EDT	(20020603_9)
+
+  Modified files:
+    src                  Makefile.in 
+  Added files:
+    src                  serv_commands.c 
+  Log:
+  - added the new serv_commands.c
+  - updated Makefile with this and commands.c -> dcc_commands.c
+  
+  Revision  Changes    Path
+  1.30      +2 -1      tcm-hybrid/src/Makefile.in
+  1.1       +42 -0     tcm-hybrid/src/serv_commands.c (new)
+
+
+
 leeh        2002/06/03 17:41:31 EDT	(20020603_8)
 
   Modified files:

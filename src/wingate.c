@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.20 2002/03/06 19:20:41 einride Exp $ */
+/* $Id: wingate.c,v 1.21 2002/03/06 21:17:20 einride Exp $ */
 
 
 #include <netdb.h>
@@ -329,8 +329,8 @@ void _scontinuous(int connnum, int argc, char *argv[])
 		tmp[3] = 0; /* EOF */
 		if (write(socks[i].socket, tmp, 4)!=4) {
 		  close(socks[i].socket);
-		  socks[i].state = INVALID;
-		  socks[i].socket = 0;
+		  socks[i].state = 0;
+		  socks[i].socket = INVALID;
 		  break;
 		} 
 		socks[i].state = SOCKS5_SENTVERSION;
@@ -342,8 +342,8 @@ void _scontinuous(int connnum, int argc, char *argv[])
 		  /* Server accepts unauthed connections */
 		  report_open_socks(i);
 		  close(socks[i].socket);
-		  socks[i].state = INVALID;
-		  socks[i].socket = 0;
+		  socks[i].state = 0;
+		  socks[i].socket = INVALID;
 		  break;
 		}
 		if(config_entries.debug && outfile)
@@ -354,8 +354,8 @@ void _scontinuous(int connnum, int argc, char *argv[])
 		  }
 
 		close(socks[i].socket);
-		socks[i].state = INVALID;
-		socks[i].socket = 0;
+		socks[i].state = 0;
+		socks[i].socket = INVALID;
 		break;
 	      case SOCKS4_CONNECTING:
 		tmp[0] = 4; /* socks v4 */
@@ -365,8 +365,8 @@ void _scontinuous(int connnum, int argc, char *argv[])
 		strcpy(tmp+8, "tcm"); /* Dummy username */
 		if (write(socks[i].socket, tmp, 12)!=12) {
 		  close(socks[i].socket);
-		  socks[i].state = INVALID;
-		  socks[i].socket = 0;
+		  socks[i].state = 0;
+		  socks[i].socket = INVALID;
 		  break;
 		} 
 		if(config_entries.debug && outfile)
@@ -388,8 +388,8 @@ void _scontinuous(int connnum, int argc, char *argv[])
 			    socks[i].host);
 		  }
 		  close(socks[i].socket);
-		  socks[i].state = INVALID;
-		  socks[i].socket = 0;
+		  socks[i].state = 0;
+		  socks[i].socket = INVALID;
 		  break;
 		} 
 		if (tmp[1] != 90) {
@@ -400,14 +400,14 @@ void _scontinuous(int connnum, int argc, char *argv[])
 			      socks[i].host, tmp[1]);
 		    }
 		  close(socks[i].socket);
-		  socks[i].state = INVALID;
-		  socks[i].socket = 0;
+		  socks[i].state = 0;
+		  socks[i].socket = INVALID;
 		  break;
 		}
 		report_open_socks(i);
 		close(socks[i].socket);
-		socks[i].state = INVALID;
-		socks[i].socket = 0;
+		socks[i].state = 0;
+		socks[i].socket = INVALID;
 		break;
 	      default:
 		break;

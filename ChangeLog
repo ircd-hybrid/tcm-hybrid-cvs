@@ -1,3 +1,28 @@
+bill        2002/08/08 14:10:43 EDT	(20020808_0)
+
+  Modified files:
+    include              hash.h stdcmds.h tcm.h userlist.h 
+    src                  bothunt.c dcc_commands.c hash.c main.c 
+                         userlist.c 
+  Log:
+  - fixed client connect/disconnect parsing errors
+  - fixed buffer overrun in wingate detection
+  - added gecos tracking/matching
+  - added .gecos command (complete with regex! e?)
+  
+  Revision  Changes    Path
+  1.25      +2 -0      tcm-hybrid/include/hash.h
+  1.33      +0 -8      tcm-hybrid/include/stdcmds.h
+  1.55      +1 -0      tcm-hybrid/include/tcm.h
+  1.87      +2 -0      tcm-hybrid/include/userlist.h
+  1.190     +39 -28    tcm-hybrid/src/bothunt.c
+  1.142     +32 -6     tcm-hybrid/src/dcc_commands.c
+  1.48      +95 -0     tcm-hybrid/src/hash.c
+  1.126     +0 -1      tcm-hybrid/src/main.c
+  1.143     +1 -1      tcm-hybrid/src/userlist.c
+
+
+
 wcampbel    2002/07/31 13:13:25 EDT	(20020731_0)
 
   Modified files:

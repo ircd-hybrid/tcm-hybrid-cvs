@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.53 2002/06/22 14:04:44 db Exp $ */
+/* $Id: bothunt.h,v 1.54 2002/06/23 19:50:14 db Exp $ */
 
 
 struct source_client;
@@ -103,6 +103,6 @@ void clear_bothunt(void);
 void on_trace_user(int argc, char *argv[]);
 void on_stats_i(int argc, char *argv[]);
 void on_server_notice(struct source_client *, int argc, char *argv[]);
-int  get_user_host(char **user_p, char **host_p, char *user_host);
+char *get_user_host(char **user_p, char **host_p, char *user_host);
 extern struct s_testline testlines;
 #endif

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.181 2002/06/23 19:24:13 db Exp $
+ * $Id: bothunt.c,v 1.182 2002/06/23 19:50:16 db Exp $
  */
 
 #include <stdio.h>
@@ -216,7 +216,7 @@ on_stats_i(int argc, char *argv[])
   int set_exempt = 0;
 
   /* N.B. get_user_host modifies argv[6] */
-  if (get_user_host(&user, &host, argv[6]) == 0)
+  if (get_user_host(&user, &host, argv[6]) == NULL)
     return;
 
   /* check for I: exemption flags, and mark exempt in tcm */
@@ -369,7 +369,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     p+=2;
 
-    if (get_user_host(&user, &host, q) != 1)
+    if (get_user_host(&user, &host, q) == NULL)
       return;
 
     if ((q = strchr(p, ']')) == NULL)
@@ -394,7 +394,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     q++;
 
-    if (get_user_host(&user, &host, p) != 1)
+    if (get_user_host(&user, &host, p) == NULL)
       return;
 
     if ((p = strrchr(q, ']')) == NULL)
@@ -477,11 +477,15 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *q++ = '\0';
     strlcpy(userinfo.nick, p+19, MAX_NICK);
-    if (get_user_host(&user, &host, q) != 1)
+    if ((p = get_user_host(&user, &host, q)) == NULL)
       return;
     strlcpy(userinfo.username, user, MAX_USER);
     strlcpy(userinfo.host, host, MAX_HOST);
 
+    if ((q = strchr(p, '[')) == NULL)
+      return;
+    q++;
+    p = q;
     if ((q = strchr(p, ']')) == NULL)
       return;
     *q++ = '\0';
@@ -505,18 +509,21 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *q++ = '\0';
     strlcpy(userinfo.nick, p+16, MAX_NICK);
-    if (get_user_host(&user, &host, q) != 1)
+    if ((p = get_user_host(&user, &host, q)) == NULL)
       return;
     strlcpy(userinfo.username, user, MAX_USER);
     strlcpy(userinfo.host, host, MAX_HOST);
-
+    if ((q = strchr(p, ']')) == NULL)
+      return;
+    q++;
+    p = q;
     if ((q = strchr(p, ']')) == NULL)
       return;
     *q++ = '\0';
 
     strlcpy(userinfo.ip_host, p, MAX_IP);
     chopuh(IS_NOT_FROM_TRACE, q, &userinfo);
-    remove_user_host(q,&userinfo);
+    remove_user_host(&userinfo);
     break;
 
   /* Unauthorized client connection from bill[bill@localhost] [127.0.0.1]
@@ -601,7 +608,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       break;
     from_server = q+4;
 
-    if (get_user_host(&user, &host, p) != 1)
+    if (get_user_host(&user, &host, p) == NULL)
       break;
 
     if ((p = strchr(from_server,' ')) == NULL)
@@ -632,7 +639,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     q++;
 
-    if (get_user_host(&user, &host, p) != 1)
+    if (get_user_host(&user, &host, p) == NULL)
       return;
 
     if (strstr(q, "possible spambot") == NULL)
@@ -675,7 +682,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     p+=5;
 
-    if (get_user_host(&user, &host, q) != 1)
+    if (get_user_host(&user, &host, q) == NULL)
       return;
 
     from_server = p;
@@ -803,7 +810,7 @@ connect_flood_notice(char *snotice, char *reason)
     ++p;
   user_host=p+1;
 
-  if (get_user_host(&user, &host, user_host) != 1)
+  if (get_user_host(&user, &host, user_host) == NULL)
     return;
 
   for(i=0; i<MAX_CONNECT_FAILS; ++i)
@@ -884,7 +891,7 @@ link_look_notice(char *snotice)
     return;
   *seen_user_host++ = '\0';
 
-  if (get_user_host(&user, &host, seen_user_host) == 0)
+  if (get_user_host(&user, &host, seen_user_host) == NULL)
     return;
 
   send_to_all(FLAGS_SPY, "[LINKS by %s (%s@%s)]",
@@ -978,7 +985,7 @@ void cs_nick_flood(char *snotice)
   if ((user_host = strchr(nick_reported,' ')) == NULL)
     return;
 
-  if (get_user_host(&user, &host, user_host) == 0)
+  if (get_user_host(&user, &host, user_host) == NULL)
     return;
 
   send_to_all(FLAGS_WARN, "CS nick flood user_host = [%s@%s]", user, host);
@@ -1010,7 +1017,7 @@ cs_clones(char *snotice)
   if ((user_host = strchr(nick_reported,' ')) == NULL)
     return;
 
-  if (get_user_host(&user, &host, user_host) == 0)
+  if (get_user_host(&user, &host, user_host) == NULL)
     return;
 
   send_to_all(FLAGS_WARN, "CS clones user_host = [%s]", user_host);
@@ -1051,7 +1058,7 @@ check_nick_flood(char *snotice)
       if ((p = strrchr(user_host,')')) != NULL)
 	*p = '\0';
 
-      if (get_user_host(&user, &host, user_host) == 0)
+      if (get_user_host(&user, &host, user_host) == NULL)
 	return;
 
       if ((p = strtok(NULL," ")) == NULL)
@@ -1382,15 +1389,17 @@ report_nick_flooders(int sock)
  *		  (user@host) or
  *		  [user@host] or even plain old
  *		  user@host
- * outputs	- pointer to user
+ * outputs	- pointer to end char +1
+ *		- pointer to user
  *		- pointer to host
  * side effects	- input user_host is modified in place
  */
 
-int
+char *
 get_user_host(char **user_p, char **host_p, char *user_host)
 {
   char *user = user_host;
+  char *end_p;
   char *p;
 
   /*
@@ -1401,25 +1410,27 @@ get_user_host(char **user_p, char **host_p, char *user_host)
     {
       user++;
       if ((p = strchr(user, ']')) == NULL)
-	return(0);
-      *p = '\0';
+	return(NULL);
+      *p++ = '\0';
+      end_p = p;
     }
   else if (*user == '(')
     {
       user++;
       if ((p = strchr(user, ')')) == NULL)
-	return(0);
-      *p = '\0';
+	return(NULL);
+      *p++ = '\0';
+      end_p = p;
     }
 
   *user_p = user;
 
   if ((p = strchr(user, '@')) == NULL)
-    return(0);
+    return(NULL);
 
-  *p = '\0';
-  *host_p = p+1; 
-  return (1);
+  *p++ = '\0';
+  *host_p = p; 
+  return (end_p);
 }
 
 /*

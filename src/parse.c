@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.78 2002/06/22 18:21:47 leeh Exp $
+ * $Id: parse.c,v 1.79 2002/06/23 19:50:17 db Exp $
  */
 
 #include <stdio.h>
@@ -83,7 +83,7 @@ parse_server(int conn_num)
       *p++ = '\0';
 
       source_p.name = source;
-      get_user_host(&source_p.username, &source_p.host, p);
+      (void)get_user_host(&source_p.username, &source_p.host, p);
     }
     else
       source_p.name = source;

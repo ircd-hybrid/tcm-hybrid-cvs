@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.40 2002/06/23 18:34:26 leeh Exp $
+ * $Id: hash.c,v 1.41 2002/06/23 19:50:17 db Exp $
  */
 
 #include <stdio.h>
@@ -334,14 +334,13 @@ foob(void)
 /*
  * remove_user_host()
  * 
- * inputs	- nick
- * 		- pointer to struct user_entry
+ * input	- pointer to struct user_entry
  * output	- NONE
  * side effects	- 
  */
 
 void
-remove_user_host(char *nick, struct user_entry *user_info)
+remove_user_host(struct user_entry *user_info)
 {
 #ifdef VIRTUAL
   char ip_class_c[MAX_IP];
@@ -351,7 +350,8 @@ remove_user_host(char *nick, struct user_entry *user_info)
   domain = find_domain(user_info->host);
 
   if(!remove_from_hash_table(host_table, user_info->host,
-			      user_info->host, user_info->username, nick)) 
+			      user_info->host, user_info->username, 
+			      user_info->nick)) 
     {
       if(!remove_from_hash_table(host_table, user_info->host,
 				  user_info->host, user_info->username, NULL))
@@ -359,13 +359,14 @@ remove_user_host(char *nick, struct user_entry *user_info)
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from host table!\n",
-		      nick, user_info->username, user_info->host);
+		      user_info->nick, user_info->username, user_info->host);
               foob();
 	    }
 	}
     }
   if(!remove_from_hash_table(domain_table, domain,
-			      user_info->host, user_info->username, nick))
+			      user_info->host, user_info->username, 
+			      user_info->nick))
     {
       if(!remove_from_hash_table(domain_table, domain,
 				  user_info->host, user_info->username, NULL))
@@ -373,12 +374,13 @@ remove_user_host(char *nick, struct user_entry *user_info)
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from domain table!\n",
-		      nick, user_info->username, user_info->host);
+		      user_info->nick, user_info->username, user_info->host);
 	    }
 	}
     }
   if(!remove_from_hash_table(user_table, user_info->username,
-			      user_info->host, user_info->username, nick))
+			      user_info->host, user_info->username,
+			      user_info->nick))
     {
       if(!remove_from_hash_table(user_table, user_info->username,
 				  user_info->host, user_info->username, NULL))
@@ -386,7 +388,7 @@ remove_user_host(char *nick, struct user_entry *user_info)
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from user table!\n",
-		      nick, user_info->username, user_info->host);
+		      user_info->nick, user_info->username, user_info->host);
 	    }
 	}
     }
@@ -398,7 +400,8 @@ remove_user_host(char *nick, struct user_entry *user_info)
     strcpy(ip_class_c, "0.0.0.0");
   make_ip_class_c(ip_class_c);
   if(!remove_from_hash_table(ip_table, ip_class_c,
-			      user_info->host, user_info->username, nick))
+			      user_info->host, user_info->username, 
+			      user_info->nick))
     {
       if(!remove_from_hash_table(ip_table, ip_class_c,
 				  user_info->host, user_info->username, NULL))
@@ -407,7 +410,8 @@ remove_user_host(char *nick, struct user_entry *user_info)
 	    {
 	      fprintf(outfile,
 		      "*** Error removing %s!%s@%s [%s] from iptable table!\n",
-		      nick, user_info->username, user_info->host, ip_class_c);
+		      user_info->nick, user_info->username,
+		      user_info->host, ip_class_c);
 	    }
 	}
     }

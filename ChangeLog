@@ -1,3 +1,7 @@
+*** 20011011_7 by wcampbel
+Cleanup of the example tcm.cf (add A:sclone: and A:drones: => A:drone: )
+
+
 *** 20011011_6 by bill
 - Taske is all over these help file updates
 

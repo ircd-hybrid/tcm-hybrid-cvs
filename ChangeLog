@@ -1,3 +1,21 @@
+wcampbel    2002/06/23 22:35:59 EDT	(20020624_3)
+
+  Modified files:
+    src                  .depend bothunt.c dcc_commands.c hash.c 
+                         userlist.c 
+  Log:
+  Compilation cleanups...
+  read_socks is never called, is this the reason why SOCKS checking is broken?
+  
+  Revision  Changes    Path
+  1.30      +1 -1      tcm-hybrid/src/.depend
+  1.185     +4 -0      tcm-hybrid/src/bothunt.c
+  1.138     +0 -2      tcm-hybrid/src/dcc_commands.c
+  1.44      +1 -0      tcm-hybrid/src/hash.c
+  1.136     +0 -27     tcm-hybrid/src/userlist.c
+
+
+
 db          2002/06/23 22:30:41 EDT	(20020624_2)
 
   Modified files:

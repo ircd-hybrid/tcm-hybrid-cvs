@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.30 2001/09/01 23:01:43 bill Exp $";
+static char *version="$Id: serverif.c,v 1.31 2001/09/02 04:30:23 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -2139,15 +2139,15 @@ static void wallops(char *source, char *params, char *body)
 {
   if (!strcmp(params+1, "WALLOPS"))
     sendtoalldcc(SEND_WALLOPS_ONLY,
-		 "WALLOPS %s ->  %s\n",
+		 "WALLOPS %s -> %s\n",
 		 source, body[0] == '-' ? body+2 : body);
   else if (!strcmp(params+1, "LOCOPS"))
     sendtoalldcc(SEND_LOCOPS_ONLY,
-		 "LOCOPS %s ->  %s\n",
+		 "LOCOPS %s -> %s\n",
 		 source, body[0] == '-' ? body+2 : body);
   else if (!strcmp(params+1, "OPERWALL"))
     sendtoalldcc(SEND_WALLOPS_ONLY,
-		 "OPERWALL %s ->  %s\n",
+		 "OPERWALL %s -> %s\n",
 		 source, body[0] == '-' ? body+2 : body);
 }
 

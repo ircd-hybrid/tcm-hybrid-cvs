@@ -1,3 +1,17 @@
+jmallett    2002/05/25 15:13:28 EDT	(20020525_30)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  Spank spank.
+  
+  Y'uns can avoid checking the fdset if we know the socket is invalid.
+  
+  Revision  Changes    Path
+  1.29      +2 -1      tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/25 15:10:11 EDT	(20020525_29)
 
   Modified files:

@@ -1,3 +1,15 @@
+db          2002/05/24 10:51:18 EDT	(20020524_10)
+
+  Modified files:
+    src                  main.c 
+  Log:
+  - errno is defined in errno.h
+  
+  Revision  Changes    Path
+  1.54      +0 -1      tcm-hybrid/src/main.c
+
+
+
 leeh        2002/05/24 10:35:22 EDT	(20020524_9)
 
   Modified files:

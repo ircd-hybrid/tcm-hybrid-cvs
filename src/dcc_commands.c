@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.13 2001/10/14 00:02:10 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.14 2001/10/14 00:14:03 bill Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -249,7 +249,7 @@ void dccproc(int connnum, int argc, char *argv[])
         not_authorized(connections[connnum].socket);
       break;
 
-    case K_VBOTS:
+    case K_VMULTI:
       if (connections[connnum].type & TYPE_OPER)
         {
           if (argc >= 2)
@@ -937,14 +937,14 @@ void dccproc(int connnum, int argc, char *argv[])
       toserv("UNKLINE %s\n",argv[1]);
       break;
 
-    case K_VMULTI:
+    case K_VBOTS:
       if (!(connections[connnum].type & TYPE_OPER))
         {
           not_authorized(connections[connnum].socket);
           return;
         }
-      if (argc >= 2) report_vmulti(connections[connnum].socket, atoi(argv[1]));
-      else report_vmulti(connections[connnum].socket, 3);
+      if (argc >= 2) report_vbots(connections[connnum].socket, atoi(argv[1]));
+      else report_vbots(connections[connnum].socket, 3);
       break;
 
 #ifndef NO_D_LINE_SUPPORT

@@ -86,6 +86,6 @@ void report_multi(int sock, int nclones);
 void report_multi_host(int sock, int nclones);
 void report_multi_user(int sock, int nclones);
 void report_multi_virtuals(int sock, int nclones);
-void report_vmulti(int sock,int nclones);
+void report_vbots(int sock,int nclones);
 
 #endif

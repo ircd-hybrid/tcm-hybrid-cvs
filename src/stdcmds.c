@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.14 2001/10/11 20:04:36 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.15 2001/10/14 00:14:03 bill Exp $";
 
 int doingtrace = NO;
 
@@ -1045,7 +1045,7 @@ void list_class(int sock,char *class_to_find,int total_only)
   prnt(sock,"%d unknown class\n", num_unknown);
 }
 
-void report_vmulti(int sock,int nclones)
+void report_vbots(int sock,int nclones)
 {
   struct hashrec *userptr,*top,*temp;
   int numfound,i;

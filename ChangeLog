@@ -1,3 +1,27 @@
+db          2002/05/26 01:48:08 EDT	(20020526_12)
+
+  Modified files:
+    include              bothunt.h config.h tcm.h tcm_io.h 
+                         userlist.h wingate.h 
+    src                  bothunt.c tcm_io.c userlist.c wingate.c 
+  Log:
+  - interim checkpoint non-functional on wingate/squid/socks detection
+    Start of the great re-do of I/O for proxy detection
+  
+  Revision  Changes    Path
+  1.31      +3 -1      tcm-hybrid/include/bothunt.h
+  1.56      +5 -2      tcm-hybrid/include/config.h
+  1.40      +1 -0      tcm-hybrid/include/tcm.h
+  1.20      +7 -2      tcm-hybrid/include/tcm_io.h
+  1.39      +1 -1      tcm-hybrid/include/userlist.h
+  1.2       +3 -5      tcm-hybrid/include/wingate.h
+  1.107     +24 -31    tcm-hybrid/src/bothunt.c
+  1.39      +10 -6     tcm-hybrid/src/tcm_io.c
+  1.75      +26 -0     tcm-hybrid/src/userlist.c
+  1.36      +180 -517  tcm-hybrid/src/wingate.c
+
+
+
 leeh        2002/05/25 23:02:52 EDT	(20020526_11)
 
   Modified files:

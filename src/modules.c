@@ -1,5 +1,5 @@
 /*
- * $Id: modules.c,v 1.43 2002/05/25 19:22:46 leeh Exp $B
+ * $Id: modules.c,v 1.44 2002/05/25 22:25:09 leeh Exp $B
  *
  */
 
@@ -37,6 +37,8 @@ const int max_mods = MODS_INCREMENT;
 static const char unknown_ver[] = "<unknown>";
 struct module modlist[MODS_INCREMENT];
 
+struct serv_numeric *serv_numeric_table;
+
 static int hash_command(const char *);
 
 struct dcc_command modload_msgtab = {
@@ -61,17 +63,18 @@ modules_init(void)
   add_dcc_handler(&modlist_msgtab);
 }
 
-/* init_hashtables()
+/* init_handlers()
  *
  * input	-
  * output	-
- * side effects - clears the dcc command and server command hashtables
+ * side effects - initialises the dcc/server handler stuff
  */
 void
 init_hashtables(void)
 {
   memset(dcc_command_table, 0, sizeof(struct dcc_command) * MAX_HASH);
   memset(serv_command_table, 0, sizeof(struct serv_command) * MAX_HASH);
+  serv_numeric_table = NULL;
 }
 
 /* add_dcc_handler()
@@ -87,9 +90,7 @@ add_dcc_handler(struct dcc_command *ptr)
 
   hashval = hash_command(ptr->cmd);
 
-  if(dcc_command_table[hashval] != NULL)
-    ptr->next = dcc_command_table[hashval];
-  
+  ptr->next = dcc_command_table[hashval];
   dcc_command_table[hashval] = ptr;
 }
 
@@ -288,6 +289,46 @@ find_serv_handler(char *cmd)
   }
 
   return NULL;
+}
+
+/* add_numeric_handler()
+ *
+ * input	- numeric handler
+ * output	-
+ * side effects - handler is added to numeric handler list
+ */
+void
+add_numeric_handler(struct serv_numeric *ptr)
+{
+  ptr->next = serv_numeric_table;
+  serv_numeric_table = ptr;
+};
+
+/* del_numeric_handler()
+ *
+ * input	- numeric handler
+ * output	-
+ * side effects - handler (if found) is removed from handler list
+ */
+void
+del_numeric_handler(struct serv_numeric *ptr)
+{
+  struct serv_numeric *temp_ptr;
+  struct serv_numeric *last_ptr;
+
+  for(temp_ptr = serv_numeric_table; temp_ptr;
+      temp_ptr = temp_ptr->next)
+  {
+    if(temp_ptr == ptr)
+      break;
+
+    last_ptr = temp_ptr;
+  }
+
+  if(last_ptr)
+    last_ptr->next = ptr->next;
+  else
+    serv_numeric_table = ptr->next;
 }
 
 /* hash_command()

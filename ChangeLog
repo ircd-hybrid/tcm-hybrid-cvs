@@ -1,3 +1,16 @@
+wcampbel    2002/05/06 09:28:03 EDT	(20020506_3)
+
+  Modified files:
+    .                    README-csircd 
+  Log:
+  Added a note about the hidehostname flag in csircd's class blocks and their
+  adverse effect on tcm's in memory userlist.
+  
+  Revision  Changes    Path
+  1.2       +5 -0      tcm-hybrid/README-csircd
+
+
+
 wcampbel    2002/05/06 09:10:55 EDT	(20020506_2)
 
   Modified files:

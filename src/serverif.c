@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.27 2001/08/15 22:56:09 bill Exp $";
+static char *version="$Id: serverif.c,v 1.28 2001/08/29 22:12:02 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -375,7 +375,6 @@ int socks_bindsocket(char *nick,char *user,char *host,char *ip)
 
   if(found_slot == INVALID)
     return INVALID;
-  log("a\n");
   /* open an inet socket */
   if ((plug = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -946,7 +945,7 @@ void rdpt(void)
 			    connections[i].last_message_time = time((time_t *)NULL);
 			    dccproc(i);
 			  }
-			  if (lnth2) bzero(connections[i].buffer, BUFFERSIZE);
+			  if (lnth2) connections[i].buffer[0] = '\0';
 			  if (*p) q = p;
 			  else break;
 			}
@@ -2309,7 +2308,6 @@ char *argv[];
 	   exit(1);
 	 }
     }
-
   connections[0].socket = bindsocket(serverhost);
   if (connections[0].socket == INVALID)
     exit(1);

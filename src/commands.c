@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.19 2001/08/27 02:11:09 bill Exp $";
+static char *version="$Id: commands.c,v 1.20 2001/08/29 22:12:02 bill Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -434,7 +434,7 @@ void dccproc(int connnum)
 	}
 
       if (!param2)
-        report_domains(connections[connnum].socket,5);
+        report_domains(connections[connnum].socket,4);
       else if (atoi(param2) < 1)
         prnt(connections[connnum].socket,"Usage: .domains [min users]\n");
       else
@@ -450,7 +450,7 @@ void dccproc(int connnum)
             }
           else
             {
-              report_multi(connections[connnum].socket,0);
+              report_multi(connections[connnum].socket,3);
             }
         }
       else
@@ -468,7 +468,7 @@ void dccproc(int connnum)
             }
           else
             {
-              report_multi_virtuals(connections[connnum].socket,10);
+              report_multi_virtuals(connections[connnum].socket,4);
             }
         }
       else
@@ -512,7 +512,7 @@ void dccproc(int connnum)
 	{
 	  if (!param2)
 	    prnt(connections[connnum].socket,
-		 "Usage: .list <wildcarded user>\n");
+		 "Usage: .ulist <wildcarded user>\n");
 	  else
 	    {
 	      snprintf(fulluh,sizeof(fulluh) - 1,"%s@*", param2 );
@@ -530,7 +530,7 @@ void dccproc(int connnum)
 	{
 	  if (!param2)
 	    prnt(connections[connnum].socket,
-		 "Usage: .list <wildcarded host>\n");
+		 "Usage: .hlist <wildcarded host>\n");
 	  else
 	    {
 	      snprintf(fulluh,sizeof(fulluh) - 1,"*@%s", param2 );
@@ -1466,7 +1466,7 @@ void dccproc(int connnum)
       else
 	{
 	  if (param2_orig) report_vmulti(connections[connnum].socket, atoi(param2_orig));
-	  else report_vmulti(connections[connnum].socket, 4);
+	  else report_vmulti(connections[connnum].socket, 3);
 	}
       break;
 
@@ -1512,9 +1512,8 @@ void dccproc(int connnum)
 	{
 	  if(param2_orig)
 	    {
-	      toserv("LOCOPS :(%s) %s %s\n",
+	      toserv("LOCOPS :(%s) %s\n",
 		     connections[connnum].nick,
-		     param2_orig,
 		     param3?param3:"");
 	    }
 	  else

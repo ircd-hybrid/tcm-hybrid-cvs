@@ -27,6 +27,7 @@ all: tcm
 build: tcm
 
 clean: 
+	@rm -f DEBUG
 	@for i in $(SUBDIRS); do \
 		echo "Cleaning $$i";\
 		cd $$i;\
@@ -46,7 +47,9 @@ distclean: clean
 		${MAKE} distclean; cd ..;\
 	done
 	${RM} -f Makefile config.status config.cache config.log include/setup.h
-	${RM} -f bin/tcm bin/mkpasswd etc/*.pref
+	${RM} -f DEBUG bin/tcm bin/mkpasswd etc/*.pref
+	@echo "all:" > Makefile
+	@echo "	@echo \"Run ./configure first, dumby\"" >> Makefile
 
 .c.o:
 	${CC} ${CPPFLAGS} ${CFLAGS} ${DEFINES} -c $<

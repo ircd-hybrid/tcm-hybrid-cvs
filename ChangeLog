@@ -1,3 +1,15 @@
+wcampbel    2002/05/09 09:02:39 EDT	(20020509_0)
+
+  Modified files:
+    src                  modules.c 
+  Log:
+  Ignore anything in the module directory with a filename beginning with '.'.
+  
+  Revision  Changes    Path
+  1.23      +1 -0      tcm-hybrid/src/modules.c
+
+
+
 jv          2002/05/08 17:02:12 EDT	(20020508_6)
 
   Modified files:

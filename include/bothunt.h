@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.23 2002/04/11 23:35:38 einride Exp $ */
+/* $Id: bothunt.h,v 1.24 2002/04/19 23:15:06 wcampbel Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -83,5 +83,7 @@ void init_link_look_table(void);
 void report_failures(int sock, int num);
 void report_domains(int sock, int num);
 void report_vbots(int sock,int nclones);
+
+void m_gline(int connnum, int argc, char *argv[]);
 
 #endif

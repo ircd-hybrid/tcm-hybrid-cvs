@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.41 2002/04/17 22:09:23 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.42 2002/04/19 23:15:09 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -43,6 +43,7 @@
 #include "stdcmds.h"
 #include "modules.h"
 #include "wild.h"
+#include "match.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"

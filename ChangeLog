@@ -1,3 +1,17 @@
+leeh        2002/06/21 11:54:58 EDT	(20020621_15)
+
+  Modified files:
+    src                  parse.c userlist.c 
+  Log:
+  - added add_oper() which will add an oper to the userlist.
+  - renamed add_an_oper() to on_stats_o()
+  
+  Revision  Changes    Path
+  1.76      +1 -1      tcm-hybrid/src/parse.c
+  1.124     +39 -65    tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/21 11:34:16 EDT	(20020621_14)
 
   Modified files:

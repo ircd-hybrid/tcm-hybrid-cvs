@@ -54,7 +54,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.4 2001/09/21 04:57:49 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.5 2001/09/22 04:47:37 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -194,29 +194,16 @@ void _ontraceuser(int connnum, int argc, char *argv[])
       right_bracket_ptr--;
     }
 
-  ip_ptr = right_bracket_ptr;
-  while(ip_ptr != argv[6])
-    {
-      if( *ip_ptr == '(' )
-	{
-	  ip_ptr++;
-	  break;
-	}
-      ip_ptr--;
-    }
+  ip_ptr = argv[6]+1;
+
+  while((*ip_ptr != ')') && *ip_ptr) ++ip_ptr;
+  if (*ip_ptr == ')') *ip_ptr = '\0';
 
   class_ptr = argv[4];
   chopuh(YES,argv[5],&userinfo);
+  snprintf(userinfo.ip, sizeof(userinfo.ip), "%s", argv[6]+1);
   snprintf(userinfo.class, sizeof(userinfo.class) - 1, "%s", class_ptr);
 
-  /* old -5 hybrid does not have IP in /trace ;-( 
-   * quick hack is to look for '.' in ip
-   */
-  if(strchr(ip_ptr,'.'))
-    userinfo.ip = ip_ptr;
-  else
-    userinfo.ip = NULL;
-  if ((ip_ptr = strchr(argv[5], '['))) *ip_ptr = '\0';
   adduserhost(argv[5],&userinfo,YES,is_oper);
 }
 
@@ -627,224 +614,6 @@ static int host_is_ip(char *host_name)
 #endif
 
 /*
- *   Chop a string of form "nick [user@host]" or "nick[user@host]" into
- *   nick and userhost parts.  Return pointer to userhost part.  Nick
- *   is still pointed to by the original param.  Note that since [ is a
- *   valid char for both nicks and usernames, this is non-trivial.
- */
-/* Also, for digi servers, added form of "nick (user@host)" */
-
-/*
- * Due to the fact texas net irc servers changed the output of the /trace
- * command slightly, chopuh() was coring... I've made the code a bit
- * more robust - Dianora
- * 
- */
-
-void chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
-{
-  char *uh;
-  char *p;
-  char skip = NO;
-  char *right_brace_pointer;
-  char *right_square_bracket_pointer;
-#ifdef DEBUGMODE
-  placed;
-#endif
-
-/* I try to pick up an [IP] from a connect or disconnect message
- * since this routine is also used on trace, some heuristics are
- * used to determine whether the [IP] is present or not.
- * *sigh* I suppose the traceflag could be used to not even go 
- * through these tests
- * bah. I added a flag -Dianora
- */
-
-  userinfo->user = (char *)NULL;
-  userinfo->host = (char *)NULL;
-  userinfo->ip = (char *)NULL;
-
-  /* ok, if its a hybrid server or modified server,
-   * I go from right to left picking up extra bits
-   * [ip] {class}, then go and pick up the nick!user@host bit
-   */
-
-  if(!istrace)	/* trace output is not the same as +c output */
-    {
-      snprintf(userinfo->class, sizeof(userinfo->class) - 1, "unknown");
-
-      p = nickuserhost;
-      while(*p)
-	p++;
-
-      right_square_bracket_pointer = (char *)NULL;
-      right_brace_pointer = (char *)NULL;
-
-      while( p != nickuserhost )
-	{
-	  if(right_square_bracket_pointer == (char *)NULL)
-	    if(*p == ']')	/* found possible [] IP field */
-	      right_square_bracket_pointer = p;
-
-	  if(*p == '}') /* found possible {} class field */
-	    right_brace_pointer = p;
-
-	  if(*p == ')')	/* end of scan for {} class field and [] IP field */
-	    break;
-	  p--;
-	}
-
-      if(right_brace_pointer)
-	{
-	  p = right_brace_pointer;
-	  *p = '\0';
-	  p--;
-	  while(p != nickuserhost)
-	    {
-	      if(*p == '{')
-		{
-		  p++;
-		  if (*p == ' ') p++;
-		  snprintf(userinfo->class, sizeof(userinfo->class) - 1,
-                           "%s", p);
-		  break;
-		}
-	      p--;
-	    }
-	}
-
-      if(right_square_bracket_pointer && config_entries.hybrid)
-        {
-	  p = right_square_bracket_pointer;
-          *p = '\0';
-          p--;
-          while(p != nickuserhost)
-            {
-              if(*p == '[')
-                {
-                  *p = '\0';
-                  p++;
-                  break;
-                }
-	      else if(*p == '@') /* nope. this isn't a +c line */
-		{
-		  p = (char *)NULL;
-		  break;
-		}
-	      else
-		p--;
-          }
-
-        if(p)
-          {
-            userinfo->ip = p;
-          }
-      }
-    }
-
-  /* If it's the first format, we have no problems */
-  if ( !(uh = strchr(nickuserhost,' ')) )
-    {
-      if( !(uh = strchr(nickuserhost,'[')) )
-	{
-	  if( !(uh = strchr(nickuserhost,'(')) )	/* lets see... */
-	    {					/* MESSED up GIVE UP */
-	      (void)fprintf(stderr,
-			    "You have VERY badly screwed up +c output!\n");
-	      (void)fprintf(stderr,
-			    "1st case nickuserhost = [%s]\n", nickuserhost);
-	      return;		/*screwy...prolly core in the caller*/
-	    }
-
-	  if( (p = strrchr(uh,')')) )
-	    {
-	      *p = '\0';
-	    }
-	  else
-	    {
-	      (void)fprintf(stderr,
-			    "You have VERY badly screwed up +c output!\n");
-	      (void)fprintf(stderr,
-			    "No ending ')' nickuserhost = [%s]\n",
-			    nickuserhost);
-	      /* No ending ')' found, but lets try it anyway */
-	    }
-          userinfo->user = uh;
-
-	  if( (p = strchr(userinfo->user,'@')) )
-	    {
-              *p = '\0';
-              p++;
-              userinfo->host = p;
-	    }
-	  return;
-	}
-
-      if (strchr(uh+1,'['))
-	{
-	  /*moron has a [ in the nickname or username.  Let's do some AI crap*/
-	  uh = strchr(uh,'~');
-	  if (!uh)
-	    {
-	      /* No tilde to guess off of... means the lamer checks out with
-		 identd and has (more likely than not) a valid username.
-		 Find the last [ in the string and assume this is the
-		 divider, unless it creates an illegal length username
-		 or nickname */
-	      uh = nickuserhost + strlen(nickuserhost);
-	      while (--uh != nickuserhost)
-		if (*uh == '[' && *(uh+1) != '@' && uh - nickuserhost < 10)
-		  break;
-	    }
-	  else
-	    {
-	      /* We have a ~ which is illegal in a nick, but also valid
-	       * in a faked username.  Assume it is the marker for the start
-	       * of a non-ident username, which means a [ should precede it.
-	       */
-
-	      if (*(uh-1) == '[')
-		{
-		  --uh;
-		}
-	      else
-		/* Idiot put a ~ in his username AND faked identd.  Take the
-		 * first [ that precedes this, unless it creates an
-		 *  illegal length username or nickname
-		 */
-		while (--uh != nickuserhost)
-		  if (*uh == '[' && uh - nickuserhost < 10)
-		    break;
-	    }
-	}
-    }
-  else
-    skip = YES;
-
-  *(uh++) = 0;
-  if (skip)
-    ++uh;                 /* Skip [ */
-  if (strchr(uh,' '))
-    *(strchr(uh,' ')) = 0;
-  if (uh[strlen(uh)-1] == '.')
-    uh[strlen(uh)-2] = 0;   /* Chop ] */
-  else
-    uh[strlen(uh)-1] = 0;   /* Chop ] */
-  userinfo->user = uh;
-
-  if( (p = strchr(userinfo->user,'@')) )
-    {
-      *p = '\0';
-      p++;
-      userinfo->host = p;
-    }
-#ifdef DEBUGMODE
-  placed;
-#endif
-  return;
-}
-
-/*
  * onservnotice()
  *
  * inputs	- message from server
@@ -868,43 +637,41 @@ void onservnotice(int connnum, int argc, char *argv[])
 #endif
 
   memset((char *)&message, 0, sizeof(message));
-  for (i=0;i<argc;++i)
+  for (i=3;i<argc;++i)
     {
       strcat((char *)&message, argv[i]);
       strcat((char *)&message, " ");
     }
   if (message[strlen(message)-1] == ' ') message[strlen(message)-1] = '\0';
+  if (message[0] == ':') p = message+1;
+  else p = message;
 
+  if (!strncasecmp(p, "*** Notice -- ", 14)) p+=14;
   i = -1;
   while (msgs_to_mon[++i])
     {
-      if (!strncmp(message,msgs_to_mon[i],strlen(msgs_to_mon[i])))
+      if (!strncmp(p,msgs_to_mon[i],strlen(msgs_to_mon[i])))
         break;
     }
 
-  if (msgs_to_mon[i]) q = message+strlen(msgs_to_mon[i]);
-  /*
-   * I added a few things here, including several additions to msgs_to_mon
-   * -bill
-   */
-
-  if (strstr(message, "closed the connection") &&
-      !strncmp(message, "Server", 6)) 
+  if (msgs_to_mon[i]) q = p+strlen(msgs_to_mon[i]);
+  if (strstr(p, "closed the connection") &&
+      !strncmp(p, "Server", 6)) 
     {
       sendtoalldcc(SEND_LINK_ONLY, "Lost server: %s\n", argv[2]);
       return;
     }
 
   /* Kline notice requested by Toast */
-  if (strstr(message, "added K-Line for"))
+  if (strstr(p, "added K-Line for"))
     {
-      kline_add_report(message);
+      kline_add_report(p);
       return;
     }
 
-  if (strstr(message, "KILL message for"))
+  if (strstr(p, "KILL message for"))
     {
-      kill_add_report(message);
+      kill_add_report(p);
       return;
     }
 
@@ -1053,13 +820,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 	{
 	  if(*user == '~')
 	    user++;
-
-	  suggest_action(get_action_type("ctcp"),
-			     nick,
-			     user,
-			     host,
-			     NO,
-			     YES);
+	  suggest_action(get_action_type("ctcp"), nick, user, host, NO, YES);
 	}
 
       break;
@@ -1093,12 +854,7 @@ void onservnotice(int connnum, int argc, char *argv[])
       if(!strstr(p,"possible spambot"))
 	break;
 
-      suggest_action(get_action_type("spambot"),
-			 nick,
-			 user,
-			 host,
-			 NO,
-			 YES);
+      suggest_action(get_action_type("spambot"), nick, user, host, NO, YES);
       break;
 
     case ILINEFULL:
@@ -1162,7 +918,6 @@ char makeconn(char *hostport,char *nick,char *userhost)
           return 0;
         }
     }
-
   connections[i].socket = bindsocket(hostport);
 
   if (connections[i].socket == INVALID)
@@ -1206,11 +961,7 @@ char makeconn(char *hostport,char *nick,char *userhost)
 
   connections[i].last_message_time = time((time_t *)NULL);
 
-  toserv("%s(%s)\n",VERSION,SERIALNUM);
   print_motd(connections[i].socket);
-
-  prnt(connections[i].socket,"current clone action: %s\n",
-       config_entries.clone_act);
 
   if(config_entries.autopilot)
     prnt(connections[i].socket,"autopilot is ON\n");
@@ -1254,17 +1005,20 @@ void _onctcp(int connnum, int argc, char *argv[])
 
   nick = argv[0] + 1;
   if ((hold = strchr(argv[0], '!'))) *hold = '\0';
+  else return;
+  ++hold;
   if (dccbuff[0] != '\0') memset(&dccbuff, 0, sizeof(dccbuff));
-  for (i=4;i<argc;++i)
-    {
-      strncat(dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
-      strncat(dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
-    }
-  if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
-  if (dccbuff[strlen(dccbuff)-1] == '\001') dccbuff[strlen(dccbuff)-1] = '\0';
-  printf("%d %d %d %d\n", msg[0], msg[1], msg[2], msg[3]);
+
+  dccbuff[0] = '#';
   if (!strncasecmp(msg,"PING",4))
     {
+      for (i=4;i<argc;++i)
+        {
+          strncat(dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
+          strncat(dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
+        }
+      if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
+      if (dccbuff[strlen(dccbuff)-1] == '\001') dccbuff[strlen(dccbuff)-1] = '\0';
       notice(nick, "\001PING %s\001\n", dccbuff);
       return;
     }
@@ -1272,21 +1026,17 @@ void _onctcp(int connnum, int argc, char *argv[])
     {
       notice(nick,"\001VERSION %s(%s)\001",VERSION,SERIALNUM);
     }
-  else if (!strncasecmp(msg,"DCC CHAT",8))
+  else if (!strcasecmp(argv[3],":\001DCC") && !strcasecmp(argv[4], "CHAT"))
     {
-      nick = argv[0]+1;
-      if ((hold = strchr(nick, '!'))) *hold = '\0';
-      else return;
-      ++hold;
-      if (!(msg = strrchr((char *)&dccbuff, ' '))) return;
-      ++msg;
-      if (atoi(msg) < 1024)
+      strcat((char *)&dccbuff, argv[6]);
+      if (atoi(argv[7]) < 1024)
         {
           notice(nick, "Invalid port specified for DCC CHAT. Not funny.");
           return;
         }
-      printf("makeconn(\"%s\", \"%s\", \"%s\")\n", msg, nick, hold);
-      if (!makeconn(msg, nick, hold))
+      strcat(dccbuff, ":");
+      strcat(dccbuff, argv[7]);
+      if (!makeconn(dccbuff, nick, hold))
         {
 	  notice(nick,"DCC CHAT connection failed");
 	  return;
@@ -1620,7 +1370,7 @@ static void adduserhost(char *nick,
   newuser->user[MAX_NICK] = '\0';
   strncpy(newuser->host,userinfo->host,MAX_HOST);
   newuser->host[MAX_HOST-1] = '\0';
-  if(userinfo->ip)
+  if(userinfo->ip[0])
     strncpy(newuser->ip_host,userinfo->ip,MAX_IP);
   else
     strcpy(newuser->ip_host,"0.0.0.0");
@@ -2004,7 +1754,7 @@ void check_host_clones(char *host)
 	      if(strcmp(last_user,current_user) != 0 && current_identd)
 		different = YES;
 
-	      suggest_action(get_action_type("clones"), find->info->nick, find->info->user,
+	      suggest_action(get_action_type("clone"), find->info->nick, find->info->user,
 			     find->info->host, different, current_identd);
 	    }
 
@@ -2137,7 +1887,7 @@ void check_virtual_host_clones(char *ip_class_c)
 			    tmrec->tm_min,
 			    tmrec->tm_sec);
 
-	      suggest_action(get_action_type("vclones"), find->info->nick, find->info->user,
+	      suggest_action(get_action_type("vclone"), find->info->nick, find->info->user,
 			     find->info->host, NO, NO);
 	    }
 
@@ -2225,7 +1975,7 @@ static void connect_flood_notice(char *server_notice)
 		{
 		  if (connect_flood[i].connect_count >= MAX_CONNECT_FAILS)
 		    {
-		      if (!strncasecmp(config_entries.cflood_act, "dline", 5))
+		      if (!strncasecmp(get_action_method("cflood"), "dline", 5))
 			suggest_action(get_action_type("cflood"), nick_reported, user, ip,
                                        NO, YES);
 		      else
@@ -2360,7 +2110,7 @@ static void link_look_notice(char *server_notice)
   /* Don't even complain about opers */
 
   sendtoalldcc(SEND_LINK_ONLY,
-	       "[LINKS] by %s (%s@%s)\n",
+	       "[LINKS by %s (%s@%s)]\n",
 	       nick_reported, user, host ); /* - zaph */
 
   if ( isoper(user,host) )  
@@ -2498,7 +2248,7 @@ void bot_report_kline(char *server_notice,char *type_of_bot)
 	       user,
 	       host);
 
-  suggest_action(get_action_type("bots"), nick, user, host, NO, YES);
+  suggest_action(get_action_type("bot"), nick, user, host, NO, YES);
 
   log("bot warning [%s@%s]\n", user, host);
 }
@@ -2619,7 +2369,7 @@ static void cs_clones(char *server_notice)
   *host = '\0';
   host++;
 
-  suggest_action(get_action_type("clones"), "", user, host, NO, identd);
+  suggest_action(get_action_type("clone"), "", user, host, NO, identd);
 }
 
 /*
@@ -3035,8 +2785,62 @@ void _reload_bothunt(int connnum, int argc, char *argv[])
  inithash();
 }
 
+void _prefsave_bothunt(int connnum, int argc, char *argv[])
+{
+  char buffer[1024];
+  if (buffer[0]) memset((char *)&buffer,0,sizeof(buffer));
+
+  snprintf(buffer, sizeof(buffer), "A:cflood:%s:%s:%d\n", get_action_method("cflood"),
+           get_action_reason("cflood"), action_log("cflood"));
+  write(connnum, buffer, strlen(buffer));
+
+  snprintf(buffer, sizeof(buffer), "A:spambot:%s:%s:%d\n", get_action_method("spambot"),
+           get_action_reason("spambot"), action_log("spambot"));
+  write(connnum, buffer, strlen(buffer));
+
+  snprintf(buffer, sizeof(buffer), "A:clone:%s:%s:%d\n", get_action_method("clone"),
+           get_action_reason("clone"), action_log("clone"));
+  write(connnum, buffer, strlen(buffer));
+
+  snprintf(buffer, sizeof(buffer), "A:ctcp:%s:%s:%d\n", get_action_method("ctcp"),
+           get_action_reason("ctcp"), action_log("ctcp"));
+  write(connnum, buffer, strlen(buffer));
+
+  snprintf(buffer, sizeof(buffer), "A:flood:%s:%s:%d\n", get_action_method("flood"),
+           get_action_reason("flood"), action_log("flood"));
+  write(connnum, buffer, strlen(buffer));
+
+  snprintf(buffer, sizeof(buffer), "A:link:%s:%s:%d\n", get_action_method("link"),
+           get_action_reason("link"), action_log("link"));
+  write(connnum, buffer, strlen(buffer));
+
+  snprintf(buffer, sizeof(buffer), "A:bot:%s:%s:%d\n", get_action_method("bot"),
+           get_action_reason("bot"), action_log("bot"));
+  write(connnum, buffer, strlen(buffer));
+
+  snprintf(buffer, sizeof(buffer), "A:vclone:%s:%s:%d\n", get_action_method("vclone"),
+           get_action_reason("vclone"), action_log("vclone"));
+  write(connnum, buffer, strlen(buffer));
+}
+
+void _config_bothunt(int connnum, int argc, char *argv[])
+{
+  if (argv[0] != 'A' && argv[0] != 'a') return;
+
+  if (!strcasecmp(argv[1], "cflood") || !strcasecmp(argv[1], "spambot") || 
+      !strcasecmp(argv[1], "clone")  || !strcasecmp(argv[1], "ctcp") || 
+      !strcasecmp(argv[1], "flood")  || !strcasecmp(argv[1], "link") || 
+      !strcasecmp(argv[1], "bot")    || !strcasecmp(argv[1], "vclone"))
+    {
+      if (argc >= 3) set_action_method(argv[1], argv[2]);
+      if (argc >= 4) set_action_reason(argv[1], argv[3]);
+    }
+}
+
 void _modinit()
 {
+  add_common_function(F_CONFIG, _config_bothunt);
+  add_common_function(F_PREFSAVE, _prefsave_bothunt);
   add_common_function(F_RELOAD, _reload_bothunt);
   add_common_function(F_SERVER_NOTICE, onservnotice);
   add_common_function(F_ONCTCP, _onctcp);
@@ -3054,4 +2858,12 @@ void _modinit()
 #endif
   memset(&nick_changes,0,sizeof(nick_changes));
   init_link_look_table();
+  add_action("cflood", "dline", "Connect flooding", YES);
+  add_action("spambot", "warn", "Spamming is prohibited", YES);
+  add_action("clone", "kline", "Cloning is prohibited", YES);
+  add_action("ctcp", "kline", "CTCP flooding", YES);
+  add_action("flood", "kline", "Flooding is prohibited", YES);
+  add_action("link", "kline 180", "Link lookers are prohibited", YES);
+  add_action("bot", "kline", "Bots are prohibited", YES);
+  add_action("vclone", "warn", "Cloning is prohibited", YES);
 }

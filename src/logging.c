@@ -40,7 +40,7 @@
 #include "bothunt.h"
 #include "logging.h"
 
-static char *version="$Id: logging.c,v 1.11 2001/09/20 19:52:30 bill Exp $";
+static char *version="$Id: logging.c,v 1.12 2001/09/22 04:47:37 bill Exp $";
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file
@@ -88,7 +88,7 @@ void chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
 
   userinfo->user = (char *)NULL;
   userinfo->host = (char *)NULL;
-  userinfo->ip = (char *)NULL;
+  memset(userinfo->ip,0,sizeof(userinfo->ip));
 
   /* ok, if its a hybrid server or modified server,
    * I go from right to left picking up extra bits
@@ -160,11 +160,8 @@ void chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
               else
                 p--;
           }
-
-        if(p)
-          {
-            userinfo->ip = p;
-          }
+        if (p)
+          snprintf(userinfo->ip, sizeof(userinfo->ip), "%s", p);
       }
     }
 

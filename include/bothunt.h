@@ -9,7 +9,7 @@ struct plus_c_info
     char *user;
     char *host;
     char class[100];
-    char *ip;
+    char ip[16];
   };
 
 /* The code uses the index into the msgs_to_mon[] table as the

@@ -246,6 +246,8 @@ void modules_init(void) {
     dcc_signon = (struct common_function *) malloc(sizeof(struct common_function));
   if (dcc_signoff == NULL)
     dcc_signoff = (struct common_function *) malloc(sizeof(struct common_function));
+  if (dcc == NULL)
+    dcc = (struct common_function *) malloc(sizeof(struct common_function));
   if (user_signon == NULL)
     user_signon = (struct common_function *) malloc(sizeof(struct common_function));
   if (user_signoff == NULL)

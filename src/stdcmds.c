@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.5 2001/09/20 19:52:30 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.6 2001/09/22 04:47:37 bill Exp $";
 
 int doingtrace = NO;
 
@@ -168,7 +168,7 @@ void prnt(int sock, ...)
 
   if(config_entries.debug)
     {
-      (void)printf("-> %s",msgbuf);     /* - zaph */
+//      (void)printf("-> %s",msgbuf);     /* - zaph */
       if(outfile)
         (void)fprintf(outfile,"%s",msgbuf);
     }
@@ -289,7 +289,7 @@ void msg_mychannel(char *format, ...)
 
   vsprintf(message, format, va );
 
-  privmsg(mychannel,message);
+  privmsg(config_entries.defchannel,message);
 
   va_end(va);
 }

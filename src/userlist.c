@@ -33,7 +33,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.15 2001/09/20 19:52:30 bill Exp $";
+static char *version="$Id: userlist.c,v 1.16 2001/09/22 04:47:37 bill Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct tcm_file_entry tcmlist[MAXTCMS];
@@ -80,7 +80,8 @@ void load_config_file(char *file_name)
   char *act;
   char *reason;
   char *message_ascii;
-  int  message;
+  char *argv[20];
+  int  message, argc;
   char *p;
   char *q;
   int error_in_config;		/* flag if error was found in config file */
@@ -107,10 +108,6 @@ void load_config_file(char *file_name)
 
   config_entries.channel_report = 
     CHANNEL_REPORT_ROUTINE | CHANNEL_REPORT_CLONES;
-
-  strcpy(config_entries.cflood_act, "dline");
-  strncpy(config_entries.cflood_reason, REASON_KDRONE,
-	  sizeof(config_entries.cflood_reason) - 1);
 
   strcpy(config_entries.sclone_act, "kline 60");
   strncpy(config_entries.sclone_reason, REASON_AUTO_MULTI_SERVER_CLONES,
@@ -165,6 +162,24 @@ void load_config_file(char *file_name)
 
   while(fgets(line, MAX_BUFF-1,fp))
     {
+      argc=0;
+      p = line;
+      q = strchr(p, ':');
+      for (;q;q=strchr(p, ':'))
+        {
+          *q = '\0';
+          if (!(argv[argc] = (char *)malloc(200))) gracefuldie(0, __FILE__, __LINE__);
+          snprintf(argv[argc], 200, "%s", p);
+          p = q+1;
+          ++argc;
+        }
+      if (!(argv[argc] = (char *)malloc(200))) gracefuldie(0, __FILE__, __LINE__);
+      snprintf(argv[argc], sizeof(argv[argc]), "%s", p);
+      ++argc;
+
+      for (temp=config;temp;temp=temp->next)
+        temp->function(0, argc, argv);
+
       if(line[0] == '#')
 	continue;
 
@@ -474,62 +489,17 @@ void load_prefs(void)
  */
 void save_prefs(void)
 {
-  FILE *fp;
+  int fp;
+  struct common_function *temp;
 
-  if( !(fp = fopen(PREF_FILE,"w")) )
+  if ((fp = open(PREF_FILE,O_CREAT)) == -1)
     {
-      sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s\n", PREF_FILE );
+      sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s: %s\n", PREF_FILE, strerror(errno));
       return;
     }
 
-  if(config_entries.clone_act[0])
-    fprintf(fp,"A:clone:%s:%s:%d\n",
-	    config_entries.clone_act,config_entries.clone_reason,
-	    config_entries.channel_report&CHANNEL_REPORT_CLONES?1:-1);
-
-#ifdef AUTO_DLINE
-  if(config_entries.vclone_act[0])
-    fprintf(fp,"A:vclone:%s:%s:%d\n",
-	    config_entries.vclone_act,config_entries.vclone_reason,
-	    config_entries.channel_report&CHANNEL_REPORT_VCLONES?1:-1);
-#endif
-
-  if(config_entries.cflood_act[0])
-    fprintf(fp,"A:cflood:%s:%s:%d\n",
-	    config_entries.cflood_act,config_entries.cflood_reason,
-	    config_entries.channel_report&CHANNEL_REPORT_CFLOOD?1:-1);
-
-  if(config_entries.sclone_act[0])
-    fprintf(fp,"A:sclone:%s:%s:%d\n",
-	    config_entries.sclone_act,config_entries.sclone_reason,
-	    config_entries.channel_report&CHANNEL_REPORT_SCLONES?1:-1);
-
-  if(config_entries.flood_act[0])
-    fprintf(fp,"A:flood:%s:%s:%d\n",
-	    config_entries.flood_act,config_entries.flood_reason,
-	    config_entries.channel_report&CHANNEL_REPORT_FLOOD?1:-1);
-
-  if(config_entries.link_act[0])
-    fprintf(fp,"A:link:%s:%s:%d\n",
-	    config_entries.link_act,config_entries.link_reason,
-	    config_entries.channel_report&CHANNEL_REPORT_LINK?1:-1);
-
-  if(config_entries.bot_act[0])
-    fprintf(fp,"A:bot:%s:%s:%d\n",
-	    config_entries.bot_act,config_entries.bot_reason,
-	    config_entries.channel_report&CHANNEL_REPORT_BOT?1:-1);
-
-#ifdef SERVICES_DRONES
-  if(config_entries.drones_act[0])
-    fprintf(fp,"A:drones:%s:%s:%d\n",
-	    config_entries.drones_act,config_entries.drones_reason,
-	    config_entries.channel_report&CHANNEL_REPORT_DRONE?1:-1);
-#endif
-
-  if(config_entries.spambot_act[0])
-    fprintf(fp,"A:spambot:%s:%s:%d\n",
-	    config_entries.spambot_act,config_entries.spambot_reason,
-	    config_entries.channel_report&CHANNEL_REPORT_SPAMBOT?1:-1);
+  for (temp=prefsave;temp;temp=temp->next)
+    temp->function(fp, 0, NULL);
 
   (void)fclose(fp);
 }

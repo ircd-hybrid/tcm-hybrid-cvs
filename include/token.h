@@ -13,7 +13,6 @@
 #define K_NFIND    	9
 #define K_LIST    	10
 #define K_KILLLIST 	11
-#define K_GLINE   	12
 #define K_KLINE   	13
 #define K_KCLONE  	14
 #define K_KFLOOD  	15
@@ -56,12 +55,10 @@
 #define K_LOCOPS        54
 #define K_INFO          55
 #define K_VMULTI	56
-#define K_ULIST         57
-#define K_HLIST         58
-#define K_KDRONE	59
-#define K_UPTIME        60
-#define K_AUTOPILOT     61
-#define K_QUOTE         62
+#define K_KDRONE	57
+#define K_UPTIME        58
+#define K_AUTOPILOT     59
+#define K_QUOTE         60
 
 char *splitc (char *rest, char divider);
 char *split (char *first);

@@ -1,3 +1,15 @@
+leeh        2002/05/25 22:14:32 EDT	(20020526_8)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  - nah, shouldve been <
+  
+  Revision  Changes    Path
+  1.105     +1 -1      tcm-hybrid/src/bothunt.c
+
+
+
 db          2002/05/25 22:12:48 EDT	(20020526_7)
 
   Modified files:

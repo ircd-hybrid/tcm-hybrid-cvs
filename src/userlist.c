@@ -32,11 +32,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.9 2001/07/22 02:52:37 wcampbel Exp $";
-
-#ifdef NEXT
-char *strdup(char *);
-#endif
+static char *version="$Id: userlist.c,v 1.10 2001/07/22 18:44:48 wcampbel Exp $";
 
 struct config_list config_entries;
 struct auth_file_entry userlist[MAXUSERS];

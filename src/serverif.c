@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.22 2001/07/22 15:25:11 wcampbel Exp $";
+static char *version="$Id: serverif.c,v 1.23 2001/07/22 18:44:47 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -2282,7 +2282,7 @@ char *argv[];
     }
   else
     {
-      if( !(outfile = fopen("tcm.pid","w")) )
+      if( !(outfile = fopen("etc/tcm.pid","w")) )
 	{
 	  fprintf(stderr,"Cannot write tcm.pid\n");
 	  exit(1);

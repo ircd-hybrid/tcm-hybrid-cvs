@@ -1,3 +1,25 @@
+leeh        2002/05/26 13:44:04 EDT	(20020526_20)
+
+  Modified files:
+    include              stdcmds.h tcm.h tcm_io.h userlist.h 
+    src                  bothunt.c services.c stdcmds.c tcm_io.c 
+  Log:
+  - ripped msg_mychannel, just call privmsg(channel, ...)
+  - ripped MAX_DOMAIN, its the same as MAX_HOST
+  - reverted the services clone/drone warnings to how they used to be
+  
+  Revision  Changes    Path
+  1.23      +0 -1      tcm-hybrid/include/stdcmds.h
+  1.43      +0 -4      tcm-hybrid/include/tcm.h
+  1.22      +1 -1      tcm-hybrid/include/tcm_io.h
+  1.41      +2 -2      tcm-hybrid/include/userlist.h
+  1.111     +2 -2      tcm-hybrid/src/bothunt.c
+  1.4       +15 -2     tcm-hybrid/src/services.c
+  1.75      +11 -27    tcm-hybrid/src/stdcmds.c
+  1.45      +4 -4      tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/26 12:10:30 EDT	(20020526_19)
 
   Modified files:

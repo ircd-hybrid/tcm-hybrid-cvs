@@ -1,3 +1,22 @@
+einride     2001/12/16 15:22:41 EST	(20011216_2)
+
+  Modified files:
+    modules              serverif.c 
+    src                  stdcmds.c 
+  Log:
+  A struct in serverif.c lacked "extern", this was causing the SEGVs.
+  
+  Changed tcm created K-lines to be *@host rather than ~*@host, as e.g.
+  connection flooding from unidented users isn't stopped by the ~* K-line
+  
+  Changed some strcpy/strcat to strncpy/strncat
+  
+  Revision  Changes    Path
+  1.37      +13 -8     tcm-hybrid/modules/serverif.c
+  1.35      +7 -24     tcm-hybrid/src/stdcmds.c
+
+
+
 einride     2001/12/15 20:33:22 EST	(20011216_1)
 
   Modified files:

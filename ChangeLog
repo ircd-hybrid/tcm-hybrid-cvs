@@ -1,3 +1,15 @@
+jv          2002/05/08 17:02:12 EDT	(20020508_6)
+
+  Modified files:
+    src                  modules.c 
+  Log:
+  - skip files shorter than 4 characters in load_all_modules().
+  
+  Revision  Changes    Path
+  1.22      +2 -1      tcm-hybrid/src/modules.c
+
+
+
 einride     2002/05/08 17:00:48 EDT	(20020508_5)
 
   Modified files:

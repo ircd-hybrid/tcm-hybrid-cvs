@@ -1,3 +1,18 @@
+jmallett    2002/05/25 12:32:41 EDT	(20020525_21)
+
+  Modified files:
+    include              tcm.h 
+    src                  main.c stdcmds.c 
+  Log:
+  Track average allocation, and number of allocations.
+  
+  Revision  Changes    Path
+  1.37      +1 -0      tcm-hybrid/include/tcm.h
+  1.70      +4 -0      tcm-hybrid/src/main.c
+  1.71      +3 -1      tcm-hybrid/src/stdcmds.c
+
+
+
 jmallett    2002/05/25 12:29:16 EDT	(20020525_20)
 
   Modified files:

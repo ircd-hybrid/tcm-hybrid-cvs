@@ -1,3 +1,19 @@
+db          2002/06/04 20:21:44 EDT	(20020605_2)
+
+  Modified files:
+    include              dcc.h 
+    src                  dcc.c parse.c 
+  Log:
+  - changed interface for accept_dcc_connection to have port passed in
+    as an int.
+  
+  Revision  Changes    Path
+  1.6       +1 -1      tcm-hybrid/include/dcc.h
+  1.8       +2 -15     tcm-hybrid/src/dcc.c
+  1.55      +16 -1     tcm-hybrid/src/parse.c
+
+
+
 leeh        2002/06/04 20:10:58 EDT	(20020605_1)
 
   Modified files:

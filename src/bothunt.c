@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.191 2002/08/08 19:00:45 bill Exp $
+ * $Id: bothunt.c,v 1.192 2002/08/09 01:53:56 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -1058,6 +1058,7 @@ cs_clones(char *snotice)
  * output	- NONE
  * side effects
  *
+ * Audited for H6, H7, cs.
  */
 
 static void
@@ -1070,42 +1071,35 @@ check_nick_flood(char *snotice)
   char *user;
   char *host;
 
-  if ((p = strtok(snotice," ")) == NULL)	/* Throw away the "From" */
+  if (*snotice == ' ')
+    snotice++;
+  if ((p = strtok(snotice," ")) == NULL)        /* p will be "From" */
+    return;
+  if ((p = strtok(NULL," ")) == NULL)           /* p will point to the nick */
     return;
 
   if (strcasecmp(p,"From") != 0)
     {
       nick1 = p;	/* This _should_ be nick1 */
 
-      if ((user_host = strtok(NULL," ")) == NULL)	/* (user@host) */
+      if ((p = strtok(NULL," ")) == NULL)               /* to */
+        return;
+
+      if ((nick2 = strtok(NULL," ")) == NULL)               /* nick2 (aa) */
+        return;
+
+      if ((user_host = strtok(NULL," ")) == NULL)	/* [user@host] */
 	return;
 
-      if ((p = strrchr(user_host,')')) != NULL)
+      if ((p = strrchr(user_host,']')) != NULL)
 	*p = '\0';
+
+      if (user_host[0] == '[')
+        user_host++;
 
       if (get_user_host(&user, &host, user_host) == NULL)
 	return;
 
-      if ((p = strtok(NULL," ")) == NULL)
-	return;
-
-      if (strcmp(p,"now") != 0 )
-	return;
-
-      if ((p = strtok(NULL," ")) == NULL)
-	return;
-
-      if (strcmp(p,"known") != 0 )
-	return;
-
-      if ((p = strtok(NULL," ")) == NULL)
-	return;
-
-      if (strcmp(p,"as") != 0)
-	return;
-
-      if ((nick2 = strtok(NULL," ")) == NULL)
-	return;
       add_to_nick_change_table(user, host, nick2);
       update_nick(user, host, nick1, nick2);
     }

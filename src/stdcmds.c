@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.55 2002/05/13 22:36:40 bill Exp $ */
+/* $Id: stdcmds.c,v 1.56 2002/05/18 02:21:14 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -213,10 +213,20 @@ join(char *chan, char *key)
 }
 
 void
-set_key(char *chan, char *key)
+set_modes(char *chan, char *mode, char *key)
 {
-  if (key != NULL)
-    toserv("MODE %s +k %s\n", chan, key);
+  if (mode != NULL)
+  {
+    if (key != NULL)
+      toserv("MODE %s +%sk %s\n", chan, mode, key);
+    else
+      toserv("MODE %s +%s\n", chan, mode);
+  }
+  else
+  {
+    if (key != NULL)
+      toserv("MODE %s +k %s\n", chan, key);
+  }
 }
 
 void

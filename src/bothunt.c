@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.70 2002/05/13 22:36:37 bill Exp $ */
+/* $Id: bothunt.c,v 1.71 2002/05/18 02:21:11 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -343,7 +343,8 @@ void _ontraceclass(int connnum, int argc, char *argv[])
   {
     doingtrace = NO;
     join(config_entries.defchannel, config_entries.defchannel_key);
-    set_key(config_entries.defchannel, config_entries.defchannel_key);
+    set_modes(config_entries.defchannel, config_entries.defchannel_mode,
+              config_entries.defchannel_key);
   }
 }
 

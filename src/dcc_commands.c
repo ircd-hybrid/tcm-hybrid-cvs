@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.55 2002/05/11 00:39:23 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.56 2002/05/18 02:21:11 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -643,9 +643,8 @@ void m_cycle(int connnum, int argc, char *argv[])
    * the key as well...
    */
   join(config_entries.defchannel, config_entries.defchannel_key);
-  set_key(config_entries.defchannel, config_entries.defchannel_key);
-  /* XXX - no set_mode...probably I should combine it with set_key */
-  toserv("MODE %s +nt\n", config_entries.defchannel);
+  set_modes(config_entries.defchannel, config_entries.defchannel_mode,
+            config_entries.defchannel_key);
 }
 
 void m_die(int connnum, int argc, char *argv[])

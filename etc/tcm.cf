@@ -1,4 +1,4 @@
-# $Id: tcm.cf,v 1.23 2002/05/08 20:01:26 bill Exp $
+# $Id: tcm.cf,v 1.24 2002/05/18 02:21:06 wcampbel Exp $
 # Username for the bot
 U:db
 
@@ -23,6 +23,13 @@ I:irc.frizzle.net tcm
 C:&frizzle.net
 # The channel can have a key set
 # C:&frizzle.net:access
+
+# And you can have a mode set
+# Don't include the + or the k for the key
+# C:&frizzle.net:access:nts
+
+# The key can be left empty
+# C:&frizzle.net::nts
 
 # A:case:action:reason
 #  Sets the action to take on various automated situations.

@@ -1,3 +1,18 @@
+wcampbel    2002/05/25 12:49:19 EDT	(20020525_22)
+
+  Modified files:
+    include              commands.h config.h 
+    src                  commands.c 
+  Log:
+  Always enable .ulist and .hlist
+  
+  Revision  Changes    Path
+  1.14      +0 -4      tcm-hybrid/include/commands.h
+  1.52      +0 -6      tcm-hybrid/include/config.h
+  1.85      +0 -12     tcm-hybrid/src/commands.c
+
+
+
 jmallett    2002/05/25 12:32:41 EDT	(20020525_21)
 
   Modified files:

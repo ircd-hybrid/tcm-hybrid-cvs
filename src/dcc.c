@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.6 2002/06/04 23:49:46 db Exp $
+ * $Id: dcc.c,v 1.7 2002/06/05 00:10:56 leeh Exp $
  */
 
 #include <stdio.h>
@@ -150,35 +150,30 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
  */
 
 int
-accept_dcc_connection(const char *host_ip, const char *port,
-		      const char *nick, char *user_host)
+accept_dcc_connection(struct source_client *source_p,
+		      const char *host_ip, const char *port)
 {
   unsigned long remoteaddr;
   struct sockaddr_in socketname;
   int  i;               /* index variable */
   int  i_port;
-  char *user;
-  char *host;
 
   if ((i = find_free_connection_slot()) < 0)
     {
-      notice(nick,"Max users on tcm, dcc chat rejected\n");
+      notice(source_p->name, "Max users on tcm, dcc chat rejected");
       return(-1);
     }
 
-  if (get_user_host(&user, &host, user_host) != 1)
-    return(-1);
-
-  if(is_an_oper(user, host) == 0)
+  if(is_an_oper(source_p->username, source_p->host) == 0)
   {
-    notice(nick,"You are not an operator");
+    notice(source_p->name, "You are not an operator");
     return (-1);
   }
 
   connections[i].set_modes = 0;
-  strlcpy(connections[i].nick, nick, MAX_NICK);
-  strlcpy(connections[i].user, user, MAX_USER);
-  strlcpy(connections[i].host, host, MAX_HOST);
+  strlcpy(connections[i].nick, source_p->name, MAX_NICK);
+  strlcpy(connections[i].user, source_p->username, MAX_USER);
+  strlcpy(connections[i].host, source_p->host, MAX_HOST);
   connections[i].last_message_time = time(NULL);
 
   (void)sscanf(host_ip, "%lu", &remoteaddr);
@@ -188,7 +183,7 @@ accept_dcc_connection(const char *host_ip, const char *port,
   i_port = atoi(port);
   if (i_port < 1024)
     {
-      notice(nick, "Invalid port specified for DCC CHAT.  Not funny.");
+      notice(source_p->name, "Invalid port specified for DCC CHAT.  Not funny.");
       return (INVALID);
     }
   connections[i].socket = connect_to_given_ip_port(&socketname, i_port);

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.85 2002/06/04 13:24:31 wcampbel Exp $
+ * $Id: tcm_io.c,v 1.86 2002/06/05 00:10:56 leeh Exp $
  */
 
 #include <stdio.h>
@@ -319,10 +319,10 @@ get_line(char *in, int *len, struct connection *connections_p)
  *   Close the old dead socket. Try to reconnect to server.
  */
 void
-server_link_closed(int conn_num)
+server_link_closed(int unused)
 {
+  close_connection(server_id);
   server_id = INVALID;
-  close_connection(conn_num);
 
   tcm_log(L_ERR, "server_link_closed()");
   tcm_status.am_opered = NO;

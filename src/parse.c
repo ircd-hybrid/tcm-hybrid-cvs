@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.53 2002/06/04 23:49:46 db Exp $
+ * $Id: parse.c,v 1.54 2002/06/05 00:10:56 leeh Exp $
  */
 
 #include <stdio.h>
@@ -38,15 +38,15 @@
 #include "dcc.h"
 
 static void do_init(void);
-static void process_server(int conn_num,
-			   char *source, char *function, char *body);
-static void process_privmsg(char *nick, char *userhost,
+static void process_server(struct source_client *,
+			   char *function, char *body);
+static void process_privmsg(struct source_client *,
 			    int argc, char *argv[]);
 static void send_umodes(char *nick);
 static void on_join(char *nick, char *channel);
 static void on_kick(char *nick);
 static void on_nick(char *old_nick, char *new_nick);
-static void on_ctcp(int connnum, int argc, char *argv[]);
+static void on_ctcp(struct source_client *source_p, int argc, char *argv[]);
 static void wallops(int connnum, int argc, char *argv[]);
 static void on_nick_taken(void);
 
@@ -63,43 +63,50 @@ struct t_tcm_status tcm_status;
 void
 parse_server(int conn_num)
 {
+  struct source_client *source_p;
   char *buffer = connections[conn_num].buffer;
   char *p;
   char *source;
   char *function;
   char *body = NULL;
 
+  source_p = (struct source_client *)xmalloc(sizeof(struct source_client));
+  memset(source_p, 0, sizeof(struct source_client));
+
   if (*buffer == ':')
   {
     source = buffer+1;
-    if ((p = strchr(buffer,' ')) != NULL)
+
+    if ((p = strchr(buffer,' ')) == NULL)
+      return;
+
+    *p++ = '\0';
+    function = p;
+
+    /* nick!user@host */
+    if((p = strchr(source, '!')) != NULL)
     {
       *p++ = '\0';
-      function = p;
 
-      if ((p = strchr(function, ' ')) != NULL)
-      {
-        *p++ = '\0';
-        body = p;
-      }
+      source_p->name = source;
+      get_user_host(&source_p->username, &source_p->host, p);
     }
     else
-      return;
+      source_p->name = source;
   }
   else
   {
-    source = "";
-
+    source_p->name = config_entries.server_name;
     function = buffer;
-
-    if ((p = strchr(function,' ')) != NULL)
-    {
-      *p++ = '\0';
-      body = p;
-    }
-    else
-      return;
   }
+  
+  if ((p = strchr(function,' ')) != NULL)
+  {
+    *p++ = '\0';
+    body = p;
+  }
+  else
+    return;
 
   if (config_entries.debug && outfile)
   {
@@ -108,7 +115,8 @@ parse_server(int conn_num)
     fflush(outfile);
   }
 
-  process_server(conn_num, source, function, body);
+  process_server(source_p, function, body);
+  xfree(source_p);
 }
 
 /*
@@ -260,7 +268,7 @@ parse_args(char *buffer, char *argv[])
  *     signals that may be ongoing.
  */
 static void
-process_server(int conn_num, char *source, char *function, char *param)
+process_server(struct source_client *source_p, char *function, char *param)
 {
   char *userhost;
   int numeric=0;      /* if its a numeric */
@@ -269,11 +277,11 @@ process_server(int conn_num, char *source, char *function, char *param)
   char *q;
   char *argv[MAX_ARGV];
 
-  if (source && *source)
-    argv[argc++] = source;
-  if (function && *function)
-    argv[argc++] = function;
-  
+  argv[0] = source_p->name;
+  argv[1] = function;
+ 
+  argc = 2;
+
   p = param;
   if (*p == ':')
     argv[argc++] = p;
@@ -306,27 +314,24 @@ process_server(int conn_num, char *source, char *function, char *param)
   {
     if(strcasecmp(argv[2], tcm_status.my_nick) == 0)
     {
-      if ((userhost = strchr(argv[0], '!')) != NULL)
-        *userhost++ = '\0';
       if (argv[3][0] == '\001')       /* it's a CTCP something */
-        on_ctcp(0, argc, argv);
+        on_ctcp(source_p, argc, argv);
       else
-        process_privmsg(source,userhost,argc,argv);
+        process_privmsg(source_p, argc, argv);
     }
   }
 
-  /* PING doesnt have a prefix */
-  else if (strcmp(argv[0], "PING") == 0)
-    print_to_server("PONG %s", argv[1]);
+  else if (strcmp(argv[1], "PING") == 0)
+    print_to_server("PONG %s", argv[2]);
 
   /* error doesnt have a prefix either */
-  else if (strcmp(argv[0],"ERROR") == 0)
+  else if (strcmp(argv[1],"ERROR") == 0)
   {
-    if (strncmp(argv[1], ":Closing Link: ", 15) == 0)
+    if (strncmp(argv[2], ":Closing Link: ", 15) == 0)
     {
-      if (strstr(argv[1], "collision)"))
+      if (strstr(argv[2], "collision)"))
         on_nick_taken();
-      server_link_closed(conn_num);
+      server_link_closed(0);
     }
   }
 
@@ -344,11 +349,11 @@ process_server(int conn_num, char *source, char *function, char *param)
   }
   else if (strcmp(argv[1],"NICK") == 0)
   {
-    on_nick(source,argv[2]);
+    on_nick(source_p->name, argv[2]);
   }
-  else if (strcmp(function,"NOTICE") == 0)
+  else if (strcmp(argv[1],"NOTICE") == 0)
   {
-    if(strcasecmp(source,config_entries.rserver_name) == 0)
+    if(strcasecmp(source_p->name, config_entries.rserver_name) == 0)
     {
       on_server_notice(argc, argv);
     }
@@ -378,7 +383,7 @@ process_server(int conn_num, char *source, char *function, char *param)
       break;
 
     case  ERR_NOTREGISTERED:
-      server_link_closed(conn_num);
+      server_link_closed(0);
       break;
 	
     case ERR_CHANNELISFULL: case ERR_INVITEONLYCHAN:
@@ -444,7 +449,7 @@ process_server(int conn_num, char *source, char *function, char *param)
     /* cant oper */
     case ERR_PASSWDMISMATCH:
     case ERR_NOOPERHOST:
-      server_link_closed(conn_num);
+      server_link_closed(0);
       break;
 	
     case RPL_STATSELINE:
@@ -468,35 +473,24 @@ process_server(int conn_num, char *source, char *function, char *param)
  */
 
 static void
-process_privmsg(char *nick, char *userhost, int argc, char *argv[])
+process_privmsg(struct source_client *source_p, int argc, char *argv[])
 {
-  char *user;   /* user portion */
-  char *host;   /* host portion */
-  char *p;
-
-  user = userhost;
-  if ((p = strchr(userhost,'@')) == NULL)
-    return;
-
-  *p++ = '\0';
-
-  host = p;
-
   if (argv[3][0] != '.')
   {
-    send_to_all(FLAGS_PRIVMSG, "[%s!%s@%s] %s", nick, user, host, argv[3]);
+    send_to_all(FLAGS_PRIVMSG, "[%s!%s@%s] %s",
+                source_p->name, source_p->username, source_p->host, argv[3]);
     return;
   }
 
-  if (!is_an_oper(user,host))
+  if (!is_an_oper(source_p->username, source_p->host))
   {
-    notice(nick,"You are not an operator");
+    notice(source_p->name, "You are not an operator");
     return;
   }
 
   if(strncmp(argv[3], ".chat", 5) == 0)
   {
-     initiate_dcc_chat(nick, user, host);
+     initiate_dcc_chat(source_p->name, source_p->username, source_p->host);
   }
 }
 
@@ -672,16 +666,15 @@ on_nick_taken(void)
  */
 
 static void
-on_ctcp(int connnum, int argc, char *argv[])
+on_ctcp(struct source_client *source_p, int argc, char *argv[])
 {
-  char *hold;
   char *nick;
   char *port;
   char *p;
   char *msg=argv[3]+1;
 
   nick = argv[0];
-  hold = nick + strlen(nick) + 1;
+
   if (strncasecmp(msg,"PING",4) == 0)
   {
     notice(nick, "%s", argv[3]);
@@ -699,10 +692,11 @@ on_ctcp(int connnum, int argc, char *argv[])
       return;
     }
     ++port;
+
     if ((p = strrchr(port, '\001')) != NULL)
       *p = '\0';
 
-    if (accept_dcc_connection(argv[3]+15, port, nick, hold) < 0)
+    if (accept_dcc_connection(source_p, argv[3]+15, port) < 0)
     {
       notice(nick, "\001DCC REJECT CHAT chat\001");
       notice(nick,"DCC CHAT connection failed");

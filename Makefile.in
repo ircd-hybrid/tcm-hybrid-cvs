@@ -1,20 +1,20 @@
-# $Id: Makefile.in,v 1.21 2002/05/22 22:03:25 leeh Exp $
+# $Id: Makefile.in,v 1.22 2002/05/23 21:59:42 bill Exp $
 CC = @CC@
 RM = @RM@
 MKDEP = ${CC} -MM
 
 TCMLIBS = @LIBS@
-INCLUDES = -I./include
+INCLUDES = -I@SRCDIR@/include
 CPPFLAGS = ${INCLUDES} @CPPFLAGS@
 
 # Any other defines you need, add below.
 DEFINES = -DDPATH=\"@prefix@\"
 
-# -O for optimization.  Can't debug.  Use -g for debuggable code.
+# GNU CC allows us to use -g with -O
 CFLAGS = @CFLAGS@
 
-# Debuggers CFLAGS
-# CFLAGS = -g -O -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations
+# Debugers can uncomment this line for paranoid output
+# CPPFLAGS = ${INCLUDES} -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations
 
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
 
@@ -124,7 +124,7 @@ tcm:
 	@for i in $(SUBDIRS); do \
 		echo "Building $$i";\
 		cd $$i;\
-		${MAKE} build; cd ..;\
+		${MAKE} CPPFLAGS="${CPPFLAGS}" build; cd ..;\
 	done
 
 lint:

@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.18 2002/05/22 22:03:34 leeh Exp $
+# $Id: Makefile.in,v 1.19 2002/05/23 21:59:49 bill Exp $
 
 CC = @CC@
 RM = @RM@
@@ -6,17 +6,13 @@ MKDEP = ${CC} -MM
 
 TCMLIBS = @LIBS@
 INCLUDES = -I../include
-CPPFLAGS = ${INCLUDES} @CPPFLAGS@
+#CPPFLAGS = ${INCLUDES} @CPPFLAGS@
 
 # Any other defines you need, add below.
 DEFINES = -DDPATH=\"@prefix@\"
 
-# -O for optimization.  Can't debug.  Use -g for debuggable code.
-CFLAGS = @CFLAGS@ -Wall
+CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
-
-# Debuggers CFLAGS
-# CFLAGS = -g -O -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations
 
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
 

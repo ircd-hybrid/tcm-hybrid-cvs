@@ -1,4 +1,4 @@
-dnl $Id: configure.in,v 1.17 2002/05/22 12:38:09 wcampbel Exp $
+dnl $Id: configure.in,v 1.18 2002/05/23 21:59:44 bill Exp $
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(include/tcm.h)
 
@@ -8,9 +8,10 @@ AC_PREFIX_DEFAULT(`pwd`)
 
 PACKAGE=tcm-hybrid
 VERSION=3.1.0-pre
+SRCDIR=`pwd`
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
-
+AC_SUBST(SRCDIR)
 AC_SUBST(DPATH)
 
 dnl Checks for programs.

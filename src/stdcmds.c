@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.80 2002/05/28 00:35:10 db Exp $ */
+/* $Id: stdcmds.c,v 1.81 2002/05/28 12:48:33 leeh Exp $ */
 
 #include "setup.h"
 
@@ -61,33 +61,14 @@ op(char *chan,char *nick)
 }
 
 void
-join(char *chan, char *key)
+join(void)
 {
-  if ((chan == NULL) || (*chan == '\0'))
+  if((config_entries.defchannel == NULL) || 
+     (*config_entries.defchannel == '\0'))
     return;
-  if (key != NULL)
-    print_to_server("JOIN %s %s", chan, key);
-  else
-    print_to_server("JOIN %s", chan);
-}
 
-void
-set_modes(char *chan, char *mode, char *key)
-{
-  if ((chan == NULL) || (*chan == '\0'))
-    return;
-  if (mode != NULL)
-  {
-    if (key != NULL)
-      print_to_server("MODE %s +%sk %s", chan, mode, key);
-    else
-      print_to_server("MODE %s +%s", chan, mode);
-  }
-  else
-  {
-    if (key != NULL)
-      print_to_server("MODE %s +k %s", chan, key);
-  }
+  print_to_server("JOIN %s %s", 
+ 	          config_entries.defchannel,config_entries.defchannel_key);
 }
 
 void

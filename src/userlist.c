@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.96 2002/05/28 12:14:17 leeh Exp $
+ * $Id: userlist.c,v 1.97 2002/05/28 12:48:33 leeh Exp $
  *
  */
 
@@ -508,15 +508,11 @@ load_config_file(char *file_name)
       if (config_entries.debug && outfile)
 	fprintf(outfile, "Channel = [%s]\n", argv[1]);
 
-      if (argc > 3)
-        strncpy(config_entries.defchannel_mode,argv[3],MAX_CONFIG-1);
-      else
-        config_entries.defchannel_mode[0] = '\0';
-
       if (argc > 2)
 	strncpy(config_entries.defchannel_key,argv[2],MAX_CONFIG-1);
       else
 	config_entries.defchannel_key[0] = '\0';
+
       strncpy(config_entries.defchannel,argv[1],MAX_CHANNEL-1);
       break;
 

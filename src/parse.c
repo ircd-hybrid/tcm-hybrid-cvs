@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.40 2002/05/28 12:14:17 leeh Exp $
+ * $Id: parse.c,v 1.41 2002/05/28 12:48:33 leeh Exp $
  */
 
 #include <stdio.h>
@@ -512,9 +512,7 @@ do_init(void)
   oper();
 
   print_to_server("VERSION");
-  join(config_entries.defchannel, config_entries.defchannel_key);
-  set_modes(config_entries.defchannel, config_entries.defchannel_mode,
-            config_entries.defchannel_key);
+  join();
 }
 
 /*
@@ -600,11 +598,7 @@ static void
 on_kick(char *nick)
 {
   if (strcmp(mynick,nick) == 0)
-  {
-    join(config_entries.defchannel,config_entries.defchannel_key);
-    set_modes(config_entries.defchannel, config_entries.defchannel_mode,
-              config_entries.defchannel_key);
-  }
+    join();
 }
 
 /*
@@ -654,10 +648,6 @@ on_nick_taken(void)
   {
     newnick(randnick);
     strcpy(mynick,randnick);
-
-    join(config_entries.defchannel,config_entries.defchannel_key);
-    set_modes(config_entries.defchannel, config_entries.defchannel_mode,
-              config_entries.defchannel_key);
   }
   else if (strncmp(randnick,config_entries.dfltnick,
                    strlen(config_entries.dfltnick)))

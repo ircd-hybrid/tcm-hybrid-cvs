@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.128 2002/05/28 12:14:16 leeh Exp $
+ * $Id: bothunt.c,v 1.129 2002/05/28 12:48:32 leeh Exp $
  */
 
 #include <stdio.h>
@@ -187,12 +187,7 @@ void
 on_trace_class(int argc, char *argv[])
 {
   if (doingtrace)
-  {
     doingtrace = NO;
-    join(config_entries.defchannel, config_entries.defchannel_key);
-    set_modes(config_entries.defchannel, config_entries.defchannel_mode,
-              config_entries.defchannel_key);
-  }
 }
 
 /* 

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.103 2002/05/28 12:14:16 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.104 2002/05/28 12:48:32 leeh Exp $ */
 
 #include "setup.h"
 
@@ -566,14 +566,13 @@ void
 m_cycle(int connnum, int argc, char *argv[])
 {
   leave(config_entries.defchannel);
-  send_to_all( SEND_ALL, "I'm cycling.  Be right back.\n");
+  send_to_all( SEND_ALL, "I'm cycling.  Be right back.");
   sleep(1);
+
   /* probably on a cycle, we'd want the tcm to set
    * the key as well...
    */
-  join(config_entries.defchannel, config_entries.defchannel_key);
-  set_modes(config_entries.defchannel, config_entries.defchannel_mode,
-            config_entries.defchannel_key);
+  join();
 }
 
 void

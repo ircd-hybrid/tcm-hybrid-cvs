@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.51 2002/05/27 23:49:10 leeh Exp $ */
+/* $Id: userlist.h,v 1.52 2002/05/28 12:48:29 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -47,8 +47,6 @@ struct config_list {
   int  debug;
   char defchannel[MAX_CHANNEL];		/* Channel tcm will use. */
   char defchannel_key[MAX_CONFIG];	/* key for Channel tcm will use. */
-  char defchannel_mode[MAX_CONFIG];     /* Default mode (not including the
-                                        ** key) for the channel */
   char dfltnick[MAX_NICK];		/* Nickname tcm will use */
   int  channel_report;			/* bit map of flags */
 

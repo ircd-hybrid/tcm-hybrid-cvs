@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.72 2002/06/21 15:20:49 leeh Exp $ */
+/* $Id: userlist.h,v 1.73 2002/06/21 15:55:51 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -83,7 +83,7 @@ void show_stats_p(const char *nick);
 
 void save_umodes(void *);
 void set_umode(int, int, const char *);
-void add_an_oper(int, char *argv[]);
+void on_stats_o(int, char *argv[]);
 
 int has_umode(int, int);
 int get_umode(int);

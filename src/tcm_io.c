@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.21 2002/05/25 15:11:15 db Exp $
+ * $Id: tcm_io.c,v 1.22 2002/05/25 16:08:45 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -512,7 +512,7 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
     return;
   }
 
-  privmsg (nick,"\001DCC CHAT chat #%lu %d\001",
+  privmsg (nick,"\001DCC CHAT chat %lu %d\001",
           local_ip(ourhostname), dcc_port);
 
   if (config_entries.debug && outfile)
@@ -592,7 +592,7 @@ privmsg(const char *nick,const char *format, ...)
 {
   char command[MAX_BUFF];
   va_list va;
-  snprintf(command, MAX_BUFF-1, "PRIVMSG %s :", nick);
+  snprintf(command, MAX_BUFF-1, "PRIVMSG %s :%s", nick, format);
   command[MAX_BUFF-1] = '\0';
   va_start(va,format);
   va_print_to_server(command, va);

@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.5 2002/06/04 13:24:31 wcampbel Exp $
+ * $Id: dcc.c,v 1.6 2002/06/04 23:49:46 db Exp $
  */
 
 #include <stdio.h>
@@ -52,7 +52,6 @@ static void finish_incoming_dcc_chat(int i);
 static void timeout_dcc_chat(int i);
 static void finish_dcc_chat(int i);
 static void close_dcc_connection(int connnum);
-static int  connect_to_dcc_ip(const char *nick, const char *hostport);
 
 /*
  * initiate_dcc_chat
@@ -143,7 +142,7 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
 /*
  * accept_dcc_connection()
  *
- * inputs	- hostpost
+ * inputs	- hostport
  * 		- nick making the connection
  *		- userhost
  * output	- 
@@ -151,10 +150,13 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
  */
 
 int
-accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
+accept_dcc_connection(const char *host_ip, const char *port,
+		      const char *nick, char *user_host)
 {
+  unsigned long remoteaddr;
+  struct sockaddr_in socketname;
   int  i;               /* index variable */
-  char *p;              /* scratch pointer used for parsing */
+  int  i_port;
   char *user;
   char *host;
 
@@ -164,33 +166,32 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
       return(-1);
     }
 
-  if ((p = strchr(userhost,'@')) != NULL)
-  {
-    user = userhost;
-    *p++ = '\0';
-    host = p;
-  }
-  else
-  {
-    host = userhost;
-    user = "*";
-  }
+  if (get_user_host(&user, &host, user_host) != 1)
+    return(-1);
 
-  if ((p = strchr(host,' ')) != NULL)
-    *p = '\0';
-
-  if(is_an_oper(user,host) == 0)
+  if(is_an_oper(user, host) == 0)
   {
     notice(nick,"You are not an operator");
     return (-1);
   }
 
   connections[i].set_modes = 0;
-  strlcpy(connections[i].nick,nick,MAX_NICK);
-  strlcpy(connections[i].user,user,MAX_USER);
-  strlcpy(connections[i].host,host,MAX_HOST);
+  strlcpy(connections[i].nick, nick, MAX_NICK);
+  strlcpy(connections[i].user, user, MAX_USER);
+  strlcpy(connections[i].host, host, MAX_HOST);
   connections[i].last_message_time = time(NULL);
-  connections[i].socket = connect_to_dcc_ip(nick, hostport);
+
+  (void)sscanf(host_ip, "%lu", &remoteaddr);
+  /* Argh.  Didn't they teach byte order in school??? --cah */
+
+  socketname.sin_addr.s_addr = htonl(remoteaddr);
+  i_port = atoi(port);
+  if (i_port < 1024)
+    {
+      notice(nick, "Invalid port specified for DCC CHAT.  Not funny.");
+      return (INVALID);
+    }
+  connections[i].socket = connect_to_given_ip_port(&socketname, i_port);
   if (connections[i].socket == INVALID)
     {
       close_connection(i);
@@ -331,49 +332,3 @@ close_dcc_connection(int connnum)
   close_connection(connnum);
 }
 
-/*
- * connect_to_dcc_ip
- *
- * input	- pointer to nick
- *		- pointer to string giving dcc ip
- * output	- socket or -1 if no socket
- * side effects	- Sets up a socket and connects to the given host and port
- *		  or given DCC chat IP
- */
-static int
-connect_to_dcc_ip(const char *nick, const char *hostport)
-{
-  struct sockaddr_in socketname;
-  char server[MAX_HOST];
-  char *p;
-  unsigned long remoteaddr;
-  int port = 0;
-
-  strcpy(server, hostport);
-
-  /* kludge for DCC CHAT precalculated sin_addrs */
-  if (*server == '#')
-    {
-       (void)sscanf(server+1,"%lu",&remoteaddr);
-       /* Argh.  Didn't they teach byte order in school??? --cah */
-       socketname.sin_addr.s_addr=htonl(remoteaddr);
-    }
-  else
-    {
-      return(INVALID);
-    }
-
-  if ((p = strchr(server,' ')))
-    {
-      *p++ = '\0';
-      port = atoi(p);
-    }
-
-  if (port < 1024)
-    {
-      notice(nick, "Invalid port specified for DCC CHAT.  Not funny.");
-      return (INVALID);
-    }
-
-  return(connect_to_given_ip_port(&socketname, port));
-}

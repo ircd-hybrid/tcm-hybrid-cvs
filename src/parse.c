@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.52 2002/06/04 21:30:14 db Exp $
+ * $Id: parse.c,v 1.53 2002/06/04 23:49:46 db Exp $
  */
 
 #include <stdio.h>
@@ -679,7 +679,6 @@ on_ctcp(int connnum, int argc, char *argv[])
   char *port;
   char *p;
   char *msg=argv[3]+1;
-  char dccbuff[MAX_BUFF];
 
   nick = argv[0];
   hold = nick + strlen(nick) + 1;
@@ -694,8 +693,6 @@ on_ctcp(int connnum, int argc, char *argv[])
   }
   else if (strncasecmp(msg, "DCC CHAT", 8) == 0)
   {
-    /* the -6 saves room for the :port */
-
     if ((port = strrchr(argv[3], ' ')) == NULL)
     {
       notice(nick, "Invalid port specified for DCC CHAT.  Not funny.");
@@ -705,11 +702,7 @@ on_ctcp(int connnum, int argc, char *argv[])
     if ((p = strrchr(port, '\001')) != NULL)
       *p = '\0';
 
-    strcat(dccbuff, ":");
-    strcat(dccbuff, port);
-    snprintf(dccbuff, MAX_BUFF-1, "#%s:%s", argv[3]+15, port);
-
-    if (accept_dcc_connection(dccbuff, nick, hold) < 0)
+    if (accept_dcc_connection(argv[3]+15, port, nick, hold) < 0)
     {
       notice(nick, "\001DCC REJECT CHAT chat\001");
       notice(nick,"DCC CHAT connection failed");

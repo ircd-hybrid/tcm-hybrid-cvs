@@ -1,3 +1,21 @@
+bill        2002/09/12 23:31:00 EDT	(20020913_1)
+
+  Modified files:
+    include              tcm.h userlist.h 
+    src                  dcc_commands.c serv_commands.c stdcmds.c 
+  Log:
+  - fixed WALLOPS/OPERWALL/LOCOPS display
+  - opers with +i usermode now have their names masked from kills/klines
+  
+  Revision  Changes    Path
+  1.56      +1 -1      tcm-hybrid/include/tcm.h
+  1.88      +4 -0      tcm-hybrid/include/userlist.h
+  1.146     +2 -4      tcm-hybrid/src/dcc_commands.c
+  1.5       +1 -1      tcm-hybrid/src/serv_commands.c
+  1.99      +19 -9     tcm-hybrid/src/stdcmds.c
+
+
+
 bill        2002/09/12 23:03:33 EDT	(20020913_0)
 
   Modified files:

@@ -4,7 +4,7 @@ RM = @RM@
 MKDEP = ${CC} -MM
 
 TCMLIBS = @LIBS@
-INCLUDES = -I./include
+INCLUDES = -I../include
 CPPFLAGS = ${INCLUDES} @CPPFLAGS@
 
 # Any other defines you need, add below.
@@ -30,30 +30,24 @@ SOURCES = 	serverif.c\
 
 OBJECTS = ${SOURCES:.c=.o}
 
-all: tcm tools
+all: tcm
+
+build: tcm
 
 clean: 
 	${RM} -f *.o tcm core tcm.core *~
-	cd tools; ${MAKE} clean; cd ..
-	-@if [ -f include/setup.h ] ; then \
-	echo "To really restart installation, make distclean" ; \
-	fi
 
-cleandata:
-	${RM} -f DEBUG *.log clone_log_* tcm.pid *.pref
-
-distclean: clean
-	${RM} -f Makefile config.status config.cache config.log include/setup.h
-	cd tools; ${MAKE} distclean; cd ..
+distclean:
+	${RM} -f Makefile
 
 .c.o:
 	${CC} ${CPPFLAGS} ${CFLAGS} ${DEFINES} -c $<
 
 tcm: ${OBJECTS}
-	${CC} ${CFLAGS} -o tcm ${OBJECTS} ${TCMLIBS}
+	${CC} ${CFLAGS} -o ../tcm ${OBJECTS} ${TCMLIBS}
 
 lint:
-	lint -aacgprxhH $(CPPFLAGS) $(SOURCES) >lint.out
+	lint -aacgprxhH $(CPPFLAGS) $(SOURCES) >../lint.out
 
 depend:
 	${MKDEP} ${INCLUDES} ${SOURCES} > .depend

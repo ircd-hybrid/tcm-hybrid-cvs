@@ -451,7 +451,7 @@ echo > confdefs.h
 
 # A filename unique to this package, relative to the directory that
 # configure is in, which we can look for to find out if srcdir is correct.
-ac_unique_file=tcm.h
+ac_unique_file=include/tcm.h
 
 # Find the source files, if location was not specified.
 if test -z "$srcdir"; then
@@ -544,7 +544,7 @@ ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
 
 
 PACKAGE=tcm-hybrid
-VERSION=2.5.1
+VERSION=2.5.7
 
 
 
@@ -1783,7 +1783,7 @@ done
 ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
-trap 'rm -fr `echo "Makefile tools/Makefile include/setup.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "Makefile src/Makefile tools/Makefile include/setup.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -1881,7 +1881,7 @@ EOF
 
 cat >> $CONFIG_STATUS <<EOF
 
-CONFIG_FILES=\${CONFIG_FILES-"Makefile tools/Makefile"}
+CONFIG_FILES=\${CONFIG_FILES-"Makefile src/Makefile tools/Makefile"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then

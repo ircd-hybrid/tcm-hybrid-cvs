@@ -8,12 +8,15 @@ INCLUDEDIR=-I../include
 
 all: mkpasswd
 
+build: all
+
 mkpasswd: mkpasswd.o
-	$(CC) $(LDFLAGS) -o mkpasswd mkpasswd.o ${TCMLIBS}
+	$(CC) $(LDFLAGS) -o ../mkpasswd mkpasswd.o ${TCMLIBS}
 
 clean:
-	${RM} -f mkpasswd *.o *~ *core
+	${RM} -f *.o *~ *core
 
 distclean: clean
 	${RM} -f Makefile
 
+depend:

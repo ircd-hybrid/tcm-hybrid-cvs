@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.92 2002/05/26 16:10:28 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.93 2002/05/26 20:44:42 leeh Exp $ */
 
 #include "setup.h"
 
@@ -51,7 +51,9 @@ static void set_actions(int sock, char *key, char *act, int duration, char *reas
 static void save_umodes(char *registered_nick, unsigned long type);
 static void load_umodes(int connect_id);
 static unsigned long find_user_umodes(char *nick);
+#if 0
 static void set_umode(int connnum, char *flags, char *registered_nick);
+#endif
 static void show_user_umodes(int sock, char *registered_nick);
 static void register_oper(int connnum, char *password, char *who_did_command);
 static void list_opers(int sock);
@@ -504,46 +506,6 @@ m_uptime(int connnum, int argc, char *argv[])
 void m_exemptions(int connnum, int argc, char *argv[])
 {
   list_exemptions(connections[connnum].socket);
-}
-
-void
-m_umode(int connnum, int argc, char *argv[])
-{
-  if (argc < 2)
-  {
-    print_to_socket(connections[connnum].socket,
-		    "Your current flags are: %s",
-         type_show(connections[connnum].type));
-    return;
-  }
-  if (argc >= 3)
-  {
-    if (!(connections[connnum].type & TYPE_ADMIN))
-    {
-      print_to_socket(connections[connnum].socket, "You aren't an admin");
-      return;
-    }
-    if ((argv[2][0] == '+') || (argv[2][0] == '-'))
-      set_umode(connnum,argv[2],argv[1]);
-    else
-        print_to_socket(connections[connnum].socket,
-             ".umode [user flags] | [user] | [flags]");
-  }
-  else
-  {
-    if ((argv[1][0] == '+') || (argv[1][0] == '-'))
-      set_umode(connnum, argv[1], NULL);
-    else
-    {
-      if (!(connections[connnum].type & TYPE_ADMIN))
-        {
-          print_to_socket(connections[connnum].socket,
-			  "You aren't an admin");
-          return;
-        }
-      show_user_umodes(connections[connnum].socket,argv[1]);
-    }
-  }
 }
 
 void
@@ -1054,6 +1016,7 @@ set_actions(int sock, char *key, char *methods, int duration, char *reason)
     }
 }
 
+#if 0
 /*
  * set_umode
  *
@@ -1293,6 +1256,8 @@ set_umode(int connnum, char *flags, char *registered_nick)
     }
   }
 }
+#endif
+
 
 /*
  * save_umodes
@@ -1421,70 +1386,6 @@ find_user_umodes(char *registered_nick)
   type &= ~(TYPE_ADMIN|TYPE_PENDING);
 
   return type;
-}
-
-/*
- * show_user_umodes
- *
- * input	- registered nick
- * output	- none
- * side effect	- 
- */
-
-static void 
-show_user_umodes(int sock, char *registered_nick)
-{
-  FILE *fp;
-  char user_pref[MAX_BUFF];
-  char type_string[32];
-  int  i;
-  unsigned long type = 0;
-  unsigned long pref_type;
-  char *p;
-  int  found = NO;
-
-  for(i=0; userlist[i].user[0]; i++)
-  {
-    if (strcasecmp(registered_nick, userlist[i].usernick) == 0)
-    {
-      type = userlist[i].type;
-      found = YES;
-      break;
-    }
-  }
-
-  if(!found)
-  {
-    print_to_socket(sock,"Can't find user [%s]", registered_nick );
-    return;
-  }
-     
-  (void)snprintf(user_pref,sizeof(user_pref) - 1,
-		 "etc/%s.pref",registered_nick);
-
-  if((fp = fopen(user_pref,"r")) == NULL)
-  {
-    print_to_socket(sock,"%s user flags are %s", 
-	 registered_nick,
-	 type_show(type));
-    return;
-  }
-
-  type &= TYPE_ADMIN ;
-
-  fgets(type_string,30,fp);
-  (void)fclose(fp);
-
-  if((p = strchr(type_string,'\n')) != NULL)
-    *p = '\0';
-
-  sscanf(type_string,"%lu",&pref_type);
-
-  pref_type &= ~(TYPE_ADMIN|TYPE_PENDING);
-
-  print_to_socket(sock,"%s user flags are %s", 
-       registered_nick,
-       type_show(type|pref_type));
 }
 
 /*
@@ -1756,9 +1657,6 @@ struct dcc_command uptime_msgtab = {
 struct dcc_command exemptions_msgtab = {
  "exemptions", NULL, {m_unregistered, m_exemptions, m_exemptions}
 };
-struct dcc_command umode_msgtab = {
- "umode", NULL, {m_unregistered, m_umode, m_umode}
-};
 struct dcc_command connections_msgtab = {
  "connections", NULL, {m_connections, m_connections, m_connections}
 };
@@ -1891,7 +1789,6 @@ init_commands(void)
   add_dcc_handler(&action_msgtab);
   add_dcc_handler(&set_msgtab);
   add_dcc_handler(&exemptions_msgtab);
-  add_dcc_handler(&umode_msgtab);
   add_dcc_handler(&connections_msgtab);
   add_dcc_handler(&whom_msgtab);
   add_dcc_handler(&who_msgtab);

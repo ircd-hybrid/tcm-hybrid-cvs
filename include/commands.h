@@ -1,7 +1,7 @@
 #ifndef __COMMANDS_H
 #define __COMMANDS_H
 
-/* $Id: commands.h,v 1.16 2002/05/26 13:09:19 leeh Exp $ */
+/* $Id: commands.h,v 1.17 2002/05/26 20:44:39 leeh Exp $ */
 
 void init_allow_nick();
 
@@ -36,7 +36,6 @@ void m_action(int connnum, int argc, char *argv[]);
 void m_set(int connnum, int argc, char *argv[]);
 void m_uptime(int connnum, int argc, char *argv[]);
 void m_exemptions(int connnum, int argc, char *argv[]);
-void m_umode(int connnum, int argc, char *argv[]);
 void m_connections(int connnum, int argc, char *argv[]);
 void m_disconnect(int connnum, int argc, char *argv[]);
 void m_help(int connnum, int argc, char *argv[]);

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.79 2002/05/26 19:27:09 db Exp $
+ * $Id: userlist.c,v 1.80 2002/05/26 20:44:42 leeh Exp $
  *
  */
 
@@ -49,13 +49,20 @@ int	wingate_class_list_index;
 static void load_a_user(char *);
 static void load_e_line(char *);
 
+static void m_umode(int, int, char *argv[]);
+
+struct dcc_command umode_msgtab = {
+  "umode", NULL, {m_unregistered, m_umode, m_umode}
+};
+
 struct umode_struct
 {
   char umode;
-  int type;
   int need_admin;
+  int type;
 };
 
+/* umode table for converting back to strings.. */
 static struct umode_struct umode_table[] =
 {
   { 'M',  1,	TYPE_ADMIN,		},
@@ -79,6 +86,180 @@ static struct umode_struct umode_table[] =
   { (char)0, 0, 0,			}
 };
 
+void
+init_userlist_handlers(void)
+{
+  add_dcc_handler(&umode_msgtab);
+}
+
+void
+set_umode(int connnum, int override, const char *umode)
+{
+  int plus;
+  int i;
+  int j;
+
+  for(i = 0; umode[i]; i++)
+  {
+    if(umode[i] == '+')
+    {
+      plus = 1;
+      continue;
+    }
+
+    if(umode[i] == '-')
+    {
+      plus = 0;
+      continue;
+    }
+
+    for(j = 0; umode_table[j].umode; j++)
+    {
+      if(umode_table[j].umode == umode[i])
+      {
+        /* flag needs admin */
+        if(!override && umode_table[j].need_admin &&
+           ((connections[connnum].type & TYPE_ADMIN) == 0))
+          break;
+
+	if(plus)
+          connections[connnum].type |= umode_table[j].type;
+	else
+          connections[connnum].type &= ~umode_table[j].type;
+
+	break;
+      }
+    }
+  }
+}
+
+void m_umode(int connnum, int argc, char *argv[])
+{
+  if(argc < 2)
+  {
+    print_to_socket(connections[connnum].socket, 
+		    "Your current flags are: %s",
+		    type_show(connections[connnum].type));
+    return;
+  }
+  else if(argc == 2)
+  {
+    if((argv[1][0] == '+') || (argv[1][0] == '-'))
+    {
+      set_umode(connnum, 0, argv[1]);
+      print_to_socket(connections[connnum].socket,
+		      "Your flags are now: %s",
+		      type_show(connections[connnum].type));
+    }
+    else
+    {
+      int user;
+
+      if((connections[connnum].type & TYPE_ADMIN) == 0)
+      {
+        print_to_socket(connections[connnum].socket,
+			"You aren't an admin");
+	return;
+      }
+
+      user = find_user(argv[1]);
+      
+      if(user >= 0)
+      {
+        unsigned long type;
+
+	type = get_umodes_from_prefs(user);
+	print_to_socket(connections[connnum].socket,
+			"%s user flags are %s",
+			argv[1], type_show(type));
+      }
+      else
+        print_to_socket(connections[connnum].socket,
+			"Can't find user [%s]", argv[1]);
+    }
+  }
+  else
+  {
+    if((connections[connnum].type & TYPE_ADMIN) == 0)
+    {
+      print_to_socket(connections[connnum].socket,
+		      "You aren't an admin");
+      return;
+    }
+
+    /* XXX - find_user doesnt return the right connnum */
+#if 0
+    if((argv[2][0] == '+') || (argv[2][0] == '-'))
+    {
+      int user;
+
+      user = find_user(argv[1]);
+
+      if(user >= 0)
+        set_umode(user, 1, argv[2]);
+      else
+        print_to_socket(connections[connnum].socket, 
+			"Can't find user [%s]", argv[1]);
+    }
+    else
+      print_to_socket(connections[connnum].socket,
+		      ".umode [user] [flags] | [user] | [flags]");
+#endif
+  }
+}
+      
+int
+find_user(const char *username)
+{
+  int i;
+
+  for(i = 0; userlist[i].user[0]; i++)
+  {
+    if(strcasecmp(userlist[i].usernick, username) == 0)
+      return i;
+  }
+
+  return -1;
+}
+
+unsigned long
+get_umodes_from_prefs(int user)
+{
+  FILE *fp;
+  char user_pref[MAX_BUFF+1];
+
+  snprintf(user_pref, MAX_BUFF, "etc/%s.pref", userlist[user].usernick);
+
+  fp = fopen(user_pref, "r");
+
+  if(fp != NULL)
+  {
+    unsigned long pref_type;
+
+    char type_string[SMALL_BUFF+1];
+    char *p;
+
+    fgets(type_string, SMALL_BUFF, fp);
+    fclose(fp);
+
+    if((p = strchr(type_string, '\n')) != NULL)
+      *p = '\0';
+
+    sscanf(type_string, "%lu", &pref_type);
+
+    pref_type &= ~TYPE_PENDING;
+
+    return pref_type;
+  }
+  else
+  {
+    unsigned long type = 0;
+
+    type = userlist[user].type;
+    return type;
+  }
+}
+    
 int
 get_method_number (char * methodname)
 {

@@ -1,3 +1,17 @@
+wcampbel    2002/05/21 18:09:44 EDT	(20020521_4)
+
+  Modified files:
+    modules              bothunt.c 
+  Log:
+  Cleanup of on_stats_i()
+  Only set exemptions from I:/auth flags that are designed to provide some
+    sort of protection.  Do not set exemptions for + - or $
+  
+  Revision  Changes    Path
+  1.77      +12 -15    tcm-hybrid/modules/bothunt.c
+
+
+
 wcampbel    2002/05/21 17:29:32 EDT	(20020521_3)
 
   Modified files:

@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.24 2001/10/29 17:10:06 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.25 2001/10/29 22:37:06 bill Exp $ */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -729,40 +729,44 @@ void
 list_virtual_users(int sock,char *userhost)
 {
   struct hashrec *ipptr;
+  char *p, *user=NULL, *host;
   int i,numfound = 0;
 
   if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
-    prnt(sock,
-         "Listing all users is not recommended.  To do it anyway, use 'list ?*@*'.\n");
-  else
     {
-      for ( i=0; i < HASHTABLESIZE; ++i)
+      prnt(sock, "Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.\n");
+      return;
+    }
+  if ((p=strchr(userhost, '@')))
+    {
+      user = userhost;
+      host = p+1;
+      *p = '\0';
+    }
+  for ( i=0; i < HASHTABLESIZE; ++i)
+    {
+      for( ipptr = iptable[i]; ipptr; ipptr = ipptr->collision )
         {
-          for( ipptr = iptable[i]; ipptr; ipptr = ipptr->collision )
+          if (!wldcmp(userhost,ipptr->info->ip_host) &&
+              ((user && !wldcmp(user, ipptr->info->user) || (user == NULL))))
             {
-              if (!wldcmp(userhost,ipptr->info->ip_host))
+              if (!numfound++)
                 {
-                  if (!numfound++)
-                    {
-                      prnt(sock,
-                           "The following clients match %.150s:\n",userhost);
-                    }
-                  prnt(sock,
-                       "  %s [%s] (%s@%s) {%s}\n",
-                       ipptr->info->nick,
-                       ipptr->info->ip_host,
-                       ipptr->info->user,ipptr->info->host,
-                       ipptr->info->class);
+                  prnt(sock, "The following clients match %.150s:\n",userhost);
                 }
+              prnt(sock,
+                   "  %s [%s] (%s@%s) {%s}\n",
+                   ipptr->info->nick,
+                   ipptr->info->ip_host,
+                   ipptr->info->user,ipptr->info->host,
+                   ipptr->info->class);
             }
         }
-      if (numfound > 0)
-        prnt(sock,
-             "%d matches for %s found\n",numfound,userhost);
-      else
-        prnt(sock,
-             "No matches for %s found\n",userhost);
     }
+  if (numfound > 0)
+    prnt(sock, "%d matches for %s found\n",numfound,userhost);
+  else
+    prnt(sock, "No matches for %s found\n",userhost);
 }
 
 /*

@@ -1,3 +1,15 @@
+leeh        2002/05/26 15:04:17 EDT	(20020526_21)
+
+  Modified files:
+    src                  userlist.c 
+  Log:
+  - added a usermode table
+  
+  Revision  Changes    Path
+  1.78      +30 -0     tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/05/26 13:44:04 EDT	(20020526_20)
 
   Modified files:

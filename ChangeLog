@@ -1,3 +1,9 @@
+*** 20001110_2 by bill
+
+Permission error, fixed.
+Added a note to comstud users for making tcm work properly into tcm.cf
+
+
 *** 20001110_1 by bill
 
 Added support for ircd-comstud-1.11REL

@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.20 2001/11/10 15:24:40 wcampbel Exp $ */
+/* $Id: main.c,v 1.21 2001/11/14 22:04:15 bill Exp $ */
 
 #include "setup.h"
 
@@ -752,8 +752,8 @@ int main(int argc, char *argv[])
   connections[0].socket = bindsocket(serverhost);
   if (connections[0].socket == INVALID)
     exit(1);
-  connections[0].buffer = (char *)malloc(BUFFERSIZE);
 
+  connections[0].buffer = (char *)malloc(BUFFERSIZE);
   if( !connections[0].buffer )
     {
       fprintf(stderr,"Memory allocation error in main()\n");
@@ -762,6 +762,7 @@ int main(int argc, char *argv[])
 #endif
       exit(1);
     }
+  memset(connections[0].buffer, 0, BUFFERSIZE);   /* I'm not really sure why this is needed, but it fixed rtmon */
 
   connections[0].type = 0;
   maxconns = 1;

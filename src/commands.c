@@ -40,7 +40,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.5 2000/12/02 01:01:39 bill Exp $";
+static char *version="$Id: commands.c,v 1.6 2000/12/05 00:54:47 bill Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -1466,7 +1466,7 @@ void dccproc(int connnum)
 	  if(param2_orig)
 	    {
 	      toserv("LOCOPS :(%s) %s %s\n",
-		     who_did_command,
+		     connections[connnum].nick,
 		     param2_orig,
 		     param3?param3:"");
 	    }

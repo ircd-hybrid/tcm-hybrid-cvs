@@ -65,7 +65,6 @@ O:pro@*.oc12.net:pro:notrealpassword:OKGi
 #
 O:db@*bsd.org:diane:notrealpassword:OK
 #
-#
 # Exceptions to kline and kill actions by tcm
 # tcm will also read the E lines from the ircd.conf file
 # by doing a stats E
@@ -73,6 +72,18 @@ O:db@*bsd.org:diane:notrealpassword:OK
 E:db@*.db.net
 E:*@*varner.com
 #
+#
+# **NEW**  F lines!
+# F-lines are like E-lines, except they are violation specific
+# You may use any violation given in the A-lines from tcm.cf
+
+# Using a wildcard for the violation is the same as an E-line
+F:*:p@inept.rh.rit.edu
+
+# This will allow pro@oc12.net to run a bot
+
+F:bots:pro@oc12.net
+#  -bill (pro@oc12.net)
 #
 # C: lines
 # tcm's we know about

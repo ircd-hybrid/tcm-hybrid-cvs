@@ -2,7 +2,7 @@
  * much of this code has been copied (though none ver batum)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.22 2002/05/08 21:02:10 jv Exp $B
+ * $Id: modules.c,v 1.23 2002/05/09 13:02:38 wcampbel Exp $B
  *
  */
 
@@ -408,6 +408,7 @@ int load_all_modules(int log)
   while ((mdirent = readdir(module_dir)))
     {
       if (strlen(mdirent->d_name) > 3 &&
+          mdirent->d_name[0] != '.' &&
           mdirent->d_name[strlen(mdirent->d_name) - 3] == '.' &&
           mdirent->d_name[strlen(mdirent->d_name) - 2] == 's' &&
           mdirent->d_name[strlen(mdirent->d_name) - 1] == 'o')

@@ -1,3 +1,14 @@
+*** 20010402_1 by db
+- cleaned up the logging, no more 0 length log files
+- renamed clone_log to just log, its a generic log
+- re-added back autopilot
+- added new tcm.cf flag "D" for deny i.e. opers only
+- oper deny /dcc will not show ip any more of tcm
+- bumped version up
+- tested on irc.ins.net.uk
+
+
+
 *** 20010221_1 by wcampbel
 Misc. documentation updates
 Release version 2.5.2, as a number of things have been done since 2.5.1

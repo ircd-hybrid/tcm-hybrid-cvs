@@ -1,3 +1,9 @@
+*** 20011028_5 by wcampbel
+<dollar>Id<dollar>'ed everything properly
+Removed more crud related to linking and remote tcm opers
+Other general cleanups
+
+
 *** 20011028_4 by wcampbel
 Removed TYPE_TCM and all it's related trash
 

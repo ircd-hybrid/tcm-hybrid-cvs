@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.34 2002/05/25 15:36:24 leeh Exp $ */
+/* $Id: tcm.h,v 1.35 2002/05/25 15:49:36 leeh Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -83,5 +83,7 @@ size_t strlcat(char *, const char *, size_t);
 #ifndef HAVE_STRLCPY
 size_t strlcpy(char *, const char *, size_t);
 #endif
+
+extern void *xmalloc(size_t);
 
 #endif

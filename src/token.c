@@ -5,7 +5,7 @@
  *
  * - Dianora db@db.net
  *
- * $Id: token.c,v 1.23 2002/04/04 23:19:24 bill Exp $
+ * $Id: token.c,v 1.24 2002/05/25 15:49:39 leeh Exp $
  *
  */
 
@@ -20,10 +20,6 @@
 #include "config.h"
 #include "tcm.h"
 #include "token.h"
-
-#ifdef DMALLOC
-#include "dmalloc.h"
-#endif
 
 static int hash_cmd(char *);
 
@@ -71,12 +67,7 @@ init_tokenizer()
 
   for(i = 0; command_table[i].token_string; i++ )
     {
-      new_command = (struct command_hash *)malloc(sizeof(struct command_hash));
-      if(new_command == (struct command_hash *)NULL)
-	{
-	  fprintf(stderr,"Out of memory in token.c\n");
-	  exit(0);
-	}
+      new_command = (struct command_hash *)xmalloc(sizeof(struct command_hash));
 
       new_command->token_string = strdup(command_table[i].token_string);
       new_command->token = command_table[i].keyword_value;

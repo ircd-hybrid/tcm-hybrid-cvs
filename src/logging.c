@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.29 2002/05/25 02:37:37 db Exp $
+ * $Id: logging.c,v 1.30 2002/05/25 15:49:39 leeh Exp $
  *
  * - db
  */
@@ -473,13 +473,7 @@ logfailure(char *nickuh,int botreject)
 
   if (!tmp)
     {
-      tmp = (struct failrec *)malloc(sizeof(struct failrec));
-      if(tmp == NULL)
-        {
-          send_to_all(SEND_ALL,
-		       "Ran out of memory in logfailure");
-	  exit(0);
-        }
+      tmp = (struct failrec *)xmalloc(sizeof(struct failrec));
 
       strncpy(tmp->user,userinfo.user,11);
       tmp->user[10] = '\0';

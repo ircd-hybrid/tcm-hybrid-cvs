@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.97 2002/05/25 12:34:22 leeh Exp $
+ * $Id: bothunt.c,v 1.98 2002/05/25 15:49:38 leeh Exp $
  */
 
 #include <stdio.h>
@@ -29,10 +29,6 @@
 #include "commands.h"
 #include "modules.h"
 #include "tcm_io.h"
-
-#ifdef DMALLOC
-#include "dmalloc.h"
-#endif
 
 static char* find_domain( char* domain );
 static void  check_nick_flood( char *snotice );
@@ -1252,12 +1248,7 @@ addtohash(struct hashrec *table[],char *key,struct userentry *item)
   struct hashrec *newhashrec;
 
   ind = hash_func(key);
-  newhashrec = (struct hashrec *)malloc(sizeof(struct hashrec));
-  if ( !newhashrec )
-  {
-    send_to_all(SEND_ALL, "Ran out of memory in addtohash");
-    exit(-1);
-  }
+  newhashrec = (struct hashrec *)xmalloc(sizeof(struct hashrec));
 
   newhashrec->info = item;
   newhashrec->collision = table[ind];
@@ -1540,15 +1531,7 @@ adduserhost(char *nick, struct plus_c_info *userinfo,int fromtrace,int is_oper)
 
   _user_signon(doingtrace, 5, par);
 
-  newuser = (struct userentry *)malloc(sizeof(struct userentry));
-  if (newuser == NULL)
-  {
-    fprintf(outfile, "Ran out of memory in adduserhost\n");
-    print_to_socket(connections[0].socket,
-		    "QUIT :Ran out of memory in adduserhost");
-    send_to_all(SEND_ALL, "Ran out of memory in adduserhost");
-    exit(-1);
-  }
+  newuser = (struct userentry *)xmalloc(sizeof(struct userentry));
 
   strncpy(newuser->nick,nick,MAX_NICK);
   newuser->nick[MAX_NICK-1] = '\0';

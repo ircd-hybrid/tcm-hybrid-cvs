@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.69 2002/05/25 15:11:16 db Exp $
+ * $Id: userlist.c,v 1.70 2002/05/25 15:49:39 leeh Exp $
  *
  */
 
@@ -35,10 +35,6 @@
 #include "commands.h"
 #include "modules.h"
 #include "match.h"
-
-#ifdef DMALLOC
-#include "dmalloc.h"
-#endif
 
 struct auth_file_entry userlist[MAXUSERS];
 struct exception_entry hostlist[MAXHOSTS];

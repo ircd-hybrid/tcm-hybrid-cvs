@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.68 2002/05/25 08:05:26 jmallett Exp $ */
+/* $Id: stdcmds.c,v 1.69 2002/05/25 15:49:39 leeh Exp $ */
 
 #include "setup.h"
 
@@ -43,10 +43,6 @@
 #include <regex.h>
 #define REGCOMP_FLAGS REG_EXTENDED
 #define REGEXEC_FLAGS 0
-#endif
-
-#ifdef DMALLOC
-#include "dmalloc.h"
 #endif
 
 #ifndef INADDR_NONE

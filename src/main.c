@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.64 2002/05/25 15:36:26 leeh Exp $ */
+/* $Id: main.c,v 1.65 2002/05/25 15:49:39 leeh Exp $ */
 
 #include "setup.h"
 
@@ -551,3 +551,23 @@ size_t strlcpy(char *dst, const char *src, size_t siz)
 }
 #endif
 
+/* xmalloc()
+ *
+ * input	- size to malloc()
+ * output	-
+ * side effects - memory is malloc()'d, exit() called if failure
+ */
+void *
+xmalloc(size_t size)
+{
+  void *ret = malloc(size);
+
+  if(!ret)
+  {
+    send_to_all(SEND_ALL, "Ran out of memory while attempting to allocate");
+    exit(-1);
+  }
+
+  return ret;
+}
+  

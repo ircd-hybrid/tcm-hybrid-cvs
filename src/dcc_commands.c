@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.79 2002/05/25 15:08:09 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.80 2002/05/25 15:49:38 leeh Exp $ */
 
 #include "setup.h"
 
@@ -43,10 +43,6 @@
 #include "tcm_io.h"
 #include "wild.h"
 #include "match.h"
-
-#ifdef DMALLOC
-#include "dmalloc.h"
-#endif
 
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>

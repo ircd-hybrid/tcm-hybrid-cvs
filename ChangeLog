@@ -1,3 +1,19 @@
+leeh        2002/05/29 09:10:44 EDT	(20020529_5)
+
+  Modified files:
+    include              userlist.h 
+    src                  userlist.c 
+  Log:
+  - kludged get_umode() for now to return(type|FLAGS_ALL) as FLAGS_ALL is
+    for messages that all clients should see, and the userlist doesnt
+    contain those in stats O..
+  
+  Revision  Changes    Path
+  1.59      +8 -11     tcm-hybrid/include/userlist.h
+  1.104     +2 -1      tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/29 02:26:18 EDT	(20020529_4)
 
   Modified files:

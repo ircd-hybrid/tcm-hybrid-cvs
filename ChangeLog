@@ -1,3 +1,26 @@
+db          2002/05/22 11:08:47 EDT	(20020522_6)
+
+  Modified files:
+    include              tcm.h 
+    modules              bothunt.c serverif.c 
+    src                  main.c 
+  Log:
+  - cleaned up m_gline, removed the mallocs
+  - added new expand_args function
+  - converted other code to use expand_args
+  
+  COMPILES but UNTESTED :-(
+  
+  I aint done yet.
+  
+  Revision  Changes    Path
+  1.29      +1 -1      tcm-hybrid/include/tcm.h
+  1.81      +76 -67    tcm-hybrid/modules/bothunt.c
+  1.71      +1 -10     tcm-hybrid/modules/serverif.c
+  1.45      +34 -0     tcm-hybrid/src/main.c
+
+
+
 wcampbel    2002/05/22 08:57:17 EDT	(20020522_5)
 
   Modified files:

@@ -1,3 +1,15 @@
+bill        2002/09/16 12:06:06 EDT	(20020916_0)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - potential core fix, submitted by Lee
+  
+  Revision  Changes    Path
+  1.101     +1 -1      tcm-hybrid/src/tcm_io.c
+
+
+
 bill        2002/09/14 16:18:09 EDT	(20020914_0)
 
   Modified files:

@@ -1,3 +1,9 @@
+*** 20011102_1 by db
+- fixed core dump on linkclosed
+- various cleanups with argv nonsense
+
+
+
 *** 20011031_1 by bill
 
 - added NULL checking in find_banned_host()

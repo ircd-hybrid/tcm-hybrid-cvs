@@ -1,0 +1,32 @@
+tcm v0.4.4b4 now has code to try and catch open wingates...
+
+  Look in config.h for DETECT_WINGATE
+
+#define AUTO_KLINE_WINGATES
+#define KLINE_WINGATE "KLINE 60"
+#define KLINE_WINGATE_REASON "Open_wingate"
+
+  Since this code sets up a reverse connection to the connecting
+client host, I would suggest a disclaimer in the motd
+"This server reserves the right to check for open wingates"
+or some such.
+
+  The DALNET anti wingate patch simply checks for port 1080 allowing
+a connection. Guess what? I found that 1080 is not listened to
+on busy wingate. i.e. The wingate is on your server already,
+and port 1080 is turned off at that time. I had to connect to port 23
+to check. When a wingate is not busy, you will get "WinGate>"
+if it is busy, you will get "Too many connected users - try again later"
+and you get disconnected. This code looks for both "WinGate>"
+and the busy message.
+
+
+  I've added the new key "W" to userlist.cf
+  If you have "W:class" you can set a class to test for wingate
+i.e. you can set it up to only wingate test class 9, and set up
+matching I lines to only test "suspicious" sites such as *ppp* etc.
+not testing shell boxes.
+
+-Dianora
+
+db@db.net

@@ -1,28 +1,20 @@
-tcm v0.4.4b4 now has code to try and catch open wingates...
+  This tcm has two methods of detecting open wingates. One is the
+class open port 1080. This will catch wingates as well as open proxies..
+Unfortunately, it will not detect an open busy wingate!
+I discovered in testing that when a microsoft wingate is full, it
+stops replying to all port 1080 connects. They get away with it if
+you only check port 1080. However, they continue to still be open on port 23.
+That leaves us with a bit of a problem. The observant will note that port
+23 is the telnet port. If you hit port 23 on shell boxes, they tend
+to get very upset.
 
-  Look in config.h for DETECT_WINGATE
+  You can reduce the risk of annoying shell boxes by limiting your
+probes to port 23 to I lines that match *ppp* or *slip* or.. 
+This is possible in tcm-hybrid by putting your *ppp* etc. into a single
+"dialup class" and having tcm only probe port 23 with connects in this class.
+This is done with the new key letter 'W".
 
-#define AUTO_KLINE_WINGATES
-#define KLINE_WINGATE "KLINE 60"
-#define KLINE_WINGATE_REASON "Open_wingate"
-
-  Since this code sets up a reverse connection to the connecting
-client host, I would suggest a disclaimer in the motd
-"This server reserves the right to check for open wingates"
-or some such.
-
-  The DALNET anti wingate patch simply checks for port 1080 allowing
-a connection. Guess what? I found that 1080 is not listened to
-on busy wingate. i.e. The wingate is on your server already,
-and port 1080 is turned off at that time. I had to connect to port 23
-to check. When a wingate is not busy, you will get "WinGate>"
-if it is busy, you will get "Too many connected users - try again later"
-and you get disconnected. This code looks for both "WinGate>"
-and the busy message.
-
-
-  I've added the new key "W" to userlist.cf
-  If you have "W:class" you can set a class to test for wingate
+  If you have "W:class" in userlist.cf, you can set a class to test for wingate
 i.e. you can set it up to only wingate test class 9, and set up
 matching I lines to only test "suspicious" sites such as *ppp* etc.
 not testing shell boxes.

@@ -1,3 +1,7 @@
+*** 20010901_1 by bill
+- fixed lag caused by wingate/socks detection
+
+
 *** 20010829_3 by bill
 - fixed socks detection (since when does fstat() return 0 on failure?)
 - fixed .quit bug

@@ -1,3 +1,10 @@
+*** 20011013_1 by bill
+- added supposed mem leak to BUGS
+- rewrote .save to replace tcm.cf rather than making its own file
+- removed obsolete .load
+- updated dependancy file
+
+
 *** 20011011_14 by bill
 
 - line break where there shouldn't be one

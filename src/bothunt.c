@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.40 2001/11/10 18:22:15 bill Exp $ */
+/* $Id: bothunt.c,v 1.41 2001/11/23 21:40:48 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -79,6 +79,7 @@ static int hash_func(char *string);
 static void addtohash(struct hashrec *table[],char *key,struct userentry *item);
 static char removefromhash(struct hashrec *table[], char *key, char *hostmatch,
                     char *usermatch, char *nickmatch);
+static void check_host_clones(char *);
 
 void _ontraceuser(int connnum, int argc, char *argv[]);
 void _ontraceclass(int connnum, int argc, char *argv[]);
@@ -1854,7 +1855,7 @@ static char* find_domain(char* host)
  * side effects	- 
  */
 
-void check_host_clones(char *host)
+static void check_host_clones(char *host)
 {
   struct hashrec *find;
   int clonecount = 0;

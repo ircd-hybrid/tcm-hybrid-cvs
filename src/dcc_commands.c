@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.28 2001/11/23 16:49:43 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.29 2001/11/23 21:40:48 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -68,6 +68,10 @@ static void report_multi(int sock, int nclones);
 static void report_multi_host(int sock, int nclones);
 static void report_multi_user(int sock, int nclones);
 static void report_multi_virtuals(int sock, int nclones);
+static int  islegal_pass(int connect_id,char *password);
+static void print_help(int sock,char *text);
+static void kill_list_users(int sock, char *userhost, char *reason);
+static void list_users(int sock,char *userhost);
 
 void _modinit();
 
@@ -2036,4 +2040,207 @@ report_multi_virtuals(int sock,int nclones)
 
   if (!foundany)
     prnt(sock, "No multiple virtual logins found.\n");
+}
+
+/*
+ * islegal_pass()
+ *
+ * inputs       - user
+ *              - host
+ *              - password
+ *              - int connect id
+ * output       - YES if legal NO if not
+ * side effects - NONE
+ */
+
+static int islegal_pass(int connect_id,char *password)
+{
+  int i;
+
+  for(i=0;userlist[i].user && userlist[i].user[0];i++)
+    {
+      if ((!wldcmp(userlist[i].user,connections[connect_id].user)) &&
+          (!wldcmp(userlist[i].host,connections[connect_id].host)))
+        {
+          if(userlist[i].password)
+            {
+#ifdef USE_CRYPT
+              if(!strcmp((char*)crypt(password,userlist[i].password),
+                         userlist[i].password))
+                {
+                  strncpy(connections[connect_id].registered_nick,
+                          userlist[i].usernick,
+                          MAX_NICK);
+                  connections[connect_id].type = userlist[i].type;
+                  return userlist[i].type;
+                }
+              else
+                return 0;
+#else
+              if(!strcmp(userlist[i].password,password))
+                {
+                  strncpy(connections[connect_id].registered_nick,
+                          userlist[i].usernick,
+                          MAX_NICK);
+                  connections[connect_id].type = userlist[i].type;
+                  return(userlist[i].type);
+                }
+              else
+                return(0);
+#endif
+            }
+        }
+    }
+  return(0);
+}
+
+/*
+ * print_help()
+ *
+ * inputs       - socket, help_text to use
+ * output       - none
+ * side effects - prints help file to user
+ */
+
+static void
+print_help(int sock,char *text)
+{
+  FILE *userfile;
+  char line[MAX_BUFF];
+  char help_file[MAX_BUFF];
+
+  if(!text || (*text == '\0'))
+    {
+      if( !(userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) )
+        {
+          prnt(sock,"Help is not currently available\n");
+          return;
+        }
+    }
+  else
+    {
+      while(*text == ' ')
+        text++;
+
+      if (*text == '\0')
+        {
+          if( !(userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) )
+            {
+              prnt(sock,"Help is not currently available\n");
+              return;
+            }
+        }
+
+      (void)snprintf(help_file,sizeof(help_file) - 1,"%s/%s.%s",
+                     HELP_PATH,HELP_FILE,text);
+      if( !(userfile = fopen(help_file,"r")) )
+        {
+          prnt(sock,"Help for '%s' is not currently available\n",text);
+          return;
+        }
+    }
+
+  while (fgets(line, MAX_BUFF-1, userfile))
+    {
+      prnt(sock, "%s", line);
+    }
+  fclose(userfile);
+}
+
+static void
+kill_list_users(int sock,char *userhost, char *reason)
+{
+  struct hashrec *userptr;
+  /* Looks fishy but it really isn't */
+  char fulluh[MAX_HOST+MAX_DOMAIN];
+  int i;
+  int numfound = 0;
+
+  if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
+      prnt(sock, "Let's not kill all the users.\n");
+  else
+    {
+      for (i=0;i<HASHTABLESIZE;++i)
+        {
+          for( userptr = domaintable[i]; userptr;
+               userptr = userptr->collision )
+            {
+              (void)snprintf(fulluh,sizeof(fulluh) - 1,
+                            "%s@%s",userptr->info->user,userptr->info->host);
+              if (!wldcmp(userhost,fulluh))
+                {
+                  if (!numfound++)
+                    {
+                        log("listkilled %s\n", fulluh);
+                    }
+                  toserv("KILL %s :%s\n", userptr->info->nick, reason);
+                }
+            }
+        }
+      if (numfound > 0)
+        prnt(sock,
+             "%d matches for %s found\n",numfound,userhost);
+      else
+        prnt(sock,
+             "No matches for %s found\n",userhost);
+  }
+}
+
+/*
+ * list_users()
+ *
+ * inputs       - socket to reply on
+ * output       - NONE
+ * side effects -
+ */
+
+static void
+list_users(int sock,char *userhost)
+{
+  struct hashrec *userptr;
+  char fulluh[MAX_HOST+MAX_DOMAIN];
+  int i;
+  int numfound = 0;
+
+  if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
+    prnt(sock,
+         "Listing all users is not recommended.  To do it anyway, use 'list ?*@*
+'.\n");
+  else
+    {
+      for (i=0;i<HASHTABLESIZE;++i)
+        {
+          for( userptr = domaintable[i]; userptr;
+               userptr = userptr->collision )
+            {
+              (void)snprintf(fulluh,sizeof(fulluh) - 1,
+                            "%s@%s",userptr->info->user,userptr->info->host);
+              if (!wldcmp(userhost,fulluh))
+                {
+                  if (!numfound++)
+                    {
+                      prnt(sock,
+                           "The following clients match %.150s:\n",userhost);
+                    }
+                  if (userptr->info->ip_host[0] > '9' ||
+                      userptr->info->ip_host[0] < '0')
+                    prnt(sock,
+                         "  %s (%s) {%s}\n",
+                         userptr->info->nick,
+                         fulluh, userptr->info->class);
+                  else
+                    prnt(sock, "  %s (%s) [%s] {%s}\n",
+                         userptr->info->nick,
+                         fulluh, userptr->info->ip_host,
+                         userptr->info->class);
+                }
+            }
+        }
+      if (numfound > 0)
+        prnt(sock,
+             "%d matches for %s found\n",numfound,userhost);
+      else
+        prnt(sock,
+             "No matches for %s found\n",userhost);
+  }
 }

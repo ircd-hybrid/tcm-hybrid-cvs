@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.29 2001/11/23 16:49:43 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.30 2001/11/23 21:40:49 wcampbel Exp $ */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -585,59 +585,6 @@ format_reason(char *reason)
 #endif
 
   return(reason_result);
-}
-
-/*
- * print_help()
- *
- * inputs       - socket, help_text to use
- * output       - none
- * side effects - prints help file to user
- */
-
-void 
-print_help(int sock,char *text)
-{
-  FILE *userfile;
-  char line[MAX_BUFF];
-  char help_file[MAX_BUFF];
-
-  if(!text || (*text == '\0'))
-    {
-      if( !(userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) )
-        {
-          prnt(sock,"Help is not currently available\n");
-          return;
-        }
-    }
-  else
-    {
-      while(*text == ' ')
-        text++;
-
-      if (*text == '\0')
-        {
-          if( !(userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) )
-            {
-              prnt(sock,"Help is not currently available\n");
-              return;
-            }
-        }
-
-      (void)snprintf(help_file,sizeof(help_file) - 1,"%s/%s.%s",
-                     HELP_PATH,HELP_FILE,text);
-      if( !(userfile = fopen(help_file,"r")) )
-        {
-          prnt(sock,"Help for '%s' is not currently available\n",text);
-          return;
-        }
-    }
-
-  while (fgets(line, MAX_BUFF-1, userfile))
-    {
-      prnt(sock, "%s", line);
-    }
-  fclose(userfile);
 }
 
 /*
@@ -1219,45 +1166,6 @@ report_domains(int sock,int num)
     }
 }
 
-void
-kill_list_users(int sock,char *userhost, char *reason)
-{
-  struct hashrec *userptr;
-  /* Looks fishy but it really isn't */
-  char fulluh[MAX_HOST+MAX_DOMAIN];
-  int i;
-  int numfound = 0;
-
-  if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
-      prnt(sock, "Let's not kill all the users.\n");
-  else
-    {
-      for (i=0;i<HASHTABLESIZE;++i)
-        {
-          for( userptr = domaintable[i]; userptr;
-               userptr = userptr->collision )
-            {
-              (void)snprintf(fulluh,sizeof(fulluh) - 1,
-                            "%s@%s",userptr->info->user,userptr->info->host);
-              if (!wldcmp(userhost,fulluh))
-                {
-                  if (!numfound++)
-                    {
-                        log("listkilled %s\n", fulluh);
-                    }
-                  toserv("KILL %s :%s\n", userptr->info->nick, reason);
-                }
-            }
-        }
-      if (numfound > 0)
-        prnt(sock,
-             "%d matches for %s found\n",numfound,userhost);
-      else
-        prnt(sock,
-             "No matches for %s found\n",userhost);
-  }
-}
-
 /*
  * do_a_kline()
  *
@@ -1430,63 +1338,5 @@ report_failures(int sock,int num)
       if (tmp->failcount < 0)
         tmp->failcount = -tmp->failcount;   /* Ugly, but it works. */
     }
-}
-
-/*
- * list_users()
- *
- * inputs       - socket to reply on
- * output       - NONE
- * side effects -
- */
-
-void
-list_users(int sock,char *userhost)
-{
-  struct hashrec *userptr;
-  char fulluh[MAX_HOST+MAX_DOMAIN];
-  int i;
-  int numfound = 0;
-
-  if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
-    prnt(sock,
-         "Listing all users is not recommended.  To do it anyway, use 'list ?*@*'.\n");
-  else
-    {
-      for (i=0;i<HASHTABLESIZE;++i)
-        {
-          for( userptr = domaintable[i]; userptr;
-               userptr = userptr->collision )
-            {
-              (void)snprintf(fulluh,sizeof(fulluh) - 1,
-                            "%s@%s",userptr->info->user,userptr->info->host);
-              if (!wldcmp(userhost,fulluh))
-                {
-                  if (!numfound++)
-                    {
-                      prnt(sock,
-                           "The following clients match %.150s:\n",userhost);
-                    }
-                  if (userptr->info->ip_host[0] > '9' ||
-                      userptr->info->ip_host[0] < '0')
-                    prnt(sock,
-                         "  %s (%s) {%s}\n",
-                         userptr->info->nick,
-                         fulluh, userptr->info->class);
-                  else
-                    prnt(sock, "  %s (%s) [%s] {%s}\n",
-                         userptr->info->nick,
-                         fulluh, userptr->info->ip_host,
-                         userptr->info->class);
-                }
-            }
-        }
-      if (numfound > 0)
-        prnt(sock,
-             "%d matches for %s found\n",numfound,userhost);
-      else
-        prnt(sock,
-             "No matches for %s found\n",userhost);
-  }
 }
 

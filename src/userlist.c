@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.34 2001/11/10 18:22:15 bill Exp $
+ * $Id: userlist.c,v 1.35 2001/11/23 21:40:49 wcampbel Exp $
  *
  */
 
@@ -898,58 +898,6 @@ void ban_manipulate(int sock,char flag,char *userhost)
 	    }
 	}
     }
-}
-
-/*
- * islegal_pass()
- *
- * inputs	- user
- * 		- host
- *		- password
- *		- int connect id
- * output	- YES if legal NO if not
- * side effects	- NONE
- */
-
-int islegal_pass(int connect_id,char *password)
-{
-  int i;
-
-  for(i=0;userlist[i].user && userlist[i].user[0];i++)
-    {
-      if ((!wldcmp(userlist[i].user,connections[connect_id].user)) &&
-	  (!wldcmp(userlist[i].host,connections[connect_id].host)))
-	{
-	  if(userlist[i].password)
-	    {
-#ifdef USE_CRYPT
-	      if(!strcmp((char*)crypt(password,userlist[i].password),
-			 userlist[i].password))
-		{
-		  strncpy(connections[connect_id].registered_nick,
-			  userlist[i].usernick,
-			  MAX_NICK);
-		  connections[connect_id].type = userlist[i].type;
-		  return userlist[i].type;
-		}
-	      else
-		return 0;
-#else
-	      if(!strcmp(userlist[i].password,password))
-		{
-		  strncpy(connections[connect_id].registered_nick,
-			  userlist[i].usernick,
-			  MAX_NICK);
-		  connections[connect_id].type = userlist[i].type;
-		  return(userlist[i].type);
-		}
-	      else
-		return(0);
-#endif
-	    }
-	}
-    }
-  return(0);
 }
 
 /* Checks for ok hosts to block auto-kline - Phisher */

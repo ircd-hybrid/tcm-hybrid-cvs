@@ -3,7 +3,7 @@
 
 /* tokens */
 
-/* $Id: token.h,v 1.13 2001/10/31 04:50:03 bill Exp $ */
+/* $Id: token.h,v 1.14 2001/11/23 21:40:46 wcampbel Exp $ */
 
 #define K_CLONES   	1
 #define K_NFLOOD   	2
@@ -67,7 +67,9 @@
 #define K_QUOTE         60
 
 char *splitc (char *rest, char divider);
-char *split (char *first);
+/* XXX - unused
+** char *split (char *first);
+*/
 int occurance(char *string, char find);
 int get_token(char *);	
 void init_tokenizer();	

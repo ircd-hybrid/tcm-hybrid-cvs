@@ -5,7 +5,7 @@
  *
  * - Dianora db@db.net
  *
- * $Id: token.c,v 1.20 2001/10/31 04:50:03 bill Exp $
+ * $Id: token.c,v 1.21 2001/11/23 21:40:49 wcampbel Exp $
  *
  */
 
@@ -219,11 +219,13 @@ splitc ( char *rest, char divider)
   return p;
 }
 
+/* XXX - unused
 char* 
 split (char *rest)
 {
   return ( splitc(rest, ' ') );
 }
+*/
 
 int 
 occurance(char *string, char find)

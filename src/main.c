@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.124 2002/06/28 00:53:49 db Exp $ */
+/* $Id: main.c,v 1.125 2002/06/28 06:23:14 db Exp $ */
 
 #include "setup.h"
 
@@ -250,6 +250,18 @@ main(int argc, char *argv[])
 	 }
     }
 
+  startup_time = time(NULL);
+
+  /* XXX move into init_tcm_status() later */
+  tcm_status.my_class[0] = '\0';
+  tcm_status.my_nick[0] = '\0';
+  tcm_status.my_server[0] = '\0';
+  tcm_status.am_opered = 0;
+  tcm_status.ping_time = 0;
+  tcm_status.doing_trace = 0;
+  tcm_status.n_of_fds_open=0;
+  tcm_status.max_fds = 128; 	/* XXX */
+
   if(connect_to_server(config_entries.server_name,
 		       atoi(config_entries.server_port)) == NULL)
     {
@@ -266,16 +278,6 @@ main(int argc, char *argv[])
     {
       gethostname(tcm_status.my_hostname,MAX_HOST-1);
     }
-
-  startup_time = time(NULL);
-
-  /* XXX move into init_tcm_status() later */
-  tcm_status.my_class[0] = '\0';
-  tcm_status.my_nick[0] = '\0';
-  tcm_status.my_server[0] = '\0';
-  tcm_status.am_opered = 0;
-  tcm_status.ping_time = 0;
-  tcm_status.doing_trace = 0;
 
   /* enter the main IO loop */
   read_packet();

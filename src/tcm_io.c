@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.96 2002/06/28 00:53:50 db Exp $
+ * $Id: tcm_io.c,v 1.97 2002/06/28 06:23:14 db Exp $
  */
 
 #include <stdio.h>
@@ -381,6 +381,10 @@ find_free_connection(void)
   dlink_node *ptr;
   struct connection *connection_p;
 
+  if ((tcm_status.n_of_fds_open + 1) > tcm_status.max_fds)
+    return (NULL);
+  tcm_status.n_of_fds_open++;
+
   connection_p = (struct connection *) xmalloc(sizeof(struct connection));
   memset(connection_p, 0, sizeof(connection_p));
 
@@ -506,12 +510,11 @@ va_send_to_connection(struct connection *connection_p,
 /*
  * send_to_all
  *
- * inputs	- message to send
- *		- flag if message is to be sent only to all users or opers only
+ * inputs	- pointer to originator of this message or NULL
+ *		- flag bits of where to send message to
+ *		- actual message
  * output	- NONE
- * side effects	- message is sent on /dcc link to all connected
- *		  users or to only opers on /dcc links
- *
+ * side effects	- message is sent on /dcc link
  */
 void
 send_to_all(struct connection *from_p, int send_umode, const char *format,...)
@@ -547,6 +550,9 @@ close_connection(struct connection *connection_p)
 
   if (connection_p->socket != INVALID)
     close(connection_p->socket);
+
+  tcm_status.n_of_fds_open--;
+  assert (tcm_status.n_of_fds_open >= 0);
 
   ptr = dlink_find(connection_p, &connections);
 

@@ -1,4 +1,4 @@
-/* $Id: parse.h,v 1.23 2002/06/24 00:40:15 db Exp $ */
+/* $Id: parse.h,v 1.24 2002/06/28 06:23:11 db Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
@@ -18,6 +18,8 @@ struct t_tcm_status {
   int  ping_time;
   int  doing_trace;		/* presently doing trace */
   int  ping_state;		/* ping to server */
+  int  n_of_fds_open;
+  int  max_fds;
 };
 
 struct source_client

@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.97 2002/06/24 00:40:21 db Exp $ */
+/* $Id: stdcmds.c,v 1.98 2002/06/28 06:23:14 db Exp $ */
 
 #include "setup.h"
 
@@ -104,7 +104,7 @@ report(int type, char *format,...)
   /* Probably not a format string bug, but I'm calling it this way
   ** for safety sake - Hwy
   */
-  send_to_all(type, "%s", msg);
+  send_to_all(NULL, type, "%s", msg);
 
   if(config_entries.channel != '\0')
     privmsg(config_entries.channel, "%s", msg);

@@ -2,14 +2,13 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.45 2002/06/28 00:53:45 db Exp $
+ * $Id: tcm_io.h,v 1.46 2002/06/28 06:23:11 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
 
 #include "tools.h"
 
-/* Dummy definition for now XXX */
 struct sockaddr_in;
 
 /*

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.85 2002/06/26 11:52:47 leeh Exp $ */
+/* $Id: userlist.h,v 1.86 2002/06/28 06:23:11 db Exp $ */
 
 #include "tools.h"
 
@@ -79,21 +79,19 @@ struct exempt_entry
 
 struct oper_entry *find_user_in_userlist(const char *);
 void show_stats_p(const char *nick);
-
 void set_umode(struct oper_entry *, int, const char *);
 void on_stats_o(int, char *argv[]);
-
 void add_exempt(char *, char *, int);
-
 void load_userlist(void);
+void reload_userlist(void);
 void init_userlist_handlers(void);
 void load_config_file(char *);
 void clear_userlist(void);
 void save_prefs(void);
 int  ok_host(char *,char *,int);
-int  str2type(char *);
 char *type_show(unsigned long type);
 int  wingate_class(char *class);
+int  is_an_oper(char *user, char *host);
 
 /* local_ip is clearly not going to be an unsigned long FIX THIS -db */
 unsigned long local_ip(char *ourhostname);
@@ -128,9 +126,6 @@ void exempt_summary();
 
 #define FLAGS_VALID		0x200000 /* valid userfile */
 #define FLAGS_CHANGED		0x400000 /* changed and needs saving */
-
-int  is_an_oper(char *user, char *host);
-void reload_userlist(void);
 
 struct config_list config_entries;
 

@@ -1,3 +1,20 @@
+db          2002/05/24 11:38:35 EDT	(20020524_13)
+
+  Modified files:
+    include              tcm_io.h 
+    modules              commands.c 
+    src                  tcm_io.c 
+  Log:
+  - convert the actual sendtoalldcc function itself to send_to_all
+    and in the process convert to using va_send_to_socket() to save code.
+  
+  Revision  Changes    Path
+  1.6       +1 -1      tcm-hybrid/include/tcm_io.h
+  1.71      +92 -47    tcm-hybrid/modules/commands.c
+  1.13      +13 -17    tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/24 11:17:52 EDT	(20020524_12)
 
   Modified files:

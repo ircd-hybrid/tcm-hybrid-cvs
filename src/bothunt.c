@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.67 2002/05/07 21:37:42 leeh Exp $ */
+/* $Id: bothunt.c,v 1.68 2002/05/08 20:45:02 einride Exp $ */
 
 #include "setup.h"
 
@@ -93,8 +93,7 @@ void _reload_bothunt(int connnum, int argc, char *argv[]);
 void _modinit();
 
 int act_cflood, act_vclone, act_flood, act_link,
-  act_bot, act_spambot, act_clone, act_rclone,
-  act_sclone, act_drone;
+  act_bot, act_spambot, act_clone, act_rclone;
 
 
 struct msg_to_action {

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.50 2002/05/08 20:39:17 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.51 2002/05/08 20:45:02 einride Exp $ */
 
 #include "setup.h"
 
@@ -323,7 +323,7 @@ void m_kaction(int connnum, int argc, char *argv[]) {
   handle_action(action, 0, host ? "" : who, host ? who : 0, host ? host : 0, 0, "Manually set");
 }
 
-extern int act_spambot;
+/*
 void m_kspam(int connnum, int argc, char *argv[])
 {
   int kline_time;
@@ -339,6 +339,7 @@ void m_kspam(int connnum, int argc, char *argv[])
       toserv("KLINE %d %s :%s\n", kline_time, argv[2], actions[act_spambot].reason);
   }
 }    
+*/
 
 void m_hmulti(int connnum, int argc, char *argv[])
 {

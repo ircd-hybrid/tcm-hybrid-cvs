@@ -1,3 +1,21 @@
+db          2002/05/28 13:32:06 EDT	(20020528_19)
+
+  Modified files:
+    include              parse.h 
+    src                  main.c parse.c tcm_io.c 
+  Log:
+  - added t_tcm_status struct and corresponding tcm_status which keep
+    track of current nick, hostname etc. more will be moved into this
+    struct as needed.
+  
+  Revision  Changes    Path
+  1.13      +9 -4      tcm-hybrid/include/parse.h
+  1.94      +12 -11    tcm-hybrid/src/main.c
+  1.43      +14 -13    tcm-hybrid/src/parse.c
+  1.64      +7 -6      tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/28 12:52:09 EDT	(20020528_18)
 
   Modified files:

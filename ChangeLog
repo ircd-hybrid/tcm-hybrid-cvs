@@ -1,3 +1,17 @@
+wcampbel    2002/04/11 09:11:15 EDT	(20020411_0)
+
+  Modified files:
+    modules              serverif.c 
+  Log:
+  Fixed TCM connecting to a server running PING cookies.  This may also
+  account for ping timeouts on an idle tcm without any sort of services
+  testing.
+  
+  Revision  Changes    Path
+  1.49      +8 -2      tcm-hybrid/modules/serverif.c
+
+
+
 wcampbel    2002/04/08 10:02:29 EDT	(20020408_0)
 
   Modified files:

@@ -1,3 +1,17 @@
+wcampbel    2002/05/21 17:29:32 EDT	(20020521_3)
+
+  Modified files:
+    src                  stdcmds.c 
+  Log:
+  Oops, JOIN and MODE sent when there's no channel specified :)
+  
+  Fixed for you Lee.
+  
+  Revision  Changes    Path
+  1.59      +4 -0      tcm-hybrid/src/stdcmds.c
+
+
+
 db          2002/05/20 23:06:21 EDT	(20020521_2)
 
   Modified files:

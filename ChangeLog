@@ -1,3 +1,15 @@
+wcampbel    2002/03/19 18:54:35 EST	(20020319_0)
+
+  Modified files:
+    src                  main.c 
+  Log:
+  Ignore SIGTRAP to prevent tcm from coring when detaching gdb on FreeBSD
+  
+  Revision  Changes    Path
+  1.27      +1 -0      tcm-hybrid/src/main.c
+
+
+
 bill        2002/03/11 01:03:47 EST	(20020311_0)
 
   Modified files:

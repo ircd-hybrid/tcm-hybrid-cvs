@@ -1,3 +1,25 @@
+leeh        2002/06/24 11:44:58 EDT	(20020624_6)
+
+  Modified files:
+    include              tcm_io.h tools.h 
+    src                  main.c tcm_io.c tools.c 
+  Log:
+  - moved the connections struct over to a dlink_list.  another of those
+    damned static structs gone! :)
+  
+    still needs code adding to detect < FD_SETSIZE however, and I think
+    find_free_connection() is somewhat of a misnomer now,
+    create_connection()?
+  
+  Revision  Changes    Path
+  1.43      +0 -1      tcm-hybrid/include/tcm_io.h
+  1.4       +3 -1      tcm-hybrid/include/tools.h
+  1.122     +0 -1      tcm-hybrid/src/main.c
+  1.94      +114 -126  tcm-hybrid/src/tcm_io.c
+  1.5       +8 -1      tcm-hybrid/src/tools.c
+
+
+
 leeh        2002/06/24 10:56:13 EDT	(20020624_5)
 
   Modified files:

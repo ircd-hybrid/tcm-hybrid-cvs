@@ -1,3 +1,15 @@
+*** 20010603_3 by db
+patch sent in by Walter Campbell
+1.  Document that USE_CRYPT is enabled by default
+2.  Fix an issue where people could telnet to the tcm and not type
+    anything.  Those people would see everything that an oper would.
+    I changed it so that sensitive data is only sent to remote TCM's
+    if they were NOT pending connections (meaning fully registered)
+
+Simple change of -1 to INVALID for consistency -db
+
+
+
 *** 20010603_2 by greg
 Two simple bugfixes.
 

@@ -52,6 +52,9 @@ distclean: clean
 tcm: ${OBJECTS}
 	${CC} ${CFLAGS} -o tcm ${OBJECTS} ${TCMLIBS}
 
+lint:
+	lint -aacgprxhH $(CPPFLAGS) $(SOURCES) >lint.out
+
 depend:
 	${MKDEP} ${INCLUDES} ${SOURCES} > .depend
 

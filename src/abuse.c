@@ -38,7 +38,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.11 2001/06/18 16:20:12 kreator Exp $";
+static char *version="$Id: abuse.c,v 1.12 2001/07/03 03:47:01 wcampbel Exp $";
 
 /*
  * do_a_kline()
@@ -179,13 +179,12 @@ void suggest_kill_kline(int reason,
 {
   char suggested_user[MAX_USER+1];
   char *suggested_host;
-  char *p;
 
   /* Don't kill or kline exempted users */  
   if(okhost(user, host))
     return;
 
-  if( (p = strchr(host,'*')) )
+  if( (strchr(host,'*') == NULL) )
     {
       report(SEND_ALL_USERS,
 	     CHANNEL_REPORT_SPOOF,
@@ -194,7 +193,7 @@ void suggest_kill_kline(int reason,
       return;
     }
 
-  if( (p = strchr(host,'?')) )
+  if( (strchr(host,'?') == NULL) )
     {
       report(SEND_ALL_USERS,
 	     CHANNEL_REPORT_SPOOF,

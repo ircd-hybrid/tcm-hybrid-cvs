@@ -56,13 +56,13 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.19 2001/06/18 16:20:14 kreator Exp $";
+static char *version="$Id: serverif.c,v 1.20 2001/07/03 03:47:02 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
 static void send_umodes(char *mynick);
 static void onjoin(char *nick, char *mychannel);
-static void onkick(char *nick, char *channel);
+static void onkick(char *nick);
 static void onnick(char *old_nick, char *new_nick);
 static void onnicktaken(void);
 static void cannotjoin(char *channel);
@@ -1950,7 +1950,7 @@ static void proc(char *source,char *fctn,char *param)
       {
         if ( (modeparms = strchr(body,' ')) )    /* 2.8 fix */
           *modeparms = '\0';
-        onkick(body,param);
+        onkick(body);
       }
     else if ( !strcmp(fctn,"NICK"))
       {
@@ -2193,7 +2193,7 @@ char *argv[];
       connections[i].registered_nick[0] = '\0';
     }
 
-  srand(time(NULL));	/* -zaph */
+  srandom(time(NULL));	/* -zaph */
   signal(SIGUSR1,init_debug);
   signal(SIGSEGV,sighandlr);
   signal(SIGBUS,sighandlr);
@@ -2394,7 +2394,8 @@ static void connect_remote_tcm(int connnum)
 
       addrlen = sizeof(struct sockaddr);
       if((connections[i].socket = accept(remote_tcm_socket,
-			 (struct sockaddr *)&incoming_addr,&addrlen)) < 0 )
+			 (struct sockaddr *)&incoming_addr,
+                         (socklen_t *)&addrlen)) < 0 )
 	{
 	  fprintf(stderr,"Error in remote tcm connect on accept\n");
 	  return;
@@ -2548,7 +2549,8 @@ static void connect_remote_client(char *nick,char *user,char *host,int sock)
 
   addrlen = sizeof(struct sockaddr);
   if((connections[i].socket = accept(sock,
-		     (struct sockaddr *)&incoming_addr,&addrlen)) < 0 )
+		     (struct sockaddr *)&incoming_addr,
+                     (socklen_t *)&addrlen)) < 0 )
     {
       notice(nick,"Error in dcc chat\n");
       (void)fprintf(stderr,"Error in remote tcm connect on accept\n");
@@ -2784,7 +2786,7 @@ static void onjoin(char *nick,char *channel)
     }
 }
 
-static void onkick(char *nick,char *channel)
+static void onkick(char *nick)
 {
   if (!strcmp(mynick,nick))
     {
@@ -2816,7 +2818,7 @@ static void onnicktaken(void)
 {
   char randnick[MAX_NICK];
 
-  (void)sprintf(randnick,"%s%1d",config_entries.dfltnick, rand() % 10);
+  (void)sprintf(randnick,"%s%1d",config_entries.dfltnick, random() % 10);
 
   if (!*mychannel)
     {

@@ -1,3 +1,7 @@
+*** 20011030_3 by wcampbel
+Minor documentation fix
+
+
 *** 20011030_2 by bill
 
 - added checking for SUN ld, -export-dynamic caused breakage on solaris

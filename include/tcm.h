@@ -1,12 +1,12 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.20 2001/11/10 15:24:40 wcampbel Exp $ */
+/* $Id: tcm.h,v 1.21 2001/11/10 18:22:15 bill Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
 
-#define MAX_ARGV	20
+#define MAX_ARGV	80
 
 /* Buffer sizes */
 

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.39 2001/11/10 15:55:47 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.40 2001/11/10 18:22:15 bill Exp $ */
 
 #include "setup.h"
 
@@ -792,6 +792,23 @@ void onservnotice(int connnum, int argc, char *argv[])
     return;
   }
 
+  if (strstr(p, "is rehashing"))
+  {
+    if (strstr(p, " DNS"))
+      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing DNS", argv[6]);
+    else if (strstr(p, "OPER MOTD file"))
+      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing OPER MOTD", argv[6]);
+    else if (strstr(p, "MOTD file"))
+      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing MOTD", argv[6]);
+    else if (strstr(p, "help files"))
+      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing help files", argv[6]);
+    else if (strstr(p, "channels"))
+      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is cleaning up channels", argv[6]);
+    else
+      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing config file", argv[6]);
+    return;
+  }
+
   if (strstr(p, "KILL message for"))
   {
     kill_add_report(p);
@@ -1299,11 +1316,8 @@ void _onctcp(int connnum, int argc, char *argv[])
   int i;
   int len;
 
-  nick = argv[0] + 1;
-  if ((hold = strchr(argv[0], '!')))
-    *hold = '\0';
-  else return;
-  ++hold;
+  nick = argv[0];
+  hold = nick + strlen(nick) + 1;
 
   if (strncasecmp(msg,"PING",4) == 0)
   {

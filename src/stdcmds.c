@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.27 2001/11/10 15:55:47 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.28 2001/11/10 18:22:15 bill Exp $ */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -1328,8 +1328,8 @@ report_multi(int sock,int nclones)
                        " %s %2d connections -- %s@%s%s {%s}\n",
                        (numfound-nclones > 2) ? "==>" :
                        "   ",numfound,userptr->info->user,
-                       notip ? "*" : userptr->info->domain,
-                       notip ? userptr->info->domain : "*",
+                       notip ? "*." : userptr->info->domain,
+                       notip ? userptr->info->domain : ".*",
                        userptr->info->class);
                 }
             }

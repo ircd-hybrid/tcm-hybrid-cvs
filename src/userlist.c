@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.33 2001/11/10 03:14:38 wcampbel Exp $
+ * $Id: userlist.c,v 1.34 2001/11/10 18:22:15 bill Exp $
  *
  */
 
@@ -77,7 +77,7 @@ void load_config_file(char *file_name)
   FILE *fp;
   char line[MAX_BUFF];
   char *argv[20];
-  int  argc;
+  int  argc, a;
   char *p;
   char *q;
   int error_in_config;		/* flag if error was found in config file */
@@ -166,7 +166,14 @@ void load_config_file(char *file_name)
 	  break;
 
 	case 'm':case 'M':
-	  strncpy(config_entries.statspmsg, argv[1],sizeof(config_entries.statspmsg));
+	  strncpy(config_entries.statspmsg, argv[1],sizeof(config_entries.statspmsg));          
+          for ( a = 2 ; a < argc ; ++a )
+          {
+            strcat(config_entries.statspmsg, ":");
+            strcat(config_entries.statspmsg, argv[a]);
+          }
+          if (config_entries.statspmsg[strlen(config_entries.statspmsg)-1] == ':')
+            config_entries.statspmsg[strlen(config_entries.statspmsg)-1] = '\0';
 	  break;
 
 	case 'o':case 'O':

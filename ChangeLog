@@ -1,3 +1,28 @@
+bill        2004/06/11 16:05:51 EDT	(20040611_0)
+
+  Modified files:
+    include              actions.h bothunt.h hash.h parse.h tcm.h 
+                         tcm_io.h userlist.h 
+    src                  .depend actions.c hash.c 
+  Log:
+  - make everything a bit more strlcpy() friendly
+  - fixed an off-by-one that would let certain people evade klines
+  - updated depend
+  
+  Revision  Changes    Path
+  1.24      +2 -2      tcm-hybrid/include/actions.h
+  1.66      +2 -2      tcm-hybrid/include/bothunt.h
+  1.32      +8 -8      tcm-hybrid/include/hash.h
+  1.27      +5 -5      tcm-hybrid/include/parse.h
+  1.61      +3 -4      tcm-hybrid/include/tcm.h
+  1.47      +5 -5      tcm-hybrid/include/tcm_io.h
+  1.98      +27 -27    tcm-hybrid/include/userlist.h
+  1.44      +3 -0      tcm-hybrid/src/.depend
+  1.55      +2 -2      tcm-hybrid/src/actions.c
+  1.76      +69 -0     tcm-hybrid/src/hash.c
+
+
+
 bill        2004/06/10 19:20:27 EDT	(20040610_1)
 
   Modified files:

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.78 2002/05/22 01:34:27 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.79 2002/05/22 02:33:07 db Exp $ */
 
 #include "setup.h"
 
@@ -76,8 +76,8 @@ static void  updatehash(struct hashrec**,char *,char *,char *);
 static void  stats_notice(char *snotice);
 static int hash_func(char *string);
 static void addtohash(struct hashrec *table[],char *key,struct userentry *item);
-static char removefromhash(struct hashrec *table[], char *key, char *hostmatch,
-                    char *usermatch, char *nickmatch);
+static int removefromhash(struct hashrec *table[], char *key, char *hostmatch,
+			  char *usermatch, char *nickmatch);
 static void check_host_clones(char *);
 #ifdef VIRTUAL
 static void check_virtual_host_clones(char *);
@@ -186,13 +186,14 @@ struct connect_flood_entry connect_flood[CONNECT_FLOOD_TABLE_SIZE];
 
 struct banned_info glines[MAXBANS];
 
-static int find_banned_host(char *user, char *host)
+static int
+find_banned_host(char *user, char *host)
 {
   int i;
 
   for (i=0; i < MAXBANS; i++)
   {
-    if (glines[i].user != NULL && glines[i].host != NULL)
+    if (glines[i].user[0] != '\0' && glines[i].host[0] != '\0')
     {
       if (!strcmp(user, glines[i].user) && !strcmp(host, glines[i].host))
         return i;
@@ -202,70 +203,55 @@ static int find_banned_host(char *user, char *host)
   return -1;
 }
 
-static void remove_gline(char *user, char *host)
+/*
+ * remove_gline
+ *
+ * inputs	- user
+ * 		- hostname
+ * output	- none
+ * side effects	-
+ */
+static void
+remove_gline(char *user, char *host)
 {
   int i;
   if ((i = find_banned_host(user, host)) == -1)
     return;
 
-  if (glines[i].user)
-    free(glines[i].user);
-
-  if (glines[i].host)
-    free(glines[i].host);
-
-  if (glines[i].reason)
-    free(glines[i].reason);
-
-  if (glines[i].who)
-    free(glines[i].who);
-
-  glines[i].next = (struct banned_info *)NULL;
-  glines[i].when = (time_t *)NULL;
+  glines[i].next = NULL;
+  glines[i].when = NULL;
 }
 
-static int gline_request(char *user, char *host, char *reason, char *who,
-                         time_t *when)
+/*
+ * gline_request
+ *
+ * inputs	- username
+ *		- hostname
+ *		- reason 
+ *		- who did the gline
+ *		- when 
+ * output	- ??
+ * side effects	-
+ */
+static int
+gline_request(char *user, char *host, char *reason, char *who)
 {
   int i;
-  time_t current_time;
+
   if (find_banned_host(user, host) != -1) return 0;
 
   /* find an empty spot for this new request */
   for (i=0; i < MAXBANS; i++)
-    if (glines[i].user == NULL)
+    if (glines[i].user[0] == '\0')
       break;
 
-  if ((glines[i].user = (char *) malloc(MAX_USER)) == NULL)
-  {
-    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host()");
-    exit(-1);
-  }
+  /* XXX not everyone supports strlcpy yet (dolts) deal with later -db */
+  strlcpy(glines[i].user, user, MAX_USER);
+  strlcpy(glines[i].host, host, MAX_HOST);
+  strlcpy(glines[i].reason, reason, MAX_REASON);
+  strlcpy(glines[i].who, who, MAX_WHO);
 
-  if ((glines[i].host = (char *) malloc(MAX_HOST)) == NULL)
-  {
-    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host()");
-    exit(-1);
-  }
-
-  if ((glines[i].reason = (char *) malloc(1024)) == NULL)
-  {
-    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host()");
-    exit(-1);
-  }
-  if ((glines[i].who = (char *) malloc(1024)) == NULL)
-  {
-    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host()");
-    exit(-1);
-  }
-
-  strncpy(glines[i].user, user, MAX_USER);
-  strncpy(glines[i].host, host, MAX_HOST);
-  strncpy(glines[i].reason, reason, 1024);
-  strncpy(glines[i].who, who, 1024);
-
-  current_time = time(NULL);
-  glines[i].when = (when) ? when : &current_time;
+  glines[i].when = CurrentTime;
 
   return 1;
 }
@@ -287,7 +273,8 @@ static int gline_request(char *user, char *host, char *reason, char *who,
  * This is moot now, as no one now runs this variant...
  */
 
-void _ontraceuser(int connnum, int argc, char *argv[])
+void
+_ontraceuser(int connnum, int argc, char *argv[])
 {
   struct plus_c_info userinfo;
   char *class_ptr;	/* pointer to class number */
@@ -429,8 +416,8 @@ void on_stats_o(int connnum, int argc, char *argv[])
  * side effects	- exception list of tcm is built up from stats E of server
  * 
  */
-
-void on_stats_e(int connnum, int argc, char *argv[])
+void
+on_stats_e(int connnum, int argc, char *argv[])
 {
   char *user;
   char *host;
@@ -483,8 +470,8 @@ void on_stats_e(int connnum, int argc, char *argv[])
  * side effects	- exception list of tcm is built up from stats I of server
  * 
  */
-
-void on_stats_i(int connnum, int argc, char *argv[])
+void
+on_stats_i(int connnum, int argc, char *argv[])
 {
   char *user;
   char *host;
@@ -556,12 +543,12 @@ void on_stats_i(int connnum, int argc, char *argv[])
  * output	- NONE
  * side effects	-
  */
-void onservnotice(int connnum, int argc, char *argv[])
+void
+onservnotice(int connnum, int argc, char *argv[])
 {
   int i = -1, a, b, c = -1;
   int faction = -1;
   struct plus_c_info userinfo;
-  time_t current_time;
   char *from_server;
   /* XXX - Verify these down below */
   char *nick = NULL;
@@ -583,7 +570,6 @@ void onservnotice(int connnum, int argc, char *argv[])
       break;
   }
 
-  current_time = time(NULL);
   if (msgs_to_mon[i].msg_to_mon != NULL)
   {
     q = p+strlen(msgs_to_mon[i].msg_to_mon);
@@ -675,7 +661,7 @@ void onservnotice(int connnum, int argc, char *argv[])
     if ((p = strrchr(q, ']')) == NULL)
       return;
     *p = '\0'; 
-    gline_request(user, host, q, nick, (time_t *)current_time);
+    gline_request(user, host, q, nick);
     sendtoalldcc(SEND_KLINE_NOTICES_ONLY,
                  "GLINE for %s@%s by %s [%s]: %s", user, host, nick, target, q);
     return;
@@ -745,7 +731,7 @@ void onservnotice(int connnum, int argc, char *argv[])
     {
       free(glines[i].user);
       free(glines[i].host);
-      glines[i].when = (time_t *)NULL;
+      glines[i].when = 0;
     }
     return;
   }
@@ -1040,7 +1026,7 @@ void onservnotice(int connnum, int argc, char *argv[])
       {
 	if (strcasecmp(connect_flood[a].user_host, user) == 0)
 	{
-	  if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
+	  if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < CurrentTime)
 	    connect_flood[a].connect_count = 0;
 
 	  ++connect_flood[a].connect_count;
@@ -1059,9 +1045,9 @@ void onservnotice(int connnum, int argc, char *argv[])
 	      connect_flood[a].user_host[0] = '\0';
 	    }
 	  else
-	    connect_flood[a].last_connect = current_time;
+	    connect_flood[a].last_connect = CurrentTime;
 	}
-	else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
+	else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < CurrentTime)
 	  connect_flood[a].user_host[0] = '\0';
       }
       else c = a;
@@ -1077,7 +1063,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 		 sizeof(connect_flood[c].user_host), "%s@%s",
 		 user, host);
       connect_flood[c].connect_count = 0;
-      connect_flood[c].last_connect = current_time;
+      connect_flood[c].last_connect = CurrentTime;
     }
     break;
 
@@ -1102,7 +1088,7 @@ void onservnotice(int connnum, int argc, char *argv[])
       {
         if (strcasecmp(connect_flood[a].user_host, user) == 0)
         {
-          if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
+          if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < CurrentTime)
             connect_flood[a].connect_count = 0;
           ++connect_flood[a].connect_count;
 
@@ -1117,11 +1103,11 @@ void onservnotice(int connnum, int argc, char *argv[])
               connect_flood[a].user_host[0] = '\0';
             }
             else
-              connect_flood[a].last_connect = current_time;
+              connect_flood[a].last_connect = CurrentTime;
           return;
         }
         else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME)
-                 < current_time)
+                 < CurrentTime)
           connect_flood[a].user_host[0] = '\0';
       }
       else
@@ -1136,7 +1122,7 @@ void onservnotice(int connnum, int argc, char *argv[])
         snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host),
                  "%s@%s", user, host);
       connect_flood[c].connect_count = 0;
-      connect_flood[c].last_connect = current_time;
+      connect_flood[c].last_connect = CurrentTime;
     }
 
   /* Invalid username: bill (!@$@&&&.com) */
@@ -1157,7 +1143,7 @@ void onservnotice(int connnum, int argc, char *argv[])
       {
 	if (!strcasecmp(user, connect_flood[a].user_host))
         {
-	  if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
+	  if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < CurrentTime)
 	    connect_flood[a].connect_count = 0;
 
 	  ++connect_flood[a].connect_count;
@@ -1173,7 +1159,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 	    }
 	}
 	else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME)
-                 < current_time)
+                 < CurrentTime)
 	  connect_flood[a].user_host[0] = '\0';
       }
       else
@@ -1187,7 +1173,7 @@ void onservnotice(int connnum, int argc, char *argv[])
       else
         snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host),
                  "%s@%s", user, host);
-      connect_flood[c].last_connect = current_time;
+      connect_flood[c].last_connect = CurrentTime;
       connect_flood[c].connect_count = 0;
     }
     break;
@@ -1260,11 +1246,16 @@ void onservnotice(int connnum, int argc, char *argv[])
 }
 
 /*
-** makeconn()
-**   Makes another connection
-*/
-
-char makeconn(char *hostport,char *nick,char *userhost)
+ * makeconn()
+ *
+ * inputs	- hostpost
+ * 		- nick making the connection
+ *		- userhost
+ * output	- 
+ * side effects	- Makes another connection
+ */
+int
+makeconn(char *hostport,char *nick,char *userhost)
 {
   int  i;               /* index variable */
   char *p;              /* scratch pointer used for parsing */
@@ -1283,7 +1274,7 @@ char makeconn(char *hostport,char *nick,char *userhost)
   }
 
   if (i > MAXDCCCONNS)
-    return 0;
+    return (0);
 
   if ((p = strchr(userhost,'@')) != NULL)
   {
@@ -1306,13 +1297,13 @@ char makeconn(char *hostport,char *nick,char *userhost)
     if (!isoper(user,host))
     {
       notice(nick,"You are not an operator");
-      return 0;
+      return (0);
     }
   }
   connections[i].socket = bindsocket(hostport);
 
   if (connections[i].socket == INVALID)
-    return 0;
+    return (0);
 
   fcntl(connections[i].socket, F_SETFL, O_NONBLOCK);
   FD_SET(connections[i].socket, &readfds);
@@ -1342,7 +1333,7 @@ char makeconn(char *hostport,char *nick,char *userhost)
     connections[i].user[0] = '\0';
     connections[i].type = 0;
     (void)free(connections[i].buffer);
-    return 0;
+    return (0);
   }
 
   connections[i].last_message_time = time(NULL);
@@ -1363,7 +1354,7 @@ char makeconn(char *hostport,char *nick,char *userhost)
 
   prnt(connections[i].socket,
        "Connected.  Send '.help' for commands.\n");
-  return 1;
+  return (1);
 }
 
 /*
@@ -1375,7 +1366,8 @@ char makeconn(char *hostport,char *nick,char *userhost)
  *
  */
 
-void _onctcp(int connnum, int argc, char *argv[])
+void
+_onctcp(int connnum, int argc, char *argv[])
 {
   char *hold, *nick, *port, *a;
   char *msg=argv[3]+1;
@@ -1436,9 +1428,16 @@ int hash_func(char *string)
 }
 
 /*
+ * addtohash
+ * 
+ * inputs	- pointer to hashtable to add to
+ *		- pointer to key being used for hash
+ *		- pointer to item being added to hash
+ * output	- NONE
+ * side effects	- adds an entry to given hash table
  */
-
-void addtohash(struct hashrec *table[],char *key,struct userentry *item)
+void
+addtohash(struct hashrec *table[],char *key,struct userentry *item)
 {
   int ind;
   struct hashrec *newhashrec;
@@ -1461,12 +1460,17 @@ void addtohash(struct hashrec *table[],char *key,struct userentry *item)
 /*
  * removefromhash()
  *
- *
- *      fixed memory leak here...
- *	make sure don't free() an already free()'ed info struct
+ * inputs	- pointer to hashtable to remove entry from
+ *		- pointer to key being used for hash
+ *		- pointer to hostname to match before removal
+ *		- pointer to username to match before removal
+ *		- pointer to nickname to match before removal
+ * output	- NONE
+ * side effects	- adds an entry to given hash table
  */
 
-char removefromhash(struct hashrec *table[],
+static int
+removefromhash(struct hashrec *table[],
 		    char *key,
 		    char *hostmatch,
 		    char *usermatch,
@@ -1520,7 +1524,8 @@ char removefromhash(struct hashrec *table[],
  *	          will show the updated nick.
  */
 
-static void updateuserhost(char *nick1,char *nick2,char *userhost)
+static void
+updateuserhost(char *nick1,char *nick2,char *userhost)
 {
   char *host;
 
@@ -1543,7 +1548,8 @@ static void updateuserhost(char *nick1,char *nick2,char *userhost)
  * side effects	- user entry nick is updated if found
  */
 
-static void updatehash(struct hashrec *table[],
+static void
+updatehash(struct hashrec *table[],
 		       char *key,char *nick1,char *nick2)
 {
   struct hashrec *find;
@@ -1566,7 +1572,8 @@ static void updatehash(struct hashrec *table[],
  * side effects	- 
  */
 
-static void removeuserhost(char *nick, struct plus_c_info *userinfo)
+static void
+removeuserhost(char *nick, struct plus_c_info *userinfo)
 {
 #ifdef VIRTUAL
   int  found_dots;
@@ -1706,8 +1713,8 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
  * These days, its better to show host IP's as class C
  */
 
-static void adduserhost(char *nick,
-			struct plus_c_info *userinfo,int fromtrace,int is_oper)
+static void
+adduserhost(char *nick, struct plus_c_info *userinfo,int fromtrace,int is_oper)
 {
   struct userentry *newuser;
   struct common_function *temp;
@@ -1821,7 +1828,8 @@ static void adduserhost(char *nick,
  *
  * return pointer to domain found from host name
  */
-static char* find_domain(char* host)
+static char*
+find_domain(char* host)
 {
   char *ip_domain;
   char *found_domain;
@@ -1926,7 +1934,8 @@ static char* find_domain(char* host)
  * side effects -
  */
 
-static void check_reconnect_clones(char *host)
+static void
+check_reconnect_clones(char *host)
 {
   int i;
   time_t now = time(NULL);
@@ -1979,7 +1988,8 @@ static void check_reconnect_clones(char *host)
  * side effects	- 
  */
 
-static void check_host_clones(char *host)
+static void
+check_host_clones(char *host)
 {
   struct hashrec *find;
   int clonecount = 0;
@@ -2145,7 +2155,8 @@ static void check_host_clones(char *host)
  *
  */
 #ifdef VIRTUAL
-static void check_virtual_host_clones(char *ip_class_c)
+static void
+check_virtual_host_clones(char *ip_class_c)
 {
   struct hashrec *find;
   int clonecount = 0;
@@ -2284,7 +2295,8 @@ static void check_virtual_host_clones(char *ip_class_c)
 }
 #endif
 
-static void connect_flood_notice(char *snotice)
+static void
+connect_flood_notice(char *snotice)
 {
   char *nick_reported;
   char *user_host;
@@ -2292,12 +2304,11 @@ static void connect_flood_notice(char *snotice)
   char host[MAX_HOST];
   char *ip;
   char *p;
-  time_t current_time;
+
   int first_empty_entry = -1;
   int found_entry = NO;
   int i, ident=YES;
 
-  current_time = time(NULL);
   snotice +=5;
 
   p=nick_reported=snotice;
@@ -2331,7 +2342,7 @@ static void connect_flood_notice(char *snotice)
 	      found_entry = YES;
 
 	      if ((connect_flood[i].last_connect + MAX_CONNECT_TIME)
-		  < current_time)
+		  < CurrentTime)
 		{
 		  connect_flood[i].connect_count = 0;
 		}
@@ -2345,7 +2356,7 @@ static void connect_flood_notice(char *snotice)
 		handle_action(act_cflood, ident, nick_reported, user, host, 0, 0);
 	    }
 	  else if ((connect_flood[i].last_connect + MAX_CONNECT_TIME)
-		   < current_time) {
+		   < CurrentTime) {
 	    connect_flood[i].user_host[0] = '\0';
 	  }
 	}
@@ -2361,7 +2372,7 @@ static void connect_flood_notice(char *snotice)
 	{
 	  strncpy(connect_flood[first_empty_entry].user_host, user_host,
 		  sizeof(connect_flood[first_empty_entry]));
-	  connect_flood[first_empty_entry].last_connect = current_time;
+	  connect_flood[first_empty_entry].last_connect = CurrentTime;
 	  connect_flood[first_empty_entry].connect_count = 0;
 	}
     }
@@ -2388,18 +2399,16 @@ static void connect_flood_notice(char *snotice)
  * LT and CS do not. sorry guys for missing that. :-(
  *  Jan 1 1997  - Dianora
  */
-static void link_look_notice(char *snotice)
+static void
+link_look_notice(char *snotice)
 {
   char *nick_reported;
   char user_host[MAX_HOST+MAX_NICK+2];
   char *user, *host;
   char *p;
-  time_t current_time;
   int first_empty_entry = -1;
   int found_entry = NO;
   int i;
-
-  current_time = time(NULL);
 
   p = strstr(snotice,"requested by");
 
@@ -2460,7 +2469,7 @@ static void link_look_notice(char *snotice)
 	       * (this should be very unlikely case)
 	       */
 
-	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
+	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < CurrentTime)
 		{
 		  link_look[i].link_look_count = 0;
 		}
@@ -2475,12 +2484,12 @@ static void link_look_notice(char *snotice)
 		}
 	      else
 		{
-		  link_look[i].last_link_look = current_time;
+		  link_look[i].last_link_look = CurrentTime;
 		}
 	    }
 	  else
 	    {
-	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
+	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < CurrentTime)
 		{
 		  link_look[i].user_host[0] = '\0';
 		}
@@ -2504,7 +2513,7 @@ static void link_look_notice(char *snotice)
 	  /* XXX */
 	  strncpy(link_look[first_empty_entry].user_host,user_host,
 		  MAX_USER+MAX_HOST);
-	  link_look[first_empty_entry].last_link_look = current_time;
+	  link_look[first_empty_entry].last_link_look = CurrentTime;
           link_look[first_empty_entry].link_look_count = 1;
 	}
     }
@@ -2519,7 +2528,8 @@ static void link_look_notice(char *snotice)
  */
 
 #ifdef BOT_WARN
-void bot_report_kline(char *snotice,char *type_of_bot)
+void
+bot_report_kline(char *snotice,char *type_of_bot)
 {
   char *p;			/* scratch variable */
   char *nick;			/* found nick */
@@ -2624,7 +2634,8 @@ static void cs_nick_flood(char *snotice)
  * connected opers are dcc'ed a suggested kline
  *
  */
-static void cs_clones(char *snotice)
+static void
+cs_clones(char *snotice)
 {
   int identd = YES;
   char *user;
@@ -2763,13 +2774,11 @@ static void check_nick_flood(char *snotice)
  *
  * inputs - NONE
  * output - NONE
- * side effects -
- * clears out the link looker change table
- * This is very similar to the NICK_CHANGE code in many respects
+ * side effects - clears out the link looker change table
  *
  */
-
-void init_link_look_table()
+void
+init_link_look_table()
 {
   int i;
 
@@ -2815,16 +2824,15 @@ void init_link_look_table()
  *
  */
 
-static void add_to_nick_change_table(char *user_host,char *last_nick)
+static void
+add_to_nick_change_table(char *user_host,char *last_nick)
 {
   char *user;
   char *host;
   int i;
   int found_empty_entry=-1;
-  time_t current_time;
   struct tm *tmrec;
 
-  current_time = time(NULL);
 
   for(i = 0; i < NICK_CHANGE_TABLE_SIZE; i++)
   {
@@ -2833,7 +2841,7 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
       time_t time_difference;
       int time_ticks;
 
-      time_difference = current_time - nick_changes[i].last_nick_change;
+      time_difference = CurrentTime - nick_changes[i].last_nick_change;
 
       /* is it stale ? */
       if (time_difference >= NICK_CHANGE_T2_TIME)
@@ -2859,7 +2867,7 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
 
 	  if ((strcasecmp(nick_changes[i].user_host,user_host)) == 0)
 	  {
-	    nick_changes[i].last_nick_change = current_time;
+	    nick_changes[i].last_nick_change = CurrentTime;
 	    (void)strncpy(nick_changes[i].last_nick,
 			  last_nick,MAX_NICK);
 	    nick_changes[i].nick_change_count++;
@@ -2924,8 +2932,8 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
 
   if (found_empty_entry > 0)
   {
-    nick_changes[found_empty_entry].first_nick_change = current_time;
-    nick_changes[found_empty_entry].last_nick_change = current_time;
+    nick_changes[found_empty_entry].first_nick_change = CurrentTime;
+    nick_changes[found_empty_entry].last_nick_change = CurrentTime;
     nick_changes[found_empty_entry].nick_change_count = 1;
     nick_changes[found_empty_entry].noticed = NO;
   }
@@ -2939,7 +2947,8 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
  * side effects 	-
  */
 
-static void stats_notice(char *snotice)
+static void
+stats_notice(char *snotice)
 {
   char *nick;
   char *fulluh;
@@ -3016,7 +3025,17 @@ void _reload_bothunt(int connnum, int argc, char *argv[])
  if (!amianoper) oper();
 }
 
-void m_gline(int connnum, int argc, char *argv[])
+/*
+ * m_gline
+ *
+ * inputs	- connection number
+ *		- argc count
+ *		- arguments
+ * output	- none
+ * side effects -
+ */
+void
+m_gline(int connnum, int argc, char *argv[])
 {
   int a, c;
   char *b, *d;

@@ -26,7 +26,7 @@
 
 /* actions.c
  *
- * $Id: actions.c,v 1.10 2002/05/30 02:21:54 db Exp $
+ * $Id: actions.c,v 1.11 2002/05/30 13:33:50 leeh Exp $
  */
 
 int act_sclone;
@@ -42,40 +42,35 @@ int act_clone;
 int act_rclone;
 struct a_entry actions[MAX_ACTIONS+1];
 
+static void set_action(int *, char *, int, char *);
+
 void
 init_actions(void)
 {
-  act_cflood = add_action("cflood");
-  set_action_strip(act_cflood, HS_CFLOOD);
-  set_action_reason(act_cflood, REASON_CFLOOD);
+  set_action(&act_cflood, "cflood", HS_CFLOOD, REASON_CFLOOD);
+  set_action(&act_vclone, "vclone", HS_VCLONE, REASON_VCLONE);
+  set_action(&act_flood, "flood", HS_FLOOD, REASON_FLOOD);
+  set_action(&act_link, "link", HS_LINK, REASON_LINK);
+  set_action(&act_bot, "bot", HS_BOT, REASON_BOT);
+  set_action(&act_spambot, "spam", HS_SPAMBOT, REASON_SPAMBOT);
+  set_action(&act_clone, "clone", HS_CLONE, REASON_CLONE);
+  set_action(&act_rclone, "rclone", HS_RCLONE, REASON_RCLONE);
+}
 
-  act_vclone = add_action("vclone");
-  set_action_strip(act_vclone, HS_VCLONE);
-  set_action_reason(act_vclone, REASON_VCLONE);
-
-  act_flood = add_action("flood");
-  set_action_strip(act_flood, HS_FLOOD);
-  set_action_reason(act_flood, REASON_FLOOD);
-
-  act_link = add_action("link");
-  set_action_strip(act_link, HS_LINK);
-  set_action_reason(act_link, REASON_LINK);
-
-  act_bot = add_action("bot");
-  set_action_strip(act_bot, HS_BOT);
-  set_action_reason(act_bot, REASON_BOT);
-
-  act_spambot = add_action("spam");
-  set_action_strip(act_spambot, HS_SPAMBOT);
-  set_action_reason(act_spambot, REASON_SPAMBOT);
-
-  act_clone = add_action("clone");
-  set_action_strip(act_clone, HS_CLONE);
-  set_action_reason(act_clone, REASON_CLONE);
-
-  act_rclone = add_action("rclone");
-  set_action_strip(act_rclone, HS_RCLONE);
-  set_action_reason(act_rclone, REASON_RCLONE);
+/* set_action()
+ *
+ * input	- action to set for
+ * 		- name of action
+ * 		- action strip type
+ * 		- action reason
+ * outputs	- 
+ * side effects -
+ */
+void set_action(int *actionid, char *action, int hoststrip, char *reason)
+{
+  *actionid = add_action(action);
+  set_action_strip(*actionid, hoststrip);
+  set_action_reason(*actionid, reason);
 }
 
 /*

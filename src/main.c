@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.95 2002/05/28 17:57:10 db Exp $ */
+/* $Id: main.c,v 1.96 2002/05/28 18:16:13 db Exp $ */
 
 #include "setup.h"
 
@@ -331,6 +331,8 @@ main(int argc, char *argv[])
 	   exit(1);
 	 }
     }
+
+  maxconns = 0;
 
   if(connect_to_server(tcm_status.serverhost) < 0)
     {

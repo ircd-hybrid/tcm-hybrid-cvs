@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.65 2002/05/28 17:57:10 db Exp $
+ * $Id: tcm_io.c,v 1.66 2002/05/28 18:16:14 db Exp $
  */
 
 #include <stdio.h>
@@ -88,8 +88,6 @@ read_packet(void)
   int  nread=0;
   int  i;
   struct timeval read_time_out;
-
-  maxconns = 0;
 
   eventAdd("check_clones", check_clones, NULL, CLONE_CHECK_TIME);
 

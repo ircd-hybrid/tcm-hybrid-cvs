@@ -1,3 +1,17 @@
+db          2002/05/26 22:24:48 EDT	(20020527_9)
+
+  Modified files:
+    src                  logging.c main.c userlist.c 
+  Log:
+  - mor tidy ups
+  
+  Revision  Changes    Path
+  1.36      +10 -14    tcm-hybrid/src/logging.c
+  1.85      +6 -8      tcm-hybrid/src/main.c
+  1.82      +16 -24    tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/05/26 21:54:50 EDT	(20020527_8)
 
   Modified files:

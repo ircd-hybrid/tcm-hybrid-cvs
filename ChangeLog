@@ -1,3 +1,18 @@
+leeh        2002/05/27 19:49:14 EDT	(20020528_2)
+
+  Modified files:
+    include              userlist.h 
+    src                  commands.c 
+  Log:
+  - ripped TYPE_PENDING
+  - ripped various old umode functions
+  
+  Revision  Changes    Path
+  1.51      +0 -1      tcm-hybrid/include/userlist.h
+  1.99      +15 -117   tcm-hybrid/src/commands.c
+
+
+
 leeh        2002/05/27 19:40:01 EDT	(20020528_1)
 
   Modified files:

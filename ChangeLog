@@ -1,3 +1,15 @@
+leeh        2002/06/21 11:55:52 EDT	(20020621_16)
+
+  Modified files:
+    include              userlist.h 
+  Log:
+  - when I actually commit from the root dir..
+  
+  Revision  Changes    Path
+  1.73      +1 -1      tcm-hybrid/include/userlist.h
+
+
+
 leeh        2002/06/21 11:54:58 EDT	(20020621_15)
 
   Modified files:

@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.3 2002/06/02 22:16:58 db Exp $
+ * $Id: dcc.c,v 1.4 2002/06/04 04:43:13 db Exp $
  */
 
 #include <stdio.h>
@@ -51,10 +51,12 @@
 #include "serno.h"
 #include "patchlevel.h"
 
-static void finish_accept_dcc_chat(int i);
+static void finish_outgoing_dcc_chat(int i);
+static void finish_incoming_dcc_chat(int i);
+static void timeout_dcc_chat(int i);
 static void finish_dcc_chat(int i);
 static void close_dcc_connection(int connnum);
-static int connect_to_dcc_ip(const char *nick, const char *hostport);
+static int  connect_to_dcc_ip(const char *nick, const char *hostport);
 
 /*
  * initiate_dcc_chat
@@ -70,8 +72,9 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
 {
   int    dcc_port;                         /* dcc port to use */
   struct sockaddr_in socketname;
-  int	 result = -1;
-  int	 i;
+  int	flags;
+  int	result = -1;
+  int	i;
 
   if ((i = find_free_connection_slot()) < 0)
     {
@@ -112,6 +115,10 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
     return;
   }
 
+  flags = fcntl(connections[i].socket, F_GETFL, 0);
+  flags |= O_NONBLOCK;
+  (void) fcntl(connections[i].socket, F_SETFL, flags);
+
   if (listen(connections[i].socket,4) < 0)
   {
     close(connections[i].socket);
@@ -128,10 +135,12 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
 		    connections[i].socket);
 
   connections[i].state = S_CONNECTING;
-  connections[i].io_read_function = finish_accept_dcc_chat;
+  connections[i].io_read_function = finish_outgoing_dcc_chat;
   connections[i].io_write_function = NULL;
   connections[i].io_close_function = close_connection;
   connections[i].last_message_time = current_time;
+  connections[i].time_out = DCC_TIMEOUT;
+  connections[i].io_timeout_function = timeout_dcc_chat;
   FD_SET(connections[i].socket, &readfds);
 }
 
@@ -192,16 +201,18 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
       return (0);
     }
   connections[i].state = S_CONNECTING;
-  connections[i].io_write_function = finish_dcc_chat;
-  connections[i].io_read_function = NULL;
+  connections[i].io_write_function = NULL;
+  connections[i].io_read_function = finish_incoming_dcc_chat;
   connections[i].io_close_function = close_connection;
-  FD_SET(connections[i].socket, &writefds);
-
+  connections[i].last_message_time = current_time;
+  connections[i].time_out = DCC_TIMEOUT; 
+  connections[i].io_timeout_function = timeout_dcc_chat;
+  FD_SET(connections[i].socket, &readfds);
   return (1);
 }
 
 /*
- * finish_accept_dcc_chat()
+ * finish_outgoing_dcc_chat()
  *
  * inputs 	- index
  * output       - none
@@ -209,17 +220,23 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
  */
 
 static void
-finish_accept_dcc_chat(int i)
+finish_outgoing_dcc_chat(int i)
 {
   struct sockaddr_in incoming_addr;
   int addrlen;
   int sock = connections[i].socket;
+  int accept_sock;
 
   addrlen = sizeof(struct sockaddr);
-  if((connections[i].socket = accept(sock,
-                     (struct sockaddr *)&incoming_addr,
-                     (socklen_t *)&addrlen)) < 0 )
+  errno=0;
+
+  if((accept_sock = accept(connections[i].socket,
+			   (struct sockaddr *)&incoming_addr,
+			   (socklen_t *)&addrlen)) < 0 )
   {
+    if (errno == EAGAIN)
+      return;
+
     notice(connections[i].nick, "Error in DCC chat\n");
     close_connection(i);
     return;
@@ -228,9 +245,44 @@ finish_accept_dcc_chat(int i)
   /* close the listening socket, I've got a working socket now */
   close(sock);
 
-  connections[i].io_write_function = finish_dcc_chat;
+  connections[i].socket = accept_sock;
   connections[i].last_message_time = current_time;
+  connections[i].io_write_function = finish_dcc_chat;
   connections[i].nbuf = 0;
+  FD_SET(connections[i].socket, &writefds);
+}
+
+/*
+ * timeout_dcc_chat()
+ *
+ * inputs 	- index
+ * output       - none
+ * side effects -
+ */
+
+static void
+timeout_dcc_chat(int i)
+{
+  notice(connections[i].nick, "DCC chat timedout\n");
+  close_connection(i);
+}
+
+/*
+ * finish_incoming_dcc_chat()
+ *
+ * inputs 	- index
+ * output       - none
+ * side effects - 
+ *
+ */
+
+static void
+finish_incoming_dcc_chat(int i)
+{
+  connections[i].io_write_function = finish_dcc_chat;
+  connections[i].io_read_function = NULL;
+  connections[i].state = S_CLIENT;
+  FD_SET(connections[i].socket, &writefds);
 }
 
 /*
@@ -253,11 +305,11 @@ finish_dcc_chat(int i)
 
   connections[i].io_read_function = parse_client;
   connections[i].state = S_CLIENT;
+  connections[i].io_read_function = parse_client;
   connections[i].io_write_function = NULL;
   connections[i].io_close_function = close_dcc_connection;
   connections[i].time_out = 0;
   FD_SET(connections[i].socket, &readfds);
-
   print_motd(connections[i].socket);
   print_to_socket(connections[i].socket,
                   "Connected.  Send '.help' for commands.");

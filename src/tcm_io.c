@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.81 2002/06/04 01:18:21 db Exp $
+ * $Id: tcm_io.c,v 1.82 2002/06/04 04:43:13 db Exp $
  */
 
 #include <stdio.h>
@@ -57,6 +57,7 @@ static void va_print_to_socket(int sock, const char *format, va_list va);
 static void va_print_to_server(const char *format, va_list va);
 static void signon_to_server(int unused);
 static void reconnect(void);
+static void server_ping_timeout(int conn_num);
 
 fd_set readfds;		/* file descriptor set for use with select */
 fd_set writefds;	/* file descriptor set for use with select */
@@ -95,25 +96,21 @@ read_packet(void)
       {
 	if (connections[i].state != S_IDLE)
 	  {
-	    FD_SET(connections[i].socket, &readfds);
-	    if(connections[i].io_write_function != NULL)
-	      FD_SET(connections[i].socket, &writefds);
-
-	    if(i == server_id && connections[i].time_out)
+	    if(connections[i].time_out != 0)
 	    {
               if(current_time > (connections[i].last_message_time
                                 + connections[i].time_out))
 	      {
-                tcm_log(L_ERR, "read_packet() ping time out");
-		send_to_all(FLAGS_ALL, "PING time out on server");
-
-		if(connections[i].io_close_function != NULL)
-                  (connections[i].io_close_function)(i);
+		if(connections[i].io_timeout_function != NULL)
+                  (connections[i].io_timeout_function)(i);
+		else if(connections[i].io_close_function != NULL)
+		  (connections[i].io_close_function)(i);
 		else
                   close_connection(i);
-	      }
-
-	      /* not sent a ping, and we've actually connected to the server */
+		continue;	/* connections[i].socket is now invalid */
+	      } /* not sent a ping, and we've actually
+		 * connected to the server
+		 */
 	      else if(tcm_status.ping_state != S_PINGSENT &&
                       connections[i].state == S_SERVER)
 	      {
@@ -126,6 +123,10 @@ read_packet(void)
 		}
 	      }
 	    }
+
+	    FD_SET(connections[i].socket, &readfds);
+	    if(connections[i].io_write_function != NULL)
+	      FD_SET(connections[i].socket, &writefds);
 	  }
       }
 
@@ -199,6 +200,7 @@ read_packet(void)
     {
       if (errno != EINTR)
       {
+	tcm_log(L_ERR, "fatal error in select() errno=%d", errno);
 	exit(-1);	/* XXX select error is fatal! */
       }
     }
@@ -326,6 +328,22 @@ server_link_closed(int conn_num)
   tcm_log(L_ERR, "server_link_closed()");
   tcm_status.am_opered = NO;
   eventAdd("reconnect", (EVH *)reconnect, NULL, 30);
+}
+
+/*
+ * server_ping_timeout()
+ *
+ * inputs	- connection id
+ * output	- none
+ * side effects	-
+ *
+ */
+static void
+server_ping_timeout(int conn_num)
+{
+  tcm_log(L_ERR, "read_packet() ping time out");
+  send_to_all(FLAGS_ALL, "PING time out on server");
+  server_link_closed(conn_num);
 }
 
 /*
@@ -629,6 +647,7 @@ connect_to_server(const char *hostport)
   connections[i].io_read_function = signon_to_server;
   connections[i].io_write_function = NULL;
   connections[i].io_close_function = server_link_closed;
+  connections[i].io_timeout_function = server_link_closed;
   connections[i].socket = connect_to_given_ip_port(&socketname, port);
 
   connections[i].time_out = SERVER_TIME_OUT_CONNECT;
@@ -751,7 +770,6 @@ connect_to_given_ip_port(struct sockaddr_in *socketname, int port)
   flags = fcntl(sock,F_GETFL,0);
   flags |= O_NONBLOCK;
   (void) fcntl(sock,F_SETFL,flags);
-
   connect (sock, (struct sockaddr *) socketname, sizeof *socketname);
   return (sock);
 }

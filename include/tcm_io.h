@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.34 2002/06/04 01:18:19 db Exp $
+ * $Id: tcm_io.h,v 1.35 2002/06/04 04:43:10 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -23,6 +23,7 @@ struct connection {
   void	(*io_read_function)(int connect_id);
   void	(*io_write_function)(int connect_id);
   void	(*io_close_function)(int connect_id);
+  void	(*io_timeout_function)(int connect_id);
   int	set_modes;		/* for set options */
   char	user[MAX_USER];
   char	host[MAX_HOST];
@@ -45,8 +46,9 @@ struct connection {
 extern struct connection connections[];
 int find_free_connection_slot(void);
 
-void	init_connections(void);
-void	close_connection(int connnum);
+void server_link_closed(int);
+void init_connections(void);
+void close_connection(int connnum);
 
 void notice(const char *nick, const char *format, ...);
 void privmsg(const char *target, const char *format, ...);
@@ -54,11 +56,10 @@ void privmsg(const char *target, const char *format, ...);
 extern fd_set readfds;
 extern fd_set writefds;
 
-extern void read_packet(void);
-extern void server_link_closed(int);
-extern void client_link_closed(int, const char *format, ...);
-extern void print_to_socket(int, const char *, ...);
-extern void print_to_server(const char *, ...);
+void read_packet(void);
+void client_link_closed(int, const char *format, ...);
+void print_to_socket(int, const char *, ...);
+void print_to_server(const char *, ...);
 /* send_to_all - Hendrix (va'd by bill) */
 void send_to_all(int type, const char *format,...);
 void send_to_partyline(int conn_num, const char *format,...);

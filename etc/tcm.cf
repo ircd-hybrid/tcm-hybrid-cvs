@@ -1,4 +1,4 @@
-# $Id: tcm.cf,v 1.22 2002/05/05 17:04:42 einride Exp $
+# $Id: tcm.cf,v 1.23 2002/05/08 20:01:26 bill Exp $
 # Username for the bot
 U:db
 
@@ -65,7 +65,7 @@ A:spambot:tkline 1440:Spamming is prohibited
 A:clone:tkline 1440:Cloning is prohibited
 A:rclone:ircwarn dccwarn tkline 240:Reconnect flood
 A:sclone:tkline 180:Clones on multiple servers
-A:drone:ccwarn kline:Drone bots
+A:drone:dccwarn kline:Drone bots
 A:wingate:dline:Open Wingate
 A:socks:dline:Open SOCKS server
 

@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.19 2002/06/24 14:56:09 leeh Exp $
+ * $Id: dcc.c,v 1.20 2002/09/26 16:17:48 bill Exp $
  */
 
 #include <stdio.h>
@@ -178,13 +178,22 @@ accept_dcc_connection(struct source_client *source_p,
       return (0);
     }
   new_conn->state = S_CONNECTING;
-  new_conn->io_write_function = NULL;
+
+  /*
+   * Solaris' poll() chose to treat recently completed
+   * connections as write'able rather than readable.
+   * So we just monitor both, and whichever happens first
+   * does the work.
+   */
+  new_conn->io_write_function = finish_incoming_dcc_chat;
+
   new_conn->io_read_function = finish_incoming_dcc_chat;
   new_conn->io_close_function = close_connection;
   new_conn->last_message_time = current_time;
   new_conn->time_out = DCC_TIMEOUT; 
   new_conn->io_timeout_function = timeout_dcc_chat;
   FD_SET(new_conn->socket, &readfds);
+  FD_SET(new_conn->socket, &writefds);
   return (1);
 }
 

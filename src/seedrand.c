@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2002 Bill Jonus
  *
- * $Id: seedrand.c,v 1.2 2002/09/26 15:26:33 bill Exp $
+ * $Id: seedrand.c,v 1.3 2002/09/26 16:17:48 bill Exp $
  */
 
 #include <assert.h>
@@ -164,7 +164,7 @@ static void m_seedrand(struct connection *connection_p, int argc, char *argv[])
 
   for (score_t = 0; score_t < numfound; ++score_t)
   {
-    temp = find_max_score(scores, HASHTABLESIZE, score_t);
+    temp = find_max_score(scores, numfound, score_t);
     temp_u = results[temp];
     temp_s = scores[temp];
 

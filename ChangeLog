@@ -1,3 +1,15 @@
+wcampbel    2002/05/20 08:48:44 EDT	(20020520_7)
+
+  Modified files:
+    logs                 .cvsignore 
+  Log:
+  Add error.log to logs/.cvsignore
+  
+  Revision  Changes    Path
+  1.3       +1 -0      tcm-hybrid/logs/.cvsignore
+
+
+
 wcampbel    2002/05/20 08:46:35 EDT	(20020520_6)
 
   Modified files:

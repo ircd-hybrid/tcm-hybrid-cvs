@@ -1,3 +1,15 @@
+db          2002/05/31 02:12:18 EDT	(20020531_5)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  - actually add info to the hash_rec being hashed in
+  
+  Revision  Changes    Path
+  1.16      +13 -4     tcm-hybrid/src/hash.c
+
+
+
 db          2002/05/31 02:03:54 EDT	(20020531_4)
 
   Modified files:

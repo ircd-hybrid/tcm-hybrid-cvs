@@ -1,3 +1,7 @@
+*** 20010722_6 by wcampbel
+Keep all logs in the logs/ directory.
+
+
 *** 20010722_5 by wcampbel
 Move the pref files and the cf's (and the motd) to the etc directory
 and document as such in INSTALL

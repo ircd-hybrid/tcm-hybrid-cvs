@@ -1,3 +1,19 @@
+bill        2002/11/14 19:09:53 EST	(20021115_0)
+
+  Modified files:
+    src                  bothunt.c seedrand.c tcm_io.c 
+  Log:
+  - additions to seedrand ruleset
+  - cleaned up system notice handlers
+  - added sanity checks to detect and side-step the .register crash (though I still haven't figured out what caused it)
+  
+  Revision  Changes    Path
+  1.204     +7 -8      tcm-hybrid/src/bothunt.c
+  1.4       +39 -2     tcm-hybrid/src/seedrand.c
+  1.105     +5 -0      tcm-hybrid/src/tcm_io.c
+
+
+
 bill        2002/10/06 11:56:33 EDT	(20021006_0)
 
   Modified files:

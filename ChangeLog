@@ -1,3 +1,7 @@
+*** 20011010_2 by bill
+- oops forgot to remove a debug statement
+
+
 *** 20011010_1 by bill
 - die on KLINE/DLINE
 - Made DCC connects O_NONBLOCKing

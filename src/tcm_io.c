@@ -1,8 +1,8 @@
 /* tcm_io.c
  *
- * handles the I/O for tcm, including dcc connections.
+ * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.74 2002/05/29 16:05:10 db Exp $
+ * $Id: tcm_io.c,v 1.75 2002/05/29 18:47:48 db Exp $
  */
 
 #include <stdio.h>
@@ -54,17 +54,13 @@
 #include "patchlevel.h"
 
 static int get_line(char *inbuf,int *len, struct connection *connections_p);
-static int connect_to_dcc_ip(const char *nick, const char *hostport);
 static void va_print_to_socket(int sock, const char *format, va_list va);
 static void va_print_to_server(const char *format, va_list va);
-static void finish_accept_dcc_chat(int i);
-static void finish_dcc_chat(int i);
-static void close_dcc_connection(int connnum);
 static void signon_to_server(int unused);
-void reconnect(void);
+static void reconnect(void);
 
-static fd_set readfds;		/* file descriptor set for use with select */
-static fd_set writefds;		/* file descriptor set for use with select */
+fd_set readfds;		/* file descriptor set for use with select */
+fd_set writefds;	/* file descriptor set for use with select */
 
 struct connection connections[MAXDCCCONNS+1]; /*plus 1 for the server, silly*/
 int pingtime;
@@ -381,83 +377,6 @@ find_free_connection_slot(void)
   return(i);
 }
 
-/*
- * initiate_dcc_chat
- *
- * inputs       - nick
- *              - host
- * output       - none
- * side effects - initiate a dcc chat =to= a requester
- */
-
-void
-initiate_dcc_chat(const char *nick, const char *user, const char *host)
-{
-  int    dcc_port;                         /* dcc port to use */
-  struct sockaddr_in socketname;
-  int	 result = -1;
-  int	 i;
-
-  if ((i = find_free_connection_slot()) < 0)
-    {
-      notice(nick,"Max users on tcm, dcc chat rejected\n");
-      return;
-    }
-
-  notice(nick, "Chat requested");
-  strlcpy(connections[i].nick, nick, MAX_NICK);
-  strlcpy(connections[i].user, user, MAX_USER);
-  strlcpy(connections[i].host, host, MAX_HOST);
-
-  if ((connections[i].socket = socket(PF_INET,SOCK_STREAM,0)) < 0)
-  {
-    notice(nick,"Error on open");
-    return;
-  }
-
-  for (dcc_port = LOWEST_DCC_PORT; dcc_port < HIGHEST_DCC_PORT; dcc_port++ )
-  {
-    memset(&socketname,0, sizeof(struct sockaddr));
-    socketname.sin_family = AF_INET;
-    socketname.sin_addr.s_addr = INADDR_ANY;
-    socketname.sin_port = htons(dcc_port);
-
-    if ((result = bind(connections[i].socket,(struct sockaddr *)&socketname,
-                       sizeof(socketname)) < 0))
-    {
-      continue;
-    }
-    break;
-  }
-
-  if (result < 0)
-  {
-    close(connections[i].socket);
-    notice(nick,"Cannot DCC chat");
-    return;
-  }
-
-  if (listen(connections[i].socket,4) < 0)
-  {
-    close(connections[i].socket);
-    notice(nick,"Cannot DCC chat");
-    return;
-  }
-
-  privmsg (nick,"\001DCC CHAT chat %lu %d\001",
-	   local_ip(tcm_status.my_hostname),
-	   dcc_port);
-
-  if (config_entries.debug && outfile)
-      (void)fprintf(outfile, "DEBUG: dcc socket = %d\n",
-		    connections[i].socket);
-
-  connections[i].state = S_CONNECTING;
-  connections[i].io_read_function = finish_accept_dcc_chat;
-  connections[i].io_write_function = NULL;
-  connections[i].io_close_function = close_connection;
-  connections[i].last_message_time = current_time;
-}
 
 /*
  * print_to_socket()
@@ -631,155 +550,6 @@ send_to_partyline(int conn_num, const char *format,...)
 }
 
 /*
- * accept_dcc_connection()
- *
- * inputs	- hostpost
- * 		- nick making the connection
- *		- userhost
- * output	- 
- * side effects	- Makes another connection
- */
-
-int
-accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
-{
-  int  i;               /* index variable */
-  char *p;              /* scratch pointer used for parsing */
-  char *user;
-  char *host;
-
-  if ((i = find_free_connection_slot()) < 0)
-    {
-      notice(nick,"Max users on tcm, dcc chat rejected\n");
-      return(-1);
-    }
-
-  if ((p = strchr(userhost,'@')) != NULL)
-  {
-    user = userhost;
-    *p++ = '\0';
-    host = p;
-  }
-  else
-  {
-    host = userhost;
-    user = "*";
-  }
-
-  if ((p = strchr(host,' ')) != NULL)
-    *p = '\0';
-
-  if(isoper(user,host) == 0)
-  {
-    notice(nick,"You are not an operator");
-    return (-1);
-  }
-
-  connections[i].set_modes = 0;
-  strlcpy(connections[i].nick,nick,MAX_NICK);
-  strlcpy(connections[i].user,user,MAX_USER);
-  strlcpy(connections[i].host,host,MAX_HOST);
-  connections[i].last_message_time = time(NULL);
-  connections[i].socket = connect_to_dcc_ip(nick, hostport);
-  if (connections[i].socket == INVALID)
-    {
-      close_connection(i);
-      return (0);
-    }
-  connections[i].state = S_CONNECTING;
-  connections[i].io_write_function = finish_dcc_chat;
-  connections[i].io_read_function = NULL;
-  connections[i].io_close_function = close_connection;
-  FD_SET(connections[i].socket, &writefds);
-
-  return (1);
-}
-
-/*
- * finish_accept_dcc_chat()
- *
- * inputs 	- index
- * output       - none
- * side effects -
- */
-
-static void
-finish_accept_dcc_chat(int i)
-{
-  struct sockaddr_in incoming_addr;
-  int addrlen;
-  int sock = connections[i].socket;
-
-  addrlen = sizeof(struct sockaddr);
-  if((connections[i].socket = accept(sock,
-                     (struct sockaddr *)&incoming_addr,
-                     (socklen_t *)&addrlen)) < 0 )
-  {
-    notice(connections[i].nick, "Error in DCC chat\n");
-    close_connection(i);
-    return;
-  }
-
-  /* close the listening socket, I've got a working socket now */
-  close(sock);
-
-  connections[i].last_message_time = current_time;
-  connections[i].nbuf = 0;
-
-  finish_dcc_chat(i);
-}
-
-/*
- * finish_dcc_chat()
- *
- * inputs 	- index
- * output       - none
- * side effects - 
- */
-
-static void
-finish_dcc_chat(int i)
-{
-  report(FLAGS_ALL,
-         CHANNEL_REPORT_ROUTINE,
-         "Oper %s (%s@%s) has connected\n",
-         connections[i].nick,
-         connections[i].user,
-         connections[i].host);
-
-  connections[i].io_read_function = parse_client;
-  connections[i].state = S_CLIENT;
-  connections[i].io_write_function = NULL;
-  connections[i].io_close_function = close_dcc_connection;
-  connections[i].time_out = 0;
-  FD_SET(connections[i].socket, &readfds);
-
-  print_motd(connections[i].socket);
-  print_to_socket(connections[i].socket,
-                  "Connected.  Send '.help' for commands.");
-}
-
-/*
- * close_dcc_connection()
- *
- * inputs	- connection number
- * output	- NONE
- * side effects	- connection on connection number connnum is closed.
- */
-
-static void
-close_dcc_connection(int connnum)
-{
-  report(FLAGS_ALL,
-         CHANNEL_REPORT_ROUTINE,
-         "Oper %s (%s@%s) has disconnected",
-         connections[connnum].nick, connections[connnum].user,
-         connections[connnum].host);
-
-  close_connection(connnum);
-}
-
-/*
  * close_connection()
  *
  * inputs	- connection number
@@ -834,7 +604,7 @@ connect_to_server(const char *hostport)
   /* Parse serverhost to look for port number */
   strcpy(server, hostport);
 
-  if ((p = strchr(server,':')))
+  if ((p = strchr(server,':')) != NULL)
     {
       *p++ = '\0';
       port = atoi(p);
@@ -899,54 +669,6 @@ signon_to_server (int unused)
   
   print_to_server("NICK %s", tcm_status.my_nick);
 }
-
-/*
- * connect_to_dcc_ip
- *
- * input	- pointer to nick
- *		- pointer to string giving dcc ip
- * output	- socket or -1 if no socket
- * side effects	- Sets up a socket and connects to the given host and port
- *		  or given DCC chat IP
- */
-static int
-connect_to_dcc_ip(const char *nick, const char *hostport)
-{
-  struct sockaddr_in socketname;
-  char server[MAX_HOST];
-  char *p;
-  unsigned long remoteaddr;
-  int port = 0;
-
-  strcpy(server, hostport);
-
-  /* kludge for DCC CHAT precalculated sin_addrs */
-  if (*server == '#')
-    {
-       (void)sscanf(server+1,"%lu",&remoteaddr);
-       /* Argh.  Didn't they teach byte order in school??? --cah */
-       socketname.sin_addr.s_addr=htonl(remoteaddr);
-    }
-  else
-    {
-      return(INVALID);
-    }
-
-  if ((p = strchr(server,' ')))
-    {
-      *p++ = '\0';
-      port = atoi(p);
-    }
-
-  if (port < 1024)
-    {
-      notice(nick, "Invalid port specified for DCC CHAT.  Not funny.");
-      return (INVALID);
-    }
-
-  return(connect_to_given_ip_port(&socketname, port));
-}
-
 
 /*
  * connect_to_given_ip_port

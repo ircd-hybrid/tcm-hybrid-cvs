@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.27 2002/05/29 01:19:32 leeh Exp $
+# $Id: Makefile.in,v 1.28 2002/05/29 18:47:48 db Exp $
 
 CC = @CC@
 RM = @RM@
@@ -20,6 +20,7 @@ SOURCES =       actions.c	\
 		bothunt.c       \
 		clones.c	\
 		commands.c	\
+		dcc.c		\
                 event.c         \
 		handler.c	\
                 hash.c		\

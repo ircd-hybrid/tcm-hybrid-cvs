@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.30 2002/05/29 06:26:10 db Exp $
+ * $Id: tcm_io.h,v 1.31 2002/05/29 18:47:46 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -48,9 +48,6 @@ struct connection {
 extern struct connection connections[];
 int find_free_connection_slot(void);
 
-extern	int initiated_dcc_socket;
-extern	time_t initiated_dcc_socket_time;
-extern	void initiate_dcc_chat(const char *, const char *, const char *);
 void	init_connections(void);
 void	close_connection(int connnum);
 
@@ -71,8 +68,6 @@ void send_to_partyline(int conn_num, const char *format,...);
 
 void close_connection(int connect_id);
 int connect_to_server(const char *hostport);
-int accept_dcc_connection(const char *hostport,
-			  const char *nick, char *userhost);
 int connect_to_given_ip_port(struct sockaddr_in *, int );
 
 

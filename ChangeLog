@@ -1,3 +1,15 @@
+wcampbel    2002/06/15 14:36:15 EDT	(20020615_0)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  Removed 2 unused variables in on_server_notice()
+  
+  Revision  Changes    Path
+  1.165     +1 -1      tcm-hybrid/src/bothunt.c
+
+
+
 leeh        2002/06/11 18:54:35 EDT	(20020611_1)
 
   Modified files:

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.143 2002/08/26 16:26:38 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.144 2002/09/11 17:55:39 db Exp $ */
 
 #include "setup.h"
 
@@ -320,7 +320,7 @@ void m_opers(struct connection *connection_p, int argc, char *argv[])
   dlink_node *ptr;
   struct oper_entry *user;
 
-  for(ptr = user_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, user_list.head)
   {
     user = ptr->data;
 
@@ -364,7 +364,7 @@ m_exempts(struct connection *connection_p, int argc, char *argv[])
   char buf[512];
   int n;
 
-  for(ptr = exempt_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, exempt_list.head)
   {
     exempt = ptr->data;
     sprintf(buf, "%s@%s is exempted for:", exempt->username, exempt->host);
@@ -1044,7 +1044,7 @@ is_legal_pass(struct connection *connection_p, char *password)
   dlink_node *ptr;
   struct oper_entry *user;
 
-  for(ptr = user_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, user_list.head)
   {
     user = ptr->data;
 

@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.144 2002/08/14 16:59:37 bill Exp $
+ * $Id: userlist.c,v 1.145 2002/09/11 17:55:39 db Exp $
  */
 
 #include <errno.h>
@@ -261,7 +261,7 @@ set_umode_userlist(char *nick, const char *umode)
   int i;
   int j;
 
-  for(ptr = user_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, user_list.head)
   {
     user = ptr->data;
 
@@ -326,7 +326,7 @@ find_user_in_userlist(const char *username)
   dlink_node *ptr;
   struct oper_entry *user;
 
-  for(ptr = user_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, user_list.head)
   {
     user = ptr->data;
 
@@ -941,20 +941,20 @@ load_e_line(char *line)
   *p = '\0';
   uhost = p+1;
   while (vltn)
-    {
-      p=strchr(vltn, ' ');
-      q=strchr(vltn, ',');
-      if (p && q)
-	p = (p<q)?p:q;
-      else if (q)
-	p=q;
-      if (p)
-	*p++=0;
-      for (i=0;actions[i].name[0];i++)
-	if (!wldcmp(vltn, actions[i].name))
-	  type = type + (1 << i);
-      vltn = p;
-    }
+  {
+    p=strchr(vltn, ' ');
+    q=strchr(vltn, ',');
+    if (p && q)
+      p = (p<q)?p:q;
+    else if (q)
+      p=q;
+    if (p)
+      *p++=0;
+    for (i=0;actions[i].name[0];i++)
+      if (!wldcmp(vltn, actions[i].name))
+	type = type + (1 << i);
+    vltn = p;
+  }
       
   if ((p = strchr(uhost, '@')) != NULL)
   {
@@ -984,16 +984,14 @@ clear_userlist()
   wingate_class_list_index = 0;
   memset((void *)wingate_class_list, 0, sizeof(wingate_class_list));
 
-  for(ptr = user_list.head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, user_list.head)
   {
-    next_ptr = ptr->next;
     xfree(ptr->data);
     xfree(ptr);
   }
 
-  for(ptr = exempt_list.head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, exempt_list.head)
   {
-    next_ptr = ptr->next;
     xfree(ptr->data);
     xfree(ptr);
   }
@@ -1016,7 +1014,7 @@ is_an_oper(char *username, char *host)
   dlink_node *ptr;
   struct oper_entry *user;
 
-  for(ptr = user_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, user_list.head)
   {
     user = ptr->data;
 
@@ -1043,7 +1041,7 @@ ok_host(char *username, char *host, int type)
   struct exempt_entry *exempt;
   int ok;
 
-  for(ptr = exempt_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, exempt_list.head)
   {
     exempt = ptr->data;
     ok = 0;
@@ -1154,7 +1152,7 @@ exempt_summary()
 
     printf("%s:", actions[i].name);
 
-    for(ptr = exempt_list.head; ptr; ptr = ptr->next)
+    DLINK_FOREACH(ptr, exempt_list.head)
     {
       exempt = ptr->data;
 
@@ -1182,48 +1180,46 @@ local_ip(char *ourhostname)
   unsigned long l_ip;
 
   if(config_entries.virtual_host_config[0])
+  {
+    if ((local_host = gethostbyname (config_entries.virtual_host_config)))
     {
-      if ((local_host = gethostbyname (config_entries.virtual_host_config)))
-        {
-          if(config_entries.debug && outfile)
-            {
-              fprintf(outfile,
-                      "virtual host [%s]\n",
-                      config_entries.virtual_host_config);
-              fprintf(outfile, "found official name [%s]\n",
-                      local_host->h_name);
-            }
+      if(config_entries.debug && outfile)
+      {
+	fprintf(outfile, "virtual host [%s]\n",
+		config_entries.virtual_host_config);
+	fprintf(outfile, "found official name [%s]\n",
+		local_host->h_name);
+      }
 
-          (void) memcpy((void *)&l_ip,(void *)local_host->h_addr,
-                 sizeof(local_host->h_addr));
-
-          if(config_entries.debug && outfile)
-            {
-              fprintf(outfile, "DEBUG: %lu %lX\n", l_ip, l_ip);
-            }
-          return(htonl(l_ip));
-        }
+      (void) memcpy((void *)&l_ip,(void *)local_host->h_addr,
+		    sizeof(local_host->h_addr));
+      
+      if(config_entries.debug && outfile)
+      {
+	fprintf(outfile, "DEBUG: %lu %lX\n", l_ip, l_ip);
+      }
+      return(htonl(l_ip));
     }
+  }
   else
+  {
+    if ((local_host = gethostbyname (ourhostname)))
     {
-      if ((local_host = gethostbyname (ourhostname)) )
-        {
-          if(config_entries.debug && outfile)
-            {
-              fprintf(outfile, "found official name [%s]\n",
-                      local_host->h_name);
-            }
+      if(config_entries.debug && outfile)
+      {
+	fprintf(outfile, "found official name [%s]\n", local_host->h_name);
+      }
 
-          (void) memcpy((void *) &l_ip,(void *) local_host->h_addr,
-                        sizeof(local_host->h_addr));
-
-          if(config_entries.debug && outfile)
-            {
-              fprintf(outfile, "DEBUG: %lu %lX\n", l_ip, l_ip);
-            }
-          return(htonl(l_ip));
-        }
+      (void) memcpy((void *) &l_ip,(void *) local_host->h_addr,
+		    sizeof(local_host->h_addr));
+      
+      if(config_entries.debug && outfile)
+      {
+	fprintf(outfile, "DEBUG: %lu %lX\n", l_ip, l_ip);
+      }
+      return(htonl(l_ip));
     }
+  }
   /* NOT REACHED */
   return (0L);
 }
@@ -1242,11 +1238,9 @@ wingate_class(char *class)
   int i;
 
   for(i=0; (wingate_class_list[i] != '\0') && (i < MAXWINGATE) ;i++)
-    {
-      if(strcasecmp(wingate_class_list[i], class) == 0)
-        {
-          return(YES);
-        }
-    }
+  {
+    if(strcasecmp(wingate_class_list[i], class) == 0)
+      return(YES);
+  }
   return(NO);
 }

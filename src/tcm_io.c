@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.99 2002/08/10 21:08:12 bill Exp $
+ * $Id: tcm_io.c,v 1.100 2002/09/11 17:55:39 db Exp $
  */
 
 #include <stdio.h>
@@ -101,48 +101,47 @@ read_packet(void)
     FD_ZERO (&readfds);
     FD_ZERO (&writefds);
 
-    for(ptr = connections.head; ptr; ptr = next_ptr)
+    DLINK_FOREACH_SAFE(ptr, next_ptr, connections.head)
+    {
+      connection_p = ptr->data;
+
+      if (connection_p->state != S_IDLE)
       {
-        next_ptr = ptr->next;
-        connection_p = ptr->data;
-
-	if (connection_p->state != S_IDLE)
+	if(connection_p->time_out != 0)
+	{
+	  if(current_time > (connection_p->last_message_time
+			     + connection_p->time_out))
 	  {
-	    if(connection_p->time_out != 0)
-	    {
-              if(current_time > (connection_p->last_message_time
-                                + connection_p->time_out))
-	      {
-		if(connection_p->io_timeout_function != NULL)
-                  (connection_p->io_timeout_function)(connection_p);
-		else if(connection_p->io_close_function != NULL)
-		  (connection_p->io_close_function)(connection_p);
-		else
-                  close_connection(connection_p);
-		continue;	/* connection_p->socket is now invalid */
-              }
-
-	        /* not sent a ping, and we've actually
-		 * connected to the server
-		 */
-	      else if(tcm_status.ping_state != S_PINGSENT &&
-                      connection_p->state == S_SERVER)
-	      {
-                /* no data, send a PING */
-                if(current_time > (connection_p->last_message_time
-                                   + (connection_p->time_out / 2)))
-		{
-                  send_to_server("PING tcm");
-		  tcm_status.ping_state = S_PINGSENT;
-		}
-	      }
-	    }
-
-	    FD_SET(connection_p->socket, &readfds);
-	    if(connection_p->io_write_function != NULL)
-	      FD_SET(connection_p->socket, &writefds);
+	    if(connection_p->io_timeout_function != NULL)
+	      (connection_p->io_timeout_function)(connection_p);
+	    else if(connection_p->io_close_function != NULL)
+	      (connection_p->io_close_function)(connection_p);
+	    else
+	      close_connection(connection_p);
+	    continue;	/* connection_p->socket is now invalid */
 	  }
+
+	  /* not sent a ping, and we've actually
+	   * connected to the server
+	   */
+	  else if(tcm_status.ping_state != S_PINGSENT &&
+		  connection_p->state == S_SERVER)
+	  {
+	    /* no data, send a PING */
+	    if(current_time > (connection_p->last_message_time
+			       + (connection_p->time_out / 2)))
+	    {
+	      send_to_server("PING tcm");
+	      tcm_status.ping_state = S_PINGSENT;
+	    }
+	  }
+	}
+
+	FD_SET(connection_p->socket, &readfds);
+	if(connection_p->io_write_function != NULL)
+	  FD_SET(connection_p->socket, &writefds);
       }
+    }
 
     read_time_out.tv_sec = 1L;
     read_time_out.tv_usec = 0L;
@@ -157,60 +156,60 @@ read_packet(void)
 
     if (select_result > 0)
     {
-      for(ptr = connections.head; ptr; ptr = ptr->next)
+      DLINK_FOREACH(ptr, connections.head)
       {
         connection_p = ptr->data;
 
 	if (connection_p->state != S_IDLE &&
 	    FD_ISSET(connection_p->socket, &writefds))
-	  {
-	    if (connection_p->io_write_function != NULL)
-	      (connection_p->io_write_function)(connection_p);
-	  }
+	{
+	  if (connection_p->io_write_function != NULL)
+	    (connection_p->io_write_function)(connection_p);
+	}
 
 	if (connection_p->state != S_IDLE &&
 	    FD_ISSET(connection_p->socket, &readfds))
-          {
-	    if (connection_p->state == S_CONNECTING)
-	      {
-		(connection_p->io_read_function)(connection_p);
-		continue;
-	      }
+        {
+	  if (connection_p->state == S_CONNECTING)
+	  {
+	    (connection_p->io_read_function)(connection_p);
+	    continue;
+	  }
 
-            nread = read(connection_p->socket,
-			 incomingbuff, sizeof(incomingbuff));
+	  nread = read(connection_p->socket,
+		       incomingbuff, sizeof(incomingbuff));
 
-            if (nread == 0)
-              {
-		(connection_p->io_close_function)(connection_p);
-              }
-            else if (nread > 0)
-              {
-                tscanned = 0;
-                connection_p->last_message_time = current_time;
+	  if (nread == 0)
+	  {
+	    (connection_p->io_close_function)(connection_p);
+	  }
+	  else if (nread > 0)
+	  {
+	    tscanned = 0;
+	    connection_p->last_message_time = current_time;
 
-		if(tcm_status.ping_state == S_PINGSENT)
-                  tcm_status.ping_state = 0;
+	    if(tcm_status.ping_state == S_PINGSENT)
+	      tcm_status.ping_state = 0;
 
-		while ((nscanned =
-			get_line(incomingbuff+tscanned,
-				 &nread, connection_p)))
-		  {
+	    while ((nscanned =
+		    get_line(incomingbuff+tscanned,
+			     &nread, connection_p)))
+	    {
 #ifdef DEBUGMODE
-		    printf("<- %s\n", connection_p->buffer);
+	      printf("<- %s\n", connection_p->buffer);
 #endif
-		    /* io_read_function e.g. server_parse()
-		     * can call close_connection(i), hence
-		     * making io_read_function NULL
-		     */
-		    if (connection_p->io_read_function == NULL)
-		      break;
-		    (connection_p->io_read_function)(connection_p);
-		    tscanned += nscanned;
-                  }
-              }
-          }
-        }
+	      /* io_read_function e.g. server_parse()
+	       * can call close_connection(i), hence
+	       * making io_read_function NULL
+	       */
+	      if (connection_p->io_read_function == NULL)
+		break;
+	      (connection_p->io_read_function)(connection_p);
+	      tscanned += nscanned;
+	    }
+	  }
+	}
+      }
     }
     else /* -ve */
     {
@@ -525,15 +524,15 @@ send_to_all(struct connection *from_p, int send_umode, const char *format,...)
   va_list va;
 
   va_start(va,format);
-  for(ptr = connections.head; ptr; ptr = ptr->next)
-    {
-      connection_p = ptr->data;
-      if (from_p == connection_p)
-	continue;
-      if((connection_p->state == S_CLIENT) &&
-         (connection_p->type & send_umode))
-        va_send_to_connection(connection_p, format, va);
-    }
+  DLINK_FOREACH(ptr, connections.head)
+  {
+    connection_p = ptr->data;
+    if (from_p == connection_p)
+      continue;
+    if((connection_p->state == S_CLIENT) &&
+       (connection_p->type & send_umode))
+      va_send_to_connection(connection_p, format, va);
+  }
   va_end(va);
 }
 
@@ -730,7 +729,7 @@ find_user_in_connections(const char *username)
   dlink_node *ptr;
   struct connection *connection_p;
 
-  for(ptr = connections.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, connections.head)
   {
     connection_p = ptr->data;
 
@@ -758,34 +757,34 @@ show_stats_p(const char *nick)
   struct connection *connection_p;
   int number_of_tcm_opers=0;
 
-  for(ptr = connections.head; ptr; ptr = ptr->next)
-    {
-      connection_p = ptr->data;
+  DLINK_FOREACH(ptr, connections.head)
+  {
+    connection_p = ptr->data;
 
-      /* ignore non clients */
-      if (connection_p->state != S_CLIENT)
-	continue;
+    /* ignore non clients */
+    if (connection_p->state != S_CLIENT)
+      continue;
 
-      /* ignore invisible users/opers */
-      if(connection_p->type & FLAGS_INVS)
-	continue;
+    /* ignore invisible users/opers */
+    if(connection_p->type & FLAGS_INVS)
+      continue;
       
-      /* display opers */
-      if(connection_p->type & FLAGS_OPER)
-	{
+    /* display opers */
+    if(connection_p->type & FLAGS_OPER)
+    {
 #ifdef HIDE_OPER_HOST
-	  notice(nick, "%s - idle %lu",
-		 connection_p->nick, 
-		 time(NULL) - connection_p->last_message_time);
+      notice(nick, "%s - idle %lu",
+	     connection_p->nick, 
+	     time(NULL) - connection_p->last_message_time);
 #else 
-	  notice(nick,
-		 "%s (%s@%s) idle %lu",
-		 connection_p->nick, connection_p->username, connection_p->host,
-		 time(NULL) - connection_p->last_message_time);
+      notice(nick,
+	     "%s (%s@%s) idle %lu",
+	     connection_p->nick, connection_p->username, connection_p->host,
+	     time(NULL) - connection_p->last_message_time);
 #endif
-	  number_of_tcm_opers++;
-	}
+      number_of_tcm_opers++;
     }
+  }
 
   notice(nick,"Number of tcm opers %d", number_of_tcm_opers);
 
@@ -807,7 +806,7 @@ list_connections(struct connection *connection_p)
   dlink_node *ptr;
   struct connection *found_p;
 
-  for(ptr = connections.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, connections.head)
   {
     found_p = ptr->data;
 

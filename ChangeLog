@@ -1,3 +1,16 @@
+db          2002/09/20 01:15:30 EDT	(20020920_2)
+
+  Modified files:
+    src                  event.c 
+  Log:
+  - if reach the end of the event table without finding a free slot,
+    then its a failure, and should be reported as such.
+  
+  Revision  Changes    Path
+  1.12      +17 -9     tcm-hybrid/src/event.c
+
+
+
 bill        2002/09/20 01:06:57 EDT	(20020920_1)
 
   Modified files:

@@ -1,3 +1,19 @@
+db          2002/06/04 01:54:06 EDT	(20020604_2)
+
+  Modified files:
+    include              parse.h tcm_io.h 
+    src                  main.c tcm_io.c 
+  Log:
+  - got rid of kludgy server:port parsing in connect_to_server
+  
+  Revision  Changes    Path
+  1.19      +0 -1      tcm-hybrid/include/parse.h
+  1.36      +1 -1      tcm-hybrid/include/tcm_io.h
+  1.108     +2 -5      tcm-hybrid/src/main.c
+  1.83      +5 -15     tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/06/04 00:43:14 EDT	(20020604_1)
 
   Modified files:

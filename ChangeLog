@@ -1,3 +1,15 @@
+leeh        2002/05/07 17:37:44 EDT	(20020507_1)
+
+  Modified files:
+    modules              bothunt.c 
+  Log:
+  - bad pointer arithmetic chopping a nick/user in failed oper attempt
+  
+  Revision  Changes    Path
+  1.67      +2 -2      tcm-hybrid/modules/bothunt.c
+
+
+
 wcampbel    2002/05/07 13:02:46 EDT	(20020507_0)
 
   Modified files:

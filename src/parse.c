@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.20 2002/05/25 19:10:09 leeh Exp $
+ * $Id: parse.c,v 1.21 2002/05/25 19:22:47 leeh Exp $
  */
 
 #include <stdio.h>
@@ -137,7 +137,7 @@ parse_client(int i, int argc, char *argv[])
   /* command */
   if(argv[0][0] == '.')
   {
-    if((ptr = find_dcc_handler(argv[0] + 1)))
+    if((ptr = find_dcc_handler(argv[0] + 1)) != NULL)
     {
       if(connections[i].type & TYPE_ADMIN)
         ptr->handler[2](i, argc, argv);
@@ -269,196 +269,207 @@ static
 void proc(char *source,char *fctn,char *param)
 {
   struct serv_command *ptr;
-    char *userhost;
-    int numeric=0;      /* if its a numeric */
-    int argc=0;
-    char *p, *q;
-    char *argv[MAX_ARGV];
+  char *userhost;
+  int numeric=0;      /* if its a numeric */
+  int argc=0;
+  char *p;
+  char *q;
+  char *argv[MAX_ARGV];
 
-    if (source && *source)
-      argv[argc++] = source;
-    if (fctn && *fctn)
-      argv[argc++] = fctn;
-    p = param;
-    if (*p == ':')
+  if (source && *source)
+    argv[argc++] = source;
+  if (fctn && *fctn)
+    argv[argc++] = fctn;
+  
+  p = param;
+  if (*p == ':')
+    argv[argc++] = p;
+  else
+  {
+    q = strchr(p, ' ');
+
+    for (; (argc < MAX_ARGV-1) && q; q=strchr(p, ' '))
+    {
+      *q++ = '\0';
+      if (*q == ':')
+      {
+        argv[argc++] = p;
+        argv[argc++] = q+1;
+        numeric = 1;
+        break;
+      }
+      
       argv[argc++] = p;
-    else
-    {
-      q = strchr(p, ' ');
-
-      for (; (argc < MAX_ARGV-1) && q; q=strchr(p, ' '))
-      {
-        *q++ = '\0';
-        if (*q == ':')
-        {
-          argv[argc++] = p;
-          argv[argc++] = q+1;
-          numeric = 1;
-          break;
-        }
-        argv[argc++] = p;
-        p = q;
-      }
-
-      if (*p != '\0' && !numeric)
-        argv[argc++] = p;
+      p = q;
     }
 
-    if((ptr = find_serv_handler(argv[1])))
-    {
-      for(; ptr; ptr = ptr->next_cmd)
-        ptr->handler(argc, argv);
-      return;
-    }
+    if (*p != '\0' && !numeric)
+      argv[argc++] = p;
+  }
+
+  if((ptr = find_serv_handler(argv[1])) != NULL)
+  {
+    for(; ptr; ptr = ptr->next_cmd)
+      ptr->handler(argc, argv);
+    return;
+  }
 		    
-    numeric=0;
-    if (strcmp(argv[1],"PRIVMSG") == 0)
-    {
-      if(strcasecmp(argv[2],mynick) == 0)
-      {
-        if ((userhost = strchr(argv[0], '!')) != NULL)
-          *userhost++ = '\0';
-        if (argv[3][0] == '\001')       /* it's a CTCP something */
-          _onctcp(0, argc, argv);
-        else
-          privmsgproc(source,userhost,argc,argv);
-      }
-    }
-    else if (strcmp(argv[0], "PING") == 0) /* PING to a client can only
-                                           ** occur without a prefix,
-                                           ** such as ping cookies
-                                           ** and the server simply
-                                           ** seeing if the TCM is still
-                                           ** alive.
-                                           */
-    {
-      print_to_server("PONG %s", argv[1]);
-    }
-    else if (strcmp(argv[0],"ERROR") == 0)
-    {
-      if (strncmp(argv[1], ":Closing Link: ", 15) == 0)
-      {
-        if (strstr(argv[1], "collision)"))
-          onnicktaken();
+  numeric=0;
 
-	linkclosed(0, argc, argv);
-      }
-    }
-    else if ((strcmp(argv[1],"WALLOPS")) == 0)
+  if (strcmp(argv[1],"PRIVMSG") == 0)
+  {
+    if(strcasecmp(argv[2],mynick) == 0)
     {
-      _wallops(0, argc, argv);
+      if ((userhost = strchr(argv[0], '!')) != NULL)
+        *userhost++ = '\0';
+      if (argv[3][0] == '\001')       /* it's a CTCP something */
+        _onctcp(0, argc, argv);
+      else
+        privmsgproc(source,userhost,argc,argv);
     }
-    else if ((strcmp(argv[1],"JOIN")) == 0)
-    {
-      _onjoin(0, argc, argv);
-    }
-    else if ((strcmp(argv[1],"KICK")) == 0)
-    {
-      onkick(argv[3]);
-    }
-    else if (strcmp(argv[1],"NICK") == 0)
-    {
-      onnick(source,argv[2]);
-    }
-    else if (strcmp(fctn,"NOTICE") == 0)
-    {
-      if(strcasecmp(source,config_entries.rserver_name) == 0)
-      {
-        onservnotice(0, argc, argv);
-      }
-#ifdef SERVICES
-      else if(strcasecmp(source,SERVICES_NAME) == 0)
-      {
-        on_services_notice(argc, argv);
-      }
-#endif
-    }
+  }
 
-    if(isdigit((int) fctn[0]) && isdigit((int) fctn[1]) &&
-       isdigit((int) fctn[2]))
-      numeric = atoi(fctn);
-    else
-      numeric = (-1);
+  /* PING doesnt have a prefix */
+  else if (strcmp(argv[0], "PING") == 0)
+    print_to_server("PONG %s", argv[1]);
 
-    switch(numeric)
-      {
-      case RPL_STATSYLINE:
-        if (!strcasecmp(argv[4], myclass))
-          pingtime = atoi(argv[5]) * 2 + 15;
-        break;
-      case ERR_NICKNAMEINUSE:
+  /* error doesnt have a prefix either */
+  else if (strcmp(argv[0],"ERROR") == 0)
+  {
+    if (strncmp(argv[1], ":Closing Link: ", 15) == 0)
+    {
+      if (strstr(argv[1], "collision)"))
         onnicktaken();
-        break;
-      case  ERR_NOTREGISTERED:
-        argv[0] = "Not registered";
-        linkclosed(0, 1, argv);
-        break;
-      case ERR_CHANNELISFULL: case ERR_INVITEONLYCHAN:
-      case ERR_BANNEDFROMCHAN: case ERR_BADCHANNELKEY:
-        cannotjoin(argv[3]);
-        break;
-      case RPL_MYINFO:
-        strncpy(config_entries.rserver_name, argv[3], MAX_CONFIG);
 
-        if ((p = strstr(argv[4],"hybrid")))
-          {
-            config_entries.hybrid = YES;
+      linkclosed(0, argc, argv);
+    }
+  }
 
-            p += 7;
-            if(*p == '5')
-              config_entries.hybrid_version = 5;
-            else if(*p == '6')
-              config_entries.hybrid_version = 6;
-            else if(*p == '7')
-              config_entries.hybrid_version = 7;
-          }
-        else
-           config_entries.hybrid = NO;
-        if (!amianoper)
-          do_init();
-        else
-          send_umodes(mynick);
-        break;
+  else if ((strcmp(argv[1],"WALLOPS")) == 0)
+  {
+    _wallops(0, argc, argv);
+  }
+  else if ((strcmp(argv[1],"JOIN")) == 0)
+  {
+    _onjoin(0, argc, argv);
+  }
+  else if ((strcmp(argv[1],"KICK")) == 0)
+  {
+    onkick(argv[3]);
+  }
+  else if (strcmp(argv[1],"NICK") == 0)
+  {
+    onnick(source,argv[2]);
+  }
+  else if (strcmp(fctn,"NOTICE") == 0)
+  {
+    if(strcasecmp(source,config_entries.rserver_name) == 0)
+    {
+      onservnotice(0, argc, argv);
+    }
+#ifdef SERVICES
+    else if(strcasecmp(source,SERVICES_NAME) == 0)
+    {
+      on_services_notice(argc, argv);
+    }
+#endif
+  }
 
-      case RPL_YOUREOPER:
-        amianoper = YES;
-        oper_time = time(NULL);
-        send_umodes(mynick);
-        inithash();
-        print_to_server("STATS Y");
-        break;
-      case RPL_TRACEOPERATOR:
-      case RPL_TRACEUSER:
-	_ontraceuser(0, argc, argv);
-        break;
-      case RPL_TRACECLASS:
-	_ontraceclass(0, argc, argv);
-        break;
-      case RPL_STATSILINE:
-	on_stats_i(0, argc, argv);
-        break;
-      case RPL_STATSKLINE:
-        break;
-      case RPL_STATSOLINE:
-	on_stats_o(0, argc, argv);
-        break;
-      case RPL_ENDOFSTATS:
-        break;
-      case RPL_VERSION:
-        /* version_reply(body); */
-        break;
-      case ERR_PASSWDMISMATCH:
-      case ERR_NOOPERHOST:              /* Can't oper! */
-        argv[0] = "Can't oper";
-        linkclosed(0, 1, argv);
-        break;
-      case RPL_STATSELINE:
-      case RPL_STATSFLINE:
-	on_stats_e(0, argc, argv);
-        break;
-      default:
-        break;
+  if(isdigit((int) fctn[0]) && isdigit((int) fctn[1]) &&
+     isdigit((int) fctn[2]))
+    numeric = atoi(fctn);
+  else
+    numeric = (-1);
+
+  switch(numeric)
+  {
+    case RPL_STATSYLINE:
+      if (!strcasecmp(argv[4], myclass))
+        pingtime = atoi(argv[5]) * 2 + 15;
+      break;
+
+    case ERR_NICKNAMEINUSE:
+      onnicktaken();
+      break;
+
+    case  ERR_NOTREGISTERED:
+      argv[0] = "Not registered";
+      linkclosed(0, 1, argv);
+      break;
+	
+    case ERR_CHANNELISFULL: case ERR_INVITEONLYCHAN:
+    case ERR_BANNEDFROMCHAN: case ERR_BADCHANNELKEY:
+      cannotjoin(argv[3]);
+      break;
+	
+    case RPL_MYINFO:
+      strncpy(config_entries.rserver_name, argv[3], MAX_CONFIG);
+
+      if ((p = strstr(argv[4],"hybrid")))
+      {
+        config_entries.hybrid = YES;
+
+        p += 7;
+        if(*p == '5')
+          config_entries.hybrid_version = 5;
+        else if(*p == '6')
+          config_entries.hybrid_version = 6;
+        else if(*p == '7')
+          config_entries.hybrid_version = 7;
       }
+      else
+         config_entries.hybrid = NO;
+
+      if (!amianoper)
+        do_init();
+      else
+        send_umodes(mynick);
+      break;
+
+    case RPL_YOUREOPER:
+      amianoper = YES;
+      oper_time = time(NULL);
+      send_umodes(mynick);
+      inithash();
+      print_to_server("STATS Y");
+      break;
+	
+    case RPL_TRACEOPERATOR:
+    case RPL_TRACEUSER:
+      _ontraceuser(0, argc, argv);
+      break;
+	
+    case RPL_TRACECLASS:
+      _ontraceclass(0, argc, argv);
+      break;
+	
+    case RPL_STATSILINE:
+      on_stats_i(0, argc, argv);
+      break;
+	
+    case RPL_STATSOLINE:
+      on_stats_o(0, argc, argv);
+      break;
+	
+    case RPL_VERSION:
+      /* version_reply(body); */
+      break;
+
+    /* cant oper */
+    case ERR_PASSWDMISMATCH:
+    case ERR_NOOPERHOST:
+      argv[0] = "Can't oper";
+      linkclosed(0, 1, argv);
+      break;
+	
+    case RPL_STATSELINE:
+    case RPL_STATSFLINE:
+      on_stats_e(0, argc, argv);
+      break;
+
+    default:
+      break;
+  }
 }
 
 #ifdef SERVICES

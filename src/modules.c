@@ -1,5 +1,5 @@
 /*
- * $Id: modules.c,v 1.42 2002/05/25 18:44:08 leeh Exp $B
+ * $Id: modules.c,v 1.43 2002/05/25 19:22:46 leeh Exp $B
  *
  */
 
@@ -87,7 +87,7 @@ add_dcc_handler(struct dcc_command *ptr)
 
   hashval = hash_command(ptr->cmd);
 
-  if(dcc_command_table[hashval])
+  if(dcc_command_table[hashval] != NULL)
     ptr->next = dcc_command_table[hashval];
   
   dcc_command_table[hashval] = ptr;
@@ -121,10 +121,10 @@ del_dcc_handler(struct dcc_command *ptr)
   }
 
   /* command was found.. */
-  if(temp_ptr)
+  if(temp_ptr != NULL)
   {
     /* something points to this command */
-    if(last_ptr)
+    if(last_ptr != NULL)
       last_ptr->next = ptr->next;
     
     /* this command is first in the hashtable */

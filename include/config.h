@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.41 2002/05/13 22:44:02 wcampbel Exp $
+ * $Id: config.h,v 1.42 2002/05/17 23:35:31 wcampbel Exp $
  */
 
 /*
@@ -251,6 +251,16 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 
 /* Maximum DCC chat connections */
 #define MAXDCCCONNS 50
+
+/* Define the low and high range of ports the tcm will try to use
+ * when an oper issues PRIVMSG tcm .chat
+ *
+ * This allows an admin to open a specific range of ports to the tcm
+ * for opers who are stuck behind NAT or strict firewalls they cannot
+ * control.
+ */
+#define LOWEST_DCC_PORT 1025
+#define HIGHEST_DCC_PORT 3050
 
 /*
  * You can leave these, or change them to suit... - Dianora

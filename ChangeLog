@@ -1,3 +1,15 @@
+bill        2002/03/11 01:03:47 EST	(20020311_0)
+
+  Modified files:
+    src                  stdcmds.c 
+  Log:
+  - fixed minor typo that caused core, found by Disciple
+  
+  Revision  Changes    Path
+  1.39      +1 -1      tcm-hybrid/src/stdcmds.c
+
+
+
 bill        2002/03/08 23:08:44 EST	(20020309_0)
 
   Modified files:

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.23 2002/06/02 02:20:44 db Exp $
+ * $Id: hash.c,v 1.24 2002/06/02 21:23:19 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -1034,21 +1034,21 @@ list_class(int sock,char *class_to_find,int total_only)
 
           if (strcasecmp(class_to_find, ptr->info->class) == 0)
             {
-              if (num_found == 0)
+              if(!total_only)
                 {
-		  num_found++;
-                  if(!total_only)
+                  if (num_found == 0)
                     {
+                      /* Simply the header to the list of clients */
                       print_to_socket(sock,
                            "The following clients are in class %s\n",
                            class_to_find);
                     }
+
+                    print_to_socket(sock, "  %s (%s@%s)\n", ptr->info->nick,
+                                    ptr->info->user, ptr->info->host);
                 }
-              if(!total_only)
-                {
-                  print_to_socket(sock, "  %s (%s@%s)\n", ptr->info->nick,
-				  ptr->info->user, ptr->info->host);
-                }
+
+              num_found++;
             }
         }
     }

@@ -1,3 +1,25 @@
+wcampbel    2002/04/16 17:33:03 EDT	(20020416_0)
+
+  Modified files:
+    src                  .depend Makefile.in stdcmds.c 
+  Added files:
+    include              match.h 
+    src                  match.c 
+  Log:
+  Added a match() function, used in commands that compare against nicks.
+    The match() is taken from IRCnet 2.10.3p3 with some local modifications.
+    The benefit is that in the non-regular expression case of .nfind, nicks
+    will be matched with the "proper" RFC1459 casemapping.
+  
+  Revision  Changes    Path
+  1.1       +28 -0     tcm-hybrid/include/match.h (new)
+  1.9       +4 -2      tcm-hybrid/src/.depend
+  1.15      +1 -0      tcm-hybrid/src/Makefile.in
+  1.1       +324 -0    tcm-hybrid/src/match.c (new)
+  1.43      +3 -2      tcm-hybrid/src/stdcmds.c
+
+
+
 bill        2002/04/11 21:40:52 EDT	(20020412_1)
 
   Modified files:

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.73 2002/06/21 01:07:43 leeh Exp $
+ * $Id: parse.c,v 1.74 2002/06/21 12:56:22 leeh Exp $
  */
 
 #include <stdio.h>
@@ -492,7 +492,6 @@ do_init(void)
   print_to_server("VERSION");
   join();
   clear_bothunt();
-  clear_hash();
 }
 
 /*

@@ -1,3 +1,20 @@
+db          2001/12/11 16:55:34 EST	(20011211_1)
+
+  Modified files:
+    include              userlist.h 
+    src                  userlist.c 
+  Log:
+  - changed some loops to use memset
+  - removed typedef no longer used
+  
+  einride volunteered to test!
+  
+  Revision  Changes    Path
+  1.22      +2 -2      tcm-hybrid/include/userlist.h
+  1.39      +26 -60    tcm-hybrid/src/userlist.c
+
+
+
 db          2001/12/11 02:00:57 EST	(20011211_0)
 
   Modified files:

@@ -1,3 +1,8 @@
+*** 20010829_3 by bill
+- fixed socks detection (since when does fstat() return 0 on failure?)
+- fixed .quit bug
+
+
 *** 20010829_2 by bill
  oopsie forget those were there ::smirk::
 

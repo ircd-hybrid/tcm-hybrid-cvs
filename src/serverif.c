@@ -52,7 +52,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.16 2001/06/03 05:41:16 db Exp $";
+static char *version="$Id: serverif.c,v 1.17 2001/06/03 20:18:03 greg Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -1322,8 +1322,8 @@ void do_init(void)
   else
     join(config_entries.defchannel,(char *)NULL);
 
-  initopers();
   oper();
+  initopers();
   inithash();
 }
 

@@ -28,7 +28,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: userlist.c,v 1.7 2001/06/03 05:41:17 db Exp $";
+static char *version="$Id: userlist.c,v 1.8 2001/06/03 20:18:03 greg Exp $";
 
 #ifdef NEXT
 char *strdup(char *);
@@ -1565,7 +1565,7 @@ int islegal_pass(int connect_id,char *password)
 {
   int i;
 
-  for(i=0;userlist[i].user;i++)
+  for(i=0;userlist[i].user && userlist[i].user[0];i++)
     {
       if(userlist[i].type & TYPE_TCM)
 	continue;

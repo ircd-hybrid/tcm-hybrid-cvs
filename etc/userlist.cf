@@ -1,14 +1,11 @@
-# $Id: userlist.cf,v 1.22 2002/05/27 11:41:53 leeh Exp $
+# $Id: userlist.cf,v 1.23 2002/06/21 00:04:11 leeh Exp $
 # userlist.cf file
 #
 # each line is colon separated
 #
-# O: line is for an oper or remote connecting tcm
+# O: line is for an oper or remote connecting tcm, format:
 #
-# O line format:
-# O:hostmask:nick:password:flags
-#
-# user@host for opers; hostname mask for remote tcm's
+# O:user@host:nick:password:flags
 #
 # Passwords can be encrypted ONLY if USE_CRYPT has been defined
 # By default, USE_CRYPT is defined!
@@ -22,7 +19,6 @@
 #   +/-M will give the user the admin privs
 #   +/-K will allows this oper to .kline
 #   +/-D will allows this oper to .dline
-#   +/-I will, if set, override the dyanmic i flag
 #   +/-W will allow this user to see WALLOPS and OPERWALL (this is only used
 #         if ENABLE_W_FLAG is defined)
 #
@@ -31,10 +27,6 @@
 # db@*db.net has oper kline and dline privs
 #
 O:db@*.db.net:diane:notrealpassword:KD
-#
-# bill@*.parodius.com has oper remote kline dline and is invisible to irc users
-#
-O:bill@*.parodius.com:pro:notrealpassword:KDI
 
 # E-lines
 #  The format for these are as follows:

@@ -1,4 +1,4 @@
-$Id: README-csircd,v 1.1 2002/04/22 22:32:01 bill Exp $
+$Id: README-csircd,v 1.2 2002/05/06 13:28:02 wcampbel Exp $
 
 Special operating instructions for csircd:
 In order for tcm to work properly on csircd-1.13, a client's ip address
@@ -16,6 +16,11 @@ canlocalkill;
 
 It should optionally have:
 cangline;	This will enable .gline (assuming its defined)
+
+If your opers have the hidehostname flag set in their class block,
+you *must* add O: lines in tcm's userlist.cf for your server operators.
+With the hidehostname flag set, tcm cannot import the ircd's oper blocks
+into it's memory.
 
 Note: If you give it the "local" flag, it will not be able to communicate
       with efnet's services completely.  Specifically, it will not be able

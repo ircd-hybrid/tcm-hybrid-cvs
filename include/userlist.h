@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.76 2002/06/21 19:17:09 leeh Exp $ */
+/* $Id: userlist.h,v 1.77 2002/06/21 23:14:01 leeh Exp $ */
 
 #include "tools.h"
 
@@ -61,7 +61,7 @@ struct config_list {
  * used for .register command
  */
 
-struct auth_file_entry
+struct oper_entry
 {
   char user[MAX_NICK];
   char host[MAX_HOST];
@@ -78,13 +78,13 @@ struct exempt_entry
   unsigned int type;
 };
 
-int find_user_in_userlist(const char *);
-int get_umodes_from_prefs(int);
+struct oper_entry *find_user_in_userlist(const char *);
+void get_umodes_from_prefs(struct oper_entry *);
 void list_connections(int sock);
 void show_stats_p(const char *nick);
 
 void save_umodes(void *);
-void set_umode(int, int, const char *);
+void set_umode(struct oper_entry *, int, const char *);
 void on_stats_o(int, char *argv[]);
 
 int has_umode(int, int);
@@ -105,11 +105,9 @@ int  wingate_class(char *class);
 /* local_ip is clearly not going to be an unsigned long FIX THIS -db */
 unsigned long local_ip(char *ourhostname);
 
-extern struct auth_file_entry userlist[];
-extern int user_list_index;
-
 struct slink_node;
 slink_node *exempt_list;
+slink_node *user_list;
 
 #ifdef DEBUGMODE
 void exempt_summary();

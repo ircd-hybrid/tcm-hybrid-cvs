@@ -1,7 +1,7 @@
 /*  tcm-hybrid/src/tools.c by fl_
  *  Copyright (C) 2002 ircd-hybrid development team
  *
- *  $Id: tools.c,v 1.2 2002/06/21 18:38:59 leeh Exp $
+ *  $Id: tools.c,v 1.3 2002/06/21 23:14:04 leeh Exp $
  */
 
 #include <stdlib.h>
@@ -26,6 +26,28 @@ slink_add(void *data, slink_node *m, slink_node **list)
   m->data = data;
   m->next = *list;
   *list = m;
+}
+
+void
+slink_add_tail(void *data, slink_node *m, slink_node **list)
+{
+  slink_node *ptr;
+
+  ptr = *list;
+  m->data = data;
+  m->next = NULL;
+
+  if(ptr == NULL)
+  {
+    *list = m;
+  }
+  else
+  {
+    while(ptr->next)
+      ptr = ptr->next;
+  
+    ptr->next = m;
+  }
 }
 
 void

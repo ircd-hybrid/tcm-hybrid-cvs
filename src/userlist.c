@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.127 2002/06/21 19:17:12 leeh Exp $
+ * $Id: userlist.c,v 1.128 2002/06/21 23:14:04 leeh Exp $
  *
  */
 
@@ -37,17 +37,13 @@
 #include "actions.h"
 #include "handler.h"
 
-struct auth_file_entry userlist[MAXUSERS];
 char wingate_class_list[MAXWINGATE][MAX_CLASS];
 
-int	user_list_index;
 int	wingate_class_list_index;
 
 static void load_a_user(char *);
 static void load_e_line(char *);
-static void add_oper(char *, char *, char *, char *, int);
-
-static void clear_exempts(void);
+static void add_oper(char *, char *, char *, char *, char *);
 
 static void m_umode(int, int, char *argv[]);
 
@@ -115,15 +111,16 @@ init_userlist_handlers(void)
 void
 m_umode(int connnum, int argc, char *argv[])
 {
-  int user;
+  struct oper_entry *user;
 
   if(argc < 2)
   {
     user = find_user_in_userlist(connections[connnum].registered_nick);
 
-    print_to_socket(connections[connnum].socket, 
-		    "Your current flags are: %s",
-		    type_show(userlist[user].type));
+    if(user != NULL)
+      print_to_socket(connections[connnum].socket, 
+  		      "Your current flags are: %s",
+		      type_show(user->type));
     return;
   }
   else if(argc == 2)
@@ -132,15 +129,19 @@ m_umode(int connnum, int argc, char *argv[])
     {
       user = find_user_in_userlist(connections[connnum].registered_nick);
 
-      /* admins can set what they want.. */
-      if(userlist[user].type & FLAGS_ADMIN)
-        set_umode(user, 1, argv[1]);
-      else
-        set_umode(user, 0, argv[1]);
+      if(user != NULL)
+      {
+        /* admins can set what they want.. */
+        if(user->type & FLAGS_ADMIN)
+          set_umode(user, 1, argv[1]);
+        else
+          set_umode(user, 0, argv[1]);
 
-      print_to_socket(connections[connnum].socket,
-		      "Your flags are now: %s",
-		      type_show(userlist[user].type));
+        print_to_socket(connections[connnum].socket,
+		        "Your flags are now: %s",
+		        type_show(user->type));
+      }
+
       return;
     }
     else
@@ -154,11 +155,11 @@ m_umode(int connnum, int argc, char *argv[])
 
       user = find_user_in_userlist(argv[1]);
       
-      if(user >= 0)
+      if(user != NULL)
       {
 	print_to_socket(connections[connnum].socket,
 			"User flags for %s are: %s",
-			argv[1], type_show(userlist[user].type));
+			argv[1], type_show(user->type));
       }
       else
         print_to_socket(connections[connnum].socket,
@@ -181,18 +182,18 @@ m_umode(int connnum, int argc, char *argv[])
 
     if((argv[2][0] == '+') || (argv[2][0] == '-'))
     {
-      if(user >= 0)
+      if(user != NULL)
       {
         set_umode(user, 1, argv[2]);
 
         print_to_socket(connections[connnum].socket,
 	  	        "User flags for %s are now: %s",
-		        argv[1], type_show(userlist[user].type));
+		        argv[1], type_show(user->type));
 
         if(user_conn >= 0)
           print_to_socket(connections[user_conn].socket,
 			  "Your flags are now: %s (changed by %s)",
-			  type_show(userlist[user].type),
+			  type_show(user->type),
 			  connections[connnum].registered_nick);
       }
       else
@@ -214,7 +215,7 @@ m_umode(int connnum, int argc, char *argv[])
  * side effects - clients usermode is changed.
  */
 void
-set_umode(int user, int admin, const char *umode)
+set_umode(struct oper_entry *user, int admin, const char *umode)
 {
   /* default to 1 so we can call this from load_a_user */
   int plus = 1;
@@ -222,7 +223,7 @@ set_umode(int user, int admin, const char *umode)
   int j;
 
   /* mark the file for saving */
-  userlist[user].changed = 1;
+  user->changed = 1;
 
   for(i = 0; umode[i]; i++)
   {
@@ -242,9 +243,9 @@ set_umode(int user, int admin, const char *umode)
       if(umode_flags[j].umode == umode[i])
       {
 	if(plus)
-          userlist[user].type |= umode_flags[j].type;
+          user->type |= umode_flags[j].type;
 	else
-          userlist[user].type &= ~umode_flags[j].type;
+          user->type &= ~umode_flags[j].type;
 
 	break;
       }
@@ -258,9 +259,9 @@ set_umode(int user, int admin, const char *umode)
         if(umode_privs[j].umode == umode[i])
 	{
           if(plus)
-            userlist[user].type |= umode_privs[j].type;
+            user->type |= umode_privs[j].type;
 	  else
-            userlist[user].type &= ~umode_privs[j].type;
+            user->type &= ~umode_privs[j].type;
 	}
       }
     }
@@ -277,11 +278,11 @@ set_umode(int user, int admin, const char *umode)
 int
 has_umode(int conn_num, int type)
 {
-  int user;
+  struct oper_entry *user;
 
   user = find_user_in_userlist(connections[conn_num].registered_nick);
 
-  if(userlist[user].type & type)
+  if(user != NULL && user->type & type)
     return type;
 
   return 0;
@@ -296,11 +297,14 @@ has_umode(int conn_num, int type)
 int
 get_umode(int conn_num)
 {
-  int user;
+  struct oper_entry *user;
 
   user = find_user_in_userlist(connections[conn_num].registered_nick);
 
-  return(userlist[user].type|FLAGS_ALL);
+  if(user != NULL)
+    return(user->type|FLAGS_ALL);
+  else
+    return(FLAGS_ALL);
 }
 
 /* find_user_in_userlist()
@@ -309,18 +313,21 @@ get_umode(int conn_num)
  * output	-
  * side effects - return place in userlist, or -1 if not found
  */
-int
+struct oper_entry *
 find_user_in_userlist(const char *username)
 {
-  int i;
+  slink_node *ptr;
+  struct oper_entry *user;
 
-  for(i = 0; userlist[i].user[0]; i++)
+  for(ptr = user_list; ptr; ptr = ptr->next)
   {
-    if(strcasecmp(userlist[i].usernick, username) == 0)
-      return i;
+    user = ptr->data;
+
+    if(strcasecmp(user->usernick, username) == 0)
+      return user;
   }
 
-  return (-1);
+  return NULL;
 }
 
 /* get_umodes_from_prefs()
@@ -329,9 +336,8 @@ find_user_in_userlist(const char *username)
  * output	-
  * side effects - usermodes from preferences are returned
  */
-
-int
-get_umodes_from_prefs(int user)
+void
+get_umodes_from_prefs(struct oper_entry *user)
 {
   FILE *fp;
   char user_pref_filename[MAX_BUFF];
@@ -339,15 +345,15 @@ get_umodes_from_prefs(int user)
   char *p;
   int type;
 
-  snprintf(user_pref_filename,
-	   MAX_BUFF, "etc/%s.pref", userlist[user].usernick);
+  snprintf(user_pref_filename, MAX_BUFF,
+	   "etc/%s.pref", user->usernick);
 
   if ((fp = fopen(user_pref_filename, "r")) != NULL)
   {
     if ((fgets(type_string, SMALL_BUFF, fp)) == NULL)
       {
 	(void)fclose(fp);
-	return 0;
+	return;
       }
 
     (void)fclose(fp);
@@ -362,13 +368,11 @@ get_umodes_from_prefs(int user)
       send_to_all(FLAGS_ALL, "Preference file %s is invalid, removing",
                   user_pref_filename);
       unlink(user_pref_filename);
-      return 0;
+      return;
     }
 
-    return type;
+    user->type |= type;
   }
-  
-  return 0;
 }
 
 /* save_umodes()
@@ -381,26 +385,28 @@ void
 save_umodes(void *unused)
 {
   FILE *fp;
+  slink_node *ptr;
+  struct oper_entry *target;
   char user_pref[MAX_BUFF];
-  int i;
 
-  for(i = 0; i < user_list_index; i++)
+  for(ptr = user_list; ptr; ptr = ptr->next)
   {
-    if(userlist[i].changed == 0)
+    target = ptr->data;
+    
+    if(target->changed == 0)
       continue;
 
-    snprintf(user_pref, MAX_BUFF, 
-             "etc/%s.pref", userlist[i].usernick);
+    snprintf(user_pref, MAX_BUFF, "etc/%s.pref", target->usernick);
 
     if((fp = fopen(user_pref, "w")) != NULL)
     {
-      fprintf(fp, "%d\n", (userlist[i].type|FLAGS_VALID));
+      fprintf(fp, "%d\n", (target->type|FLAGS_VALID));
       (void)fclose(fp);
     }
     else
       send_to_all(FLAGS_ALL, "Couldn't open %s for writing", user_pref);
 
-    userlist[i].changed = 0;
+    target->changed = 0;
   }
 }
     
@@ -777,52 +783,45 @@ load_userlist()
 static void
 load_a_user(char *line)
 {
-    char *userathost;
-    char *user;
-    char *host;
-    char *usernick;
-    char *password;
-    char *type;
-    char *p;
+  char *userathost;
+  char *user;
+  char *host;
+  char *usernick;
+  char *password;
+  char *type;
+  char *p;
 
-    if(config_entries.debug && outfile)
-      {
-	fprintf(outfile, "load_a_user() line =[%s]\n",line);
-      }
+  if(config_entries.debug && outfile)
+    fprintf(outfile, "load_a_user() line =[%s]\n",line);
 
-    if(user_list_index == (MAXUSERS - 1))
-	return;
+  if ((userathost = strtok(line,":")) == NULL)
+    return;
 
-    if ((userathost = strtok(line,":")) == NULL)
-      return;
+  if((usernick = strtok(NULL, ":")) == NULL)
+    return;
 
-    if((usernick = strtok(NULL, ":")) == NULL)
-      return;
+  if((password = strtok(NULL, ":")) == NULL)
+    return;
 
-    if((password = strtok(NULL, ":")) == NULL)
-      return;
+  if((type = strtok(NULL, ":")) == NULL)
+    return;
 
-    if((type = strtok(NULL, ":")) == NULL)
-      return;
+  user = userathost;
+  if((p = strchr(userathost,'@')) != NULL)
+    {
+      *p++ = '\0';
+      host = p;
+    }
+  else
+    {
+      user = "*";
+      host = userathost;
+    }
 
-    user = userathost;
-    if((p = strchr(userathost,'@')) != NULL)
-      {
-	*p++ = '\0';
-	host = p;
-      }
-    else
-      {
-	user = "*";
-	host = userathost;
-      }
+  if((p = strchr(host,' ')) != NULL)
+    *p = '\0';
 
-    if((p = strchr(host,' ')) != NULL)
-      *p = '\0';
-
-    set_umode(user_list_index, 1, type);
-    add_oper(user, host, usernick, password, 
-             get_umodes_from_prefs(user_list_index));
+  add_oper(user, host, usernick, password, type);
 }
 
 /* on_stats_o()
@@ -840,10 +839,6 @@ on_stats_o(int argc, char *argv[])
   char *nick;
   char *p;
 
-  /* No point if I am maxed out going any further */
-  if(user_list_index == (MAXUSERS - 1))
-    return;
-
   user = user_at_host = argv[4];
   nick = argv[6];
 
@@ -858,33 +853,40 @@ on_stats_o(int argc, char *argv[])
       host = p;
     }
 
-  add_oper(user, host, nick, "\0", 0);
+  add_oper(user, host, nick, "\0", "\0");
   add_exempt(user, host, 0);
 }
 
 void
-add_oper(char *user, char *host, char *usernick, char *password, int type)
+add_oper(char *username, char *host, char *usernick, 
+         char *password, char *type)
 {
+  slink_node *ptr;
+  struct oper_entry *user;
+
   if(strcmp(host, "*") == 0)
     return;
 
-  if(is_an_oper(user, host))
+  if(is_an_oper(username, host))
     return;
 
-  strlcpy(userlist[user_list_index].user, user,
-          sizeof(userlist[user_list_index].user));
+  ptr = slink_create();
+  user = (struct oper_entry *) xmalloc(sizeof(struct oper_entry));
+  memset(user, 0, sizeof(struct oper_entry));
 
-  strlcpy(userlist[user_list_index].host, host,
-          sizeof(userlist[user_list_index].host));
+  strlcpy(user->user, username, sizeof(user->user));
+  strlcpy(user->host, host, sizeof(user->host));
+  strlcpy(user->usernick, usernick, sizeof(user->usernick));
+  strlcpy(user->password, password, sizeof(user->password));
 
-  strlcpy(userlist[user_list_index].usernick, usernick,
-          sizeof(userlist[user_list_index].usernick));
+  /* its from the conf.. load their umodes. */
+  if(*type != '\0')
+  {
+    set_umode(user, 1, type); 
+    get_umodes_from_prefs(user);
+  }
 
-  strlcpy(userlist[user_list_index].password, password,
-          sizeof(userlist[user_list_index].password));
-
-  userlist[user_list_index].type |= type;
-  user_list_index++;
+  slink_add_tail(user, ptr, &user_list);
 }
 
 void
@@ -898,6 +900,7 @@ add_exempt(char *user, char *host, int type)
 
   ptr = slink_create();
   exempt = (struct exempt_entry *) xmalloc(sizeof(struct exempt_entry));
+  memset(exempt, 0, sizeof(struct exempt_entry));
 
   strlcpy(exempt->user, user, sizeof(exempt->user));
   strlcpy(exempt->host, host, sizeof(exempt->host));
@@ -961,30 +964,30 @@ load_e_line(char *line)
 void
 clear_userlist()
 {
-  user_list_index = 0;
-  wingate_class_list_index = 0;
-
-  memset((void *)userlist, 0, sizeof(userlist));
-  memset((void *)wingate_class_list, 0, sizeof(wingate_class_list));
-}
-
-void
-clear_exempts(void)
-{
   slink_node *ptr;
   slink_node *next_ptr;
 
-  for(ptr = exempt_list; ptr; ptr = next_ptr)
+  wingate_class_list_index = 0;
+  memset((void *)wingate_class_list, 0, sizeof(wingate_class_list));
+
+  for(ptr = user_list; ptr; ptr = next_ptr)
   {
     next_ptr = ptr->next;
-
     xfree(ptr->data);
     xfree(ptr);
   }
 
+  for(ptr = exempt_list; ptr; ptr = next_ptr)
+  {
+    next_ptr = ptr->next;
+    xfree(ptr->data);
+    xfree(ptr);
+  }
+
+  user_list = NULL;
   exempt_list = NULL;
 }
-  
+
 /*
  * is_an_oper()
  *
@@ -993,18 +996,21 @@ clear_exempts(void)
  * output	- 1 if oper, 0 if not
  * side effects	- NONE
  */
-
 int
-is_an_oper(char *user,char *host)
+is_an_oper(char *username, char *host)
 {
-  int i;
+  slink_node *ptr;
+  struct oper_entry *user;
 
-  for(i=0; userlist[i].user[0]; i++)
-    {
-      if ((!match(userlist[i].user,user)) &&
-          (!wldcmp(userlist[i].host,host)))
-        return(YES);
-    }
+  for(ptr = user_list; ptr; ptr = ptr->next)
+  {
+    user = ptr->data;
+
+    if((match(user->user, username) == 0) &&
+       (wldcmp(user->host, host) == 0))
+      return(YES);
+  }
+
   return(NO);
 }
 
@@ -1106,7 +1112,6 @@ reload_userlist(void)
 #endif
 
   clear_userlist();
-  clear_exempts();
   load_userlist();
 
   print_to_server("STATS Y");

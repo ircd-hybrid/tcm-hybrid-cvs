@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.70 2002/06/21 18:38:57 leeh Exp $
+ * $Id: config.h,v 1.71 2002/06/21 23:14:01 leeh Exp $
  */
 
 /*
@@ -188,9 +188,6 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 
 /* Maximum number of reconnections to a server allowed before quitting.  */
 #define MAXRECONNECTS 5
-
-/* Maximum users allowed in tcm userlist */
-#define MAXUSERS 100
 
 /* Maximum pending connects for wingates */
 #define MAXWINGATE 200

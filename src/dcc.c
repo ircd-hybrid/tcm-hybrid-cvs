@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.13 2002/06/21 14:07:38 leeh Exp $
+ * $Id: dcc.c,v 1.14 2002/06/21 23:14:04 leeh Exp $
  */
 
 #include <stdio.h>
@@ -44,6 +44,8 @@
 #include "hash.h"
 #include "logging.h"
 #include "stdcmds.h"
+#include "match.h"
+#include "wild.h"
 #include "serno.h"
 #include "patchlevel.h"
 
@@ -65,6 +67,9 @@ static void close_dcc_connection(int connnum);
 void
 initiate_dcc_chat(struct source_client *source_p)
 {
+  slink_node *ptr;
+  struct oper_entry *user;
+
   int    dcc_port;                         /* dcc port to use */
   struct sockaddr_in socketname;
   int	flags;
@@ -82,6 +87,19 @@ initiate_dcc_chat(struct source_client *source_p)
   strlcpy(connections[i].user, source_p->username, MAX_USER);
   strlcpy(connections[i].host, source_p->host, MAX_HOST);
 
+  for(ptr = user_list; ptr; ptr = ptr->next)
+  {
+    user = ptr->data;
+
+    if((match(user->user, source_p->username) == 0) &&
+       (wldcmp(user->host, source_p->host) == 0))
+    {
+      strlcpy(connections[i].registered_nick, user->usernick,
+              sizeof(connections[i].registered_nick));
+      break;
+    }
+  }
+    
   if ((connections[i].socket = socket(PF_INET,SOCK_STREAM,0)) < 0)
   {
     notice(source_p->name, "Error on open");
@@ -151,6 +169,8 @@ accept_dcc_connection(struct source_client *source_p,
 {
   unsigned long remoteaddr;
   struct sockaddr_in socketname;
+  slink_node *ptr;
+  struct oper_entry *user;
   int  i;               /* index variable */
 
   if ((i = find_free_connection_slot()) < 0)
@@ -165,6 +185,19 @@ accept_dcc_connection(struct source_client *source_p,
   strlcpy(connections[i].host, source_p->host, MAX_HOST);
   connections[i].last_message_time = current_time;
 
+  for(ptr = user_list; ptr; ptr = ptr->next)
+  {
+    user = ptr->data;
+
+    if((match(user->user, source_p->username) == 0) &&
+       (wldcmp(user->host, source_p->host) == 0))
+    {
+      strlcpy(connections[i].registered_nick, user->usernick,
+              sizeof(connections[i].registered_nick));
+      break;
+    }
+  }
+    
   (void)sscanf(host_ip, "%lu", &remoteaddr);
   /* Argh.  Didn't they teach byte order in school??? --cah */
 

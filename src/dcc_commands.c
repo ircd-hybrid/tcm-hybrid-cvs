@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.131 2002/06/21 19:17:12 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.132 2002/06/21 23:14:04 leeh Exp $ */
 
 #include "setup.h"
 
@@ -148,7 +148,7 @@ m_killlist(int connnum, int argc, char *argv[])
   if(has_umode(connnum, FLAGS_INVS) == 0)
   {
     strncat(reason, " (requested by ", MAX_REASON - strlen(reason));
-    strncat(reason, connections[connnum].registered_nick,
+    strncat(reason, connections[connnum].nick,
             MAX_REASON - strlen(reason));
     strncat(reason, ")", MAX_REASON - strlen(reason));
   }
@@ -157,14 +157,14 @@ m_killlist(int connnum, int argc, char *argv[])
   if (strcasecmp(argv[1], "-r") == 0)
   {
     send_to_all(FLAGS_ALL, "*** killlist %s :%s by %s", argv[2],
-                reason, connections[connnum].registered_nick);
+                reason, connections[connnum].nick);
     kill_or_list_users(connections[connnum].socket, argv[2], YES, YES, reason);
   }
   else
 #endif
   {
     send_to_all(FLAGS_ALL, "*** killlist %s :%s by %s", argv[1],
-                reason, connections[connnum].registered_nick);
+                reason, connections[connnum].nick);
     kill_or_list_users(connections[connnum].socket, argv[1], NO, YES, reason);
   }
 }
@@ -303,17 +303,16 @@ m_register(int connnum, int argc, char *argv[])
 
 void m_opers(int connnum, int argc, char *argv[])
 {
-  int i;
+  slink_node *ptr;
+  struct oper_entry *user;
 
-  for(i = 0; i < MAXUSERS; i++)
+  for(ptr = user_list; ptr; ptr = ptr->next)
   {
-    if(userlist[i].user[0] == '\0')
-      break;
+    user = ptr->data;
 
     print_to_socket(connections[connnum].socket, "(%s) %s@%s %s",
-		    (userlist[i].usernick) ? userlist[i].usernick : "unknown",
-		    userlist[i].user, userlist[i].host,
-		    type_show(userlist[i].type));
+		    user->usernick, user->user, user->host,
+		    type_show(user->type));
   }
 }
 
@@ -773,15 +772,18 @@ register_oper(int connnum, char *password, char *who_did_command)
   {
     if(is_legal_pass(connnum, password))
     {
-      int user;
+      struct oper_entry *user;
 
       user = find_user_in_userlist(connections[connnum].registered_nick);
+
+      if(user == NULL)
+        return;
 
       print_to_socket(connections[connnum].socket,
 		      "Set umodes from preferences");
       print_to_socket(connections[connnum].socket,
 		      "Your current flags are now: %s",
-		      type_show(userlist[user].type));
+		      type_show(user->type));
 
       if(has_umode(connnum, FLAGS_SUSPENDED))
       {
@@ -796,7 +798,7 @@ register_oper(int connnum, char *password, char *who_did_command)
 	send_to_all(FLAGS_ALL, "%s has registered", who_did_command);
 
 	/* mark them as registered */
-	userlist[user].type |= FLAGS_OPER;
+	user->type |= FLAGS_OPER;
       }
     }
     else
@@ -806,7 +808,7 @@ register_oper(int connnum, char *password, char *who_did_command)
   }
   else
   {
-    print_to_socket(connections[connnum].socket,"missing password");
+    print_to_socket(connections[connnum].socket, "missing password");
   }
 }
 
@@ -1022,42 +1024,32 @@ init_commands(void)
 static int
 is_legal_pass(int connect_id, char *password)
 {
-  int i;
+  slink_node *ptr;
+  struct oper_entry *user;
 
-  for(i=0; userlist[i].user && userlist[i].host[0]; i++)
+  for(ptr = user_list; ptr; ptr = ptr->next)
+  {
+    user = ptr->data;
+
+    if((match(user->user, connections[connect_id].user) == 0) &&
+       (wldcmp(user->host, connections[connect_id].host) == 0) &&
+       (user->password[0] != '\0'))
     {
-      if((match(userlist[i].user,connections[connect_id].user) == 0) &&
-          (wldcmp(userlist[i].host,connections[connect_id].host) == 0))
-        {
-	  /* 
-	   * userlist entries discovered from stats O
-	   * has no valid password field. ignore them.
-	   */
-
-          if(userlist[i].password[0])
-            {
 #ifdef USE_CRYPT
-              if(strcmp((char*)crypt(password,userlist[i].password),
-                         userlist[i].password) == 0)
-	      {
-                strlcpy(connections[connect_id].registered_nick,
-                        userlist[i].usernick, MAX_NICK);
-
-		return 1;
-	      }
+      if(strcmp((char *)crypt(password, user->password),
+                user->password) == 0)
 #else
-              if(strcmp(userlist[i].password,password) == 0)
-	      {
-                strlcpy(connections[connect_id].registered_nick,
-                        userlist[i].usernick, MAX_NICK);
-
-		return 1;
-	      }
+      if(strcmp(user->password, password) == 0)
 #endif
-            }
-        }
+      {
+        strlcpy(connections[connect_id].registered_nick, user->usernick, 
+                sizeof(connections[connect_id].registered_nick));
+	return 1;
+      }
     }
-  return(0);
+  }
+
+  return 0;
 }
 
 /*

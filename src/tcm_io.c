@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.88 2002/06/21 13:45:22 leeh Exp $
+ * $Id: tcm_io.c,v 1.89 2002/06/21 23:14:04 leeh Exp $
  */
 
 #include <stdio.h>
@@ -784,7 +784,7 @@ show_stats_p(const char *nick)
   int i;
   int number_of_tcm_opers=0;
 
-  for (i=0; i<maxconns; ++i)
+  for (i = 0; i < maxconns; ++i)
     {
       /* ignore non clients */
       if (connections[i].state != S_CLIENT)
@@ -829,8 +829,8 @@ show_stats_p(const char *nick)
 void 
 list_connections(int sock)
 {
+  struct oper_entry *user;
   int i;
-  int user;
 
   for (i=0; i<maxconns; i++)
   {
@@ -839,19 +839,21 @@ list_connections(int sock)
       if(connections[i].registered_nick[0] != 0)
       {
 	user = find_user_in_userlist(connections[i].registered_nick);
-	print_to_socket(sock,
-	     "%s/%s %s (%s@%s) is connected - idle: %ld",
-	     connections[i].nick, connections[i].registered_nick,
-	     type_show(userlist[user].type), connections[i].user,
-	     connections[i].host,
-	     time((time_t *)NULL)-connections[i].last_message_time );
+
+	if(user != NULL)
+  	  print_to_socket(sock,
+	       "%s/%s %s (%s@%s) is connected - idle: %ld",
+	       connections[i].nick, connections[i].registered_nick,
+	       type_show(user->type), connections[i].user,
+	       connections[i].host,
+	       time((time_t *)NULL)-connections[i].last_message_time);
       }
       else
       {
 	print_to_socket(sock,
 	     "%s O (%s@%s) is connected - idle: %ld",
 	     connections[i].nick, connections[i].user, connections[i].host,
-	     time((time_t *)NULL)-connections[i].last_message_time  );
+	     time(NULL) - connections[i].last_message_time);
       }
     }
   }

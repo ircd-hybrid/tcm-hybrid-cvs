@@ -1,3 +1,18 @@
+bill        2002/04/04 18:19:26 EST	(20020404_2)
+
+  Modified files:
+    modules              commands.c 
+    src                  token.c userlist.c 
+  Log:
+  - fully integreated ENABLE_W_FLAG and NO_D_LINE_SUPPORT
+  
+  Revision  Changes    Path
+  1.40      +20 -0     tcm-hybrid/modules/commands.c
+  1.23      +1 -64     tcm-hybrid/src/token.c
+  1.46      +2 -0      tcm-hybrid/src/userlist.c
+
+
+
 bill        2002/04/04 17:53:47 EST	(20020404_1)
 
   Modified files:

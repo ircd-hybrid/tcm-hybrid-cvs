@@ -56,7 +56,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.13 2001/10/11 20:04:36 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.14 2001/10/11 20:45:22 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -1604,8 +1604,9 @@ void check_virtual_host_clones(char *ip_class_c)
   time_t now, lastreport, oldest;
   char notice1[MAX_BUFF];
   char notice0[MAX_BUFF];
+  char user[MAX_USER];
   struct tm *tmrec;
-  int ind;
+  int ind, different=NO, ident=YES;
 
   oldest = now = time(NULL);
   lastreport = 0;
@@ -1659,6 +1660,7 @@ void check_virtual_host_clones(char *ip_class_c)
 
   clonecount = 0;
 
+  memset(&user, 0, sizeof(user));
   for ( find = iptable[ind]; find; find = find->collision )
     {
       if (!strcmp(find->info->ip_class_c,ip_class_c) &&
@@ -1668,6 +1670,9 @@ void check_virtual_host_clones(char *ip_class_c)
 	  ++clonecount;
 	  tmrec = localtime(&find->info->connecttime);
 
+          if (user[0] == '\0') snprintf(user, sizeof(user), "%s", find->info->user);
+          if (strcasecmp(user, find->info->user)) different=YES;
+          if (find->info->user[0] == '~') ident = NO;
 	  if (clonecount == 1)
 	    {
 	      (void)snprintf(notice1,sizeof(notice1) - 1,
@@ -1693,7 +1698,7 @@ void check_virtual_host_clones(char *ip_class_c)
 			    tmrec->tm_sec);
 
 	      suggest_action(get_action_type("vclone"), find->info->nick, find->info->user,
-			     find->info->host, NO, NO);
+			     find->info->ip_host, different, ident);
 	    }
 
 	  find->info->reporttime = now;

@@ -20,9 +20,6 @@ setting a time in seconds, in the [time] field.
 
  - .kline [time] [nick|user@host] reason
     Generic K-line command.
- - .gline user@host reason
-   Force the TCM to vote for a G-line.  Note that the TCM must have G-line
-   privileges on it's server for this to work.
  - .kill nick reason
    Issue a KILL for a specific user.
  - .dline IP reason

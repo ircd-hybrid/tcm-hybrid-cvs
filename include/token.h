@@ -23,7 +23,7 @@
 #define K_OPERS   	20
 #define K_TCMLIST 	21
 #define K_TCMCONN 	22
-#define K_ALLOW   	23
+/*			23 */
 #define K_UMODE		24
 #define K_CONNECTIONS 	25
 #define K_DISCONNECT 	26

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.38 2002/06/23 13:24:31 wcampbel Exp $
+ * $Id: hash.c,v 1.39 2002/06/23 18:09:53 leeh Exp $
  */
 
 #include <stdio.h>
@@ -222,9 +222,11 @@ remove_from_hash_table(struct hash_rec *table[],
 {
   struct hash_rec *find;
   struct hash_rec *prev=NULL;
-  int ind;
+  int hash_val;
 
-  for (find = table[(ind = hash_func(key))]; find; find = find->next)
+  hash_val = hash_func(key);
+
+  for (find = table[hash_val]; find; find = find->next)
   {
     if((!host_match	|| !strcmp(find->info->host, host_match)) &&
        (!user_match	|| !strcmp(find->info->username, user_match)) &&
@@ -233,7 +235,7 @@ remove_from_hash_table(struct hash_rec *table[],
       if(prev != NULL)
 	prev->next = find->next;
       else
-	table[ind] = find->next;
+	table[hash_val] = find->next;
 
       if(find->info->link_count > 0)
 	{
@@ -323,6 +325,13 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
     }
 }
 
+static void foob(void);
+
+void
+foob(void)
+{
+  return;
+}
 
 /*
  * remove_user_host()
@@ -353,6 +362,7 @@ remove_user_host(char *nick, struct user_entry *user_info)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from host table!\n",
 		      nick, user_info->username, user_info->host);
+              foob();
 	    }
 	}
     }
@@ -848,7 +858,7 @@ void
 update_nick(char *user, char *host, char *old_nick, char *new_nick)
 {
   struct hash_rec *find;
-  unsigned int hash_val;
+  int hash_val;
 
   hash_val = hash_func(user);
   

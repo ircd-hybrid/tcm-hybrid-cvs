@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.55 2002/06/05 00:21:43 db Exp $
+ * $Id: parse.c,v 1.56 2002/06/05 01:01:01 db Exp $
  */
 
 #include <stdio.h>
@@ -490,7 +490,7 @@ process_privmsg(struct source_client *source_p, int argc, char *argv[])
 
   if(strncmp(argv[3], ".chat", 5) == 0)
   {
-     initiate_dcc_chat(source_p->name, source_p->username, source_p->host);
+    initiate_dcc_chat(source_p);
   }
 }
 

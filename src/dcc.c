@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.8 2002/06/05 00:21:42 db Exp $
+ * $Id: dcc.c,v 1.9 2002/06/05 01:01:01 db Exp $
  */
 
 #include <stdio.h>
@@ -63,7 +63,7 @@ static void close_dcc_connection(int connnum);
  */
 
 void
-initiate_dcc_chat(const char *nick, const char *user, const char *host)
+initiate_dcc_chat(struct source_client *source_p)
 {
   int    dcc_port;                         /* dcc port to use */
   struct sockaddr_in socketname;
@@ -73,18 +73,18 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
 
   if ((i = find_free_connection_slot()) < 0)
     {
-      notice(nick,"Max users on tcm, dcc chat rejected\n");
+      notice(source_p->name, "Max users on tcm, dcc chat rejected\n");
       return;
     }
 
-  notice(nick, "Chat requested");
-  strlcpy(connections[i].nick, nick, MAX_NICK);
-  strlcpy(connections[i].user, user, MAX_USER);
-  strlcpy(connections[i].host, host, MAX_HOST);
+  notice(source_p->name, "Chat requested");
+  strlcpy(connections[i].nick, source_p->name, MAX_NICK);
+  strlcpy(connections[i].user, source_p->username, MAX_USER);
+  strlcpy(connections[i].host, source_p->host, MAX_HOST);
 
   if ((connections[i].socket = socket(PF_INET,SOCK_STREAM,0)) < 0)
   {
-    notice(nick,"Error on open");
+    notice(source_p->name, "Error on open");
     return;
   }
 
@@ -106,7 +106,7 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
   if (result < 0)
   {
     close(connections[i].socket);
-    notice(nick,"Cannot DCC chat");
+    notice(source_p->name, "Cannot DCC chat");
     return;
   }
 
@@ -117,11 +117,11 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
   if (listen(connections[i].socket,4) < 0)
   {
     close(connections[i].socket);
-    notice(nick,"Cannot DCC chat");
+    notice(source_p->name, "Cannot DCC chat");
     return;
   }
 
-  privmsg (nick,"\001DCC CHAT chat %lu %d\001",
+  privmsg (source_p->name, "\001DCC CHAT chat %lu %d\001",
 	   local_ip(tcm_status.my_hostname),
 	   dcc_port);
 

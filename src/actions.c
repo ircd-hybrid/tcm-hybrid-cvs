@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.27 2002/06/07 10:58:06 leeh Exp $
+ * $Id: actions.c,v 1.28 2002/06/07 11:20:13 leeh Exp $
  */
 
 #include "setup.h"
@@ -44,7 +44,7 @@ int act_bot;
 int act_spambot;
 int act_clone;
 int act_rclone;
-struct a_entry actions[MAX_ACTIONS+1];
+struct a_entry actions[MAX_ACTIONS];
 
 static int add_action(char *name);
 static void update_action(int connnum, int argc, char *argv[]);
@@ -538,7 +538,7 @@ char *
 get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
 {
   struct user_entry *userptr;
-  static char newuserhost[MAX_USER+MAX_HOST+2]; /* one for @, one for \0 */
+  static char newuserhost[MAX_USERHOST];
   char *user;
   char *host;
   char *p;
@@ -569,7 +569,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
       case HOSTSTRIP_NOIDENT_PREFIXED:
         s = user;
 
-	if(strlen(user) > MAX_USER-1)
+	if(strlen(user) >= MAX_USER)
           s++;
 
         snprintf(p, MAX_USER, "*%s", s);
@@ -594,10 +594,10 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
       case HOSTSTRIP_IDENT_PREFIXED:
         s = user;
 
-	if(strlen(user) > MAX_USER-1)
+	if(strlen(user) >= MAX_USER)
           s++;
 
-	snprintf(p, MAX_USER+1, "*%s", s);
+	snprintf(p, MAX_USER, "*%s", s);
 	p += strlen(p);
 	break;
 
@@ -630,7 +630,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
 	      return NULL;
 	  }
 
-	snprintf(p, MAX_HOST+1, "*%s", s);
+	snprintf(p, MAX_HOST, "*%s", s);
       }
 
       /* IP */
@@ -642,7 +642,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
           return NULL;
 
 	*s = '\0';
-	snprintf(p, MAX_HOST+1, "%s.*", host);
+	snprintf(p, MAX_HOST, "%s.*", host);
       }
       break;
 

@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.48 2002/06/05 14:15:49 leeh Exp $ */
+/* $Id: bothunt.h,v 1.49 2002/06/07 11:20:09 leeh Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -90,7 +90,7 @@ void _config(int, int, char *argv[]);
 
 struct reconnect_clone_entry
 {
-  char host [MAX_HOST+1];
+  char host [MAX_HOST];
   int count;
   time_t first;
 };
@@ -101,7 +101,7 @@ struct reconnect_clone_entry reconnect_clone[RECONNECT_CLONE_TABLE_SIZE];
 
 struct link_look_entry
 {
-  char user_host[MAX_USER+MAX_HOST+2];
+  char user_host[MAX_USERHOST];
   int  link_look_count;
   time_t last_link_look;
 };
@@ -112,7 +112,7 @@ struct link_look_entry link_look[LINK_LOOK_TABLE_SIZE];
 
 struct connect_flood_entry
 {
-  char user_host[MAX_USER+MAX_HOST+2];
+  char user_host[MAX_USERHOST];
   char ip[MAX_IP];
   int  connect_count;
   time_t last_connect;

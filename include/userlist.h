@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.67 2002/06/07 10:46:03 leeh Exp $ */
+/* $Id: userlist.h,v 1.68 2002/06/07 11:20:10 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -14,13 +14,13 @@
 
 struct f_entry {
   int type;
-  char uhost[MAX_NICK+2+MAX_HOST];
+  char uhost[MAX_USERHOST];
   struct f_entry *next;
 };
 
 struct failrec
 {
-  char user[MAX_NICK+1];
+  char user[MAX_NICK];
   char host[MAX_HOST];
   int failcount;
   struct failrec *next;
@@ -62,7 +62,7 @@ struct config_list {
 
 struct auth_file_entry
 {
-  char user[MAX_NICK+1];
+  char user[MAX_NICK];
   char host[MAX_HOST];
   char usernick[MAX_NICK];
   char password[MAX_CONFIG];
@@ -72,7 +72,7 @@ struct auth_file_entry
 
 struct exception_entry
 {
-  char user[MAX_NICK+1];
+  char user[MAX_NICK];
   char host[MAX_HOST];
   unsigned int type;
 };

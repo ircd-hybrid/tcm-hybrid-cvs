@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.17 2002/06/05 15:10:25 leeh Exp $
+ * $Id: clones.c,v 1.18 2002/06/07 11:20:14 leeh Exp $
  */
 
 #include <assert.h>
@@ -282,7 +282,7 @@ report_clones(int sock)
                 }
               if (num_found > 2)
                 {
-                  for (k=num_found-1; k>1; --k)
+                  for (k = num_found-1; k > 1; --k)
                     {
                       for (j=0; j<num_found-k; ++j)
                         {

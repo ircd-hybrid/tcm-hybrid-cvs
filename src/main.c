@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.113 2002/06/07 10:46:06 leeh Exp $ */
+/* $Id: main.c,v 1.114 2002/06/07 11:20:14 leeh Exp $ */
 
 #include "setup.h"
 
@@ -261,9 +261,8 @@ main(int argc, char *argv[])
 
   if(config_entries.virtual_host_config[0] != '\0')
     {
-      strlcpy(tcm_status.my_hostname,
-	      config_entries.virtual_host_config,
-	      MAX_HOST-1);
+      strlcpy(tcm_status.my_hostname, config_entries.virtual_host_config,
+	      MAX_HOST);
     }
   else
     {

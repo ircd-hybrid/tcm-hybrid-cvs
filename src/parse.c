@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.70 2002/06/07 10:46:07 leeh Exp $
+ * $Id: parse.c,v 1.71 2002/06/07 11:20:14 leeh Exp $
  */
 
 #include <stdio.h>
@@ -157,7 +157,7 @@ parse_client(int i)
     {
       char buff[MAX_BUFF];
 
-      expand_args(buff, MAX_BUFF-1, argc, argv);
+      expand_args(buff, MAX_BUFF, argc, argv);
 
       send_to_partyline(i, "<%s> %s", connections[i].nick, buff);
     }

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.30 2002/06/06 01:57:58 wcampbel Exp $
+ * $Id: hash.c,v 1.31 2002/06/07 11:20:14 leeh Exp $
  */
 
 #include <stdio.h>
@@ -444,7 +444,7 @@ find_domain(char* host)
   int  found_dots=0;
   int  two_letter_tld=NO;
   int  is_legal_ip = YES;
-  static char iphold[MAX_IP+1];
+  static char iphold[MAX_IP];
   int i = 0;
  
   ip_domain = host;
@@ -617,14 +617,14 @@ check_host_clones(char *host)
 
       if(clonecount == 1)
       {
-	(void)snprintf(notice1, MAX_BUFF-1,
+	(void)snprintf(notice1, MAX_BUFF,
 		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
 		       find->info->nick, find->info->user, find->info->host,
 		       tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
       }
       else
       {
-	(void)snprintf(notice0, MAX_BUFF-1,
+	(void)snprintf(notice0, MAX_BUFF,
 		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
 		       find->info->nick, find->info->user, find->info->host,
 		       tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
@@ -758,7 +758,7 @@ check_virtual_host_clones(char *ip_class_c)
 	  tmrec = localtime(&find->info->connecttime);
 
           if(user[0] == '\0')
-	    snprintf(user, MAX_USER-1, "%s", find->info->user);
+	    snprintf(user, MAX_USER, "%s", find->info->user);
 
           if(strcasecmp(user, find->info->user))
 	    different=YES;
@@ -916,7 +916,7 @@ kill_add_report(char *server_notice)
  * side effects -
  */
 
-struct sort_array sort[MAXDOMAINS+1];
+struct sort_array sort[MAXDOMAINS];
 
 void 
 report_domains(int sock,int num)
@@ -1125,7 +1125,7 @@ kill_or_list_users(int sock, char *userhost, int regex,
   regex_t reg;
   regmatch_t m[1];
 #endif
-  char uhost[MAX_USERHOST+1];
+  char uhost[MAX_USERHOST];
   int i;
   int numfound = 0;
 

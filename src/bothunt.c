@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.154 2002/06/07 10:58:06 leeh Exp $
+ * $Id: bothunt.c,v 1.155 2002/06/07 11:20:13 leeh Exp $
  */
 
 #include <stdio.h>
@@ -198,7 +198,7 @@ on_stats_e(int argc, char *argv[])
   char *host;
   char body[MAX_BUFF];
 
-  expand_args(body, MAX_BUFF-1, argc, argv);
+  expand_args(body, MAX_BUFF, argc, argv);
 
 /* No point if I am maxed out going any further */
   if (host_list_index == (MAXHOSTS - 1))
@@ -973,7 +973,7 @@ connect_flood_notice(char *snotice)
 {
   char *nick_reported;
   char *user_host;
-  char user[MAX_USER+1];
+  char user[MAX_USER];
   char host[MAX_HOST];
   char *ip;
   char *p;
@@ -1007,8 +1007,8 @@ connect_flood_notice(char *snotice)
   while (*p != '@')
     ++p;
   *p='\0';
-  snprintf(user, MAX_USER - 1, "%s", user_host);
-  snprintf(host, MAX_HOST - 1, "%s", p+1);
+  snprintf(user, MAX_USER, "%s", user_host);
+  snprintf(host, MAX_HOST, "%s", p+1);
   *p='@';
 
   for(i=0; i<MAX_CONNECT_FAILS; ++i)
@@ -1072,7 +1072,7 @@ link_look_notice(char *snotice)
   char *nick_reported;
   char *user;
   char *host;
-  char user_host[MAX_HOST+MAX_NICK+2];
+  char user_host[MAX_USERHOST];
   char *seen_user_host;
   int first_empty_entry = -1;
   int found_entry = NO;

@@ -1,7 +1,7 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.12 2002/06/05 14:43:35 leeh Exp $ */
+/* $Id: actions.h,v 1.13 2002/06/07 11:20:09 leeh Exp $ */
 
 #define MAX_ACTIONS	16
 
@@ -33,7 +33,7 @@ char *get_method_names(int method);
 char *get_method_userhost(int, char *, char *, char *);
 
 int get_method_number(char * name);
-extern struct a_entry actions[MAX_ACTIONS+1];
+extern struct a_entry actions[MAX_ACTIONS];
 
 /* Defines for an actions hoststrip field */
 

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.86 2002/06/05 00:10:56 leeh Exp $
+ * $Id: tcm_io.c,v 1.87 2002/06/07 11:20:15 leeh Exp $
  */
 
 #include <stdio.h>
@@ -61,7 +61,7 @@ static void reconnect(void);
 fd_set readfds;		/* file descriptor set for use with select */
 fd_set writefds;	/* file descriptor set for use with select */
 
-struct connection connections[MAXDCCCONNS+1]; /*plus 1 for the server, silly*/
+struct connection connections[MAXDCCCONNS]; /*plus 1 for the server, silly*/
 int pingtime;
 static int server_id;
 static int maxconns;
@@ -366,7 +366,7 @@ find_free_connection_slot(void)
 {
   int i;
 
-  for (i = 0; i < MAXDCCCONNS+1; ++i)
+  for (i = 0; i < MAXDCCCONNS; ++i)
     {
       if (connections[i].state == S_IDLE)
 	{
@@ -376,7 +376,7 @@ find_free_connection_slot(void)
 	}
     }
 
-  if(i > MAXDCCCONNS)
+  if(i >= MAXDCCCONNS)
   {
     return(-1);
   }
@@ -433,8 +433,7 @@ notice(const char *nick, const char *format, ...)
 {
   char	command[MAX_BUFF];
   va_list va;
-  snprintf(command, MAX_BUFF-1, "NOTICE %s :%s", nick, format);
-  command[MAX_BUFF-1] = '\0';
+  snprintf(command, MAX_BUFF, "NOTICE %s :%s", nick, format);
   va_start(va,format);
   va_print_to_server(command, va);
   va_end(va);
@@ -456,8 +455,7 @@ privmsg(const char *target, const char *format, ...)
   char command[MAX_BUFF];
   va_list va;
 
-  snprintf(command, MAX_BUFF-1, "PRIVMSG %s :%s", target, format);
-  command[MAX_BUFF-1] = '\0';
+  snprintf(command, MAX_BUFF, "PRIVMSG %s :%s", target, format);
   va_start(va,format);
   va_print_to_server(command, va);
   va_end(va);

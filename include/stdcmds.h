@@ -1,7 +1,7 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.28 2002/06/02 22:16:54 db Exp $ */
+/* $Id: stdcmds.h,v 1.29 2002/06/07 11:20:09 leeh Exp $ */
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
@@ -19,7 +19,7 @@ void oper();
 
 struct s_testline
 {
-  char umask[MAX_USER+MAX_HOST+2]; /* umask for TESTLINE */
+  char umask[MAX_USERHOST]; /* umask for TESTLINE */
   int index;                       /* index in connections[]
 				    * of who did command
 				    */

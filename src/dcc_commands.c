@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.123 2002/06/07 10:58:06 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.124 2002/06/07 11:20:14 leeh Exp $ */
 
 #include "setup.h"
 
@@ -129,7 +129,7 @@ m_killlist(int connnum, int argc, char *argv[])
 
   if (argc >= 4)
   {
-    expand_args(reason, MAX_REASON-1, argc-3, argv+3);
+    expand_args(reason, MAX_REASON, argc-3, argv+3);
   }
 #else
   if (argc < 2)
@@ -141,7 +141,7 @@ m_killlist(int connnum, int argc, char *argv[])
 
   if (argc >= 3)
   {
-    expand_args(reason, sizeof(reason)-1, argc-2, argv+2);
+    expand_args(reason, sizeof(reason), argc-2, argv+2);
   }
 #endif
   else
@@ -186,7 +186,7 @@ m_kline(int connnum, int argc, char *argv[])
     {
       if (argc >= 4)
       {
-	expand_args(buff, MAX_BUFF-1, argc-3, argv+3);
+	expand_args(buff, MAX_BUFF, argc-3, argv+3);
       }
       else
         snprintf(buff, sizeof(buff), "No reason");
@@ -197,7 +197,7 @@ m_kline(int connnum, int argc, char *argv[])
     {
       if (argc >= 3)
       {
-	expand_args(buff, MAX_BUFF-1, argc-2, argv+2);
+	expand_args(buff, MAX_BUFF, argc-2, argv+2);
       }
       do_a_kline(0, argv[1], buff,
 		 connections[connnum].registered_nick);
@@ -217,10 +217,10 @@ m_kill(int connnum, int argc, char *argv[])
     return;
   }
   else if (argc == 2)
-    snprintf(reason, MAX_REASON-1, "No reason");
+    snprintf(reason, MAX_REASON, "No reason");
   else
   {
-    expand_args(reason, MAX_REASON-1, argc-2, argv+2);
+    expand_args(reason, MAX_REASON, argc-2, argv+2);
   }
 
   send_to_all(FLAGS_VIEW_KLINES, "*** kill %s :%s by %s",
@@ -556,7 +556,7 @@ m_quote(int connnum, int argc, char *argv[])
     return;
   }
 
-  expand_args(dccbuff, MAX_BUFF-1, argc-1, argv+1);
+  expand_args(dccbuff, MAX_BUFF, argc-1, argv+1);
   print_to_server("%s", dccbuff);
 }
 #endif
@@ -1147,7 +1147,7 @@ print_help(int sock,char *text)
         }
     }
 
-  while (fgets(line, MAX_BUFF-1, userfile))
+  while (fgets(line, MAX_BUFF, userfile))
     {
       print_to_socket(sock, "%s", line);
     }

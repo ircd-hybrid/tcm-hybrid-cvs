@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.37 2002/06/05 00:10:53 leeh Exp $
+ * $Id: tcm_io.h,v 1.38 2002/06/07 11:20:10 leeh Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -27,8 +27,8 @@ struct connection {
   int	set_modes;		/* for set options */
   char	user[MAX_USER];
   char	host[MAX_HOST];
-  char	nick[MAX_NICK+2];	/* allow + 2 for incoming tcm names */
-  char	registered_nick[MAX_NICK+2]; /* allow + 2  */
+  char	nick[MAX_NICK];
+  char	registered_nick[MAX_NICK];
   char	ip[MAX_IP];
   time_t last_message_time;
   int	time_out;		/* 0 for no time out */

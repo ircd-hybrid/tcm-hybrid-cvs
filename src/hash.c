@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.48 2002/08/08 18:10:39 bill Exp $
+ * $Id: hash.c,v 1.49 2002/08/08 19:42:07 bill Exp $
  */
 
 #include <stdio.h>
@@ -351,9 +351,6 @@ remove_user_host(struct user_entry *user_info)
 
   domain = find_domain(user_info->host);
 
-  send_to_all(NULL, FLAGS_ALL, "Removing %s (%s@%s) [%s] (domain:%s)", user_info->nick,
-              user_info->username, user_info->host, user_info->ip_host, domain);
-
   if(!remove_from_hash_table(host_table, user_info->host,
 			      user_info->host, user_info->username, 
 			      user_info->nick)) 
@@ -404,7 +401,6 @@ remove_user_host(struct user_entry *user_info)
     }
 
 #ifdef VIRTUAL
-  send_to_all(NULL, FLAGS_ALL, "Beginning removal from iptable...");
   if(user_info->ip_host[0])
     strlcpy(ip_class_c, user_info->ip_host, MAX_IP);
   else

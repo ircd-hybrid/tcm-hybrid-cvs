@@ -1,3 +1,9 @@
+*** 20011026_7 by wcampbel
+Massive code cleanup - no more warnings in modules/*.c
+Fixed some format string bugs and an if (... = ...)
+Added modules/.cvsignore
+
+
 *** 20011026_6 by db
 - corrected typos, it runs...
 

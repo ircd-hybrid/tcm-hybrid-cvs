@@ -1,3 +1,36 @@
+wcampbel    2002/06/23 09:24:35 EDT	(20020623_0)
+
+  Modified files:
+    etc                  tcm.cf 
+    include              config.h hash.h userlist.h 
+    src                  .depend actions.c bothunt.c clones.c 
+                         hash.c logging.c stdcmds.c vclones.c 
+                         wingate.c 
+  Log:
+  More ->user to ->username changes, this compiles with the default config.h
+    and with one with everything turned on, still please verify.
+  Fixed a buffer size (MAX_NICK used instead of MAX_USER)
+  Made DETECT_SQUID compile.  Someone will need to test it to see if it works
+    however.
+  Fixed a comment in tcm.cf
+  
+  Revision  Changes    Path
+  1.29      +1 -1      tcm-hybrid/etc/tcm.cf
+  1.75      +11 -0     tcm-hybrid/include/config.h
+  1.21      +1 -1      tcm-hybrid/include/hash.h
+  1.82      +1 -1      tcm-hybrid/include/userlist.h
+  1.29      +2 -2      tcm-hybrid/src/.depend
+  1.32      +16 -16    tcm-hybrid/src/actions.c
+  1.177     +4 -4      tcm-hybrid/src/bothunt.c
+  1.19      +10 -9     tcm-hybrid/src/clones.c
+  1.38      +33 -32    tcm-hybrid/src/hash.c
+  1.51      +2 -2      tcm-hybrid/src/logging.c
+  1.95      +1 -1      tcm-hybrid/src/stdcmds.c
+  1.12      +5 -5      tcm-hybrid/src/vclones.c
+  1.59      +7 -7      tcm-hybrid/src/wingate.c
+
+
+
 leeh        2002/06/22 14:21:51 EDT	(20020622_7)
 
   Modified files:

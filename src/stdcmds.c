@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.9 2001/10/04 23:14:35 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.10 2001/10/08 15:19:08 wcampbel Exp $";
 
 int doingtrace = NO;
 
@@ -524,7 +524,7 @@ void print_help(int sock,char *text)
   char line[MAX_BUFF];
   char help_file[MAX_BUFF];
 
-  if(!text)
+  if(!text || (*text == '\0'))
     {
       if( !(userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) )
         {
@@ -537,11 +537,20 @@ void print_help(int sock,char *text)
       while(*text == ' ')
         text++;
 
+      if (*text == '\0')
+        {
+          if( !(userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) )
+            {
+              prnt(sock,"Help is not currently available\n");
+              return;
+            }
+        }
+
       (void)snprintf(help_file,sizeof(help_file) - 1,"%s/%s.%s",
                      HELP_PATH,HELP_FILE,text);
       if( !(userfile = fopen(help_file,"r")) )
         {
-          prnt(sock,"Help for %s is not currently available\n",text);
+          prnt(sock,"Help for '%s' is not currently available\n",text);
           return;
         }
     }

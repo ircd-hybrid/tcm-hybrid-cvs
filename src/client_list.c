@@ -1,9 +1,10 @@
 /*
  * client_list.c: contains routines for managing lists of clients
  *
- * $Id: client_list.c,v 1.4 2003/04/09 05:02:54 bill Exp $
+ * $Id: client_list.c,v 1.5 2003/05/16 16:23:31 bill Exp $
  */
 
+#include <stdlib.h>
 #include "tcm.h"
 #include "config.h"
 #include "tcm_io.h"

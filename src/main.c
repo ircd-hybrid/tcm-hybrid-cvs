@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.23 2001/11/25 02:58:37 bill Exp $ */
+/* $Id: main.c,v 1.24 2002/03/05 07:10:55 bill Exp $ */
 
 #include "setup.h"
 
@@ -718,6 +718,8 @@ int main(int argc, char *argv[])
       gethostname(ourhostname,MAX_HOST-1);
     }
   *mynick = '\0';
+  pingtime = 0;
+  memset((void *)&myclass, sizeof(myclass), 0);
 
   amianoper = NO;
   startup_time = time(NULL);

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.42 2002/02/24 07:45:04 bill Exp $
+ * $Id: userlist.c,v 1.43 2002/03/05 07:10:55 bill Exp $
  *
  */
 
@@ -726,6 +726,7 @@ int isoper(char *user,char *host)
  * side effects	- NONE
  */
 
+#ifndef OPERS_ONLY
 int isbanned(char *user,char *host)
 {
   int i;
@@ -807,6 +808,7 @@ void ban_manipulate(int sock,char flag,char *userhost)
 	}
     }
 }
+#endif
 
 /* Checks for ok hosts to block auto-kline - Phisher */
 /*

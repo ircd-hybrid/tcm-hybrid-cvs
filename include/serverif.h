@@ -1,12 +1,16 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
-/* $Id: serverif.h,v 1.13 2001/11/10 15:55:46 wcampbel Exp $ */
+/* $Id: serverif.h,v 1.14 2002/03/05 07:10:49 bill Exp $ */
 
-/* Time out for no response from the server 
- * 5 minutes should be plenty to receive a PING from the server
+/*
+ * default ping timeout time from server
+ * note: this value is only used if tcm cannot
+ *       determine the ping-frequency value in
+ *       the Y: lines.
  */
 #define SERVER_TIME_OUT 300
+int pingtime;
 
 time_t cur_time;
 
@@ -30,6 +34,8 @@ struct connection {
 #ifndef OPERS_ONLY
 extern int isbanned(char *,char *);
 #endif
+
+char myclass[100];
 
 /*
  * services struct
@@ -85,8 +91,5 @@ void _modinit();
 #define SEND_KLINE_NOTICES_ONLY 10
 #define SEND_ADMIN_ONLY 11
 #define SEND_OPERWALL_ONLY 12
-
-/* wait five minutes after last PING before figuring server is stoned */
-#define PING_OUT_TIME 300
 
 #endif

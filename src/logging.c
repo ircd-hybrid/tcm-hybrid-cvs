@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.17 2001/11/10 15:55:47 wcampbel Exp $
+ * $Id: logging.c,v 1.18 2002/03/05 07:10:55 bill Exp $
  *
  * - db
  */
@@ -41,6 +41,7 @@
 #include "serverif.h"
 #include "bothunt.h"
 #include "logging.h"
+#include "stdcmds.h"
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file

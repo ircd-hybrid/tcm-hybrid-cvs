@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.34 2001/12/13 03:57:17 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.35 2002/03/05 07:10:52 bill Exp $ */
 
 #include "setup.h"
 
@@ -77,6 +77,106 @@ void _modinit();
 
 extern struct connection connections[];
 extern struct s_testline testlines;
+
+void m_uptime(int connnum, int argc, char *argv[])
+{
+  report_uptime(connections[connnum].socket);
+}
+
+void m_mem(int connnum, int argc, char *argv[])
+{
+  report_mem(connections[connnum].socket);
+}
+
+void m_clones(int connnum, int argc, char *argv[])
+{
+  report_clones(connections[connnum].socket);
+}
+
+void m_nflood(int connnum, int argc, char *argv[])
+{
+  report_nick_flooders(connections[connnum].socket);
+}
+
+void m_rehash(int connnum, int argc, char *argv[])
+{
+  sendtoalldcc(SEND_ALL_USERS, "Rehash requested by %s", 
+               connections[connnum].registered_nick[0] ?
+               connections[connnum].registered_nick :
+               connections[connnum].nick);
+
+  if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
+    toserv("STATS I\n");
+  else
+    toserv("STATS E\nSTATS F\n");
+
+  initopers();
+}
+
+void m_trace(int connnum, int argc, char *argv[])
+{
+  sendtoalldcc(SEND_OPERS_ONLY, "Trace requested by %s",
+               connections[connnum].registered_nick[0] ?
+               connections[connnum].registered_nick :
+               connections[connnum].nick);
+
+  inithash();
+  toserv("STATS Y\n");
+}
+
+void m_failures(int connnum, int argc, char *argv[])
+{
+  if (argc < 2)
+    report_failures(connections[connnum].socket, 7);
+  else if (atoi(argv[1]) < 1)
+    prnt(connections[connnum].socket, "Usage: .%s [min failures]\n", argv[0]);
+  else
+    report_failures(connections[connnum].socket, atoi(argv[1]));
+}
+
+void m_domains(int connnum, int argc, char *argv[])
+{
+  if (argc < 2)
+    report_domains(connections[connnum].socket, 5);
+  else if (atoi(argv[1]) < 1)
+    prnt(connections[connnum].socket, "Usage: .%s [min users]\n", argv[0]);
+  else
+    report_domains(connections[connnum].socket, atoi(argv[1]));
+}
+
+void m_bots(int connnum, int argc, char *argv[])
+{
+  if (argc >= 2)
+    report_multi(connections[connnum].socket, atoi(argv[1]));
+  else
+    report_multi(connections[connnum].socket, 3);
+}
+
+void m_vmulti(int connnum, int argc, char *argv[])
+{
+  if (argc >= 2)
+    report_multi_virtuals(connections[connnum].socket, atoi(argv[1]));
+  else
+    report_multi_virtuals(connections[connnum].socket, 3);
+}
+
+void m_nfind(int connnum, int argc, char *argv[])
+{
+  if (argc != 2)
+    prnt(connections[connnum].socket, "Usage: .%s <wildcarded nick>\n",
+         argv[0]);
+  else
+    list_nicks(connections[connnum].socket, argv[1]);
+} 
+
+void m_list(int connnum, int argc, char *argv[])
+{
+  if (argc < 2)
+    prnt(connections[connnum].socket, "Usage: .%s <wildcarded userhost>\n",
+         argv[0]);
+  else
+    list_users(connections[connnum].socket, argv[1]);
+}
 
 /*
 ** dccproc()
@@ -159,124 +259,11 @@ dccproc(int connnum, int argc, char *argv[])
   command = argv[0]+1;
   switch(get_token(command))
   {
-  case K_UPTIME:
-    report_uptime(connections[connnum].socket);
-    break;
-
-  case K_MEM:
-    report_mem(connections[connnum].socket);
-    break;
-
-  case K_CLONES:
-    if (connections[connnum].type & TYPE_OPER)
-    {
-      report_clones(connections[connnum].socket);
-    }
-    else
-    {
-      not_authorized(connections[connnum].socket);
-    }
-    break;
-
-  case K_NFLOOD:
-    if (connections[connnum].type & TYPE_OPER)
-    {
-      report_nick_flooders(connections[connnum].socket);
-    }
-    else
-      {
-	not_authorized(connections[connnum].socket);
-      }
-    break;
-
-  case K_REHASH:
-    sendtoalldcc(SEND_ALL_USERS,"Rehash requested by %s",who_did_command);
-
-    if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
-      toserv("STATS I\n");
-    else
-      toserv("STATS E\nSTATS F\n");
-    initopers();
-    break;
-
-  case K_TRACE:
-    sendtoalldcc(SEND_OPERS_ONLY,
-		 "trace requested by %s\n",
-		 who_did_command);
-    inithash();
-    break;
-
-  case K_FAILURES:
-    if (argc < 2)
-      report_failures(connections[connnum].socket,7);
-    else if (atoi(argv[1]) < 1)
-      prnt(connections[connnum].socket,"Usage: .failures [min failures]\n");
-    else
-      report_failures(connections[connnum].socket,atoi(argv[1]));
-    break;
-
-  case K_DOMAINS:
-    if (argc < 2)
-      report_domains(connections[connnum].socket,5);
-    else if (atoi(argv[1]) < 1)
-      prnt(connections[connnum].socket,"Usage: .domains [min users]\n");
-    else
-      report_domains(connections[connnum].socket,atoi(argv[1]));
-    break;
-
-  case K_BOTS:
-    if (connections[connnum].type & TYPE_OPER)
-    {
-      if (argc >= 2)
-	report_multi(connections[connnum].socket,atoi(argv[1]));
-      else
-	report_multi(connections[connnum].socket,3);
-    }
-    else
-      not_authorized(connections[connnum].socket);
-    break;
-
-  case K_VMULTI:
-    if (connections[connnum].type & TYPE_OPER)
-    {
-      if (argc >= 2)
-	report_multi_virtuals(connections[connnum].socket,atoi(argv[1]));
-      else
-	report_multi_virtuals(connections[connnum].socket,3);
-    }
-    else
-      not_authorized(connections[connnum].socket);
-    break;
-      
-  case K_NFIND:
-    if (connections[connnum].type & TYPE_OPER)
-    {
-      if (argc < 2)
-	prnt(connections[connnum].socket, "Usage: .nfind <wildcarded nick>\n");
-      else
-	list_nicks(connections[connnum].socket,argv[1]);
-    }
-    else
-      not_authorized(connections[connnum].socket);
-    break;
-
-  case K_LIST:
-    if (connections[connnum].type & TYPE_OPER)
-    {
-      if (argc < 2)
-	prnt(connections[connnum].socket, "Usage: .list <wildcarded userhost>\n");
-      else
-	list_users(connections[connnum].socket,argv[1]);
-    }
-    else
-      not_authorized(connections[connnum].socket);
-    break;
-
   case K_VLIST:
     if (connections[connnum].type & TYPE_OPER)
     {
       if (argc<2)
-	prnt(connections[connnum].socket, "Usage: .vlist <ip_block>\n");
+	prnt(connections[connnum].socket, "Usage: .vlist <ip block>\n");
       else
 	list_virtual_users(connections[connnum].socket,argv[1]);
     }
@@ -1806,6 +1793,61 @@ not_authorized(int sock)
 {
   prnt(sock,"Only authorized opers may use this command\n");
 }
+
+#ifdef IRCD_HYBRID
+/*
+ * ircd-hybrid-7 loadable module code goes here
+ */
+#else
+struct TcmMessage uptime_msgtab = {
+ ".uptime", 0, 0,
+ {m_uptime, m_uptime, m_uptime, m_uptime}
+};
+struct TcmMessage mem_msgtab = {
+ ".mem", 0, 0,
+ {m_unregistered, m_not_oper, m_not_admin, m_mem}
+};
+struct TcmMessage clones_msgtab = {
+ ".clones", 0, 0,
+ {m_unregistered, m_not_oper, m_clones, m_clones}
+};
+struct TcmMessage nflood_msgtab = {
+ ".nflood", 0, 0,
+ {m_unregistered, m_not_oper, m_nflood, m_nflood}
+};
+struct TcmMessage rehash_msgtab = {
+ ".rehash", 0, 0,
+ {m_unregistered, m_not_oper, m_not_admin, m_rehash}
+};
+struct TcmMessage trace_msgtab = {
+ ".trace", 0, 0,
+ {m_unregistered, m_not_oper, m_trace, m_trace}
+};
+struct TcmMessage failures_msgtab = {
+ ".failures", 0, 0,
+ {m_unregistered, m_not_oper, m_failures, m_failures}
+};
+struct TcmMessage domains_msgtab = {
+ ".domains", 0, 1,
+ {m_unregistered, m_not_oper, m_domains, m_domains}
+};
+struct TcmMessage bots_msgtab = {
+ ".bots", 0, 1,
+ {m_unregistered, m_not_oper, m_bots, m_bots}
+};
+struct TcmMessage vmulti_msgtab = {
+ ".vmulti", 0, 1,
+ {m_unregistered, m_not_oper, m_vmulti, m_vmulti}
+};
+struct TcmMessage nfind_msgtab = {
+ ".nfind", 0, 1,
+ {m_unregistered, m_not_oper, m_nfind, m_nfind}
+};
+struct TcmMessage list_msgtab = {
+ ".list", 0, 1,
+ {m_unregistered, m_not_oper, m_list, m_list}
+};
+#endif
 
 void 
 _modinit()

@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.17 2001/12/12 23:08:16 einride Exp $
+ * $Id: modules.c,v 1.18 2002/03/05 07:10:55 bill Exp $
  *
  */
 
@@ -20,6 +20,7 @@
 #include "commands.h"
 #include "modules.h"
 #include "serverif.h"
+#include "stdcmds.h"
 #include "wild.h"
 
 #define MODS_INCREMENT 25
@@ -39,7 +40,11 @@ extern struct connection connections[];
  * implementing the loadable module support for insertion
  * directly into ircd-hybrid-7 in the future.
  */
-#ifndef IRCD_MODULE
+#ifdef IRCD_HYBRID
+/*
+ * ircd-hybrid-7 loadable module code goes here.
+ */
+#else
 struct TcmMessage modload_msgtab = {
  ".modload", 0, 1,
  {m_unregistered, m_not_oper, m_not_admin, m_modload}
@@ -110,7 +115,6 @@ void mod_del_cmd(struct TcmMessage *msg)
 void add_common_function(int type, void *function)
 {
   struct common_function **temp, *new;
-  int null=0;
 
   switch (type)
     {

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.46 2001/12/13 14:21:09 einride Exp $ */
+/* $Id: bothunt.c,v 1.47 2002/03/05 07:10:51 bill Exp $ */
 
 #include "setup.h"
 
@@ -354,6 +354,10 @@ void _ontraceuser(int connnum, int argc, char *argv[])
   if (*ip_ptr == ')')
     *ip_ptr = '\0';
 
+  if (!strncmp(argv[5], mynick, strlen(mynick)))
+  {
+    snprintf(myclass, sizeof(myclass), "%s", argv[4]);
+  }
   class_ptr = argv[4];
   chopuh(YES,argv[5],&userinfo);
   snprintf(userinfo.ip, sizeof(userinfo.ip), "%s", argv[6]+1);
@@ -1276,8 +1280,11 @@ char makeconn(char *hostport,char *nick,char *userhost)
   connections[i].type = 0;
   connections[i].type |= isoper(user,host);
 
-  if (!(connections[i].type & TYPE_OPER) &&
-      isbanned(user,host)) /* allow opers on */
+  if (!(connections[i].type & TYPE_OPER)
+#ifndef OPERS_ONLY
+      && isbanned(user,host)
+#endif
+       ) /* allow opers on */
   {
     prnt(connections[i].socket,
 	 "Sorry, you are banned.\n");

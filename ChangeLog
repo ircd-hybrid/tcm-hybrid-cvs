@@ -1,3 +1,15 @@
+bill        2002/04/27 02:18:40 EDT	(20020427_0)
+
+  Modified files:
+    modules              bothunt.c 
+  Log:
+  - fixed a few off-by-ones reported by Tim Baur
+  
+  Revision  Changes    Path
+  1.59      +3 -3      tcm-hybrid/modules/bothunt.c
+
+
+
 bill        2002/04/26 15:16:51 EDT	(20020426_0)
 
   Modified files:

@@ -1,3 +1,15 @@
+db          2002/05/31 00:54:52 EDT	(20020531_3)
+
+  Modified files:
+    src                  vclones.c 
+  Log:
+  - consolidated report_vbots() and report_multi_user()
+  
+  Revision  Changes    Path
+  1.8       +67 -83    tcm-hybrid/src/vclones.c
+
+
+
 wcampbel    2002/05/30 22:06:36 EDT	(20020531_2)
 
   Modified files:

@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.81 2002/05/28 12:48:33 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.82 2002/05/29 06:26:14 db Exp $ */
 
 #include "setup.h"
 
@@ -209,7 +209,7 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
   if(config_entries.hybrid)
     {
       if(kline_time)
-        send_to_all(SEND_ALL,
+        send_to_all(FLAGS_ALL,
                      "%s %d %s :%s added by oper %s",
                      command_name,
                      kline_time,
@@ -217,7 +217,7 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
                      format_reason(reason),
                      who_did_command);
       else
-        send_to_all(SEND_ALL,
+        send_to_all(FLAGS_ALL,
                      "%s %s :%s added by oper %s",
                      command_name,
                      pattern,
@@ -226,7 +226,7 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
     }
   else
     {
-      send_to_all(SEND_ALL,
+      send_to_all(FLAGS_ALL,
                    "%s %s :%s added by oper %s",
                    command_name,
                    pattern,

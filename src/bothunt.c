@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.135 2002/05/29 00:59:25 leeh Exp $
+ * $Id: bothunt.c,v 1.136 2002/05/29 06:26:12 db Exp $
  */
 
 #include <stdio.h>
@@ -376,7 +376,7 @@ on_server_notice(int argc, char *argv[])
     if ((q = strrchr(p, ' ')) == NULL)
       return;
     ++q;
-    send_to_all(SEND_WARN, "*** %s has just become an irc operator %s", 
+    send_to_all(FLAGS_WARN, "*** %s has just become an irc operator %s", 
 	        message+14, q);
     return;
   }
@@ -421,7 +421,7 @@ on_server_notice(int argc, char *argv[])
     if ((p = strrchr(q, ']')) == NULL)
       return;
     *p = '\0'; 
-    send_to_all(SEND_KLINE_NOTICES,
+    send_to_all(FLAGS_VIEW_KLINES,
                  "GLINE for %s@%s by %s [%s]: %s", user, host, nick, target, q);
     return;
   }
@@ -434,7 +434,7 @@ on_server_notice(int argc, char *argv[])
     if ((p = strchr(message+14, ' ')) != NULL)
       *p = '\0';
     p = host + strlen(host) + 1;
-    send_to_all(SEND_KLINE_NOTICES,
+    send_to_all(FLAGS_VIEW_KLINES,
 		 "G-line for %s@%s triggered by %s: %s", user, host,
                  message+14, p);
     return;
@@ -447,10 +447,10 @@ on_server_notice(int argc, char *argv[])
       return;
     *q++ = '\0';
     if (strstr(q, " DNS"))
-      send_to_all(SEND_SPY, "*** %s is rehashing DNS", nick);
+      send_to_all(FLAGS_SPY, "*** %s is rehashing DNS", nick);
     else
     {
-      send_to_all(SEND_SPY, "*** %s is rehashing config file", nick);
+      send_to_all(FLAGS_SPY, "*** %s is rehashing config file", nick);
       print_to_server("STATS Y");
     }
     return;
@@ -461,7 +461,7 @@ on_server_notice(int argc, char *argv[])
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
-    send_to_all(SEND_KLINE_NOTICES, "*** %s is clearing temp klines", nick);
+    send_to_all(FLAGS_VIEW_KLINES, "*** %s is clearing temp klines", nick);
     return;
   }
   else if (strstr(p, "clearing G-lines"))
@@ -470,7 +470,7 @@ on_server_notice(int argc, char *argv[])
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
-    send_to_all(SEND_KLINE_NOTICES, "*** %s is clearing g-lines", nick);
+    send_to_all(FLAGS_VIEW_KLINES, "*** %s is clearing g-lines", nick);
     return;
   }
   else if (strstr(p, "garbage collecting"))
@@ -479,7 +479,7 @@ on_server_notice(int argc, char *argv[])
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
-    send_to_all(SEND_SPY, "*** %s is garbage collecting", nick);
+    send_to_all(FLAGS_SPY, "*** %s is garbage collecting", nick);
     return;
   }
   else if (strstr(p, "forcing re-reading of"))
@@ -491,7 +491,7 @@ on_server_notice(int argc, char *argv[])
     if ((p = strstr(q, "re-reading of")) == NULL)
       return;
     p+=14;
-    send_to_all(SEND_SPY, "*** %is is rehashing %s", nick, p);
+    send_to_all(FLAGS_SPY, "*** %is is rehashing %s", nick, p);
     return;
   }
 
@@ -594,7 +594,7 @@ on_server_notice(int argc, char *argv[])
   /* Link with test.server[bill@255.255.255.255] established: (TS) link */ 
   case LINKWITH:
     ++q;
-    send_to_all(SEND_SERVERS, "Link with %s", q);
+    send_to_all(FLAGS_SERVERS, "Link with %s", q);
     break;
 
   /* Received SQUIT test.server from bill[bill@ummm.E] (this is a test) */
@@ -604,13 +604,13 @@ on_server_notice(int argc, char *argv[])
       return;
     *p = '\0';
     p+=6;
-    send_to_all(SEND_SERVERS, "SQUIT for %s from %s", q, p);
+    send_to_all(FLAGS_SERVERS, "SQUIT for %s from %s", q, p);
     break;
 
   /* motd requested by bill (bill@ummm.E) [irc.bill.eagan.mn.us] */
   case MOTDREQ:
     ++q;
-    send_to_all(SEND_SPY, "[MOTD requested by %s]\n", q);
+    send_to_all(FLAGS_SPY, "[MOTD requested by %s]\n", q);
     break;
 
   case  IGNORE:
@@ -668,7 +668,7 @@ on_server_notice(int argc, char *argv[])
     target = p + 8;
     if (strcasecmp(config_entries.rserver_name,from_server) == 0)
     {
-      send_to_all(SEND_WARN,
+      send_to_all(FLAGS_WARN,
 		   "*** Flooder %s (%s@%s) target: %s",
 		   nick, user, host, target);
       handle_action(act_flood, (*user != '~'), nick, user, host, 0, 0);
@@ -710,7 +710,7 @@ on_server_notice(int argc, char *argv[])
   /* *** You have been D-lined */
   /* *** Banned: this is a test (2002/04/11 15.10) */
   case BANNED:
-    send_to_all(SEND_ALL, "I am banned from %s.  Exiting..", 
+    send_to_all(FLAGS_ALL, "I am banned from %s.  Exiting..", 
 		 config_entries.rserver_name[0] ?
 		 config_entries.rserver_name : config_entries.server_name);
     tcm_log(L_ERR, "onservnotice Banned from server.  Exiting.");
@@ -743,7 +743,7 @@ on_server_notice(int argc, char *argv[])
       break;
     p+=9; 
 
-    send_to_all(SEND_WARN, "Possible drone flooder: %s!%s@%s target: %s",
+    send_to_all(FLAGS_WARN, "Possible drone flooder: %s!%s@%s target: %s",
                  nick, user, host, p);
     break;
 
@@ -931,7 +931,7 @@ on_server_notice(int argc, char *argv[])
         return;
       *q = '\0';
       user = q+12;
-      send_to_all(SEND_SERVERS, "Server %s split from %s", nick, user);
+      send_to_all(FLAGS_SERVERS, "Server %s split from %s", nick, user);
     }
     else if (strstr(q, "being introduced"))
     {
@@ -940,8 +940,7 @@ on_server_notice(int argc, char *argv[])
         return;
       *q = '\0';
       user = q+21;
-      send_to_all( SEND_SERVERS, "Server %s being introduced by %s", nick,
-                   user);
+      send_to_all(FLAGS_SERVERS, "Server %s being introduced by %s", nick, user);
     }
     break;
 
@@ -951,7 +950,7 @@ on_server_notice(int argc, char *argv[])
       return;
     *q = '\0';
     user = q+1;
-    send_to_all(SEND_WARN, "*** Failed oper attempt by %s %s", nick, user);
+    send_to_all(FLAGS_WARN, "*** Failed oper attempt by %s %s", nick, user);
     break;
 
   /* info requested by bill (bill@ummm.e) [irc.bill.eagan.mn.us] */
@@ -964,7 +963,7 @@ on_server_notice(int argc, char *argv[])
     if ((q = strchr(user, ')')) == NULL)
       return;
     *q = '\0';
-    send_to_all(SEND_SPY, "[INFO requested by %s (%s)]", nick, user);
+    send_to_all(FLAGS_SPY, "[INFO requested by %s (%s)]", nick, user);
     break;
 
   /* No aconf found */
@@ -981,7 +980,7 @@ on_server_notice(int argc, char *argv[])
       p += 14;
     else
       p = message;
-    send_to_all(SEND_NOTICES, "Notice: %s", p);
+    send_to_all(FLAGS_NOTICE, "Notice: %s", p);
     break;
   }
 }
@@ -1121,7 +1120,7 @@ link_look_notice(char *snotice)
   if (get_user_host(&user, &host, seen_user_host) == 0)
     return;
 
-  send_to_all(SEND_SPY, "[LINKS by %s (%s@%s)]",
+  send_to_all(FLAGS_SPY, "[LINKS by %s (%s@%s)]",
 	       nick_reported, user, host ); /* - zaph */
 
   snprintf(user_host, MAX_USER + MAX_HOST, "%s@%s", user, host);
@@ -1220,7 +1219,7 @@ void cs_nick_flood(char *snotice)
   if (get_user_host(&user, &host, user_host) == 0)
     return;
 
-  send_to_all(SEND_WARN, "CS nick flood user_host = [%s@%s]", user, host);
+  send_to_all(FLAGS_WARN, "CS nick flood user_host = [%s@%s]", user, host);
   tcm_log(L_NORM, "CS nick flood user_host = [%s@%s]\n", user, host);
   handle_action(act_flood, (*user != '~'), nick_reported, user, host, 0, 0);
 }
@@ -1253,7 +1252,7 @@ cs_clones(char *snotice)
   if (get_user_host(&user, &host, user_host) == 0)
     return;
 
-  send_to_all(SEND_WARN, "CS clones user_host = [%s]", user_host);
+  send_to_all(FLAGS_WARN, "CS clones user_host = [%s]", user_host);
   tcm_log(L_NORM, "CS clones = [%s]\n", user_host);
 
   if (*user == '~')
@@ -1466,7 +1465,7 @@ add_to_nick_change_table(char *user_host,char *last_nick)
 	  {
 	    tmrec = localtime(&nick_changes[i].last_nick_change);
 
-	    send_to_all(SEND_WARN,
+	    send_to_all(FLAGS_WARN,
 		 "nick flood %s (%s) %d in %d seconds (%2.2d:%2.2d:%2.2d)",
 			 nick_changes[i].user_host,
 			 nick_changes[i].last_nick,
@@ -1564,44 +1563,9 @@ stats_notice(char *snotice)
 
 #ifdef STATS_P
   if (stat == 'p')
-  {
-    for (i=1;i<maxconns;++i)
-    {
-      /* ignore bad sockets */
-      if (connections[i].socket == INVALID)
-	continue;
-
-      /* ignore invisible users/opers */
-      if(has_umode(i, TYPE_INVS))
-	continue;
-
-      /* display opers */
-      if(has_umode(i, TYPE_OPER))
-      {
-#ifdef HIDE_OPER_HOST
-	notice(nick,
-	       "%s - idle %lu\n",
-	       connections[i].nick,
-	       time(NULL) - connections[i].last_message_time );
-#else 
-	notice(nick,
-	       "%s (%s@%s) idle %lu\n",
-	       connections[i].nick,
-	       connections[i].user,
-	       connections[i].host,
-	       time(NULL) - connections[i].last_message_time );
+    show_stats_p((const char *)nick);
 #endif
-	number_of_tcm_opers++;
-      }
-    }
-    notice(nick,"Number of tcm opers %d\n", number_of_tcm_opers);
-
-    if (config_entries.statspmsg[0])
-      notice(nick, config_entries.statspmsg);
-  }
-#endif
-
-  send_to_all(SEND_SPY, "[STATS %c requested by %s (%s)]",
+  send_to_all(FLAGS_SPY, "[STATS %c requested by %s (%s)]",
 	       stat, nick, fulluh);
 }
 

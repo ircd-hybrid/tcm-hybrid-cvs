@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.1 2002/05/29 00:59:25 leeh Exp $
+ * $Id: clones.c,v 1.2 2002/05/29 06:26:13 db Exp $
  */
 
 #include <assert.h>
@@ -162,7 +162,7 @@ check_clones(void *unused)
             (strlen(userptr->info->domain) ==
              strlen(userptr->info->host));
 
-          send_to_all(SEND_WARN,
+          send_to_all(FLAGS_WARN,
                        "clones> %2d connections -- %s@%s%s {%s}",
                        numfound,userptr->info->user,
                        notip ? "*" : userptr->info->domain,

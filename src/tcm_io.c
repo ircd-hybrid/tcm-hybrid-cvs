@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.71 2002/05/29 00:59:26 leeh Exp $
+ * $Id: tcm_io.c,v 1.72 2002/05/29 06:26:14 db Exp $
  */
 
 #include <stdio.h>
@@ -69,7 +69,7 @@ static fd_set writefds;		/* file descriptor set for use with select */
 struct connection connections[MAXDCCCONNS+1]; /*plus 1 for the server, silly*/
 int pingtime;
 static int server_id;
-int maxconns;
+static int maxconns;
 
 /*
  * read_packet()
@@ -111,7 +111,7 @@ read_packet(void)
                                 + connections[i].time_out))
 	      {
                 tcm_log(L_ERR, "read_packet() ping time out");
-		send_to_all(SEND_ALL, "PING time out on server");
+		send_to_all(FLAGS_ALL, "PING time out on server");
 
 		if(connections[i].io_close_function != NULL)
                   (connections[i].io_close_function)(i);
@@ -586,7 +586,7 @@ va_print_to_socket(int sock, const char *format, va_list va)
  */
 
 void
-send_to_all(int type, const char *format,...)
+send_to_all(int send_umode, const char *format,...)
 {
   va_list va;
   int i;
@@ -596,63 +596,8 @@ send_to_all(int type, const char *format,...)
     {
       if (connections[i].state == S_CLIENT)
 	{
-	  switch(type)
-	    {
-	    case SEND_KLINE_NOTICES:
-	      if(has_umode(i, TYPE_VIEW_KLINES))
-		va_print_to_socket(connections[i].socket, format, va);
-	      break;
-
-	    case SEND_SPY:
-	      if(has_umode(i, TYPE_SPY))
-                va_print_to_socket(connections[i].socket, format, va);
-
-	      break;
-
-	    case SEND_WARN:
-	      if(has_umode(i, TYPE_WARN))
-		va_print_to_socket(connections[i].socket, format, va);
-	      break;
-	      
-            case SEND_WALLOPS:
-#ifdef ENABLE_W_FLAG
-              if(has_umode(i, TYPE_WALLOPS))
-                va_print_to_socket(connections[i].socket, format, va);
-#endif
-              break;
-
-	    case SEND_LOCOPS:
-	      if(has_umode(i, TYPE_LOCOPS))
-		va_print_to_socket(connections[i].socket, format, va);
-	      break;
-	      
-	    case SEND_PRIVMSG:
-	      if(has_umode(i, TYPE_PRIVMSG))
-		va_print_to_socket(connections[i].socket, format, va);
-	      break;
-
-	    case SEND_NOTICES:
-	      if(has_umode(i, TYPE_NOTICE))
-		va_print_to_socket(connections[i].socket, format, va);
-	      break;
-
-            case SEND_SERVERS:
-              if(has_umode(i, TYPE_SERVERS))
-                va_print_to_socket(connections[i].socket, format, va);
-              break;
-
-	    case SEND_ADMINS:
-	      if(has_umode(i, TYPE_ADMIN))
-                va_print_to_socket(connections[i].socket, format, va);
-	      break;
-
-	    case SEND_ALL:
-	      va_print_to_socket(connections[i].socket, format, va);
-	      break;
-
-	    default:
-	      break;
-	    }
+	  if (get_umode(i) & send_umode)
+	    va_print_to_socket(connections[i].socket, format, va);
 	}
     }
     va_end(va);
@@ -679,7 +624,7 @@ send_to_partyline(int conn_num, const char *format,...)
     {
       if (connections[i].state == S_CLIENT)
 	{
-	  if (conn_num != i && has_umode(i, TYPE_PARTYLINE))
+	  if (conn_num != i && has_umode(i, FLAGS_PARTYLINE))
 	    va_print_to_socket(connections[i].socket, format, va);
 	}
     }
@@ -797,7 +742,7 @@ finish_accept_dcc_chat(int i)
 static void
 finish_dcc_chat(int i)
 {
-  report(SEND_ALL,
+  report(FLAGS_ALL,
          CHANNEL_REPORT_ROUTINE,
          "Oper %s (%s@%s) has connected\n",
          connections[i].nick,
@@ -827,7 +772,7 @@ finish_dcc_chat(int i)
 static void
 close_dcc_connection(int connnum)
 {
-  report(SEND_ALL,
+  report(FLAGS_ALL,
          CHANNEL_REPORT_ROUTINE,
          "Oper %s (%s@%s) has disconnected",
          connections[connnum].nick,
@@ -1040,7 +985,7 @@ connect_to_given_ip_port(struct sockaddr_in *socketname, int port)
   /* open an inet socket */
   if ((sock = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
-      send_to_all(SEND_ALL,
+      send_to_all(FLAGS_ALL,
 		   "Can't assign fd for socket\n");
       return(INVALID);
     }
@@ -1143,4 +1088,97 @@ find_user_in_connections(const char *username)
   }
 
   return -1;
+}
+
+/*
+ * show_stats_p
+ *
+ * inputs	- nick to send stats p towards
+ * output	- NONE
+ * side effects	- NONE
+ */
+
+void
+show_stats_p(const char *nick)
+{
+  int i;
+  int number_of_tcm_opers=0;
+
+  for (i=0;i<maxconns;++i)
+    {
+      /* ignore bad sockets */
+      if (connections[i].socket == INVALID)
+	continue;
+
+      /* ignore invisible users/opers */
+      if(has_umode(i, FLAGS_INVS))
+	continue;
+      
+      /* display opers */
+      if(has_umode(i, FLAGS_OPER))
+	{
+#ifdef HIDE_OPER_HOST
+	  notice(nick,
+		 "%s - idle %lu\n",
+		 connections[i].nick,
+		 time(NULL) - connections[i].last_message_time );
+#else 
+	  notice(nick,
+		 "%s (%s@%s) idle %lu\n",
+		 connections[i].nick,
+		 connections[i].user,
+		 connections[i].host,
+		 time(NULL) - connections[i].last_message_time );
+#endif
+	  number_of_tcm_opers++;
+	}
+    }
+  notice(nick,"Number of tcm opers %d\n", number_of_tcm_opers);
+
+  if (config_entries.statspmsg[0])
+    notice(nick, config_entries.statspmsg);
+}
+
+
+/*
+ * list_connections
+ *
+ * inputs	- socket
+ * output	- NONE
+ * side effects	- active connections are listed to socket
+ */
+
+void 
+list_connections(int sock)
+{
+  int i;
+  int user;
+
+  for (i=0; i<maxconns; i++)
+  {
+    if (connections[i].state == S_CLIENT)
+    {
+      if(connections[i].registered_nick[0] != 0)
+      {
+	user = find_user_in_userlist(connections[i].registered_nick);
+	print_to_socket(sock,
+	     "%s/%s %s (%s@%s) is connected - idle: %ld",
+	     connections[i].nick,
+	     connections[i].registered_nick,
+	     type_show(userlist[user].type),
+	     connections[i].user,
+	     connections[i].host,
+	     time((time_t *)NULL)-connections[i].last_message_time );
+      }
+      else
+      {
+	print_to_socket(sock,
+	     "%s O (%s@%s) is connected - idle: %ld",
+	     connections[i].nick,
+	     connections[i].user,
+	     connections[i].host,
+	     time((time_t *)NULL)-connections[i].last_message_time  );
+      }
+    }
+  }
 }

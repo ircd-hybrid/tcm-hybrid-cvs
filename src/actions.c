@@ -26,7 +26,7 @@
 
 /* actions.c
  *
- * $Id: actions.c,v 1.6 2002/05/28 16:41:55 db Exp $
+ * $Id: actions.c,v 1.7 2002/05/29 06:26:12 db Exp $
  */
 
 int act_sclone;
@@ -321,14 +321,14 @@ handle_action(int actionid, int idented, char *nick, char *user,
     {
 
       if (addcmt && addcmt[0])
-	send_to_all(SEND_WARN,
+	send_to_all(FLAGS_WARN,
 		     "*** %s violation (%s) from %s (%s@%s): %s", 
 		     actions[actionid].name, addcmt,
 		     (nick && nick[0]) ? nick : "<unknown>", 
 		     (user && user[0]) ? user : "<unknown>",
 		     host, comment);
       else
-	send_to_all(SEND_WARN,
+	send_to_all(FLAGS_WARN,
 		     "*** %s violation from %s (%s@%s): %s", 
 		     actions[actionid].name, 
 		     (nick && nick[0]) ? nick : "<unknown>", 

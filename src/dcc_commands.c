@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.111 2002/05/29 01:47:32 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.112 2002/05/29 06:26:13 db Exp $ */
 
 #include "setup.h"
 
@@ -52,7 +52,6 @@
 static void set_actions(int sock, char *key, char *act, int duration, char *reason);
 static void register_oper(int connnum, char *password, char *who_did_command);
 static void list_opers(int sock);
-static void list_connections(int sock);
 static void list_exemptions(int sock);
 static void handle_save(int sock,char *nick);
 static int  is_legal_pass(int connect_id,char *password);
@@ -111,7 +110,7 @@ m_killlist(int connnum, int argc, char *argv[])
   else
     snprintf(reason, sizeof(reason), "No reason");
 
-  if(has_umode(connnum, TYPE_INVS) == 0)
+  if(has_umode(connnum, FLAGS_INVS) == 0)
   {
     strncat(reason, " (requested by ", MAX_REASON - strlen(reason));
     strncat(reason, connections[connnum].registered_nick,
@@ -122,14 +121,14 @@ m_killlist(int connnum, int argc, char *argv[])
 #ifdef HAVE_REGEX_H
   if (strcasecmp(argv[1], "-r") == 0)
   {
-    send_to_all(SEND_ALL, "*** killlist %s :%s by %s", argv[2],
+    send_to_all(FLAGS_ALL, "*** killlist %s :%s by %s", argv[2],
                 reason, connections[connnum].registered_nick);
     kill_list_users(connections[connnum].socket, argv[2], reason, YES);
   }
   else
 #endif
   {
-    send_to_all(SEND_ALL, "*** killlist %s :%s by %s", argv[1],
+    send_to_all(FLAGS_ALL, "*** killlist %s :%s by %s", argv[1],
                 reason, connections[connnum].registered_nick);
     kill_list_users(connections[connnum].socket, argv[1], reason, NO);
   }
@@ -198,11 +197,11 @@ m_kill(int connnum, int argc, char *argv[])
     expand_args(reason, MAX_REASON-1, argc-2, argv+2);
   }
 
-  send_to_all(SEND_KLINE_NOTICES, "*** kill %s :%s by %s",
+  send_to_all(FLAGS_VIEW_KLINES, "*** kill %s :%s by %s",
               argv[1], reason, connections[connnum].registered_nick);
   log_kline("KILL", argv[1], 0, connections[connnum].registered_nick, reason);
 
-  if(has_umode(connnum, TYPE_INVS) == 0)
+  if(has_umode(connnum, FLAGS_INVS) == 0)
   {
     strncat(reason, " (requested by ", MAX_REASON - 1 - strlen(reason));
     strncat(reason, connections[connnum].registered_nick,
@@ -276,7 +275,7 @@ m_kaction(int connnum, int argc, char *argv[])
 void
 m_register(int connnum, int argc, char *argv[])
 {
-  if(has_umode(connnum, TYPE_OPER))
+  if(has_umode(connnum, FLAGS_OPER))
   {
     print_to_socket(connections[connnum].socket, 
 		    "You are already registered.");
@@ -469,7 +468,7 @@ void
 m_cycle(int connnum, int argc, char *argv[])
 {
   leave(config_entries.defchannel);
-  send_to_all( SEND_ALL, "I'm cycling.  Be right back.");
+  send_to_all( FLAGS_ALL, "I'm cycling.  Be right back.");
   sleep(1);
 
   /* probably on a cycle, we'd want the tcm to set
@@ -481,7 +480,7 @@ m_cycle(int connnum, int argc, char *argv[])
 void
 m_die(int connnum, int argc, char *argv[])
 {
-  send_to_all( SEND_ALL, "I've been ordered to quit irc, goodbye.");
+  send_to_all( FLAGS_ALL, "I've been ordered to quit irc, goodbye.");
   print_to_server("QUIT :Dead by request!");
   tcm_log(L_ERR,
 	  "DIEd by oper %s\n", connections[connnum].registered_nick);
@@ -491,7 +490,7 @@ m_die(int connnum, int argc, char *argv[])
 void
 m_restart(int connnum, int argc, char *argv[])
 {
-  send_to_all( SEND_ALL, "I've been ordered to restart.");
+  send_to_all( FLAGS_ALL, "I've been ordered to restart.");
   print_to_server("QUIT :Restart by request!");
   tcm_log(L_ERR,
 	  "RESTART by oper %s", connections[connnum].registered_nick);
@@ -547,7 +546,7 @@ m_unkline(int connnum, int argc, char *argv[])
   {
     tcm_log(L_NORM, "UNKLINE %s attempted by oper %s", argv[1],
         connections[connnum].registered_nick);
-    send_to_all( SEND_KLINE_NOTICES, "UNKLINE %s attempted by oper %s", 
+    send_to_all( FLAGS_VIEW_KLINES, "UNKLINE %s attempted by oper %s", 
                  argv[1], connections[connnum].registered_nick);
     print_to_server("UNKLINE %s",argv[1]);
   }
@@ -560,7 +559,7 @@ m_dline(int connnum, int argc, char *argv[])
   char *p, reason[MAX_BUFF];
   int i, len;
 
-  if(has_umode(connnum, TYPE_DLINE) == 0)
+  if(has_umode(connnum, FLAGS_DLINE) == 0)
   {
     print_to_socket(connections[connnum].socket,
 		    "You do not have access to .dline");
@@ -582,10 +581,10 @@ m_dline(int connnum, int argc, char *argv[])
     else
       log_kline("DLINE", argv[1], 0, connections[connnum].registered_nick,
                 reason);
-    send_to_all( SEND_ALL, "*** dline %s :%s by %s", argv[1],
+    send_to_all( FLAGS_ALL, "*** dline %s :%s by %s", argv[1],
                  reason, connections[connnum].registered_nick);
 
-    if(has_umode(connnum, TYPE_INVS) == 0)
+    if(has_umode(connnum, FLAGS_INVS) == 0)
     {
       strncat(reason, " (requested by ", sizeof(reason)-strlen(reason));
       strncat(reason, connections[connnum].nick,
@@ -630,7 +629,7 @@ void m_nflood(int connnum, int argc, char *argv[])
 void
 m_rehash(int connnum, int argc, char *argv[])
 {
-  send_to_all( SEND_ALL,
+  send_to_all( FLAGS_ALL,
 	       "*** rehash requested by %s", 
                connections[connnum].registered_nick[0] ?
                connections[connnum].registered_nick :
@@ -655,7 +654,7 @@ m_rehash(int connnum, int argc, char *argv[])
 void
 m_trace(int connnum, int argc, char *argv[])
 {
-  send_to_all( SEND_ALL,
+  send_to_all( FLAGS_ALL,
 	       "Trace requested by %s",
                connections[connnum].registered_nick[0] ?
                connections[connnum].registered_nick :
@@ -911,26 +910,26 @@ register_oper(int connnum, char *password, char *who_did_command)
 		      "Your current flags are now: %s",
 		      type_show(userlist[user].type));
 
-      if(has_umode(connnum, TYPE_SUSPENDED))
+      if(has_umode(connnum, FLAGS_SUSPENDED))
       {
 	print_to_socket(connections[connnum].socket,
  	                "You are suspended");
-	send_to_all(SEND_ALL, "%s is suspended", who_did_command);
+	send_to_all(FLAGS_ALL, "%s is suspended", who_did_command);
       }
       else
       {
 	print_to_socket(connections[connnum].socket,
 	                "You are now registered");
-	send_to_all(SEND_ALL, "%s has registered", who_did_command);
+	send_to_all(FLAGS_ALL, "%s has registered", who_did_command);
 
 	/* mark them as registered */
-	userlist[user].type |= TYPE_OPER;
+	userlist[user].type |= FLAGS_OPER;
       }
     }
     else
     {
       print_to_socket(connections[connnum].socket,"illegal password");
-      send_to_all(SEND_ALL, "illegal password from %s", who_did_command);
+      send_to_all(FLAGS_ALL, "illegal password from %s", who_did_command);
     }
   }
   else
@@ -992,49 +991,6 @@ list_exemptions(int sock)
   }
 }
 
-/*
- * list_connections
- *
- * inputs	- socket
- * output	- NONE
- * side effects	- active connections are listed to socket
- */
-
-static void 
-list_connections(int sock)
-{
-  int i;
-
-  for (i=1; i<maxconns; i++)
-  {
-    if (connections[i].socket != INVALID)
-    {
-      if(connections[i].registered_nick[0] != 0)
-      {
-        int user;
-
-	user = find_user_in_userlist(connections[i].registered_nick);
-	print_to_socket(sock,
-	     "%s/%s %s (%s@%s) is connected - idle: %ld",
-	     connections[i].nick,
-	     connections[i].registered_nick,
-	     type_show(userlist[user].type),
-	     connections[i].user,
-	     connections[i].host,
-	     time((time_t *)NULL)-connections[i].last_message_time );
-      }
-      else
-      {
-	print_to_socket(sock,
-	     "%s O (%s@%s) is connected - idle: %ld",
-	     connections[i].nick,
-	     connections[i].user,
-	     connections[i].host,
-	     time((time_t *)NULL)-connections[i].last_message_time  );
-      }
-    }
-  }
-}
 
 /*
  * handle_save
@@ -1049,7 +1005,7 @@ static void
 handle_save(int sock,char *nick)
 {
   print_to_socket(sock, "Saving %s file", CONFIG_FILE);
-  send_to_all( SEND_ALL, "%s is saving %s", nick, CONFIG_FILE);
+  send_to_all( FLAGS_ALL, "%s is saving %s", nick, CONFIG_FILE);
   save_prefs();
 }
 

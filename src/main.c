@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.99 2002/05/29 01:19:32 leeh Exp $ */
+/* $Id: main.c,v 1.100 2002/05/29 06:26:13 db Exp $ */
 
 #include "setup.h"
 
@@ -523,7 +523,7 @@ xmalloc(size_t size)
 
   if (ret == NULL)
   {
-    send_to_all(SEND_ALL, "Ran out of memory while attempting to allocate");
+    send_to_all(FLAGS_ALL, "Ran out of memory while attempting to allocate");
     exit(-1);
   }
 

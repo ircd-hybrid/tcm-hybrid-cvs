@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.29 2002/05/28 16:41:52 db Exp $
+ * $Id: tcm_io.h,v 1.30 2002/05/29 06:26:10 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -75,22 +75,8 @@ int accept_dcc_connection(const char *hostport,
 			  const char *nick, char *userhost);
 int connect_to_given_ip_port(struct sockaddr_in *, int );
 
-/* types for send_to_all */
-
-#define SEND_ALL		0x001 /* general messages */
-#define SEND_PRIVMSG		0x002 /* users privmsging tcm */
-#define SEND_NOTICES		0x004 /* users noticing tcm */
-#define SEND_WALLOPS		0x008 /* wallops and operwall */
-#define SEND_LOCOPS		0x010 /* locops */
-#define SEND_WARN		0x020 /* warning messages (clones etc) */
-#define SEND_SPY		0x040 /* motd, links, info, stats requests */
-#define SEND_KLINE_NOTICES	0x080 /* klines/unklines */
-#define SEND_ADMINS		0x100 /* admin stuff like modload */
-#define SEND_SERVERS		0x200 /* server splits/joins */
 
 #define EOL(c) ((c=='\r')||(c=='\n'))
-
-int pingtime; /* XXX hide later */
 
 int find_user_in_connections(const char *);
 

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.5 2002/05/29 01:19:32 leeh Exp $
+ * $Id: hash.c,v 1.6 2002/05/29 06:26:13 db Exp $
  */
 
 #include <stdio.h>
@@ -704,7 +704,7 @@ check_host_clones(char *host)
 
   if (reportedclones)
   {
-    report(SEND_WARN,
+    report(FLAGS_WARN,
 	   CHANNEL_REPORT_CLONES,
 	   "%d more possible clones (%d total) from %s:\n",
 	   clonecount, clonecount+reportedclones, host);
@@ -714,7 +714,7 @@ check_host_clones(char *host)
   }
   else
   {
-    report(SEND_WARN,
+    report(FLAGS_WARN,
 	   CHANNEL_REPORT_CLONES,
 	   "Possible clones from %s detected: %d connects in %d seconds\n",
 	   host, clonecount, now - oldest);
@@ -786,13 +786,13 @@ check_host_clones(char *host)
       {
         if (notice1[0])
         {
-  	  report(SEND_WARN, CHANNEL_REPORT_CLONES, "%s", notice1);
+  	  report(FLAGS_WARN, CHANNEL_REPORT_CLONES, "%s", notice1);
 	  tcm_log(L_NORM, "%s", notice1);
         }
 	/* I haven't figured out why all these are nessecary, but I know they are */
 	if (notice0[0])
         {
-          report(SEND_WARN, CHANNEL_REPORT_CLONES, "%s", notice0);
+          report(FLAGS_WARN, CHANNEL_REPORT_CLONES, "%s", notice0);
   	  tcm_log(L_NORM, "%s", notice0);
         }
       }
@@ -800,7 +800,7 @@ check_host_clones(char *host)
       {
         if (notice0[0])
         {
-	  report(SEND_WARN, CHANNEL_REPORT_CLONES, "%s", notice0);
+	  report(FLAGS_WARN, CHANNEL_REPORT_CLONES, "%s", notice0);
 	  tcm_log(L_NORM, "%s", notice0);
         }
       }
@@ -808,7 +808,7 @@ check_host_clones(char *host)
       {
         if (notice0[0])
         {
-	  send_to_all( SEND_WARN, "%s", notice0);
+	  send_to_all( FLAGS_WARN, "%s", notice0);
 	  tcm_log(L_NORM, "  [etc.]\n");
         }
       }
@@ -869,7 +869,7 @@ check_virtual_host_clones(char *ip_class_c)
 
   if (reportedclones)
     {
-      report(SEND_WARN,
+      report(FLAGS_WARN,
 	     CHANNEL_REPORT_VCLONES,
 	     "%d more possible virtual host clones (%d total) from %s.*:\n",
 	     clonecount, clonecount+reportedclones, ip_class_c);
@@ -880,7 +880,7 @@ check_virtual_host_clones(char *ip_class_c)
     }
   else
     {
-      report(SEND_WARN,
+      report(FLAGS_WARN,
 	     CHANNEL_REPORT_VCLONES,
 	     "Possible virtual host clones from %s.* detected: %d connects in %d seconds\n",
 	     ip_class_c, clonecount, now - oldest);
@@ -956,20 +956,20 @@ check_virtual_host_clones(char *ip_class_c)
 	    ;
 	  else if (clonecount == 2)
 	    {
-	      report(SEND_WARN, CHANNEL_REPORT_VCLONES, "%s", notice1);
+	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s", notice1);
 	      tcm_log(L_NORM, "%s", notice1);
 
-	      report(SEND_WARN, CHANNEL_REPORT_VCLONES, "%s", notice0);
+	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s", notice0);
 	      tcm_log(L_NORM, "%s", notice0);
 	    }
 	  else if (clonecount < 5)
 	    {
-	      report(SEND_WARN, CHANNEL_REPORT_VCLONES, "%s", notice0);
+	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s", notice0);
 	      tcm_log(L_NORM, "%s", notice0);
 	    }
 	  else if (clonecount == 5)
 	    {
-	      send_to_all(SEND_WARN, "%s", notice0);
+	      send_to_all(FLAGS_WARN, "%s", notice0);
 	      tcm_log(L_NORM, "  [etc.]\n");
 	    }
 	}

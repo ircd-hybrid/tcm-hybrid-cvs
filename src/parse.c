@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.45 2002/05/28 20:01:51 leeh Exp $
+ * $Id: parse.c,v 1.46 2002/05/29 06:26:13 db Exp $
  */
 
 #include <stdio.h>
@@ -136,9 +136,9 @@ parse_client(int i)
   {
     if((ptr = find_dcc_handler(argv[0] + 1)) != NULL)
     {
-      if(has_umode(i, TYPE_ADMIN))
+      if(has_umode(i, FLAGS_ADMIN))
         ptr->handler[2](i, argc, argv);
-      else if(has_umode(i, TYPE_OPER))
+      else if(has_umode(i, FLAGS_OPER))
         ptr->handler[1](i, argc, argv);
       else
         ptr->handler[0](i, argc, argv);
@@ -152,7 +152,7 @@ parse_client(int i)
   /* message to partyline */
   else
   {
-    if(has_umode(i, TYPE_PARTYLINE))
+    if(has_umode(i, FLAGS_PARTYLINE))
     {
       char buff[MAX_BUFF];
 
@@ -482,7 +482,7 @@ process_privmsg(char *nick, char *userhost, int argc, char *argv[])
 
   if (argv[3][0] != '.')
   {
-    send_to_all(SEND_PRIVMSG, "[%s!%s@%s] %s", nick, user, host, argv[3]);
+    send_to_all(FLAGS_PRIVMSG, "[%s!%s@%s] %s", nick, user, host, argv[3]);
     return;
   }
 
@@ -535,11 +535,11 @@ wallops(int connnum, int argc, char *argv[])
     ++nick;
 
   if (!strncmp(argv[2], ":OPERWALL - ", 12))
-    send_to_all(SEND_WALLOPS, "OPERWALL %s -> %s", nick, argv[2]+12);
+    send_to_all(FLAGS_WALLOPS, "OPERWALL %s -> %s", nick, argv[2]+12);
   else if (!strncmp(argv[2], ":LOCOPS - ", 9))
-    send_to_all(SEND_LOCOPS, "LOCOPS %s -> %s", nick, argv[2]+9);
+    send_to_all(FLAGS_LOCOPS, "LOCOPS %s -> %s", nick, argv[2]+9);
   else
-    send_to_all(SEND_WALLOPS, "WALLOPS %s -> %s", nick, argv[2]+11);
+    send_to_all(FLAGS_WALLOPS, "WALLOPS %s -> %s", nick, argv[2]+11);
 }
 
 /*

@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.40 2002/05/28 16:41:56 db Exp $
+ * $Id: logging.c,v 1.41 2002/05/29 06:26:13 db Exp $
  *
  * - db
  */
@@ -535,7 +535,7 @@ kline_report(char *server_notice)
 
   broken_up_time = localtime(&current_time);
   
-  send_to_all(SEND_KLINE_NOTICES,
+  send_to_all(FLAGS_VIEW_KLINES,
 	       "*** %s", server_notice);
 
 /* Probably don't need to log klines. --- Toast */

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.57 2002/05/29 00:59:22 leeh Exp $ */
+/* $Id: userlist.h,v 1.58 2002/05/29 06:26:10 db Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -81,12 +81,15 @@ struct exception_entry
 
 int find_user_in_userlist(const char *);
 int get_umodes_from_prefs(int);
+void list_connections(int sock);
+void show_stats_p(const char *nick);
 
 void save_umodes(void *);
 void set_umode(int, int, const char *);
 void add_an_oper(int, char *argv[]);
 
 int has_umode(int, int);
+int get_umode(int);
 
 void load_userlist(void);
 void load_config_file(char *);
@@ -111,25 +114,31 @@ extern int host_list_index;
 void exemption_summary();
 #endif
 
-#define TYPE_OPER		0x00001	/* user has registered as an oper */
-#define TYPE_KLINE		0x00002 /* user has .kline privs */
-#define TYPE_SERVERS            0x00008 /* user sees server intro/quits */
-#define TYPE_PARTYLINE		0x00010	/* user wants to be on partyline */
-#define TYPE_PRIVMSG		0x00020 /* user wants to see privmsgs */
-#define TYPE_NOTICE		0x00040 /* user wants to see notices */
-#define TYPE_WARN		0x00080	/* user sees clone reports */
-#define TYPE_INVS		0x00100	/* user is invisible to STATS p list */
-#define TYPE_LOCOPS		0x00400 /* user sees LOCOPS */
-#define TYPE_ADMIN		0x00800 /* user is an adminstrator */
-#define TYPE_DLINE		0x02000 /* user has .dline privs */
-#define TYPE_SPY		0x04000 /* links, motd, info requests */
-#define TYPE_VIEW_KLINES	0x20000 /* user see's klines/unklines */
-#define TYPE_SUSPENDED		0x40000 /* user is suspended */
-#ifdef ENABLE_W_FLAG
-#define TYPE_WALLOPS		0x80000 /* user can see OPERWALL */
-#endif
+/* privs first */
+#define FLAGS_OPER		0x00001	/* user has registered as an oper */
+#define FLAGS_KLINE		0x00002 /* user has .kline privs */
+#define FLAGS_INVS		0x00004	/* user is invisible to STATS p list */
+#define FLAGS_PARTYLINE		0x00008	/* user wants to be on partyline */
+#define FLAGS_DLINE		0x00010 /* user has .dline privs */
+#define FLAGS_SUSPENDED		0x00020 /* user is suspended */
 
-int isoper(char *user, char *host);
+/* send second */
+#define FLAGS_SERVERS           0x00100 /* user sees server intro/quits */
+#define FLAGS_PRIVMSG		0x00200 /* user wants to see privmsgs */
+#define FLAGS_NOTICE		0x00400 /* user wants to see notices */
+#define FLAGS_WARN		0x00800	/* user sees clone reports */
+#define FLAGS_LOCOPS		0x01000 /* user sees LOCOPS */
+#define FLAGS_ADMIN		0x02000 /* user is an adminstrator */
+#define FLAGS_SPY		0x04000 /* links, motd, info requests */
+#define FLAGS_VIEW_KLINES	0x10000 /* user see's klines/unklines */
+
+#define FLAGS_ALL		0x1FFFF /* XXX not quite right too tired */
+
+
+#define FLAGS_WALLOPS		0x20000 /* user can see OPERWALL */
+
+
+int  isoper(char *user, char *host);
 void init_userlist(void);
 void reload_user_list(int sig);
 

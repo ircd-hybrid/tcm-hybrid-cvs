@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.102 2002/05/28 18:47:16 leeh Exp $
+ * $Id: userlist.c,v 1.103 2002/05/29 06:26:14 db Exp $
  *
  */
 
@@ -69,14 +69,14 @@ struct umode_struct
  */
 static struct umode_struct umode_privs[] =
 {
-  { 'M', TYPE_ADMIN,		},
-  { 'K', TYPE_KLINE,		},
+  { 'M', FLAGS_ADMIN,		},
+  { 'K', FLAGS_KLINE,		},
 #ifndef NO_D_LINE_SUPPORT
-  { 'D', TYPE_DLINE,		},
+  { 'D', FLAGS_DLINE,		},
 #endif
-  { 'S', TYPE_SUSPENDED, 	},
+  { 'S', FLAGS_SUSPENDED, 	},
 #ifdef ENABLE_W_FLAG
-  { 'W', TYPE_WALLOPS,		},
+  { 'W', FLAGS_WALLOPS,		},
 #endif
   { (char)0, 0,			}
 };
@@ -87,15 +87,15 @@ static struct umode_struct umode_privs[] =
  */
 static struct umode_struct umode_flags[] =
 {
-  { 'k', TYPE_VIEW_KLINES, 	},
-  { 'w', TYPE_WARN,		},
-  { 'y', TYPE_SPY,		},
-  { 'i', TYPE_INVS,		},
-  { 'o', TYPE_LOCOPS,		},
-  { 'p', TYPE_PARTYLINE,	},
-  { 'x', TYPE_SERVERS,		},
-  { 'm', TYPE_PRIVMSG,		},
-  { 'n', TYPE_NOTICE,		},
+  { 'k', FLAGS_VIEW_KLINES, 	},
+  { 'w', FLAGS_WARN,		},
+  { 'y', FLAGS_SPY,		},
+  { 'i', FLAGS_INVS,		},
+  { 'o', FLAGS_LOCOPS,		},
+  { 'p', FLAGS_PARTYLINE,	},
+  { 'x', FLAGS_SERVERS,		},
+  { 'm', FLAGS_PRIVMSG,		},
+  { 'n', FLAGS_NOTICE,		},
   { (char)0, 0,			}
 };
 
@@ -134,7 +134,7 @@ m_umode(int connnum, int argc, char *argv[])
       user = find_user_in_userlist(connections[connnum].registered_nick);
 
       /* admins can set what they want.. */
-      if(userlist[user].type & TYPE_ADMIN)
+      if(userlist[user].type & FLAGS_ADMIN)
         set_umode(user, 1, argv[1]);
       else
         set_umode(user, 0, argv[1]);
@@ -146,7 +146,7 @@ m_umode(int connnum, int argc, char *argv[])
     }
     else
     {
-      if(has_umode(connnum, TYPE_ADMIN) == 0)
+      if(has_umode(connnum, FLAGS_ADMIN) == 0)
       {
         print_to_socket(connections[connnum].socket,
 			"You aren't an admin");
@@ -170,7 +170,7 @@ m_umode(int connnum, int argc, char *argv[])
   {
     int user_conn;
 
-    if(has_umode(connnum, TYPE_ADMIN) == 0)
+    if(has_umode(connnum, FLAGS_ADMIN) == 0)
     {
       print_to_socket(connections[connnum].socket,
 		      "You aren't an admin");
@@ -289,6 +289,21 @@ has_umode(int conn_num, int type)
   return 0;
 }
 
+/* get_umode()
+ *
+ * input	- connection number of client to get umode for
+ * output	-
+ * side effects - returns umode or 0 if not found
+ */
+int
+get_umode(int conn_num)
+{
+  int user;
+
+  user = find_user_in_userlist(connections[conn_num].registered_nick);
+  return(userlist[user].type);
+}
+
 /* find_user_in_userlist()
  *
  * input	- username to search for
@@ -371,7 +386,7 @@ save_umodes(void *unused)
       (void)fclose(fp);
     }
     else
-      send_to_all(SEND_ALL, "Couldn't open %s for writing", user_pref);
+      send_to_all(FLAGS_ALL, "Couldn't open %s for writing", user_pref);
 
     userlist[i].changed == 0;
   }
@@ -647,7 +662,7 @@ save_prefs(void)
 
   if ((fp_in = fopen(CONFIG_FILE,"r")) == NULL)
     {
-      send_to_all(SEND_ALL, "Couldn't open %s: %s",
+      send_to_all(FLAGS_ALL, "Couldn't open %s: %s",
 		  CONFIG_FILE, strerror(errno));
       return;
     }
@@ -656,7 +671,7 @@ save_prefs(void)
 
   if ((fp_out = fopen(filename, "w")) == NULL)
     {
-      send_to_all(SEND_ALL, "Couldn't open %s: %s", filename, strerror(errno));
+      send_to_all(FLAGS_ALL, "Couldn't open %s: %s", filename, strerror(errno));
       fclose(fp_in);
       return;
     }
@@ -720,7 +735,7 @@ save_prefs(void)
   fclose(fp_out);
 
   if (rename(filename, CONFIG_FILE))
-    send_to_all(SEND_ALL,
+    send_to_all(FLAGS_ALL,
 		 "Error renaming new config file.  Changes may be lost.  %s",
                  strerror(errno));
   chmod(CONFIG_FILE, 0600);
@@ -1137,7 +1152,7 @@ reload_user_list(int sig)
 
   initopers();
 
-  send_to_all(SEND_ALL, "*** Caught SIGHUP ***\n");
+  send_to_all(FLAGS_ALL, "*** Caught SIGHUP ***\n");
 }
 
 #ifdef DEBUGMODE

@@ -1,5 +1,5 @@
 /*
- * $Id: modules.c,v 1.47 2002/05/29 00:59:26 leeh Exp $B
+ * $Id: modules.c,v 1.48 2002/05/29 06:26:13 db Exp $B
  *
  */
 
@@ -22,6 +22,7 @@
 #include "wild.h"
 #include "parse.h"
 #include "handler.h"
+#include "userlist.h"
 
 #define MODS_INCREMENT 25
 
@@ -112,7 +113,7 @@ load_a_module(char *name, int log)
 #ifdef DEBUGMODE
       printf("Error loading module %s\n", err);
 #endif
-      send_to_all(SEND_ADMINS, "Error loading module %s: %s", name, err);
+      send_to_all(FLAGS_ADMIN, "Error loading module %s: %s", name, err);
       return -1;
     }
 
@@ -126,7 +127,7 @@ load_a_module(char *name, int log)
 #ifdef DEBUGMODE
       printf("Module %s has no _modinit() function\n", name);
 #endif
-      send_to_all(SEND_ADMINS, "Module %s has no _modinit() function", name);
+      send_to_all(FLAGS_ADMIN, "Module %s has no _modinit() function", name);
       dlclose(modpointer);
       return -1;
     }
@@ -144,7 +145,7 @@ load_a_module(char *name, int log)
 
   if (modlist[i].name != NULL)
     {
-      send_to_all(SEND_ALL, "Too many modules loaded");
+      send_to_all(FLAGS_ALL, "Too many modules loaded");
       return -1;
     }
   modlist[i].address = modpointer;
@@ -154,7 +155,7 @@ load_a_module(char *name, int log)
   
   if (log)
     {
-      send_to_all(SEND_ADMINS, "Module %s [version: %s] loaded at 0x%lx",
+      send_to_all(FLAGS_ADMIN, "Module %s [version: %s] loaded at 0x%lx",
                   (modlist[i].name == unknown_ver) ? name : modlist[i].name,
                    modlist[i].version, (long)modlist[i].address);
 #ifdef DEBUGMODE
@@ -186,7 +187,7 @@ unload_a_module(char *name, int log)
   modlist[modindex].address = NULL;
 
   if (log)
-    send_to_all(SEND_ADMINS, "Module %s unloaded", name);
+    send_to_all(FLAGS_ADMIN, "Module %s unloaded", name);
   return 0;
 }
 
@@ -195,7 +196,7 @@ m_modload (int connnum, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (load_a_module(argv[1], 1) != -1)
-    send_to_all(SEND_ADMINS, "Loaded by %s", connections[connnum].nick);
+    send_to_all(FLAGS_ADMIN, "Loaded by %s", connections[connnum].nick);
   else
     print_to_socket(connections[connnum].socket,
 		    "Load of %s failed", argv[1]);
@@ -206,7 +207,7 @@ m_modunload (int connnum, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (unload_a_module(argv[1], 1) != -1)
-    send_to_all(SEND_ADMINS, "Loaded by %s", connections[connnum].nick);
+    send_to_all(FLAGS_ADMIN, "Loaded by %s", connections[connnum].nick);
 }
 
 void
@@ -216,7 +217,7 @@ m_modreload (int connnum, int argc, char *argv[])
   if (unload_a_module(argv[1], 0) != -1)
     {
       if (load_a_module(argv[1], 1))
-        send_to_all(SEND_ADMINS, "Reloaded by %s", connections[connnum].nick);
+        send_to_all(FLAGS_ADMIN, "Reloaded by %s", connections[connnum].nick);
     }
   else
     print_to_socket(connections[connnum].socket,

@@ -1,3 +1,17 @@
+db          2002/06/02 22:10:17 EDT	(20020603_3)
+
+  Modified files:
+    src                  stdcmds.c tcm_io.c 
+  Log:
+  - parse_server() can call close_connection() which means io_read_function() can
+    become NULL during I/O loop. oops
+  
+  Revision  Changes    Path
+  1.89      +0 -5      tcm-hybrid/src/stdcmds.c
+  1.79      +6 -0      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/06/02 19:41:35 EDT	(20020603_2)
 
   Modified files:

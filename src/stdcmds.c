@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.41 2002/04/03 00:24:12 bill Exp $ */
+/* $Id: stdcmds.c,v 1.42 2002/04/06 02:00:18 bill Exp $ */
 
 #include "setup.h"
 
@@ -717,6 +717,7 @@ list_nicks(int sock,char *nick,int regex)
  * inputs       - socket to reply on
  *              - uhost to match on
  *              - regex or no?
+ *		- list to save results to
  * output       - NONE
  * side effects -
  */
@@ -732,7 +733,6 @@ list_users(int sock,char *userhost,int regex)
 #endif
   char *uhost, *uhostmatch;
   int i, numfound = 0;
-
   if ((uhost = (char *)malloc(1024)) == NULL)
   {
     sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");

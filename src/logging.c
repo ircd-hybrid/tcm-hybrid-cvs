@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.19 2002/04/02 23:24:30 bill Exp $
+ * $Id: logging.c,v 1.20 2002/04/06 02:00:18 bill Exp $
  *
  * - db
  */
@@ -570,7 +570,7 @@ void kill_add_report(char *server_notice)
   if ((p = strstr(server_notice, ". From")) == NULL)
     return;
   *p = '\0';
-  p+=8;
+  p+=7;
   if ((nick = strrchr(server_notice, ' ')) == NULL)
     return;
   ++nick;
@@ -598,6 +598,8 @@ void kill_add_report(char *server_notice)
         break;
       }
     }
+    if (i == -1)
+      break;
   }
   if (i != -1)
     return;

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.52 2002/04/04 23:46:16 bill Exp $ */
+/* $Id: bothunt.c,v 1.53 2002/04/06 02:00:15 bill Exp $ */
 
 #include "setup.h"
 
@@ -189,49 +189,16 @@ struct banned_info glines[MAXBANS];
 
 static int find_banned_host(char *user, char *host)
 {
-  int wld[2] = { NO, NO };
   int i;
-  int match = YES;
-
-  if (strchr(user, '?') != NULL)
-    wld[0] = YES;
-  else if (strchr(user, '*') != NULL)
-    wld[0] = YES;
-
-  if (strchr(host, '?') != NULL)
-    wld[1] = YES;
-  else if (strchr(host, '*') != NULL)
-    wld[1] = YES;
 
   for (i=0; i < MAXBANS; i++)
   {
     if (glines[i].user != NULL && glines[i].host != NULL)
     {
-      if (wld[0])
-      {
-        if (wldwld(user, glines[i].user))
-  	  match = NO;
-      }
-      else
-      {
-        if (wldcmp(user, glines[i].user))
-	  match = NO;
-      }
-      if (match == YES && wld[1])
-      {
-        if (wldwld(host, glines[i].host))
-	  match = NO;
-      }
-      else if (match == YES)
-      {
-        if (wldcmp(host, glines[i].host))
-	  match = NO;
-      }
-      if (match == YES)
+      if (!strcmp(user, glines[i].user) && !strcmp(host, glines[i].host))
         return i;
     }
   }
-
   /* There was no match above, so we KNOW match == NO - Hwy */
   return -1;
 }
@@ -251,12 +218,15 @@ static void remove_gline(char *user, char *host)
   if (glines[i].reason)
     free(glines[i].reason);
 
-  glines[i].pending = NO;
+  if (glines[i].who)
+    free(glines[i].who);
 
+  glines[i].next = (struct banned_info *)NULL;
   glines[i].when = (time_t *)NULL;
 }
 
-static int gline_request(char *user, char *host, char *reason, time_t *when)
+static int gline_request(char *user, char *host, char *reason, char *who,
+                         time_t *when)
 {
   int i;
   time_t current_time;
@@ -268,32 +238,35 @@ static int gline_request(char *user, char *host, char *reason, time_t *when)
       break;
 
   if ((glines[i].user = (char *) malloc(MAX_USER)) == NULL)
-    {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host");
-      gracefuldie(0, __FILE__, __LINE__);
-    }
+  {
+    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host()");
+    gracefuldie(0, __FILE__, __LINE__);
+  }
 
   if ((glines[i].host = (char *) malloc(MAX_HOST)) == NULL)
-    {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host");
-      gracefuldie(0, __FILE__, __LINE__);
-    }
+  {
+    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host()");
+    gracefuldie(0, __FILE__, __LINE__);
+  }
 
   if ((glines[i].reason = (char *) malloc(1024)) == NULL)
-    {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host");
-      gracefuldie(0, __FILE__, __LINE__);
-    }
+  {
+    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host()");
+    gracefuldie(0, __FILE__, __LINE__);
+  }
+  if ((glines[i].who = (char *) malloc(1024)) == NULL)
+  {
+    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host()");
+    gracefuldie(0, __FILE__, __LINE__);
+  }
 
   strncpy(glines[i].user, user, MAX_USER);
   strncpy(glines[i].host, host, MAX_HOST);
   strncpy(glines[i].reason, reason, 1024);
-  glines[i].pending = YES;
+  strncpy(glines[i].who, who, 1024);
+
   current_time = time(NULL);
-  if (when)
-    glines[i].when = when;
-  else
-    glines[i].when = &current_time;
+  glines[i].when = (when) ? when : &current_time;
 
   return 1;
 }
@@ -625,7 +598,6 @@ void on_stats_i(int connnum, int argc, char *argv[])
  * output	- NONE
  * side effects	-
  */
-
 void onservnotice(int connnum, int argc, char *argv[])
 {
   int i = -1, a, b, c = -1;
@@ -640,7 +612,7 @@ void onservnotice(int connnum, int argc, char *argv[])
   char *target;
   char *p, *q, *message;
 
-  message = p = argv[argc-1];
+  p = message = argv[argc-1];
 
   if (strncasecmp(p, "*** Notice -- ", 14) == 0)
     p+=14;
@@ -734,31 +706,30 @@ void onservnotice(int connnum, int argc, char *argv[])
 
   if (strstr(p, "is requesting gline for "))
   {
-    q = strstr(p, "is requesting gline for ");
-    *(q-1) = '\0';
-    q += 25;
-    if ((p = strchr(q, '@')) == NULL)
+    nick = p;
+    if ((q = strchr(p, ' ')) == NULL)
       return;
-    *p++ = '\0';
-    user = q;
-    host = p;
+    *q = '\0';
+    target = q+4;
+    if ((q = strchr(target, ' ')) == NULL)
+      return;
+    *q = '\0';
+    user = q+26;
+    if ((q = strchr(user, '@')) == NULL)
+      return;
+    *q = '\0';
+    host = q+1;
     if ((q = strchr(host, ']')) == NULL)
       return;
     *q = '\0';
-    q += 3; 
+    q+=3;
     if ((p = strrchr(q, ']')) == NULL)
       return;
-    *p = '\0';
-    if ((p = strchr(message, ' ')) == NULL)
-      return;
-    *p = '\0';
-    if (gline_request(user, host, q, (time_t *)current_time))
-    {
-      sendtoalldcc(SEND_KLINE_NOTICES_ONLY,
-		   "G-line for %s@%s requested by %s: %s", user, 
-		   host, message+14, q);
-      return;
-    }
+    *p = '\0'; 
+    gline_request(user, host, q, nick, (time_t *)current_time);
+    sendtoalldcc(SEND_KLINE_NOTICES_ONLY,
+                 "GLINE for %s@%s by %s [%s]: %s", user, host, nick, target, q);
+    return;
   }
   else if (strstr(p, "has triggered gline for "))
   {
@@ -825,7 +796,6 @@ void onservnotice(int connnum, int argc, char *argv[])
     {
       free(glines[i].user);
       free(glines[i].host);
-      glines[i].pending = NO;
       glines[i].when = (time_t *)NULL;
     }
     return;
@@ -3152,6 +3122,121 @@ void _reload_bothunt(int connnum, int argc, char *argv[])
  if (!amianoper) oper();
 }
 
+void m_gline(int connnum, int argc, char *argv[])
+{
+  int a, c;
+  char *b, *d;
+
+  if (!(connections[connnum].type & TYPE_GLINE))
+  {
+    prnt(connections[connnum].socket, "You do not have %s access\n", argv[0]);
+    return;
+  }
+
+  if (argc == 1)
+  {
+    for (a=0;a<MAXBANS;++a)
+    { 
+      if (glines[a].user && glines[a].host)
+        prnt(connections[connnum].socket, "%d) %s@%s :%s -- %s\n", a+1,
+             glines[a].user, glines[a].host, glines[a].reason, glines[a].who);
+    }
+    return;
+  }
+  if (argc == 2)
+  {
+    if ((a = atoi(argv[1])) && glines[a-1].user && glines[a-1].host)
+    {
+      toserv("GLINE %s@%s :%s\n", glines[a-1].user, glines[a-1].host,
+             (glines[a-1].reason == NULL) ? "No reason" : glines[a-1].reason);
+      return;
+    }
+    else
+    {
+      for (b=argv[1],a=0;*b;++b)
+        if (*b != '?' && *b != '*')
+          ++a;
+      if (a < 4)
+      {
+        prnt(connections[connnum].socket,
+        "Please include at least 4 non-wildcard characters in the user@host\n");
+        return;
+      }
+      if ((b = strchr(argv[1], '@')) == NULL)
+      {
+        prnt(connections[connnum].socket,
+             "Please include a \'@\' in the user@host\n");
+        return;
+      }
+      *b++ = '\0';
+      toserv("GLINE %s@%s :No reason\n", argv[1], b);
+      return;
+    }
+  }
+  else if (argc >= 3)
+  {
+    if ((a = atoi(argv[1])) && glines[a-1].user && glines[a-1].host)
+    {
+      if ((b = (char *)malloc(1024)) == NULL)
+      {
+        sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in m_gline()");
+        exit(0);
+      }
+      snprintf(b, 1024, "%s", argv[2]);
+      for (c=3;c<argc;++c)
+      {
+        strncat(b, " ", 1024-strlen(b));
+        strncat(b, argv[c], 1024-strlen(b));
+      }
+      toserv("GLINE %s@%s :%s\n", glines[a-1].user, glines[a-1].host,
+             (*b == ':') ? b+1 : b);
+      free(b);
+      return;
+    }
+    else
+    {
+      for(b=argv[1],a=0;*b;++b)
+        if (*b != '?' && *b != '*')
+          ++a;
+      if (a < 4)
+      {
+        prnt(connections[connnum].socket,
+      "Please include at least 4 non-wildcard characters with the user@host\n");
+        return;
+      }
+      if ((b = strchr(argv[1], '@')) == NULL)
+      {
+        prnt(connections[connnum].socket,
+             "Please include a \'@\' with the user@host\n");
+        return;
+      }
+      if ((d = (char *)malloc(1024)) == NULL)
+      {
+        sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in m_gline()");
+        exit(0);
+      }
+      snprintf(d, 1024, "%s", argv[2]);
+      for(c=3;c<argc;++c)
+      {
+        strncat(d, " ", 1024-strlen(d));
+        strncat(d, argv[c], 1024-strlen(d));
+      }
+      toserv("GLINE %s@%s :%s\n", argv[1], b, (*d == ':') ? d+1 : d);
+      free(d);
+      return;
+    }
+  }
+}
+
+#ifdef IRCD_HYBRID
+
+#else
+struct TcmMessage gline_msgtab = {
+ ".gline", 0, 0,
+ {m_unregistered, m_not_oper, m_gline, m_gline}
+};
+#endif
+
 void _modinit()
 {
   add_common_function(F_RELOAD, _reload_bothunt);
@@ -3162,6 +3247,7 @@ void _modinit()
   add_common_function(F_STATSI, on_stats_i);
   add_common_function(F_STATSE, on_stats_e);
   add_common_function(F_STATSO, on_stats_o);
+  mod_add_cmd(&gline_msgtab);
   memset(&usertable,0,sizeof(usertable));
   memset(&hosttable,0,sizeof(usertable));
   memset(&domaintable,0,sizeof(usertable));

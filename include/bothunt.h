@@ -1,29 +1,29 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.21 2002/04/02 23:24:21 bill Exp $ */
+/* $Id: bothunt.h,v 1.22 2002/04/06 02:00:13 bill Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
 
 struct plus_c_info
-  {
-    char *user;
-    char *host;
-    char class[100];
-    char ip[16];
-  };
+{
+  char *user;
+  char *host;
+  char class[100];
+  char ip[16];
+};
 
 struct banned_info
-  {
-    char *user;
-    char *host;
-    char *reason;
-    time_t *when;
-    int pending;
-    int duration;
-    struct banned_info *next;
-  };
+{
+  char *user;
+  char *host;
+  char *reason;
+  char *who;
+  char *server;
+  time_t *when;
+  struct banned_info *next;
+};
 
 #define IGNORE		-1
 #define CONNECT		 0

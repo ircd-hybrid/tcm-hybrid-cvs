@@ -1,3 +1,24 @@
+db          2002/06/01 15:43:16 EDT	(20020601_12)
+
+  Modified files:
+    include              logging.h userlist.h 
+    src                  bothunt.c hash.c logging.c stdcmds.c 
+                         vclones.c 
+  Log:
+  - yet more cleanups.  removed a function, replaced with tcm_log
+  - removed unused botfailure
+  
+  Revision  Changes    Path
+  1.15      +1 -2      tcm-hybrid/include/logging.h
+  1.63      +0 -1      tcm-hybrid/include/userlist.h
+  1.146     +6 -6      tcm-hybrid/src/bothunt.c
+  1.22      +37 -37    tcm-hybrid/src/hash.c
+  1.46      +30 -108   tcm-hybrid/src/logging.c
+  1.85      +27 -68    tcm-hybrid/src/stdcmds.c
+  1.10      +6 -5      tcm-hybrid/src/vclones.c
+
+
+
 wcampbel    2002/06/01 09:06:03 EDT	(20020601_11)
 
   Modified files:

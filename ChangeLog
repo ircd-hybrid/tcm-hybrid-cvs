@@ -1,3 +1,17 @@
+wcampbel    2002/05/19 17:08:21 EDT	(20020519_2)
+
+  Modified files:
+    modules              commands.c 
+  Log:
+  Fixed .quit, it should alias .close, not .disconnect.
+  .close simply closes the sender's DCC connection, so it should NOT be admin
+    only...
+  
+  Revision  Changes    Path
+  1.59      +2 -2      tcm-hybrid/modules/commands.c
+
+
+
 wcampbel    2002/05/19 12:11:35 EDT	(20020519_1)
 
   Modified files:

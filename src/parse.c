@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.8 2002/05/24 02:31:54 db Exp $
+ * $Id: parse.c,v 1.9 2002/05/24 04:04:23 db Exp $
  */
 
 #include <stdio.h>
@@ -40,7 +40,6 @@
 
 static void proc(char *source,char *function, char *body);
 static void privmsgproc(char *nick,char *userhost, int argc, char *argv[]);
-
 static void send_umodes(char *nick);
 static void onkick(char *nick);
 static void onnick(char *old_nick, char *new_nick);
@@ -68,7 +67,9 @@ struct services_entry services;
  * output       - NONE
  * side effects - process server message
  */
-void parse_server(void)
+
+void
+parse_server(void)
 {
   char *buffer = connections[0].buffer;
   char *p;
@@ -179,7 +180,8 @@ parse_client(int i, int argc, char *argv[])
  *     server... hold them up and make sure to stay synced with the timer
  *     signals that may be ongoing.
  */
-static void proc(char *source,char *fctn,char *param)
+static
+void proc(char *source,char *fctn,char *param)
 {
     char *userhost;
     int numeric=0;      /* if its a numeric */
@@ -490,7 +492,9 @@ void on_services_notice(int argc, char *argv[])
  * output       - none
  * side effects -
  */
-void privmsgproc(char *nick, char *userhost, int argc, char *argv[])
+
+void
+privmsgproc(char *nick, char *userhost, int argc, char *argv[])
 {
   int token;
   char *user;   /* user portion */
@@ -507,7 +511,7 @@ void privmsgproc(char *nick, char *userhost, int argc, char *argv[])
 
   if (argv[3][0] != '.')
   {
-    sendtoalldcc(SEND_OPERS_PRIVMSG_ONLY,
+    sendtoalldcc(incoming_connnum, SEND_OPERS_PRIVMSG_ONLY,
                  "[%s!%s@%s] %s", nick, user, host, argv[3]);
     return;
   }
@@ -543,6 +547,14 @@ void privmsgproc(char *nick, char *userhost, int argc, char *argv[])
   }
 }
 
+/*
+ * do_init()
+ *
+ * inputs       - none
+ * output       - none
+ * side effects - attempt to oper up, get version of server.
+ */
+
 void
 do_init(void)
 {
@@ -574,11 +586,14 @@ _wallops(int connnum, int argc, char *argv[])
     ++nick;
 
   if (!strncmp(argv[2], ":OPERWALL - ", 12))
-    sendtoalldcc(SEND_OPERWALL_ONLY, "OPERWALL %s -> %s\n", nick, argv[2]+12);
+    sendtoalldcc(incoming_connnum, SEND_OPERWALL_ONLY, 
+		 "OPERWALL %s -> %s", nick, argv[2]+12);
   else if (!strncmp(argv[2], ":LOCOPS - ", 9))
-    sendtoalldcc(SEND_LOCOPS_ONLY, "LOCOPS %s -> %s\n", nick, argv[2]+9);
+    sendtoalldcc(incoming_connnum, SEND_LOCOPS_ONLY,
+		 "LOCOPS %s -> %s", nick, argv[2]+9);
   else
-    sendtoalldcc(SEND_OPERWALL_ONLY, "WALLOPS %s -> %s\n", nick, argv[2]+11);
+    sendtoalldcc(incoming_connnum, SEND_OPERWALL_ONLY,
+		 "WALLOPS %s -> %s", nick, argv[2]+11);
 }
 
 /*
@@ -589,7 +604,8 @@ _wallops(int connnum, int argc, char *argv[])
  * side effects - Hopefully, set proper umodes for this tcm
  */
 
-static void send_umodes(char *nick)
+static void
+send_umodes(char *nick)
 {
   if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
     print_to_server("MODE %s :+bcdfknrswxyzl\nSTATS I", nick );
@@ -627,6 +643,14 @@ _onjoin(int connnum, int argc, char *argv[])
   }
 }
 
+/*
+ * onkick
+ *
+ * inputs       - nick being kicked
+ * output       - none
+ * side effects - note kicked off of channel if it is us
+ */
+
 static void
 onkick(char *nick)
 {
@@ -638,7 +662,17 @@ onkick(char *nick)
   }
 }
 
-static void onnick(char *old_nick,char *new_nick)
+/*
+ * connick
+ *
+ * inputs       - old nick
+ *		- new nick
+ * output       - none
+ * side effects - change nick
+ */
+
+static void
+onnick(char *old_nick,char *new_nick)
 {
   char *p;
 
@@ -717,6 +751,16 @@ cannotjoin(char *channel)
             config_entries.defchannel_key);
 }
 
+/*
+ * _signon
+ *
+ * inputs       - connection number
+ *		- argc
+ *		- argv[]
+ * output       - NONE
+ * side effects - does signon to server
+ */
+
 void
 _signon (int connnum, int argc, char *argv[])
 {
@@ -784,8 +828,8 @@ check_clones(void *unused)
             (strlen(userptr->info->domain) ==
              strlen(userptr->info->host));
 
-          sendtoalldcc(SEND_WARN_ONLY,
-                       "clones> %2d connections -- %s@%s%s {%s}\n",
+          sendtoalldcc(incoming_connnum, SEND_WARN_ONLY,
+                       "clones> %2d connections -- %s@%s%s {%s}",
                        numfound,userptr->info->user,
                        notip ? "*" : userptr->info->domain,
                        notip ? userptr->info->domain : "*",

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.7 2002/05/24 02:31:55 db Exp $
+ * $Id: tcm_io.c,v 1.8 2002/05/24 04:04:23 db Exp $
  */
 
 #include <stdio.h>
@@ -120,7 +120,8 @@ read_packet(void)
     if (CurrentTime > (connections[0].last_message_time + server_time_out))
     {
       /* timer expired */
-      sendtoalldcc(SEND_ALL_USERS,"PING time out on server\n");
+      sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+		   "PING time out on server");
       log_problem("read_packet()", "ping time out");
       argv[0] = "ping time out";
       linkclosed(0, 1, argv);
@@ -225,7 +226,8 @@ read_packet(void)
     {
       if (errno != EINTR)
       {
-        sendtoalldcc(SEND_ALL_USERS,"Select error: %s (%d)\n",
+        sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+		     "Select error: %s (%d)",
                      strerror(errno), errno);
         (void)snprintf(dccbuff, sizeof(dccbuff) - 1,"select error %d", errno);
         log_problem("read_packet()", dccbuff);
@@ -618,4 +620,110 @@ va_print_to_socket(int sock, const char *format, va_list va)
   vsnprintf(msgbuf, sizeof(msgbuf)-2, format, va);
   if (msgbuf[strlen(msgbuf)-1] != '\n') strncat(msgbuf, "\n\0", 2);
   send(sock, msgbuf, strlen(msgbuf), 0);
+}
+
+/*
+ * sendtoalldcc
+ *
+ * inputs	- message to send
+ *		- flag if message is to be sent only to all users or opers only
+ * output	- NONE
+ * side effects	- message is sent on /dcc link to all connected
+ *		  users or to only opers on /dcc links
+ *
+ */
+
+void
+sendtoalldcc(int incoming_connnum, int type, char *format,...)
+{
+  va_list va;
+  char msgbuf[MAX_BUFF];
+  int i;
+  int echo;
+
+  va_start(va,format);
+
+  /* we needn't check for \n here because it is done already in print_to_socket() */
+  vsnprintf(msgbuf, sizeof(msgbuf), format, va);
+
+  echo = (connections[incoming_connnum].type & TYPE_ECHO);
+
+  for(i = 1; i < maxconns; i++)
+    {
+      if( !echo && (i == incoming_connnum) )
+	continue;
+
+      if (connections[i].socket != INVALID)
+	{
+	  switch(type)
+	    {
+	    case SEND_KLINE_NOTICES_ONLY:
+	      if (connections[i].type & TYPE_KLINE)
+		print_to_socket(connections[i].socket, msgbuf);
+	      break;
+
+	    case SEND_MOTD_ONLY:
+	      if (connections[i].type & TYPE_MOTD)
+		print_to_socket(connections[i].socket, msgbuf);
+	      break;
+
+	    case SEND_LINK_ONLY:
+	      if (connections[i].type & TYPE_LINK)
+		print_to_socket(connections[i].socket, msgbuf);
+	      break;
+
+	    case SEND_WARN_ONLY:
+	      if (connections[i].type & TYPE_WARN)
+		print_to_socket(connections[i].socket, msgbuf);
+	      break;
+	      
+            case SEND_OPERWALL_ONLY:
+#ifdef ENABLE_W_FLAG
+              if (connections[i].type & TYPE_OPERWALL)
+                print_to_socket(connections[i].socket, msgbuf);
+#endif
+              break;
+
+	    case SEND_LOCOPS_ONLY:
+	      if (connections[i].type & TYPE_LOCOPS)
+		print_to_socket(connections[i].socket, msgbuf);
+	      break;
+	      
+	    case SEND_OPERS_STATS_ONLY:
+	      if(connections[i].type & TYPE_STAT)
+		print_to_socket(connections[i].socket, msgbuf);
+	      break;
+
+	    case SEND_OPERS_ONLY:
+	      if(connections[i].type & (TYPE_OPER | TYPE_WARN))
+		print_to_socket(connections[i].socket, msgbuf);
+	      break;
+
+	    case SEND_OPERS_PRIVMSG_ONLY:
+	      if((connections[i].type & TYPE_OPER) &&
+		 (connections[i].set_modes & SET_PRIVMSG))
+		print_to_socket(connections[i].socket, msgbuf);
+	      break;
+
+	    case SEND_OPERS_NOTICES_ONLY:
+	      if((connections[i].type & TYPE_OPER) &&
+		 (connections[i].set_modes & SET_NOTICES))
+		print_to_socket(connections[i].socket, msgbuf);
+	      break;
+
+            case SEND_SERVERS_ONLY:
+              if(connections[i].type & TYPE_SERVERS)
+                print_to_socket(connections[i].socket, msgbuf);
+              break;
+
+	    case SEND_ALL_USERS:
+	      print_to_socket(connections[i].socket, msgbuf);
+	      break;
+
+	    default:
+	      break;
+	    }
+	}
+    }
+    va_end(va);
 }

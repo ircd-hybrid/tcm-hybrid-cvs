@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.25 2002/05/24 02:31:54 db Exp $
+ * $Id: logging.c,v 1.26 2002/05/24 04:04:23 db Exp $
  *
  * - db
  */
@@ -35,6 +35,7 @@
 #include "config.h"
 #include "tcm.h"
 #include "userlist.h"
+#include "tcm_io.h"
 #include "serverif.h"
 #include "bothunt.h"
 #include "logging.h"
@@ -476,8 +477,10 @@ logfailure(char *nickuh,int botreject)
       tmp = (struct failrec *)malloc(sizeof(struct failrec));
       if(tmp == NULL)
         {
-          print_to_socket(connections[0].socket,"Ran out of memory in logfailure\n");
-          sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in logfailure");
+          print_to_socket(connections[0].socket,
+			  "Ran out of memory in logfailure");
+          sendtoalldcc(incoming_connnum,
+		       SEND_ALL_USERS, "Ran out of memory in logfailure");
 	  exit(0);
         }
 
@@ -519,7 +522,8 @@ kline_report(char *server_notice)
   current_time = time(NULL);
   broken_up_time = localtime(&current_time);
   
-  sendtoalldcc(SEND_KLINE_NOTICES_ONLY, "*** %s", server_notice);
+  sendtoalldcc(incoming_connnum,
+	       SEND_KLINE_NOTICES_ONLY, "*** %s", server_notice);
 
 /* Probably don't need to log klines. --- Toast */
 /* I think we need to log everything JIC - Dianora */
@@ -699,10 +703,10 @@ log(char *format,...)
 void 
 report_uptime(int sock)
 {
-  print_to_socket(sock, "*** tcm has been up for %s\n",
+  print_to_socket(sock, "*** tcm has been up for %s",
        duration((double) time(NULL)-startup_time));
 
-  print_to_socket(sock, "*** tcm has been opered up for %s\n",
+  print_to_socket(sock, "*** tcm has been opered up for %s",
        duration((double) time(NULL)-oper_time));
 }
 

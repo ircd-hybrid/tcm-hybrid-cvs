@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.66 2002/05/24 02:31:51 db Exp $ */
+/* $Id: dcc_commands.c,v 1.67 2002/05/24 04:04:19 db Exp $ */
 
 #include "setup.h"
 
@@ -81,15 +81,17 @@ void m_vlist(int connnum, int argc, char *argv[])
 {
 #ifdef HAVE_REGEX_H
   if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
-    print_to_socket(connections[connnum].socket, "Usage: %s <wildcarded/regexp ip>\n",
-         argv[0]);
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <wildcarded/regexp ip>",
+		    argv[0]);
   else if (argc == 2)
     list_virtual_users(connections[connnum].socket, argv[1], NO);
   else
     list_virtual_users(connections[connnum].socket, argv[2], YES);
 #else
   if (argc < 2)
-    print_to_socket(connections[connnum].socket, "Usage %s <wildcarded ip>\n", argv[0]);
+    print_to_socket(connections[connnum].socket, 
+		    "Usage %s <wildcarded ip>", argv[0]);
   else
     list_virtual_users(connections[connnum].socket, argv[1], NO);
 #endif
@@ -98,7 +100,8 @@ void m_vlist(int connnum, int argc, char *argv[])
 void m_class(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
-    print_to_socket(connections[connnum].socket, "Usage: %s <class name>\n", argv[0]);
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <class name>", argv[0]);
   else
     list_class(connections[connnum].socket, argv[1], NO);
 }
@@ -106,53 +109,37 @@ void m_class(int connnum, int argc, char *argv[])
 void m_classt(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
-    print_to_socket(connections[connnum].socket, "Usage: %s <class name>\n", argv[0]);
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <class name>", argv[0]);
   else
     list_class(connections[connnum].socket, argv[1], YES);
 }
 
 void m_killlist(int connnum, int argc, char *argv[])
 {
-  char reason[1024];
-  int i;
+  char reason[MAX_REASON];
 
 #ifdef HAVE_REGEX_H
   if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
   {
     print_to_socket(connections[connnum].socket,
-         "Usage: %s [-r] <wildcarded/regex userhost>\n", argv[0]);
+		    "Usage: %s [-r] <wildcarded/regex userhost>", argv[0]);
     return;
   }
   if (argc >= 4)
   {
-    if (argv[3][0] == ':')
-      snprintf(reason, sizeof(reason), "%s", argv[3]+1);
-    else
-      snprintf(reason, sizeof(reason), "%s", argv[3]);
-    for (i=4; i<argc; ++i)
-    {
-      strncat(reason, " ", sizeof(reason)-strlen(reason));
-      strncat(reason, argv[i], sizeof(reason)-strlen(reason));
-    }
+    expand_args(reason, MAX_REASON-1, argc-3, argv+3);
   }
 #else
   if (argc < 2)
   {
     print_to_socket(connections[connnum].socket,
-         "Usage: %s <wildcarded userhost>\n", argv[0]);
+         "Usage: %s <wildcarded userhost>", argv[0]);
     return;
   }
   if (argc >= 3)
   {
-    if (argv[2][0] == ':')
-      snprintf(reason, sizeof(reason), "%s", argv[2]+1);
-    else
-      snprintf(reason, sizeof(reason), "%s", argv[2]);
-    for (i=3; i<argc; ++i)
-    {
-      strncat(reason, " ", sizeof(reason)-strlen(reason));
-      strncat(reason, argv[i], sizeof(reason)-strlen(reason));
-    }
+    expand_args(reason, sizeof(reason)-1, argc-3, argv+3);
   }
   else
     snprintf(reason, sizeof(reason), "No reason");
@@ -167,18 +154,21 @@ void m_killlist(int connnum, int argc, char *argv[])
 #ifdef HAVE_REGEX_H
   if (strcasecmp(argv[1], "-r"))
   {
-    sendtoalldcc(SEND_OPERS_ONLY, "*** killlist %s :%s by %s\n", argv[1],
+    sendtoalldcc(incoming_connnum,
+		 SEND_OPERS_ONLY, "*** killlist %s :%s by %s", argv[1],
                  reason, connections[connnum].registered_nick);
     kill_list_users(connections[connnum].socket, argv[1], reason, NO);
   }
   else
   {
-    sendtoalldcc(SEND_OPERS_ONLY, "*** killlist %s :%s by %s\n", argv[2],
+    sendtoalldcc(incoming_connnum,
+		 SEND_OPERS_ONLY, "*** killlist %s :%s by %s", argv[2],
                  reason, connections[connnum].registered_nick);
     kill_list_users(connections[connnum].socket, argv[2], reason, YES);
   }
 #else
-  sendtoalldcc(SEND_OPERS_ONLY, "*** killlist %s :%s by %s\n", argv[1],
+  sendtoalldcc(incoming_connnum,
+	       SEND_OPERS_ONLY, "*** killlist %s :%s by %s", argv[1],
                reason, connections[connnum].registered_nick);
   kill_list_users(connections[connnum].socket, argv[1], reason, NO);
 #endif
@@ -187,24 +177,18 @@ void m_killlist(int connnum, int argc, char *argv[])
 void m_kline(int connnum, int argc, char *argv[])
 {
   char buff[MAX_BUFF];
-  int i, kline_time;
+  int kline_time;
 
   if (argc < 3)
     print_to_socket(connections[connnum].socket,
-         "Usage: %s [time] <[nick]|[user@host]> [reason]\n", argv[0]);
+         "Usage: %s [time] <[nick]|[user@host]> [reason]", argv[0]);
   else
   {
     if ((kline_time = atoi(argv[1])))
     {
       if (argc >= 4)
       {
-        snprintf(buff, sizeof(buff), "%s",
-                 (argv[3][0] == ':') ? argv[3]+1 : argv[3]);
-        for (i=4; i < argc; ++i)
-        {
-          strncat(buff, " ", sizeof(buff)-strlen(buff));
-          strncat(buff, argv[i], sizeof(buff)-strlen(buff));
-        }
+	expand_args(buff, MAX_BUFF-1, argc-3, argv+3);
       }
       else
         snprintf(buff, sizeof(buff), "No reason");
@@ -215,18 +199,10 @@ void m_kline(int connnum, int argc, char *argv[])
     {
       if (argc >= 3)
       {
-        snprintf(buff, sizeof(buff), "%s",
-                 (argv[2][0] == ':') ? argv[2]+1 : argv[2]);
-        for (i=3; i < argc; ++i)
-        {
-          strncat(buff, " ", sizeof(buff)-strlen(buff));
-          strncat(buff, argv[i], sizeof(buff)-strlen(buff));
-        }
+	expand_args(buff, MAX_BUFF-1, argc-3, argv+3);
       }
-      else
-        snprintf(buff, sizeof(buff), "No reason");
       do_a_kline("kline", 0, argv[1], buff,
-                 connections[connnum].registered_nick);
+		 connections[connnum].registered_nick);
     }
   }
 }
@@ -235,7 +211,7 @@ void m_kperm(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
     print_to_socket(connections[connnum].socket,
-         "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
+         "Usage: %s [time] <[nick]|[user@host]>", argv[0]);
   else
     do_a_kline("kperm", 0, argv[1], REASON_KPERM, 
                connections[connnum].registered_nick);
@@ -244,27 +220,21 @@ void m_kperm(int connnum, int argc, char *argv[])
 void m_kill(int connnum, int argc, char *argv[])
 {
   char reason[1024];
-  int i;
 
   if (argc < 2)
   {
     print_to_socket(connections[connnum].socket,
-         "Usage: %s <nick|user@host> [reason]\n", argv[0]);
+         "Usage: %s <nick|user@host> [reason]", argv[0]);
     return;
   }
   else if (argc == 2)
     snprintf(reason, sizeof(reason), "No reason");
   else
   {
-    snprintf(reason, sizeof(reason), "%s", 
-             (argv[2][0] == ':') ? argv[2]+1 : argv[2]);
-    for (i=3; i < argc; ++i)
-    {
-      strncat(reason, " ", sizeof(reason)-strlen(reason));
-      strncat(reason, argv[i], sizeof(reason)-strlen(reason));
-    }
+    expand_args(reason, sizeof(reason)-1, argc-2, argv+2);
   }
-  sendtoalldcc(SEND_KLINE_NOTICES_ONLY, "*** kill %s :%s by %s\n",
+  sendtoalldcc(incoming_connnum,
+	       SEND_KLINE_NOTICES_ONLY, "*** kill %s :%s by %s",
                argv[1], reason, connections[connnum].registered_nick);
   log_kline("KILL", argv[1], 0, connections[connnum].registered_nick, reason);
   if (!(connections[connnum].type & (TYPE_INVS|TYPE_INVM)))
@@ -277,43 +247,55 @@ void m_kill(int connnum, int argc, char *argv[])
   print_to_server("KILL %s :%s", argv[1], reason);
 }
 
-void m_use_kaction(int connnum, int argc, char *argv[]) {
+void m_use_kaction(int connnum, int argc, char *argv[])
+{
   print_to_socket(connections[connnum].socket,
-       "%s is deprecated, please use .kaction\n", argv[0]);
+		  "%s is deprecated, please use .kaction", argv[0]);
 
 }
 
-void m_kaction(int connnum, int argc, char *argv[]) {
+void m_kaction(int connnum, int argc, char *argv[])
+{
   int actionid;
   int kline_time = 0;
   char *who, *host;
 
-  if (argc < 3) {
-    print_to_socket(connections[connnum].socket,
-         "Usage: %s action [time] <[nick]|[user@host]>\n", argv[0]);
-    return;
-  } 
-  actionid = find_action(argv[1]);
-  if (actionid < 0) {
-    print_to_socket(connections[connnum].socket,
-	 "%s is not a valid action\n", argv[1]);
-    return;
-  }
-  
-  if (argc == 4) {
-    if (actions[actionid].method & METHOD_TKLINE) {
-      kline_time = atoi(argv[2]);
-      if (!kline_time) {
-	print_to_socket(connections[connnum].socket,
-	     "%s is not a valid k-line time\n", argv[2]);
-	return;
-      }
-    } else {
+  if (argc < 3)
+    {
       print_to_socket(connections[connnum].socket,
-	   "The %s action is not configured to use temporary k-lines, k-line time will be ignored\n", argv[1]);
+		      "Usage: %s action [time] <[nick]|[user@host]>",
+		      argv[0]);
+      return;
+    } 
+
+  actionid = find_action(argv[1]);
+  if (actionid < 0)
+    {
+      print_to_socket(connections[connnum].socket,
+		      "%s is not a valid action", argv[1]);
+      return;
     }
-    who = argv[3];
-  } else
+  
+  if (argc == 4)
+    {
+      if (actions[actionid].method & METHOD_TKLINE)
+	{
+	  kline_time = atoi(argv[2]);
+	  if (!kline_time)
+	    {
+	      print_to_socket(connections[connnum].socket,
+			      "%s is not a valid k-line time", argv[2]);
+	      return;
+	    }
+	}
+      else
+	{
+	  print_to_socket(connections[connnum].socket,
+ "The %s action is not configured to use temporary k-lines, k-line time will be ignored\n", argv[1]);
+	}
+      who = argv[3];
+    }
+  else
     who = argv[2];
   
   if ((host = strchr(who, '@')))
@@ -322,23 +304,6 @@ void m_kaction(int connnum, int argc, char *argv[]) {
   handle_action(actionid, 0, host ? "" : who, host ? who : 0, host ? host : 0, 0, "Manually set");
 }
 
-/*
-void m_kspam(int connnum, int argc, char *argv[])
-{
-  int kline_time;
-
-  if (argc < 2)
-    print_to_socket(connections[connnum].socket,
-         "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
-  else
-  {
-    if (!(kline_time=atoi(argv[1])))
-      print_to_server("KLINE %s :%s", argv[1], actions[act_spambot].reason);
-    else
-      print_to_server("KLINE %d %s :%s", kline_time, argv[2], actions[act_spambot].reason);
-  }
-}    
-*/
 
 void m_hmulti(int connnum, int argc, char *argv[])
 {
@@ -380,11 +345,13 @@ void m_register(int connnum, int argc, char *argv[])
 {
   if (connections[connnum].type & TYPE_REGISTERED)
   {
-    print_to_socket(connections[connnum].socket, "You are already registered.\n");
+    print_to_socket(connections[connnum].socket, 
+		    "You are already registered.");
     return;
   }
   if (argc != 2)
-    print_to_socket(connections[connnum].socket, "Usage: %s <password>\n", argv[0]);
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <password>", argv[0]);
   else
     register_oper(connnum, argv[1], connections[connnum].nick);
 }
@@ -398,12 +365,14 @@ void m_testline(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
   {
-    print_to_socket(connections[connnum].socket, "Usage: %s <mask>\n", argv[0]);
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <mask>", argv[0]);
     return;
   }
   if (strcasecmp(argv[1], testlines.umask) == 0)
   {
-    print_to_socket(connections[connnum].socket, "Already pending %s\n", argv[1]);
+    print_to_socket(connections[connnum].socket,
+		    "Already pending %s", argv[1]);
     return;
   }
   snprintf(testlines.umask, sizeof(testlines.umask), "%s", argv[1]);
@@ -413,7 +382,8 @@ void m_testline(int connnum, int argc, char *argv[])
 
 void m_actions(int connnum, int argc, char *argv[])
 {
-  print_to_socket(connections[connnum].socket, "%s is deprecated, use .action\n", argv[0]);
+  print_to_socket(connections[connnum].socket,
+		  "%s is deprecated, use .action", argv[0]);
 }
 
 void m_action(int connnum, int argc, char *argv[])
@@ -443,22 +413,28 @@ void m_action(int connnum, int argc, char *argv[])
       kline_time = 0;
       methods[0] = 0;
       reason[0] = 0;
-      for (i=2;i<argc;i++) {
-	if (argv[i][0]==':') {
-	  snprintf(reason, sizeof(reason), "%s ", argv[i]+1);
-	  for (;i<argc;i++) {
-	    strncat(reason, argv[i], sizeof(reason));
-	    strncat(reason, " ", sizeof(reason));
-	  }
-	  break;
+      for (i=2;i<argc;i++)
+	{
+	  if (argv[i][0]==':')
+	    {
+	      snprintf(reason, sizeof(reason), "%s ", argv[i]+1);
+	      for (;i<argc;i++)
+		{
+		  strncat(reason, argv[i], sizeof(reason));
+		  strncat(reason, " ", sizeof(reason));
+		}
+	      break;
+	    }
+	  if ((!kline_time) && (atoi(argv[i])>0))
+	    {
+	      kline_time = atoi(argv[i]);
+	    }
+	  else
+	    {
+	      strncat(methods, argv[i], sizeof(methods));
+	      strncat(methods, " ", sizeof(methods));
+	    }
 	}
-	if ((!kline_time) && (atoi(argv[i])>0)) {
-	  kline_time = atoi(argv[i]);
-	} else {
-	  strncat(methods, argv[i], sizeof(methods));
-	  strncat(methods, " ", sizeof(methods));
-	}
-      }
       i = strlen(methods);
       if (i && (methods[i-1]==' '))
 	methods[i-1] = 0;
@@ -478,41 +454,45 @@ void m_set(int connnum, int argc, char *argv[])
   if (argc < 2)
   {
     if (connections[connnum].set_modes & SET_PRIVMSG)
-      print_to_socket(connections[connnum].socket, "MESSAGES\n");
+      print_to_socket(connections[connnum].socket, "MESSAGES");
     else
-      print_to_socket(connections[connnum].socket, "NOMESSAGES\n");
+      print_to_socket(connections[connnum].socket, "NOMESSAGES");
     if (connections[connnum].set_modes & SET_NOTICES)
-      print_to_socket(connections[connnum].socket, "NOTICES\n");
+      print_to_socket(connections[connnum].socket, "NOTICES");
     else
-      print_to_socket(connections[connnum].socket, "NONOTICES\n");
+      print_to_socket(connections[connnum].socket, "NONOTICES");
     return;
   }
   if ((strcasecmp(argv[1],"MESSAGES")) == 0)
   {
     connections[connnum].set_modes |= SET_PRIVMSG;
-    print_to_socket(connections[connnum].socket, "You will see privmsgs sent to tcm\n");
+    print_to_socket(connections[connnum].socket,
+		    "You will see privmsgs sent to tcm");
   }
   else if ((strcasecmp(argv[1],"NOMESSAGES")) == 0)
   {
     connections[connnum].set_modes &= ~SET_PRIVMSG;
     print_to_socket(connections[connnum].socket,
-         "You will not see privmsgs sent to tcm\n");
+		    "You will not see privmsgs sent to tcm");
   }
   else if ((strcasecmp(argv[1],"NOTICES")) == 0)
   {
     connections[connnum].set_modes |= SET_NOTICES;
     print_to_socket(connections[connnum].socket,
-         "You will see selected server notices\n");
+		    "You will see selected server notices");
   }
   else if ((strcasecmp(argv[1],"NONOTICES")) == 0)
   {
     connections[connnum].set_modes &= ~SET_NOTICES;
-      print_to_socket(connections[connnum].socket, "You will not see server notices\n");
+    print_to_socket(connections[connnum].socket,
+		    "You will not see server notices");
   }
   else
   {
-    print_to_socket(connections[connnum].socket, "Usage: .set [MESSAGES|NOMESSAGES]\n");
-    print_to_socket(connections[connnum].socket, "Usage: .set [NOTICES|NONOTICES]\n");
+    print_to_socket(connections[connnum].socket,
+		    "Usage: .set [MESSAGES|NOMESSAGES]");
+    print_to_socket(connections[connnum].socket,
+		    "Usage: .set [NOTICES|NONOTICES]");
   }
 }
 
@@ -540,12 +520,12 @@ void m_ban(int connnum, int argc, char *argv[])
   }
   else
   {
-    print_to_socket(connections[connnum].socket, "Current bans:\n");
+    print_to_socket(connections[connnum].socket, "Current bans:");
     for (j=0; j < MAXBANS; ++j)
     {
       if (!banlist[j].host[0]) break;
       if (!banlist[j].user[0]) break;
-      print_to_socket(connections[connnum].socket, "%s@%s\n", banlist[j].user,
+      print_to_socket(connections[connnum].socket, "%s@%s", banlist[j].user,
            banlist[j].host);
     }
   }
@@ -556,7 +536,8 @@ void m_umode(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
   {
-    print_to_socket(connections[connnum].socket, "Your current flags are: %s\n",
+    print_to_socket(connections[connnum].socket,
+		    "Your current flags are: %s",
          type_show(connections[connnum].type));
     return;
   }
@@ -564,14 +545,14 @@ void m_umode(int connnum, int argc, char *argv[])
   {
     if (!(connections[connnum].type & TYPE_ADMIN))
     {
-      print_to_socket(connections[connnum].socket, "You aren't an admin\n");
+      print_to_socket(connections[connnum].socket, "You aren't an admin");
       return;
     }
     if ((argv[2][0] == '+') || (argv[2][0] == '-'))
       set_umode(connnum,argv[2],argv[1]);
     else
         print_to_socket(connections[connnum].socket,
-             ".umode [user flags] | [user] | [flags]\n");
+             ".umode [user flags] | [user] | [flags]");
   }
   else
   {
@@ -581,7 +562,8 @@ void m_umode(int connnum, int argc, char *argv[])
     {
       if (!(connections[connnum].type & TYPE_ADMIN))
         {
-          print_to_socket(connections[connnum].socket, "You aren't an admin\n");
+          print_to_socket(connections[connnum].socket,
+			  "You aren't an admin");
           return;
         }
       show_user_umodes(connections[connnum].socket,argv[1]);
@@ -597,7 +579,8 @@ void m_connections(int connnum, int argc, char *argv[])
 void m_disconnect(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
-    print_to_socket(connections[connnum].socket, "Usage: %s <nick>\n", argv[0]);
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <nick>", argv[0]);
   else
     handle_disconnect(connections[connnum].socket, argv[1],
                       connections[connnum].registered_nick);
@@ -606,7 +589,8 @@ void m_disconnect(int connnum, int argc, char *argv[])
 void m_help(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
-    print_to_socket(connections[connnum].socket, "Usage: %s ?\n", argv[0]);
+    print_to_socket(connections[connnum].socket, 
+		    "Usage: %s ?", argv[0]);
   else
     print_help(connections[connnum].socket, argv[1]);
 }
@@ -624,14 +608,15 @@ void m_save(int connnum, int argc, char *argv[])
 
 void m_close(int connnum, int argc, char *argv[])
 {
-  print_to_socket(connections[connnum].socket, "Closing connection\n");
+  print_to_socket(connections[connnum].socket, "Closing connection");
   closeconn(connnum, 0, NULL);
 }
 
 void m_op(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
-    print_to_socket(connections[connnum].socket, "Usage: %s <nick>\n", argv[0]);
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <nick>", argv[0]);
   else
     op(config_entries.defchannel, argv[1]);
 }
@@ -639,7 +624,8 @@ void m_op(int connnum, int argc, char *argv[])
 void m_cycle(int connnum, int argc, char *argv[])
 {
   leave(config_entries.defchannel);
-  sendtoalldcc(SEND_OPERS_ONLY, "I'm cycling.  Be right back.\n");
+  sendtoalldcc(incoming_connnum,
+	       SEND_OPERS_ONLY, "I'm cycling.  Be right back.\n");
   sleep(1);
   /* probably on a cycle, we'd want the tcm to set
    * the key as well...
@@ -651,7 +637,8 @@ void m_cycle(int connnum, int argc, char *argv[])
 
 void m_die(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(SEND_ALL_USERS, "I've been ordered to quit irc, goodbye.");
+  sendtoalldcc(incoming_connnum,
+	       SEND_ALL_USERS, "I've been ordered to quit irc, goodbye.");
   print_to_server("QUIT :Dead by request!");
   log("DIEd by oper %s\n", connections[connnum].registered_nick);
   exit(1);
@@ -659,7 +646,8 @@ void m_die(int connnum, int argc, char *argv[])
 
 void m_restart(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(SEND_ALL_USERS, "I've been ordered to restart.");
+  sendtoalldcc(incoming_connnum,
+	       SEND_ALL_USERS, "I've been ordered to restart.");
   print_to_server("QUIT :Restart by request!");
   log("RESTART by oper %s", connections[connnum].registered_nick);
   sleep(1);
@@ -668,13 +656,13 @@ void m_restart(int connnum, int argc, char *argv[])
 
 void m_info(int connnum, int argc, char *argv[])
 {
-  print_to_socket(connections[connnum].socket, "real server name [%s]\n",
+  print_to_socket(connections[connnum].socket, "real server name [%s]",
        config_entries.rserver_name);
   if (config_entries.hybrid)
-    print_to_socket(connections[connnum].socket, "Hybrid server version %d\n",
+    print_to_socket(connections[connnum].socket, "Hybrid server version %d",
          config_entries.hybrid_version);
   else
-    print_to_socket(connections[connnum].socket, "Non hybrid server\n");
+    print_to_socket(connections[connnum].socket, "Non hybrid server");
 }
 
 void m_locops(int connnum, int argc, char *argv[])
@@ -699,18 +687,20 @@ void m_locops(int connnum, int argc, char *argv[])
   }
   else
     print_to_socket(connections[connnum].socket,
-         "Really, it would help if you said something\n");
+         "Really, it would help if you said something");
 }
 
 void m_unkline(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
-    print_to_socket(connections[connnum].socket, "Usage: %s <user@host>\n", argv[0]);
+    print_to_socket(connections[connnum].socket, 
+		    "Usage: %s <user@host>", argv[0]);
   else
   {
     log("UNKLINE %s attempted by oper %s", argv[1],
         connections[connnum].registered_nick);
-    sendtoalldcc(SEND_OPERS_ONLY, "UNKLINE %s attempted by oper %s", 
+    sendtoalldcc(incoming_connnum,
+		 SEND_OPERS_ONLY, "UNKLINE %s attempted by oper %s", 
                  argv[1], connections[connnum].registered_nick);
     print_to_server("UNKLINE %s",argv[1]);
   }
@@ -732,7 +722,8 @@ void m_dline(int connnum, int argc, char *argv[])
 
   if (!(connections[connnum].type & TYPE_DLINE))
   {
-    print_to_socket(connections[connnum].socket, "You do not have access to .dline\n");
+    print_to_socket(connections[connnum].socket,
+		    "You do not have access to .dline");
     return;
   }
   if (argc >= 3)
@@ -751,7 +742,8 @@ void m_dline(int connnum, int argc, char *argv[])
     else
       log_kline("DLINE", argv[1], 0, connections[connnum].registered_nick,
                 reason);
-    sendtoalldcc(SEND_OPERS_ONLY, "*** dline %s :%s by %s", argv[1],
+    sendtoalldcc(incoming_connnum,
+		 SEND_OPERS_ONLY, "*** dline %s :%s by %s", argv[1],
                  reason, connections[connnum].registered_nick);
     if (!connections[connnum].type & (TYPE_INVS|TYPE_INVM))
     {
@@ -773,7 +765,8 @@ void m_quote(int connnum, int argc, char *argv[])
 
   if (argc < 2)
   {
-    print_to_socket(connections[connnum].socket, "Usage: %s <server message>\n", 
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <server message>", 
          argv[0]);
     return;
   }
@@ -806,7 +799,8 @@ void m_nflood(int connnum, int argc, char *argv[])
 
 void m_rehash(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(SEND_ALL_USERS, "*** rehash requested by %s", 
+  sendtoalldcc(incoming_connnum,
+	       SEND_ALL_USERS, "*** rehash requested by %s", 
                connections[connnum].registered_nick[0] ?
                connections[connnum].registered_nick :
                connections[connnum].nick);
@@ -828,7 +822,8 @@ void m_rehash(int connnum, int argc, char *argv[])
 
 void m_trace(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(SEND_OPERS_ONLY, "Trace requested by %s",
+  sendtoalldcc(incoming_connnum,
+	       SEND_OPERS_ONLY, "Trace requested by %s",
                connections[connnum].registered_nick[0] ?
                connections[connnum].registered_nick :
                connections[connnum].nick);
@@ -842,7 +837,8 @@ void m_failures(int connnum, int argc, char *argv[])
   if (argc < 2)
     report_failures(connections[connnum].socket, 7);
   else if (atoi(argv[1]) < 1)
-    print_to_socket(connections[connnum].socket, "Usage: %s [min failures]\n", argv[0]);
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s [min failures]", argv[0]);
   else
     report_failures(connections[connnum].socket, atoi(argv[1]));
 }
@@ -852,7 +848,8 @@ void m_domains(int connnum, int argc, char *argv[])
   if (argc < 2)
     report_domains(connections[connnum].socket, 5);
   else if (atoi(argv[1]) < 1)
-    print_to_socket(connections[connnum].socket, "Usage: %s [min users]\n", argv[0]);
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s [min users]", argv[0]);
   else
     report_domains(connections[connnum].socket, atoi(argv[1]));
 }
@@ -885,14 +882,15 @@ void m_nfind(int connnum, int argc, char *argv[])
 #ifdef HAVE_REGEX_H
   if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
     print_to_socket(connections[connnum].socket,
-         "Usage: %s [-r] <wildcarded/regexp nick>\n", argv[0]);
+		    "Usage: %s [-r] <wildcarded/regexp nick>", argv[0]);
   else if (argc == 2)
     list_nicks(connections[connnum].socket, argv[1], NO);
   else
     list_nicks(connections[connnum].socket, argv[2], YES);
 #else
   if (argc <= 2)
-    print_to_socket(connections[connnum].socket, "Usage: %s <wildcarded nick>\n", argv[0]);
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <wildcarded nick>", argv[0]);
   else
     list_nicks(connections[connnum].socket, argv[1], NO);
 #endif
@@ -903,14 +901,15 @@ void m_list(int connnum, int argc, char *argv[])
 #ifdef HAVE_REGEX_H
   if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
     print_to_socket(connections[connnum].socket,
-         "Usage: %s [-r] <wildcarded/regex userhost>\n", argv[0]);
+         "Usage: %s [-r] <wildcarded/regex userhost>", argv[0]);
   else if (argc == 2)
     list_users(connections[connnum].socket, argv[1], NO);
   else
     list_users(connections[connnum].socket, argv[2], YES);
 #else
   if (argc < 2)
-    print_to_socket(connections[connnum].socket, "Usage: %s <wildcarded userhost>\n",
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <wildcarded userhost>",
          argv[0]);
   else
     list_users(connections[connnum].socket, argv[1], NO);
@@ -925,7 +924,7 @@ void m_ulist(int connnum, int argc, char *argv[])
 #ifdef HAVE_REGEX_H
   if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
     print_to_socket(connections[connnum].socket,
-         "Usage: %s [-r] <wildcarded/regex username>\n", argv[0]);
+         "Usage: %s [-r] <wildcarded/regex username>", argv[0]);
   else if (argc == 2)
   {
     snprintf(buf, MAX_BUFF, "%s@*", argv[1]);
@@ -938,7 +937,8 @@ void m_ulist(int connnum, int argc, char *argv[])
   }
 #else
   if (argc < 2)
-    print_to_socket(connections[connnum].socket, "Usage: %s <wildcarded username>\n",
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <wildcarded username>",
          argv[0]);
   else
   {
@@ -957,7 +957,7 @@ void m_hlist(int connnum, int argc, char *argv[])
 #ifdef HAVE_REGEX_H
   if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
     print_to_socket(connections[connnum].socket,
-         "Usage: %s [-r] <wildcarded/regex host>\n", argv[0]);
+         "Usage: %s [-r] <wildcarded/regex host>", argv[0]);
   else if (argc == 2)
   {
     snprintf(buf, MAX_BUFF, "*@%s", argv[1]);
@@ -970,7 +970,8 @@ void m_hlist(int connnum, int argc, char *argv[])
   }
 #else
   if (argc < 2)
-    print_to_socket(connections[connnum].socket, "Usage: %s <wildcarded host>\n",
+    print_to_socket(connections[connnum].socket, 
+		    "Usage: %s <wildcarded host>",
          argv[0]);
   else
   {
@@ -998,7 +999,8 @@ dccproc(int connnum, int argc, char *argv[])
 
   if (argv[0][0] == '.')
   {
-    print_to_socket(connections[connnum].socket, "Unknown command [%s]\n", argv[0]+1);
+    print_to_socket(connections[connnum].socket, 
+		    "Unknown command [%s]", argv[0]+1);
     return;
   }
   p = buff;
@@ -1025,14 +1027,16 @@ dccproc(int connnum, int argc, char *argv[])
              connections[connnum].nick, config_entries.dfltnick, buffer);
 
   if(connections[connnum].type & TYPE_PARTYLINE )
-    sendtoalldcc(opers_only, "%s", dccbuff); /* Thanks Garfr, Talen */
+    sendtoalldcc(incoming_connnum,
+		 opers_only, "%s", dccbuff); /* Thanks Garfr, Talen */
   else
   {
     if(opers_only == SEND_OPERS_ONLY)
-      sendtoalldcc(opers_only, "%s", dccbuff);
+      sendtoalldcc(incoming_connnum,
+		   opers_only, "%s", dccbuff);
     else
       print_to_socket(connections[connnum].socket,
-           "You are not +p, not sending to chat line\n");
+           "You are not +p, not sending to chat line");
   }
   return;
 }
@@ -1053,53 +1057,72 @@ set_actions(int sock, char *key, char *methods, int duration, char *reason)
   int newmethods = 0;
   int changing = (methods || duration || reason);
 
-  while (methods) {
-    p = strchr(methods, ' ');
-    if (p) 
-      *p++ = 0;
-    // Lookup method constant based on method name
-    i = get_method_number(methods);
-    if (i) {
-      newmethods |= i;
-    } else {
-      print_to_socket(sock, "%s is not a valid method\n", methods);
-      return;
+  while (methods)
+    {
+      p = strchr(methods, ' ');
+      if (p) 
+	*p++ = 0;
+      /* Lookup method constant based on method name */
+      i = get_method_number(methods);
+      if (i)
+	{
+	  newmethods |= i;
+	}
+      else
+	{
+	  print_to_socket(sock, "%s is not a valid method", methods);
+	  return;
+	}
+      methods = p;
     }
-    methods = p;
-  }
 
   if (key == NULL)
     key = "*";
-  if (changing) {
-    print_to_socket(sock, "Updating actions matching '%s'\n", key);
-  } else {
-    print_to_socket(sock, "Listing actions matching '%s'\n", key);
-  }
-
-  for (i=0; i<MAX_ACTIONS; i++) {
-    if (actions[i].name[0]) {
-      if (!wldcmp(key, actions[i].name)) {
-	if (newmethods) 
-	  set_action_method(i, newmethods);
-	if (reason)
-	  set_action_reason(i, reason);
-	if (duration)
-	  set_action_time(i, duration);
-	
-	if (changing) {
-	  print_to_socket(sock, "%s action now: %s, duration %d, reason '%s'\n", actions[i].name,
-	       get_method_names(actions[i].method),
-	       actions[i].klinetime,
-	       actions[i].reason);
-	} else {
-	  print_to_socket(sock, "%s action: %s, duration %d, reason '%s'\n", actions[i].name,
-	       get_method_names(actions[i].method),
-	       actions[i].klinetime,
-	       actions[i].reason);
-	}
-      }
+  if (changing)
+    {
+      print_to_socket(sock, "Updating actions matching '%s'", key);
     }
-  }
+  else
+    {
+      print_to_socket(sock, "Listing actions matching '%s'", key);
+    }
+
+  for (i=0; i<MAX_ACTIONS; i++)
+    {
+      if (actions[i].name[0])
+	{
+	  if (!wldcmp(key, actions[i].name))
+	    {
+	      if (newmethods) 
+		set_action_method(i, newmethods);
+	      if (reason)
+		set_action_reason(i, reason);
+	      if (duration)
+		set_action_time(i, duration);
+	
+	      if (changing)
+		{
+		  print_to_socket(
+				  sock,
+			  "%s action now: %s, duration %d, reason '%s'",
+				  actions[i].name,
+				  get_method_names(actions[i].method),
+				  actions[i].klinetime,
+				  actions[i].reason);
+		}
+	      else
+		{
+		  print_to_socket(
+				  sock,
+				  "%s action: %s, duration %d, reason '%s'",
+				  actions[i].name,
+				  get_method_names(actions[i].method),
+				  actions[i].klinetime,
+				  actions[i].reason);
+		}
+	    }
+	}
+    }
 }
 
 /*
@@ -1194,7 +1217,7 @@ set_umode(int connnum, char *flags, char *registered_nick)
     }
 
     print_to_socket(connections[connnum].socket,
-	 "Your flags are now: +%s\n",
+	 "Your flags are now: +%s",
 	 type_show(connections[connnum].type));
 
     save_umodes(connections[connnum].registered_nick,
@@ -1265,13 +1288,13 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	}
 
 	print_to_socket(connections[connnum].socket,
-	     "Flags for %s are now: +%s\n",
-	     registered_nick, type_show(connections[z].type));
+			"Flags for %s are now: +%s",
+			registered_nick, type_show(connections[z].type));
 
 	print_to_socket(connections[z].socket,
-	     "Flags for you changed by %s are now: +%s\n",
-	     connections[connnum].nick,
-	     type_show(connections[z].type));
+			"Flags for you changed by %s are now: +%s",
+			connections[connnum].nick,
+			type_show(connections[z].type));
       }
     }
 
@@ -1350,7 +1373,7 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	  }
 	  
 	  print_to_socket(connections[connnum].socket,
-	       "Startup flags for %s are now: +%s\n",
+	       "Startup flags for %s are now: +%s",
 	       registered_nick, type_show(new_type));
 	  save_umodes(registered_nick, new_type);
 	}
@@ -1379,7 +1402,8 @@ save_umodes(char *registered_nick, unsigned long type)
 
   if((fp = fopen(user_pref,"w")) == NULL)
   {
-    sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s for write\n",
+    sendtoalldcc(incoming_connnum,
+		 SEND_ALL_USERS, "Couldn't open %s for write",
 		 user_pref );
     return;
   }
@@ -1413,7 +1437,8 @@ load_umodes(int connect_id)
   {
     if((fp = fopen(user_pref,"w")) == NULL)
     {
-      sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s for write\n",
+      sendtoalldcc(incoming_connnum,
+		   SEND_ALL_USERS, "Couldn't open %s for write",
 		   user_pref );
       return;
     }
@@ -1440,8 +1465,10 @@ load_umodes(int connect_id)
     type = type & TYPE_SUSPENDED;
   }
 
-  print_to_socket(connections[connect_id].socket, "Set umodes from %s\n", user_pref );
-  print_to_socket(connections[connect_id].socket, "Your current flags are now: %s\n",
+  print_to_socket(connections[connect_id].socket, 
+		  "Set umodes from %s", user_pref );
+  print_to_socket(connections[connect_id].socket,
+		  "Your current flags are now: %s",
        type_show(connections[connect_id].type));
 }
 
@@ -1520,7 +1547,7 @@ show_user_umodes(int sock, char *registered_nick)
 
   if(!found)
   {
-    print_to_socket(sock,"Can't find user [%s]\n", registered_nick );
+    print_to_socket(sock,"Can't find user [%s]", registered_nick );
     return;
   }
      
@@ -1529,7 +1556,7 @@ show_user_umodes(int sock, char *registered_nick)
 
   if((fp = fopen(user_pref,"r")) == NULL)
   {
-    print_to_socket(sock,"%s user flags are %s\n", 
+    print_to_socket(sock,"%s user flags are %s", 
 	 registered_nick,
 	 type_show(type));
     return;
@@ -1547,7 +1574,7 @@ show_user_umodes(int sock, char *registered_nick)
 
   pref_type &= ~(TYPE_ADMIN|TYPE_PENDING);
 
-  print_to_socket(sock,"%s user flags are %s\n", 
+  print_to_socket(sock,"%s user flags are %s", 
        registered_nick,
        type_show(type|pref_type));
 }
@@ -1574,8 +1601,9 @@ register_oper(int connnum, char *password, char *who_did_command)
       if ( connections[connnum].type & TYPE_SUSPENDED)
       {
 	print_to_socket(connections[connnum].socket,
-	     "You are suspended\n");
-	sendtoalldcc(SEND_OPERS_ONLY,"%s is suspended\n",
+	     "You are suspended");
+	sendtoalldcc(incoming_connnum,
+		     SEND_OPERS_ONLY,"%s is suspended",
 		     who_did_command);
 	if (connections[connnum].type &
 	    (TYPE_PENDING))
@@ -1584,9 +1612,10 @@ register_oper(int connnum, char *password, char *who_did_command)
       else
       {
 	print_to_socket(connections[connnum].socket,
-	     "You are now registered\n");
-	sendtoalldcc(SEND_OPERS_ONLY,
-		     "%s has registered\n",
+	     "You are now registered");
+	sendtoalldcc(incoming_connnum,
+		     SEND_OPERS_ONLY,
+		     "%s has registered",
 		     who_did_command);
 	if (connections[connnum].type &
 	    (TYPE_PENDING))
@@ -1595,15 +1624,16 @@ register_oper(int connnum, char *password, char *who_did_command)
     }
     else
     {
-      print_to_socket(connections[connnum].socket,"illegal password\n");
-      sendtoalldcc(SEND_OPERS_ONLY,
-		   "illegal password from %s\n",
+      print_to_socket(connections[connnum].socket,"illegal password");
+      sendtoalldcc(incoming_connnum,
+		   SEND_OPERS_ONLY,
+		   "illegal password from %s",
 		   who_did_command);
     }
   }
   else
   {
-    print_to_socket(connections[connnum].socket,"missing password\n");
+    print_to_socket(connections[connnum].socket,"missing password");
   }
 }
 
@@ -1656,7 +1686,7 @@ list_exemptions(int sock)
     for (n=0;actions[n].name[0];n++)
       if ((1 << n) & hostlist[i].type)
 	snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " %s", actions[n].name);
-    print_to_socket(sock,"%s\n", buf);
+    print_to_socket(sock,"%s", buf);
   }
 }
 
@@ -1680,7 +1710,7 @@ list_connections(int sock)
       if(connections[i].registered_nick[0] != 0)
       {
 	print_to_socket(sock,
-	     "%s/%s %s (%s@%s) is connected - idle: %ld\n",
+	     "%s/%s %s (%s@%s) is connected - idle: %ld",
 	     connections[i].nick,
 	     connections[i].registered_nick,
 	     type_show(connections[i].type),
@@ -1691,7 +1721,7 @@ list_connections(int sock)
       else
       {
 	print_to_socket(sock,
-	     "%s %s (%s@%s) is connected - idle: %ld\n",
+	     "%s %s (%s@%s) is connected - idle: %ld",
 	     connections[i].nick,
 	     type_show(connections[i].type),
 	     connections[i].user,
@@ -1718,7 +1748,7 @@ handle_disconnect(int sock,char *nickname,char *who_did_command)
   int  i;
 
   if (nickname == NULL)
-    print_to_socket(sock, "Usage: disconnect <nickname>\n");
+    print_to_socket(sock, "Usage: disconnect <nickname>");
   else
   {
     for (i=1; i<maxconns; i++)
@@ -1729,11 +1759,11 @@ handle_disconnect(int sock,char *nickname,char *who_did_command)
 	  type = "oper";
 
 	print_to_socket(sock,
-	     "Disconnecting %s %s\n",
+	     "Disconnecting %s %s",
 	     type,
 	     connections[i].nick);
 	print_to_socket(sock,
-	     "You have been disconnected by oper %s\n",
+	     "You have been disconnected by oper %s",
 	     who_did_command);
 	closeconn(i, 0, NULL);
       }
@@ -1752,8 +1782,9 @@ handle_disconnect(int sock,char *nickname,char *who_did_command)
 static void 
 handle_save(int sock,char *nick)
 {
-  print_to_socket(sock, "Saving %s file\n", CONFIG_FILE);
-  sendtoalldcc(SEND_OPERS_ONLY, "%s is saving %s\n", nick, CONFIG_FILE);
+  print_to_socket(sock, "Saving %s file", CONFIG_FILE);
+  sendtoalldcc(incoming_connnum,
+	       SEND_OPERS_ONLY, "%s is saving %s", nick, CONFIG_FILE);
   save_prefs();
 }
 
@@ -2192,7 +2223,7 @@ print_help(int sock,char *text)
     {
       if( (userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) == NULL )
         {
-          print_to_socket(sock,"Help is not currently available\n");
+          print_to_socket(sock,"Help is not currently available");
           return;
         }
     }
@@ -2205,7 +2236,7 @@ print_help(int sock,char *text)
         {
           if( (userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) == NULL )
             {
-              print_to_socket(sock,"Help is not currently available\n");
+              print_to_socket(sock,"Help is not currently available");
               return;
             }
         }
@@ -2214,7 +2245,8 @@ print_help(int sock,char *text)
                      HELP_PATH,HELP_FILE,text);
       if( (userfile = fopen(help_file,"r")) == NULL)
         {
-          print_to_socket(sock,"Help for '%s' is not currently available\n",text);
+          print_to_socket(sock,
+			  "Help for '%s' is not currently available",text);
           return;
         }
     }

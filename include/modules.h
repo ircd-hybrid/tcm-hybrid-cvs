@@ -1,7 +1,7 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.17 2002/05/23 23:26:54 leeh Exp $ */
+/* $Id: modules.h,v 1.18 2002/05/24 04:04:17 db Exp $ */
 
 struct module
 {
@@ -36,7 +36,6 @@ struct common_function *reload;
 /*				12 */
 #define F_RELOAD		14
 
-extern void sendtoalldcc(int type,char *format,...);
 extern void report(int type, int channel_send_flag, char *format,...);
 extern char *date_stamp(void);
 

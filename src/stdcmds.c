@@ -1,5 +1,4 @@
 /************************************************************
-* MrsBot by Hendrix <jimi@texas.net>                        *
 * stdcmds.c                                                 *
 *   Simple interfaces to send out most types of IRC messages*
 *   Contains interface to msg an entire file to a user      *
@@ -14,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.61 2002/05/24 02:31:54 db Exp $ */
+/* $Id: stdcmds.c,v 1.62 2002/05/24 04:04:23 db Exp $ */
 
 #include "setup.h"
 
@@ -32,6 +31,7 @@
 
 #include "config.h"
 #include "tcm.h"
+#include "tcm_io.h"
 #include "logging.h"
 #include "serverif.h"
 #include "stdcmds.h"
@@ -71,7 +71,7 @@ free_hash_links(struct hashrec *ptr)
 {
   struct hashrec *next_ptr;
 
-  while( ptr )
+  while(ptr != NULL)
     {
       next_ptr = ptr->collision;
 
@@ -271,7 +271,7 @@ report(int type, int channel_send_flag, char *format,...)
   /* Probably not a format string bug, but I'm calling it this way
   ** for safety sake - Hwy
   */
-  sendtoalldcc(type,"%s",msg);
+  sendtoalldcc(incoming_connnum, type,"%s",msg);
 
   if( channel_send_flag & config_entries.channel_report )
     {
@@ -551,13 +551,15 @@ handle_action(int actionid, int idented, char *nick, char *user,
   if (actions[actionid].method & METHOD_DCC_WARN)
     {
       if (addcmt && addcmt[0])
-	sendtoalldcc(SEND_WARN_ONLY, "*** %s violation (%s) from %s (%s@%s): %s", 
+	sendtoalldcc(incoming_connnum, SEND_WARN_ONLY,
+		     "*** %s violation (%s) from %s (%s@%s): %s", 
 		     actions[actionid].name, addcmt,
 		     (nick && nick[0]) ? nick : "<unknown>", 
 		     (user && user[0]) ? user : "<unknown>",
 		     host, comment);
       else
-	sendtoalldcc(SEND_WARN_ONLY, "*** %s violation from %s (%s@%s): %s", 
+	sendtoalldcc(incoming_connnum, SEND_WARN_ONLY,
+		     "*** %s violation from %s (%s@%s): %s", 
 		     actions[actionid].name, 
 		     (nick && nick[0]) ? nick : "<unknown>", 
 		     (user && user[0]) ? user : "<unknown>",
@@ -668,7 +670,8 @@ list_nicks(int sock,char *nick,int regex)
   {
     if ((errbuf = (char *)malloc(1024)) == NULL)
     {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_nicks()");
+      sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+		   "Ran out of memory in list_nicks()");
       exit(0);
     }
     regerror(i, (regex_t *)&reg, errbuf, 1024); 
@@ -742,7 +745,8 @@ list_users(int sock,char *userhost,int regex)
   int i, numfound = 0;
   if ((uhost = (char *)malloc(1024)) == NULL)
   {
-    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
+    sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+		 "Ran out of memory in list_users()\n");
     exit(0);
   }
 
@@ -751,7 +755,8 @@ list_users(int sock,char *userhost,int regex)
   {
     if ((errbuf = (char *)malloc(1024)) == NULL)
     {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
+      sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+		   "Ran out of memory in list_users()");
       exit(0);
     }
     regerror(i, (regex_t *)&reg, errbuf, 1024); 
@@ -826,7 +831,8 @@ list_virtual_users(int sock,char *userhost,int regex)
 
   if ((uhost = (char *)malloc(1024)) == NULL)
   {
-    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
+    sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+		 "Ran out of memory in list_users()");
     exit(0);
   }
 
@@ -835,7 +841,8 @@ list_virtual_users(int sock,char *userhost,int regex)
   {
     if ((errbuf = (char *)malloc(REGEX_SIZE)) == NULL)
     {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
+      sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+		   "Ran out of memory in list_users()");
       exit(0);
     }
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE); 
@@ -898,7 +905,8 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
   {
     if ((errbuf = (char *)malloc(REGEX_SIZE)) == NULL)
     {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in kill_list_users()\n");
+      sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+		   "Ran out of memory in kill_list_users()");
       exit(0);
     }
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE);
@@ -1656,16 +1664,16 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
   if(config_entries.hybrid)
     {
       if(kline_time)
-        sendtoalldcc(SEND_OPERS_ONLY,
-                     "%s %d %s : %s added by oper %s\n",
+        sendtoalldcc(incoming_connnum, SEND_OPERS_ONLY,
+                     "%s %d %s : %s added by oper %s",
                      command_name,
                      kline_time,
                      pattern,
                      format_reason(reason),
                      who_did_command);
       else
-        sendtoalldcc(SEND_OPERS_ONLY,
-                     "%s %s : %s added by oper %s\n",
+        sendtoalldcc(incoming_connnum, SEND_OPERS_ONLY,
+                     "%s %s : %s added by oper %s",
                      command_name,
                      pattern,
                      format_reason(reason),
@@ -1673,8 +1681,8 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
     }
   else
     {
-      sendtoalldcc(SEND_OPERS_ONLY,
-                   "%s %s : %s added by oper %s\n",
+      sendtoalldcc(incoming_connnum, SEND_OPERS_ONLY,
+                   "%s %s : %s added by oper %s",
                    command_name,
                    pattern,
                    format_reason(reason),

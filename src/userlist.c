@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.60 2002/05/24 02:31:55 db Exp $
+ * $Id: userlist.c,v 1.61 2002/05/24 04:04:23 db Exp $
  *
  */
 
@@ -26,6 +26,7 @@
 #include "config.h"
 #include "token.h"
 #include "tcm.h"
+#include "tcm_io.h"
 #include "serverif.h"
 #include "userlist.h"
 #include "logging.h"
@@ -359,8 +360,8 @@ save_prefs(void)
 
   if ((fp_in = fopen(CONFIG_FILE,"r")) == NULL)
   {
-    sendtoalldcc(SEND_ALL_USERS,
-		 "Couldn't open %s: %s\n", CONFIG_FILE, strerror(errno));
+    sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+		 "Couldn't open %s: %s", CONFIG_FILE, strerror(errno));
     return;
   }
 
@@ -368,8 +369,8 @@ save_prefs(void)
 
   if ((fp_out = fopen(filename, "w")) == NULL)
   {
-    sendtoalldcc(SEND_ALL_USERS, 
-		 "Couldn't open %s: %s\n", filename, strerror(errno));
+    sendtoalldcc(incoming_connnum, SEND_ALL_USERS, 
+		 "Couldn't open %s: %s", filename, strerror(errno));
     fclose(fp_in);
     return;
   }
@@ -430,7 +431,7 @@ save_prefs(void)
   fclose(fp_out);
 
   if (rename(filename, CONFIG_FILE))
-    sendtoalldcc(SEND_ALL_USERS,
+    sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
 		 "Error renaming new config file.  Changes may be lost.  %s",
                  strerror(errno));
   chmod(CONFIG_FILE, 0600);
@@ -1042,7 +1043,7 @@ void reload_user_list(int sig)
 
   initopers();
 
-  sendtoalldcc(SEND_ALL_USERS, "*** Caught SIGHUP ***\n");
+  sendtoalldcc(incoming_connnum, SEND_ALL_USERS, "*** Caught SIGHUP ***\n");
 }
 
 #ifdef DEBUGMODE

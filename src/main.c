@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.51 2002/05/24 02:31:54 db Exp $ */
+/* $Id: main.c,v 1.52 2002/05/24 04:04:23 db Exp $ */
 
 #include "setup.h"
 
@@ -152,7 +152,8 @@ bindsocket(char *hostport)
   /* open an inet socket */
   if ((plug = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
-      sendtoalldcc(SEND_ALL_USERS, "Can't assign fd for socket\n");
+      sendtoalldcc(incoming_connnum,
+		   SEND_ALL_USERS, "Can't assign fd for socket\n");
       exit(0);
       return (INVALID);
     }
@@ -242,111 +243,6 @@ bindsocket(char *hostport)
   return (plug);
 }
 
-/*
- * sendtoalldcc
- *
- * inputs	- message to send
- *		- flag if message is to be sent only to all users or opers only
- * output	- NONE
- * side effects	- message is sent on /dcc link to all connected
- *		  users or to only opers on /dcc links
- *
- */
-
-void
-sendtoalldcc(int type,char *format,...)
-{
-  va_list va;
-  char msgbuf[MAX_BUFF];
-  int i;
-  int echo;
-
-  va_start(va,format);
-
-  /* we needn't check for \n here because it is done already in print_to_socket() */
-  vsnprintf(msgbuf, sizeof(msgbuf), format, va);
-
-  echo = (connections[incoming_connnum].type & TYPE_ECHO);
-
-  for(i = 1; i < maxconns; i++)
-    {
-      if( !echo && (i == incoming_connnum) )
-	continue;
-
-      if (connections[i].socket != INVALID)
-	{
-	  switch(type)
-	    {
-	    case SEND_KLINE_NOTICES_ONLY:
-	      if (connections[i].type & TYPE_KLINE)
-		print_to_socket(connections[i].socket, msgbuf);
-	      break;
-
-	    case SEND_MOTD_ONLY:
-	      if (connections[i].type & TYPE_MOTD)
-		print_to_socket(connections[i].socket, msgbuf);
-	      break;
-
-	    case SEND_LINK_ONLY:
-	      if (connections[i].type & TYPE_LINK)
-		print_to_socket(connections[i].socket, msgbuf);
-	      break;
-
-	    case SEND_WARN_ONLY:
-	      if (connections[i].type & TYPE_WARN)
-		print_to_socket(connections[i].socket, msgbuf);
-	      break;
-	      
-            case SEND_OPERWALL_ONLY:
-#ifdef ENABLE_W_FLAG
-              if (connections[i].type & TYPE_OPERWALL)
-                print_to_socket(connections[i].socket, msgbuf);
-#endif
-              break;
-
-	    case SEND_LOCOPS_ONLY:
-	      if (connections[i].type & TYPE_LOCOPS)
-		print_to_socket(connections[i].socket, msgbuf);
-	      break;
-	      
-	    case SEND_OPERS_STATS_ONLY:
-	      if(connections[i].type & TYPE_STAT)
-		print_to_socket(connections[i].socket, msgbuf);
-	      break;
-
-	    case SEND_OPERS_ONLY:
-	      if(connections[i].type & (TYPE_OPER | TYPE_WARN))
-		print_to_socket(connections[i].socket, msgbuf);
-	      break;
-
-	    case SEND_OPERS_PRIVMSG_ONLY:
-	      if((connections[i].type & TYPE_OPER) &&
-		 (connections[i].set_modes & SET_PRIVMSG))
-		print_to_socket(connections[i].socket, msgbuf);
-	      break;
-
-	    case SEND_OPERS_NOTICES_ONLY:
-	      if((connections[i].type & TYPE_OPER) &&
-		 (connections[i].set_modes & SET_NOTICES))
-		print_to_socket(connections[i].socket, msgbuf);
-	      break;
-
-            case SEND_SERVERS_ONLY:
-              if(connections[i].type & TYPE_SERVERS)
-                print_to_socket(connections[i].socket, msgbuf);
-              break;
-
-	    case SEND_ALL_USERS:
-	      print_to_socket(connections[i].socket, msgbuf);
-	      break;
-
-	    default:
-	      break;
-	    }
-	}
-    }
-    va_end(va);
-}
 
 /*
  * closeconn()
@@ -374,7 +270,8 @@ closeconn(int connnum, int argc, char *argv[])
       maxconns = i+1;
     }
     
-  sendtoalldcc(SEND_ALL_USERS, "%s %s (%s@%s) has disconnected",
+  sendtoalldcc(incoming_connnum,
+	       SEND_ALL_USERS, "%s %s (%s@%s) has disconnected",
                connections[connnum].type & TYPE_OPER ? "Oper" : "User", 
                connections[connnum].nick, connections[connnum].user,
                connections[connnum].host);

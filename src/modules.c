@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.30 2002/05/24 02:31:54 db Exp $B
+ * $Id: modules.c,v 1.31 2002/05/24 04:04:23 db Exp $B
  *
  */
 
@@ -17,6 +17,7 @@
 #include <unistd.h>
 #include "config.h"
 #include "tcm.h"
+#include "tcm_io.h"
 #include "commands.h"
 #include "bothunt.h"
 #include "modules.h"
@@ -90,7 +91,8 @@ void mod_add_cmd(struct TcmMessage *msg)
 
   if ((msg_hash_table[msgindex].cmd = (char *)malloc(MAX_BUFF)) == NULL)
     {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in mod_add_cmd");
+      sendtoalldcc(incoming_connnum,
+		   SEND_ALL_USERS, "Ran out of memory in mod_add_cmd");
       exit(1);
     }
 
@@ -195,7 +197,8 @@ int load_a_module(char *name, int log)
 #ifdef DEBUGMODE
       printf("Error loading module %s\n", err);
 #endif
-      sendtoalldcc(SEND_ADMIN_ONLY, "Error loading module %s: %s", name, err);
+      sendtoalldcc(incoming_connnum,
+		   SEND_ADMIN_ONLY, "Error loading module %s: %s", name, err);
       return -1;
     }
 
@@ -206,7 +209,8 @@ int load_a_module(char *name, int log)
 #ifdef DEBUGMODE
       printf("Module %s has no _modinit() function\n", name);
 #endif
-      sendtoalldcc(SEND_ADMIN_ONLY, "Module %s has no _modinit() function", name);
+      sendtoalldcc(incoming_connnum, SEND_ADMIN_ONLY,
+		   "Module %s has no _modinit() function", name);
       dlclose(modpointer);
       return -1;
     }
@@ -219,14 +223,16 @@ int load_a_module(char *name, int log)
   for (i=0;i<max_mods;++i) if (!modlist[i].name) break;
   if (modlist[i].name)
     {
-      sendtoalldcc(SEND_ALL_USERS, "Too many modules loaded\n");
+      sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+		   "Too many modules loaded");
       return -1;
     }
   modlist[i].address = modpointer;
   modlist[i].version = ver;
   if (!(modlist[i].name = (char *)malloc(30)))
     {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in load_a_module\n");
+      sendtoalldcc(incoming_connnum, SEND_ALL_USERS,
+		   "Ran out of memory in load_a_module");
       exit(1);
     }
   strcpy(modlist[i].name, name);
@@ -234,7 +240,8 @@ int load_a_module(char *name, int log)
   
   if (log)
     {
-      sendtoalldcc(SEND_ADMIN_ONLY, "Module %s [version: %s] loaded at 0x%lx",
+      sendtoalldcc(incoming_connnum, SEND_ADMIN_ONLY,
+		   "Module %s [version: %s] loaded at 0x%lx",
                   (modlist[i].name == unknown_ver) ? name : modlist[i].name,
                    modlist[i].version, (long)modlist[i].address);
 #ifdef DEBUGMODE
@@ -266,7 +273,8 @@ int unload_a_module(char *name, int log)
   modlist[modindex].address = NULL;
 
   if (log)
-    sendtoalldcc(SEND_ADMIN_ONLY, "Module %s unloaded", name);
+    sendtoalldcc(incoming_connnum, SEND_ADMIN_ONLY,
+		 "Module %s unloaded", name);
   return 0;
 }
 
@@ -274,47 +282,57 @@ void m_modload (int connnum, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (load_a_module(argv[1], 1) != -1)
-    sendtoalldcc(SEND_ADMIN_ONLY, "Loaded by %s", connections[connnum].nick);
+    sendtoalldcc(incoming_connnum, SEND_ADMIN_ONLY,
+		 "Loaded by %s", connections[connnum].nick);
   else
     print_to_socket(connections[connnum].socket, "Load of %s failed\n", argv[1]);
 }
 
-void m_modunload (int connnum, int argc, char *argv[]) {
+void m_modunload (int connnum, int argc, char *argv[])
+{
   if (argc != 2) return;
   if (unload_a_module(argv[1], 1) != -1)
-    sendtoalldcc(SEND_ADMIN_ONLY, "Loaded by %s", connections[connnum].nick);
+    sendtoalldcc(incoming_connnum, SEND_ADMIN_ONLY,
+		 "Loaded by %s", connections[connnum].nick);
 }
 
-void m_modreload (int connnum, int argc, char *argv[]) {
+void m_modreload (int connnum, int argc, char *argv[])
+{
   if (argc != 2) return;
   if (unload_a_module(argv[1], 0) != -1)
     {
       if (load_a_module(argv[1], 1))
-        sendtoalldcc(SEND_ADMIN_ONLY, "Reloaded by %s", connections[connnum].nick);
+        sendtoalldcc(incoming_connnum, SEND_ADMIN_ONLY,
+		     "Reloaded by %s", connections[connnum].nick);
     }
-  else print_to_socket(connections[connnum].socket, "Module %s is not loaded\n", argv[1]);
+  else
+    print_to_socket(connections[connnum].socket,
+		    "Module %s is not loaded", argv[1]);
 }
 
-void m_modlist (int connnum, int argc, char *argv[]) {
+void m_modlist (int connnum, int argc, char *argv[])
+{
   int i;
 
   if (argc >= 2)
-    print_to_socket(connections[connnum].socket, "Listing all modules matching '%s'...\n", argv[1]);
+    print_to_socket(connections[connnum].socket,
+		    "Listing all modules matching '%s'...", argv[1]);
   else
-    print_to_socket(connections[connnum].socket, "Listing all modules...\n");
+    print_to_socket(connections[connnum].socket, "Listing all modules...");
+
   for (i=0;i<max_mods;++i)
    {
      if (modlist[i].name != NULL)
        {
          if (argc == 2 && !wldcmp(argv[1], modlist[i].name))
-           print_to_socket(connections[connnum].socket, "--- %s 0x%lx %s\n", 
+           print_to_socket(connections[connnum].socket, "--- %s 0x%lx %s", 
                 modlist[i].name, modlist[i].address, modlist[i].version);
          else if (argc == 1)
-           print_to_socket(connections[connnum].socket, "--- %s 0x%lx %s\n", 
+           print_to_socket(connections[connnum].socket, "--- %s 0x%lx %s", 
                 modlist[i].name, modlist[i].address, modlist[i].version);
        }
    }
-  print_to_socket(connections[connnum].socket, "Done.\n");
+  print_to_socket(connections[connnum].socket, "Done.");
 }
 
 /* XXX - Return value is ignored...use it or lose it... */

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.218 2003/03/29 00:22:53 bill Exp $
+ * $Id: bothunt.c,v 1.219 2003/03/29 02:05:17 bill Exp $
  */
 
 #include <stdio.h>
@@ -602,6 +602,9 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     {
       /* Force it to be null */
       userinfo.gecos[0] = '\0';
+#ifdef AGGRESSIVE_GECOS
+      send_to_server("WHO %s", userinfo.nick);
+#endif
     }
 
     add_user_host(&userinfo, NO);

@@ -1,3 +1,40 @@
+bill        2003/04/14 04:50:38 EDT	(20030414_0)
+
+  Modified files:
+    etc                  tcm.cf 
+    help                 help.clones 
+    include              actions.h userlist.h 
+    src                  .depend Makefile.in actions.c main.c 
+                         userlist.c 
+  Added files:
+    etc                  dynamic.hosts 
+    include              skline.h 
+    src                  skline.c 
+  Log:
+  - added smart klines to tcm, here's how they work:
+    when an action is set to skline <duration>, it will take all calls to
+    handle_action(), and compare the hostname against a list of hostmasks,
+    defined in etc/dynamic.hosts.  if the hostname matches a hostmask,
+    the host is considered dynamic, and the kline is temporary.  otherwise,
+    the kline is permanent.
+  - updated conf/help
+  
+  Revision  Changes    Path
+  1.1       +128 -0    tcm-hybrid/etc/dynamic.hosts (new)
+  1.34      +5 -2      tcm-hybrid/etc/tcm.cf
+  1.14      +2 -0      tcm-hybrid/help/help.clones
+  1.21      +1 -1      tcm-hybrid/include/actions.h
+  1.1       +23 -0     tcm-hybrid/include/skline.h (new)
+  1.93      +1 -0      tcm-hybrid/include/userlist.h
+  1.38      +3 -1      tcm-hybrid/src/.depend
+  1.37      +1 -0      tcm-hybrid/src/Makefile.in
+  1.51      +89 -29    tcm-hybrid/src/actions.c
+  1.133     +4 -4      tcm-hybrid/src/main.c
+  1.1       +189 -0    tcm-hybrid/src/skline.c (new)
+  1.149     +7 -0      tcm-hybrid/src/userlist.c
+
+
+
 bill        2003/04/09 01:02:56 EDT	(20030409_0)
 
   Modified files:

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.130 2002/06/22 09:21:50 leeh Exp $
+ * $Id: userlist.c,v 1.131 2002/06/22 09:57:36 leeh Exp $
  *
  */
 
@@ -112,12 +112,17 @@ void
 m_umode(int connnum, int argc, char *argv[])
 {
   struct oper_entry *user;
+  slink_node *ptr;
+  int new_type = 0;
 
   if(argc < 2)
   {
     user = find_user_in_userlist(connections[connnum].registered_nick);
 
-    if(user != NULL)
+    if(user == NULL)
+      print_to_socket(connections[connnum].socket,
+		      "Unable to find matching userlist entry!");
+    else
       print_to_socket(connections[connnum].socket, 
   		      "Your current flags are: %s",
 		      type_show(user->type));
@@ -127,21 +132,32 @@ m_umode(int connnum, int argc, char *argv[])
   {
     if((argv[1][0] == '+') || (argv[1][0] == '-'))
     {
-      user = find_user_in_userlist(connections[connnum].registered_nick);
-
-      if(user != NULL)
+      /* update *all* the conf entries for this user, as there can
+       * be multiple ones for different user@hosts
+       */
+      for(ptr = user_list; ptr; ptr = ptr->next)
       {
+        user = ptr->data;
+
+	if(strcasecmp(connections[connnum].registered_nick, user->usernick))
+          continue;
+
+	/* dont set usermodes for stuff from stats O */
+        if(*user->password == '\0')
+          continue;
+
         /* admins can set what they want.. */
         if(user->type & FLAGS_ADMIN)
           set_umode(user, 1, argv[1]);
         else
           set_umode(user, 0, argv[1]);
 
-        print_to_socket(connections[connnum].socket,
-		        "Your flags are now: %s",
-		        type_show(user->type));
+	new_type = user->type;
       }
 
+      print_to_socket(connections[connnum].socket,
+		      "Your flags are now: %s",
+		      type_show(new_type));
       return;
     }
     else
@@ -177,18 +193,30 @@ m_umode(int connnum, int argc, char *argv[])
       return;
     }
 
-    user = find_user_in_userlist(argv[1]);
     user_conn = find_user_in_connections(argv[1]);
 
     if((argv[2][0] == '+') || (argv[2][0] == '-'))
     {
-      if(user != NULL)
+      /* update every relevant entry in userlist */
+      for(ptr = user_list; ptr; ptr = ptr->next)
       {
-        set_umode(user, 1, argv[2]);
+        user = ptr->data;
 
+        if(strcasecmp(argv[1], user->usernick))
+          continue;
+
+        if(*user->password == '\0')
+          continue;
+
+        set_umode(user, 1, argv[2]);
+	new_type = user->type;
+      }
+
+      if(new_type)
+      {
         print_to_socket(connections[connnum].socket,
-	  	        "User flags for %s are now: %s",
-		        argv[1], type_show(user->type));
+  	                "User flags for %s are now: %s",
+	 	        argv[1], type_show(new_type));
 
         if(user_conn >= 0)
           print_to_socket(connections[user_conn].socket,
@@ -197,8 +225,10 @@ m_umode(int connnum, int argc, char *argv[])
 			  connections[connnum].registered_nick);
       }
       else
+      {
         print_to_socket(connections[connnum].socket, 
 			"Can't find user [%s]", argv[1]);
+      }
     }
     else
       print_to_socket(connections[connnum].socket,
@@ -1151,7 +1181,7 @@ exempt_summary()
       exempt = ptr->data;
 
       if(exempt->type & i)
-        printf(" %s@%s", exempt->user, exempt->host);
+        printf(" %s@%s", exempt->username, exempt->host);
     }
 
     printf("\n");

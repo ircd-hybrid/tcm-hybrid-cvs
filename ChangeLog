@@ -1,3 +1,9 @@
+*** 20000930_1 by bill
+
+changed comment for DETECT_DNS_SPOOFERS
+turned DETECT_DNS_SPOOFERS off by default
+
+
 *** 20000902_9 by db
 - discovered I had a previously released 2.4.7, bumped to 2.5.0 again
   to reduce confusion.

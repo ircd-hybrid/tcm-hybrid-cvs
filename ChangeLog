@@ -1,3 +1,22 @@
+db          2002/06/04 00:43:14 EDT	(20020604_1)
+
+  Modified files:
+    include              config.h tcm_io.h 
+    src                  dcc.c tcm_io.c 
+  Log:
+  - reworked the way time outs happen, yet another handler handles timeouts.
+  - listen() socket was not being made non blocking, so the tcm was blocking
+    waiting for /dcc chats *oops*
+  - reworked dcc.c code, more sensible naming. made work.
+  
+  Revision  Changes    Path
+  1.66      +4 -0      tcm-hybrid/include/config.h
+  1.35      +8 -7      tcm-hybrid/include/tcm_io.h
+  1.4       +68 -16    tcm-hybrid/src/dcc.c
+  1.82      +32 -14    tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/06/03 21:18:23 EDT	(20020604_0)
 
   Modified files:

@@ -1,18 +1,17 @@
-# $Id: Makefile.in,v 1.26 2003/01/22 02:50:50 bill Exp $
+# $Id: Makefile.in,v 1.27 2003/08/17 02:59:00 joshk Exp $
 CC = @CC@
 RM = @RM@
+CP = @CP@
 MKDEP = ${CC} -MM
 
 TCMLIBS = @LIBS@
 INCLUDES = -I@SRCDIR@/include
 CPPFLAGS = ${INCLUDES} @CPPFLAGS@
 
-# Any other defines you need, add below.
-DEFINES = -DDPATH=\"@prefix@\"
-
 # GNU CC allows us to use -g with -O
 CFLAGS = @CFLAGS@
 
+prefix = @prefix@
 # Debugers can uncomment this line for paranoid output
 # CPPFLAGS = ${INCLUDES} -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations
 
@@ -27,66 +26,62 @@ all: tcm
 
 build: tcm
 
-install:
-	-@if [ ! -x bin/tcm ] ; then \
-	make all ; \
-	fi
-
+install: tcm
 	@echo Installing...
-	-@if [ ! -x @prefix@ ] ; then \
-	echo mkdir @prefix@ ; \
-	mkdir @prefix@ ; \
+	-@if [ ! -x $(prefix) ] ; then \
+	echo mkdir -p $(prefix) ; \
+	mkdir -p $(prefix) ; \
 	fi
 
-	-@if [ ! -x @prefix@/bin ] ; then \
-	echo mkdir @prefix@/bin ; \
-	mkdir @prefix@/bin ; \
+	-@if [ ! -x $(prefix)/bin ] ; then \
+	echo mkdir -p $(prefix)/bin ; \
+	mkdir -p $(prefix)/bin ; \
 	fi
 
-	-@if [ ! -x @prefix@/etc ] ; then \
-	echo mkdir @prefix@/etc ; \
-	mkdir @prefix@/etc ; \
+	-@if [ ! -x $(prefix)/etc ] ; then \
+	echo mkdir -p $(prefix)/etc ; \
+	mkdir -p $(prefix)/etc ; \
 	fi
 
-	-@if [ -x @prefix@/modules-old ] ; then \
-	echo rm -rf @prefix@/modules-old ; \
-	${RM} -rf @prefix@/modules-old ; \
+	-@if [ -x $(prefix)/modules-old ] ; then \
+	echo rm -rf $(prefix)/modules-old ; \
+	${RM} -rf $(prefix)/modules-old ; \
 	fi
 
-	-@if [ -x @prefix@/modules ] ; then \
-	echo mv @prefix@/modules @prefix@/modules-old ; \
-	mv @prefix@/modules @prefix@/modules-old ; \
+	-@if [ -x $(prefix)/modules ] ; then \
+	echo mv $(prefix)/modules $(prefix)/modules-old ; \
+	mv $(prefix)/modules $(prefix)/modules-old ; \
 	fi
 
-	-@if [ ! -x @prefix@/modules ] ; then \
-	echo mkdir @prefix@/modules ; \
-	mkdir @prefix@/modules ; \
+	-@if [ ! -x $(prefix)/modules ] ; then \
+	echo mkdir -p $(prefix)/modules ; \
+	mkdir -p $(prefix)/modules ; \
 	fi
 
-	-@if [ ! -x @prefix@/help ] ; then \
-	echo mkdir @prefix@/help ; \
-	mkdir @prefix@/help ; \
+	-@if [ ! -x $(prefix)/help ] ; then \
+	echo mkdir -p $(prefix)/help ; \
+	mkdir -p $(prefix)/help ; \
 	fi
 
-	-@if [ ! -x @prefix@/logs ] ; then \
-	echo mkdir @prefix@/logs ; \
-	mkdir @prefix@/logs ; \
+	-@if [ ! -x $(prefix)/logs ] ; then \
+	echo mkdir -p $(prefix)/logs ; \
+	mkdir -p $(prefix)/logs ; \
 	fi
 
-	mv -f bin/tcm bin/mkpasswd @prefix@/bin/
+	mv -f bin/tcm bin/mkpasswd $(prefix)/bin/
 
-	-@if [ ! -e @prefix@/etc/tcm.cf ] ; then \
-	echo mv etc/tcm.cf @prefix@/etc/ ; \
-        mv etc/tcm.cf @prefix@/etc/ ; \
+	-@if [ ! -e $(prefix)/etc/tcm.cf ] ; then \
+	echo ${CP} etc/tcm.cf $(prefix)/etc/ ; \
+        ${CP} etc/tcm.cf $(prefix)/etc/ ; \
         fi
 
-	-@if [ ! -e @prefix@/etc/userlist.cf ] ; then \
-	echo mv etc/userlist.cf @prefix@/etc/ ; \
-	mv -f etc/userlist.cf @prefix@/etc/ ; \
+	-@if [ ! -e $(prefix)/etc/userlist.cf ] ; then \
+	echo ${CP} etc/userlist.cf $(prefix)/etc/ ; \
+	${CP} -f etc/userlist.cf $(prefix)/etc/ ; \
 	fi
 
-#	cp modules/*.so @prefix@/modules/
-	cp help/help.* help/help @prefix@/help/
+#	cp modules/*.so $(prefix)/modules/
+	${CP} help/help.* help/help $(prefix)/help/
 	@echo Done
 
 clean:
@@ -100,9 +95,6 @@ clean:
 	echo "To really restart installation, make distclean" ; \
 	fi
 
-cleandata:
-	${RM} -f DEBUG etc/tcm.pid
-
 distclean:
 	@for i in $(SUBDIRS); do \
 		echo "Distcleaning $$i";\
@@ -112,21 +104,19 @@ distclean:
 	${RM} -f Makefile configure.lineno config.status config.cache config.log include/setup.h etc/tcm.pid
 	${RM} -f DEBUG bin/tcm bin/mkpasswd etc/*.pref logs/*log logs/clone_log_* logs/tcm.log*
 	${RM} -f ktrace.out tcm.core core
+	${RM} -rf autom4te.cache
 
 .c.o:
 	${CC} ${CPPFLAGS} ${CFLAGS} ${DEFINES} -c $<
 
-tcm:
-	-@if [ ! -f include/setup.h ] ; then \
-		echo "Hmm...doesn't look like you've run configure..."; \
-		echo "Doing so now."; \
-		sh configure; \
-	fi
+tcm: include/setup.h
 	@for i in $(SUBDIRS); do \
 		echo "Building $$i";\
-		cd $$i;\
-		${MAKE} CPPFLAGS="${CPPFLAGS}" build; cd ..;\
+		cd $$i && ${MAKE} build || exit; cd ..; \
 	done
+
+include/setup.h:
+	sh configure
 
 lint:
 	@for i in $(SUBDIRS); do \
@@ -142,3 +132,4 @@ depend:
 		${MAKE} depend; cd ..;\
 	done
 
+.PHONY: clean distclean all build lint depend install

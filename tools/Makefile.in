@@ -1,7 +1,10 @@
-CC=@CC@
-RM=@RM@
-TCMLIBS=@LIBS@
-INCLUDEDIR=-I../include
+# $Id: Makefile.in,v 1.6 2003/08/17 02:59:09 joshk Exp $
+
+CC		= @CC@
+RM		= @RM@
+CFLAGS		= @CFLAGS@
+TCMLIBS		= @LIBS@
+INCLUDEDIR	= -I../include
 
 .c.o:
 	${CC} ${CPPFLAGS} ${INCLUDEDIR} ${CFLAGS} -c $<
@@ -23,3 +26,5 @@ depend:
 
 lint:
 	lint -aacgprxhH ${CPPFLAGS} ${INCLUDEDIR} mkpasswd.c >>../lint.out
+
+.PHONY: build all clean distclean lint

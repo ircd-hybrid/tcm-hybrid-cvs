@@ -1,4 +1,4 @@
-Quick install guide for tcm-hybrid3.0
+Quick install guide for tcm-hybrid3.1
 
   To install into a directory other than the compile directory, you 
 must run ./configure --prefix with the pathname following.  Example:
@@ -21,3 +21,5 @@ are also online at http://www.ircd-hybrid.org/tcm/tcm.html
 the provided files for more information.
 
 - Dianora
+
+$Id: INSTALL,v 1.7 2003/08/17 02:59:00 joshk Exp $

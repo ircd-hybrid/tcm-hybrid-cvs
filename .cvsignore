@@ -5,3 +5,4 @@ config.status
 Makefile
 tcm
 mkpasswd
+autom4te.cache

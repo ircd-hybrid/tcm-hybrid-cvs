@@ -1,3 +1,8 @@
+*** 20010131_1 by wcampbel
+Major docs cleanup
+Minor bug fixes with the tokenizing code, and the commands parser
+
+
 *** 20010123_1 by wcampbel
 pwd.h isn't needed for a password encrypter
 

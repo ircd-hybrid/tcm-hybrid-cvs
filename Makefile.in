@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.29 2004/05/11 19:31:48 bill Exp $
+# $Id: Makefile.in,v 1.30 2004/06/10 23:20:17 bill Exp $
 CC = @CC@
 RM = @RM@
 CP = @CP@
@@ -93,7 +93,7 @@ distclean:
 	${RM} -f Makefile configure.lineno config.status config.cache config.log include/setup.h etc/tcm.pid
 	${RM} -f DEBUG bin/tcm bin/mkpasswd etc/*.pref logs/*log logs/clone_log_* logs/tcm.log*
 	${RM} -f ktrace.out tcm.core core
-	${RM} -rf autom4te.cache
+	${RM} -rf autoconf/autom4te.cache
 
 .c.o:
 	${CC} ${CPPFLAGS} ${CFLAGS} ${DEFINES} -c $<

@@ -1,9 +1,25 @@
 /*
- * tcm_parser.y
+ *  tcm-hybrid: an advanced irc connection monitor
+ *  tcm_parser.y: parses configuration file
  *
- * config file parser
+ *  Copyright (C) 2004 by William Bierman and the Hybrid Development Team
  *
- * $Id: tcm_parser.y,v 1.4 2004/06/09 21:23:00 bill Exp $
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ *  USA
+ *
+ *    $Id: tcm_parser.y,v 1.5 2004/06/10 23:20:24 bill Exp $
  */
 
 %{
@@ -71,7 +87,7 @@ char *user, *host;
 %token	SCLONE
 %token	SERVER
 %token	SKLINE
-%token	SKLINE_FILE
+%token	_SKLINE_FILE
 %token	SPAM
 %token	SSL_KEYFILE
 %token	SSL_KEYPHRASE
@@ -267,7 +283,7 @@ general_server: SERVER '=' QSTRING ';'
   strlcpy(config_entries.server_name, yylval.string, sizeof(config_entries.server_name));
 };
 
-general_skline_file: SKLINE_FILE '=' QSTRING ';'
+general_skline_file: _SKLINE_FILE '=' QSTRING ';'
 {
   strlcpy(config_entries.dynamic_config, yylval.string, sizeof(config_entries.dynamic_config));
 };

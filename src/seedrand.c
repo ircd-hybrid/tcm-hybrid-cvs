@@ -1,9 +1,25 @@
 /*
- * seedrand 0.1
+ *  tcm-hybrid: an advanced irc connection monitor
+ *  seedrand.c: assign integer measuring nickname randomness
  *
- * Copyright (c) 2002-2003 Bill Jonus
+ *  Copyright (C) 2002-2004 by William Bierman
  *
- * $Id: seedrand.c,v 1.9 2004/05/11 19:31:59 bill Exp $
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ *  USA
+ *
+ *    $Id: seedrand.c,v 1.10 2004/06/10 23:20:23 bill Exp $
  */
 
 #include <assert.h>
@@ -38,15 +54,15 @@ struct dcc_command seedrand_msgtab = {
 };
 
 int uses[72]; /* the size of this must be updated as s_all is changed! */
-char *s_all		= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\\|^_-{[}]`";
-char *s_consonants	= "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ";
-char *s_left_brackets	= "{[";
-char *s_lower		= "abcdefghijklmnopqrstuvwxyz";
-char *s_numerics	= "0123456789";
-char *s_right_brackets	= "}]";
-char *s_sylable_end	= "bdgjkpqxzBDGJKPQXZ";
-char *s_upper		= "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-char *s_vowels		= "aeiouAEIOU";
+const char *s_all		= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\\|^_-{[}]`";
+const char *s_consonants	= "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ";
+const char *s_left_brackets	= "{[";
+const char *s_lower		= "abcdefghijklmnopqrstuvwxyz";
+const char *s_numerics		= "0123456789";
+const char *s_right_brackets	= "}]";
+const char *s_sylable_end	= "bdgjkpqxzBDGJKPQXZ";
+const char *s_upper		= "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const char *s_vowels		= "aeiouAEIOU";
 
 struct node {
   char string[100];

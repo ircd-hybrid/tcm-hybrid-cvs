@@ -1,15 +1,11 @@
 /*
  * skline.h - Smart K-Lines
  *
- * $Id: skline.h,v 1.3 2004/06/09 21:22:58 bill Exp $
+ * $Id: skline.h,v 1.4 2004/06/10 23:20:21 bill Exp $
  */
 
 #ifndef __SKLINE_H_
 #define __SKLINE_H_
-
-#ifndef SKLINE_PATH
-#define SKLINE_PATH "etc/dynamic.hosts"
-#endif
 
 struct dynamic_info
 {

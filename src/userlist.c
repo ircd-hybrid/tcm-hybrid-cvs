@@ -1,9 +1,25 @@
-/* tcm-hybrid/src/userlist.c
+/*
+ *  tcm-hybrid: an advanced irc connection monitor
+ *  userlist.c: maintains userlist in memory and writes user preferences
  *
- * contains functions for loading and updating the userlist and
- * config files.
+ *  Copyright (C) 2004 by William Bierman and the Hybrid Development Team
  *
- * $Id: userlist.c,v 1.157 2004/06/09 21:23:00 bill Exp $
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ *  USA
+ *
+ *    $Id: userlist.c,v 1.158 2004/06/10 23:20:24 bill Exp $
  */
 
 #include <errno.h>
@@ -21,7 +37,6 @@
 #include "parse.h"
 #include "logging.h"
 #include "stdcmds.h"
-#include "wild.h"
 #include "match.h"
 #include "bothunt.h"
 #include "actions.h"
@@ -532,7 +547,7 @@ is_an_oper(char *username, char *host)
     user = ptr->data;
 
     if((match(user->username, username) == 0) &&
-       (wldcmp(user->host, host) == 0))
+       (match(user->host, host) == 0))
       return(YES);
   }
 
@@ -561,23 +576,23 @@ ok_host(char *username, char *host, int type)
     
     if (strchr(username, '?') || strchr(username, '*'))
     {
-      if(wldwld(exempt->username, username) == 0)
+      if(match(exempt->username, username) == 0)
         ok++;
     }
     else
     {
-      if(wldcmp(exempt->username, username) == 0)
+      if(match(exempt->username, username) == 0)
         ok++;
     }
 
     if (strchr(host, '?') || strchr(host, '*'))
     {
-      if(wldwld(exempt->host, host) == 0)
+      if(match(exempt->host, host) == 0)
         ok++;
     }
     else
     {
-      if(wldcmp(exempt->host, host) == 0)
+      if(match(exempt->host, host) == 0)
         ok++;
     }
 

@@ -1,19 +1,26 @@
-/************************************************************
-* stdcmds.c                                                 *
-*   Simple interfaces to send out most types of IRC messages*
-*   Contains interface to msg an entire file to a user      *
-* Includes routines:                                        *
-*   void op                                                 *
-*   void join                                               *
-*   void leave                                              *
-*   void notice                                             *
-*   void msg                                                *
-*   void newnick                                            *
-*   void get_userhost                                       *
-*   void privmsg                                            *
-************************************************************/
-
-/* $Id: stdcmds.c,v 1.104 2004/06/10 18:51:08 bill Exp $ */
+/*
+ *  tcm-hybrid: an advanced irc connection monitor
+ *  stdcmds.c: standard commands used by IRC
+ *
+ *  Copyright (C) 2004 by William Bierman and the Hybrid Development Team
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ *  USA
+ *
+ *    $Id: stdcmds.c,v 1.105 2004/06/10 23:20:23 bill Exp $
+ */
 
 #include "setup.h"
 
@@ -36,7 +43,6 @@
 #include "logging.h"
 #include "stdcmds.h"
 #include "userlist.h"
-#include "wild.h"
 #include "hash.h"
 
 /* The following are primitives that send messages to the server to perform

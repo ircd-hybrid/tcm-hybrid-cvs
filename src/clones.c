@@ -1,7 +1,25 @@
-/* clones.c
+/*
+ *  tcm-hybrid: an advanced irc connection monitor
+ *  clones.c: dcc commands for clone listing and action
  *
- * contains the code for clone functions
- * $Id: clones.c,v 1.28 2004/05/11 19:31:58 bill Exp $
+ *  Copyright (C) 2004 by William Bierman and the Hybrid Development Team
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ *  USA
+ *
+ *    $Id: clones.c,v 1.29 2004/06/10 23:20:23 bill Exp $
  */
 
 #include <assert.h>
@@ -18,7 +36,6 @@
 #include "tcm_io.h"
 #include "bothunt.h"
 #include "stdcmds.h"
-#include "wild.h"
 #include "parse.h"
 #include "hash.h"
 #include "handler.h"

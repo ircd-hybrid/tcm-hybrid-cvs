@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.43 2004/06/10 18:51:08 bill Exp $
+# $Id: Makefile.in,v 1.44 2004/06/10 23:20:22 bill Exp $
 
 CC = @CC@
 RM = @RM@
@@ -53,8 +53,7 @@ SOURCES =       actions.c	\
 		tools.c		\
 		userlist.c	\
 		@UTIL_C@	\
-		vclones.c	\
-		wild.c
+		vclones.c
 
 OBJECTS = ${SOURCES:.c=.o}
 

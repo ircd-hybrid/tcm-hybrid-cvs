@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.53)
 
-AC_COPYRIGHT([$Id: configure.ac,v 1.4 2004/06/10 18:51:03 bill Exp $])
+AC_COPYRIGHT([$Id: configure.ac,v 1.5 2004/06/10 23:20:19 bill Exp $])
 
 AC_INIT([tcm-hybrid],[4-beta1])
 
@@ -78,9 +78,12 @@ AC_SEARCH_LIBS(inet_aton, resolv,
 [if test "$ac_cv_search_inet_aton" = "no"; then UTIL_C=util.c; fi])
 
 dnl Basic check for SSL.
-AC_CHECK_HEADERS([openssl/err.h openssl/rsa.h openssl/pem.h openssl/md5.h],	\
-                  AC_DEFINE([RESPOND_C], "respond.c"),				\
-                  AC_DEFINE([NO_SSL]))
+AC_CHECK_HEADERS([openssl/err.h openssl/rsa.h openssl/pem.h openssl/md5.h], , [no_ssl=1])
+if test "$no_ssl" = 0; then
+  AC_DEFINE([NO_SSL])
+else
+  RESPOND_C=respond.c
+fi
 AC_SUBST(RESPOND_C)
 
 AC_CHECK_LIB(crypto, RSA_private_decrypt, , AC_DEFINE([NO_SSL]))

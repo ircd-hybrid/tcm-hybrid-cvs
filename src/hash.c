@@ -1,6 +1,25 @@
-/* hash.c
+/*
+ *  tcm-hybrid: an advanced irc connection monitor
+ *  hash.c: hashing routines
  *
- * $Id: hash.c,v 1.74 2004/06/03 20:15:25 bill Exp $
+ *  Copyright (C) 2004 by William Bierman and the Hybrid Development Team
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ *  USA
+ *
+ *    $Id: hash.c,v 1.75 2004/06/10 23:20:23 bill Exp $
  */
 
 #include <stdio.h>
@@ -24,7 +43,6 @@
 #include "bothunt.h"
 #include "userlist.h"
 #include "logging.h"
-#include "wild.h"
 #include "serno.h"
 #include "patchlevel.h"
 #include "hash.h"
@@ -158,12 +176,12 @@ find_nick_or_host(const char *find, int find_nick)
 	{
 	  if(find_nick)
 	    {
-	      if(!wldcmp((char *)find, ptr->info->nick))
+	      if(!match((char *)find, ptr->info->nick))
 		return (ptr->info);
 	    }
 	  else
 	    {
-	      if(!wldcmp((char *)find, ptr->info->host))
+	      if(!match((char *)find, ptr->info->host))
 		return (ptr->info);
 	    }
 	}

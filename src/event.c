@@ -1,9 +1,9 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  tcm-hybrid: an advanced Internet Relay Chat Daemon(ircd).
  *  event.c: Event functions.
  *
  *  Copyright (C) 1998-2000 Regents of the University of California
- *  Copyright (C) 2001-2002 Hybrid Development Team
+ *  Copyright (C) 2001-2004 William Bierman and The Hybrid Development Team
  *
  *  Code borrowed from the squid web cache by Adrian Chadd.
  *  Original header:
@@ -23,7 +23,7 @@
  *  developed and/or copyrighted by other sources.  Please see the
  *  CREDITS file for full details.
  *
- *  $Id: event.c,v 1.14 2003/08/13 02:43:31 joshk Exp $
+ *  $Id: event.c,v 1.15 2004/06/10 23:20:23 bill Exp $
  */
 
 /*

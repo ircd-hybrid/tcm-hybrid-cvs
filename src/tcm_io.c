@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.30 2002/05/25 19:21:43 jmallett Exp $
+ * $Id: tcm_io.c,v 1.31 2002/05/25 22:03:00 db Exp $
  */
 
 #include <stdio.h>
@@ -55,18 +55,10 @@
 
 static int get_line(char *inbuf,int *len, struct connection *connections_p);
 static int connect_to_dcc_ip(const char *nick, const char *hostport);
-static void connect_remote_client(char *, char *, char *, int);
 static void va_print_to_socket(int sock, const char *format, va_list va);
 static void va_print_to_server(const char *format, va_list va);
 static void finish_accept_dcc_chat(int i);
-
-/* -1 indicates listening for connection */
-int initiated_dcc_socket = -1;
-time_t initiated_dcc_socket_time;
-
-char initiated_dcc_nick[MAX_NICK];
-char initiated_dcc_user[MAX_USER];
-char initiated_dcc_host[MAX_HOST];
+static void finish_dcc_chat(int i);
 
 fd_set readfds;            /* file descriptor set for use with select */
 fd_set writefds;
@@ -136,6 +128,8 @@ read_packet(void)
 	if (connections[i].socket != INVALID)
 	  {
 	    FD_SET(connections[i].socket, &readfds);
+	    if (connections[i].state != S_IDLE)
+	      FD_SET(connections[i].socket, &writefds);
 	  }
       }
 
@@ -156,26 +150,25 @@ read_packet(void)
 
       for (i=0; i < MAXDCCCONNS; i++)
       {
-          if (connections[i].socket != INVALID &&
-              FD_ISSET(connections[i].socket, &readfds))
+	if (FD_ISSET(connections[i].socket, &readfds))
           {
-	    if (i == 0)
+	    if (connections[i].state == S_CONNECTING_TO_SERVER)
 	      {
-		if (connections[i].connecting)
-		  {
-		    connections[i].connecting = 0;
-		    _signon(0, 0, NULL);
-		    continue;
-		  }
+		connections[i].state = S_IDLE;
+		_signon(0, 0, NULL);
+		continue;
 	      }
-	    else
+	    else if (connections[i].state == S_CONNECTING_TO_CLIENT)
 	      {
-		if (connections[i].connecting)
-		  {
-		    connections[i].connecting = 0;
-		    finish_accept_dcc_chat(i);
-		    continue;
-		  }
+		connections[i].state = S_IDLE;
+		finish_dcc_chat(i);
+		continue;
+	      }
+	    else if (connections[i].state == S_LISTENING_TO_CLIENT)
+	      {
+		connections[i].state = S_IDLE;
+		finish_accept_dcc_chat(i);
+		continue;
 	      }
 
             incoming_connnum = i;
@@ -378,7 +371,7 @@ linkclosed(int connnum, int argc, char *argv[])
   sleep(30);
 
   connections[0].socket = connect_to_server(serverhost);
-  connections[0].connecting = 1;
+  connections[0].state = S_CONNECTING_TO_SERVER;
   if (connections[0].socket == INVALID)
     {
       log_problem("linkclosed()", "invalid socket quitting");
@@ -390,75 +383,38 @@ linkclosed(int connnum, int argc, char *argv[])
 }
 
 
+
 /*
- * connect_remote_client()
+ * find_free_connection_slot
  *
  * inputs       - nick
- *              - username
- *              - hostname
- *              - incoming socket
+ *              - host
  * output       - none
- * side effects -
+ * side effects - finds a free connection slot to use
  */
 
-static void
-connect_remote_client(char *nick,char *user,char *host,int sock)
+int
+find_free_connection_slot(const char *nick)
 {
   int i;
-  struct sockaddr_in incoming_addr;
-  int addrlen;
 
   for (i=1; i < MAXDCCCONNS+1; ++i)
-  {
-    if (connections[i].socket == INVALID)
     {
-      if (maxconns < i+1)
-        maxconns = i+1;
-      break;
+      if (connections[i].socket == INVALID)
+	{
+	  if (maxconns < i+1)
+	    maxconns = i+1;
+	  break;
+	}
     }
-  }
 
   if(i > MAXDCCCONNS)
   {
     notice(nick,"Max users on tcm, dcc chat rejected\n");
-    (void)close(sock);
-    return;
+    return(-1);
   }
 
-  addrlen = sizeof(struct sockaddr);
-  if((connections[i].socket = accept(sock,
-                     (struct sockaddr *)&incoming_addr,
-                     (socklen_t *)&addrlen)) < 0 )
-  {
-    notice(nick,"Error in DCC chat\n");
-    (void)fprintf(stderr,"Error in remote connect on accept()\n");
-    (void)close(sock);
-    return;
-  }
-  connections[i].last_message_time = time(NULL);
-  connections[i].nbuf = 0;
-  connections[i].type = 0;
-
-  if (!isoper(user,host))
-  {
-    notice(nick, "You are not an operator");
-    return;
-  }
-
-  strncpy(connections[i].nick,initiated_dcc_nick,MAX_NICK);
-  strncpy(connections[i].user,initiated_dcc_user,MAX_USER);
-  strncpy(connections[i].host,initiated_dcc_host,MAX_HOST);
-
-  print_motd(connections[i].socket);
-  print_to_socket(connections[i].socket,
-		  "Connected.  Send '.help' for commands.");
-  report(SEND_ALL, CHANNEL_REPORT_ROUTINE, "Oper %s (%s@%s) has connected\n",
-         connections[i].nick, connections[i].user, connections[i].host);
-
-  log("OPER DCC connection from %s!%s@%s",
-      nick,
-      user,
-      connections[i].host);
+  return(i);
 }
 
 /*
@@ -476,13 +432,18 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
   int dcc_port;                         /* dcc port to use */
   struct sockaddr_in socketname;
   int result = -1;
+  int i;
 
-  notice(nick,"Chat requested");
-  strncpy(initiated_dcc_nick,nick,MAX_NICK);
-  strncpy(initiated_dcc_user,user,MAX_USER);
-  strncpy(initiated_dcc_host,host,MAX_HOST);
+  i = find_free_connection_slot(nick);
+  if (i < 0)
+    return;
 
-  if ((initiated_dcc_socket = socket(PF_INET,SOCK_STREAM,0)) < 0)
+  notice(nick, "Chat requested");
+  strncpy(connections[i].nick, nick, MAX_NICK);
+  strncpy(connections[i].user, user, MAX_USER);
+  strncpy(connections[i].host, host, MAX_HOST);
+
+  if ((connections[i].socket = socket(PF_INET,SOCK_STREAM,0)) < 0)
   {
     fprintf(stderr, "Error on open()\n");
     notice(nick,"Error on open");
@@ -496,7 +457,7 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
     socketname.sin_addr.s_addr = INADDR_ANY;
     socketname.sin_port = htons(dcc_port);
 
-    if ((result = bind(initiated_dcc_socket,(struct sockaddr *)&socketname,
+    if ((result = bind(connections[i].socket,(struct sockaddr *)&socketname,
                        sizeof(socketname)) < 0))
     {
       continue;
@@ -506,31 +467,28 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
 
   if (result < 0)
   {
-    (void)close(initiated_dcc_socket);
-    initiated_dcc_socket = (-1);
-    (void)fprintf(stderr, "Cannot bind result = %d errno = %d\n",
-                  result, errno);
+    close(connections[i].socket);
+    fprintf(stderr, "Cannot bind result = %d errno = %d\n", result, errno);
     notice(nick,"Cannot DCC chat");
     return;
   }
 
-  if (listen(initiated_dcc_socket,4) < 0)
+  if (listen(connections[i].socket,4) < 0)
   {
-    (void)close(initiated_dcc_socket);
-    initiated_dcc_socket = (-1);
-    (void)fprintf(stderr,"Cannot listen\n");
+    fprintf(stderr,"Cannot listen\n");
     notice(nick,"Cannot DCC chat");
     return;
   }
 
-  privmsg (nick,"\001DCC CHAT chat %lu %d\001",
-          local_ip(ourhostname), dcc_port);
+  privmsg (nick,"\001DCC CHAT chat %lu %d\001", local_ip(ourhostname),
+	   dcc_port);
 
   if (config_entries.debug && outfile)
-      (void)fprintf(outfile, "DEBUG: initiated_dcc_socket = %d\n",
-                    initiated_dcc_socket);
+      (void)fprintf(outfile, "DEBUG: dcc socket = %d\n",
+		    connections[i].socket);
 
-  initiated_dcc_socket_time = current_time;
+  connections[i].state = S_LISTENING_TO_CLIENT;
+  connections[i].last_message_time = current_time;
 }
 
 /*
@@ -683,6 +641,7 @@ send_to_all(int type, const char *format,...)
 	    case SEND_SPY:
 	      if(connections[i].type & TYPE_SPY)
                 va_print_to_socket(connections[i].socket, format, va);
+
 	      break;
 
 	    case SEND_WARN:
@@ -752,18 +711,9 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   char *user;
   char *host;
 
-  for (i=1; i < MAXDCCCONNS+1; ++i)
-  {
-    if (connections[i].socket == INVALID)
-    {
-      if (maxconns < i+1)
-	maxconns = i+1;
-      break;
-    }
-  }
-
-  if (i > MAXDCCCONNS)
-    return (0);
+  i = find_free_connection_slot(nick);
+  if (i < 0)
+    return(-1);
 
   if ((p = strchr(userhost,'@')) != NULL)
   {
@@ -800,12 +750,55 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   connections[i].socket = connect_to_dcc_ip(nick, hostport);
   if (connections[i].socket == INVALID)
     return (0);
-  connections[i].connecting = 1;
+  connections[i].state = S_CONNECTING_TO_CLIENT;
   FD_SET(connections[i].socket, &readfds);
 }
 
+/*
+ * finish_accept_dcc_chat()
+ *
+ * inputs 	- index
+ * output       - none
+ * side effects -
+ */
+
 static void
 finish_accept_dcc_chat(int i)
+{
+  struct sockaddr_in incoming_addr;
+  int addrlen;
+  int sock = connections[i].socket;
+
+  addrlen = sizeof(struct sockaddr);
+  if((connections[i].socket = accept(sock,
+                     (struct sockaddr *)&incoming_addr,
+                     (socklen_t *)&addrlen)) < 0 )
+  {
+    notice(connections[i].nick, "Error in DCC chat\n");
+    fprintf(stderr, "Error in remote connect on accept()\n");
+    close(sock);
+    return;
+  }
+
+  (void)close(sock);
+
+  connections[i].last_message_time = current_time;
+  connections[i].nbuf = 0;
+  connections[i].type = 0;
+
+  finish_dcc_chat(i);
+}
+
+/*
+ * finish_dcc_chat()
+ *
+ * inputs 	- index
+ * output       - none
+ * side effects -
+ */
+
+static void
+finish_dcc_chat(int i)
 {
   print_motd(connections[i].socket);
 
@@ -817,8 +810,7 @@ finish_accept_dcc_chat(int i)
          connections[i].host);
 
   print_to_socket(connections[i].socket,
-       "Connected.  Send '.help' for commands.");
-  return;
+		  "Connected.  Send '.help' for commands.");
 }
 
 /*

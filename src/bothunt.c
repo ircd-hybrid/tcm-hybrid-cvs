@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.101 2002/05/25 17:45:14 jmallett Exp $
+ * $Id: bothunt.c,v 1.102 2002/05/25 22:02:59 db Exp $
  */
 
 #include <stdio.h>
@@ -1187,7 +1187,7 @@ _onctcp(int connnum, int argc, char *argv[])
   {
     notice(nick,"\001VERSION %s(%s)\001",VERSION,SERIALNUM);
   }
-  else if (!strncasecmp(msg, "DCC CHAT", 8))
+  else if (strncasecmp(msg, "DCC CHAT", 8) == 0)
   {
     /* the -6 saves room for the :port */
     snprintf(dccbuff, sizeof(dccbuff)-7, "#%s", argv[3]+15);
@@ -1202,7 +1202,7 @@ _onctcp(int connnum, int argc, char *argv[])
 
     strcat(dccbuff, ":");
     strcat(dccbuff, port);
-    if (!accept_dcc_connection(dccbuff, nick, hold))
+    if (accept_dcc_connection(dccbuff, nick, hold) < 0)
     {
       notice(nick, "\001DCC REJECT CHAT chat\001");
       notice(nick,"DCC CHAT connection failed");

@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.13 2002/05/25 17:34:29 db Exp $
+ * $Id: tcm_io.h,v 1.14 2002/05/25 22:02:57 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -18,7 +18,7 @@ struct connection {
   char	buffer[BUFFERSIZE];
   int	nbuf;			/* number in buffer */
   int	socket;
-  int	connecting;		/* set to 1 if connecting */
+  int   state;
   int	type;			/* why was this a char? -bill */
   int	set_modes;		/* for set options */
   char	user[MAX_USER];
@@ -27,6 +27,12 @@ struct connection {
   char	registered_nick[MAX_NICK+2]; /* allow + 2  */
   time_t last_message_time;
 };
+
+#define	S_IDLE			0
+#define	S_CONNECTING_TO_SERVER	1
+#define	S_CONNECTING_TO_CLIENT	2
+#define	S_LISTENING_TO_CLIENT	3
+
 
 extern struct connection connections[];
 

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.21 2002/05/25 19:22:47 leeh Exp $
+ * $Id: parse.c,v 1.22 2002/05/25 22:03:00 db Exp $
  */
 
 #include <stdio.h>
@@ -627,18 +627,6 @@ privmsgproc(char *nick, char *userhost, int argc, char *argv[])
 
   if(strncmp(argv[3], ".chat", 5) == 0)
   {
-    if(initiated_dcc_socket > 0)
-    {
-      if((initiated_dcc_socket_time + 60) < current_time)
-      {
-        close(initiated_dcc_socket);
-	initiated_dcc_socket = -1;
-	initiate_dcc_chat(nick, user, host);
-      }
-      else
-        notice(nick,"Unable to dcc chat right now, wait a minute");
-    }
-    else
      initiate_dcc_chat(nick, user, host);
   }
 }

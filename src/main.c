@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.72 2002/05/25 17:45:14 jmallett Exp $ */
+/* $Id: main.c,v 1.73 2002/05/25 22:02:59 db Exp $ */
 
 #include "setup.h"
 
@@ -386,7 +386,7 @@ main(int argc, char *argv[])
 	 }
     }
   connections[0].socket = connect_to_server(serverhost);
-  connections[0].connecting = 1;
+  connections[0].state = S_CONNECTING_TO_SERVER;
   if (connections[0].socket == INVALID)
     exit(1);
   connections[0].nbuf = 0;

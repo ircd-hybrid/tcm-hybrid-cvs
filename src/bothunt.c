@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.158 2002/06/08 01:52:44 db Exp $
+ * $Id: bothunt.c,v 1.159 2002/06/08 14:13:34 db Exp $
  */
 
 #include <stdio.h>
@@ -172,7 +172,7 @@ on_trace_user(int argc, char *argv[])
 
   if (!strncmp(argv[5], tcm_status.my_nick, strlen(tcm_status.my_nick)))
   {
-    snprintf(tcm_status.my_class, MAX_CLASS, "%s", argv[4]);
+    strlcpy(tcm_status.my_class, argv[4], MAX_CLASS);
   }
 
   chopuh(IS_FROM_TRACE, argv[5], &userinfo);
@@ -239,11 +239,8 @@ on_stats_i(int argc, char *argv[])
 {
   char *user;
   char *host;
-  int  alpha, ok=NO;
 
-  alpha = NO;
-
-/* No point if I am maxed out going any further */
+  /* No point if I am maxed out going any further */
   if (host_list_index == (MAXHOSTS - 1))
     return;
 
@@ -253,14 +250,12 @@ on_stats_i(int argc, char *argv[])
 
   /* if client is exempt, mark it as such in the exemption list */
 
-  for(;*user;user++)
-  {
-    switch(*user)
+  switch(*user)
     {
-    /* Check for flags that set some sort of exemption or protection from
-     * something on the ircd side, and not flags that set some sort of
-     * limitation.
-     */
+      /* Check for flags that set some sort of exemption or protection from
+       * something on the ircd side, and not flags that set some sort of
+       * limitation.
+       */
     case '^': /* K:/G: Protection (E:) */
     case '&': /* Can run a bot, obsolete in H7, should just add bot flags */
     case '>': /* Exempt from user limits (F:) */
@@ -269,28 +264,19 @@ on_stats_i(int argc, char *argv[])
     case '=': /* Spoof...reasoning:  if they're spoofed, they're likely
                * trustworthy enough to be exempt from tcm's wrath
                */
-      ok=YES;
-      break;
+      strlcpy(hostlist[host_list_index].user, 
+	      user, sizeof(hostlist[host_list_index].user));
+
+      strlcpy(hostlist[host_list_index].host,
+	      host, sizeof(hostlist[host_list_index].host));
+      hostlist[host_list_index].type = 0xFFFFFFFF;
+
+      host_list_index++;
+      return;
       
     default:
-      alpha = YES;
-      break;
+      return;
     }
-    if (alpha)
-      break;
-  }
-
-  if (ok)
-  {
-    strlcpy(hostlist[host_list_index].user, 
-	    user, sizeof(hostlist[host_list_index].user));
-
-    strlcpy(hostlist[host_list_index].host,
-	    host, sizeof(hostlist[host_list_index].host));
-    hostlist[host_list_index].type = 0xFFFFFFFF;
-
-    host_list_index++;
-  }
 }
 
 /*

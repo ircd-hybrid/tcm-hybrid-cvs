@@ -4,6 +4,7 @@ to this bot:
  - For help on basic admin commands type .help admin
  - For help on clone commands type .help clones
  - For help on remote commands type .help remote
+ - For help on user modes type .help umode
 
  - .help
     Get a list of command descriptions.

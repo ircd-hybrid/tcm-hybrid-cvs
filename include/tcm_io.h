@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.22 2002/05/26 17:43:58 leeh Exp $
+ * $Id: tcm_io.h,v 1.23 2002/05/26 23:15:00 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -39,7 +39,8 @@ struct connection {
 
 #define	S_IDLE			0
 #define	S_CONNECTING		1
-#define	S_ACTIVE		2
+#define	S_SERVER		2
+#define	S_CLIENT		3
 
 extern struct connection connections[];
 int find_free_connection_slot(const char *nick);
@@ -60,7 +61,9 @@ extern void read_packet(void);
 extern void linkclosed(int, int, char *argv[]);
 extern void print_to_socket(int, const char *, ...);
 extern void print_to_server(const char *, ...);
-void send_to_all(int type, const char *format,...);	/* - Hendrix (va'd by bill) */
+/* send_to_all - Hendrix (va'd by bill) */
+void send_to_all(int type, const char *format,...);
+void send_to_partyline(int conn_num, const char *format,...);
 
 void close_connection(int connect_id);
 int connect_to_server(const char *hostport);

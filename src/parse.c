@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.28 2002/05/26 02:55:10 db Exp $
+ * $Id: parse.c,v 1.29 2002/05/26 23:15:02 db Exp $
  */
 
 #include <stdio.h>
@@ -158,7 +158,7 @@ parse_client(int i)
 
       expand_args(buff, MAX_BUFF-1, argc, argv);
 
-      send_to_all(SEND_ALL, "<%s> %s", connections[i].nick, buff);
+      send_to_partyline(i, "<%s> %s", connections[i].nick, buff);
     }
     else
       print_to_socket(connections[i].socket,

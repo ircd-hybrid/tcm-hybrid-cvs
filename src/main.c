@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.81 2002/05/26 20:44:42 leeh Exp $ */
+/* $Id: main.c,v 1.82 2002/05/26 23:15:02 db Exp $ */
 
 #include "setup.h"
 
@@ -55,14 +55,10 @@
 #endif
 
 struct s_testline testlines;
-
 time_t current_time;
 
 char ourhostname[MAX_HOST];   /* This is our hostname with domainname */
 char serverhost[MAX_HOST];    /* Server tcm will use. */
-
-/* kludge for ensuring no direct loops */
-int  incoming_connnum;	      /* current connection number incoming */
 
 int act_drone, act_sclone;
 

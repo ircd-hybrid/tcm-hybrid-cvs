@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.45 2002/05/26 17:44:01 leeh Exp $
+ * $Id: tcm_io.c,v 1.46 2002/05/26 23:15:03 db Exp $
  */
 
 #include <stdio.h>
@@ -157,12 +157,11 @@ read_packet(void)
           {
 	    if (connections[i].state == S_CONNECTING)
 	      {
-		connections[i].state = S_ACTIVE;
+		/*		connections[i].state = S_ACTIVE; */
 		(connections[i].io_read_function)(i);
 		continue;
 	      }
 
-            incoming_connnum = i;
             nread = read(connections[i].socket,
                         incomingbuff, sizeof(incomingbuff));
 
@@ -598,17 +597,10 @@ send_to_all(int type, const char *format,...)
 {
   va_list va;
   int i;
-  int echo;
 
   va_start(va,format);
-
-  echo = (connections[incoming_connnum].type & TYPE_ECHO);
-
   for(i = 1; i < maxconns; i++)
     {
-      if( !echo && (i == incoming_connnum) )
-	continue;
-
       if (connections[i].socket != INVALID)
 	{
 	  switch(type)
@@ -671,6 +663,34 @@ send_to_all(int type, const char *format,...)
 	}
     }
     va_end(va);
+}
+
+/*
+ * send_to_partyline
+ *
+ * inputs	- connection id not to send message back to
+ *		- message to send
+ * output	- NONE
+ * side effects	- message is sent on /dcc link to all connected users
+ *
+ */
+
+void
+send_to_partyline(int conn_num, const char *format,...)
+{
+  va_list va;
+  int i;
+
+  va_start(va,format);
+  for(i = 0; i < maxconns; i++)
+    {
+      if (connections[i].state == S_CLIENT)
+	{
+	  if (conn_num != i)
+	    va_print_to_socket(connections[i].socket, format, va);
+	}
+    }
+  va_end(va);
 }
 
 /*
@@ -779,7 +799,7 @@ finish_accept_dcc_chat(int i)
  *
  * inputs 	- index
  * output       - none
- * side effects -
+ * side effects - 
  */
 
 static void
@@ -797,6 +817,7 @@ finish_dcc_chat(int i)
   print_to_socket(connections[i].socket,
 		  "Connected.  Send '.help' for commands.");
   connections[i].io_read_function = parse_client;
+  connections[i].state = S_CLIENT;
   connections[i].io_write_function = NULL;
   connections[i].io_close_function = close_dcc_connection;
 }
@@ -914,6 +935,7 @@ signon_to_server (int unused)
 {
   connections[0].io_read_function = parse_server;
   connections[0].io_write_function = NULL;
+  connections[0].state = S_SERVER;
   connections[0].nbuf = 0;
   if (*mynick == '\0')
     strcpy (mynick,config_entries.dfltnick);

@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.17 2001/10/20 22:13:56 db Exp $";
+static char *version="$Id: stdcmds.c,v 1.18 2001/10/26 13:08:29 db Exp $";
 
 int doingtrace = NO;
 
@@ -49,7 +49,8 @@ extern struct connection connections[];
  * output       - none
  * side effects -
  */
-static void free_hash_links(struct hashrec *ptr)
+static void 
+free_hash_links(struct hashrec *ptr)
 {
   struct hashrec *next_ptr;
 
@@ -79,7 +80,8 @@ static void free_hash_links(struct hashrec *ptr)
  *
 */
 
-void freehash(void)
+void 
+freehash(void)
 {
   struct hashrec *ptr;
   int i;
@@ -120,7 +122,8 @@ void freehash(void)
  * side effects - server executes command.
  */
 
-void toserv(char *format, ... )
+void 
+toserv(char *format, ... )
 {
   char msgbuf[MAX_BUFF];
   va_list va;
@@ -149,7 +152,8 @@ void toserv(char *format, ... )
  * output        - NONE
  * side effects  - NONE
  */
-void prnt(int sock, ...)
+void
+prnt(int sock, ...)
 {
   char dccbuff[DCCBUFF_SIZE];
   char msgbuf[MAX_BUFF];
@@ -181,50 +185,61 @@ void prnt(int sock, ...)
  * to document each.  By no means are they complex.
  */
 
-void oper()
+void
+oper()
 {
   toserv("OPER %s %s\n",
           config_entries.oper_nick_config,
           config_entries.oper_pass_config);
 }
 
-void op(char *chan,char *nick)
+void
+op(char *chan,char *nick)
 {
   toserv("MODE %s +oooo %s\n", chan, nick);
 }
 
-void kick(char* chan,char* nick,char *comment)
+void
+kick(char* chan,char* nick,char *comment)
 {
   toserv("KICK %s %s :%s\n", chan, nick, comment);
 }
 
-void join(char *chan, char *key)
+void
+join(char *chan, char *key)
 {
-  if (key) toserv("JOIN %s %s\n", chan, key);
-  else toserv("JOIN %s\n", chan);
+  if (key != NULL)
+    toserv("JOIN %s %s\n", chan, key);
+  else
+    toserv("JOIN %s\n", chan);
 }
 
-void who(char *nick)
+void
+who(char *nick)
 {
   toserv("WHO %s\n", nick);
 }
 
-void whois(char *nick)
+void 
+whois(char *nick)
 {
   toserv("WHOIS %s\n", nick);
 }
 
-void names(char *chan)
+void 
+names(char *chan)
 {
   toserv("NAMES %s\n", chan);
 }
 
-void leave(char *chan)
+void
+leave(char *chan)
 {
   toserv("PART %s\n", chan);
 }
 
-void notice(char *nick,...)
+void
+notice(char *nick,...)
 {
   va_list va;
   char msg[MAX_BUFF];
@@ -239,7 +254,8 @@ void notice(char *nick,...)
   va_end(va);
 }
 
-void privmsg(char *nick,...)
+void
+privmsg(char *nick,...)
 {
   va_list va;
   char msg[MAX_BUFF];
@@ -254,7 +270,8 @@ void privmsg(char *nick,...)
   va_end(va);
 }
 
-void say(char *chan,...)
+void
+say(char *chan,...)
 {
   va_list va;
   char msg[MAX_BUFF];
@@ -269,12 +286,14 @@ void say(char *chan,...)
   va_end(va);
 }
 
-void newnick(char *nick)
+void
+newnick(char *nick)
 {
   toserv("NICK %s\n", nick);
 }
 
-void invite(char *nick,char *chan)
+void 
+invite(char *nick,char *chan)
 {
   toserv("INVITE %s %s\n", nick, chan);
 }
@@ -287,7 +306,8 @@ void invite(char *nick,char *chan)
  * side effects -
  */
 
-void msg_mychannel(char *format, ...)
+void
+msg_mychannel(char *format, ...)
 {
   va_list va;
   char message[MAX_BUFF];
@@ -311,7 +331,8 @@ void msg_mychannel(char *format, ...)
  * side effects
  */
 
-void report(int type, int channel_send_flag, char *format,...)
+void 
+report(int type, int channel_send_flag, char *format,...)
 {
   char msg[MAX_BUFF];
   va_list va;
@@ -338,7 +359,8 @@ void report(int type, int channel_send_flag, char *format,...)
  * output       - hostname stripped to klinable form
  * side effects - NONE
 */
-static char *suggest_host(char *host, int ident, int type)
+static char *
+suggest_host(char *host, int ident, int type)
 {
   static char work_host[MAX_HOST];
   char *p = work_host;
@@ -388,7 +410,9 @@ static char *suggest_host(char *host, int ident, int type)
 
           return q;
         }
-      /* if we are still here, hopefully the older part of suggset_host() will catch it */
+      /* if we are still here,
+       * hopefully the older part of suggset_host() will catch it
+       */
     }
   if (type & get_action_type("flood"))
     {
@@ -482,17 +506,18 @@ static char *suggest_host(char *host, int ident, int type)
  *  -bill
  */
 
-void suggest_action(int type,
-                    char *nick,
-                    char *user,
-                    char *host,
-                    int different,
-                    int identd)
+void
+suggest_action(int type,
+	       char *nick,
+	       char *user,
+	       char *host,
+	       int different,
+	       int identd)
 {
   char suggested_user[MAX_USER+1];
   char action[15], reason[MAX_BUFF];
   char *suggested_host;
-  int index;
+  int i;
 
   if (user != NULL && host != NULL)
     {
@@ -500,10 +525,10 @@ void suggest_action(int type,
       if(okhost(user, host, type))
         return;
 
-      if (strchr(host,'*'))
+      if (strchr(host,'*') != NULL)
         return;
 
-      if (strchr(host,'?'))
+      if (strchr(host,'?') != NULL)
         return;
 
       if (identd && !different)
@@ -552,22 +577,27 @@ void suggest_action(int type,
       suggested_host=suggest_host(host, identd, type);
     }
 
-  for (index=0;index<MAX_ACTIONS;++index)
-    if (type == actions[index].type) break;
+  for (i = 0; i < MAX_ACTIONS; i++)
+    if (type == actions[i].type) break;
 
-  if (type != actions[index].type) return; /* how did we not find it? */
+  if (type != actions[i].type) return; /* how did we not find it? */
 
-  snprintf(action, sizeof(action), "%s", actions[index].method);
-  snprintf(reason, sizeof(reason), "%s", actions[index].reason);
+  snprintf(action, sizeof(action), "%s", actions[i].method);
+  snprintf(reason, sizeof(reason), "%s", actions[i].reason);
 
-  if (!strcasecmp(action, "warn")) return;
+  if (strcasecmp(action, "warn") == 0)
+    return;
+
   if (suggested_user == NULL || suggested_host == NULL)
     {
       toserv("%s %s :%s\n", action, nick, reason);
       return;
     }
-  if (!strncasecmp(action, "dline", 5)) toserv("%s %s :%s\n", action, host, reason);
-  else toserv("%s %s@%s :%s\n", action, suggested_user, suggested_host, reason);
+
+  if (strncasecmp(action, "dline", 5) == 0)
+    toserv("%s %s :%s\n", action, host, reason);
+  else
+    toserv("%s %s@%s :%s\n", action, suggested_user, suggested_host, reason);
 
 
   /* 
@@ -584,7 +614,8 @@ void suggest_action(int type,
  * side effects - none
  */
 
-char *format_reason(char *reason)
+char *
+format_reason(char *reason)
 {
   static char reason_result[COMMENT_BUFF];
 
@@ -614,7 +645,8 @@ char *format_reason(char *reason)
  * side effects - prints help file to user
  */
 
-void print_help(int sock,char *text)
+void 
+print_help(int sock,char *text)
 {
   FILE *userfile;
   char line[MAX_BUFF];
@@ -669,7 +701,8 @@ void print_help(int sock,char *text)
  * I just stole the code from print_help
  */
 
-void print_motd(int sock)
+void 
+print_motd(int sock)
 {
   FILE *userfile;
   char line[MAX_BUFF];
@@ -695,7 +728,8 @@ void print_motd(int sock)
  * side effects -
  */
 
-void list_nicks(int sock,char *nick)
+void 
+list_nicks(int sock,char *nick)
 {
   struct hashrec *userptr;
   int i;
@@ -739,7 +773,8 @@ void list_nicks(int sock,char *nick)
  * side effects -
  */
 
-void list_virtual_users(int sock,char *userhost)
+void 
+list_virtual_users(int sock,char *userhost)
 {
   struct hashrec *ipptr;
   int i,numfound = 0;
@@ -796,7 +831,7 @@ void report_multi_host(int sock,int nclones)
 #endif
 
   nclones-=1;
-  for (i=0;i<HASHTABLESIZE;++i)
+  for (i = 0; i < HASHTABLESIZE; ++i)
     {
       for (top = userptr = hosttable[i]; userptr; userptr = userptr->collision)
         {
@@ -864,7 +899,7 @@ void report_mem(int sock)
 
   /*  hosttable,domaintable,iptable */
 
-  for(i=0; i < HASHTABLESIZE; i++ )
+  for( i = 0; i < HASHTABLESIZE; i++ )
     {
       for( current = hosttable[i]; current; current = current->collision )
         {
@@ -876,7 +911,7 @@ void report_mem(int sock)
         }
     }
 
-  for(i=0; i < HASHTABLESIZE; i++ )
+  for( i = 0; i < HASHTABLESIZE; i++ )
     {
       for( current = domaintable[i]; current; current = current->collision )
         {
@@ -886,7 +921,7 @@ void report_mem(int sock)
     }
 
 #ifdef VIRTUAL
-  for(i=0; i < HASHTABLESIZE; i++ )
+  for( i = 0; i < HASHTABLESIZE; i++ )
     {
       for( current = iptable[i]; current; current = current->collision )
         {
@@ -896,7 +931,7 @@ void report_mem(int sock)
     }
 #endif
 
-  for(i=0; i < HASHTABLESIZE; i++ )
+  for( i = 0; i < HASHTABLESIZE; i++ )
     {
       for( current = usertable[i]; current; current = current->collision )
         {
@@ -932,7 +967,8 @@ void report_mem(int sock)
  * side effects - NONE
  */
 
-void report_clones(int sock)
+void 
+report_clones(int sock)
 {
   struct hashrec *userptr;
   struct hashrec *top;
@@ -947,7 +983,7 @@ void report_clones(int sock)
   if(sock < 0)
     return;
 
-  for (i=0;i<HASHTABLESIZE;++i)
+  for ( i = 0; i < HASHTABLESIZE; ++i)
     {
       for( top = userptr = hosttable[i]; userptr; userptr = userptr->collision)
         {
@@ -1020,7 +1056,8 @@ void report_clones(int sock)
  *
  */
 
-void report_nick_flooders(int sock)
+void 
+report_nick_flooders(int sock)
 {
   int i;
   int reported_nick_flooder= NO;
@@ -1090,7 +1127,8 @@ void report_nick_flooders(int sock)
  * side effects -
  */
 
-void list_class(int sock,char *class_to_find,int total_only)
+void 
+list_class(int sock,char *class_to_find,int total_only)
 {
   struct hashrec *userptr;
   int i;
@@ -1135,7 +1173,8 @@ void list_class(int sock,char *class_to_find,int total_only)
   prnt(sock,"%d unknown class\n", num_unknown);
 }
 
-void report_vbots(int sock,int nclones)
+void
+report_vbots(int sock,int nclones)
 {
   struct hashrec *userptr,*top,*temp;
   int numfound,i;
@@ -1198,7 +1237,8 @@ void report_vbots(int sock,int nclones)
 
 struct sortarray sort[MAXDOMAINS+1];
 
-void report_domains(int sock,int num)
+void 
+report_domains(int sock,int num)
 {
   struct hashrec *userptr;
 
@@ -1209,7 +1249,7 @@ void report_domains(int sock,int num)
   int found;
   int foundany = NO;
 
-  for (i=0;i<HASHTABLESIZE;i++)
+  for ( i = 0; i < HASHTABLESIZE; i++ )
     {
       for( userptr = hosttable[i]; userptr; userptr = userptr->collision )
         {
@@ -1231,7 +1271,7 @@ void report_domains(int sock,int num)
         }
     }
   /* Print 'em out from highest to lowest */
-  for (;;)
+  FOREVER
     {
       maxx = num-1;
       found = -1;
@@ -1272,7 +1312,8 @@ void report_domains(int sock,int num)
  * side effects -
  */
 
-void report_multi(int sock,int nclones)
+void
+report_multi(int sock,int nclones)
 {
   struct hashrec *userptr,*top,*temp;
   int numfound,i;
@@ -1339,7 +1380,8 @@ void report_multi(int sock,int nclones)
  * side effects -
  */
 
-void report_multi_user(int sock,int nclones)
+void
+report_multi_user(int sock,int nclones)
 {
   struct hashrec *userptr,*top,*temp;
   int numfound;
@@ -1407,7 +1449,8 @@ void report_multi_user(int sock,int nclones)
  * side effects -
  */
 
-void report_multi_virtuals(int sock,int nclones)
+void
+report_multi_virtuals(int sock,int nclones)
 {
   struct hashrec *userptr;
   struct hashrec *top;
@@ -1465,7 +1508,8 @@ void report_multi_virtuals(int sock,int nclones)
     prnt(sock, "No multiple virtual logins found.\n");
 }
 
-void kill_list_users(int sock,char *userhost, char *reason)
+void
+kill_list_users(int sock,char *userhost, char *reason)
 {
   struct hashrec *userptr;
   /* Looks fishy but it really isn't */
@@ -1517,8 +1561,9 @@ void kill_list_users(int sock,char *userhost, char *reason)
  *
  */
 
-void do_a_kline(char *command_name,int kline_time, char *pattern,
-                char *reason,char *who_did_command)
+void
+do_a_kline(char *command_name,int kline_time, char *pattern,
+	   char *reason,char *who_did_command)
 {
 #ifdef DEBUGMODE
   placed;
@@ -1616,21 +1661,24 @@ void do_a_kline(char *command_name,int kline_time, char *pattern,
  *
  */
 
-void initopers(void)
+void
+initopers(void)
 {
   clear_userlist();
   load_userlist();
   toserv("STATS O\n");
 }
 
-void inithash()
+void
+inithash()
 {
   freehash();
   doingtrace = YES;
   toserv("TRACE\n");
 }
 
-void report_failures(int sock,int num)
+void
+report_failures(int sock,int num)
 {
   int maxx;
   int foundany = NO;
@@ -1685,7 +1733,8 @@ void report_failures(int sock,int num)
  * side effects -
  */
 
-void list_users(int sock,char *userhost)
+void
+list_users(int sock,char *userhost)
 {
   struct hashrec *userptr;
   char fulluh[MAX_HOST+MAX_DOMAIN];

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.56 2002/05/27 23:59:47 db Exp $
+ * $Id: tcm_io.c,v 1.57 2002/05/28 00:20:23 db Exp $
  */
 
 #include <stdio.h>
@@ -749,11 +749,9 @@ finish_accept_dcc_chat(int i)
                      (socklen_t *)&addrlen)) < 0 )
   {
     notice(connections[i].nick, "Error in DCC chat\n");
-    close(sock);
+    close_connection(i);
     return;
   }
-
-  (void)close(sock);
 
   connections[i].last_message_time = current_time;
   connections[i].nbuf = 0;

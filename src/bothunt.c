@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.122 2002/05/27 23:59:45 db Exp $
+ * $Id: bothunt.c,v 1.123 2002/05/28 00:20:23 db Exp $
  */
 
 #include <stdio.h>
@@ -1096,28 +1096,33 @@ connect_flood_notice(char *snotice)
   snotice +=5;
 
   p=nick_reported=snotice;
-  while (*p != ' ' && *p != '[') ++p;
+  while (*p != ' ' && *p != '[')
+    ++p;
   user_host=p+1;
   *p = '\0';
 
   p=user_host;
-  while (*p != ' ' && *p != ']') ++p;
-  if (strlen(p) >= 4) ip=p+3;
+  while (*p != ' ' && *p != ']')
+    ++p;
+  if (strlen(p) >= 4)
+    ip=p+3;
   else return;
   *p = '\0';
 
   p=ip;
-  if (!(p = strchr(ip, ')'))) return;
+  if ((p = strchr(ip, ')')) == NULL)
+    return;
   *p = '\0';
 
   p=user_host;
-  while (*p != '@') ++p;
+  while (*p != '@')
+    ++p;
   *p='\0';
   snprintf(user, MAX_USER - 1, "%s", user_host);
   snprintf(host, MAX_HOST - 1, "%s", p+1);
   *p='@';
 
-  for(i=0;i<MAX_CONNECT_FAILS;++i)
+  for(i=0; i<MAX_CONNECT_FAILS; ++i)
     {
       if (connect_flood[i].user_host[0])
 	{
@@ -1187,18 +1192,14 @@ link_look_notice(char *snotice)
   int found_entry = NO;
   int i;
 
-  p = strstr(snotice,"requested by");
-
-  if (!p)
+  if ((p = strstr(snotice,"requested by")) == NULL)
     return;
 
   nick_reported = p + 13;
 
-  if ((p = strchr(nick_reported,' ')))
-    *p = '\0';
-  else
+  if ((p = strchr(nick_reported,' ')) == NULL)
     return;
-  p++;
+  *p++ = '\0';
 
   user = p;
 /*
@@ -1254,7 +1255,9 @@ link_look_notice(char *snotice)
 	      
 	      if (link_look[i].link_look_count >= MAX_LINK_LOOKS)
 		{
-		  handle_action(act_link, (*user != '~'), nick_reported, user, host, 0, 0);
+		  handle_action(act_link,
+				(*user != '~'),
+				nick_reported, user, host, 0, 0);
 		  /* the client is dead now */
 		  link_look[i].user_host[0] = '\0';
 		}

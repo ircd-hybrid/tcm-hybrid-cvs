@@ -1,3 +1,34 @@
+bill        2002/09/12 23:03:33 EDT	(20020913_0)
+
+  Modified files:
+    etc                  tcm.cf 
+    include              actions.h bothunt.h config.h hash.h 
+    src                  actions.c bothunt.c clones.c hash.c 
+  Log:
+  - removed unused bot action
+  - changed spambot hoststrip ident_all->ident_as_is
+  - changed clone hoststrip ident_prefixed&noident_all_none->ident_all&no_ident_all
+  - added ip storing to reconnect clone struct, so dline works for rclone action
+  - increased link looks table size
+  - fixed core in handle_action()
+  - redid dline handling in handle_action, we now properly lookup the ip address
+    in the hash table(s) if it is not provided to the function
+  - fixed connection flood/reconnection flood detection
+  - fixed link look detection
+  
+  Revision  Changes    Path
+  1.30      +0 -2      tcm-hybrid/etc/tcm.cf
+  1.14      +2 -3      tcm-hybrid/include/actions.h
+  1.59      +2 -1      tcm-hybrid/include/bothunt.h
+  1.76      +1 -2      tcm-hybrid/include/config.h
+  1.27      +1 -1      tcm-hybrid/include/hash.h
+  1.40      +38 -29    tcm-hybrid/src/actions.c
+  1.202     +60 -56    tcm-hybrid/src/bothunt.c
+  1.24      +4 -3      tcm-hybrid/src/clones.c
+  1.56      +18 -10    tcm-hybrid/src/hash.c
+
+
+
 bill        2002/09/12 18:49:49 EDT	(20020912_0)
 
   Modified files:

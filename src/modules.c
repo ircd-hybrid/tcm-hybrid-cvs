@@ -1,8 +1,5 @@
 /*
- * much of this code has been copied (though none verbatim)
- * from ircd-hybrid-7.
- *
- * $Id: modules.c,v 1.39 2002/05/25 12:34:23 leeh Exp $B
+ * $Id: modules.c,v 1.40 2002/05/25 15:36:26 leeh Exp $B
  *
  */
 
@@ -63,12 +60,24 @@ void modules_init(void)
   add_dcc_handler(&modlist_msgtab);
 }
 
+/* init_hashtables()
+ *
+ * input	-
+ * output	-
+ * side effects - clears the dcc command and server command hashtables
+ */
 void init_hashtables(void)
 {
   memset(dcc_command_table, 0, sizeof(struct dcc_command) * MAX_HASH);
   memset(serv_command_table, 0, sizeof(struct serv_command) * MAX_HASH);
 }
 
+/* add_dcc_handler()
+ *
+ * input	- dcc command struct
+ * output	-
+ * side effects - command is added to dcc hash table
+ */
 void add_dcc_handler(struct dcc_command *ptr)
 {
   int hashval;
@@ -81,6 +90,12 @@ void add_dcc_handler(struct dcc_command *ptr)
   dcc_command_table[hashval] = ptr;
 }
 
+/* del_dcc_handler()
+ *
+ * input	- dcc command
+ * output	-
+ * side effects - command (if found) is removed from dcc hashtable
+ */
 void del_dcc_handler(char *cmd)
 {
   struct dcc_command *ptr;
@@ -89,6 +104,9 @@ void del_dcc_handler(char *cmd)
   
   hashval = hash_command(cmd);
 
+  /* search the hash table for the command, we dont use 
+   * find_dcc_handler because we need last_ptr
+   */
   for(ptr = dcc_command_table[hashval]; ptr; ptr = ptr->next)
   {
     if(strcasecmp(cmd, ptr->cmd) == 0)
@@ -97,15 +115,25 @@ void del_dcc_handler(char *cmd)
     last_ptr = ptr;
   }
 
+  /* command was found.. */
   if(ptr)
   {
+    /* something points to this command */
     if(last_ptr)
       last_ptr->next = ptr->next;
+    
+    /* this command is first in the hashtable */
     else
       dcc_command_table[hashval] = ptr->next;
   }
 }
 
+/* find_dcc_handler()
+ *
+ * input	- command
+ * output	-
+ * side effects - dcc handler is returned if found, else NULL
+ */
 struct dcc_command *
 find_dcc_handler(char *cmd)
 {
@@ -123,7 +151,14 @@ find_dcc_handler(char *cmd)
   return NULL;
 }
 
-static int hash_command(const char *p)
+/* hash_command()
+ *
+ * input	- command
+ * output	-
+ * side effects - command is changed into its hash value
+ */
+static int 
+hash_command(const char *p)
 {
   int hash_val = 0;
 
@@ -135,7 +170,28 @@ static int hash_command(const char *p)
 
   return(hash_val % MAX_HASH);
 }
-	
+
+/* m_unregistered()
+ *
+ * sent to an oper who needs to register to use a command
+ */
+void
+m_unregistered(int connnum, int argc, char *argv[])
+{
+  print_to_socket(connections[connnum].socket, "You have not registered");
+}
+
+/* m_not_admin()
+ *
+ * sent to an oper who tries to execute an admin only command
+ */
+void
+m_not_admin(int connnum, int argc, char *argv[])
+{
+  print_to_socket(connections[connnum].socket,
+		  "Only authorized admins may use this command");
+}
+
 int findmodule(char *name)
 {
   int i;

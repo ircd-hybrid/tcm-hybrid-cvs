@@ -1,7 +1,7 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.23 2002/05/25 12:34:20 leeh Exp $ */
+/* $Id: modules.h,v 1.24 2002/05/25 15:36:24 leeh Exp $ */
 
 #define MAX_HASH 256
 
@@ -41,6 +41,9 @@ struct serv_command
 extern void add_dcc_handler(struct dcc_command *);
 extern void del_dcc_handler(char *);
 extern struct dcc_command *find_dcc_handler(char *);
+
+void m_unregistered(int connnum, int argc, char *argv[]);
+void m_not_admin(int connnum, int argc, char *argv[]);
 
 extern void report(int type, int channel_send_flag, char *format,...);
 extern char *date_stamp(void);

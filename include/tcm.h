@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.33 2002/05/25 15:08:06 leeh Exp $ */
+/* $Id: tcm.h,v 1.34 2002/05/25 15:36:24 leeh Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -67,13 +67,6 @@ int amianoper;
 int quit;			/* Quit when = YES */
 
 int maxconns;
-
-#ifdef IRCD_HYBRID
-#else
-void m_unregistered(int connnum, int argc, char *argv[]);
-void m_not_oper(int connnum, int argc, char *argv[]);
-void m_not_admin(int connnum, int argc, char *argv[]);
-#endif
 
 int add_action(char *name);
 void set_action_time(int action, int klinetime);

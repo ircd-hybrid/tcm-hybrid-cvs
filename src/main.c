@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.63 2002/05/25 15:08:09 leeh Exp $ */
+/* $Id: main.c,v 1.64 2002/05/25 15:36:26 leeh Exp $ */
 
 #include "setup.h"
 
@@ -441,30 +441,6 @@ init_debug(int sig)
     }
 }
 
-#ifdef IRCD_HYBRID
-
-#else
-
-void
-m_unregistered(int connnum, int argc, char *argv[])
-{
-  print_to_socket(connections[connnum].socket, "You have not registered");
-}
-
-void
-m_not_oper(int connnum, int argc, char *argv[])
-{
-  print_to_socket(connections[connnum].socket,
-       "Only authorized opers may use this command");
-}
-
-void
-m_not_admin(int connnum, int argc, char *argv[])
-{
-  print_to_socket(connections[connnum].socket,
-       "Only authorized admins may use this command");
-}
-#endif
 
 #ifdef HAVE_SETRLIMIT
 /*

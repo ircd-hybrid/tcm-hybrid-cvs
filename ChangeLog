@@ -1,3 +1,8 @@
+*** 20011030_1 by bill
+
+- fixed parse error in .testline response.  k-line notice argv[] was off by 2
+
+
 *** 20011029_7 by bill
 
 - fixed bug in gline request/trigger parsing

@@ -1,3 +1,28 @@
+wiz         2003/01/18 20:18:41 EST	(20030119_0)
+
+  Modified files:
+    include              config.h tcm.h userlist.h 
+    src                  .depend Makefile.in hash.c vclones.c 
+  Added files:
+    include              ipv6.h 
+    src                  ipv6.c 
+  Log:
+  - Added a couple common IPv6 functions to begin IPv6 support
+  - Modified .vmulti command to check for IPv6 vclone clients
+  
+  Revision  Changes    Path
+  1.80      +8 -0      tcm-hybrid/include/config.h
+  1.1       +7 -0      tcm-hybrid/include/ipv6.h (new)
+  1.58      +4 -0      tcm-hybrid/include/tcm.h
+  1.91      +4 -0      tcm-hybrid/include/userlist.h
+  1.34      +6 -4      tcm-hybrid/src/.depend
+  1.35      +1 -0      tcm-hybrid/src/Makefile.in
+  1.61      +36 -2     tcm-hybrid/src/hash.c
+  1.1       +206 -0    tcm-hybrid/src/ipv6.c (new)
+  1.17      +5 -3      tcm-hybrid/src/vclones.c
+
+
+
 bill        2003/01/15 20:27:11 EST	(20030116_0)
 
   Modified files:

@@ -1,3 +1,7 @@
+*** 20010922_4 by bill
+- freebsd likes making things difficult for me, as always.
+
+
 *** 20010922_3 by bill
 - already found a bug, heh.  this fixes cwd problem in *bsd
 

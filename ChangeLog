@@ -1,3 +1,18 @@
+wcampbel    2002/05/22 08:57:17 EDT	(20020522_5)
+
+  Modified files:
+    modules              bothunt.c 
+  Log:
+  bothunt.c: In function `remove_gline':
+  bothunt.c:222: warning: assignment makes integer from pointer without a cast
+  
+  Can't set NULL to a time_t.
+  
+  Revision  Changes    Path
+  1.80      +1 -1      tcm-hybrid/modules/bothunt.c
+
+
+
 wcampbel    2002/05/22 08:38:15 EDT	(20020522_4)
 
   Modified files:

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.31 2001/11/25 02:58:36 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.32 2001/11/26 20:50:33 bill Exp $ */
 
 #include "setup.h"
 
@@ -357,10 +357,14 @@ dccproc(int connnum, int argc, char *argv[])
       if (argc < 2)
       {
 	prnt(connections[connnum].socket,
-	     "Usage: .kclone [nick]|[user@host]\n");
+	     "Usage: .kclone [time] <[nick]|[user@host]>\n");
 	return;
       }
-      suggest_action(get_action_type("clone"), argv[1], NULL, NULL, NO, NO);
+      if ((kline_time=atoi(argv[1])))
+        suggest_action(-get_action_type("clone"), argv[2], NULL, NULL, 
+                       kline_time, NO);
+      else
+        suggest_action(-get_action_type("clone"), argv[1], NULL, NULL, 0, NO);
     }
     else
       prnt(connections[connnum].socket,"You aren't registered\n");
@@ -376,7 +380,11 @@ dccproc(int connnum, int argc, char *argv[])
 	     "Usage: .kflood [nick]|[user@host]\n");
 	return;
       }
-      suggest_action(get_action_type("flood"), argv[1], NULL, NULL, NO, NO);
+      if ((kline_time=atoi(argv[1])))
+        suggest_action(-get_action_type("flood"), argv[2], NULL, NULL,
+                       kline_time, NO);
+      else
+        suggest_action(-get_action_type("flood"), argv[1], NULL, NULL, 0, NO);
     }
     else
       prnt(connections[connnum].socket,"You aren't registered\n");
@@ -391,7 +399,7 @@ dccproc(int connnum, int argc, char *argv[])
 	     "Usage: .kperm [nick]|[user@host]\n");
 	return;
       }
-      do_a_kline("kperm",kline_time,argv[1],REASON_KPERM,who_did_command);
+      do_a_kline("kperm",0,argv[1],REASON_KPERM,who_did_command);
     }
     else
       prnt(connections[connnum].socket,"You aren't registered\n");
@@ -406,7 +414,11 @@ dccproc(int connnum, int argc, char *argv[])
 	     "Usage: .klink [nick]|[user@host]\n");
 	return;
       }
-      suggest_action(get_action_type("link"), argv[1], NULL, NULL, NO, NO);
+      if ((kline_time=atoi(argv[1])))
+        suggest_action(-get_action_type("link"), argv[2], NULL, NULL, 
+                       kline_time, NO);
+      else
+        suggest_action(-get_action_type("link"), argv[1], NULL, NULL, NO, NO);
     }
     else
       prnt(connections[connnum].socket,"You aren't registered\n");
@@ -421,7 +433,11 @@ dccproc(int connnum, int argc, char *argv[])
 	     "Usage: .kdrone [nick]|[user@host]\n");
 	return;
       }
-      suggest_action(get_action_type("drone"), argv[1], NULL, NULL, NO, NO);
+      if ((kline_time=atoi(argv[1])))
+        suggest_action(-get_action_type("drone"), argv[2], NULL, NULL, 
+                       kline_time, NO);
+      else
+        suggest_action(-get_action_type("drone"), argv[1], NULL, NULL, NO, NO);
     }
     else
       prnt(connections[connnum].socket,"You aren't registered\n");
@@ -432,10 +448,14 @@ dccproc(int connnum, int argc, char *argv[])
     {
       if (argc < 2)
       {
-	prnt(connections[connnum].socket, "Usage: .kbot [nick]|[user@host]\n");
+	prnt(connections[connnum].socket, "Usage: .kbot [time] <[nick]|[user@host]>\n");
 	return;
       }
-      suggest_action(get_action_type("bot"), argv[1], NULL, NULL, NO, NO);
+      if ((kline_time=atoi(argv[1])))
+        suggest_action(-get_action_type("bot"), argv[2], NULL, NULL, 
+                       kline_time, NO);
+      else
+        suggest_action(-get_action_type("bot"), argv[1], NULL, NULL, NO, NO);
     }
     else
       prnt(connections[connnum].socket,"You aren't registered\n");
@@ -484,17 +504,21 @@ dccproc(int connnum, int argc, char *argv[])
   }
   break;
 
-  case K_SPAM:
+  case K_KSPAM:
 
     if( connections[connnum].type & TYPE_REGISTERED )
     {
       if (argc < 2)
       {
 	prnt(connections[connnum].socket, 
-	     "Usage: .kspam [nick]|[user@host]\n");
+	     "Usage: .kspam [time] <[nick]|[user@host]>\n");
 	return;
       }
-      suggest_action(get_action_type("spam"), argv[1], NULL, NULL, NO, NO);
+      if ((kline_time=atoi(argv[1])))
+        suggest_action(-get_action_type("spam"), argv[2], NULL, NULL, 
+                       kline_time, NO);
+      else
+        suggest_action(-get_action_type("spam"), argv[1], NULL, NULL, NO, NO);
     }
     else
       prnt(connections[connnum].socket,"You aren't registered\n");

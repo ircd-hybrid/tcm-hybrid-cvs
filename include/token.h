@@ -3,7 +3,7 @@
 
 /* tokens */
 
-/* $Id: token.h,v 1.14 2001/11/23 21:40:46 wcampbel Exp $ */
+/* $Id: token.h,v 1.15 2001/11/26 20:50:31 bill Exp $ */
 
 #define K_CLONES   	1
 #define K_NFLOOD   	2
@@ -45,7 +45,7 @@
 #define K_CLASS		38
 #define K_CLASST	39
 #define K_CHAT		40
-#define K_SPAM		41
+#define K_KSPAM		41
 #define K_BAN		42
 #define K_VBOTS		43
 #define K_VLIST		44

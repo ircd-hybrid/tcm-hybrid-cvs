@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.31 2001/11/25 02:58:37 bill Exp $ */
+/* $Id: stdcmds.c,v 1.32 2001/11/26 20:50:34 bill Exp $ */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -457,7 +457,7 @@ suggest_host(char *host, int ident, int type)
  */
 
 void
-suggest_action(int type,
+suggest_action(int type_s,
 	       char *nick,
 	       char *user,
 	       char *host,
@@ -467,13 +467,19 @@ suggest_action(int type,
   char suggested_user[MAX_USER+1];
   char action[15], reason[MAX_BUFF];
   char *suggested_host=NULL;
-  int i;
+  int i, type;
+
+  if (type_s < 0)
+    type = -type_s;
+  else
+    type = type_s;
+
+  /* Don't kill or kline exempted users */
+  if(okhost(user, host, type))
+    return;
 
   if (user != NULL && host != NULL)
     {
-      /* Don't kill or kline exempted users */
-      if(okhost(user, host, type))
-        return;
 
       if (strchr(host,'*') != (char *)NULL)
         return;
@@ -535,8 +541,16 @@ suggest_action(int type,
   snprintf(action, sizeof(action), "%s", actions[i].method);
   snprintf(reason, sizeof(reason), "%s", actions[i].reason);
 
-  if (strcasecmp(action, "warn") == 0)
+  if (strcasecmp(action, "warn") == 0 && type_s > 0)
     return;
+  else if (strcasecmp(action, "warn") == 0 && type_s < 0)
+  {
+    if (different)
+      toserv("KLINE %d %s@%s :%s\n", different, suggested_user,
+             suggested_host, reason);
+    else
+      toserv("KLINE %s@%s :%s\n", suggested_user, suggested_host, reason);
+  }
 
   if (suggested_user == NULL || suggested_host == NULL)
     {

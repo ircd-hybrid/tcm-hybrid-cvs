@@ -5,7 +5,7 @@
  *
  * - Dianora db@db.net
  *
- * $Id: token.c,v 1.21 2001/11/23 21:40:49 wcampbel Exp $
+ * $Id: token.c,v 1.22 2001/11/26 20:50:34 bill Exp $
  *
  */
 
@@ -64,7 +64,7 @@ struct command_token command_table[] =
   {"kperm",        K_KPERM},
   {"klink",        K_KLINK},
   {"kbot",         K_KBOT},
-  {"kspam",	   K_SPAM},
+  {"kspam",	   K_KSPAM},
   {"kdrone",	   K_KDRONE},
   {"kill",         K_KILL},
   {"register",     K_REGISTER},

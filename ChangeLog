@@ -1,3 +1,22 @@
+leeh        2002/05/23 19:27:02 EDT	(20020524_1)
+
+  Modified files:
+    include              modules.h 
+    modules              commands.c 
+    src                  main.c modules.c parse.c tcm_io.c 
+  Log:
+  - handler code.. explode!
+  
+  Revision  Changes    Path
+  1.17      +4 -12     tcm-hybrid/include/modules.h
+  1.65      +2 -7      tcm-hybrid/modules/commands.c
+  1.50      +0 -13     tcm-hybrid/src/main.c
+  1.29      +1 -25     tcm-hybrid/src/modules.c
+  1.7       +2 -5      tcm-hybrid/src/parse.c
+  1.6       +1 -2      tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/23 19:09:47 EDT	(20020524_0)
 
   Modified files:

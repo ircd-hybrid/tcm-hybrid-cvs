@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.147 2002/10/04 00:28:52 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.148 2003/02/16 23:05:40 bill Exp $ */
 
 #include "setup.h"
 
@@ -286,7 +286,7 @@ m_kaction(struct connection *connection_p, int argc, char *argv[])
   }
   else
   {
-    if((p = strchr(argv[1], '@')) != NULL)
+    if((p = strchr(argv[2], '@')) != NULL)
     {
       *p++ = '\0';
       userhost = get_method_userhost(actionid, NULL, argv[2], p);

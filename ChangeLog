@@ -1,3 +1,15 @@
+wcampbel    2002/06/08 22:30:16 EDT	(20020609_4)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  lint cleanup
+  
+  Revision  Changes    Path
+  1.161     +1 -1      tcm-hybrid/src/bothunt.c
+
+
+
 wcampbel    2002/06/08 22:11:29 EDT	(20020609_3)
 
   Modified files:

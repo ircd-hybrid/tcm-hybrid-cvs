@@ -1,3 +1,7 @@
+*** 20010114_1 by wcampbel
+Documented the weird bug that spookey and I have been trying to debug
+
+
 *** 20010113_1 by wcampbel
 1. Added a missing \n to the DCC CHAT msg()
 2. Fixed the if's in local_ip() so that it will actually return a valid

@@ -49,8 +49,6 @@ distclean:
 	${RM} -f Makefile config.status config.cache config.log include/setup.h etc/tcm.pid
 	${RM} -f DEBUG bin/tcm bin/mkpasswd etc/*.pref logs/*log logs/clone_log_* logs/tcm.log*
 	${RM} -f ktrace.out tcm.core core
-	@echo "all:" > Makefile
-	@echo "	@echo \"Run ./configure first, dumby\"" >> Makefile
 
 .c.o:
 	${CC} ${CPPFLAGS} ${CFLAGS} ${DEFINES} -c $<

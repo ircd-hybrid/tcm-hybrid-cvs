@@ -1,3 +1,16 @@
+bill        2002/05/28 17:10:29 EDT	(20020528_26)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - moved finish_dcc_chat to io_write_function, as we are waiting to be able to write to the socket, not read from it.
+  - log dcc quits the same we log dcc connects
+  
+  Revision  Changes    Path
+  1.69      +14 -16    tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/28 16:01:53 EDT	(20020528_25)
 
   Modified files:

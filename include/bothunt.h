@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.14 2001/10/29 00:12:13 wcampbel Exp $ */
+/* $Id: bothunt.h,v 1.15 2001/10/29 03:56:30 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -25,10 +25,7 @@ struct banned_info
     struct banned_info *next;
   };
 
-/* The code uses the index into the msgs_to_mon[] table as the
- * token value to hand to the switch.
- */
-
+#define IGNORE		-1
 #define CONNECT		 0
 #define EXITING		 1
 #define UNAUTHORIZED	 2
@@ -42,30 +39,22 @@ struct banned_info
 #define LINK_LOOK	10
 #define KLINE_ADD_REPORT 11	/* Toast */
 #define STATS		12
-#define JOHBOT		13
-#define EGGDROP		14
-#define IGNORE1		15
-#define IGNORE2		16
-#define IGNORE3		17
-#define IGNORE4		18
-#define IGNORE5		19
-#define IGNORE6		20
-#define IGNORE7		21
-#define LINKWITH	22
-#define WRITEERR	23
-#define SQUITOF		24
-#define MOTDREQ		25
-#define FLOODER		26
-#define SPAMBOT		27
-#define ILINEMASK	28
-#define ILINEFULL	29
-#define BANNED		30
-#define DRONE		31
-#define XLINEREJ	32
-#define INVALIDUH	33
-#define SERVER		34
-#define FAILEDOPER	35
-#define INFOREQUESTED	36
+
+#define LINKWITH	13
+#define WRITEERR	14
+#define SQUITOF		15
+#define MOTDREQ		16
+#define FLOODER		17
+#define SPAMBOT		18
+#define ILINEMASK	19
+#define ILINEFULL	20
+#define BANNED		21
+#define DRONE		22
+#define XLINEREJ	23
+#define INVALIDUH	24
+#define SERVER		25
+#define FAILEDOPER	26
+#define INFOREQUESTED	27
 
 #define CLONECONNECTCOUNT 3
 #define CLONECONNECTFREQ  30

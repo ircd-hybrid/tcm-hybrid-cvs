@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.16 2001/10/29 00:12:13 wcampbel Exp $ */
+/* $Id: main.c,v 1.17 2001/10/29 03:56:31 db Exp $ */
 
 #include "setup.h"
 
@@ -84,7 +84,6 @@ int  incoming_connnum;	      /* current connection number incoming */
 /* allow for ':' ' ' etc. */
 
 #ifdef DEBUGMODE
-void add_placed (char *file, int line);
 void write_debug();
 #endif
 
@@ -110,24 +109,41 @@ char *get_action_reason(char *name);
  */
 void init_hash_tables(void)
 {
-  if (signon) memset(signon,0,sizeof(struct common_function));
-  if (signoff) memset(signoff,0,sizeof(struct common_function));
-  if (dcc_signon) memset(dcc_signon,0,sizeof(struct common_function));
-  if (dcc_signoff) memset(dcc_signoff,0,sizeof(struct common_function));
-  if (user_signon) memset(user_signon,0,sizeof(struct common_function));
-  if (user_signoff) memset(user_signoff,0,sizeof(struct common_function));
-  if (continuous) memset(continuous,0,sizeof(struct common_function));
-  if (scontinuous) memset(scontinuous,0,sizeof(struct common_function));
-  if (config) memset(config,0,sizeof(struct common_function));
-  if (action) memset(action,0,sizeof(struct common_function));
-  if (reload) memset(reload,0,sizeof(struct common_function));
-  if (wallops) memset(wallops,0,sizeof(struct common_function));
-  if (onjoin) memset(onjoin,0,sizeof(struct common_function));
-  if (onctcp) memset(onctcp,0,sizeof(struct common_function));
+  if (signon)
+    memset(signon,0,sizeof(struct common_function));
+  if (signoff)
+    memset(signoff,0,sizeof(struct common_function));
+  if (dcc_signon)
+    memset(dcc_signon,0,sizeof(struct common_function));
+  if (dcc_signoff)
+    memset(dcc_signoff,0,sizeof(struct common_function));
+  if (user_signon)
+    memset(user_signon,0,sizeof(struct common_function));
+  if (user_signoff)
+    memset(user_signoff,0,sizeof(struct common_function));
+  if (continuous)
+    memset(continuous,0,sizeof(struct common_function));
+  if (scontinuous)
+    memset(scontinuous,0,sizeof(struct common_function));
+  if (config)
+    memset(config,0,sizeof(struct common_function));
+  if (action)
+    memset(action,0,sizeof(struct common_function));
+  if (reload)
+    memset(reload,0,sizeof(struct common_function));
+  if (wallops)
+    memset(wallops,0,sizeof(struct common_function));
+  if (onjoin)
+    memset(onjoin,0,sizeof(struct common_function));
+  if (onctcp)
+    memset(onctcp,0,sizeof(struct common_function));
   if (ontraceuser) memset(ontraceuser,0,sizeof(struct common_function));
-  if (ontraceclass) memset(ontraceclass,0,sizeof(struct common_function));
-  if (server_notice) memset(server_notice,0,sizeof(struct common_function));
-  if (statsi) memset(statsi,0,sizeof(struct common_function));
+  if (ontraceclass)
+    memset(ontraceclass,0,sizeof(struct common_function));
+  if (server_notice)
+    memset(server_notice,0,sizeof(struct common_function));
+  if (statsi)
+    memset(statsi,0,sizeof(struct common_function));
 }
 
 /*
@@ -147,9 +163,6 @@ int bindsocket(char *hostport)
   char *hold;
   int optval;
   unsigned long remoteaddr;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   /* Parse serverhost to look for port number */
   strcpy (server,hostport);
@@ -269,9 +282,6 @@ void sendtoalldcc(int type,...)
   char *format;
   int i;
   int echo;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   va_start(va,type);
 
@@ -365,9 +375,6 @@ void sendtoalldcc(int type,...)
 void closeconn(int connnum, int argc, char *argv[])
 {
   int i;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   if (connections[connnum].socket != INVALID)
     close(connections[connnum].socket);
@@ -602,11 +609,6 @@ int main(int argc, char *argv[])
   init_tokenizer();		/* in token.c */
   init_userlist();
 
-#ifdef DEBUGMODE		/* initialize debug list */
-  for(i=0;i<16;++i) placed;
-  i=0;
-#endif
-
   config_entries.conffile=NULL;
 
   while( (c=getopt(argc, argv, "dvhnf:")) != -1)
@@ -806,9 +808,6 @@ static void init_debug(int sig)
 
 void sighandlr(int sig)
 {
-#ifdef DEBUGMODE
-  write_debug();
-#endif
   if (sig == SIGINT)
     {
       toserv("QUIT :Ctrl+C; Exiting...\n");
@@ -818,55 +817,6 @@ void sighandlr(int sig)
     gracefuldie(sig, __FILE__, __LINE__);
   signal(sig, sighandlr);
 }
-
-#ifdef DEBUGMODE
-void add_placed (char *file, int line)
-{
-  int a;
-  for(a=0;a<16;++a)
-    {
-      if (!placef[a][0])
-	{
-	  snprintf(placef[a], sizeof(placef[a]), "%s", file);
-	  placel[a] = line;
-	  return;
-	}
-    }
-  for(a=1;a<=16;++a)
-    {
-      snprintf(placef[a-1], sizeof(placef[a-1]), "%s", placef[a]);
-      placel[a-1]=placel[a];
-    }
-  snprintf(placef[15], sizeof(placef[15]), "%s", file);
-  placel[15] = line;
-}
-
-void write_debug()
-{
-  int a, x;
-  time_t now;
-  char buff[MAX_BUFF];
-  x = creat("DEBUG", 0640);
-  now = time(NULL);
-  if (x < 0)
-    {
-      fprintf(stderr, "Error writing DEBUG: %s\n", strerror(errno));
-      return;
-    }
-  snprintf(buff, sizeof(buff) - 1,
-	   "DEBUG Wrote %s\nFunction History:\n", ctime(&now));
-  write(x, buff, strlen(buff));
-  for(a=0;a<15;++a)
-    {
-      snprintf(buff, sizeof(buff) - 1, " %s/%d\n", placef[a], placel[a]);
-      write(x, buff, strlen(buff));
-    }
-  snprintf(buff, sizeof(buff) - 1,
-	   "Last function:\t%s/%d\n", placef[15], placel[15]);
-  write(x, buff, strlen(buff));
-  close(x);
-}
-#endif
 
 #ifdef IRCD_HYBRID
 

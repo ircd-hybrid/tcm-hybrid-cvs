@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.28 2001/10/29 00:12:13 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.29 2001/10/29 03:56:30 db Exp $ */
 
 #include "setup.h"
 
@@ -99,46 +99,49 @@ void _modinit();
 #define R_SPAMBOT       0x400
 #define R_CFLOOD        0x800
 
-char *msgs_to_mon[] = {
-  "Client connecting: ", 
-  "Client exiting: ",
-  "Unauthorized ",
-  "Rejecting clonebot:",		/* CSr notice */
-  "Too many connections from ",
-  "Nick change:",
-  "Nick flooding detected by:",		/* CSr notice */
-  "Rejecting ",
-  "Clonebot killed:",			/* CSr notice */
-  "Idle time limit exceeded for ",	/* CSr notice */
-  "LINKS ",
-  "KLINE ",	/* Just a place holder */
-  "STATS ",	/* look at stats ... */
-  "JohBot alarm activated:",
-  "EggDrop signon alarm activated:",
+struct msg_to_action {
+  char *msg_to_mon;
+  int  action;
+};
 
-  "Nick collision on",		/* IGNORE1 ignore these */
-  "Send message",		/* IGNORE2 ignore these */
-  "Ghosted",			/* IGNORE3 ignore these */
-  "connect failure",		/* IGNORE4 ignore these */
-  "Invisible client count",	/* IGNORE5 ignore these */
-  "Oper count off by",		/* IGNORE6 ignore these */
-  "User count off by",		/* IGNORE7 ignore these */
-  "Link with",
-  "Write error to",
-  "Received SQUIT",
-  "motd requested by",
-  "Flooder",
-  "User",
-  "I-line mask",
-  "I-line is full",
-  "*** Banned: ",
-  "Possible Drone Flooder",
-  "X-line Rejecting",
-  "Invalid username:",
-  "Server",
-  "Failed OPER attempt",
-  "info requested by",
-  (char *)NULL
+struct msg_to_action msgs_to_mon[] = {
+  {"Client connecting: ", CONNECT},
+  {"Client exiting: ", EXITING},
+  {"Unauthorized ", UNAUTHORIZED},
+  {"Rejecting clonebot:", REJECTING},
+  {"Too many connections from ",TOOMANY},
+  {"Nick change:", NICKCHANGE},
+  {"Nick flooding detected by:", CS_NICKFLOODING},
+  {"Rejecting ", CS_CLONES},
+  {"Clonebot killed:",CS_CLONEBOT_KILLED},
+  {"Idle time limit exceeded for ", IGNORE},
+  {"LINKS ", LINK_LOOK},
+  {"KLINE ", IGNORE},  
+  {"STATS ", STATS},
+
+  {"Nick collision on", IGNORE},
+  {"Send message", IGNORE},
+  {"Ghosted", IGNORE},
+  {"connect failure",IGNORE},
+  {"Invisible client count",IGNORE},
+  {"Oper count off by",IGNORE},
+  {"User count off by",IGNORE},
+  {"Link with", LINKWITH},
+  {"Write error to", WRITEERR},
+  {"Received SQUIT", SQUITOF},
+  {"motd requested by",MOTDREQ},
+  {"Flooder", FLOODER},
+  {"User", IGNORE},
+  {"I-line mask", IGNORE},
+  {"I-line is full", ILINEFULL},
+  {"*** Banned: ", BANNED},
+  {"Possible Drone Flooder", DRONE},
+  {"X-line Rejecting", XLINEREJ},
+  {"Invalid username:", INVALIDUH},
+  {"Server", SERVER},
+  {"Failed OPER attempt", FAILEDOPER},
+  {"info requested by", INFOREQUESTED},
+  {(char *)NULL, INVALID}
 };	
 
 
@@ -606,6 +609,7 @@ void on_stats_i(int connnum, int argc, char *argv[])
 void onservnotice(int connnum, int argc, char *argv[])
 {
   int i = -1, a, b, c;
+  int action = -1;
   int len;
   struct plus_c_info userinfo;
   time_t current_time;
@@ -618,9 +622,6 @@ void onservnotice(int connnum, int argc, char *argv[])
   char *p;
   char *q = NULL;
   char message[1024];
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   p = message;
   for (i = 3; i < argc; i++)
@@ -636,17 +637,25 @@ void onservnotice(int connnum, int argc, char *argv[])
   else
     p = message;
 
-  if (!strncasecmp(p, "*** Notice -- ", 14)) p+=14;
-  i = -1;
+  if (strncasecmp(p, "*** Notice -- ", 14) == 0)
+    p+=14;
 
-  while (msgs_to_mon[++i])
+  for (i = 0; msgs_to_mon[i].msg_to_mon; i++)
   {
-    if (!strncmp(p,msgs_to_mon[i],strlen(msgs_to_mon[i])))
+    if (strncmp(p,msgs_to_mon[i].msg_to_mon,
+		strlen(msgs_to_mon[i].msg_to_mon)) == 0)
       break;
   }
 
   current_time = time(NULL);
-  if (msgs_to_mon[i]) q = p+strlen(msgs_to_mon[i]);
+  if (msgs_to_mon[i].msg_to_mon != NULL)
+    {
+      q = p+strlen(msgs_to_mon[i].msg_to_mon);
+      action = msgs_to_mon[i].action;
+    }
+  else
+    action = IGNORE;
+
   if (strstr(p, "closed the connection") &&
       !strncmp(p, "Server", 6)) 
     {
@@ -773,7 +782,7 @@ void onservnotice(int connnum, int argc, char *argv[])
       return;
     }
 
-  switch (i)
+  switch (action)
     {
     case CONNECT:
       chopuh(NO,q,&userinfo);
@@ -811,25 +820,9 @@ void onservnotice(int connnum, int argc, char *argv[])
     case STATS:
       stats_notice(q);
       break;
-    case JOHBOT:
-#ifdef DEBUGMODE
-      placed;
-#endif
-#ifdef BOT_WARN
-      bot_report_kline(q,"johbot");
-#endif
-      break;
-    case EGGDROP:
-#ifdef DEBUGMODE
-      placed;
-#endif
-#ifdef BOT_WARN
-      bot_report_kline(q,"eggdrop");
-#endif
-      break;
+
     case LINKWITH:
       ++q;
-      
       sendtoalldcc(SEND_LINK_ONLY, "Link with %s\n", q);
       break;
 
@@ -846,11 +839,7 @@ void onservnotice(int connnum, int argc, char *argv[])
       sendtoalldcc(SEND_MOTD_ONLY, "[MOTD requested by %s]\n", q);
       break;
 
-    case  IGNORE1:case IGNORE2:case IGNORE3:case IGNORE4:case IGNORE5:
-    case  IGNORE6:case IGNORE7:
-#ifdef DEBUGMODE
-      placed;
-#endif
+    case  IGNORE:
       break;
 
       /* send the unknown server message to opers who have requested
@@ -1134,9 +1123,6 @@ char makeconn(char *hostport,char *nick,char *userhost)
   char *type;
   char *user;
   char *host;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   for (i=1; i<MAXDCCCONNS+1; ++i)
   {
@@ -1457,9 +1443,6 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
   char ip_class_c[MAX_IP];
   char *p;
   char *domain;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   /* Determine the domain name */
   domain = find_domain(userinfo->host);
@@ -1575,9 +1558,6 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
 		ip_class_c);
       }
     }
-#endif
-#ifdef DEBUGMODE
-  placed;
 #endif
 }
 
@@ -2874,9 +2854,6 @@ static void stats_notice(char *snotice)
   int i;
   int number_of_tcm_opers=0;
   int stat;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   stat = *snotice;
 
@@ -2899,16 +2876,8 @@ static void stats_notice(char *snotice)
 #ifdef STATS_P
   if (stat == 'p')
   {
-#ifdef DEBUGMODE
-    placed;
-#endif
-
     for (i=1;i<maxconns;++i)
     {
-#ifdef DEBUGMODE
-      placed;
-#endif
-
       /* ignore bad sockets */
       if (connections[i].socket == INVALID)
 	continue;
@@ -2949,9 +2918,6 @@ static void stats_notice(char *snotice)
 
 void _reload_bothunt(int connnum, int argc, char *argv[])
 {
-#ifdef DEBUGMODE
-  placed;
-#endif
  if (!amianoper) oper();
 }
 

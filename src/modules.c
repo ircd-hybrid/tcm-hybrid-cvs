@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.13 2001/10/29 00:12:13 wcampbel Exp $
+ * $Id: modules.c,v 1.14 2001/10/29 03:56:31 db Exp $
  *
  */
 
@@ -333,9 +333,6 @@ int load_a_module(char *name, int log)
   char absolute_path[100], *ver, **verp;
   void (*initmod) (void);
   int i;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   snprintf(absolute_path, sizeof(absolute_path), "%s/%s", getcwd((char *)NULL, 
            sizeof(absolute_path)-strlen(name)-1), name);

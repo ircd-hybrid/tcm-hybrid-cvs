@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.12 2001/10/29 00:12:13 wcampbel Exp $ */
+/* $Id: wingate.c,v 1.13 2001/10/29 03:56:31 db Exp $ */
 
 #include <netdb.h>
 #include <unistd.h>
@@ -97,9 +97,6 @@ int wingate_bindsocket(char *nick,char *user,char *host,char *ip)
   int optval;
   int i;
   int found_slot = INVALID;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   for(i=0;i<MAXWINGATES;i++)
     {
@@ -179,9 +176,6 @@ int socks_bindsocket(char *nick,char *user,char *host,char *ip)
   int optval;
   int i;
   int found_slot = INVALID;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   for(i=0;i<MAXSOCKS;i++)
     {

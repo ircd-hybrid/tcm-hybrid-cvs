@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.15 2001/10/29 00:12:13 wcampbel Exp $
+ * $Id: logging.c,v 1.16 2001/10/29 03:56:31 db Exp $
  *
  * - db
  */
@@ -74,9 +74,6 @@ void chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
   char skip = NO;
   char *right_brace_pointer;
   char *right_square_bracket_pointer;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
 /* I try to pick up an [IP] from a connect or disconnect message
  * since this routine is also used on trace, some heuristics are
@@ -260,10 +257,6 @@ void chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
       p++;
       userinfo->host = p;
     }
-#ifdef DEBUGMODE
-  placed;
-#endif
-  return;
 }
 
 /*

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.23 2001/10/29 00:12:13 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.24 2001/10/29 03:56:30 db Exp $ */
 
 #include "setup.h"
 
@@ -77,17 +77,10 @@ extern struct s_testline testlines;
 void 
 dccproc(int connnum, int argc, char *argv[])
 {
-
-/* *sigh* maximum allow for MAXIMUM sprintf limit */
-/* connnections[connnum].buffer can be larger than MAX_BUFF plus overhead */
-/* connnum].buffer can be much larger than outgoing
-*/
-
-#define FLUFF_SIZE (4*MAX_NICK)+10
-
   char buff[MAX_BUFF];
   char dccbuff[MAX_BUFF];
   char who_did_command[2*MAX_NICK];
+  int len;
   int i;
   int opers_only = SEND_ALL_USERS; 	/* Is it an oper only message ? */
   int ignore_bot = NO;
@@ -96,9 +89,6 @@ dccproc(int connnum, int argc, char *argv[])
   struct common_function *temp;
 #ifndef NO_D_LINE_SUPPORT
   char *pattern;  /* u@h or nick */
-#endif
-#ifdef DEBUGMODE
-  placed;
 #endif
 
   if (buff[0]) memset(&buff, 0, sizeof(buff));
@@ -121,39 +111,39 @@ dccproc(int connnum, int argc, char *argv[])
 	         connections[connnum].nick,config_entries.dfltnick);
 
   if(*buffer != '.')
-    {	
-      if((buffer[0] == 'o' || buffer[0] == 'O')
-	 && buffer[1] == ':')
-	{
-	  opers_only = SEND_OPERS_ONLY;
-	  (void)snprintf(dccbuff,sizeof(dccbuff) - 1,"o:<%s@%s> %s",
-	   	         connections[connnum].nick,config_entries.dfltnick,
-		         buffer+2);
-	}
-      else
-	{
-          (void)snprintf(dccbuff,sizeof(dccbuff) - 1,"<%s@%s> %s",
-		         connections[connnum].nick,
-		         config_entries.dfltnick,
-		         buffer);
-	}
-      if(!ignore_bot)
-	{
-	  if(connections[connnum].type & TYPE_PARTYLINE )
-	    {
-	      sendtoalldcc(opers_only, dccbuff); /* Thanks Garfr, Talen */
-	    }
-	  else
-	    {
-	      if(opers_only == SEND_OPERS_ONLY)
-		sendtoalldcc(opers_only, dccbuff);
-	      else
-		prnt(connections[connnum].socket,
-		     "You are not +p, not sending to chat line\n");
-	    }
-	}
-      return;
+  {	
+    if((buffer[0] == 'o' || buffer[0] == 'O') && buffer[1] == ':')
+    {
+      opers_only = SEND_OPERS_ONLY;
+      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,"o:<%s@%s> %s",
+		     connections[connnum].nick,config_entries.dfltnick,
+		     buffer+2);
     }
+    else
+    {
+      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,"<%s@%s> %s",
+		     connections[connnum].nick,
+		     config_entries.dfltnick,
+		     buffer);
+    }
+
+    if(!ignore_bot)
+    {
+      if(connections[connnum].type & TYPE_PARTYLINE )
+      {
+	sendtoalldcc(opers_only, dccbuff); /* Thanks Garfr, Talen */
+      }
+      else
+      {
+	if(opers_only == SEND_OPERS_ONLY)
+	  sendtoalldcc(opers_only, dccbuff);
+	else
+	  prnt(connections[connnum].socket,
+	       "You are not +p, not sending to chat line\n");
+      }
+    }
+    return;
+  }
 
   buffer++;	/* skip the '.' */
 
@@ -163,879 +153,906 @@ dccproc(int connnum, int argc, char *argv[])
 
   command = argv[0]+1;
   switch(get_token(command))
+  {
+  case K_UPTIME:
+    report_uptime(connections[connnum].socket);
+    break;
+
+  case K_MEM:
+    report_mem(connections[connnum].socket);
+    break;
+
+  case K_CLONES:
+    if (connections[connnum].type & TYPE_OPER)
     {
-    case K_UPTIME:
-      report_uptime(connections[connnum].socket);
-      break;
-
-    case K_MEM:
-      report_mem(connections[connnum].socket);
-      break;
-
-    case K_CLONES:
-      if (connections[connnum].type & TYPE_OPER)
-        {
-          report_clones(connections[connnum].socket);
-        }
-      else
-        {
-          not_authorized(connections[connnum].socket);
-        }
-      break;
-
-    case K_NFLOOD:
-      if (connections[connnum].type & TYPE_OPER)
-        {
-          report_nick_flooders(connections[connnum].socket);
-        }
-      else
-        {
-          not_authorized(connections[connnum].socket);
-        }
-      break;
-
-    case K_REHASH:
-      sendtoalldcc(SEND_ALL_USERS,"Rehash requested by %s",who_did_command);
-
-      if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
-	toserv("STATS I\n");
-      else
-	toserv("STATS E\nSTATS F\n");
-      initopers();
-      break;
-
-    case K_TRACE:
-      sendtoalldcc(SEND_OPERS_ONLY,
-		   "trace requested by %s\n",
-		   who_did_command);
-      inithash();
-      break;
-
-    case K_FAILURES:
-
-      if (argc < 2)
-	report_failures(connections[connnum].socket,7);
-      else if (atoi(argv[1]) < 1)
-	prnt(connections[connnum].socket,"Usage: .failures [min failures]\n");
-      else
-	report_failures(connections[connnum].socket,atoi(argv[1]));
-      break;
-
-    case K_DOMAINS:
-
-      if (argc < 2)
-        report_domains(connections[connnum].socket,5);
-      else if (atoi(argv[1]) < 1)
-        prnt(connections[connnum].socket,"Usage: .domains [min users]\n");
-      else
-        report_domains(connections[connnum].socket,atoi(argv[1]));
-      break;
-
-    case K_BOTS:
-      if (connections[connnum].type & TYPE_OPER)
-        {
-          if (argc >= 2)
-            report_multi(connections[connnum].socket,atoi(argv[1]));
-          else
-            report_multi(connections[connnum].socket,3);
-        }
-      else
-        not_authorized(connections[connnum].socket);
-      break;
-
-    case K_VMULTI:
-      if (connections[connnum].type & TYPE_OPER)
-        {
-          if (argc >= 2)
-            report_multi_virtuals(connections[connnum].socket,atoi(argv[1]));
-          else
-            report_multi_virtuals(connections[connnum].socket,3);
-        }
-      else
-        not_authorized(connections[connnum].socket);
-      break;
-      
-    case K_NFIND:
-      if (connections[connnum].type & TYPE_OPER)
-	{
-	  if (argc < 2)
-	    prnt(connections[connnum].socket, "Usage: .nfind <wildcarded nick>\n");
-	  else
-	    list_nicks(connections[connnum].socket,argv[1]);
-	}
-      else
-        not_authorized(connections[connnum].socket);
-      break;
-
-    case K_LIST:
-      if (connections[connnum].type & TYPE_OPER)
-	{
-	  if (argc < 2)
-	    prnt(connections[connnum].socket, "Usage: .list <wildcarded userhost>\n");
-	  else
-	    list_users(connections[connnum].socket,argv[1]);
-	}
-      else
-	not_authorized(connections[connnum].socket);
-      break;
-
-    case K_VLIST:
-      if (connections[connnum].type & TYPE_OPER)
-	{
-	  if (argc<2)
-	    prnt(connections[connnum].socket, "Usage: .vlist <ip_block>\n");
-	  else
-	    list_virtual_users(connections[connnum].socket,argv[1]);
-	}
-      else
-        not_authorized(connections[connnum].socket);
-      break;
-
-    case K_CLASS:
-      if (connections[connnum].type & TYPE_OPER)
-	{
-	  if (argc > 1)
-	    list_class(connections[connnum].socket,argv[1],NO);
-	  else
-            prnt(connections[connnum].socket, "Usage: .class <class name>\n");
-	}
-      else
-	not_authorized(connections[connnum].socket);
-      break;
-
-    case K_CLASST:
-      if (connections[connnum].type & TYPE_OPER)
-	{
-	  if (argc > 1)
-	    list_class(connections[connnum].socket,argv[1],YES);
-	  else
-	    prnt(connections[connnum].socket, "Usage: .classt <class name>\n");
-	}
-      else
-	not_authorized(connections[connnum].socket);
-      break;
-
-
-    case K_KILLLIST:	/* - Phisher */
-      if (connections[connnum].type & TYPE_REGISTERED)
-	{
-	  if (argc <= 1)
-	    prnt(connections[connnum].socket, "Usage: %s <wildcarded userhost>\n", argv[0]);
-	  else
-	    {
-	      sendtoalldcc(SEND_OPERS_ONLY, "killlist %s by %s\n", argv[1], who_did_command);
-	      kill_list_users(connections[connnum].socket, argv[1], 
-                              "Too many connections, read MOTD");
-	    }
-	}
-      else
-	prnt(connections[connnum].socket,"You aren't registered\n");
-      break;
-
-    case K_KLINE:
-      if( connections[connnum].type & TYPE_REGISTERED )
-	{
-	  if (argc < 3)
-	    {
-	      prnt(connections[connnum].socket, "Usage: .kline [nick]|[user@host] reason\n");
-	      return;
-	    }
-	  do_a_kline("kline",kline_time,argv[1],argv[2],who_did_command);
-	}
-      else
-	prnt(connections[connnum].socket,"You aren't registered\n");
+      report_clones(connections[connnum].socket);
+    }
+    else
+    {
+      not_authorized(connections[connnum].socket);
+    }
     break;
 
-/* Toast */
-    case K_KCLONE:
-      if( connections[connnum].type & TYPE_REGISTERED )
-	{
-	  if (argc < 2)
-	    {
-	      prnt(connections[connnum].socket, "Usage: .kclone [nick]|[user@host]\n");
-	      return;
-	    }
-          suggest_action(get_action_type("clone"), argv[1], NULL, NULL, NO, NO);
-	}
-      else
-	prnt(connections[connnum].socket,"You aren't registered\n");
-    break;
-
-/* Toast */
-    case K_KFLOOD:
-      if( connections[connnum].type & TYPE_REGISTERED )
-	{
-	  if (argc < 2)
-	    {
-	      prnt(connections[connnum].socket, "Usage: .kflood [nick]|[user@host]\n");
-	      return;
-	    }
-          suggest_action(get_action_type("flood"), argv[1], NULL, NULL, NO, NO);
-	}
-      else
-	prnt(connections[connnum].socket,"You aren't registered\n");
-    break;
-
-    case K_KPERM:
-      if( connections[connnum].type & TYPE_REGISTERED )
-	{
-	  if (argc < 2)
-	    {
-	      prnt(connections[connnum].socket, "Usage: .kperm [nick]|[user@host]\n");
-              return;
-	    }
-	  do_a_kline("kperm",kline_time,argv[1],REASON_KPERM,who_did_command);
-	}
-      else
-	prnt(connections[connnum].socket,"You aren't registered\n");
-    break;
-
-    case K_KLINK:
-      if (connections[connnum].type & TYPE_REGISTERED)
-	{
-	  if (argc < 2)
-	    {
-	      prnt(connections[connnum].socket, "Usage: .klink [nick]|[user@host]\n");
-              return;
-	    }
-          suggest_action(get_action_type("link"), argv[1], NULL, NULL, NO, NO);
-	}
-      else
-	prnt(connections[connnum].socket,"You aren't registered\n");
-      break;
-
-    case K_KDRONE:
-      if( connections[connnum].type & TYPE_REGISTERED )
-	{
-	  if (argc < 2)
-	    {
-	      prnt(connections[connnum].socket, "Usage: .kdrone [nick]|[user@host]\n");
-	      return;
-	    }
-          suggest_action(get_action_type("drone"), argv[1], NULL, NULL, NO, NO);
-	}
-      else
-	prnt(connections[connnum].socket,"You aren't registered\n");
-    break;
-
-    case K_KBOT:
-      if( connections[connnum].type & TYPE_REGISTERED )
-	{
-	  if (argc < 2)
-	    {
-	      prnt(connections[connnum].socket, "Usage: .kbot [nick]|[user@host]\n");
-	      return;
-	    }
-          suggest_action(get_action_type("bot"), argv[1], NULL, NULL, NO, NO);
-	}
-      else
-	prnt(connections[connnum].socket,"You aren't registered\n");
-    break;
-
-    case K_KILL:
+  case K_NFLOOD:
+    if (connections[connnum].type & TYPE_OPER)
+    {
+      report_nick_flooders(connections[connnum].socket);
+    }
+    else
       {
-	char *reason;
+	not_authorized(connections[connnum].socket);
+      }
+    break;
+
+  case K_REHASH:
+    sendtoalldcc(SEND_ALL_USERS,"Rehash requested by %s",who_did_command);
+
+    if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
+      toserv("STATS I\n");
+    else
+      toserv("STATS E\nSTATS F\n");
+    initopers();
+    break;
+
+  case K_TRACE:
+    sendtoalldcc(SEND_OPERS_ONLY,
+		 "trace requested by %s\n",
+		 who_did_command);
+    inithash();
+    break;
+
+  case K_FAILURES:
+    if (argc < 2)
+      report_failures(connections[connnum].socket,7);
+    else if (atoi(argv[1]) < 1)
+      prnt(connections[connnum].socket,"Usage: .failures [min failures]\n");
+    else
+      report_failures(connections[connnum].socket,atoi(argv[1]));
+    break;
+
+  case K_DOMAINS:
+    if (argc < 2)
+      report_domains(connections[connnum].socket,5);
+    else if (atoi(argv[1]) < 1)
+      prnt(connections[connnum].socket,"Usage: .domains [min users]\n");
+    else
+      report_domains(connections[connnum].socket,atoi(argv[1]));
+    break;
+
+  case K_BOTS:
+    if (connections[connnum].type & TYPE_OPER)
+    {
+      if (argc >= 2)
+	report_multi(connections[connnum].socket,atoi(argv[1]));
+      else
+	report_multi(connections[connnum].socket,3);
+    }
+    else
+      not_authorized(connections[connnum].socket);
+    break;
+
+  case K_VMULTI:
+    if (connections[connnum].type & TYPE_OPER)
+    {
+      if (argc >= 2)
+	report_multi_virtuals(connections[connnum].socket,atoi(argv[1]));
+      else
+	report_multi_virtuals(connections[connnum].socket,3);
+    }
+    else
+      not_authorized(connections[connnum].socket);
+    break;
+      
+  case K_NFIND:
+    if (connections[connnum].type & TYPE_OPER)
+    {
+      if (argc < 2)
+	prnt(connections[connnum].socket, "Usage: .nfind <wildcarded nick>\n");
+      else
+	list_nicks(connections[connnum].socket,argv[1]);
+    }
+    else
+      not_authorized(connections[connnum].socket);
+    break;
+
+  case K_LIST:
+    if (connections[connnum].type & TYPE_OPER)
+    {
+      if (argc < 2)
+	prnt(connections[connnum].socket, "Usage: .list <wildcarded userhost>\n");
+      else
+	list_users(connections[connnum].socket,argv[1]);
+    }
+    else
+      not_authorized(connections[connnum].socket);
+    break;
+
+  case K_VLIST:
+    if (connections[connnum].type & TYPE_OPER)
+    {
+      if (argc<2)
+	prnt(connections[connnum].socket, "Usage: .vlist <ip_block>\n");
+      else
+	list_virtual_users(connections[connnum].socket,argv[1]);
+    }
+    else
+      not_authorized(connections[connnum].socket);
+    break;
+
+  case K_CLASS:
+    if (connections[connnum].type & TYPE_OPER)
+    {
+      if (argc > 1)
+	list_class(connections[connnum].socket,argv[1],NO);
+      else
+	prnt(connections[connnum].socket, "Usage: .class <class name>\n");
+    }
+    else
+      not_authorized(connections[connnum].socket);
+    break;
+
+  case K_CLASST:
+    if (connections[connnum].type & TYPE_OPER)
+    {
+      if (argc > 1)
+	list_class(connections[connnum].socket,argv[1],YES);
+      else
+	prnt(connections[connnum].socket, "Usage: .classt <class name>\n");
+    }
+    else
+      not_authorized(connections[connnum].socket);
+    break;
+
+
+  case K_KILLLIST:	/* - Phisher */
+    if (connections[connnum].type & TYPE_REGISTERED)
+    {
+      if (argc <= 1)
+	prnt(connections[connnum].socket,
+	     "Usage: %s <wildcarded userhost>\n", argv[0]);
+      else
+      {
+	sendtoalldcc(SEND_OPERS_ONLY,
+		     "killlist %s by %s\n", argv[1], who_did_command);
+	kill_list_users(connections[connnum].socket, argv[1], 
+			"Too many connections, read MOTD");
+      }
+    }
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
+    break;
+
+  case K_KLINE:
+    if( connections[connnum].type & TYPE_REGISTERED )
+    {
+      if (argc < 3)
+      {
+	prnt(connections[connnum].socket,
+	     "Usage: .kline [nick]|[user@host] reason\n");
+	return;
+      }
+      do_a_kline("kline",kline_time,argv[1],argv[2],who_did_command);
+    }
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
+    break;
+
+    /* Toast */
+  case K_KCLONE:
+    if( connections[connnum].type & TYPE_REGISTERED )
+    {
+      if (argc < 2)
+      {
+	prnt(connections[connnum].socket,
+	     "Usage: .kclone [nick]|[user@host]\n");
+	return;
+      }
+      suggest_action(get_action_type("clone"), argv[1], NULL, NULL, NO, NO);
+    }
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
+    break;
+
+    /* Toast */
+  case K_KFLOOD:
+    if( connections[connnum].type & TYPE_REGISTERED )
+    {
+      if (argc < 2)
+      {
+	prnt(connections[connnum].socket,
+	     "Usage: .kflood [nick]|[user@host]\n");
+	return;
+      }
+      suggest_action(get_action_type("flood"), argv[1], NULL, NULL, NO, NO);
+    }
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
+    break;
+
+  case K_KPERM:
+    if( connections[connnum].type & TYPE_REGISTERED )
+    {
+      if (argc < 2)
+      {
+	prnt(connections[connnum].socket,
+	     "Usage: .kperm [nick]|[user@host]\n");
+	return;
+      }
+      do_a_kline("kperm",kline_time,argv[1],REASON_KPERM,who_did_command);
+    }
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
+    break;
+
+  case K_KLINK:
+    if (connections[connnum].type & TYPE_REGISTERED)
+    {
+      if (argc < 2)
+      {
+	prnt(connections[connnum].socket,
+	     "Usage: .klink [nick]|[user@host]\n");
+	return;
+      }
+      suggest_action(get_action_type("link"), argv[1], NULL, NULL, NO, NO);
+    }
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
+    break;
+
+  case K_KDRONE:
+    if( connections[connnum].type & TYPE_REGISTERED )
+    {
+      if (argc < 2)
+      {
+	prnt(connections[connnum].socket, 
+	     "Usage: .kdrone [nick]|[user@host]\n");
+	return;
+      }
+      suggest_action(get_action_type("drone"), argv[1], NULL, NULL, NO, NO);
+    }
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
+    break;
+
+  case K_KBOT:
+    if( connections[connnum].type & TYPE_REGISTERED )
+    {
+      if (argc < 2)
+      {
+	prnt(connections[connnum].socket, "Usage: .kbot [nick]|[user@host]\n");
+	return;
+      }
+      suggest_action(get_action_type("bot"), argv[1], NULL, NULL, NO, NO);
+    }
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
+    break;
+
+  case K_KILL:
+  {
+    char *reason;
 #ifdef NO_D_LINE_SUPPORT
-        char *pattern;  /* u@h or nick */
+    char *pattern;  /* u@h or nick */
 #endif
 	
-	if( connections[connnum].type & TYPE_REGISTERED )
+    if( connections[connnum].type & TYPE_REGISTERED )
+    {
+      if(argc >= 2)
+      {
+	pattern = argv[1];
+	reason = argv[2];
+
+	if(pattern && reason)
 	  {
-	    if(argc >= 2)
-	      {
-		pattern = argv[1];
-		reason = argv[2];
-
-		if(pattern && reason)
-		  {
-		    log_kline("KILL", pattern, 0, who_did_command, reason);
-
-		    sendtoalldcc(SEND_OPERS_ONLY,	
-				 "kill %s :by oper %s@%s %s",
-				 pattern,
-				 connections[connnum].nick,
-				 config_entries.dfltnick,
-				 reason);
+	    log_kline("KILL", pattern, 0, who_did_command, reason);
+	    
+	    sendtoalldcc(SEND_OPERS_ONLY,	
+			 "kill %s :by oper %s@%s %s",
+			 pattern,
+			 connections[connnum].nick,
+			 config_entries.dfltnick,
+			 reason);
 
 #ifdef HIDE_OPER_IN_KLINES
-                    toserv("KILL %s :%s\n", pattern, reason);
+	    toserv("KILL %s :%s\n", pattern, reason);
 #else
-                    toserv("KILL %s :requested by %s reason- %s\n", pattern, who_did_command,
-			   reason);
+	    toserv("KILL %s :requested by %s reason- %s\n",
+		   pattern, who_did_command,
+		   reason);
 #endif
-                  }
-                else
-                  prnt(connections[connnum].socket, "Usage: .kill [nick]|[user@host] reason\n");
-              }
-          }
+	  }
 	else
-	  prnt(connections[connnum].socket,"You aren't registered\n");
+	  prnt(connections[connnum].socket,
+	       "Usage: .kill [nick]|[user@host] reason\n");
       }
-    break;
+    }
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
+  }
+  break;
 
-    case K_SPAM:
+  case K_SPAM:
 
-      if( connections[connnum].type & TYPE_REGISTERED )
-	{
-	  if (argc < 2)
-	    {
-	      prnt(connections[connnum].socket, "Usage: .kspam [nick]|[user@host]\n");
-	      return;
-	    }
-          suggest_action(get_action_type("spam"), argv[1], NULL, NULL, NO, NO);
-	}
-      else
-	prnt(connections[connnum].socket,"You aren't registered\n");
-    break;
-
-    case K_HMULTI:
-      if (connections[connnum].type & TYPE_OPER)
-	{
-	  int j;
-	  if (argc >= 2)
-	    {
-	      j=atoi(argv[1]);
-	      if (j<3)
-		{
-		  prnt(connections[connnum].socket, 
-                       "Using a threshold less than 3 is not recommended, changed to 3\n");
-		  j=3;
-		}
-	    }
-	  else
-	    j=3;
-	  report_multi_host(connections[connnum].socket,j);
-	}
-      else
-	not_authorized(connections[connnum].socket);
-      break;
-
-    case K_UMULTI:
-      if (connections[connnum].type & TYPE_OPER)
-	{
-	  int j;
-	  if (argc >= 2)
-	    {
-	      j=atoi(argv[1]);
-	      if (j<3)
-		{
-		  prnt(connections[connnum].socket,
-       "Using a threshold less than 3 is not recommended, changed to 3\n");
-		  j=3;
-		}
-	    }
-	  else
-	    j=3;
-	  report_multi_user(connections[connnum].socket,j);
-	}
-      else
-        not_authorized(connections[connnum].socket);
-      break;
-
-
-    case K_REGISTER:
-      if (connections[connnum].type & TYPE_OPER && argc == 2)
-	register_oper(connnum, argv[1], who_did_command);
-      else if (argc != 2)
-        prnt(connections[connnum].socket, "Usage: .register <password>\n");
-      else
-	not_authorized(connections[connnum].socket);
-    break;
-
-    case K_OPERS:
-      list_opers(connections[connnum].socket);
-    break;
-
-    case K_TESTLINE:
-      if (!(connections[connnum].type & TYPE_OPER))
-        {
-          prnt(connections[connnum].socket, "You are not registered\n");
-          return;
-        }
+    if( connections[connnum].type & TYPE_REGISTERED )
+    {
       if (argc < 2)
-        {
-          prnt(connections[connnum].socket, "Usage: %s <mask>\n", argv[0]);
-          return;
-        }
-      if (!strcasecmp(argv[1], testlines.umask))
-        {
-          prnt(connections[connnum].socket, "Already pending %s\n", argv[1]);
-          return;
-        }
-      snprintf(testlines.umask, sizeof(testlines.umask), "%s", argv[1]);
-      testlines.index = connnum;
-      toserv("TESTLINE %s\n", argv[1]);
-      break;
-
-    case K_ACTION:
-      if (connections[connnum].type & TYPE_OPER )
-        {
-	  switch (argc)
-            {
-              /* .action */
-              case 1:
-                set_actions(connections[connnum].socket, NULL, NULL, 0, NULL);
-                break;
-              /* .action clone */
-              /* .action *c* */
-              case 2:
-                set_actions(connections[connnum].socket, argv[1], NULL, 0, NULL);
-                break;
-              /* .action clone :Cloning */
-              /* .action clone kline */
-              case 3:
-                if (argv[2][0] == ':')
-                  {
-                    p = &argv[2][1];
-                    set_actions(connections[connnum].socket, argv[1], NULL, 0, p);
-                    break;
-                  }
-                set_actions(connections[connnum].socket, argv[1], argv[2], 0, NULL);
-                break;
-              default:
-                if (argc < 4) break;
-                /* .action clone :Cloning is prohibited*/
-                if (argv[2][0] == ':')
-                  {
-                    memset(&dccbuff, 0, sizeof(dccbuff));
-                    p=&argv[2][1];
-                    snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
-                    for (i=3;i<argc;++i)
-                      {
-                        strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
-                        strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
-                      }
-                    if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
-                    set_actions(connections[connnum].socket, argv[1], NULL, 0, dccbuff);
-                    break;
-                  }
-                /* .action clone kline :Cloning */
-                if (argv[3][0] == ':')
-                  {
-                    memset(&dccbuff, 0, sizeof(dccbuff));
-                    p=&argv[3][1];
-                    snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
-                    for (i=4;i<argc;++i)
-                      {
-                        strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
-                        strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
-                      }
-                    if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
-                    set_actions(connections[connnum].socket, argv[1], argv[2], 0, dccbuff);
-                    break;
-                  }
-                /* .action clone kline 1440 */
-                /* .action clone kline 1440 :Cloning is prohibited */
-                /* .action clone kline Clones */
-                /* .action clone kline Cloning is prohibited */
-                if (!(kline_time = atoi(argv[3])))
-                  {
-                    memset(&dccbuff, 0, sizeof(dccbuff));
-                    if (argv[3][0] == ':')
-                      p = &argv[3][1];
-                    else
-                      p = &argv[3][0];
-                    snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
-                    for (i=4;i<argc;++i)
-                      {
-                        strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
-                        strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
-                      }
-                    if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
-
-                    set_actions(connections[connnum].socket, argv[1], argv[2], 0, argv[3]);
-                    break;
-                  }
-                if (argc == 4)
-                  {
-                    set_actions(connections[connnum].socket, argv[1], argv[2], kline_time, NULL);
-                    break;
-                  }
-                memset(&dccbuff, 0, sizeof(dccbuff));
-                if (argv[4][0] == ':')
-                  p = &argv[4][1];
-                else
-                  p = &argv[4][0];
-                snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
-                for (i=5;i<argc;++i)
-                  {
-                    strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
-                    strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
-                  }
-                if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
-                set_actions(connections[connnum].socket, argv[1], argv[2], kline_time, dccbuff);
-                break;
-            }
-        }
-      else
-        not_authorized(connections[connnum].socket);
-    break;
-
-    case K_SET:
       {
-	if(argc < 2)
-	  {
-	    if (connections[connnum].set_modes & SET_PRIVMSG)
-	      prnt(connections[connnum].socket, "MESSAGES\n");
-	    else
-	      prnt(connections[connnum].socket, "NOMESSAGES\n");
-
-	    if (connections[connnum].set_modes & SET_NOTICES)
-	      prnt(connections[connnum].socket, "NOTICES\n");
-	    else
-	      prnt(connections[connnum].socket, "NONOTICES\n");
-	    return;
-	  }
-
-	if (!(strcasecmp(argv[1],"MESSAGES")))
-	  {
-	    connections[connnum].set_modes |= SET_PRIVMSG;
-	    prnt(connections[connnum].socket, "You will see privmsgs sent to tcm\n");
-	  }
-	else if (!(strcasecmp(argv[1],"NOMESSAGES")))
-	  {
-	    connections[connnum].set_modes &= ~SET_PRIVMSG;
-	    prnt(connections[connnum].socket, "You will not see privmsgs sent to tcm\n");
-	  }
-	else if (!(strcasecmp(argv[1],"NOTICES")))
-	  {
-	    connections[connnum].set_modes |= SET_NOTICES;
-	    prnt(connections[connnum].socket, "You will see selected server notices\n");
-	  }
-	else if (!(strcasecmp(argv[1],"NONOTICES")))
-	  {
-	    connections[connnum].set_modes &= ~SET_NOTICES;
-	    prnt(connections[connnum].socket, "You will not see server notices\n");
-	  }
-	else
-	  {
-	    prnt(connections[connnum].socket, "Usage: .set [MESSAGES|NOMESSAGES]\n");
-	    prnt(connections[connnum].socket, "Usage: .set [NOTICES|NONOTICES]\n");
-	  }
+	prnt(connections[connnum].socket, 
+	     "Usage: .kspam [nick]|[user@host]\n");
+	return;
       }
+      suggest_action(get_action_type("spam"), argv[1], NULL, NULL, NO, NO);
+    }
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
     break;
 
-    case K_EXEMPTIONS:
-      list_exemptions(connections[connnum].socket);
+  case K_HMULTI:
+    if (connections[connnum].type & TYPE_OPER)
+    {
+      int j;
+      if (argc >= 2)
+      {
+	j=atoi(argv[1]);
+	if (j<3)
+	{
+	  prnt(connections[connnum].socket, 
+	       "Using a threshold less than 3 is not recommended, changed to 3\n");
+	  j=3;
+	}
+      }
+      else
+	j=3;
+      report_multi_host(connections[connnum].socket,j);
+    }
+    else
+      not_authorized(connections[connnum].socket);
+    break;
+
+  case K_UMULTI:
+    if (connections[connnum].type & TYPE_OPER)
+    {
+      int j;
+      if (argc >= 2)
+	{
+	  j=atoi(argv[1]);
+	  if (j<3)
+	  {
+	    prnt(connections[connnum].socket,
+		 "Using a threshold less than 3 is not recommended, changed to 3\n");
+	    j=3;
+	  }
+	}
+      else
+	j=3;
+      report_multi_user(connections[connnum].socket,j);
+    }
+    else
+      not_authorized(connections[connnum].socket);
+    break;
+
+
+  case K_REGISTER:
+    if (connections[connnum].type & TYPE_OPER && argc == 2)
+      register_oper(connnum, argv[1], who_did_command);
+    else if (argc != 2)
+      prnt(connections[connnum].socket, "Usage: .register <password>\n");
+    else
+      not_authorized(connections[connnum].socket);
+    break;
+
+  case K_OPERS:
+    list_opers(connections[connnum].socket);
+    break;
+
+  case K_TESTLINE:
+    if (!(connections[connnum].type & TYPE_OPER))
+    {
+      prnt(connections[connnum].socket, "You are not registered\n");
+      return;
+    }
+    if (argc < 2)
+    {
+      prnt(connections[connnum].socket, "Usage: %s <mask>\n", argv[0]);
+      return;
+    }
+    if (!strcasecmp(argv[1], testlines.umask))
+    {
+      prnt(connections[connnum].socket, "Already pending %s\n", argv[1]);
+      return;
+    }
+    snprintf(testlines.umask, sizeof(testlines.umask), "%s", argv[1]);
+    testlines.index = connnum;
+    toserv("TESTLINE %s\n", argv[1]);
+    break;
+
+  case K_ACTION:
+    if (connections[connnum].type & TYPE_OPER )
+    {
+      switch (argc)
+      {
+	/* .action */
+      case 1:
+	set_actions(connections[connnum].socket, NULL, NULL, 0, NULL);
+	break;
+	/* .action clone */
+	/* .action *c* */
+      case 2:
+	set_actions(connections[connnum].socket, argv[1], NULL, 0, NULL);
+	break;
+	/* .action clone :Cloning */
+	/* .action clone kline */
+      case 3:
+	if (argv[2][0] == ':')
+	{
+	  p = &argv[2][1];
+	  set_actions(connections[connnum].socket, argv[1], NULL, 0, p);
+	  break;
+	}
+	set_actions(connections[connnum].socket, argv[1], argv[2], 0, NULL);
+	break;
+      default:
+	if (argc < 4) break;
+	/* .action clone :Cloning is prohibited*/
+	if (argv[2][0] == ':')
+	{
+	  p=&argv[2][1];
+
+	  len = snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
+	  p = dccbuff + len;
+
+	  for (i = 3; i < argc; i++)
+	  {
+	    len = sprintf(p, "%s ", argv[i]);
+	    p += len;
+	  }
+	  /* blow away last ' ' */
+	  *--p = '\0';
+
+	  set_actions(connections[connnum].socket, argv[1], NULL, 0, dccbuff);
+	  break;
+	}
+	/* .action clone kline :Cloning */
+	if (argv[3][0] == ':')
+	{
+	  p=&argv[3][1];
+	  snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
+	  for (i=4;i<argc;++i)
+	  {
+	    strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
+	    strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
+	  }
+	  if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
+	  set_actions(connections[connnum].socket, argv[1], argv[2], 0, dccbuff);
+	  break;
+	}
+	/* .action clone kline 1440 */
+	/* .action clone kline 1440 :Cloning is prohibited */
+	/* .action clone kline Clones */
+	/* .action clone kline Cloning is prohibited */
+	if (!(kline_time = atoi(argv[3])))
+	{
+	  if (argv[3][0] == ':')
+	    p = &argv[3][1];
+	  else
+	    p = &argv[3][0];
+	  snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
+	  for (i=4;i<argc;++i)
+	  {
+	    strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
+	    strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
+	  }
+	  if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
+	  
+	  set_actions(connections[connnum].socket, argv[1], argv[2], 0, argv[3]);
+	  break;
+	}
+	if (argc == 4)
+	{
+	  set_actions(connections[connnum].socket, argv[1], argv[2], kline_time, NULL);
+	  break;
+	}
+	if (argv[4][0] == ':')
+	  p = &argv[4][1];
+	else
+	  p = &argv[4][0];
+
+	len = snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
+	p = dccbuff + len;
+
+	for (i = 5; i < argc; i++)
+	  {
+	    len = sprintf(p, "%s ", argv[i]);
+	    p += len;
+	  }
+	/* blow away last ' ' */
+	*--p = '\0';
+
+	set_actions(connections[connnum].socket,
+		    argv[1], argv[2], kline_time, dccbuff);
+	break;
+      }
+    }
+    else
+      not_authorized(connections[connnum].socket);
+    break;
+
+  case K_SET:
+  {
+    if(argc < 2)
+    {
+      if (connections[connnum].set_modes & SET_PRIVMSG)
+	prnt(connections[connnum].socket, "MESSAGES\n");
+      else
+	prnt(connections[connnum].socket, "NOMESSAGES\n");
+      
+      if (connections[connnum].set_modes & SET_NOTICES)
+	prnt(connections[connnum].socket, "NOTICES\n");
+      else
+	prnt(connections[connnum].socket, "NONOTICES\n");
+      return;
+    }
+
+    if ((strcasecmp(argv[1],"MESSAGES")) == 0)
+    {
+      connections[connnum].set_modes |= SET_PRIVMSG;
+      prnt(connections[connnum].socket, "You will see privmsgs sent to tcm\n");
+    }
+    else if ((strcasecmp(argv[1],"NOMESSAGES")) == 0)
+    {
+      connections[connnum].set_modes &= ~SET_PRIVMSG;
+      prnt(connections[connnum].socket, "You will not see privmsgs sent to tcm\n");
+    }
+    else if ((strcasecmp(argv[1],"NOTICES")) == 0)
+    {
+      connections[connnum].set_modes |= SET_NOTICES;
+      prnt(connections[connnum].socket, "You will see selected server notices\n");
+    }
+    else if ((strcasecmp(argv[1],"NONOTICES")) == 0)
+    {
+      connections[connnum].set_modes &= ~SET_NOTICES;
+      prnt(connections[connnum].socket, "You will not see server notices\n");
+    }
+    else
+    {
+      prnt(connections[connnum].socket, "Usage: .set [MESSAGES|NOMESSAGES]\n");
+      prnt(connections[connnum].socket, "Usage: .set [NOTICES|NONOTICES]\n");
+    }
+  }
+  break;
+  
+  case K_EXEMPTIONS:
+    list_exemptions(connections[connnum].socket);
     break;
 
 #ifndef OPERS_ONLY
     case K_BAN:
+    {
+      if(connections[connnum].type & TYPE_OPER)
       {
-	if(connections[connnum].type & TYPE_OPER)
-	  {
-	    int j;
+	int j;
 
-	    if(argc >= 2)
-	      {
-		if(argv[1][0] == '+')
-		  ban_manipulate(connections[connnum].socket,'+',argv[1]+1);
-		else
-		  ban_manipulate(connections[connnum].socket,'-',argv[1]+1);
-	      }
-	    else
-	      {
-		prnt(connections[connnum].socket,"current bans\n");
-		for (j=0;j<MAXBANS;j++)
-		  {
-		    if (!banlist[j].host[0]) break;
-		    if (!banlist[j].user[0]) break;
-		    if (banlist[j].host[0])
-		      prnt(connections[connnum].socket,
-                           "%s@%s\n", banlist[j].user, banlist[j].host);
-		  }
-	      }
-	  }
+	if(argc >= 2)
+	{
+	  if(argv[1][0] == '+')
+	    ban_manipulate(connections[connnum].socket,'+',argv[1]+1);
+	  else
+	    ban_manipulate(connections[connnum].socket,'-',argv[1]+1);
+	}
 	else
-          not_authorized(connections[connnum].socket);
+	{
+	  prnt(connections[connnum].socket,"current bans\n");
+	  for (j=0;j<MAXBANS;j++)
+	  {
+	    if (!banlist[j].host[0]) break;
+	    if (!banlist[j].user[0]) break;
+	    if (banlist[j].host[0])
+	      prnt(connections[connnum].socket,
+		   "%s@%s\n", banlist[j].user, banlist[j].host);
+	  }
+	}
       }
-      break;
+      else
+	not_authorized(connections[connnum].socket);
+    }
+    break;
 #endif
      
-      case K_UMODE:
+  case K_UMODE:
 
-        if (!(connections[connnum].type & TYPE_REGISTERED))
-          {
-            prnt(connections[connnum].socket, "You aren't registered\n");
-            return;
-          }
+    if (!(connections[connnum].type & TYPE_REGISTERED))
+    {
+      prnt(connections[connnum].socket, "You aren't registered\n");
+      return;
+    }
 
-        if (argc < 2)
-          {
-            prnt(connections[connnum].socket, "Your current flags are: %s\n",
-                 type_show(connections[connnum].type));
-            break;
-          }
-        if (argc >= 3)
-          {
-            if (!(connections[connnum].type & TYPE_ADMIN))
-              {
-                prnt(connections[connnum].socket, "You aren't an admin\n");
-                return;
-              }
-            if ((argv[2][0] == '+') || (argv[2][0] == '-'))
-              set_umode(connnum,argv[2],argv[1]);
-            else
-              prnt(connections[connnum].socket, ".umode [user flags] | [user] | [flags]\n");
-          }
-        else
-          {
-            if ((argv[1][0] == '+') || (argv[1][0] == '-'))
-              set_umode(connnum, argv[1], NULL);
-            else
-              {
-                if (!(connections[connnum].type & TYPE_ADMIN))
-                  {
-                    prnt(connections[connnum].socket, "You aren't an admin\n");
-                    return;
-                  }
-                show_user_umodes(connections[connnum].socket,argv[1]);
-              }
-          }
-        break;
+    if (argc < 2)
+    {
+      prnt(connections[connnum].socket, "Your current flags are: %s\n",
+	   type_show(connections[connnum].type));
+      break;
+    }
+    if (argc >= 3)
+    {
+      if (!(connections[connnum].type & TYPE_ADMIN))
+      {
+	prnt(connections[connnum].socket, "You aren't an admin\n");
+	return;
+      }
+      if ((argv[2][0] == '+') || (argv[2][0] == '-'))
+	set_umode(connnum,argv[2],argv[1]);
+      else
+	prnt(connections[connnum].socket, ".umode [user flags] | [user] | [flags]\n");
+    }
+    else
+    {
+      if ((argv[1][0] == '+') || (argv[1][0] == '-'))
+	set_umode(connnum, argv[1], NULL);
+      else
+	{
+	  if (!(connections[connnum].type & TYPE_ADMIN))
+	    {
+	      prnt(connections[connnum].socket, "You aren't an admin\n");
+	      return;
+	    }
+	  show_user_umodes(connections[connnum].socket,argv[1]);
+	}
+    }
+    break;
 
-      case K_CONNECTIONS:
-	list_connections(connections[connnum].socket);
-	break;
+  case K_CONNECTIONS:
+    list_connections(connections[connnum].socket);
+    break;
 
-      case K_DISCONNECT:
-	if (connections[connnum].type & TYPE_REGISTERED)
-	  handle_disconnect(connections[connnum].socket,argv[1],
-			    who_did_command);
-	else
-	  prnt(connections[connnum].socket,"You aren't registered\n");
-	  break;
+  case K_DISCONNECT:
+    if (connections[connnum].type & TYPE_REGISTERED)
+      handle_disconnect(connections[connnum].socket,argv[1],
+			who_did_command);
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
+    break;
 
-      case K_HELP:
-	print_help(connections[connnum].socket, argv[1]);
-	break;
+  case K_HELP:
+    print_help(connections[connnum].socket, argv[1]);
+    break;
 
-      case K_MOTD:
-	print_motd(connections[connnum].socket);
-        break;
+  case K_MOTD:
+    print_motd(connections[connnum].socket);
+    break;
 
-      case K_SAVE:
-	if(connections[connnum].type & TYPE_ADMIN)
-	  handle_save(connections[connnum].socket,connections[connnum].nick);
-	else
-	  prnt(connections[connnum].socket, "You don't have admin priv. to save %s file\n", 
-               CONFIG_FILE);
-        break;
+  case K_SAVE:
+    if(connections[connnum].type & TYPE_ADMIN)
+      handle_save(connections[connnum].socket,connections[connnum].nick);
+    else
+      prnt(connections[connnum].socket,
+	   "You don't have admin priv. to save %s file\n", 
+	   CONFIG_FILE);
+    break;
 
-      case K_CLOSE:
-	prnt(connections[connnum].socket,"Closing connection\n");
-        for (temp=dcc_signoff;temp;temp=temp->next)
-          temp->function(connnum, 0, NULL);
-	break;
+  case K_CLOSE:
+    prnt(connections[connnum].socket,"Closing connection\n");
+    for (temp=dcc_signoff;temp;temp=temp->next)
+      temp->function(connnum, 0, NULL);
+    break;
 
 /* Added by ParaGod */
 
-      case K_OP:
-	if (connections[connnum].type & TYPE_REGISTERED)
-	  {
-	    if (argc != 2)
-	      prnt(connections[connnum].socket,"Usage: op [nick]\n");
-	    else
-	      op(config_entries.defchannel,argv[1]); 
-	  }
-	else
-	  prnt(connections[connnum].socket,"You aren't registered\n");
-        break;
+  case K_OP:
+    if (connections[connnum].type & TYPE_REGISTERED)
+    {
+      if (argc != 2)
+	prnt(connections[connnum].socket,"Usage: op [nick]\n");
+      else
+	op(config_entries.defchannel,argv[1]); 
+    }
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
+    break;
 
-      case K_CYCLE:
-	if (connections[connnum].type & TYPE_REGISTERED)
-	  {
-	    leave(config_entries.defchannel);
-	    sendtoalldcc(SEND_OPERS_ONLY, "I'm cycling.  Be right back.\n");
-	    sleep(1);
+  case K_CYCLE:
+    if (connections[connnum].type & TYPE_REGISTERED)
+    {
+      leave(config_entries.defchannel);
+      sendtoalldcc(SEND_OPERS_ONLY, "I'm cycling.  Be right back.\n");
+      sleep(1);
 
-	    /* probably on a cycle, we'd want the tcm to set
-	     * the key as well...
-	     */
+      /* probably on a cycle, we'd want the tcm to set
+       * the key as well...
+       */
 
-            toserv("JOIN %s %s\nMODE %s +ntk %s\n", config_entries.defchannel, 
-                   config_entries.defchannel_key, config_entries.defchannel, 
-                   config_entries.defchannel_key);
-	  }
-	else
-	  prnt(connections[connnum].socket,"You aren't registered\n");
-        break;
+      toserv("JOIN %s %s\nMODE %s +ntk %s\n", config_entries.defchannel, 
+	     config_entries.defchannel_key, config_entries.defchannel, 
+	     config_entries.defchannel_key);
+    }
+    else
+      prnt(connections[connnum].socket,"You aren't registered\n");
+    break;
 
-      case K_DIE:
-	if (connections[connnum].type & TYPE_REGISTERED)
-	  {
-	     sendtoalldcc(SEND_ALL_USERS, "I've been ordered to quit irc, goodbye.");
-	     toserv("QUIT :Dead by request!\n");
-	     log("DIED by oper %s", who_did_command);
-	     exit(1);
-	  }
-	else
-	  not_authorized(connections[connnum].socket);
-        break;
+  case K_DIE:
+    if (connections[connnum].type & TYPE_REGISTERED)
+    {
+      sendtoalldcc(SEND_ALL_USERS, "I've been ordered to quit irc, goodbye.");
+      toserv("QUIT :Dead by request!\n");
+      log("DIED by oper %s", who_did_command);
+      exit(1);
+    }
+    else
+      not_authorized(connections[connnum].socket);
+    break;
     /* End of stuff added by ParaGod */
 
-    case K_RESTART:
-        if (connections[connnum].type & TYPE_REGISTERED)
-          {
-             sendtoalldcc(SEND_ALL_USERS, "I've been ordered to restart.");
-             toserv("QUIT :Restart by request!\n");
-             log("RESTART by oper %s", who_did_command);
-             sleep(1);
-             execv(SPATH, NULL);
-          }
-        else
-          not_authorized(connections[connnum].socket);
-        break;
+  case K_RESTART:
+    if (connections[connnum].type & TYPE_REGISTERED)
+    {
+      sendtoalldcc(SEND_ALL_USERS, "I've been ordered to restart.");
+      toserv("QUIT :Restart by request!\n");
+      log("RESTART by oper %s", who_did_command);
+      sleep(1);
+      execv(SPATH, NULL);
+    }
+    else
+      not_authorized(connections[connnum].socket);
+    break;
 
-    case K_INFO:
-      prnt(connections[connnum].socket, "real server name [%s]\n", config_entries.rserver_name);
+  case K_INFO:
+    prnt(connections[connnum].socket,
+	 "real server name [%s]\n", config_entries.rserver_name);
 
-      if(config_entries.hybrid)
-	prnt(connections[connnum].socket,"Hybrid server version %d\n", 
-             config_entries.hybrid_version );
-      else
-	prnt(connections[connnum].socket,"Not hybrid server\n" );
+    if(config_entries.hybrid)
+      prnt(connections[connnum].socket,"Hybrid server version %d\n", 
+	   config_entries.hybrid_version );
+    else
+      prnt(connections[connnum].socket,"Not hybrid server\n" );
 
-      break;
+    break;
 
-    case K_AUTOPILOT:
-      if (!(connections[connnum].type & TYPE_OPER))
-	not_authorized(connections[connnum].socket);
+  case K_AUTOPILOT:
+    if (!(connections[connnum].type & TYPE_OPER))
+      not_authorized(connections[connnum].socket);
+    else
+    {
+      if(config_entries.autopilot)
+	{
+	  sendtoalldcc(SEND_OPERS_ONLY, "autopilot is now OFF");
+	  config_entries.autopilot = NO;
+	  prnt(connections[connnum].socket, "autopilot is now OFF");
+	  log("AUTOPILOT turned off by oper %s", who_did_command);
+	}
       else
 	{
-	  if(config_entries.autopilot)
-	    {
-	      sendtoalldcc(SEND_OPERS_ONLY, "autopilot is now OFF");
-	      config_entries.autopilot = NO;
-	      prnt(connections[connnum].socket, "autopilot is now OFF");
-	      log("AUTOPILOT turned off by oper %s", who_did_command);
-	    }
-	  else
-	    {
-	      sendtoalldcc(SEND_OPERS_ONLY, "autopilot is now ON");
-	      config_entries.autopilot = YES;
-	      prnt(connections[connnum].socket, "autopilot is now ON");
-
-	      log("AUTOPILOT turned on by oper %s", who_did_command);
-	    }
+	  sendtoalldcc(SEND_OPERS_ONLY, "autopilot is now ON");
+	  config_entries.autopilot = YES;
+	  prnt(connections[connnum].socket, "autopilot is now ON");
+	  
+	  log("AUTOPILOT turned on by oper %s", who_did_command);
 	}
-      break;
+    }
+    break;
 
-    case K_LOCOPS:
-      if (!(connections[connnum].type & TYPE_OPER))
-	not_authorized(connections[connnum].socket);
+  case K_LOCOPS:
+    if (!(connections[connnum].type & TYPE_OPER))
+      not_authorized(connections[connnum].socket);
+    else
+    {
+      if(argc >= 2)
+      {
+	p = dccbuff;
+	for (i = 1; i < argc; i++)
+	  {
+	    len = sprintf(p, "%s ", argv[i]);
+	    p += len;
+	  }
+	/* blow away last ' ' */
+	*--p = '\0';
+
+	if (dccbuff[0] == ':')
+	  toserv("LOCOPS :(%s) %s\n", connections[connnum].nick, dccbuff+1);
+	else
+	  toserv("LOCOPS :(%s) %s\n", connections[connnum].nick, dccbuff);
+      }
       else
-	{
-	  if(argc >= 2)
-	    {
-              memset(&dccbuff,0,sizeof(dccbuff));
-              for (i=1;i<argc;++i)
-                {
-                  strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
-                  strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
-                }
-              if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
-              if (dccbuff[0] == ':')
-	        toserv("LOCOPS :(%s) %s\n", connections[connnum].nick, dccbuff+1);
-              else
-	        toserv("LOCOPS :(%s) %s\n", connections[connnum].nick, dccbuff);
-	    }
-	  else
-	    prnt(connections[connnum].socket, "Really, it would help if you said something\n");
-	}
-      break;
+	prnt(connections[connnum].socket, "Really, it would help if you said something\n");
+    }
+    break;
 
-    case K_UNKLINE:
-      if (!connections[connnum].type & TYPE_REGISTERED)
-        {
-          prnt(connections[connnum].socket,"You aren't registered\n");
-          return;
-        }
-      if (argc < 2)
-        {
-          prnt(connections[connnum].socket, "Usage: .unkline [user@host]\n");
-          return;
-        }
+  case K_UNKLINE:
+    if (!connections[connnum].type & TYPE_REGISTERED)
+    {
+      prnt(connections[connnum].socket,"You aren't registered\n");
+      return;
+    }
+    if (argc < 2)
+    {
+      prnt(connections[connnum].socket, "Usage: .unkline [user@host]\n");
+      return;
+    }
 
-      log("UNKLINE %s attempted by oper %s", argv[1], who_did_command);
+    log("UNKLINE %s attempted by oper %s", argv[1], who_did_command);
 
-      sendtoalldcc(SEND_OPERS_ONLY, "UNKLINE %s attempted by oper %s", argv[1],who_did_command);
-      toserv("UNKLINE %s\n",argv[1]);
-      break;
+    sendtoalldcc(SEND_OPERS_ONLY,
+		 "UNKLINE %s attempted by oper %s", argv[1],who_did_command);
+    toserv("UNKLINE %s\n",argv[1]);
+    break;
 
-    case K_VBOTS:
-      if (!(connections[connnum].type & TYPE_OPER))
-        {
-          not_authorized(connections[connnum].socket);
-          return;
-        }
-      if (argc >= 2) report_vbots(connections[connnum].socket, atoi(argv[1]));
-      else report_vbots(connections[connnum].socket, 3);
-      break;
+  case K_VBOTS:
+    if (!(connections[connnum].type & TYPE_OPER))
+    {
+      not_authorized(connections[connnum].socket);
+      return;
+    }
+    if (argc >= 2) report_vbots(connections[connnum].socket, atoi(argv[1]));
+    else report_vbots(connections[connnum].socket, 3);
+    break;
 
 #ifndef NO_D_LINE_SUPPORT
-    case K_DLINE:
-      if (!connections[connnum].type & TYPE_REGISTERED)
-        {
-	  prnt(connections[connnum].socket,"You aren't registered\n");
-          return;
-        }
-      if (argc >= 3)
-        {
-	  pattern = argv[1];
-          memset((char *)&dccbuff,0,sizeof(dccbuff));
-          for (i=2;i<argc;++i)
-            {
-              strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
-              strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
-            }
-          if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
-          if (dccbuff[0] == ':')
-            log_kline("DLINE", pattern, 0, who_did_command, dccbuff+1);
-          else
-	    log_kline("DLINE", pattern, 0, who_did_command, dccbuff);
+  case K_DLINE:
+    if (!connections[connnum].type & TYPE_REGISTERED)
+    {
+      prnt(connections[connnum].socket,"You aren't registered\n");
+      return;
+    }
+    if (argc >= 3)
+    {
+      pattern = argv[1];
 
-	  sendtoalldcc(SEND_OPERS_ONLY, "dline %s : by oper %s %s", pattern, who_did_command,
-	               dccbuff);
+      p = dccbuff;
+      for (i = 2; i < argc; i++)
+      {
+	len = sprintf(p, "%s ", argv[i]);
+	p += len;
+      }
+      /* blow away last ' ' */
+      *--p = '\0';
 
-#ifdef HIDE_OPER_IN_KLINES
-          toserv("DLINE %s :%s\n", pattern, dccbuff);
-#else
-          toserv("DLINE %s :%s [%s]\n", pattern, dccbuff, who_did_command);
-#endif
-        }
+      if (dccbuff[0] == ':')
+	log_kline("DLINE", pattern, 0, who_did_command, dccbuff+1);
       else
-        prnt(connections[connnum].socket, "Usage: .dline [nick]|[user@host] reason\"\n");
-      break;
+	log_kline("DLINE", pattern, 0, who_did_command, dccbuff);
+
+      sendtoalldcc(SEND_OPERS_ONLY, "dline %s : by oper %s %s", pattern, who_did_command,
+		   dccbuff);
+      
+#ifdef HIDE_OPER_IN_KLINES
+      toserv("DLINE %s :%s\n", pattern, dccbuff);
+#else
+      toserv("DLINE %s :%s [%s]\n", pattern, dccbuff, who_did_command);
+#endif
+    }
+    else
+      prnt(connections[connnum].socket, "Usage: .dline [nick]|[user@host] reason\"\n");
+    break;
 #endif
 
 #ifdef ENABLE_QUOTE
-      case K_QUOTE:
-        if (connections[connnum].type & TYPE_ADMIN)
-          {
-            if (argc < 2)
-              {
-                prnt(connections[connnum].socket,"Usage: .quote <server message>\n");
-                return;
-              }
-            memset((char *)&dccbuff,0,sizeof(dccbuff));
-            for (i=1;i<argc;++i)
-              {
-                strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
-                strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
-              }
-            if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
-            toserv("%s\n", dccbuff);
-          }
-        else
-          prnt(connections[connnum].socket, "You don't have admin privileges\n");
-        break;
+  case K_QUOTE:
+    if (connections[connnum].type & TYPE_ADMIN)
+    {
+      if (argc < 2)
+      {
+	prnt(connections[connnum].socket,"Usage: .quote <server message>\n");
+	return;
+      }
+
+      p = dccbuff;
+      for (i = 1; i < argc; i++)
+      {
+	len = sprintf(p, "%s ", argv[i]);
+	p += len;
+      }
+      /* blow away last ' ' */
+      *--p = '\0';
+
+      toserv("%s\n", dccbuff);
+    }
+    else
+      prnt(connections[connnum].socket, "You don't have admin privileges\n");
+    break;
 #endif
 
-      default:
-        prnt(connections[connnum].socket,"Unknown command [%s]\n",argv[0]+1);
-        break;
-    }
+  default:
+    prnt(connections[connnum].socket,"Unknown command [%s]\n",argv[0]+1);
+    break;
+  }
 }
 
 /*
@@ -1106,21 +1123,18 @@ static int
 is_kline_time(char *p)
 {
   int result = 0;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   while(*p)
+  {
+    if(isdigit(*p))
     {
-      if(isdigit(*p))
-        {
-          result *= 10;
-          result += ((*p) & 0xF);
-          p++;
-        }
-      else
-        return(0);
+      result *= 10;
+      result += ((*p) & 0xF);
+      p++;
     }
+    else
+      return(0);
+  }
 
   /* in the degenerate case where oper does a /quote kline 0 user@host :reason
    * i.e. they specifically use 0, I am going to return 1 instead

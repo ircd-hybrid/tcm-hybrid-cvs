@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.22 2001/10/29 00:12:13 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.23 2001/10/29 03:56:31 db Exp $ */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -129,9 +129,6 @@ toserv(char *format, ... )
 {
   char msgbuf[MAX_BUFF];
   va_list va;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   va_start(va,format);
 
@@ -160,9 +157,6 @@ prnt(int sock, ...)
   char msgbuf[MAX_BUFF];
   char *format;
   va_list va;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   va_start(va,sock);
 
@@ -781,9 +775,6 @@ void report_multi_host(int sock,int nclones)
   struct hashrec *userptr,*top,*temp;
   int numfound,i;
   int foundany = NO;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   nclones-=1;
   for (i = 0; i < HASHTABLESIZE; ++i)
@@ -1342,9 +1333,6 @@ report_multi_user(int sock,int nclones)
   int numfound;
   int i;
   int foundany = NO;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   nclones-=1;
   for (i=0;i<HASHTABLESIZE;++i)
@@ -1520,10 +1508,6 @@ void
 do_a_kline(char *command_name,int kline_time, char *pattern,
 	   char *reason,char *who_did_command)
 {
-#ifdef DEBUGMODE
-  placed;
-#endif
-
   if(pattern == NULL)
     return;
 

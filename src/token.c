@@ -5,7 +5,7 @@
  *
  * - Dianora db@db.net
  *
- * $Id: token.c,v 1.18 2001/10/29 02:44:12 wcampbel Exp $
+ * $Id: token.c,v 1.19 2001/10/29 03:56:31 db Exp $
  *
  */
 
@@ -230,9 +230,6 @@ int
 occurance(char *string, char find)
 {
   int a=0, found=0;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   if (!string) return 0;
   for (a=0;a<strlen(string);++a)

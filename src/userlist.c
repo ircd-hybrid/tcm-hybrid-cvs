@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.30 2001/10/29 02:44:12 wcampbel Exp $
+ * $Id: userlist.c,v 1.31 2001/10/29 03:56:31 db Exp $
  *
  */
 
@@ -675,9 +675,7 @@ static void load_a_user(char *line,int link_tcm)
 static void load_e_line(char *line) {
   char *vltn, *p, *uhost;
   int type=0;
-#ifdef DEBUGMODE
-  placed;
-#endif
+
 
   if (!(p = strchr(line, ':'))) return;
   vltn = line;
@@ -843,9 +841,6 @@ void ban_manipulate(int sock,char flag,char *userhost)
   char *user;
   char *host;
   int  i;
-#ifdef DEBUGMODE
-  placed;
-#endif
 
   if( !(user = strtok(userhost,"@")) )
     return;

@@ -1,3 +1,34 @@
+db          2002/05/25 22:55:14 EDT	(20020526_10)
+
+  Modified files:
+    include              bothunt.h config.h stdcmds.h tcm_io.h 
+    src                  .depend bothunt.c commands.c logging.c 
+                         main.c modules.c parse.c stdcmds.c 
+                         tcm_io.c userlist.c 
+  Removed files:
+    include              serverif.h 
+  Log:
+  - removed serverif.h
+  
+  Revision  Changes    Path
+  1.30      +1 -0      tcm-hybrid/include/bothunt.h
+  1.55      +8 -0      tcm-hybrid/include/config.h
+  1.27      +0 -25     tcm-hybrid/include/serverif.h (dead)
+  1.22      +3 -0      tcm-hybrid/include/stdcmds.h
+  1.19      +1 -0      tcm-hybrid/include/tcm_io.h
+  1.18      +10 -10    tcm-hybrid/src/.depend
+  1.106     +1 -1      tcm-hybrid/src/bothunt.c
+  1.90      +0 -1      tcm-hybrid/src/commands.c
+  1.33      +0 -1      tcm-hybrid/src/logging.c
+  1.79      +0 -1      tcm-hybrid/src/main.c
+  1.45      +0 -1      tcm-hybrid/src/modules.c
+  1.28      +2 -2      tcm-hybrid/src/parse.c
+  1.74      +0 -1      tcm-hybrid/src/stdcmds.c
+  1.37      +1 -1      tcm-hybrid/src/tcm_io.c
+  1.74      +0 -1      tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/25 22:32:48 EDT	(20020526_9)
 
   Modified files:

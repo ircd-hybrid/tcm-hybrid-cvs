@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.44 2002/05/28 17:57:10 db Exp $
+ * $Id: parse.c,v 1.45 2002/05/28 20:01:51 leeh Exp $
  */
 
 #include <stdio.h>
@@ -424,7 +424,7 @@ process_server(int conn_num, char *source, char *function, char *param)
       break;
 	
     case RPL_TRACECLASS:
-      on_trace_class(argc, argv);
+      doingtrace = NO;
       break;
 	
     case RPL_STATSILINE:

@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.42 2002/05/28 19:40:50 db Exp $ */
+/* $Id: bothunt.h,v 1.43 2002/05/28 20:01:48 leeh Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -132,7 +132,6 @@ extern void init_bothunt(void);
 extern void free_bothunt(void);
 extern void reload_bothunt(void);
 extern void on_trace_user(int argc, char *argv[]);
-extern void on_trace_class(int argc, char *argv[]);
 extern void on_stats_e(int argc, char *argv[]);
 extern void on_stats_i(int argc, char *argv[]);
 extern void on_server_notice(int argc, char *argv[]);

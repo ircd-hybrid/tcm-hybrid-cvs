@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.133 2002/05/28 19:40:53 db Exp $
+ * $Id: bothunt.c,v 1.134 2002/05/28 20:01:51 leeh Exp $
  */
 
 #include <stdio.h>
@@ -181,13 +181,6 @@ on_trace_user(int argc, char *argv[])
   /* XXX */
   userinfo.nick = argv[5]; /* XXX */
   adduserhost(&userinfo,YES,is_oper);
-}
-
-void
-on_trace_class(int argc, char *argv[])
-{
-  if (doingtrace)
-    doingtrace = NO;
 }
 
 /* 

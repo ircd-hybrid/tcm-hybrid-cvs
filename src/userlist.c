@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.143 2002/08/08 18:10:40 bill Exp $
+ * $Id: userlist.c,v 1.144 2002/08/14 16:59:37 bill Exp $
  */
 
 #include <errno.h>
@@ -167,18 +167,16 @@ m_umode(struct connection *connection_p, int argc, char *argv[])
 	  "Your flags are now: %s (changed by %s)",
 	  type_show(user_conn->type),
 	  connection_p->registered_nick);
+        send_to_connection(connection_p, "User flags for %s are now: %s",
+                           argv[1], type_show(user_conn->type));
       }
       else 
       {
         set_umode_userlist(argv[1], argv[2]);
+        send_to_connection(connection_p, "Added %s to user flags for %s",
+                           argv[2], argv[1]);
       }
 
-      send_to_connection(connection_p, "User flags for %s are now: %s",
-			 argv[1], type_show(user_conn->type));
-
-      {
-        send_to_connection(connection_p, "Can't find user [%s]", argv[1]);
-      }
     }
     else
       send_to_connection(connection_p,

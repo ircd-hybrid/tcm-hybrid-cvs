@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.198 2002/08/12 17:52:28 bill Exp $
+ * $Id: bothunt.c,v 1.199 2002/08/14 16:59:36 bill Exp $
  */
 
 #include <stdio.h>
@@ -135,6 +135,12 @@ struct msg_to_action msgs_to_mon[] = {
   {MSG_INFO_REQUESTED, sizeof(MSG_INFO_REQUESTED)-1, INFOREQUESTED},
   {MSG_NO_ACONF, sizeof(MSG_NO_ACONF)-1, NOACONFFOUND},
   {MSG_QUARANTINED, sizeof(MSG_QUARANTINED)-1, QUARANTINE},
+  {MSG_KACTIVE7, sizeof(MSG_KACTIVE7)-1, ACTIVE},
+  {MSG_KACTIVE6, sizeof(MSG_KACTIVE6)-1, ACTIVE},
+  {MSG_GACTIVE7, sizeof(MSG_GACTIVE7)-1, ACTIVE},
+  {MSG_GACTIVE6, sizeof(MSG_GACTIVE6)-1, ACTIVE},
+  {MSG_DACTIVE7, sizeof(MSG_DACTIVE7)-1, ACTIVE},
+  {MSG_DACTIVE6, sizeof(MSG_DACTIVE6)-1, ACTIVE},
   {NULL, 0, INVALID}
 };	
 
@@ -652,8 +658,6 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if (strstr(q, "possible spambot") == NULL)
       return;
 
-    send_to_all(NULL, FLAGS_ALL, "Spambot: %s (%s@%s)", nick, user, host);
-
     handle_action(act_spambot, nick, user, host, 0, 0);
     break;
 
@@ -780,6 +784,16 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 		    "%s does not have access", config_entries.testline_umask);
     config_entries.testline_cnctn = NULL;
     memset(&config_entries.testline_umask, 0, sizeof(config_entries.testline_umask));
+    break;
+
+  /* KLINE active for bill[bill@ummm.E] */
+  /* K-line active for bill[bill@ummm.E] */
+  case ACTIVE:
+    if ((q = strrchr(p, ' ')) == NULL)
+      return;
+    ++q;
+
+    send_to_all(NULL, FLAGS_SPY, "*** Active for %s", q);
     break;
 
   default:

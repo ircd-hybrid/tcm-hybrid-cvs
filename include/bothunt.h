@@ -1,7 +1,7 @@
 #ifndef __BOTHNUT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.56 2002/08/10 21:08:09 bill Exp $ */
+/* $Id: bothunt.h,v 1.57 2002/08/14 16:59:34 bill Exp $ */
 
 
 struct source_client;
@@ -54,6 +54,12 @@ void _config(int, int, char *argv[]);
 #define MSG_INFO_REQUESTED	"info requested by"
 #define MSG_NO_ACONF		"No aconf found"
 #define MSG_QUARANTINED		"Quaratined nick"
+#define MSG_KACTIVE7		"KLINE active for"
+#define MSG_KACTIVE6		"K-line active for"
+#define MSG_GACTIVE7		"GLINE active for"
+#define MSG_GACTIVE6		"G-line active for"
+#define MSG_DACTIVE7		"DLINE active for"
+#define MSG_DACTIVE6		"D-line active for"
 
 #define IGNORE		-1
 #define CONNECT		 0
@@ -79,6 +85,7 @@ void _config(int, int, char *argv[]);
 #define INFOREQUESTED	31
 #define NOACONFFOUND	32
 #define QUARANTINE	33
+#define ACTIVE		34
 
 #define CLONECONNECTCOUNT 3
 #define CLONECONNECTFREQ  30

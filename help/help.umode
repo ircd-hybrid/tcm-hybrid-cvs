@@ -2,16 +2,13 @@ umode is used to save personal preferences for oneself or others.
 each flag is turned on with + turned off with -
 
 To change umode for oneself
-.umode +psweioklm
+.umode +pywokx-i
  +p be on party line
- +s see server messages
+ +y see spy notices
  +w see warning messages
- +e echo commands back to user
  +i invisible, do not show up on stats p
  +o see LOCOPS send LOCOPS via .locops
  +k see klines/kills/unklines
- +l see LINK notices
- +m see motd  
  +x see server introduction/quits
  +W see OPERWALL/WALLOPS
 

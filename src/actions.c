@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.37 2002/08/13 00:39:42 bill Exp $
+ * $Id: actions.c,v 1.38 2002/08/14 16:59:36 bill Exp $
  */
 
 #include "setup.h"
@@ -543,6 +543,12 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
   if(valid_string(m_user) && valid_string(m_host))
   {
     user = m_user;
+    host = m_host;
+  }
+  else if(!valid_string(m_user) && valid_string(m_host))
+  {
+    /* for some actions, we have no username (like reconnecting clones) */
+    user = "\0";
     host = m_host;
   }
   else if(valid_string(nick))

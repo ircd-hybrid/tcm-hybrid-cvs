@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.52 2002/08/11 22:46:30 wcampbel Exp $
+ * $Id: hash.c,v 1.53 2002/08/14 16:59:36 bill Exp $
  */
 
 #include <stdio.h>
@@ -303,14 +303,6 @@ add_user_host(struct user_entry *user_info, int fromtrace)
    * to those that connect after the tcm has succesfully oper'd on its
    * server.
    */
-#if 0
-  /* XXX - Note to Bill, it was previously memset above, move the set
-  ** down here
-  */
-  if (fromtrace == YES)
-    memset(new_user->gecos, 0, MAX_GECOS);
-  else
-#endif
   if (fromtrace == NO)
     strlcpy(new_user->gecos, user_info->gecos, MAX_GECOS);
 

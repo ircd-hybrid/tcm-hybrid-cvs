@@ -1,3 +1,8 @@
+*** 20011017_1 by bill
+
+- whoop, first in what is sure to be series of typo fixes (argv[9] needed where argv[6] was)
+
+
 *** 20011016_2 by bill
 - got rid of tcm linking userlist flags
   (note: once and for all, tcm link support is *gone*)

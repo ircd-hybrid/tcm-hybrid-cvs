@@ -1,3 +1,15 @@
+leeh        2002/05/24 08:24:47 EDT	(20020524_5)
+
+  Modified files:
+    include              config.h 
+  Log:
+  - dont enable debugmode by default.
+  
+  Revision  Changes    Path
+  1.48      +1 -1      tcm-hybrid/include/config.h
+
+
+
 bill        2002/05/24 01:34:19 EDT	(20020524_4)
 
   Modified files:

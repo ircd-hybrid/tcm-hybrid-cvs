@@ -1,3 +1,16 @@
+db          2002/05/28 14:18:30 EDT	(20020528_22)
+
+  Modified files:
+    src                  main.c tcm_io.c 
+  Log:
+  - hide init of maxconns in init_connections()
+  
+  Revision  Changes    Path
+  1.97      +0 -2      tcm-hybrid/src/main.c
+  1.67      +2 -0      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/28 14:16:15 EDT	(20020528_21)
 
   Modified files:

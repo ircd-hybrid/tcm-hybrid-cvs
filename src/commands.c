@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.18 2001/08/27 02:09:30 bill Exp $";
+static char *version="$Id: commands.c,v 1.19 2001/08/27 02:11:09 bill Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -842,18 +842,18 @@ void dccproc(int connnum)
 			      reason);
 
 		    sendtoalldcc(SEND_OPERS_ONLY,	
-				 "kill %s : by oper %s@%s %s",
+				 "kill %s :by oper %s@%s %s",
 				 pattern,
 				 connections[connnum].nick,
 				 config_entries.dfltnick,
 				 reason);
 
 #ifdef HIDE_OPER_IN_KLINES
-                    toserv("KILL %s : %s\n",
+                    toserv("KILL %s :%s\n",
 			   pattern,
 			   reason);
 #else
-                    toserv("KILL %s : requested by %s reason- %s\n",
+                    toserv("KILL %s :requested by %s reason- %s\n",
 			   pattern,
 			   who_did_command,
 			   reason);

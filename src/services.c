@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.23 2002/09/20 04:22:43 bill Exp $
+ * $Id: services.c,v 1.24 2002/11/26 15:56:25 bill Exp $
  */
 
 #include <stdio.h>
@@ -96,6 +96,9 @@ services_handler(struct source_client *source_p, int argc, char *argv[])
     if((p = strchr(host, ' ')) != NULL)
       *p = '\0';
 
+    if (ok_host(user, host, act_drone))
+      return;
+
     send_to_all(NULL, FLAGS_ALL, "%s reports drone %s", SERVICES_NAME, nick);
 
     if(config_entries.channel != '\0')
@@ -148,6 +151,7 @@ services_handler(struct source_client *source_p, int argc, char *argv[])
     while(*nick == ' ')
       ++nick;
 
+    /* when could this happen? -bill */
     if(services.clones_displayed == 3)
       return;
 
@@ -160,6 +164,9 @@ services_handler(struct source_client *source_p, int argc, char *argv[])
 
     user = userathost;
     *host++ = '\0';
+
+    if (ok_host(user, host, act_sclone))
+      return;
 
     /* XXX */
     send_to_all(NULL, FLAGS_ALL, "%s reports %d cloning %s@%s nick %s",

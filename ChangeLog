@@ -1,3 +1,15 @@
+db          2002/05/26 21:44:36 EDT	(20020527_7)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - removed unused dccbuf
+  
+  Revision  Changes    Path
+  1.52      +2 -2      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/26 21:37:45 EDT	(20020527_6)
 
   Modified files:

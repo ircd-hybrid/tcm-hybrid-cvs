@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.100 2002/09/11 17:55:39 db Exp $
+ * $Id: tcm_io.c,v 1.101 2002/09/16 16:06:05 bill Exp $
  */
 
 #include <stdio.h>
@@ -156,7 +156,7 @@ read_packet(void)
 
     if (select_result > 0)
     {
-      DLINK_FOREACH(ptr, connections.head)
+      DLINK_FOREACH_SAFE(ptr, next_ptr, connections.head)
       {
         connection_p = ptr->data;
 

@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.32 2001/11/26 20:50:34 bill Exp $ */
+/* $Id: stdcmds.c,v 1.33 2001/11/29 05:07:40 bill Exp $ */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -474,12 +474,11 @@ suggest_action(int type_s,
   else
     type = type_s;
 
-  /* Don't kill or kline exempted users */
-  if(okhost(user, host, type))
-    return;
-
   if (user != NULL && host != NULL)
     {
+      /* Don't kill or kline exempted users */
+      if(okhost(user, host, type))
+        return;
 
       if (strchr(host,'*') != (char *)NULL)
         return;
@@ -545,6 +544,15 @@ suggest_action(int type_s,
     return;
   else if (strcasecmp(action, "warn") == 0 && type_s < 0)
   {
+    if (suggested_user[0] == '\0' || suggested_host == NULL)
+      {
+        if (different)
+          toserv("KLINE %d %s :%s\n", different, nick, reason);
+        else
+          toserv("KLINE %s :%s\n", nick, reason);
+        return;
+      }
+
     if (different)
       toserv("KLINE %d %s@%s :%s\n", different, suggested_user,
              suggested_host, reason);
@@ -552,7 +560,7 @@ suggest_action(int type_s,
       toserv("KLINE %s@%s :%s\n", suggested_user, suggested_host, reason);
   }
 
-  if (suggested_user == NULL || suggested_host == NULL)
+  if (suggested_user[0] == '\0' || suggested_host == NULL)
     {
       toserv("%s %s :%s\n", action, nick, reason);
       return;

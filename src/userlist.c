@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.36 2001/11/25 02:58:37 bill Exp $
+ * $Id: userlist.c,v 1.37 2001/11/29 05:07:40 bill Exp $
  *
  */
 
@@ -738,7 +738,7 @@ void clear_userlist()
 
   for(cnt = 0; cnt < MAXHOSTS; cnt++)
     {
-      hostlist[cnt].user[0] = '0';
+      hostlist[cnt].user[0] = '\0';
       hostlist[cnt].host[0] = '\0';
     }
 

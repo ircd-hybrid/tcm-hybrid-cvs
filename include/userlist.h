@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.60 2002/05/31 01:54:14 wcampbel Exp $ */
+/* $Id: userlist.h,v 1.61 2002/06/01 01:46:20 wcampbel Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -76,7 +76,7 @@ struct exception_entry
 {
   char user[MAX_NICK+1];
   char host[MAX_HOST];
-  int type;
+  unsigned int type;
 };
 
 int find_user_in_userlist(const char *);

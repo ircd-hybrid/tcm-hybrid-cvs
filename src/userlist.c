@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.77 2002/05/26 16:10:28 leeh Exp $
+ * $Id: userlist.c,v 1.78 2002/05/26 19:04:15 leeh Exp $
  *
  */
 
@@ -46,6 +46,36 @@ int  ban_list_index;
 
 static void load_a_user(char *);
 static void load_e_line(char *);
+
+struct umode_struct
+{
+  char umode;
+  int type;
+  int need_admin;
+};
+
+static struct umode_struct umode_table[] =
+{
+  { 'M',  1,	TYPE_ADMIN,		},
+  { 'K',  1,	TYPE_KLINE,		},
+#ifndef NO_D_LINE_SUPPORT
+  { 'D',  1,	TYPE_DLINE,		},
+#endif
+  { 'S',  1,	TYPE_SUSPENDED, 	},
+  { 'I',  1,	TYPE_INVM,		},
+#ifdef ENABLE_W_FLAG
+  { 'W',  1,	TYPE_WALLOPS,		},
+#endif
+  { 'k',  0,	TYPE_VIEW_KLINES, 	},
+  { 'w',  0,	TYPE_WARN,		},
+  { 'y',  0,	TYPE_SPY,		},
+  { 'i',  0,	TYPE_INVS,		},
+  { 'o',  0,	TYPE_LOCOPS,		},
+  { 'p',  0,	TYPE_PARTYLINE,		},
+  { 'e',  0,	TYPE_ECHO,		},
+  { 'x',  0,	TYPE_SERVERS,		},
+  { (char)0, 0, 0,			}
+};
 
 int
 get_method_number (char * methodname)

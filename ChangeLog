@@ -1,3 +1,21 @@
+db          2002/05/22 21:57:23 EDT	(20020523_0)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - fixed get_line
+    sorry folks.
+    I had forgotten to take care of the case of a line continued into
+    the next read.
+  
+  Groceries come first!
+  Still more to come....
+  
+  Revision  Changes    Path
+  1.2       +40 -3     tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/22 18:17:38 EDT	(20020522_9)
 
   Removed files:

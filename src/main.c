@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.42 2002/05/22 01:34:30 wcampbel Exp $ */
+/* $Id: main.c,v 1.43 2002/05/22 01:52:41 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -351,7 +351,7 @@ sendtoalldcc(int type,char *format,...)
 	      break;
 
             case SEND_SERVERS_ONLY:
-              if(connections[i].type & (TYPE_OPER | TYPE_SERVERS))
+              if(connections[i].type & TYPE_SERVERS)
                 prnt(connections[i].socket, msgbuf);
               break;
 

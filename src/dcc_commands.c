@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.63 2002/05/20 12:58:28 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.64 2002/05/22 01:52:38 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -1134,6 +1134,7 @@ set_umode(int connnum, char *flags, char *registered_nick)
       case 'p': type = TYPE_PARTYLINE; break;
       case 's': type = TYPE_STAT; break;
       case 'w': type = TYPE_WARN; break;
+      case 'x': type = TYPE_SERVERS; break;
 
       case 'I':
 	if (connections[connnum].type & TYPE_ADMIN)
@@ -1229,6 +1230,7 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	  case 'p': type = TYPE_PARTYLINE; break;
 	  case 's': type = TYPE_STAT; break;
 	  case 'w': type = TYPE_WARN; break;
+          case 'x': type = TYPE_SERVERS; break;
 	  case '-':
 	    reversing=YES;
 	    type = 0;
@@ -1318,6 +1320,7 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	    case 'l': type = TYPE_LINK; break;
 	    case 'm': type = TYPE_MOTD; break;
 	    case 'o': type = TYPE_LOCOPS; break;
+            case 'x': type = TYPE_SERVERS; break;
 	    case '-':
 	      reversing=YES;
 	      type = 0;

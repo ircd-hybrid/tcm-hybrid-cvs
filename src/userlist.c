@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.29 2001/10/29 00:16:48 wcampbel Exp $
+ * $Id: userlist.c,v 1.30 2001/10/29 02:44:12 wcampbel Exp $
  *
  */
 
@@ -900,32 +900,6 @@ void ban_manipulate(int sock,char flag,char *userhost)
     }
 }
 
-#if 0
-
-/*
- * flags_by_userhost()
- *
- * inputs	- user
- *		- host
- * outputs	- type of user by hostmask provided
- * side effects	- NONE
- * NOTE:  Not used currently
- */
-
-int flags_by_userhost(char *user, char *host)
-{
-  int i;
-
-  for(i = 0; userlist[i].user; i++)
-    {
-      if ((!wldcmp(userlist[i].user,user)) &&
-	  (!wldcmp(userlist[i].host,host)))
-	return( userlist[i].type);
-    }
-  return 0;
-}
-#endif
-
 /*
  * islegal_pass()
  *
@@ -977,22 +951,6 @@ int islegal_pass(int connect_id,char *password)
     }
   return(0);
 }
-
-#if 0
-/* Not used currently */
-int f_lined(char *user, char *host, int type) {
-  struct f_entry *temp;
-  char uhost[MAX_NICK+2+MAX_HOST];
-  snprintf(uhost, sizeof(uhost), "%s@%s", user, host);
-
-  temp = flines;
-  while (temp != NULL) {
-    if (wldcmp(temp->uhost, uhost) && (temp->type & type || temp->type == -1)) return 1;
-    temp = temp->next;
-  }
-  return 0;
-}
-#endif
 
 /* Checks for ok hosts to block auto-kline - Phisher */
 /*

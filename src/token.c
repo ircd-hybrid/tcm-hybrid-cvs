@@ -5,7 +5,7 @@
  *
  * - Dianora db@db.net
  *
- * $Id: token.c,v 1.17 2001/10/29 00:12:13 wcampbel Exp $
+ * $Id: token.c,v 1.18 2001/10/29 02:44:12 wcampbel Exp $
  *
  */
 
@@ -215,7 +215,7 @@ splitc ( char *rest, char divider)
       return((char *)NULL);
     }
 
-  *p = 0;
+  *p = '\0';
   p++;
   return p;
 }

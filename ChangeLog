@@ -1,3 +1,7 @@
+*** 20011026_10 by bill
+- removed generation of 'rude' default Makefile on distclean
+
+
 *** 20011026_9 by wcampbel
 Updated the INSTALL document
 

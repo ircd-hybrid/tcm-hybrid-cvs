@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.26 2002/05/22 22:03:27 leeh Exp $ */
+/* $Id: bothunt.h,v 1.27 2002/05/23 06:41:52 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -62,6 +62,38 @@ struct banned_info
 #define CLONERECONCOUNT   5	/* this many reconnects */
 #define CLONERECONFREQ    15    /* in this many seconds */
 
+#define RECONNECT_CLONE_TABLE_SIZE 50
+
+struct reconnect_clone_entry
+{
+  char host [MAX_HOST+1];
+  int count;
+  time_t first;
+};
+
+struct reconnect_clone_entry reconnect_clone[RECONNECT_CLONE_TABLE_SIZE];
+
+#define LINK_LOOK_TABLE_SIZE 10
+
+struct link_look_entry
+{
+  char user_host[MAX_USER+MAX_HOST+2];
+  int  link_look_count;
+  time_t last_link_look;
+};
+
+struct link_look_entry link_look[LINK_LOOK_TABLE_SIZE];
+
+#define CONNECT_FLOOD_TABLE_SIZE 30
+
+struct connect_flood_entry
+{
+  char user_host[MAX_USER+MAX_HOST+2];
+  char ip[18];
+  int  connect_count;
+  time_t last_connect;
+};
+
 extern int maxconns;
 
 void report_clones(int);
@@ -96,5 +128,8 @@ extern void on_stats_o(int connnum, int argc, char *argv[]);
 extern void on_stats_e(int connnum, int argc, char *argv[]);
 extern void on_stats_i(int connnum, int argc, char *argv[]);
 extern void onservnotice(int connnum, int argc, char *argv[]);
+extern struct connection connections[];
+extern struct s_testline testlines;
+extern int doingtrace;
 
 #endif

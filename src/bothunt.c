@@ -1,21 +1,9 @@
 /*
-** This code below is UGLY as sin and is not commented.  I would NOT use
-** it for the basis of anything real, as it is the worst example of data
-** structure misuse and abuse that I have ever SEEN much less written.
-** If you're looking for how to implement hash tables, don't look here.
-** If I had $100 for every time I looped thru every bucket of the hash
-** tables to process a user command, I could retire.  Any way, it may be
-** inefficient as hell when handling user commands, but it's fast and
-** much cleaner when handling the server notice traffic.  Since the server
-** notice traffic should outweigh commands to the bot by - oh like - 100
-** to 1 or more, I didn't care too much about inefficiencies and ugliness
-** in the stuff that processes user commands... I just wanted to throw it
-** together quickly.
-*/
+ *
+ */
 
-/* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.82 2002/05/22 22:03:34 leeh Exp $ */
+/* $Id: bothunt.c,v 1.83 2002/05/23 06:41:55 db Exp $ */
 
 #include "setup.h"
 
@@ -135,47 +123,19 @@ struct msg_to_action msgs_to_mon[] = {
   {(char *)NULL, INVALID}
 };	
 
-
-extern struct connection connections[];
-extern struct s_testline testlines;
-extern int doingtrace;
-
-#define RECONNECT_CLONE_TABLE_SIZE 50
-
-struct reconnect_clone_entry
-{
-  char host [MAX_HOST+1];
-  int count;
-  time_t first;
-};
-
-struct reconnect_clone_entry reconnect_clone[RECONNECT_CLONE_TABLE_SIZE];
-
-#define LINK_LOOK_TABLE_SIZE 10
-
-struct link_look_entry
-{
-  char user_host[MAX_USER+MAX_HOST+2];
-  int  link_look_count;
-  time_t last_link_look;
-};
-
-struct link_look_entry link_look[LINK_LOOK_TABLE_SIZE];
-
-#define CONNECT_FLOOD_TABLE_SIZE 30
-
-struct connect_flood_entry
-{
-  char user_host[MAX_USER+MAX_HOST+2];
-  char ip[18];
-  int  connect_count;
-  time_t last_connect;
-};
-
 struct connect_flood_entry connect_flood[CONNECT_FLOOD_TABLE_SIZE];
 
 struct banned_info glines[MAXBANS];
 
+/*
+ * find_banned_host
+ *
+ * inputs	- user
+ * 		- hostname
+ * output	- return index of user@host found in glines, or -1
+ *		  if not found
+ * side effects	-
+ */
 static int
 find_banned_host(char *user, char *host)
 {
@@ -235,12 +195,10 @@ gline_request(char *user, char *host, char *reason, char *who)
     if (glines[i].user[0] == '\0')
       break;
 
-  /* XXX not everyone supports strlcpy yet (dolts) deal with later -db */
   strlcpy(glines[i].user, user, MAX_USER);
   strlcpy(glines[i].host, host, MAX_HOST);
   strlcpy(glines[i].reason, reason, MAX_REASON);
   strlcpy(glines[i].who, who, MAX_WHO);
-
   glines[i].when = CurrentTime;
 
   return 1;
@@ -253,14 +211,6 @@ gline_request(char *user, char *host, char *reason, char *who)
  * output	- NONE
  * side effects	- user is added to hash tables
  * 
- * 
- * texas went and modified the output of /trace in their irc server
- * so that it appears as "nick [user@host]" _ontraceuser promptly
- * threw out the "[user@host]" part.. *sigh* I've changed the code
- * here to check for a '[' right after a space, and not blow away
- * the "[user@host]" part. - Dianora
- * 
- * This is moot now, as no one now runs this variant...
  */
 
 void
@@ -328,8 +278,8 @@ void _ontraceclass(int connnum, int argc, char *argv[])
 /* 
  * on_stats_o()
  *
- * inputs		- body of server message
- * output		- none
+ * inputs	- body of server message
+ * output	- none
  * side effects	- user list of tcm is built up from stats O of tcm server
  * 
  *   Some servers have some "interesting" O lines... lets
@@ -1950,14 +1900,19 @@ check_reconnect_clones(char *host)
       return;
     }
   }
-  for (i=0; i<RECONNECT_CLONE_TABLE_SIZE; ++i) {
-    if ((reconnect_clone[i].host[0]) && (now - reconnect_clone[i].first > CLONERECONFREQ)) {
+
+  for (i=0; i < RECONNECT_CLONE_TABLE_SIZE; ++i)
+  {
+    if ((reconnect_clone[i].host[0]) &&
+	(now - reconnect_clone[i].first > CLONERECONFREQ))
+    {
       reconnect_clone[i].host[0] = 0;
       reconnect_clone[i].count = 0;
       reconnect_clone[i].first = 0;
     }
   }
-  for ( i=0 ; i<RECONNECT_CLONE_TABLE_SIZE ; ++i )
+
+  for ( i=0 ; i < RECONNECT_CLONE_TABLE_SIZE ; ++i )
   {
     if (!reconnect_clone[i].host[0])
     {
@@ -2399,13 +2354,6 @@ connect_flood_notice(char *snotice)
  * new entry into. If the user@host entry is NOT found in the table
  * then an entry is made for this user@host, and is time stamped.
  *
- *
- * ARGGHHHHH
- *
- * +th ircd has "LINKS '...' requested by "
- * where ... is usualy blank or a server name etc.
- * LT and CS do not. sorry guys for missing that. :-(
- *  Jan 1 1997  - Dianora
  */
 static void
 link_look_notice(char *snotice)
@@ -2526,56 +2474,6 @@ link_look_notice(char *snotice)
 	}
     }
 }
-
-/*
- * bot_report_kline()
- *
- * inputs	- server notice after the bot notice
- * output	- NONE
- * side effects	- generates a suggested kline for bot
- */
-
-#ifdef BOT_WARN
-void
-bot_report_kline(char *snotice,char *type_of_bot)
-{
-  char *p;			/* scratch variable */
-  char *nick;			/* found nick */
-  char *user_host;		/* user@host */
-  char *user;			/* user */
-  char *host;			/* host */
-
-  if ( !(nick = strtok(snotice," ")) )
-    return;
-
-  if ( !(user_host = strtok(NULL," ")) )
-    return;
-
-  if (*user_host == '[')
-    *user_host++;
-  if ( !(p = strrchr(user_host,']')) )
-    return;
-  *p = '\0';		
-
-  user = user_host;	
-  if ( !(p = strchr(user_host,'@')) )
-    return;
-  *p = '\0';
-
-  host = p;	
-  host++;
-
-  sendtoalldcc(SEND_WARN_ONLY,"%s bot [%s!%s@%s]",
-	       type_of_bot,
-	       nick,	
-	       user,
-	       host);
-
-  handle_action(act_bot, 1, nick, user, host, 0, 0);
-
-  log("bot warning [%s@%s]\n", user, host);
-}
-#endif
 
 /*
  * cs_nick_flood

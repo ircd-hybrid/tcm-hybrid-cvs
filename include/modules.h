@@ -1,7 +1,7 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.15 2002/05/23 21:27:46 leeh Exp $ */
+/* $Id: modules.h,v 1.16 2002/05/23 23:09:42 leeh Exp $ */
 
 struct module {
   char *name;
@@ -15,8 +15,6 @@ struct common_function {
   struct common_function *next;
 };
 
-struct common_function *signon;
-struct common_function *signoff;
 struct common_function *user_signon;
 struct common_function *user_signoff;
 struct common_function *dcc_signon;
@@ -30,10 +28,7 @@ struct common_function *action;
 struct common_function *reload;
 struct common_function *onjoin;
 struct common_function *onctcp;
-struct common_function *server_notice;
 
-#define F_SIGNON		1
-#define F_SIGNOFF		2
 #define F_USER_SIGNON		3
 #define F_USER_SIGNOFF		4
 #define F_DCC_SIGNON		5
@@ -48,7 +43,6 @@ struct common_function *server_notice;
 #define F_RELOAD		14
 #define F_ONJOIN		16
 #define F_ONCTCP		17
-#define F_SERVER_NOTICE		20
 
 extern void sendtoalldcc(int type,char *format,...);
 extern void report(int type, int channel_send_flag, char *format,...);

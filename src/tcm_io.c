@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.4 2002/05/23 16:05:51 leeh Exp $
+ * $Id: tcm_io.c,v 1.5 2002/05/23 23:09:45 leeh Exp $
  */
 
 #include <stdio.h>
@@ -417,7 +417,6 @@ toserv(char *format, ... )
 void
 linkclosed(int connnum, int argc, char *argv[])
 {
-  struct common_function *temp;
   char reason[MAX_BUFF];
 
   if (argc == 0)
@@ -445,8 +444,7 @@ linkclosed(int connnum, int argc, char *argv[])
     return;
   }
 
-  for (temp=signon;temp;temp=temp->next)
-    temp->function(0, 0, NULL);
+  _signon(0, 0, NULL);
 }
 
 

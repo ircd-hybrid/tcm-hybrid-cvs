@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.48 2002/05/23 21:27:48 leeh Exp $ */
+/* $Id: main.c,v 1.49 2002/05/23 23:09:44 leeh Exp $ */
 
 #include "setup.h"
 
@@ -107,10 +107,6 @@ static void setup_corefile(void);
 void
 init_hash_tables(void)
 {
-  if (signon)
-    memset(signon,0,sizeof(struct common_function));
-  if (signoff)
-    memset(signoff,0,sizeof(struct common_function));
   if (dcc_signon)
     memset(dcc_signon,0,sizeof(struct common_function));
   if (dcc_signoff)
@@ -133,8 +129,6 @@ init_hash_tables(void)
     memset(onjoin,0,sizeof(struct common_function));
   if (onctcp)
     memset(onctcp,0,sizeof(struct common_function));
-  if (server_notice)
-    memset(server_notice,0,sizeof(struct common_function));
 }
 
 /*
@@ -489,7 +483,6 @@ main(int argc, char *argv[])
   char c;
   extern char *optarg;
   extern int optind;
-  struct common_function *temp;
 
   /* chdir returns 0 on sucess, -1 on failure */
   if (chdir(DPATH))
@@ -541,11 +534,8 @@ main(int argc, char *argv[])
   load_all_modules(YES);
 
   /* XXX - these used to be in the modules, need to be done properly */
-  add_common_function(F_SIGNON, _signon);
-  add_common_function(F_SIGNOFF, linkclosed);
   add_common_function(F_ONJOIN, _onjoin);
   add_common_function(F_RELOAD, _reload_bothunt);
-  add_common_function(F_SERVER_NOTICE, onservnotice);
   add_common_function(F_ONCTCP, _onctcp);
 
 #ifdef GLINES
@@ -678,15 +668,13 @@ main(int argc, char *argv[])
 
   amianoper = NO;
   startup_time = time(NULL);
-  for (temp=signon;temp;temp=temp->next)
-    temp->function(0, 0, NULL);
+  _signon(0, 0, NULL);
 
   /* enter the main IO loop */
   while(!quit)
     read_packet();
 
-  for (temp=signoff;temp;temp=temp->next)
-    temp->function(0, 0, NULL);
+  linkclosed(0, 0, NULL);
 
   if(config_entries.debug && outfile)
     {

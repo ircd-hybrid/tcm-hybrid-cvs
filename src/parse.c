@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.5 2002/05/23 21:27:48 leeh Exp $
+ * $Id: parse.c,v 1.6 2002/05/23 23:09:44 leeh Exp $
  */
 
 #include <stdio.h>
@@ -247,8 +247,8 @@ static void proc(char *source,char *fctn,char *param)
       {
         if (strstr(argv[1], "collision)"))
           onnicktaken();
-        for (temp=signoff;temp;temp=temp->next)
-          temp->function(0, argc, argv);
+
+	linkclosed(0, argc, argv);
       }
     }
     else if ((strcmp(argv[1],"WALLOPS")) == 0)
@@ -272,8 +272,7 @@ static void proc(char *source,char *fctn,char *param)
     {
       if(strcasecmp(source,config_entries.rserver_name) == 0)
       {
-        for (temp=server_notice;temp;temp=temp->next)
-          temp->function(0, argc, argv);
+        onservnotice(0, argc, argv);
       }
 #ifdef SERVICES
       else if(strcasecmp(source,SERVICES_NAME) == 0)

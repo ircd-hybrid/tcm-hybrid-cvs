@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.27 2002/05/23 21:27:48 leeh Exp $B
+ * $Id: modules.c,v 1.28 2002/05/23 23:09:44 leeh Exp $B
  *
  */
 
@@ -118,12 +118,6 @@ void add_common_function(int type, void *function)
 
   switch (type)
     {
-      case F_SIGNON:
-        temp = &signon;
-        break;
-      case F_SIGNOFF:
-        temp = &signoff;
-        break;
       case F_USER_SIGNON:
         temp = &user_signon;
         break;
@@ -160,9 +154,6 @@ void add_common_function(int type, void *function)
       case F_ONCTCP:
         temp = &onctcp;
         break;
-      case F_SERVER_NOTICE:
-        temp = &server_notice;
-        break;
       default:
         return;
         break;
@@ -186,11 +177,7 @@ void modules_init(void)
   mod_add_cmd(&modreload_msgtab);
   mod_add_cmd(&modlist_msgtab);
 
-/*  if (signon == NULL)
-    signon = (struct common_function *) malloc(sizeof(struct common_function));
-  if (signoff == NULL)
-    signoff = (struct common_function *) malloc(sizeof(struct common_function));
-  if (dcc_signon == NULL)
+/*  if (dcc_signon == NULL)
     dcc_signon = (struct common_function *) malloc(sizeof(struct common_function));
   if (dcc_signoff == NULL)
     dcc_signoff = (struct common_function *) malloc(sizeof(struct common_function));
@@ -214,8 +201,6 @@ void modules_init(void)
     onjoin = (struct common_function *) malloc(sizeof(struct common_function));
   if (onctcp == NULL)
     onctcp = (struct common_function *) malloc(sizeof(struct common_function));
-  if (server_notice == NULL)
-    server_notice = (struct common_function *) malloc(sizeof(struct common_function));
 */
 }
 

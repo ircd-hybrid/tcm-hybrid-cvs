@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.19 2002/03/06 10:58:55 einride Exp $ */
+/* $Id: wingate.c,v 1.20 2002/03/06 19:20:41 einride Exp $ */
 
 
 #include <netdb.h>
@@ -26,15 +26,18 @@
 #define REASON_SOCKS   "Open SOCKS"
 
 /* Maximum pending connects for wingates */
-#define MAXWINGATES 100
+#define MAXWINGATES 200
 
 /* Maximum pending connects for socks */
-#define MAXSOCKS 100
+#define MAXSOCKS 400 
 
 #define WINGATE_CONNECTING 1
 #define WINGATE_READING 2
 #define WINGATE_READ 3
-#define SOCKS_CONNECTING 4
+#define SOCKS5_CONNECTING 4
+#define SOCKS4_CONNECTING 5
+#define SOCKS5_SENTVERSION 6
+#define SOCKS4_SENTCONNECT 7
 
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
 struct wingates {
@@ -54,6 +57,7 @@ char *_version="20012009";
 char wingate_class_list[MAXWINGATES][100];
 int  wingate_class_list_index;
 extern fd_set writefds;
+extern fd_set readfds;
 #endif
 
 #ifdef DETECT_WINGATE
@@ -83,7 +87,7 @@ void _modinit();
 int wingate_bindsocket(char *nick,char *user,char *host);
 #endif
 #ifdef DETECT_SOCKS
-int socks_bindsocket(char *nick,char *user,char *host);
+int socks_bindsocket(char *nick,char *user,char *host,int socksversion);
 #endif
 
 #ifdef DETECT_WINGATE
@@ -170,7 +174,7 @@ int wingate_bindsocket(char *nick,char *user,char *host)
 ** socks_bindsocket()
 **   Sets up a socket and connects to the given host
 */
-int socks_bindsocket(char *nick,char *user,char *host)
+int socks_bindsocket(char *nick,char *user,char *host, int socksversion)
 {
   int plug;
   int result;
@@ -179,6 +183,8 @@ int socks_bindsocket(char *nick,char *user,char *host)
   int optval;
   int i;
   int found_slot = INVALID;
+  if ((socksversion != 4) && (socksversion != 5))
+    return;
 
   for(i=0;i<MAXSOCKS;i++)
     {
@@ -211,7 +217,10 @@ int socks_bindsocket(char *nick,char *user,char *host)
     }
 
   socks[found_slot].socket = plug;
-  socks[found_slot].state = SOCKS_CONNECTING;
+  if (socksversion == 4)
+    socks[found_slot].state = SOCKS4_CONNECTING;
+  else
+    socks[found_slot].state = SOCKS5_CONNECTING;
   strncpy(socks[found_slot].user,user,MAX_USER-1);
   strncpy(socks[found_slot].host,host,MAX_HOST-1);
   strncpy(socks[found_slot].nick,nick,MAX_NICK-1);
@@ -243,8 +252,9 @@ int socks_bindsocket(char *nick,char *user,char *host)
 
 void _scontinuous(int connnum, int argc, char *argv[])
 {
+  unsigned char tmp[200];
   char sillybuf[1];
-  int i;
+  int i, n;
 
 #ifdef DETECT_WINGATE
   for (i=0; i<MAXWINGATES;i++)
@@ -309,14 +319,99 @@ void _scontinuous(int connnum, int argc, char *argv[])
     {
       if (socks[i].socket != INVALID)
         {
-          if (FD_ISSET(socks[i].socket, &writefds))
+          if (FD_ISSET(socks[i].socket, &writefds) || FD_ISSET(socks[i].socket, &readfds)) 
             {
-	      char ch=0;
-	      if (write(socks[i].socket, &ch, 1)==1)
+	      switch (socks[i].state) {
+	      case SOCKS5_CONNECTING:
+		tmp[0] = 5; /* socks version */
+		tmp[1] = 1; /* Number of supported auth methods */
+		tmp[2] = 0; /* Auth method 0 (no auth) */
+		tmp[3] = 0; /* EOF */
+		if (write(socks[i].socket, tmp, 4)!=4) {
+		  close(socks[i].socket);
+		  socks[i].state = INVALID;
+		  socks[i].socket = 0;
+		  break;
+		} 
+		socks[i].state = SOCKS5_SENTVERSION;
+		break;
+	      case SOCKS5_SENTVERSION:
+		memset(tmp, 0, sizeof(tmp));
+		n = read(socks[i].socket, tmp, sizeof(tmp));
+		if ((n>=2) && (tmp[1]==0)) {
+		  /* Server accepts unauthed connections */
+		  report_open_socks(i);
+		  close(socks[i].socket);
+		  socks[i].state = INVALID;
+		  socks[i].socket = 0;
+		  break;
+		}
+		if(config_entries.debug && outfile)
+		  {
+		    fprintf(outfile,
+			    "DEBUG: _scontinous: Socks 5 server at %s rejects login\n",
+			    socks[i].host);
+		  }
+
+		close(socks[i].socket);
+		socks[i].state = INVALID;
+		socks[i].socket = 0;
+		break;
+	      case SOCKS4_CONNECTING:
+		tmp[0] = 4; /* socks v4 */
+		tmp[1] = 1; /* connect */
+		*((unsigned short *) (tmp+2)) = htons(SOCKS_CHECKPORT); /* Connect to port */
+		*((unsigned int *) (tmp+4)) = inet_addr(SOCKS_CHECKIP); /* Connect to ip */
+		strcpy(tmp+8, "tcm"); /* Dummy username */
+		if (write(socks[i].socket, tmp, 12)!=12) {
+		  close(socks[i].socket);
+		  socks[i].state = INVALID;
+		  socks[i].socket = 0;
+		  break;
+		} 
+		if(config_entries.debug && outfile)
+		  {
+		    fprintf(outfile,
+			    "DEBUG: _scontinous: Sent Socks 4 CONNECT to %s\n",
+			    socks[i].host);
+		  }
+		socks[i].state=SOCKS4_SENTCONNECT;
+		break;
+	      case SOCKS4_SENTCONNECT:
+		memset(tmp, 0xCC, sizeof(tmp));
+		n = read(socks[i].socket, tmp, sizeof(tmp));
+		if (n<=0) {
+		  if(config_entries.debug && outfile)
+		  {
+		    fprintf(outfile,
+			    "DEBUG: _scontinous: Socks 4 at %s closed connection\n",
+			    socks[i].host);
+		  }
+		  close(socks[i].socket);
+		  socks[i].state = INVALID;
+		  socks[i].socket = 0;
+		  break;
+		} 
+		if (tmp[1] != 90) {
+		  if(config_entries.debug && outfile)
+		    {
+		      fprintf(outfile,
+			      "DEBUG: _scontinous: Socks 4 server at %s denies connect (0x%02hhx)\n",
+			      socks[i].host, tmp[1]);
+		    }
+		  close(socks[i].socket);
+		  socks[i].state = INVALID;
+		  socks[i].socket = 0;
+		  break;
+		}
 		report_open_socks(i);
-              (void)close(socks[i].socket);
-              socks[i].state = 0;
-              socks[i].socket = INVALID;
+		close(socks[i].socket);
+		socks[i].state = INVALID;
+		socks[i].socket = 0;
+		break;
+	      default:
+		break;
+	      }
             }
         }
     }
@@ -353,13 +448,14 @@ void _continuous(int connnum, int argc, char *argv[])
     }
 #endif
 #ifdef DETECT_SOCKS
-  for (i=0; i<MAXSOCKS;i++)
-    {
-      if (socks[i].socket != INVALID && socks[i].state == SOCKS_CONNECTING)
-        FD_SET(socks[i].socket,&writefds);
-     }
+  for (i=0; i<MAXSOCKS;i++) {
+    if ((socks[i].socket != INVALID) && ((socks[i].state == SOCKS4_CONNECTING) || (socks[i].state == SOCKS5_CONNECTING)))
+      FD_SET(socks[i].socket,&writefds);
+    else if ((socks[i].socket != INVALID) && 
+	     ((socks[i].state >= SOCKS5_SENTVERSION)))
+      FD_SET(socks[i].socket,&readfds);
+  }
 #endif
-
 }
 void _config(int connnum, int argc, char *argv[]) {
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
@@ -380,7 +476,8 @@ void _user_signon(int connnum, int argc, char *argv[])
       wingate_bindsocket(argv[0], argv[1], argv[2]);
 #endif
 #ifdef DETECT_SOCKS
-      socks_bindsocket(argv[0], argv[1], argv[2]);
+      socks_bindsocket(argv[0], argv[1], argv[2], 5);
+      socks_bindsocket(argv[0], argv[1], argv[2], 4);
 #endif
     }
 }
@@ -462,7 +559,7 @@ static void report_open_wingate(int i)
 static void report_open_socks(int i)
 {
   if (config_entries.debug && outfile)
-    fprintf(outfile, "Found open socks proxy\n");
+    fprintf(outfile, "DEBUG: Found open socks proxy at %s\n", socks[i].host);
 
   suggest_action(get_action_type("socks"), socks[i].nick, socks[i].user, socks[i].host, NO, NO);
   log("Open socks proxy %s\n",socks[i].host);

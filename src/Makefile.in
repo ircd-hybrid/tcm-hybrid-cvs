@@ -3,7 +3,7 @@ CC = @CC@
 RM = @RM@
 MKDEP = ${CC} -MM
 
-TCMLIBS = @LIBS@
+TCMLIBS = @LIBS@ -ldl
 INCLUDES = -I../include
 CPPFLAGS = ${INCLUDES} @CPPFLAGS@
 
@@ -19,6 +19,7 @@ CFLAGS = -g -O2
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
 
 SOURCES = 	main.c\
+		modules.c\
 		logging.c\
 		stdcmds.c\
 		token.c\

@@ -203,7 +203,6 @@ int load_a_module(char *name, int log) {
 #endif
 
   snprintf(absolute_path, sizeof(absolute_path), "%s/%s", get_current_dir_name(), name);
-  printf("absolute_path: \"%s\"\n", absolute_path);
   if ((modpointer=dlopen(absolute_path, RTLD_NOW)) == NULL)
     {
       const char *err = dlerror();
@@ -329,7 +328,8 @@ int load_all_modules(int log)
     }
   while ((mdirent = readdir(module_dir)))
     {
-      if (mdirent->d_name[strlen(mdirent->d_name) - 2] == '.' &&
+      if (mdirent->d_name[strlen(mdirent->d_name) - 3] == '.' &&
+          mdirent->d_name[strlen(mdirent->d_name) - 2] == 's' &&
           mdirent->d_name[strlen(mdirent->d_name) - 1] == 'o')
         {
           snprintf(module_path, sizeof(module_path), "%s%s", MODULE_DIRECTORY, 

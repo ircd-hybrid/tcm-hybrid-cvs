@@ -45,6 +45,16 @@ struct common_function *server_notice;
 #define F_ONJOIN	14
 #define F_SERVER_NOTICE	15
 
+extern void add_placed(char *file, int line);
+extern void sendtoalldcc(int type,...);
+extern void log_kline(char *command_name, char *pattern, int  kline_time, char *who_did_command,
+                      char *reason);
+extern void toserv(char *format, ... );
+extern int okhost(char *user,char *host);
+extern void report(int type, int channel_send_flag, char *format,...);
+extern char *date_stamp(void);
+
+
 void m_modload(int connnum, int argc, char *argv[]);
 void m_modunload(int connnum, int argc, char *argv[]);
 void m_modreload(int connnum, int argc, char *argv[]);

@@ -1,3 +1,19 @@
+db          2002/05/28 15:40:54 EDT	(20020528_24)
+
+  Modified files:
+    include              bothunt.h hash.h 
+    src                  bothunt.c 
+  Log:
+  - redid bothunt.c messages to monitor code
+    precalculate message lengths
+  
+  Revision  Changes    Path
+  1.42      +38 -26    tcm-hybrid/include/bothunt.h
+  1.6       +21 -0     tcm-hybrid/include/hash.h
+  1.133     +41 -41    tcm-hybrid/src/bothunt.c
+
+
+
 leeh        2002/05/28 14:47:19 EDT	(20020528_23)
 
   Modified files:

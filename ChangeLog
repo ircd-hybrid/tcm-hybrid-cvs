@@ -1,3 +1,10 @@
+*** 20011204_1 by bill
+
+- added detection for rapid reconnects
+  note: the thresholds for this are rather aggressive,
+        to change them you must edit include/bothunt.h
+
+
 *** 20011129_1 by bill
 
 - fixed bug in okhost()

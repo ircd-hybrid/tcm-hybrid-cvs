@@ -1,3 +1,16 @@
+bill        2002/11/26 23:31:17 EST	(20021127_2)
+
+  Modified files:
+    include              config.h 
+  Log:
+  Submitted by:   markalso
+  - swapped services.us with services.xo
+  
+  Revision  Changes    Path
+  1.78      +2 -2      tcm-hybrid/include/config.h
+
+
+
 bill        2002/11/26 21:51:00 EST	(20021127_1)
 
   Modified files:

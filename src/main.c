@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.69 2002/05/25 16:29:14 jmallett Exp $ */
+/* $Id: main.c,v 1.70 2002/05/25 16:32:39 jmallett Exp $ */
 
 #include "setup.h"
 
@@ -77,6 +77,8 @@ int  incoming_connnum;	      /* current connection number incoming */
 
 /* total memory xmalloc'd */
 unsigned long totalmem;
+/* number of xmallocations */
+unsigned long numalloc;
 
 #ifdef DEBUGMODE
 void write_debug();
@@ -561,6 +563,8 @@ void *
 xmalloc(size_t size)
 {
   void *ret;
+
+  numalloc++;
 
   ret = malloc(size);
 

@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.70 2002/05/25 16:14:36 jmallett Exp $ */
+/* $Id: stdcmds.c,v 1.71 2002/05/25 16:32:39 jmallett Exp $ */
 
 #include "setup.h"
 
@@ -1198,7 +1198,9 @@ void report_mem(int sock)
   print_to_socket(sock,"Total memory in use %lu\n",
        total_hosttable + total_domaintable + total_iptable + total_userentry);
 
-  print_to_socket(sock,"Total memory allocated over time: %lu\n", totalmem);
+  print_to_socket(sock,"Total memory allocated over time %lu\n", totalmem);
+  print_to_socket(sock,"Average memory allocated in %lu allocations %lu\n",
+	numalloc, totalmem/numalloc);
 }
 
 /*

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.225 2004/05/19 09:58:14 bill Exp $
+ * $Id: bothunt.c,v 1.226 2004/05/20 09:26:27 bill Exp $
  */
 
 #include <stdio.h>
@@ -433,47 +433,65 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     return;
   }
 
+  /* billy-jon!bill@ummm.E{bill} added temporary 1 min. K-Line for [a@b.com] [Temporary K-line 1 min. - test (2004/5/20 08.54)] */
+  /* billy-jon!bill@ummm.E{bill} added K-Line for [a@b.com] [test] */
+  /* billy-jon!bill@ummm.E{bill} added D-Line for [1.2.3.4] [test] */
   if (strstr(p, "-Line for"))
   {
-    if (strstr(p, "added") == NULL)
+    target = p;
+
+    if ((q = strchr(p, ' ')) == NULL)
       return;
 
-#ifndef REPORT_KLINES
-    if (strstr(p, "K-Line"))
-      return;
+    *q++ = '\0';
+
+    if (*(q+6) == 't')
+      i = atoi(q+16);
     else
-#endif
-      send_to_all(NULL, FLAGS_VIEW_KLINES, "%s", p);
-    tcm_log(L_NORM, "%s", p);
-    return;
-  }
-  else if (strstr(p, "added temporary "))
-  {
-#ifndef REPORT_KLINES
-    if (strstr(p, "K-Line"))
-      return;
-#endif
+      i = 0;
 
-    send_to_all(NULL, FLAGS_VIEW_KLINES, "%s", p);
-    tcm_log(L_NORM, "%s", p);
-    return;
-  }
-  else if (strstr(p, "has removed the "))
-  {
-#ifndef REPORT_KLINES
-    if (strstr(p, "K-Line"))
+    if ((nick = strchr(q, '-')) == NULL)
       return;
-#endif
+    nick--;
 
-    send_to_all(NULL, FLAGS_VIEW_KLINES, "%s", p);
-    tcm_log(L_NORM, "%s", p);
+    q = nick+11;
+
+    if ((p = strchr(q, ' ')) == NULL)
+      return;
+
+    *(++p) = '\0';
+    p++;
+
+    if (get_user_host(&user, &host, q) == NULL)
+      return;
+
+    if ((q = strrchr(p, ']')) == NULL)
+      return;
+    *q = '\0';
+
+    if (i)
+    {
+      send_to_all(NULL, FLAGS_VIEW_KLINES,
+                  "T%cLINE %d for %s@%s added by %s [%s]",
+                  *nick, i, user, host, target, p);
+      tcm_log(L_NORM, "T%cLINE %d for %s@%s added by %s [%s]",
+              *nick, i, user, host, target, p);
+    }
+    else
+    {
+      send_to_all(NULL, FLAGS_VIEW_KLINES,
+                  "%cLINE for %s@%s added by %s [%s]",
+                  *nick, user, host, target, p);
+      tcm_log(L_NORM, "%cLINE for %s@%s added by %s [%s]",
+              *nick, user, host, target, p);
+    }
     return;
   }
 
 #ifdef REPORT_GLINES
   /* billy-jon!bill@aloha.from.hilo on irc.intranaut.com is requesting gline for [this@is.a.test] [test test2] */
   /* billy-jon!bill@holier.than.thou{bill} requesting G-Line for [a@test] [e] */
-  if (strstr(p, "is requesting gline for ") || strstr(p, "requesting G-Line for"))
+  if (strstr(p, "is requesting gline for "))
   {
     nick = p;
     if ((q = strchr(p, ' ')) == NULL)
@@ -525,7 +543,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     return;
   }
   /* billy-jon!bill@ummm.E on irc.intranaut.com has triggered gline for [test@this.is.a.test] [test1 test2] */
-  else if (strstr(p, "has triggered gline for "))
+  else if (strstr(p, "has triggered gline for"))
   {
     nick = p;
     if ((q = strchr(nick, ' ')) == NULL)
@@ -550,34 +568,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     *p = '\0';
 
     send_to_all(NULL, FLAGS_VIEW_KLINES,
-		"GLINE for %s@%s triggered by %s{%s} [%s]", user, host, nick, target, q);
-    return;
-  }
-  /* billy-jon!bill@ummm.E{irc.intranaut.com} added G-Line for [test@this.is.a.test] [test1 test2 (2004/5/19 11.22)] */
-  else if (strstr(p, "added G-Line for"))
-  {
-    nick = p;
-    if ((q = strchr(nick, ' ')) == NULL)
-      return;
-    *q = '\0';
-    q+=18;
-
-    if ((p = strchr(q, ' ')) == NULL)
-      return;
-    *(p-1) = '\0';
-
-    if (get_user_host(&user, &host, q) == NULL)
-      return;
-
-    *(++p) = '\0';
-
-    if ((q = strrchr(++p, ']')) == NULL)
-      return;
-
-    *q = '\0';
-
-    send_to_all(NULL, FLAGS_VIEW_KLINES,
-                "GLINE for %s@%s triggered by %s [%s]", user, host, nick, p);
+		"GLINE for %s@%s added by %s{%s} [%s]", user, host, nick, target, q);
     return;
   }
 #endif /* REPORT_GLINES */

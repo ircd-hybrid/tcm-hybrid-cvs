@@ -1,3 +1,19 @@
+bill        2004/06/15 18:39:55 EDT	(20040615_5)
+
+  Modified files:
+    etc                  example.conf 
+  Added files:
+    help                 help.check 
+  Log:
+  - added help file for .check
+  - updated example.conf to reflect multiple scanners
+  
+  Revision  Changes    Path
+  1.5       +13 -0     tcm-hybrid/etc/example.conf
+  1.1       +4 -0      tcm-hybrid/help/help.check (new)
+
+
+
 bill        2004/06/15 18:36:49 EDT	(20040615_4)
 
   Modified files:

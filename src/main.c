@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.53 2002/05/24 14:13:57 leeh Exp $ */
+/* $Id: main.c,v 1.54 2002/05/24 14:51:17 db Exp $ */
 
 #include "setup.h"
 
@@ -54,7 +54,6 @@
 #include <sys/resource.h>
 #endif
 
-extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
 extern struct a_entry actions[MAX_ACTIONS+1];
 extern int load_all_modules(int log);

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.32 2002/05/22 01:34:25 wcampbel Exp $ */
+/* $Id: userlist.h,v 1.33 2002/05/24 05:34:12 bill Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -62,7 +62,7 @@
 #define HS_DRONE    HS_DEFAULT
 #define HS_WINGATE  (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
 #define HS_SOCKS    (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
-
+#define HS_SQUID    (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
 
 struct f_entry {
   int type;

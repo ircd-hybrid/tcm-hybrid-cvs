@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.62 2002/05/24 04:04:23 db Exp $ */
+/* $Id: stdcmds.c,v 1.63 2002/05/24 05:34:17 bill Exp $ */
 
 #include "setup.h"
 
@@ -545,7 +545,7 @@ handle_action(int actionid, int idented, char *nick, char *user,
     }
   else
     {
-      strcpy(comment, "Exempted host - no actions taken");
+      return;
     }
 
   if (actions[actionid].method & METHOD_DCC_WARN)

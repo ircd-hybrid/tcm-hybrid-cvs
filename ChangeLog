@@ -1,3 +1,15 @@
+db          2002/05/27 21:07:58 EDT	(20020528_7)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - close listening socket after accept
+  
+  Revision  Changes    Path
+  1.58      +3 -0      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/27 20:35:14 EDT	(20020528_6)
 
   Modified files:

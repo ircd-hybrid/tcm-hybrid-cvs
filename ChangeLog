@@ -1,3 +1,17 @@
+einride     2001/12/13 09:21:11 EST	(20011213_1)
+
+  Modified files:
+    modules              bothunt.c 
+  Log:
+  Updated connect_flood_notice to consider "unknown@host" as an unidented
+  connection, connection floods from unidented users was not correctly
+  K-lined.
+  
+  Revision  Changes    Path
+  1.46      +1 -1      tcm-hybrid/modules/bothunt.c
+
+
+
 wcampbel    2001/12/12 22:57:19 EST	(20011213_0)
 
   Modified files:

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.83 2002/06/04 05:54:04 db Exp $
+ * $Id: tcm_io.c,v 1.84 2002/06/04 08:36:29 db Exp $
  */
 
 #include <stdio.h>
@@ -612,18 +612,13 @@ int
 connect_to_server(const char *server, const int port)
 {
   struct sockaddr_in socketname;
-  int i;
   struct hostent *remote_hostent;
-  char *p;
 
-  if ((i = find_free_connection_slot()) < 0)
+  if ((server_id = find_free_connection_slot()) < 0)
     {
-      /* This is a fatal error */
       tcm_log(L_ERR, "Could not find a free connection slot!\n");
-      exit(-1);
+      return (INVALID);
     }
-
-  server_id = i;
 
   if ((remote_hostent = gethostbyname (server)) == NULL)
     {
@@ -635,16 +630,16 @@ connect_to_server(const char *server, const int port)
 	  (void *) remote_hostent->h_addr,
 	  remote_hostent->h_length);
 
-  connections[i].state = S_CONNECTING;
-  connections[i].io_read_function = signon_to_server;
-  connections[i].io_write_function = NULL;
-  connections[i].io_close_function = server_link_closed;
-  connections[i].io_timeout_function = server_link_closed;
-  connections[i].socket = connect_to_given_ip_port(&socketname, port);
-  connections[i].time_out = SERVER_TIME_OUT_CONNECT;
+  connections[server_id].state = S_CONNECTING;
+  connections[server_id].io_read_function = signon_to_server;
+  connections[server_id].io_write_function = NULL;
+  connections[server_id].io_close_function = server_link_closed;
+  connections[server_id].io_timeout_function = server_link_closed;
+  connections[server_id].socket = connect_to_given_ip_port(&socketname, port);
+  connections[server_id].time_out = SERVER_TIME_OUT_CONNECT;
   current_time = time(NULL);
   connections[server_id].last_message_time = current_time;
-  return(connections[i].socket);
+  return(connections[server_id].socket);
 }
 
 /*
@@ -664,7 +659,7 @@ signon_to_server (int unused)
   connections[server_id].nbuf = 0;
   tcm_status.ping_state = S_PINGSENT;
 
-  if (tcm_status.ping_time)
+  if (tcm_status.ping_time != 0)
     connections[server_id].time_out = tcm_status.ping_time;
   else
     connections[server_id].time_out = SERVER_TIME_OUT;
@@ -809,7 +804,7 @@ show_stats_p(const char *nick)
   int i;
   int number_of_tcm_opers=0;
 
-  for (i=0;i<maxconns;++i)
+  for (i=0; i<maxconns; ++i)
     {
       /* ignore non clients */
       if (connections[i].state != S_CLIENT)
@@ -881,3 +876,4 @@ list_connections(int sock)
     }
   }
 }
+

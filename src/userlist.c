@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.126 2002/06/21 18:36:35 leeh Exp $
+ * $Id: userlist.c,v 1.127 2002/06/21 19:17:12 leeh Exp $
  *
  */
 
@@ -859,7 +859,7 @@ on_stats_o(int argc, char *argv[])
     }
 
   add_oper(user, host, nick, "\0", 0);
-  add_exemption(user, host, 0);
+  add_exempt(user, host, 0);
 }
 
 void
@@ -888,16 +888,16 @@ add_oper(char *user, char *host, char *usernick, char *password, int type)
 }
 
 void
-add_exemption(char *user, char *host, int type)
+add_exempt(char *user, char *host, int type)
 {
   slink_node *ptr;
-  struct exception_entry *exempt;
+  struct exempt_entry *exempt;
 
   if(strcmp(host, "*") == 0)
     return;
 
   ptr = slink_create();
-  exempt = (struct exception_entry *) xmalloc(sizeof(struct exception_entry));
+  exempt = (struct exempt_entry *) xmalloc(sizeof(struct exempt_entry));
 
   strlcpy(exempt->user, user, sizeof(exempt->user));
   strlcpy(exempt->host, host, sizeof(exempt->host));
@@ -942,11 +942,11 @@ load_e_line(char *line)
   if ((p = strchr(uhost, '@')) != NULL)
   {
     *p++ = '\0';
-    add_exemption(uhost, p, type);
+    add_exempt(uhost, p, type);
   }
   else
   {
-    add_exemption("*", uhost, type);
+    add_exempt("*", uhost, type);
   }
 }
 
@@ -1012,18 +1012,15 @@ is_an_oper(char *user,char *host)
 /*
  * ok_host()
  * 
- * inputs	- user
- * 		- host
- *		- type
- * output	- if this user@host is in the exception list or not
+ * inputs	- user, host, type
+ * output	- if this user@host is in the exempt list or not
  * side effects	- none
  */
-
 int
-ok_host(char *user,char *host, int type)
+ok_host(char *user, char *host, int type)
 {
   slink_node *ptr;
-  struct exception_entry *exempt;
+  struct exempt_entry *exempt;
   int ok;
 
   for(ptr = exempt_list; ptr; ptr = ptr->next)
@@ -1099,7 +1096,7 @@ type_show(unsigned long type)
  *
  * inputs	-
  * outputs	-
- * side effects - userlist and exemption list are reloaded.
+ * side effects - userlist and exempt list are reloaded.
  */
 void
 reload_userlist(void)
@@ -1123,18 +1120,18 @@ reload_userlist(void)
 
 #ifdef DEBUGMODE
 /*
- * exemption_summary()
+ * exempt_summary()
  *
  * inputs - none
  * outputs - none
- * side effects - prints out summary of exemptions, indexed by action names
+ * side effects - prints out summary of exempts, indexed by action names
  */
 
 void
-exemption_summary()
+exempt_summary()
 {
   slink_node *ptr;
-  struct exception_entry *exempt;
+  struct exempt_entry *exempt;
   int i;
 
   for (i = 0; i < MAX_ACTIONS; i++)

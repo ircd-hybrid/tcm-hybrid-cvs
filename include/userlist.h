@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.75 2002/06/21 18:36:32 leeh Exp $ */
+/* $Id: userlist.h,v 1.76 2002/06/21 19:17:09 leeh Exp $ */
 
 #include "tools.h"
 
@@ -71,7 +71,7 @@ struct auth_file_entry
   int changed;
 };
 
-struct exception_entry
+struct exempt_entry
 {
   char user[MAX_NICK];
   char host[MAX_HOST];
@@ -90,7 +90,7 @@ void on_stats_o(int, char *argv[]);
 int has_umode(int, int);
 int get_umode(int);
 
-void add_exemption(char *, char *, int);
+void add_exempt(char *, char *, int);
 
 void load_userlist(void);
 void init_userlist_handlers(void);
@@ -112,7 +112,7 @@ struct slink_node;
 slink_node *exempt_list;
 
 #ifdef DEBUGMODE
-void exemption_summary();
+void exempt_summary();
 #endif
 
 /* privs first */

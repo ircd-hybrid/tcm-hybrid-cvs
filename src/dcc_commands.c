@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.130 2002/06/21 18:36:35 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.131 2002/06/21 19:17:12 leeh Exp $ */
 
 #include "setup.h"
 
@@ -50,8 +50,6 @@
 #endif
 
 static void register_oper(int connnum, char *password, char *who_did_command);
-static void list_opers(int sock);
-static void list_exemptions(int sock);
 static int  is_legal_pass(int connect_id,char *password);
 static void print_help(int sock,char *text);
 
@@ -65,7 +63,7 @@ static void m_register(int connnum, int argc, char *argv[]);
 static void m_opers(int connnum, int argc, char *argv[]);
 static void m_testline(int connnum, int argc, char *argv[]);
 static void m_uptime(int connnum, int argc, char *argv[]);
-static void m_exemptions(int connnum, int argc, char *argv[]);
+static void m_exempts(int connnum, int argc, char *argv[]);
 static void m_connections(int connnum, int argc, char *argv[]);
 static void m_disconnect(int connnum, int argc, char *argv[]);
 static void m_help(int connnum, int argc, char *argv[]);
@@ -305,7 +303,18 @@ m_register(int connnum, int argc, char *argv[])
 
 void m_opers(int connnum, int argc, char *argv[])
 {
-  list_opers(connections[connnum].socket);
+  int i;
+
+  for(i = 0; i < MAXUSERS; i++)
+  {
+    if(userlist[i].user[0] == '\0')
+      break;
+
+    print_to_socket(connections[connnum].socket, "(%s) %s@%s %s",
+		    (userlist[i].usernick) ? userlist[i].usernick : "unknown",
+		    userlist[i].user, userlist[i].host,
+		    type_show(userlist[i].type));
+  }
 }
 
 void
@@ -334,9 +343,27 @@ m_uptime(int connnum, int argc, char *argv[])
   report_uptime(connections[connnum].socket);
 }
 
-void m_exemptions(int connnum, int argc, char *argv[])
+void m_exempts(int connnum, int argc, char *argv[])
 {
-  list_exemptions(connections[connnum].socket);
+  slink_node *ptr;
+  struct exempt_entry *exempt;
+  char buf[512];
+  int n;
+
+  for(ptr = exempt_list; ptr; ptr = ptr->next)
+  {
+    exempt = ptr->data;
+    sprintf(buf, "%s@%s is exempted for:", exempt->user, exempt->host);
+
+    for(n = 0; actions[n].name[0] != '\0'; n++)
+    {
+      if((1 << n) & exempt->type)
+        snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), 
+                 " %s", actions[n].name);
+    }
+
+    print_to_socket(connections[connnum].socket, "%s", buf);
+  }
 }
 
 void
@@ -783,62 +810,6 @@ register_oper(int connnum, char *password, char *who_did_command)
   }
 }
 
-/*
- * list_opers
- *
- * inputs	- socket
- * output	- NONE
- * side effects	- list current opers on socket
- */
-
-static void 
-list_opers(int sock)
-{
-  int i;
-  
-  for (i=0; i<MAXUSERS; i++)
-  {
-    if(userlist[i].user[0] == 0)
-      break;
-
-    print_to_socket(sock, "(%s) %s@%s %s",
-  	            (userlist[i].usernick) ? userlist[i].usernick : "unknown",
-	            userlist[i].user, userlist[i].host, 
-		    type_show(userlist[i].type));
-  }
-}
-
-/*
- * list_exemptions
- *
- * inputs	- socket
- * output	- NONE
- * side effects	- list current exemptions on socket
- */
-
-static void 
-list_exemptions(int sock)
-{
-  slink_node *ptr;
-  struct exception_entry *exempt;
-  char buf[512];
-  int n;
-
-  for(ptr = exempt_list; ptr; ptr = ptr->next)
-  {
-    exempt = ptr->data;
-    sprintf(buf, "%s@%s is exempted for:", exempt->user, exempt->host);
-
-    for (n=0;actions[n].name[0];n++)
-    {
-      if((1 << n) & exempt->type)
-	snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " %s", actions[n].name);
-    }
-
-    print_to_socket(sock, "%s", buf);
-  }
-}
-
 struct dcc_command class_msgtab = {
  "class", NULL, {m_unregistered, m_class, m_class}
 };
@@ -885,7 +856,10 @@ struct dcc_command uptime_msgtab = {
  "uptime", NULL, {m_uptime, m_uptime, m_uptime}
 };
 struct dcc_command exemptions_msgtab = {
- "exemptions", NULL, {m_unregistered, m_exemptions, m_exemptions}
+ "exemptions", NULL, {m_unregistered, m_exempts, m_exempts}
+};
+struct dcc_command exempts_msgtab = {
+ "exempts", NULL, {m_unregistered, m_exempts, m_exempts}
 };
 struct dcc_command connections_msgtab = {
  "connections", NULL, {m_connections, m_connections, m_connections}
@@ -997,6 +971,7 @@ init_commands(void)
   add_dcc_handler(&opers_msgtab);
   add_dcc_handler(&testline_msgtab);
   add_dcc_handler(&exemptions_msgtab);
+  add_dcc_handler(&exempts_msgtab);
   add_dcc_handler(&connections_msgtab);
   add_dcc_handler(&whom_msgtab);
   add_dcc_handler(&who_msgtab);

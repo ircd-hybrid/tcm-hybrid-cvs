@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.173 2002/06/21 16:46:46 leeh Exp $
+ * $Id: bothunt.c,v 1.174 2002/06/21 19:17:11 leeh Exp $
  */
 
 #include <stdio.h>
@@ -187,7 +187,7 @@ on_trace_user(int argc, char *argv[])
  *
  * inputs	- body of server message
  * output	- none
- * side effects	- exception list of tcm is built up from stats I of server
+ * side effects	- exempt list of tcm is built up from stats I of server
  * 
  */
 void
@@ -220,7 +220,7 @@ on_stats_i(int argc, char *argv[])
 	if(isalnum((int)*p) || *p == '*' || *p == '?' || *p == '~')
 	{
           if(set_exempt)
-            add_exemption(p, host, 0);
+            add_exempt(p, host, 0);
 
 	  return;
 	}

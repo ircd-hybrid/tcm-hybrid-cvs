@@ -1,3 +1,15 @@
+bill        2004/06/01 22:01:48 EDT	(20040602_1)
+
+  Added files:
+    etc                  example.conf 
+  Log:
+  - oops, forgot to add the new example.conf
+  
+  Revision  Changes    Path
+  1.1       +149 -0    tcm-hybrid/etc/example.conf (new)
+
+
+
 bill        2004/06/01 22:00:46 EDT	(20040602_0)
 
   Modified files:

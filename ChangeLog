@@ -1,3 +1,15 @@
+bill        2002/10/06 11:56:33 EDT	(20021006_0)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - first attempt at fixing nbuf bug reported by efnet tcm users
+  
+  Revision  Changes    Path
+  1.104     +1 -1      tcm-hybrid/src/tcm_io.c
+
+
+
 bill        2002/10/03 20:28:54 EDT	(20021004_0)
 
   Modified files:

@@ -1,3 +1,10 @@
+*** 20010602_2 by greg
+.. this one got missed.
+
+- FLAGS +SOME +UNGODLY +NUMBER +OF +INDIVIDUAL +FLAGS -> FLAGS +ALL
+  (ircd-comstud compat.)
+
+
 *** 20010602_1 by greg
 Well kids, my first CVS commit. Be afraid or something.
 

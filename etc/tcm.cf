@@ -1,3 +1,4 @@
+# $Id: tcm.cf,v 1.17 2002/04/02 23:24:19 bill Exp $
 # Username for the bot
 U:db
 
@@ -32,7 +33,6 @@ C:&frizzle.net
 #	- flood       <what action to take when a user floods>
 #	- link        <what action to take when a link looker is found>
 #	- bot         <what action to take when a bot is found>
-#	- ctcp        <what action to take when a ctcp flooder is found>
 #	- spambot     <what action to take when a spambot is found>
 #	- clone       <what action to take when clones are found>
 #	- sclone      <what action to take when multi-server clones are found>
@@ -50,9 +50,8 @@ C:&frizzle.net
 A:cflood:dline:Connection flooding
 A:vclone:kline 180:Cloning is prohibited
 A:flood:kline 180:Flooding is prohibited
-A:link:kline:Link Lookers are prohibited
+A:link:kline 180:Link Lookers are prohibited
 A:bot:kline:Bots are prohibited
-A:ctcp:kline 180:CTCP Flooding is prohibited:YES
 A:spambot:kline 1440:Spamming is prohibited
 A:clone:kline 1440:Cloning is prohibited:NO
 A:sclone:kline 180:clones on multiple servers

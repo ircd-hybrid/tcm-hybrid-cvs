@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.18 2002/03/05 07:10:55 bill Exp $
+ * $Id: logging.c,v 1.19 2002/04/02 23:24:30 bill Exp $
  *
  * - db
  */
@@ -75,7 +75,6 @@ void chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
   char skip = NO;
   char *right_brace_pointer;
   char *right_square_bracket_pointer;
-
 /* I try to pick up an [IP] from a connect or disconnect message
  * since this routine is also used on trace, some heuristics are
  * used to determine whether the [IP] is present or not.
@@ -563,33 +562,48 @@ void kline_report(char *server_notice)
 
 void kill_add_report(char *server_notice)
 {
-char *path;
-char *p, *from;
-int number_of_bangs = 0;
+  char buff[MAX_BUFF], *p, *q;
+  char *nick, *by, *reason;
+  struct hashrec *userptr;
+  int i=0;
 
-  if( !(from = strstr(server_notice,". From ")) )
-    return;	
-
-  /* Now check the killer's name for a . */
-  for (p = (from += 7); ((*p) && (*p != ' ')); p++)
-    if (*p == '.')			/* Ignore Server kills */
-      return;
-
-  if( !(path = strstr(server_notice,"Path:")) )
+  if ((p = strstr(server_notice, ". From")) == NULL)
     return;
-
-  p = path;
-  while(*p)
+  *p = '\0';
+  p+=8;
+  if ((nick = strrchr(server_notice, ' ')) == NULL)
+    return;
+  ++nick;
+  by = p;
+  if ((p = strchr(by, ' ')) == NULL)
+    return;
+  *p = '\0';
+  if (strchr(by, '.')) /* ignore kills by servers */
+    return;
+  p+=7;
+  if ((q = strchr(p, ' ')) == NULL)
+    return;
+  q+=2;
+  if ((p = strrchr(q, ')')) == NULL)
+    return;
+  *p = '\0';
+  reason = q;
+  for (i=0;i<HASHTABLESIZE;++i)
+  {
+    for (userptr = domaintable[i]; userptr; userptr = userptr->collision)
     {
-      if(*p == '!')
-        {
-          number_of_bangs++;
-          if( number_of_bangs > 1)return;
-        }
-      p++;
+      if (!strcasecmp(nick, userptr->info->nick))
+      {
+        i = -1;
+        break;
+      }
     }
-
-  kline_report(server_notice);
+  }
+  if (i != -1)
+    return;
+  snprintf(buff, sizeof(buff), "%s killed by %s: %s", nick, by, reason);
+  kline_report(buff);
+  memset(&buff, 0, sizeof(buff));
 }
 
 /*

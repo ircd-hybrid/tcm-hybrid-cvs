@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.21 2002/03/06 21:17:20 einride Exp $ */
+/* $Id: wingate.c,v 1.22 2002/04/02 23:24:26 bill Exp $ */
 
 
 #include <netdb.h>
@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <string.h>
 #include "config.h"
 #include "tcm.h"
@@ -184,7 +185,7 @@ int socks_bindsocket(char *nick,char *user,char *host, int socksversion)
   int i;
   int found_slot = INVALID;
   if ((socksversion != 4) && (socksversion != 5))
-    return;
+    return INVALID;
 
   for(i=0;i<MAXSOCKS;i++)
     {
@@ -253,7 +254,6 @@ int socks_bindsocket(char *nick,char *user,char *host, int socksversion)
 void _scontinuous(int connnum, int argc, char *argv[])
 {
   unsigned char tmp[200];
-  char sillybuf[1];
   int i, n;
 
 #ifdef DETECT_WINGATE

@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.20 2002/03/06 05:16:18 bill Exp $ */
+/* $Id: bothunt.h,v 1.21 2002/04/02 23:24:21 bill Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -30,10 +30,8 @@ struct banned_info
 #define EXITING		 1
 #define UNAUTHORIZED	 2
 #define CS_CLONES	 3	/* CSr notice */
-#define TOOMANY		 4
 #define NICKCHANGE	 5
 #define CS_NICKFLOODING	 6	/* CSr notice */
-#define REJECTING	 7
 #define CS_CLONEBOT_KILLED 8	/* CSr notice */
 #define CS_IDLER	 9	/* CSr notice */
 #define LINK_LOOK	10
@@ -55,6 +53,8 @@ struct banned_info
 #define SERVER		26
 #define FAILEDOPER	27
 #define INFOREQUESTED	28
+#define NOACONFFOUND	29
+#define QUARANTINE	30
 
 #define CLONECONNECTCOUNT 3
 #define CLONECONNECTFREQ  30
@@ -63,11 +63,6 @@ struct banned_info
 #define CLONERECONFREQ    15    /* in this many seconds */
 
 extern int maxconns;
-
-void list_nicks(int, char *);	
-void list_class(int, char *, int);	
-
-void list_virtual_users(int sock,char *);
 
 void report_clones(int);
 

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.48 2002/03/06 05:16:21 bill Exp $ */
+/* $Id: bothunt.c,v 1.49 2002/04/02 23:24:25 bill Exp $ */
 
 #include "setup.h"
 
@@ -69,7 +69,6 @@ static void  cs_clones( char *snotice );
 static void  link_look_notice( char *snotice );
 static void  connect_flood_notice( char *snotice );
 static void  add_to_nick_change_table( char *user_host, char *last_nick );
-static void  bot_reject( char *text );
 static void  adduserhost( char *, struct plus_c_info *, int, int);
 static void  removeuserhost( char *, struct plus_c_info *);
 static void  updateuserhost( char *nick1, char *nick2, char *userhost);
@@ -111,8 +110,6 @@ struct msg_to_action msgs_to_mon[] = {
   {"Client connecting: ", CONNECT},
   {"Client exiting: ", EXITING},
   {"Unauthorized ", UNAUTHORIZED},
-  {"Rejecting clonebot:", REJECTING},
-  {"Too many connections from ",TOOMANY},
   {"Nick change:", NICKCHANGE},
   {"Nick flooding detected by:", CS_NICKFLOODING},
   {"Rejecting ", CS_CLONES},
@@ -134,7 +131,7 @@ struct msg_to_action msgs_to_mon[] = {
   {"Received SQUIT", SQUITOF},
   {"motd requested by",MOTDREQ},
   {"Flooder", FLOODER},
-  {"User", IGNORE},
+  {"User", SPAMBOT},
   {"I-line mask", IGNORE},
   {"I-line is full", ILINEFULL},
   {"*** Banned: ", BANNED},
@@ -144,6 +141,8 @@ struct msg_to_action msgs_to_mon[] = {
   {"Server", SERVER},
   {"Failed OPER attempt", FAILEDOPER},
   {"info requested by", INFOREQUESTED},
+  {"No aconf found", NOACONFFOUND},
+  {"Quarantined nick", QUARANTINE},
   {(char *)NULL, INVALID}
 };	
 
@@ -629,9 +628,8 @@ void on_stats_i(int connnum, int argc, char *argv[])
 
 void onservnotice(int connnum, int argc, char *argv[])
 {
-  int i = -1, a, b, c;
+  int i = -1, a, b, c = -1;
   int faction = -1;
-  int len;
   struct plus_c_info userinfo;
   time_t current_time;
   char *from_server;
@@ -642,21 +640,7 @@ void onservnotice(int connnum, int argc, char *argv[])
   char *target;
   char *p;
   char *q = NULL;
-  char message[1024];
-
-  p = message;
-  for (i = 3; i < argc; i++)
-  {
-    len = sprintf(p, "%s ", argv[i]);
-    p += len;
-  }
-  /* blow away last ' ' */
-  *--p = '\0';
-
-  if (message[0] == ':')
-    p = message+1;
-  else
-    p = message;
+  char *message = p = argv[3];
 
   if (strncasecmp(p, "*** Notice -- ", 14) == 0)
     p+=14;
@@ -679,56 +663,55 @@ void onservnotice(int connnum, int argc, char *argv[])
 
   if (strstr(p, "closed the connection") && (strncmp(p, "Server", 6) == 0)) 
   {
-    sendtoalldcc(SEND_LINK_ONLY, "Lost server: %s\n", argv[2]);
+    q = message+8;
+    if ((p = strchr(q, ' ')) == NULL)
+      return;
+    *p = '\0';
+    sendtoalldcc(SEND_LINK_ONLY, "Lost server: %s\n", q);
     return;
   }
 
   if (strstr(p, "I-line mask "))
   {
-    if ((p = strchr(argv[argc-1]+1, ']')))
-      *p = '\0';
-      
+    if ((q = strrchr(p, '[')) == NULL)
+      return;
+    if ((p = strrchr(q, ']')) == NULL)
+      return;
+    ++q;
+    *p = '\0';
     prnt(connections[testlines.index].socket,
-	 "%s has access to class %s\n", testlines.umask,
-	 argv[argc-1]+1);
+	 "%s has access to class %s\n", testlines.umask, q);
     testlines.index = -1;
     memset(&testlines.umask, 0, sizeof(testlines.umask));
     return;
   }
   else if (strstr(p, "K-line name "))
   {
-    p = message;
-    len = snprintf(message, sizeof(message), "%s", argv[8]+1);
-    p += len;
-    for (i = 9; i < argc; i++)
-    {
-      len = sprintf(p, "%s ", argv[i]);
-      p += len;
-    }
-    *--p = '\0';
-    if (*p == ']')
-      --p;
-
+    if ((q = strstr(p, "pass [")) == NULL)
+      return;
+    q+=6;
+    if ((p = strchr(q, ']')) == NULL)
+      return;
+    *p = '\0';
     prnt(connections[testlines.index].socket, 
-	 "%s has been K-lined: %s\n", testlines.umask,
-	 message);
+	 "%s has been K-lined: %s\n", testlines.umask, q);
     testlines.index = -1;
     memset(&testlines.umask, 0, sizeof(testlines.umask));
     return;
   }
 
-  if (strcmp(argv[argc-1], "[IRC(o)p]") == 0)
+  if (strstr(p, "is now operator ("))
   {
+    if ((q = strchr(p, ' ')) == NULL)
+      return;
+    if ((p = strchr(q+1, ' ')) == NULL)
+      return;
+    *p++ = '\0';
+    if ((q = strrchr(p, ' ')) == NULL)
+      return;
+    ++q;
     sendtoalldcc(SEND_WARN_ONLY,
-		 "*** %s %s has just become an irc operator (o)", argv[6], 
-		 argv[7]);
-    return;
-  }
-  else if (strcmp(argv[argc-1], "[IRC(O)p]") == 0)
-  {
-    sendtoalldcc(SEND_WARN_ONLY,
-		 "*** %s %s has just become an irc operator (O)", argv[6],
-		 argv[7]);
+		 "*** %s has just become an irc operator %s", message+14, q);
     return;
   }
 
@@ -751,82 +734,121 @@ void onservnotice(int connnum, int argc, char *argv[])
 
   if (strstr(p, "is requesting gline for "))
   {
-    if ((q = strchr(argv[13], '@')) == NULL)
-      return;                         /* how the hell did we get here? */
-    *q = '\0';
-    user = argv[13]+1;
-    host = q+1;
-
-    if ((q=strrchr(host, ']')) == NULL)
+    q = strstr(p, "is requesting gline for ");
+    *(q-1) = '\0';
+    q += 25;
+    if ((p = strchr(q, '@')) == NULL)
       return;
-
+    *p++ = '\0';
+    user = q;
+    host = p;
+    if ((q = strchr(host, ']')) == NULL)
+      return;
     *q = '\0';
-
-    p = message;
-    len = snprintf(message, sizeof(message), "%s", argv[14]+1);
-    p += len;
-    for (i = 15; i < argc; i++)
-    {
-      len = sprintf(p, "%s ", argv[i]);
-      p += len;
-    }
-    *--p = '\0';
-    if (*p == ']')
-      --p;
-
-    if (gline_request(user, host, message, (time_t *)current_time))
+    q += 3; 
+    if ((p = strrchr(q, ']')) == NULL)
+      return;
+    *p = '\0';
+    if ((p = strchr(message, ' ')) == NULL)
+      return;
+    *p = '\0';
+    if (gline_request(user, host, q, (time_t *)current_time))
     {
       sendtoalldcc(SEND_KLINE_NOTICES_ONLY,
 		   "G-line for %s@%s requested by %s: %s", user, 
-		   host, argv[6], message);
+		   host, message+14, q);
       return;
     }
   }
   else if (strstr(p, "has triggered gline for "))
   {
-    if ((q = strchr(argv[13], '@')) != NULL)
-      *q = '\0';
-    user = argv[10]+1;
-    host = q+1;
-    if ((q=strrchr(host, ']')) != NULL)
-      *q = '\0';
-    p = message;
-
-    len = snprintf(message, sizeof(message), "%s", argv[14]+1);
-    p += len;
-    for (i = 15; i < argc; i++)
-    {
-      len = sprintf(p, "%s ", argv[i]);
-      p += len;
-    }
-    *--p = '\0';
-    if (*p == ']')
-      --p;
-
+    q = strstr(p, "has triggered gline for ");
+    q += 25;
+    if ((p = strchr(q, '@')) == NULL)
+      return;
+    *p++ = '\0';
+    user = q;
+    host = p;
+    if ((p = strchr(host, ']')) == NULL)
+      return;
+    *p = '\0';
+    p += 3;
+    if ((q = strrchr(p, ']')) == NULL)
+      return;
+    *q = '\0';
+    if ((q = strchr(message+14, ' ')) == NULL)
+      return;
+    *q = '\0';
+     
     sendtoalldcc(SEND_KLINE_NOTICES_ONLY,
-		 "G-line for %s@%s triggered by %s: %s", user, 
-		 host, argv[6], message);
+		 "G-line for %s@%s triggered by %s: %s", user, host,
+                 message+14, p);
     remove_gline(user, host);
     return;
   }
 
   if (strstr(p, "is rehashing"))
   {
-    if (strstr(p, " DNS"))
-      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing DNS", argv[6]);
-    else if (strstr(p, "OPER MOTD file"))
-      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing OPER MOTD", argv[6]);
-    else if (strstr(p, "MOTD file"))
-      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing MOTD", argv[6]);
-    else if (strstr(p, "help files"))
-      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing help files", argv[6]);
-    else if (strstr(p, "channels"))
-      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is cleaning up channels", argv[6]);
+    nick = p;
+    if ((q = strchr(nick, ' ')) == NULL)
+      return;
+    *q++ = '\0';
+    if (strstr(q, " DNS"))
+      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing DNS", nick);
     else
     {
-      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing config file", argv[6]);
+      sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing config file",
+                   nick);
       toserv("STATS Y\n");
     }
+    return;
+  }
+  else if (strstr(p, "clearing temp klines"))
+  {
+    nick = q+1;
+    if ((q = strchr(nick, ' ')) == NULL)
+      return;
+    *q = '\0';
+    sendtoalldcc(SEND_KLINE_NOTICES_ONLY, "*** %s is clearing temp klines",
+                 nick);
+    return;
+  }
+  else if (strstr(p, "clearing G-lines"))
+  {
+    nick = q+1;
+    if ((q = strchr(nick, ' ')) == NULL)
+      return;
+    *q = '\0';
+    sendtoalldcc(SEND_KLINE_NOTICES_ONLY, "*** %s is clearing g-lines",
+                 nick);
+    for (a=0;a<MAXBANS;++a)
+    {
+      free(glines[i].user);
+      free(glines[i].host);
+      glines[i].pending = NO;
+      glines[i].when = (time_t *)NULL;
+    }
+    return;
+  }
+  else if (strstr(p, "garbage collecting"))
+  {
+    nick = q+1;
+    if ((q = strchr(nick, ' ')) == NULL)
+      return;
+    *q = '\0';
+    sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is garbage collecting", nick);
+    return;
+  }
+  else if (strstr(p, "forcing re-reading of"))
+  {
+    nick = q+1;
+    if ((q = strchr(nick, ' ')) == NULL)
+      return;
+    *q = '\0';
+    if ((p = strstr(q, "re-reading of")) == NULL)
+      return;
+    p+=14;
+    sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %is is rehashing %s", nick, p);
     return;
   }
 
@@ -839,36 +861,39 @@ void onservnotice(int connnum, int argc, char *argv[])
   switch (faction)
   {
   case CONNECT:
-    if ((q = strchr(argv[9], '@')) == NULL)
-    {
+    if ((q = strchr(p, '(')) == NULL)
       return;
-    }
     *q = '\0';
+    userinfo.user = q+1;
+    *(q-1) = '\0';
 
-    userinfo.user = argv[9]+1;
-    userinfo.host = q+1;
+    if ((q = strrchr(p, ' ')) == NULL)
+      return;
+    nick = q+1;
+
+    if ((q = strchr(userinfo.user, '@')) == NULL)
+      return;
+    *q++ = '\0';
+    userinfo.host = q;
+
     if ((q = strchr(userinfo.host, ')')) == NULL)
-    {
       return;
-    }
     *q = '\0';
-
-    if ((q = strchr(argv[11], '}')) == NULL)
-    {
+    q += 3;
+    if ((p = strchr(q, ']')) == NULL)
       return;
-    }
-    *q = '\0';
+    *p++ = '\0';
+    strcpy((char *)&userinfo.ip, q);
 
-    if ((q = strchr(argv[10], ']')) == NULL)
-    {
+    if ((q = strchr(p, '{')) == NULL)
       return;
-    }
-    *q = '\0';
+    q++;
+    if ((p = strchr(q, '}')) == NULL)
+      return;
+    *p = '\0';
+    strcpy((char *)&userinfo.class, q);
 
-    strcpy((char *)&userinfo.class, argv[11]+1);
-    strcpy((char *)&userinfo.ip, argv[10]+1);
-
-    adduserhost(argv[8],&userinfo,NO,NO);
+    adduserhost(nick, &userinfo, NO, NO);
     break;
 
   case EXITING:
@@ -877,15 +902,14 @@ void onservnotice(int connnum, int argc, char *argv[])
     break;
 
   case UNAUTHORIZED:
-    logfailure(argv[10],0);
-    break;
-
-  case REJECTING:
-    bot_reject(q);
-    break;
-
-  case TOOMANY:
-    logfailure(q,0);
+    if ((q = strchr(p, '[')) == NULL)
+      return;
+    for (p=q;*p != ' '; --p);
+    ++p;
+    if ((q = strchr(p, ' ')) == NULL)
+      return;
+    *q = '\0';
+    logfailure(p,NO);
     break;
 
   case NICKCHANGE:
@@ -920,12 +944,16 @@ void onservnotice(int connnum, int argc, char *argv[])
     break;
 
   case WRITEERR:
-    sendtoalldcc(SEND_LINK_ONLY,
-		 "Write error to %s, closing link.\n", argv[2]);
+    sendtoalldcc(SEND_LINK_ONLY, "%s", q);
     break;
 
   case SQUITOF:
-    sendtoalldcc(SEND_LINK_ONLY, "SQUIT for %s from %s\n", argv[1], argv[4]);
+    ++q;
+    if ((p = strchr(q, ' ')) == NULL)
+      return;
+    *p = '\0';
+    p+=5;
+    sendtoalldcc(SEND_LINK_ONLY, "SQUIT for %s from %s\n", q, p);
     break;
 
   case MOTDREQ:
@@ -938,6 +966,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 
     /* send the unknown server message to opers who have requested
        they see them */
+     /* WHAT?! -bill */
 
   case FLOODER:
     ++q;
@@ -984,21 +1013,12 @@ void onservnotice(int connnum, int argc, char *argv[])
       break;
 
     target = p + 8;
-
-    if (strcasecmp(target,nick) == 0)
-    {
-      sendtoalldcc(SEND_WARN_ONLY,
-		   "User CTCP Flooding themselves, strange %s!%s@%s\n",
-		   nick, user, host);
-      break;
-    }
-
     if (strcasecmp(config_entries.rserver_name,from_server) == 0)
     {
       if (*user == '~')
-	suggest_action(get_action_type("ctcp"), nick, user, host, NO, NO);
+	suggest_action(get_action_type("flood"), nick, user, host, NO, NO);
       else
-	suggest_action(get_action_type("ctcp"), nick, user, host, NO, YES);
+	suggest_action(get_action_type("flood"), nick, user, host, NO, YES);
     }
 
     break;
@@ -1006,31 +1026,23 @@ void onservnotice(int connnum, int argc, char *argv[])
   case SPAMBOT:
     ++q;
     if ((p = strchr(q,' ')) == NULL)
-      break;
+      return;
 
     *p = '\0';
-    p++;
     nick = q;
-
-    user = p;
-    if ((p = strchr(user,'(')) == NULL)
-      break;
-    p++;
-    user = p;
+    user = p+2;
 
     if ((p = strchr(user,'@')) == NULL)
-      break;
-    *p = '\0';
-    p++;
+      return;
+    *p++ = '\0';
 
     host = p;
     if ((p = strchr(host,')')) == NULL)
-      break;
-    *p = '\0';
-    p++;
+      return;
+    *p++ = '\0';
 
     if (strstr(p,"possible spambot") == NULL)
-      break;
+      return;
 
     suggest_action(get_action_type("spam"), nick, user, host, NO, YES);
     break;
@@ -1049,27 +1061,45 @@ void onservnotice(int connnum, int argc, char *argv[])
     break;
 
   case DRONE:
-    if (!strcasecmp(argv[9], config_entries.rserver_name) ||
-	!strcasecmp(argv[9], 
-		    config_entries.server_name))
-    {
-      sendtoalldcc(SEND_WARN_ONLY,
-		   "Drone flooder detected %s!%s@%s target: %s", argv[6], 
-		   user, host, argv[11]);
-      suggest_action(get_action_type("drone"), nick, user, host, NO, 
-		     (user[0] == '~' ? YES : NO ));
-    }
+    ++q;
+    nick = q;
+    if ((q = strchr(nick, ' ')) == NULL)
+      return;
+    *q = '\0';
+    user = q+2;
+    if ((q = strchr(user, '@')) == NULL)
+      return;
+    *q++ = '\0';
+    host = q;
+    if ((q = strchr(host, ']')) == NULL)
+      return;
+    *q = '\0';
+    q+=5;
+    if ((p = strchr(q, ' ')) == NULL)
+      return;
+    *p = '\0';
+    if (strcasecmp(q, config_entries.rserver_name) &&
+        strcasecmp(q, config_entries.server_name))
+      break;
+    p+=9; 
+
+    sendtoalldcc(SEND_WARN_ONLY, "Possible drone flooder: %s!%s@%s target: %s",
+                 nick, user, host, p);
     break;
 
   case XLINEREJ:
-    nick = argv[argc-1];
-    if ((p = strchr(nick, '[')) == NULL)
-      break;
-    *p = '\0';
-    user = p+1;
+    if ((nick = strrchr(q, ' ')) == NULL)
+      return;
+    ++nick;
 
-    if (user[strlen(user)-1] == ']')
-      user[strlen(user)-1] = '\0';
+    if ((p = strchr(nick, '[')) == NULL)
+      return;
+    *p++ = '\0';
+    user = p;
+
+    if ((p = strrchr(user, ']')) == NULL)
+      return;
+    *p = '\0';
     c=-1;
 
     for (a=0;a<MAX_CONNECT_FAILS;++a)
@@ -1084,8 +1114,8 @@ void onservnotice(int connnum, int argc, char *argv[])
 	  ++connect_flood[a].connect_count;
 	  if ((p = strchr(user, '@')) == NULL)
 	    break;
-	  *p = '\0';
-	  host = p+1;
+	  *p++ = '\0';
+	  host = p;
 
 	  if (!okhost(user, host, get_action_type("cflood")))
 	  {
@@ -1095,8 +1125,8 @@ void onservnotice(int connnum, int argc, char *argv[])
 		b = NO;
 	      else
 		b = YES;
-	      suggest_action(get_action_type("cflood"),
-			     nick, user, host, NO, b);
+	      suggest_action(get_action_type("cflood"), nick, user, host, NO,
+                             (user[0] == '~' ? NO : YES));
 	      connect_flood[a].user_host[0] = '\0';
 	    }
 	  }
@@ -1123,47 +1153,104 @@ void onservnotice(int connnum, int argc, char *argv[])
     }
     break;
 
-  case INVALIDUH:
-    if ((p = strchr(argv[9], '@')) == NULL)
-      break;
+  case QUARANTINE:
+    nick = q+2;
+    if ((q = strchr(nick, ']')) == NULL)
+      return;
+    *q = '\0';
+    user = q+13;
+
+    if ((p = strchr(user, ']')) == NULL)
+      return;
     *p = '\0';
-    user = argv[9]+1;
-    host = p+1;
-
-    if ((host[strlen(host)-1] == ')'))
-      host[strlen(host)-1] = '\0';
-    
-    snprintf(message, sizeof(message), "%s@%s", user, host);
-
-    c = -1;
-
     for (a=0;a<MAX_CONNECT_FAILS;++a)
     {
       if (connect_flood[a].user_host[0])
       {
-	if (!strcasecmp(message, connect_flood[a].user_host))
+        if (strcasecmp(connect_flood[a].user_host, user) == 0)
+        {
+          if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
+            connect_flood[a].connect_count = 0;
+          ++connect_flood[a].connect_count;
+
+          if ((p = strchr(user, '@')) == NULL)
+            return;
+          *p++ = '\0';
+          host = p;
+
+          if (!okhost(user, host, get_action_type("cflood")))
+          {
+            if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
+            {
+              suggest_action(get_action_type("cflood"), nick, user, host, NO,
+                             (user[0] == '~' ? NO : YES));
+              connect_flood[a].user_host[0] = '\0';
+            }
+            else
+              connect_flood[a].last_connect = current_time;
+          }
+          else
+            connect_flood[a].last_connect = current_time;
+          return;
+        }
+        else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME)
+                 < current_time)
+          connect_flood[a].user_host[0] = '\0';
+      }
+      else
+        c = a;
+    }
+    if (c >= 0)
+    {
+      if (strchr(user, '@'))
+        snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host),
+                 "%s", user);
+      else
+        snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host),
+                 "%s@%s", user, host);
+      connect_flood[c].connect_count = 0;
+      connect_flood[c].last_connect = current_time;
+    }
+    
+  case INVALIDUH:
+    nick = q+1;
+    if ((p = strchr(nick, ' ')) == NULL)
+      return;
+    *p = '\0';
+    user = p+2;
+    if ((p = strchr(user, ')')) == NULL)
+      return;
+    *p++ = '\0';
+
+    c = -1;
+    for (a=0;a<MAX_CONNECT_FAILS;++a)
+    {
+      if (connect_flood[a].user_host[0])
+      {
+	if (!strcasecmp(user, connect_flood[a].user_host))
         {
 	  if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
 	    connect_flood[a].connect_count = 0;
 
 	  ++connect_flood[a].connect_count;
+          if ((p = strchr(user, '@')) == NULL)
+            return;
+          *p++ = '\0';
+          host = p;
 	  if (!okhost(user, host, get_action_type("cflood")))
 	  {
 	    if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
 	    {
-	      if (user[0] == '~')
-		b = NO;
-	      else
-		b = YES;
-	      suggest_action(get_action_type("cflood"),
-			     argv[8], user, host, NO, b);
+	      suggest_action(get_action_type("cflood"), nick, user, host, NO,
+                             (user[0] == '~' ? NO : YES));
 	      connect_flood[a].user_host[0] = '\0';
 	    }
 	  }
 	  else
 	    connect_flood[a].last_connect = current_time;
 	}
-	else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
+	else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME)
+                 < current_time)
 	  connect_flood[a].user_host[0] = '\0';
       }
       else
@@ -1171,31 +1258,68 @@ void onservnotice(int connnum, int argc, char *argv[])
     }
     if (c >= 0)
     {
-      snprintf(connect_flood[c].user_host,
-	       sizeof(connect_flood[c].user_host), "%s@%s",
-	       user, host);
+      if (strchr(user, '@'))
+        snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host),
+                 "%s", user);
+      else
+        snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host),
+                 "%s@%s", user, host);
       connect_flood[c].last_connect = current_time;
       connect_flood[c].connect_count = 0;
     }
     break;
 
   case SERVER:
-    if (strcmp(argv[8], "split") == 0)
-      sendtoalldcc(SEND_WARN_ONLY,
-		   "Server %s split from %s", argv[7], argv[10]);
-    else
-      sendtoalldcc(SEND_WARN_ONLY,
-		   "Server %s being introduced by %s", argv[7], argv[11]);
+    ++q;
+    if (strstr(q, "split"))
+    {
+      nick = q;
+      if ((q = strchr(nick, ' ')) == NULL)
+        return;
+      *q = '\0';
+      user = q+12;
+      sendtoalldcc(SEND_WARN_ONLY, "Server %s split from %s", nick, user);
+    }
+    else if (strstr(q, "being introduced"))
+    {
+      nick = q;
+      if ((q = strchr(nick, ' ')) == NULL)
+        return;
+      *q = '\0';
+      user = q+21;
+      sendtoalldcc(SEND_WARN_ONLY, "Server %s being introduced by %s", nick,
+                   user);
+    }
     break;
 
   case FAILEDOPER:
+    nick = q+5;
+    if ((q = strchr(nick, ' ')) == NULL)
+      return;
+    *q = '\0';
+    user = q+2;
     sendtoalldcc(SEND_WARN_ONLY,
-		 "*** Failed oper attempt by %s %s", argv[argc-2], argv[argc-1]);
+		 "*** Failed oper attempt by %s %s", nick, user);
     break;
 
   case INFOREQUESTED:
+    nick = q+1;
+    if ((q = strchr(nick, ' ')) == NULL)
+      return;
+    *q = '\0';
+    user = q+2;
+    if ((q = strchr(user, ')')) == NULL)
+      return;
+    *q = '\0';
     sendtoalldcc(SEND_OPERS_STATS_ONLY, 
-		 "[INFO requested by %s %s]", argv[9], argv[10]);
+		 "[INFO requested by %s (%s)]", nick, user);
+    break;
+
+  case NOACONFFOUND:
+    prnt(connections[testlines.index].socket, "%s does not have access\n",
+         testlines.umask);
+    testlines.index = -1;
+    memset((char *)&testlines.umask, 0, sizeof(testlines.umask));
     break;
 
   default:
@@ -1337,45 +1461,41 @@ char makeconn(char *hostport,char *nick,char *userhost)
 
 void _onctcp(int connnum, int argc, char *argv[])
 {
-  char *hold, *nick;
-  char *msg=argv[3]+2;
-  char dccbuff[DCCBUFF_SIZE];
-  char *p;
-  int i;
-  int len;
+  char *hold, *nick, *port, *a;
+  char *msg=argv[3]+1;
+  char dccbuff[MAX_BUFF];
 
   nick = argv[0];
   hold = nick + strlen(nick) + 1;
-
   if (strncasecmp(msg,"PING",4) == 0)
   {
-    p = dccbuff;
-    for (i = 4; i < argc; i++)
-      {
-	len = sprintf(p, "%s ", argv[i]);
-	p += len;
-      }
-    /* blow away last ' ' */
-    *--p = '\0';
-    if (*p == '\001')
-      *--p = '\0';
-    notice(nick, "\001PING %s", dccbuff);
+    notice(nick, "%s", argv[3]);
     return;
   }
   else if (strncasecmp(msg,"VERSION",7) == 0)
   {
     notice(nick,"\001VERSION %s(%s)\001",VERSION,SERIALNUM);
   }
-  else if (!strcasecmp(argv[3],":\001DCC") && !strcasecmp(argv[4], "CHAT"))
+  else if (!strncasecmp(msg, "DCC CHAT", 8))
   {
-    snprintf(dccbuff, sizeof(dccbuff), "#%s", argv[6]);
-    if (atoi(argv[7]) < 1024)
+    /* the -6 saves room for the :port */
+    snprintf(dccbuff, sizeof(dccbuff)-7, "#%s", argv[3]+15);
+    if ((port = strrchr(argv[3], ' ')) == NULL)
     {
-      notice(nick, "Invalid port specified for DCC CHAT. Not funny.");
+      notice(nick, "Invalid port specified for DCC CHAT.  Not funny.");
+      return;
+    }
+    ++port;
+    if ((a = strrchr(port, '\001')) != NULL)
+      *a = '\0';
+
+    if (atoi(port) < 1024)
+    {
+      notice(nick, "Invalid port specified for DCC CHAT.  Not funny.");
       return;
     }
     strcat(dccbuff, ":");
-    strcat(dccbuff, argv[7]);
+    strcat(dccbuff, port);
     if (!makeconn(dccbuff, nick, hold))
     {
       notice(nick,"DCC CHAT connection failed");
@@ -2463,11 +2583,8 @@ static void link_look_notice(char *snotice)
 	      if (link_look[i].link_look_count >= MAX_LINK_LOOKS)
 		{
 		  sendtoalldcc(SEND_WARN_ONLY,
-			       "possible LINK LOOKER nick [%s]\n", 
+			       "*** LINK LOOKER %s (%s)\n", 
 			       nick_reported,user_host);
-
-		  log("possible LINK LOOKER  = %s [%s]\n",
-		      nick_reported,user_host);
 
 		  if ( !okhost(user,host,get_action_type("link")) )
 		    {
@@ -2738,7 +2855,6 @@ static void check_nick_flood(char *snotice)
 
       if ((nick2 = strtok(NULL," ")) == NULL)
 	return;
-
       add_to_nick_change_table(user_host,nick2);
       updateuserhost(nick1,nick2,user_host);
 
@@ -2771,7 +2887,6 @@ static void check_nick_flood(char *snotice)
  * This caused a bug in v0.1
  *
  */
-
   add_to_nick_change_table(user_host,nick2);
   updateuserhost(nick1,nick2,user_host);
 }
@@ -2955,52 +3070,6 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
 }
 
 /*
- * bot_reject()
- *
- * inputs	- reject message from server
- * output		- NONE
- * side effects	- logs the failure
- *
- */
-
-static void bot_reject(char *text)
-{
-  char generic = 0;
-  char *p;
-
-  if (text)
-  {
-    if (strncmp("bot:",text,4) == 0)
-      generic = YES;
-
-    if ((text = strchr(text,' ')) == NULL)
-      return;
-
-    if ((p = strstr(text+1,"(Single")) != NULL)
-    {
-      while(p != text)
-      {
-	if (*p == ']')
-	{
-	  p++;
-	  *p = '\0';
-	  break;
-	}
-	p--;
-      }
-    }
-
-    if (!generic)
-    {
-      if ((text = strchr(text+1,' ')) == NULL)
-	return;
-    }
-
-    logfailure(text+1,1);
-  }
-}
-
-/*
  * stats_notice
  * 
  * inputs		- notice
@@ -3111,8 +3180,6 @@ void _modinit()
   set_action_type("link", R_LINK);
   add_action("bot", "kline", "Bots are prohibited");
   set_action_type("bot", R_BOT);
-  add_action("ctcp", "kline", "CTCP flooding");
-  set_action_type("ctcp", R_CTCP);
   add_action("spambot", "warn", "Spamming is prohibited");
   set_action_type("spambot", R_SPAMBOT);
   add_action("clone", "kline", "Cloning is prohibited");

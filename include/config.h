@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.33 2002/03/06 19:24:38 einride Exp $
+ * $Id: config.h,v 1.34 2002/04/02 23:24:22 bill Exp $
  */
 
 /*
@@ -128,9 +128,6 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 
 /* .kflood reason */
 #define REASON_KFLOOD "Flooding is prohibited"
-
-/* ctcp flooders reason */
-#define REASON_CTCP "Floodbot"
 
 /* .kperm reason */
 #define REASON_KPERM "PERMANENT"

@@ -2,7 +2,7 @@
  * much of this code has been copied (though none ver batum)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.19 2002/03/06 05:16:25 bill Exp $B
+ * $Id: modules.c,v 1.20 2002/04/02 23:24:30 bill Exp $B
  *
  */
 
@@ -313,11 +313,11 @@ int load_a_module(char *name, int log)
     {
       sendtoalldcc(SEND_ADMIN_ONLY, "Module %s [version: %s] loaded at 0x%lx",
                   (modlist[i].name == unknown_ver) ? name : modlist[i].name,
-                   modlist[i].version, modlist[i].address);
+                   modlist[i].version, (long)modlist[i].address);
 #ifdef DEBUGMODE
       printf("Module %s [version: %s] loaded at 0x%lx\n",
             (modlist[i].name == unknown_ver) ? name : modlist[i].name,
-             modlist[i].version, modlist[i].address);
+             modlist[i].version, (long)modlist[i].address);
 #endif
     }
   return 0;

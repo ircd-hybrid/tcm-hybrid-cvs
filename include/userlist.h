@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.22 2001/12/11 21:55:30 db Exp $ */
+/* $Id: userlist.h,v 1.23 2002/04/02 23:24:22 bill Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -188,7 +188,6 @@ struct config_list config_entries;
 #define CHANNEL_REPORT_VCLONES	0x0002
 #define CHANNEL_REPORT_SCLONES  0x0004
 #define CHANNEL_REPORT_FLOOD	0x0008
-#define CHANNEL_REPORT_CTCP	0x0010
 #define CHANNEL_REPORT_LINK	0x0020
 #define CHANNEL_REPORT_WINGATE	0x0040
 #define CHANNEL_REPORT_SOCKS	0x0080

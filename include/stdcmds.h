@@ -1,7 +1,7 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.12 2001/11/26 20:50:31 bill Exp $ */
+/* $Id: stdcmds.h,v 1.13 2002/04/02 23:24:22 bill Exp $ */
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
@@ -11,8 +11,10 @@ void notice(char *nick,...);
 void privmsg(char *nick,...);
 void newnick(char *nick);
 void print_motd(int sock);
-void list_nicks(int sock,char *nick);
-void list_virtual_users(int sock,char *userhost);
+void list_nicks(int sock,char *nick,int regex);
+void list_virtual_users(int sock,char *userhost,int regex);
+void list_users(int sock,char *userhost,int regex);
+void kill_list_users(int sock,char *userhost,char *reason,int regex);
 void report_mem(int sock);
 void report_clones(int sock);
 void report_nick_flooders(int sock);

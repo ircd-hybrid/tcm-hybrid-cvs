@@ -1,3 +1,4 @@
+dnl $Id: configure.in,v 1.12 2002/04/02 23:24:17 bill Exp $
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(include/tcm.h)
 
@@ -44,6 +45,8 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/socketvar.h sys/stream.h crypt.h)
 
+dnl Check for regex.h - if found, assume regexec() and regcomp()
+AC_CHECK_HEADER(regex.h, AC_DEFINE(HAVE_REGEX_H), AC_MSG_WARN(regex.h could not be found - regex matching will not be implemented))
 dnl Check for stdarg.h - if we can't find it, halt configure
 AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - tcm-hybrid will not compile without it **))
 

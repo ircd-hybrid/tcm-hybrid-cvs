@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.37 2002/03/20 05:08:24 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.38 2002/04/02 23:24:25 bill Exp $ */
 
 #include "setup.h"
 
@@ -50,14 +50,12 @@
 
 char *_version="20012009";
 
-static int is_kline_time(char *p);
 static void set_actions(int sock, char *key, char *act, int duration, char *reason);
 static void save_umodes(char *registered_nick, unsigned long type);
 static void load_umodes(int connect_id);
 static unsigned long find_user_umodes(char *nick);
 static void set_umode(int connnum, char *flags, char *registered_nick);
 static void show_user_umodes(int sock, char *registered_nick);
-static void not_authorized(int sock);
 static void register_oper(int connnum, char *password, char *who_did_command);
 static void list_opers(int sock);
 static void list_connections(int sock);
@@ -70,20 +68,29 @@ static void report_multi_user(int sock, int nclones);
 static void report_multi_virtuals(int sock, int nclones);
 static int  islegal_pass(int connect_id,char *password);
 static void print_help(int sock,char *text);
-static void kill_list_users(int sock, char *userhost, char *reason);
-static void list_users(int sock,char *userhost);
 
 void _modinit();
+void _moddeinit();
 
 extern struct connection connections[];
 extern struct s_testline testlines;
 
 void m_vlist(int connnum, int argc, char *argv[])
 {
-  if (argc < 2)
-    prnt(connections[connnum].socket, "Usage: %s <ip block>\n", argv[0]);
+#ifdef HAVE_REGEX_H
+  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+    prnt(connections[connnum].socket, "Usage: %s <wildcarded/regexp ip>\n",
+         argv[0]);
+  else if (argc == 2)
+    list_virtual_users(connections[connnum].socket, argv[1], NO);
   else
-    list_virtual_users(connections[connnum].socket, argv[1]);
+    list_virtual_users(connections[connnum].socket, argv[2], YES);
+#else
+  if (argc < 2)
+    prnt(connections[connnum].socket, "Usage %s <wildcarded ip>\n", argv[0]);
+  else
+    list_virtual_users(connections[connnum].socket, argv[1], NO);
+#endif
 }
 
 void m_class(int connnum, int argc, char *argv[])
@@ -107,35 +114,72 @@ void m_killlist(int connnum, int argc, char *argv[])
   char reason[1024];
   int i;
 
-  if (argc < 2)
-    prnt(connections[connnum].socket, "Usage: %s <wildcarded userhost>\n", argv[0]);
-  else
+#ifdef HAVE_REGEX_H
+  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
   {
-    if (argc >= 3)
-    {
-      if (argv[2][0] == ':')
-        snprintf(reason, sizeof(reason), "%s", argv[2]+1);
-      else
-        snprintf(reason, sizeof(reason), "%s", argv[2]);
-      for (i=3; i<argc; ++i)
-      {
-        strncat(reason, " ", sizeof(reason)-strlen(reason));
-        strncat(reason, argv[i], sizeof(reason)-strlen(reason));
-      }
-    }
+    prnt(connections[connnum].socket,
+         "Usage: %s [-r] <wildcarded/regex userhost>\n", argv[0]);
+    return;
+  }
+  if (argc >= 4)
+  {
+    if (argv[3][0] == ':')
+      snprintf(reason, sizeof(reason), "%s", argv[3]+1);
     else
-      snprintf(reason, sizeof(reason), "No reason");
-    if (!(connections[connnum].type & (TYPE_INVS|TYPE_INVM)))
+      snprintf(reason, sizeof(reason), "%s", argv[3]);
+    for (i=4; i<argc; ++i)
     {
-      strncat(reason, " (requested by ", sizeof(reason)-strlen(reason));
-      strncat(reason, connections[connnum].registered_nick,
-              sizeof(reason)-strlen(reason));
-      strncat(reason, ")", sizeof(reason)-strlen(reason));
+      strncat(reason, " ", sizeof(reason)-strlen(reason));
+      strncat(reason, argv[i], sizeof(reason)-strlen(reason));
     }
+  }
+#else
+  if (argc < 2)
+  {
+    prnt(connections[connnum].socket,
+         "Usage: %s <wildcarded userhost>\n", argv[0]);
+    return;
+  }
+  if (argc >= 3)
+  {
+    if (argv[2][0] == ':')
+      snprintf(reason, sizeof(reason), "%s", argv[2]+1);
+    else
+      snprintf(reason, sizeof(reason), "%s", argv[2]);
+    for (i=3; i<argc; ++i)
+    {
+      strncat(reason, " ", sizeof(reason)-strlen(reason));
+      strncat(reason, argv[i], sizeof(reason)-strlen(reason));
+    }
+  }
+  else
+    snprintf(reason, sizeof(reason), "No reason");
+#endif
+  if (!(connections[connnum].type & (TYPE_INVS|TYPE_INVM)))
+  {
+    strncat(reason, " (requested by ", sizeof(reason)-strlen(reason));
+    strncat(reason, connections[connnum].registered_nick,
+            sizeof(reason)-strlen(reason));
+    strncat(reason, ")", sizeof(reason)-strlen(reason));
+  }
+#ifdef HAVE_REGEX_H
+  if (strcasecmp(argv[1], "-r"))
+  {
     sendtoalldcc(SEND_OPERS_ONLY, "*** killlist %s :%s by %s\n", argv[1],
                  reason, connections[connnum].registered_nick);
-    kill_list_users(connections[connnum].socket, argv[1], reason);
+    kill_list_users(connections[connnum].socket, argv[1], reason, NO);
   }
+  else
+  {
+    sendtoalldcc(SEND_OPERS_ONLY, "*** killlist %s :%s by %s\n", argv[2],
+                 reason, connections[connnum].registered_nick);
+    kill_list_users(connections[connnum].socket, argv[2], reason, YES);
+  }
+#else
+  sendtoalldcc(SEND_OPERS_ONLY, "*** killlist %s :%s by %s\n", argv[1],
+               reason, connections[connnum].registered_nick);
+  kill_list_users(connections[connnum].socket, argv[1], reason, NO);
+#endif
 }
 
 void m_kline(int connnum, int argc, char *argv[])
@@ -338,12 +382,14 @@ void m_hmulti(int connnum, int argc, char *argv[])
   int t;
 
   if (argc >= 2)
+  {
     if ((t = atoi(argv[1])) < 3)
     {
       prnt(connections[connnum].socket,
            "Using a threshold less than 3 is not recommended, changed to 3\n");
       t = 3;
     }
+  }
   else
     t = 3;
   report_multi_host(connections[connnum].socket, t);
@@ -354,12 +400,14 @@ void m_umulti(int connnum, int argc, char *argv[])
   int t;
 
   if (argc >= 2)
+  {
     if ((t = atoi(argv[1])) < 3)
     {
       prnt(connections[connnum].socket,
            "Using a threshold less than 3 is not recommended, changed to 3\n");
       t = 3;
     }
+  }
   else
     t = 3;
   report_multi_user(connections[connnum].socket, t);
@@ -870,7 +918,7 @@ void m_failures(int connnum, int argc, char *argv[])
   if (argc < 2)
     report_failures(connections[connnum].socket, 7);
   else if (atoi(argv[1]) < 1)
-    prnt(connections[connnum].socket, "Usage: .%s [min failures]\n", argv[0]);
+    prnt(connections[connnum].socket, "Usage: %s [min failures]\n", argv[0]);
   else
     report_failures(connections[connnum].socket, atoi(argv[1]));
 }
@@ -880,7 +928,7 @@ void m_domains(int connnum, int argc, char *argv[])
   if (argc < 2)
     report_domains(connections[connnum].socket, 5);
   else if (atoi(argv[1]) < 1)
-    prnt(connections[connnum].socket, "Usage: .%s [min users]\n", argv[0]);
+    prnt(connections[connnum].socket, "Usage: %s [min users]\n", argv[0]);
   else
     report_domains(connections[connnum].socket, atoi(argv[1]));
 }
@@ -903,20 +951,39 @@ void m_vmulti(int connnum, int argc, char *argv[])
 
 void m_nfind(int connnum, int argc, char *argv[])
 {
-  if (argc != 2)
-    prnt(connections[connnum].socket, "Usage: .%s <wildcarded nick>\n",
-         argv[0]);
+#ifdef HAVE_REGEX_H
+  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+    prnt(connections[connnum].socket,
+         "Usage: %s [-r] <wildcarded/regexp nick>\n", argv[0]);
+  else if (argc == 2)
+    list_nicks(connections[connnum].socket, argv[1], NO);
   else
-    list_nicks(connections[connnum].socket, argv[1]);
+    list_nicks(connections[connnum].socket, argv[2], YES);
+#else
+  if (argc <= 2)
+    prnt(connections[connnum].socket, "Usage: %s <wildcarded nick>\n", argv[0]);
+  else
+    list_nicks(connections[connnum].socket, argv[1], NO);
+#endif
 } 
 
 void m_list(int connnum, int argc, char *argv[])
 {
+#ifdef HAVE_REGEX_H
+  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+    prnt(connections[connnum].socket,
+         "Usage: %s [-r] <wildcarded/regex userhost>\n", argv[0]);
+  else if (argc == 2)
+    list_users(connections[connnum].socket, argv[1], NO);
+  else
+    list_users(connections[connnum].socket, argv[2], YES);
+#else
   if (argc < 2)
-    prnt(connections[connnum].socket, "Usage: .%s <wildcarded userhost>\n",
+    prnt(connections[connnum].socket, "Usage: %s <wildcarded userhost>\n",
          argv[0]);
   else
-    list_users(connections[connnum].socket, argv[1]);
+    list_users(connections[connnum].socket, argv[1], NO);
+#endif
 }
 
 /*
@@ -932,12 +999,7 @@ dccproc(int connnum, int argc, char *argv[])
   int len;
   int i;
   int opers_only = SEND_ALL_USERS; 	/* Is it an oper only message ? */
-  char *command, *buffer, *p;
-  int kline_time;
-  struct common_function *temp;
-#ifndef NO_D_LINE_SUPPORT
-  char *pattern;  /* u@h or nick */
-#endif
+  char *buffer, *p;
 
   if (argv[0][0] == '.')
   {
@@ -1038,41 +1100,6 @@ set_actions(int sock, char *key, char *act, int duration, char *reason)
       }
     }
   }
-}
-
-/*
- * is_kline_time()
- *
- * inputs          - pointer to ascii string in
- * output          - 0 if not an integer number, else the number
- * side effects    - none
- */
-
-static int 
-is_kline_time(char *p)
-{
-  int result = 0;
-
-  while(*p)
-  {
-    if(isdigit(*p))
-    {
-      result *= 10;
-      result += ((*p) & 0xF);
-      p++;
-    }
-    else
-      return(0);
-  }
-
-  /* in the degenerate case where oper does a /quote kline 0 user@host :reason
-   * i.e. they specifically use 0, I am going to return 1 instead
-   * as a return value of non-zero is used to flag it as a temporary kline
-   */
-
-  if(result == 0)
-    result = 1;
-  return(result);
 }
 
 /*
@@ -1702,20 +1729,6 @@ handle_save(int sock,char *nick)
   prnt(sock, "Saving %s file\n", CONFIG_FILE);
   sendtoalldcc(SEND_OPERS_ONLY, "%s is saving %s\n", nick, CONFIG_FILE);
   save_prefs();
-}
-
-/*
- * not_authorized
- *
- * inputs	- socket
- * output	- NONE
- * side effects	- user is warned they aren't an oper
- */
-
-static void 
-not_authorized(int sock)
-{
-  prnt(sock,"Only authorized opers may use this command\n");
 }
 
 #ifdef IRCD_HYBRID
@@ -2392,101 +2405,4 @@ print_help(int sock,char *text)
       prnt(sock, "%s", line);
     }
   fclose(userfile);
-}
-
-static void
-kill_list_users(int sock,char *userhost, char *reason)
-{
-  struct hashrec *userptr;
-  /* Looks fishy but it really isn't */
-  char fulluh[MAX_HOST+MAX_DOMAIN+2];
-  int i;
-  int numfound = 0;
-
-  if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
-      prnt(sock, "Let's not kill all the users.\n");
-  else
-    {
-      for (i=0;i<HASHTABLESIZE;++i)
-        {
-          for( userptr = domaintable[i]; userptr;
-               userptr = userptr->collision )
-            {
-              (void)snprintf(fulluh,sizeof(fulluh) - 1,
-                            "%s@%s",userptr->info->user,userptr->info->host);
-              if (!wldcmp(userhost,fulluh))
-                {
-                  if (!numfound++)
-                    {
-                        log("listkilled %s\n", fulluh);
-                    }
-                  toserv("KILL %s :%s\n", userptr->info->nick, reason);
-                }
-            }
-        }
-      if (numfound > 0)
-        prnt(sock,
-             "%d matches for %s found\n",numfound,userhost);
-      else
-        prnt(sock,
-             "No matches for %s found\n",userhost);
-  }
-}
-
-/*
- * list_users()
- *
- * inputs       - socket to reply on
- * output       - NONE
- * side effects -
- */
-
-static void
-list_users(int sock,char *userhost)
-{
-  struct hashrec *userptr;
-  char fulluh[MAX_HOST+MAX_DOMAIN];
-  int i;
-  int numfound = 0;
-
-  if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
-    prnt(sock,
-         "Listing all users is not recommended.  To do it anyway, use 'list ?*@*'.\n");
-  else
-    {
-      for (i=0;i<HASHTABLESIZE;++i)
-        {
-          for( userptr = domaintable[i]; userptr;
-               userptr = userptr->collision )
-            {
-              (void)snprintf(fulluh,sizeof(fulluh) - 1,
-                            "%s@%s",userptr->info->user,userptr->info->host);
-              if (!wldcmp(userhost,fulluh))
-                {
-                  if (!numfound++)
-                    {
-                      prnt(sock,
-                           "The following clients match %.150s:\n",userhost);
-                    }
-                  if (userptr->info->ip_host[0] > '9' ||
-                      userptr->info->ip_host[0] < '0')
-                    prnt(sock,
-                         "  %s (%s) {%s}\n",
-                         userptr->info->nick,
-                         fulluh, userptr->info->class);
-                  else
-                    prnt(sock, "  %s (%s) [%s] {%s}\n",
-                         userptr->info->nick,
-                         fulluh, userptr->info->ip_host,
-                         userptr->info->class);
-                }
-            }
-        }
-      if (numfound > 0)
-        prnt(sock,
-             "%d matches for %s found\n",numfound,userhost);
-      else
-        prnt(sock,
-             "No matches for %s found\n",userhost);
-  }
 }

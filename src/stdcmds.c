@@ -14,7 +14,9 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.39 2002/03/11 06:03:45 bill Exp $ */
+/* $Id: stdcmds.c,v 1.40 2002/04/02 23:24:30 bill Exp $ */
+
+#include "setup.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -25,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
 #include "config.h"
 #include "tcm.h"
 #include "logging.h"
@@ -32,6 +35,12 @@
 #include "stdcmds.h"
 #include "userlist.h"
 #include "wild.h"
+
+#ifdef HAVE_REGEX_H
+#include <regex.h>
+#define REGCOMP_FLAGS REG_EXTENDED
+#define REGEXEC_FLAGS 0
+#endif
 
 #ifdef DMALLOC
 #include "dmalloc.h"
@@ -374,11 +383,6 @@ suggest_host(char *host, int ident, int type)
       if (!ident)
         return q;
     }
-  if (type & get_action_type("ctcp"))
-    {
-      if (!ident)
-        return q;
-    }
   if (type & get_action_type("spambot"))
     {
       if (!ident)
@@ -636,23 +640,50 @@ print_motd(int sock)
 /*
  * list_nicks()
  *
- * inputs       - socket to reply on, nicks to search for
+ * inputs       - socket to reply on, nicks to search for,regexpression?
  * output       - NONE
  * side effects -
  */
 
 void 
-list_nicks(int sock,char *nick)
+list_nicks(int sock,char *nick,int regex)
 {
   struct hashrec *userptr;
-  int i;
+#ifdef HAVE_REGEX_H
+  char *errbuf=NULL;
+  regex_t reg;
+  regmatch_t m[1];
+#endif
+  int i=0, a;
   int numfound=0;
+
+#ifdef HAVE_REGEX_H
+  if (regex == YES && (i=regcomp((regex_t *)&reg, nick, 1)))
+  {
+    if ((errbuf = (char *)malloc(1024)) == NULL)
+    {
+      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_nicks()");
+      exit(0);
+    }
+    regerror(i, (regex_t *)&reg, errbuf, 1024); 
+    prnt(sock, "Error compiling regular expression: %s\n", errbuf);
+    free(errbuf);
+    return;
+  }
+#endif
 
   for (i=0;i<HASHTABLESIZE;++i)
     {
       for( userptr = domaintable[i]; userptr; userptr = userptr->collision )
         {
-          if (!wldcmp(nick,userptr->info->nick))
+#ifdef HAVE_REGEX_H
+          if ((regex == YES &&
+           !(a=regexec((regex_t *)&reg, userptr->info->nick,1,m,REGEXEC_FLAGS))
+               && strlen(userptr->info->nick) == m[0].rm_eo)
+              || (regex == NO && !wldcmp(nick, userptr->info->nick)))
+#else
+          if (!wldcmp(nick, userptr->info->nick))
+#endif
             {
               if(!numfound)
                 {
@@ -675,77 +706,250 @@ list_nicks(int sock,char *nick)
   else
     prnt(sock,
          "No matches for %s found\n",nick);
+#ifdef HAVE_REGEX_H
+  if (errbuf != NULL)
+    free(errbuf);
+#endif
+}
+
+/*
+ * list_users()
+ *
+ * inputs       - socket to reply on
+ *              - uhost to match on
+ *              - regex or no?
+ * output       - NONE
+ * side effects -
+ */
+
+void 
+list_users(int sock,char *userhost,int regex)
+{
+  struct hashrec *ipptr;
+#ifdef HAVE_REGEX_H
+  char *errbuf=NULL;
+  regex_t reg;
+  regmatch_t m[1];
+#endif
+  char *uhost, *uhostmatch;
+  int i, numfound = 0;
+
+  if ((uhost = (char *)malloc(1024)) == NULL)
+  {
+    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
+    exit(0);
+  }
+  if ((uhostmatch = (char *)malloc(1024)) == NULL)
+  {
+    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
+    exit(0);
+  }
+  if (strchr(userhost, '@') == NULL && regex != YES)
+    snprintf(uhostmatch, 1024, "*@%s", userhost);
+  else
+    snprintf(uhostmatch, 1024, "%s", userhost);
+
+#ifdef HAVE_REGEX_H
+  if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
+  {
+    if ((errbuf = (char *)malloc(1024)) == NULL)
+    {
+      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
+      exit(0);
+    }
+    regerror(i, (regex_t *)&reg, errbuf, 1024); 
+    prnt(sock, "Error compiling regular expression: %s\n", errbuf);
+    free(errbuf);
+    return;
+  }
+#endif
+  if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
+    {
+      prnt(sock, "Listing all users is not recommended.  To do it anyway, use '.list ?*@*'.\n");
+      return;
+    }
+
+  for ( i=0; i < HASHTABLESIZE; ++i)
+  {
+    for( ipptr = iptable[i]; ipptr; ipptr = ipptr->collision )
+    {
+      snprintf(uhost, 1024, "%s@%s", ipptr->info->user, ipptr->info->host);
+#ifdef HAVE_REGEX_H
+      if ((regex == YES &&
+          !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS) &&
+          strlen(uhost) == m[0].rm_eo) ||
+          (regex == NO && !wldcmp(uhostmatch, uhost)))
+#else
+      if (!wldcmp(uhostmatch, uhost))
+#endif 
+      {
+        if (!numfound++)
+          prnt(sock, "The following clients match %s:\n", uhostmatch);
+
+        if (ipptr->info->ip_host[0] > '9' || ipptr->info->ip_host[0] < '0')
+          prnt(sock, "  %s (%s@%s) {%s}\n", ipptr->info->nick,
+               ipptr->info->user, ipptr->info->host, ipptr->info->class);
+        else
+          prnt(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
+               ipptr->info->user, ipptr->info->host, ipptr->info->ip_host,
+               ipptr->info->class);
+      }
+    }
+  }
+  if (numfound > 0)
+    prnt(sock, "%d matche%sfor %s found\n", numfound,
+         (numfound > 1 ? "s " : " "), uhostmatch);
+  else
+    prnt(sock, "No matches for %s found\n", uhostmatch);
+  free(uhost);
+  free(uhostmatch);
 }
 
 /*
  * list_virtual_users()
  *
  * inputs       - socket to reply on
- *              - ip block to match on
+ *              - ipblock to match on
+ *              - regex or no?
  * output       - NONE
  * side effects -
  */
 
 void 
-list_virtual_users(int sock,char *userhost)
+list_virtual_users(int sock,char *userhost,int regex)
 {
   struct hashrec *ipptr;
-  char *p, *user=NULL, *host;
+#ifdef HAVE_REGEX_H
+  char *errbuf;
+  regex_t reg;
+  regmatch_t m[1];
+#endif
+  char *uhost, *uhostmatch;
   int i,numfound = 0;
 
+  if ((uhost = (char *)malloc(1024)) == NULL)
+  {
+    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
+    exit(0);
+  }
+  if ((uhostmatch = (char *)malloc(1024)) == NULL)
+  {
+    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
+    exit(0);
+  }
+  if (strchr(userhost, '@') == NULL && regex != YES)
+    snprintf(uhostmatch, 1024, "*@%s", userhost);
+  else
+    snprintf(uhostmatch, 1024, "%s", userhost);
+
+#ifdef HAVE_REGEX_H
+  if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
+  {
+    if ((errbuf = (char *)malloc(1024)) == NULL)
+    {
+      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
+      exit(0);
+    }
+    regerror(i, (regex_t *)&reg, errbuf, 1024); 
+    prnt(sock, "Error compiling regular expression: %s\n", errbuf);
+    free(errbuf);
+    return;
+  }
+#endif
   if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
     {
       prnt(sock, "Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.\n");
       return;
     }
-  if ((p=strchr(userhost, '@')))
-    {
-      user = userhost;
-      host = p+1;
-      *p = '\0';
-    }
-  else
-    host = userhost;
+
   for ( i=0; i < HASHTABLESIZE; ++i)
+  {
+    for( ipptr = iptable[i]; ipptr; ipptr = ipptr->collision )
     {
-      for( ipptr = iptable[i]; ipptr; ipptr = ipptr->collision )
-        {
-          if (!wldcmp(host,ipptr->info->ip_host))
-            {
-              if ((user && !wldcmp(user, ipptr->info->user)) || user == NULL)
-                {
-                  if (!numfound++)
-                    {
-                      if (user)
-                        prnt(sock, "The following clients match %s@%s:\n",user, host);
-                      else
-                        prnt(sock, "The following clients match %s:\n", host);
-                    }
-                  prnt(sock, "  %s [%s] (%s@%s) {%s}\n", 
-                       ipptr->info->nick, ipptr->info->ip_host,
-                       ipptr->info->user, ipptr->info->host,
-                       ipptr->info->class);
-                }
-            }
-        }
+      snprintf(uhost, 1024, "%s@%s", ipptr->info->user, ipptr->info->ip_host);
+#ifdef HAVE_REGEX_H
+      if ((regex == YES &&
+          !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS) &&
+          strlen(uhost) == m[0].rm_eo) ||
+          (regex == NO && !wldcmp(uhostmatch, uhost)))
+#else
+      if (!wldcmp(uhostmatch, uhost))
+#endif 
+      {
+        if (!numfound++)
+          prnt(sock, "The following clients match %s:\n", uhostmatch);
+
+        prnt(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
+             ipptr->info->user, ipptr->info->host, ipptr->info->ip_host,
+             ipptr->info->class);
+      }
     }
+  }
   if (numfound > 0)
-    {
-      if (user)
-        prnt(sock, "%d matche%sfor %s@%s found\n",numfound,(numfound > 1 ? "s " : " "), 
-             user, host);
-      else
-        prnt(sock, "%d matche%sfor %s found\n",numfound,(numfound > 1 ? "s " : " "), host);
-    }
+    prnt(sock, "%d matche%sfor %s found\n", numfound,
+         (numfound > 1 ? "s " : " "), uhostmatch);
   else
-    {
-      if (user)
-        prnt(sock, "No matches for %s@%s found\n", user, host);
-      else
-        prnt(sock, "No matches for %s found\n", host);
-    }
+    prnt(sock, "No matches for %s found\n", uhostmatch);
+  free(uhost);
+  free(uhostmatch);
 }
 
+void kill_list_users(int sock, char *userhost, char *reason, int regex)
+{
+  struct hashrec *userptr;
+#ifdef HAVE_REGEX_H
+  char *errbuf=NULL;
+  regex_t reg;
+  regmatch_t m[1];
+#endif
+  char fulluh[MAX_HOST+MAX_DOMAIN+2];
+  int i, numfound=0;
+
+#ifdef HAVE_REGEX_H
+  if (regex == YES && (i=regcomp((regex_t *)&reg, userhost, 1)))
+  {
+    if ((errbuf = (char *)malloc(1024)) == NULL)
+    {
+      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in kill_list_users()\n");
+      exit(0);
+    }
+    regerror(i, (regex_t *)&reg, errbuf, 1024);
+    prnt(sock, "Error compiling regular expression: %s\n", errbuf);
+    free(errbuf);
+    return;
+  }
+#endif
+
+  for (i=0;i<HASHTABLESIZE;++i)
+  {
+    for (userptr = domaintable[i]; userptr; userptr = userptr->collision)
+    {
+      snprintf(fulluh, sizeof(fulluh), "%s@%s", userptr->info->user,
+               userptr->info->host);
+#ifdef HAVE_REGEX_H
+      if ((regex == YES &&
+           !regexec((regex_t *)&reg, fulluh, 1, m, REGEXEC_FLAGS) &&
+           strlen(fulluh) == m[0].rm_eo) ||
+          (regex == NO && !wldcmp(userhost, fulluh)))
+#else
+      if (!wldcmp(userhost, fulluh))
+#endif
+      {
+        if (!numfound++)
+          log("killlisted %s\n", fulluh);
+        toserv("KILL %s :%s\n", userptr->info->nick, reason);
+      }
+    }
+  }
+  if (numfound > 0)
+    prnt(sock, "%d matches for %s found\n", userhost);
+  else
+    prnt(sock, "No matches for %s found\n", userhost);
+#ifdef HAVE_REGEX_H
+  if (errbuf != NULL)
+    free(errbuf);
+#endif
+}
 /*
  * report_multi_host()
  *

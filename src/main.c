@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.27 2002/03/19 23:54:34 wcampbel Exp $ */
+/* $Id: main.c,v 1.28 2002/04/02 23:24:30 bill Exp $ */
 
 #include "setup.h"
 
@@ -52,9 +52,7 @@
 #include "commands.h"
 #include "modules.h"
 #include "stdcmds.h"
-/*#include "token.h"
-#include "logging.h"
-#include "wild.h"*/
+#include "wild.h"
 #include "serno.h"
 #include "patchlevel.h"
 

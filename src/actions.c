@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.29 2002/06/21 13:45:21 leeh Exp $
+ * $Id: actions.c,v 1.30 2002/06/21 14:13:46 leeh Exp $
  */
 
 #include "setup.h"
@@ -485,7 +485,8 @@ handle_action(int actionid, char *nick, char *user,
 
     }
 
-  if (actions[actionid].method & METHOD_IRC_WARN)
+  if (actions[actionid].method & METHOD_IRC_WARN &&
+      (*config_entries.defchannel != '\0'))
     {
       if (addcmt && addcmt[0])
 	privmsg(config_entries.defchannel,

@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.91 2002/06/21 14:07:38 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.92 2002/06/21 14:13:46 leeh Exp $ */
 
 #include "setup.h"
 
@@ -105,7 +105,9 @@ report(int type, char *format,...)
   ** for safety sake - Hwy
   */
   send_to_all(type, "%s", msg);
-  privmsg(config_entries.defchannel, "%s", msg);
+
+  if(config_entries.defchannel != '\0')
+    privmsg(config_entries.defchannel, "%s", msg);
 
   va_end(va);
 }

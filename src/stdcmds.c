@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.59 2002/05/21 21:29:30 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.60 2002/05/22 22:03:34 leeh Exp $ */
 
 #include "setup.h"
 
@@ -129,34 +129,6 @@ freehash(void)
       nick_changes[i].user_host[0] = '\0';
       nick_changes[i].noticed = NO;
     }
-}
-
-/*
- * toserv
- *
- * inputs       - msg to send directly to server
- * output       - NONE
- * side effects - server executes command.
- */
-
-void 
-toserv(char *format, ... )
-{
-  char msgbuf[MAX_BUFF];
-  va_list va;
-
-  va_start(va,format);
-
-  if (connections[0].socket != INVALID)
-    {
-      vsnprintf(msgbuf,sizeof(msgbuf),format, va);
-      send(connections[0].socket, msgbuf, strlen(msgbuf), 0);
-    }
-#ifdef DEBUGMODE
-  printf("->%s", msgbuf);
-#endif
-
-  va_end(va);
 }
 
 /*

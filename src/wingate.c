@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.24 2002/05/05 17:04:48 einride Exp $ */
+/* $Id: wingate.c,v 1.25 2002/05/22 22:03:31 leeh Exp $ */
 
 
 #include <netdb.h>
@@ -18,6 +18,7 @@
 #include "userlist.h"
 #include "logging.h"
 #include "stdcmds.h"
+#include "tcm_io.h"
 
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
 #undef REPORT_WINGATES_TO_CHANNEL
@@ -55,8 +56,6 @@ char *_version="20012009";
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
 char wingate_class_list[MAXWINGATES][100];
 int  wingate_class_list_index;
-extern fd_set writefds;
-extern fd_set readfds;
 #endif
 
 #ifdef DETECT_WINGATE

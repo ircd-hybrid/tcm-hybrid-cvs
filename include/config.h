@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.45 2002/05/20 18:42:24 wcampbel Exp $
+ * $Id: config.h,v 1.46 2002/05/22 22:03:27 leeh Exp $
  */
 
 /*
@@ -208,7 +208,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 /*
  * define this if you want services code at all
  */
-#define SERVICES
+#undef SERVICES
 
 /* to kline drones
  * drone detect only works if the tcm is global oper ;-(

@@ -1,7 +1,7 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.12 2002/03/06 05:16:18 bill Exp $ */
+/* $Id: modules.h,v 1.13 2002/05/22 22:03:27 leeh Exp $ */
 
 struct module {
   char *name;
@@ -67,7 +67,6 @@ struct common_function *statso;
 extern void sendtoalldcc(int type,char *format,...);
 extern void log_kline(char *command_name, char *pattern, int  kline_time, char *who_did_command,
                       char *reason);
-extern void toserv(char *format, ... );
 extern int okhost(char *user,char *host,int);
 extern void report(int type, int channel_send_flag, char *format,...);
 extern char *date_stamp(void);

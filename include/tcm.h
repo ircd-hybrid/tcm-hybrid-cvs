@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.29 2002/05/22 15:08:39 db Exp $ */
+/* $Id: tcm.h,v 1.30 2002/05/22 22:03:28 leeh Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -53,14 +53,18 @@ extern time_t CurrentTime;
 
 #define FOREVER for(;;)	
 
+extern struct connection connections[MAXDCCCONNS+1];
+
 time_t startup_time, oper_time;
 
 char mychannel[MAX_CHANNEL];
 char mynick[MAX_NICK];
+char serverhost[MAX_HOST];
+char ourhostname[MAX_HOST];
+
+extern int incoming_connnum;
 int amianoper;
 int quit;			/* Quit when = YES */
-
-fd_set readfds;
 
 int maxconns;
 

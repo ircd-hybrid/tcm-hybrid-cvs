@@ -2,7 +2,7 @@
  * much of this code has been copied (though none ver batum)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.24 2002/05/20 05:31:03 db Exp $B
+ * $Id: modules.c,v 1.25 2002/05/22 22:03:34 leeh Exp $B
  *
  */
 
@@ -18,10 +18,12 @@
 #include "config.h"
 #include "tcm.h"
 #include "commands.h"
+#include "bothunt.h"
 #include "modules.h"
 #include "serverif.h"
 #include "stdcmds.h"
 #include "wild.h"
+#include "parse.h"
 
 #define MODS_INCREMENT 25
 
@@ -137,9 +139,6 @@ void add_common_function(int type, void *function)
       case F_DCC:
         temp = &dcc;
         break;
-      case F_UPPER_CONTINUOUS:
-        temp = &upper_continuous;
-        break;
       case F_CONTINUOUS:
         temp = &continuous;
         break;
@@ -222,8 +221,6 @@ void modules_init(void)
     user_signon = (struct common_function *) malloc(sizeof(struct common_function));
   if (user_signoff == NULL)
     user_signoff = (struct common_function *) malloc(sizeof(struct common_function));
-  if (upper_continuous == NULL)
-    upper_continuous = (struct common_function *) malloc(sizeof(struct common_function));
   if (continuous == NULL)
     continuous = (struct common_function *) malloc(sizeof(struct common_function));
   if (scontinuous == NULL)

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.81 2002/05/22 15:08:42 db Exp $ */
+/* $Id: bothunt.c,v 1.82 2002/05/22 22:03:34 leeh Exp $ */
 
 #include "setup.h"
 
@@ -55,6 +55,7 @@
 #include "patchlevel.h"
 #include "commands.h"
 #include "modules.h"
+#include "tcm_io.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
@@ -84,19 +85,8 @@ static void check_virtual_host_clones(char *);
 #endif
 static void check_reconnect_clones(char *);
 
-void _ontraceuser(int connnum, int argc, char *argv[]);
-void _ontraceclass(int connnum, int argc, char *argv[]);
-void _onctcp(int connnum, int argc, char *argv[]);
-void on_stats_o(int connnum, int argc, char *argv[]);
-void on_stats_e(int connnum, int argc, char *argv[]);
-void on_stats_i(int connnum, int argc, char *argv[]);
-void onservnotice(int connnum, int argc, char *argv[]);
-void _reload_bothunt(int connnum, int argc, char *argv[]);
-void _modinit();
-
 int act_cflood, act_vclone, act_flood, act_link,
   act_bot, act_spambot, act_clone, act_rclone;
-
 
 struct msg_to_action {
   char *msg_to_mon;
@@ -3158,17 +3148,8 @@ struct TcmMessage gline_msgtab = {
 };
 #endif
 
-void _modinit()
+void init_bothunt(void)
 {
-  add_common_function(F_RELOAD, _reload_bothunt);
-  add_common_function(F_SERVER_NOTICE, onservnotice);
-  add_common_function(F_ONCTCP, _onctcp);
-  add_common_function(F_ONTRACEUSER, _ontraceuser);
-  add_common_function(F_ONTRACECLASS, _ontraceclass);
-  add_common_function(F_STATSI, on_stats_i);
-  add_common_function(F_STATSE, on_stats_e);
-  add_common_function(F_STATSO, on_stats_o);
-  mod_add_cmd(&gline_msgtab);
   memset(&usertable,0,sizeof(usertable));
   memset(&hosttable,0,sizeof(usertable));
   memset(&domaintable,0,sizeof(usertable));

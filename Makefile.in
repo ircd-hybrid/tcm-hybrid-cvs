@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.20 2002/05/06 13:37:23 wcampbel Exp $
+# $Id: Makefile.in,v 1.21 2002/05/22 22:03:25 leeh Exp $
 CC = @CC@
 RM = @RM@
 MKDEP = ${CC} -MM
@@ -45,6 +45,16 @@ install:
 	-@if [ ! -x @prefix@/etc ] ; then \
 	echo mkdir @prefix@/etc ; \
 	mkdir @prefix@/etc ; \
+	fi
+
+	-@if [ -x @prefix@/modules-old ] ; then \
+	echo rm -rf @prefix@/modules-old ; \
+	${RM} -rf @prefix@/modules-old ; \
+	fi
+
+	-@if [ -x @prefix@/modules ] ; then \
+	echo mv @prefix@/modules @prefix@/modules-old ; \
+	mv @prefix@/modules @prefix@/modules-old ; \
 	fi
 
 	-@if [ ! -x @prefix@/modules ] ; then \

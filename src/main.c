@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.45 2002/05/22 15:08:45 db Exp $ */
+/* $Id: main.c,v 1.46 2002/05/22 22:03:34 leeh Exp $ */
 
 #include "setup.h"
 
@@ -33,6 +33,7 @@
 
 #include "config.h"
 #include "tcm.h"
+#include "tcm_io.h"
 #include "event.h"
 #include "serverif.h"
 #include "userlist.h"
@@ -43,6 +44,7 @@
 #include "wild.h"
 #include "serno.h"
 #include "patchlevel.h"
+#include "parse.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
@@ -67,8 +69,6 @@ time_t CurrentTime;
 
 char ourhostname[MAX_HOST];   /* This is our hostname with domainname */
 char serverhost[MAX_HOST];    /* Server tcm will use. */
-
-fd_set writefds;
 
 /* kludge for ensuring no direct loops */
 int  incoming_connnum;	      /* current connection number incoming */
@@ -543,6 +543,38 @@ main(int argc, char *argv[])
   add_common_function(F_DCC_SIGNOFF, closeconn);
   load_all_modules(YES);
 
+  /* XXX - these used to be in the modules, need to be done properly */
+  add_common_function(F_SIGNON, _signon);
+  add_common_function(F_SIGNOFF, linkclosed);
+  add_common_function(F_WALLOPS, _wallops);
+  add_common_function(F_ONJOIN, _onjoin);
+  add_common_function(F_RELOAD, _reload_bothunt);
+  add_common_function(F_SERVER_NOTICE, onservnotice);
+  add_common_function(F_ONCTCP, _onctcp);
+  add_common_function(F_ONTRACEUSER, _ontraceuser);
+  add_common_function(F_ONTRACECLASS, _ontraceclass);
+  add_common_function(F_STATSI, on_stats_i);
+  add_common_function(F_STATSE, on_stats_e);
+  add_common_function(F_STATSO, on_stats_o);
+
+#ifdef GLINES
+  mod_add_cmd(&gline_msgtab);
+#endif
+
+  init_bothunt();
+
+#ifdef SERVICES
+  act_sclone = add_action("sclone");
+  set_action_strip(act_sclone, HS_SCLONE);
+  set_action_reason(act_sclone, REASON_SCLONE);
+
+#ifdef SERVICES_DRONES
+  act_drone = add_action("drone");
+  set_action_strip(act_drone, HS_DRONE);
+  set_action_reason(act_drone, REASON_DRONE);
+#endif
+#endif
+
   if (config_entries.conffile)
     load_config_file(config_entries.conffile);
   else
@@ -658,12 +690,9 @@ main(int argc, char *argv[])
   for (temp=signon;temp;temp=temp->next)
     temp->function(0, 0, NULL);
 
+  /* enter the main IO loop */
   while(!quit)
-    {
-      for (temp=upper_continuous;temp;temp=temp->next)
-        temp->function(0, 0, NULL);
-      quit=YES;
-    }
+    read_packet();
 
   for (temp=signoff;temp;temp=temp->next)
     temp->function(0, 0, NULL);

@@ -1,7 +1,7 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
-/* $Id: serverif.h,v 1.19 2002/05/22 02:33:04 db Exp $ */
+/* $Id: serverif.h,v 1.20 2002/05/22 22:03:28 leeh Exp $ */
 
 /*
  * default ping timeout time from server
@@ -63,13 +63,6 @@ void sendto_all_linkedbots(char *);
 
 void oper();
 void msg_mychannel(char *msg,...);
-
-void rdpt(void);
-void linkclosed(int connnum, int argc, char *argv[]);
-void _wallops(int connnum, int argc, char *argv[]);
-void _onjoin(int connnum, int argc, char *argv[]);
-void _signon (int connnum, int argc, char *argv[]);
-void _modinit();
 
 /* types for sendtoalldcc */
 

@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.69 2002/06/21 13:09:39 leeh Exp $
+ * $Id: config.h,v 1.70 2002/06/21 18:38:57 leeh Exp $
  */
 
 /*
@@ -201,10 +201,6 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 /* Maximum pending connects for squid */
 #define MAXSQUID 400
 
-/* maximum number of hosts not to auto kline */
-#define MAXHOSTS 200
-
-#define MAXBANS 50
 /*
  * define this if you want services code at all
  */

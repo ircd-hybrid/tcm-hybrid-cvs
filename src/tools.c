@@ -1,7 +1,7 @@
 /*  tcm-hybrid/src/tools.c by fl_
  *  Copyright (C) 2002 ircd-hybrid development team
  *
- *  $Id: tools.c,v 1.1 2002/06/21 18:36:35 leeh Exp $
+ *  $Id: tools.c,v 1.2 2002/06/21 18:38:59 leeh Exp $
  */
 
 #include <stdlib.h>
@@ -14,6 +14,7 @@ slink_create(void)
   slink_node *m;
 
   m = (slink_node *) xmalloc(sizeof(slink_node));
+  m->data = NULL;
   m->next = NULL;
 
   return m;

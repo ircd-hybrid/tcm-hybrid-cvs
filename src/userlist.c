@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.32 2001/10/31 04:50:03 bill Exp $
+ * $Id: userlist.c,v 1.33 2001/11/10 03:14:38 wcampbel Exp $
  *
  */
 
@@ -58,7 +58,7 @@ int  host_list_index;
 int  ban_list_index;
 
 static void load_a_ban(char *);
-static void load_a_user(char *,int);
+static void load_a_user(char *);
 static void load_e_line(char *);
 
 /*
@@ -472,7 +472,7 @@ void load_userlist()
 	      break;
 
 	    case 'O':
-	      load_a_user(line+2,0);
+	      load_a_user(line+2);
 	      break;
 
 	    default:
@@ -527,12 +527,11 @@ void load_a_ban(char *line)
 /*
  * load_a_user()
  * inputs	- rest of line past the 'O:' or 'o:'
- *		  link_tcm is 1 if its a linked tcm incoming
  * output	- NONE
  * side effects	- userlist is updated
  */
 
-static void load_a_user(char *line,int link_tcm)
+static void load_a_user(char *line)
   {
     char *userathost;
     char *user;

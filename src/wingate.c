@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.13 2001/10/29 03:56:31 db Exp $ */
+/* $Id: wingate.c,v 1.14 2001/11/10 03:14:38 wcampbel Exp $ */
 
 #include <netdb.h>
 #include <unistd.h>
@@ -77,10 +77,10 @@ void _reload_wingate(int connnum, int argc, char *argv[]);
 void _modinit();
 
 #ifdef DETECT_WINGATE
-int wingate_bindsocket(char *nick,char *user,char *host,char *ip);
+int wingate_bindsocket(char *nick,char *user,char *host);
 #endif
 #ifdef DETECT_SOCKS
-int socks_bindsocket(char *nick,char *user,char *host,char *ip);
+int socks_bindsocket(char *nick,char *user,char *host);
 #endif
 
 #ifdef DETECT_WINGATE
@@ -88,7 +88,7 @@ int socks_bindsocket(char *nick,char *user,char *host,char *ip);
 ** wingate_bindsocket()
 **   Sets up a socket and connects to the given host
 */
-int wingate_bindsocket(char *nick,char *user,char *host,char *ip)
+int wingate_bindsocket(char *nick,char *user,char *host)
 {
   int plug;
   int result;
@@ -167,7 +167,7 @@ int wingate_bindsocket(char *nick,char *user,char *host,char *ip)
 ** socks_bindsocket()
 **   Sets up a socket and connects to the given host
 */
-int socks_bindsocket(char *nick,char *user,char *host,char *ip)
+int socks_bindsocket(char *nick,char *user,char *host)
 {
   int plug;
   int result;
@@ -363,10 +363,10 @@ void _user_signon(int connnum, int argc, char *argv[])
   if (wingate_class(argv[4]))
     {
 #ifdef DETECT_WINGATE
-      wingate_bindsocket(argv[0], argv[1], argv[2], argv[3]);
+      wingate_bindsocket(argv[0], argv[1], argv[2]);
 #endif
 #ifdef DETECT_SOCKS
-      socks_bindsocket(argv[0], argv[1], argv[2], argv[3]);
+      socks_bindsocket(argv[0], argv[1], argv[2]);
 #endif
     }
 }

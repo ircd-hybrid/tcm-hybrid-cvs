@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.37 2001/11/08 20:39:51 bill Exp $ */
+/* $Id: bothunt.c,v 1.38 2001/11/10 03:14:38 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -1003,6 +1003,8 @@ void onservnotice(int connnum, int argc, char *argv[])
 		 config_entries.rserver_name : config_entries.server_name);
     log_problem("onservnotice", "Banned from server.  Exiting.");
     gracefuldie(0, __FILE__, __LINE__);
+    /* NOT REACHED */
+    break;
 
   case DRONE:
     if (!strcasecmp(argv[9], config_entries.rserver_name) ||

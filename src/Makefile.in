@@ -44,7 +44,7 @@ build: ${OBJECTS}
 	${CC} ${CFLAGS} ${LDFLAGS} -o ../bin/tcm ${OBJECTS} ${TCMLIBS}
 
 lint:
-	lint -aacgprxhH $(CPPFLAGS) $(SOURCES) >../lint.out
+	lint -aacgprxhH $(CPPFLAGS) $(DEFINES) $(SOURCES) >../lint.out
 
 depend:
 	${MKDEP} ${INCLUDES} ${SOURCES} > .depend

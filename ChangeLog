@@ -1,3 +1,15 @@
+db          2002/06/23 21:23:29 EDT	(20020624_1)
+
+  Modified files:
+    src                  wingate.c 
+  Log:
+  - first pass at re-doing wingate.c to use connection pointers
+  
+  Revision  Changes    Path
+  1.62      +81 -82    tcm-hybrid/src/wingate.c
+
+
+
 db          2002/06/23 20:40:28 EDT	(20020624_0)
 
   Modified files:

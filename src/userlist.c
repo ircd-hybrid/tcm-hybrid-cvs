@@ -37,7 +37,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.24 2001/10/27 15:57:34 db Exp $";
+static char *version="$Id: userlist.c,v 1.25 2001/10/28 17:48:02 wcampbel Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct tcm_file_entry tcmlist[MAXTCMS];
@@ -48,6 +48,8 @@ extern void set_action_reason(char *name, char *reason);
 extern void set_action_method(char *name, char *method);
 extern int get_action(char *name);
 extern int get_action_type(char *name);
+
+/* XXX - This is a kludge for Linux systems */
 extern char *crypt(const char *key, const char *salt);
 
 int  user_list_index;

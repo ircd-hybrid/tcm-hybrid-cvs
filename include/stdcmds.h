@@ -3,16 +3,11 @@
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
-void who(char *nick);
-void whois(char *nick);
-void names(char *chan);
 void join(char *chan,char *key);
 void leave(char *chan);
 void notice(char *nick,...);
 void privmsg(char *nick,...);
-void say(char *chan,...);
 void newnick(char *nick);
-void invite(char *nick,char *chan);
 void print_help(int sock,char *text);
 void print_motd(int sock);
 void list_nicks(int sock,char *nick);
@@ -41,12 +36,5 @@ struct s_testline
   char umask[MAX_USER+MAX_HOST+2]; /* umask for TESTLINE */
   int index;                       /* index in connections[] of who did command */
 };
-
-/* Prevent implicit declarations - Hwy */
-void do_a_kline(char *command_name, int kline_time, char *pattern,
-                char *reason, char *who_did_command);
-void suggest_action(int type, char *nick, char *user, char *host,
-                    int different, int identd);
-void print_help(int sock,char *text);
 
 #endif

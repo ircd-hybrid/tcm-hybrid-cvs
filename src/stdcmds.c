@@ -5,17 +5,11 @@
 *   Contains interface to msg an entire file to a user      *
 * Includes routines:                                        *
 *   void op                                                 *
-*   void kick                                               *
-*   void who                                                *
-*   void whois                                              *
-*   void names                                              *
 *   void join                                               *
 *   void leave                                              *
 *   void notice                                             *
 *   void msg                                                *
-*   void say                                                *
 *   void newnick                                            *
-*   void invite                                             *
 *   void get_userhost                                       *
 *   void privmsg                                            *
 ************************************************************/
@@ -41,7 +35,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.20 2001/10/27 01:53:59 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.21 2001/10/28 17:48:02 wcampbel Exp $";
 
 int doingtrace = NO;
 
@@ -203,13 +197,7 @@ oper()
 void
 op(char *chan,char *nick)
 {
-  toserv("MODE %s +oooo %s\n", chan, nick);
-}
-
-void
-kick(char* chan,char* nick,char *comment)
-{
-  toserv("KICK %s %s :%s\n", chan, nick, comment);
+  toserv("MODE %s +o %s\n", chan, nick);
 }
 
 void
@@ -219,24 +207,6 @@ join(char *chan, char *key)
     toserv("JOIN %s %s\n", chan, key);
   else
     toserv("JOIN %s\n", chan);
-}
-
-void
-who(char *nick)
-{
-  toserv("WHO %s\n", nick);
-}
-
-void 
-whois(char *nick)
-{
-  toserv("WHOIS %s\n", nick);
-}
-
-void 
-names(char *chan)
-{
-  toserv("NAMES %s\n", chan);
 }
 
 void
@@ -278,31 +248,9 @@ privmsg(char *nick,...)
 }
 
 void
-say(char *chan,...)
-{
-  va_list va;
-  char msg[MAX_BUFF];
-  char *format;
-
-  va_start(va,chan);
-
-  format = va_arg(va, char*);
-  vsprintf(msg, format, va );
-  toserv("PRIVMSG %s :%s", chan, msg);
-
-  va_end(va);
-}
-
-void
 newnick(char *nick)
 {
   toserv("NICK %s\n", nick);
-}
-
-void 
-invite(char *nick,char *chan)
-{
-  toserv("INVITE %s %s\n", nick, chan);
 }
 
 /*

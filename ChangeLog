@@ -1,3 +1,30 @@
+db          2002/05/25 02:39:32 EDT	(20020525_5)
+
+  Modified files:
+    include              serverif.h stdcmds.h tcm_io.h 
+    src                  bothunt.c commands.c main.c stdcmds.c 
+                         tcm_io.c 
+  Log:
+  - split out bindsocket into
+    connect_to_server(), connect_to_dcc_ip()
+  - change makeconn() into accept_dcc_connection()
+  - now have connect_to_given_ip_port() which will attempt
+    to connect to the given ip and port passed.
+  
+  more to come....
+  
+  Revision  Changes    Path
+  1.23      +0 -1      tcm-hybrid/include/serverif.h
+  1.20      +0 -2      tcm-hybrid/include/stdcmds.h
+  1.10      +14 -4     tcm-hybrid/include/tcm_io.h
+  1.95      +1 -6      tcm-hybrid/src/bothunt.c
+  1.77      +14 -12    tcm-hybrid/src/commands.c
+  1.61      +4 -125    tcm-hybrid/src/main.c
+  1.67      +0 -31     tcm-hybrid/src/stdcmds.c
+  1.19      +260 -18   tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/24 22:51:47 EDT	(20020525_4)
 
   Modified files:

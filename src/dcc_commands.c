@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.117 2002/05/31 01:54:18 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.118 2002/06/01 04:46:31 db Exp $ */
 
 #include "setup.h"
 
@@ -161,14 +161,14 @@ m_killlist(int connnum, int argc, char *argv[])
   {
     send_to_all(FLAGS_ALL, "*** killlist %s :%s by %s", argv[2],
                 reason, connections[connnum].registered_nick);
-    kill_list_users(connections[connnum].socket, argv[2], reason, YES);
+    kill_or_list_users(connections[connnum].socket, argv[2], YES, YES, reason);
   }
   else
 #endif
   {
     send_to_all(FLAGS_ALL, "*** killlist %s :%s by %s", argv[1],
                 reason, connections[connnum].registered_nick);
-    kill_list_users(connections[connnum].socket, argv[1], reason, NO);
+    kill_or_list_users(connections[connnum].socket, argv[1], NO, YES, reason);
   }
 }
 
@@ -667,16 +667,16 @@ m_list(int connnum, int argc, char *argv[])
     print_to_socket(connections[connnum].socket,
          "Usage: %s [-r] <wildcarded/regex userhost>", argv[0]);
   else if (argc == 2)
-    list_users(connections[connnum].socket, argv[1], NO);
+    kill_or_list_users(connections[connnum].socket, argv[1], NO, NO, NULL);
   else
-    list_users(connections[connnum].socket, argv[2], YES);
+    kill_or_list_users(connections[connnum].socket, argv[2], YES, NO, NULL);
 #else
   if (argc < 2)
     print_to_socket(connections[connnum].socket,
 		    "Usage: %s <wildcarded userhost>",
          argv[0]);
   else
-    list_users(connections[connnum].socket, argv[1], NO);
+    kill_or_list_users(connections[connnum].socket, argv[1], NO, NO, NULL);
 #endif
 }
 
@@ -692,12 +692,12 @@ m_ulist(int connnum, int argc, char *argv[])
   else if (argc == 2)
   {
     snprintf(buf, MAX_BUFF, "%s@*", argv[1]);
-    list_users(connections[connnum].socket, buf, NO);
+    kill_or_list_users(connections[connnum].socket, buf, NO, NO, NULL);
   }
   else
   {
     snprintf(buf, MAX_BUFF, "%s@*", argv[2]);
-    list_users(connections[connnum].socket, buf, YES);
+    kill_or_list_users(connections[connnum].socket, buf, YES, NO, NULL);
   }
 #else
   if (argc < 2)
@@ -707,7 +707,7 @@ m_ulist(int connnum, int argc, char *argv[])
   else
   {
     snprintf(buf, MAX_BUFF, "%s@*", argv[1]);
-    list_users(connections[connnum].socket, argv[1], NO);
+    kill_or_list_users(connections[connnum].socket, argv[1], NO, NO, NULL);
   }
 #endif
 }
@@ -724,12 +724,12 @@ m_hlist(int connnum, int argc, char *argv[])
   else if (argc == 2)
   {
     snprintf(buf, MAX_BUFF, "*@%s", argv[1]);
-    list_users(connections[connnum].socket, buf, NO);
+    kill_or_list_users(connections[connnum].socket, buf, NO, NO, NULL);
   }
   else
   {
     snprintf(buf, MAX_BUFF, "*@%s", argv[2]);
-    list_users(connections[connnum].socket, buf, YES);
+    kill_or_list_users(connections[connnum].socket, buf, YES, NO, NULL);
   }
 #else
   if (argc < 2)
@@ -739,7 +739,7 @@ m_hlist(int connnum, int argc, char *argv[])
   else
   {
     snprintf(buf, MAX_BUFF, "*@%s", argv[1]);
-    list_users(connections[connnum].socket, argv[1], NO);
+    kill_or_list_users(connections[connnum].socket, argv[1], NO, NO, NULL);
   }
 #endif
 }

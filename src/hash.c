@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.20 2002/06/01 04:22:03 db Exp $
+ * $Id: hash.c,v 1.21 2002/06/01 04:46:31 db Exp $
  */
 
 #include <stdio.h>
@@ -1146,7 +1146,7 @@ list_nicks(int sock,char *nick,int regex)
 }
 
 /*
- * list_users()
+ * kill_or_list_users()
  *
  * inputs       - socket to reply on
  *              - uhost to match on
@@ -1157,22 +1157,23 @@ list_nicks(int sock,char *nick,int regex)
  */
 
 void 
-list_users(int sock,char *userhost,int regex)
+kill_or_list_users(int sock, char *userhost, int regex,
+		   int kill_users, const char *reason)
 {
-  struct hash_rec *ipptr;
+  struct hash_rec *ptr;
 #ifdef HAVE_REGEX_H
   regex_t reg;
   regmatch_t m[1];
 #endif
-  char uhost[1024];
+  char uhost[MAX_USERHOST+1];
   int i;
   int numfound = 0;
 
 #ifdef HAVE_REGEX_H
   if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
   {
-    char errbuf[1024];
-    regerror(i, (regex_t *)&reg, errbuf, 1024); 
+    char errbuf[REGEX_SIZE];
+    regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE); 
     print_to_socket(sock, "Error compiling regular expression: %s\n",
 		    errbuf);
     return;
@@ -1187,9 +1188,9 @@ list_users(int sock,char *userhost,int regex)
 
   for (i=0; i < HASHTABLESIZE; ++i)
   {
-    for (ipptr = ip_table[i]; ipptr; ipptr = ipptr->next)
+    for (ptr = domain_table[i]; ptr; ptr = ptr->next)
     {
-      snprintf(uhost, 1024, "%s@%s", ipptr->info->user, ipptr->info->host);
+      snprintf(uhost, MAX_USERHOST, "%s@%s", ptr->info->user, ptr->info->host);
 #ifdef HAVE_REGEX_H
       if ((regex == YES &&
           !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS)) 
@@ -1198,74 +1199,40 @@ list_users(int sock,char *userhost,int regex)
       if (!match(userhost, uhost))
 #endif 
       {
-        if (!numfound++)
-          print_to_socket(sock, "The following clients match %s:\n", userhost);
+	if (kill_users)
+	  {
+	    if (numfound == 0)
+	      {
+		numfound++;
+		tcm_log(L_NORM, "killlisted %s\n", uhost);
+	      }
+	    print_to_server("KILL %s :%s", ptr->info->nick, reason);
+	  }
+	else
+	  {
+	    if (numfound == 0)
+	      print_to_socket(sock,
+			      "The following clients match %s:\n", userhost);
 
-        if (ipptr->info->ip_host[0] > '9' || ipptr->info->ip_host[0] < '0')
-          print_to_socket(sock, "  %s (%s@%s) {%s}\n", ipptr->info->nick,
-               ipptr->info->user, ipptr->info->host, ipptr->info->class);
-        else
-          print_to_socket(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
-			  ipptr->info->user, ipptr->info->host,
-			  ipptr->info->ip_host, ipptr->info->class);
+	    numfound++;
+	    if (ptr->info->ip_host[0] > '9' || ptr->info->ip_host[0] < '0')
+	      print_to_socket(sock, "  %s (%s@%s) {%s}\n", ptr->info->nick,
+               ptr->info->user, ptr->info->host, ptr->info->class);
+	    else
+	      print_to_socket(sock,
+			      "  %s (%s@%s) [%s] {%s}\n", ptr->info->nick,
+			      ptr->info->user, ptr->info->host,
+			      ptr->info->ip_host, ptr->info->class);
+	  }
       }
     }
   }
   if (numfound > 0)
-    print_to_socket(sock, "%d match%sfor %s found\n", numfound,
-		    (numfound > 1 ? "es " : " "), userhost);
+    print_to_socket(sock, "%d matches for %s found\n", numfound, userhost);
   else
     print_to_socket(sock, "No matches for %s found\n", userhost);
 }
 
-void kill_list_users(int sock, char *userhost, char *reason, int regex)
-{
-  struct hash_rec *ptr;
-#ifdef HAVE_REGEX_H
-  regex_t reg;
-  regmatch_t m[1];
-#endif
-  char fulluh[MAX_USERHOST+1];
-  int i, numfound=0;
-
-#ifdef HAVE_REGEX_H
-  if (regex == YES && (i=regcomp((regex_t *)&reg, userhost, 1)))
-    {
-      char errbuf[REGEX_SIZE];
-      regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE);
-      print_to_socket(sock, "Error compiling regular expression: %s\n", errbuf);
-      return;
-    }
-#endif
-
-  for (i=0; i<HASHTABLESIZE; ++i)
-    {
-      for (ptr = domain_table[i]; ptr; ptr=ptr->next)
-	{
-	  snprintf(fulluh, sizeof(fulluh), "%s@%s",
-		   ptr->info->user, ptr->info->host);
-#ifdef HAVE_REGEX_H
-	  if ((regex == YES &&
-	       !regexec((regex_t *)&reg, fulluh, 1, m, REGEXEC_FLAGS))
-	      || (regex == NO && !match(userhost, fulluh)))
-#else
-	    if (!match(userhost, fulluh))
-#endif
-	      {
-		if (numfound == 0)
-		  {
-		    numfound++;
-		    tcm_log(L_NORM, "killlisted %s\n", fulluh);
-		  }
-		print_to_server("KILL %s :%s", ptr->info->nick, reason);
-	      }
-	}
-    }
-  if (numfound > 0)
-    print_to_socket(sock, "%d matches for %s found\n", userhost);
-  else
-    print_to_socket(sock, "No matches for %s found\n", userhost);
-}
 
 /*
  * report_mem()

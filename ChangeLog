@@ -1,3 +1,19 @@
+db          2002/06/01 00:46:33 EDT	(20020601_8)
+
+  Modified files:
+    include              hash.h 
+    src                  commands.c hash.c 
+  Log:
+  - made .list work again (typo, had ip_table not domain_table)n
+  - combined kill_list and list_users into kill_or_list_users()
+  
+  Revision  Changes    Path
+  1.16      +3 -3      tcm-hybrid/include/hash.h
+  1.118     +11 -11    tcm-hybrid/src/commands.c
+  1.21      +35 -68    tcm-hybrid/src/hash.c
+
+
+
 db          2002/06/01 00:22:05 EDT	(20020601_7)
 
   Modified files:

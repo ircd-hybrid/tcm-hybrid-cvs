@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.144 2002/09/11 17:55:39 db Exp $ */
+/* $Id: dcc_commands.c,v 1.145 2002/09/12 22:49:47 bill Exp $ */
 
 #include "setup.h"
 
@@ -100,6 +100,9 @@ static void m_list(struct connection *connection_p, int argc, char *argv[]);
 static void m_gecos(struct connection *connection_p, int argc, char *argv[]);
 static void m_ulist(struct connection *connection_p, int argc, char *argv[]);
 static void m_hlist(struct connection *connection_p, int argc, char *argv[]);
+#ifdef DEBUGMODE
+static void m_sysnotice(struct connection *connection_p, int argc, char *argv[]);
+#endif
 
 void
 m_class(struct connection *connection_p, int argc, char *argv[])
@@ -781,6 +784,35 @@ m_hlist(struct connection *connection_p, int argc, char *argv[])
 #endif
 }
 
+#ifdef DEBUGMODE
+void
+m_sysnotice(struct connection *connection_p, int argc, char *argv[])
+{
+  char buf[MAX_BUFF];
+  char *aargv[5] = { tcm_status.my_server, "NOTICE", tcm_status.my_nick, buf, NULL };
+  int a;
+
+  if (argc <= 1)
+  {
+    send_to_connection(connection_p, "Usage: %s <system notice>",
+                       argv[0]);
+    return;
+  }
+
+  buf[0] = '\0';
+
+  for (a=1; a<argc; ++a)
+  {
+    strlcat(buf, argv[a], sizeof(buf)-strlen(buf));
+    strlcat(buf, " ", sizeof(buf)-strlen(buf));
+  }
+  buf[strlen(buf)-1] = '\0';
+  
+  send_to_connection(connection_p, "Simulating \"%s\"", buf);
+  on_server_notice(NULL, 4, aargv);
+}
+#endif
+
 /*
  * register_oper
  *
@@ -973,6 +1005,11 @@ struct dcc_command ulist_msgtab = {
 struct dcc_command hlist_msgtab = {
  "hlist", NULL, {m_unregistered, m_hlist, m_hlist}
 };
+#ifdef DEBUGMODE
+struct dcc_command sysnotice_msgtab = {
+ "sysnotice", NULL, {m_unregistered, m_not_admin, m_sysnotice}
+};
+#endif
 
 void 
 init_commands(void)
@@ -1027,6 +1064,9 @@ init_commands(void)
   add_dcc_handler(&gecos_msgtab);
   add_dcc_handler(&ulist_msgtab);
   add_dcc_handler(&hlist_msgtab);
+#ifdef DEBUGMODE
+  add_dcc_handler(&sysnotice_msgtab);
+#endif
   add_dcc_handler(&uptime_msgtab);
 }
 

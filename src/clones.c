@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.22 2002/06/28 00:53:48 db Exp $
+ * $Id: clones.c,v 1.23 2002/09/12 22:49:47 bill Exp $
  */
 
 #include <assert.h>
@@ -196,6 +196,7 @@ check_reconnect_clones(char *host)
   if (host == NULL)  /* I don't know how this could happen.  ::shrug:: */
     return;
 
+  /* first, search the table for previous entries from this host */
   for (i=0; i<RECONNECT_CLONE_TABLE_SIZE ; ++i)
   {
     if (!strcasecmp(reconnect_clone[i].host, host))
@@ -214,6 +215,7 @@ check_reconnect_clones(char *host)
     }
   }
 
+  /* new host? second, eliminate any expired entries */
   for (i=0; i < RECONNECT_CLONE_TABLE_SIZE; ++i)
   {
     if ((reconnect_clone[i].host[0]) &&
@@ -225,6 +227,7 @@ check_reconnect_clones(char *host)
     }
   }
 
+  /* finally, find an empty record and add the host. */
   for (i=0 ; i < RECONNECT_CLONE_TABLE_SIZE ; ++i)
   {
     if (!reconnect_clone[i].host[0])
@@ -233,9 +236,16 @@ check_reconnect_clones(char *host)
       reconnect_clone[i].host[MAX_HOST] = 0;
       reconnect_clone[i].first = current_time;
       reconnect_clone[i].count = 1;
-      break;
     }
+    return;
   }
+
+  /*
+   * if we get here, it means we failed to add the host to the table.
+   * the only way this can happen is if the last for() failed, which
+   * means the table is full.  let an admin know.
+   */
+  send_to_all(NULL, FLAGS_ADMIN, "*** Error adding *@%s to reconnect clone table.  The table is full.", host);
 }
 
 /*

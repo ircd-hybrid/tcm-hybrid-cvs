@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.38 2002/08/14 16:59:36 bill Exp $
+ * $Id: actions.c,v 1.39 2002/09/12 22:49:47 bill Exp $
  */
 
 #include "setup.h"
@@ -317,25 +317,40 @@ list_one_action(struct connection *connection_p, int actionid)
  */
 
 void
-handle_action(int actionid, char *nick, char *username,
-	      char *host, char *ip, char * addcmt)
+handle_action(int actionid, char *g_nick, char *g_username,
+	      char *g_host, char *g_ip, char * addcmt)
 {
   char comment[MAX_BUFF];
+  char l_nick[MAX_NICK], l_username[MAX_USER], l_host[MAX_HOST], l_ip[MAX_HOST];
+  char *nick, *username, *host, *ip;
   char *userhost;
   char *p;
   struct user_entry *userptr;
 
-  if ((username != NULL) && (host != NULL) && (nick != NULL))
+
+  /*
+   * it is nessecary to make copies of this data because of the parsing that follows.
+   * sometimes, some of this data must be manipulated to form a ban mask, and if we
+   * simply modified the original memory, it may cause problems removing the user
+   * from the hash tables when the client disconnects.  -bill
+   */
+  strlcpy(l_nick, g_nick, MAX_NICK); nick = l_nick;
+  strlcpy(l_username, g_username, MAX_USER); username = l_username;
+  strlcpy(l_host, g_host, MAX_HOST); host = l_host;
+  strlcpy(l_ip, g_ip, MAX_HOST); ip = l_ip;
+
+  if ((g_ip == NULL || g_host == NULL || g_username == NULL) && (g_nick != NULL))
+  {
+    if ((userptr = find_nick_or_host(nick, FIND_NICK)) != NULL)
     {
-      if ((userptr = find_nick_or_host(nick, FIND_NICK)) != NULL)
-	{
-	  username = userptr->username;
-	  host = userptr->host;
-	  ip = userptr->ip_host;
-	  if (!strcmp(ip, "255.255.255.255"))
-	    ip = 0;
-	}
+      strlcpy(username, userptr->username, MAX_USER);
+      strlcpy(host, userptr->host, MAX_HOST);
+      strlcpy(ip, userptr->ip_host, MAX_HOST);
+
+      if (!strcmp(ip, "255.255.255.255"))
+        ip = NULL;
     }
+  }
 
   /* Sane input? */
   if ((actionid < 0) || (actionid >= MAX_ACTIONS) ||
@@ -373,7 +388,6 @@ handle_action(int actionid, char *nick, char *username,
     }
 
   userhost = get_method_userhost(actionid, nick, username, host);
-
   strcpy(comment, "No actions taken");
 
   if (ok_host((username && username[0]) ? username : "*", host, actionid) == 0)

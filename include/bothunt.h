@@ -1,7 +1,7 @@
 #ifndef __BOTHNUT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.57 2002/08/14 16:59:34 bill Exp $ */
+/* $Id: bothunt.h,v 1.58 2002/09/12 22:49:46 bill Exp $ */
 
 
 struct source_client;
@@ -27,7 +27,6 @@ void _config(int, int, char *argv[]);
 #define MSG_NICK_CHANGE		"Nick change:"
 #define MSG_IDLE_TIME		"Idle time limit exceeded for "
 #define MSG_LINKS		"LINKS "
-#define MSG_KLINE		"KLINE "
 #define MSG_STATS		"STATS "
 #define MSG_GOT_SIGNAL		"Got signal"
 #define MSG_NICK_COLLISION	"Nick collision on"
@@ -44,6 +43,7 @@ void _config(int, int, char *argv[]);
 #define MSG_USER		"User"
 #define MSG_I_LINE_MASK		"I-line mask"
 #define MSG_I_LINE_FULL		"I-line is full"
+#define MSG_TOOMANY		"Too many on IP for"
 #define MSG_BANNED		"*** Banned: "
 #define MSG_D_LINED		"*** You have been D-lined"
 #define MSG_DRONE_FLOODER	"Possible Drone Flooder"
@@ -76,7 +76,8 @@ void _config(int, int, char *argv[]);
 #define FLOODER		21
 #define SPAMBOT		22
 #define ILINEFULL	23
-#define BANNED		24
+#define TOOMANY		24
+#define BANNED		25
 #define DRONE		26
 #define XLINEREJ	27
 #define INVALIDUH	28

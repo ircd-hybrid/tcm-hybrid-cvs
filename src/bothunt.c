@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.200 2002/08/26 16:26:38 bill Exp $
+ * $Id: bothunt.c,v 1.201 2002/09/12 22:49:47 bill Exp $
  */
 
 #include <stdio.h>
@@ -109,7 +109,6 @@ struct msg_to_action msgs_to_mon[] = {
   {MSG_NICK_CHANGE, sizeof(MSG_NICK_CHANGE)-1, NICKCHANGE},
   {MSG_IDLE_TIME, sizeof(MSG_IDLE_TIME)-1, IGNORE},
   {MSG_LINKS, sizeof(MSG_LINKS)-1, LINK_LOOK},
-  {MSG_KLINE, sizeof(MSG_KLINE)-1, IGNORE},  
   {MSG_STATS, sizeof(MSG_STATS)-1, STATS},
   {MSG_GOT_SIGNAL, sizeof(MSG_GOT_SIGNAL)-1, SIGNAL},
   {MSG_LINK_WITH, sizeof(MSG_LINK_WITH)-1, LINKWITH},
@@ -125,6 +124,7 @@ struct msg_to_action msgs_to_mon[] = {
   {MSG_FLOODER, sizeof(MSG_FLOODER)-1, FLOODER},
   {MSG_USER, sizeof(MSG_USER)-1, SPAMBOT},
   {MSG_I_LINE_FULL, sizeof(MSG_I_LINE_FULL)-1, ILINEFULL},
+  {MSG_TOOMANY, sizeof(MSG_TOOMANY)-1, TOOMANY},
   {MSG_BANNED, sizeof(MSG_BANNED)-1, BANNED},
   {MSG_D_LINED, sizeof(MSG_D_LINED)-1, BANNED},
   {MSG_DRONE_FLOODER, sizeof(MSG_DRONE_FLOODER)-1, DRONE},
@@ -257,8 +257,11 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   char *p, *message;
   char *q = NULL;
 
+#ifndef DEBUGMODE
+  /* kludge to allow for .sysnotice */
   if(strcasecmp(source_p->name, tcm_status.my_server) != 0)
     return;
+#endif
 
   p = message = argv[argc-1];
 
@@ -371,7 +374,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *q = '\0';
     send_to_all(NULL, FLAGS_VIEW_KLINES,
-                "GLINE for %s@%s by %s [%s]: %s", user, host, nick, target, p);
+                "GLINE for %s@%s requested by %s [%s]: %s", user, host, nick, target, p);
     return;
   }
   /* billy-jon!bill@ummm.E on irc.intranaut.com has triggered gline for [test@this.is.a.test] [test1 test2] */
@@ -544,6 +547,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 #ifdef VIRTUAL
     strlcpy(userinfo.ip_class_c, q, MAX_IP);
 #endif
+
     remove_user_host(&userinfo);
     break;
 
@@ -665,6 +669,12 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   case ILINEFULL:
     nick = p+19;
     connect_flood_notice(nick, "I line full");
+    break;
+
+  /* Too many on IP for fallacy[unknown@24.123.128.153] (24.123.128.153). */
+  case TOOMANY:
+    nick = p+19;
+    connect_flood_notice(nick, "Too many on IP");
     break;
 
   /* *** You have been D-lined */
@@ -794,6 +804,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     ++q;
 
     send_to_all(NULL, FLAGS_VIEW_KLINES, "*** Active for %s", q);
+
     break;
 
   default:
@@ -1230,10 +1241,6 @@ stats_notice(char *snotice)
   char *fulluh;
   char *p;
   int stat;
-
-#ifdef DEBUGMODE
-  printf("stats_notice(\"%s\")\n", snotice);
-#endif
 
   stat = *(snotice + 6);
 

@@ -1,7 +1,7 @@
 /*  tcm-hybrid/src/tools.c by fl_
  *  Copyright (C) 2002 ircd-hybrid development team
  *
- *  $Id: tools.c,v 1.4 2002/06/24 14:56:10 leeh Exp $
+ *  $Id: tools.c,v 1.5 2002/06/24 15:44:56 leeh Exp $
  */
 
 #include <stdlib.h>
@@ -19,6 +19,13 @@ dlink_create(void)
   m->prev = NULL;
 
   return m;
+}
+
+/* XXX - macro? */
+void
+dlink_free(dlink_node *m)
+{
+  xfree(m);
 }
 
 void
@@ -52,7 +59,7 @@ dlink_add_tail(void *data, dlink_node *m, dlink_list *list)
 }
 
 void
-dlink_delete(void *data, dlink_node *m, dlink_list *list)
+dlink_delete(dlink_node *m, dlink_list *list)
 {
   /* item is at head */
   if(m->prev == NULL)

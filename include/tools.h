@@ -1,4 +1,4 @@
-/* $Id: tools.h,v 1.3 2002/06/24 14:56:06 leeh Exp $ */
+/* $Id: tools.h,v 1.4 2002/06/24 15:44:53 leeh Exp $ */
 #ifndef __TOOLS_H
 #define __TOOLS_H
 
@@ -19,9 +19,11 @@ struct _dlink_list
 };
 
 dlink_node *dlink_create(void);
+void dlink_free(dlink_node *m);
+
 void dlink_add(void *data, dlink_node *m, dlink_list *list);
 void dlink_add_tail(void *data, dlink_node *m, dlink_list *list);
-void dlink_delete(void *data, dlink_node *m, dlink_list *list);
+void dlink_delete(dlink_node *m, dlink_list *list);
 dlink_node *dlink_find(void *data, dlink_list *list);
 
 #endif

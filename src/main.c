@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.121 2002/06/24 00:40:21 db Exp $ */
+/* $Id: main.c,v 1.122 2002/06/24 15:44:56 leeh Exp $ */
 
 #include "setup.h"
 
@@ -179,7 +179,6 @@ main(int argc, char *argv[])
   exempt_summary();
 #endif
 
-  init_connections();
   srandom(time(NULL));	/* -zaph */
   signal(SIGUSR1,init_debug);
 #if 0

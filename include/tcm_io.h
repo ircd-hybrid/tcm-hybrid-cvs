@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.42 2002/06/24 00:40:15 db Exp $
+ * $Id: tcm_io.h,v 1.43 2002/06/24 15:44:53 leeh Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -48,7 +48,6 @@ struct connection {
 struct connection *find_free_connection(void);
 
 void server_link_closed(struct connection *uplink);
-void init_connections(void);
 void close_connection(struct connection *connection_p);
 
 void notice(const char *nick, const char *format, ...);

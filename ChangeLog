@@ -1,3 +1,16 @@
+bill        2002/02/24 02:45:05 EST	(20020224_0)
+
+  Modified files:
+    src                  userlist.c 
+  Log:
+  Submitted by: zartik <code@psu.edu>
+  - extra %s in conf saving, found and fixed by zartik <code@psu.edu>
+  
+  Revision  Changes    Path
+  1.42      +2 -4      tcm-hybrid/src/userlist.c
+
+
+
 einride     2001/12/17 17:08:26 EST	(20011217_0)
 
   Modified files:

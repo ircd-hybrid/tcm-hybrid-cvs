@@ -1,3 +1,20 @@
+bill        2002/04/04 17:17:49 EST	(20020404_0)
+
+  Modified files:
+    .                    Makefile.in 
+    modules              bothunt.c serverif.c 
+  Log:
+  - replaced 8 spaces with \t in Makefile.in
+  - typo prevented spambots from being klined
+  - finished new argv[] processing (redid the rest of the server msg processing)
+  
+  Revision  Changes    Path
+  1.19      +1 -1      tcm-hybrid/Makefile.in
+  1.50      +1 -1      tcm-hybrid/modules/bothunt.c
+  1.46      +93 -115   tcm-hybrid/modules/serverif.c
+
+
+
 bill        2002/04/02 19:24:13 EST	(20020403_0)
 
   Modified files:

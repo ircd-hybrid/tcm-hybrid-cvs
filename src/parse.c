@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.50 2002/06/02 23:13:19 db Exp $
+ * $Id: parse.c,v 1.51 2002/06/02 23:30:10 db Exp $
  */
 
 #include <stdio.h>
@@ -370,7 +370,7 @@ process_server(int conn_num, char *source, char *function, char *param)
   {
     case RPL_STATSYLINE:
       if (!strcasecmp(argv[4], tcm_status.my_class))
-        tcm_status.pingtime = atoi(argv[5]) * 2 + 15;
+        tcm_status.ping_time = atoi(argv[5]) * 2 + 15;
       break;
 
     case ERR_NICKNAMEINUSE:

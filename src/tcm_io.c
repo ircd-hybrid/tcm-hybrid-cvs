@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.77 2002/06/01 13:04:25 wcampbel Exp $
+ * $Id: tcm_io.c,v 1.78 2002/06/02 23:30:10 db Exp $
  */
 
 #include <stdio.h>
@@ -336,7 +336,7 @@ reconnect(void)
 {
   eventDelete((EVH *)reconnect, NULL);
 
-  if (connect_to_server(tcm_status.serverhost) == INVALID)
+  if (connect_to_server(tcm_status.server_host) == INVALID)
     {
       /* This one is fatal folks */
       tcm_log(L_ERR, "server_link_closed() invalid socket quitting");
@@ -600,7 +600,7 @@ connect_to_server(const char *hostport)
     }
 
   server_id = i;
-  /* Parse serverhost to look for port number */
+  /* Parse server host to look for port number */
   strcpy(server, hostport);
 
   if ((p = strchr(server,':')) != NULL)
@@ -649,8 +649,8 @@ signon_to_server (int unused)
   connections[server_id].curr_state = S_PINGSENT;
   connections[server_id].nbuf = 0;
 
-  if (pingtime)
-    connections[server_id].time_out = pingtime;
+  if (tcm_status.ping_time)
+    connections[server_id].time_out = tcm_status.ping_time;
   else
     connections[server_id].time_out = SERVER_TIME_OUT;
 

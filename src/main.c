@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.106 2002/06/02 23:13:18 db Exp $ */
+/* $Id: main.c,v 1.107 2002/06/02 23:30:10 db Exp $ */
 
 #include "setup.h"
 
@@ -175,9 +175,8 @@ main(int argc, char *argv[])
   exemption_summary();
 #endif
 
-  snprintf(tcm_status.serverhost,
-	   MAX_HOST,
-	   "%s:%d", config_entries.server_name, 
+  snprintf(tcm_status.server_host,
+	   MAX_HOST, "%s:%d", config_entries.server_name, 
            atoi(config_entries.server_port));
 
   init_connections();
@@ -252,7 +251,7 @@ main(int argc, char *argv[])
 	 }
     }
 
-  if(connect_to_server(tcm_status.serverhost) < 0)
+  if(connect_to_server(tcm_status.server_host) < 0)
     {
       tcm_log(L_ERR, "Could not connect to server at startup\n");
       exit(1);
@@ -275,7 +274,7 @@ main(int argc, char *argv[])
   tcm_status.my_class[0] = '\0';
   tcm_status.my_nick[0] = '\0';
   tcm_status.am_opered = 0;
-  tcm_status.pingtime = 0;
+  tcm_status.ping_time = 0;
   tcm_status.doing_trace = 0;
 
   reload_bothunt();

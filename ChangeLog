@@ -1,3 +1,26 @@
+leeh        2002/05/26 09:09:25 EDT	(20020526_17)
+
+  Modified files:
+    include              bothunt.h commands.h config.h tcm.h 
+    src                  bothunt.c commands.c userlist.c wingate.c 
+  Log:
+  - fixed the expand_args bugs where we were jumping too far ahead in
+    a buffer, causing us to pull stuff from random memory
+  - fixed some compile warnings
+  - started on getting rid of all these damned sizeof()'s everywhere.
+  
+  Revision  Changes    Path
+  1.32      +8 -4      tcm-hybrid/include/bothunt.h
+  1.16      +1 -1      tcm-hybrid/include/commands.h
+  1.57      +12 -25    tcm-hybrid/include/config.h
+  1.41      +2 -0      tcm-hybrid/include/tcm.h
+  1.108     +22 -23    tcm-hybrid/src/bothunt.c
+  1.91      +34 -31    tcm-hybrid/src/commands.c
+  1.76      +2 -0      tcm-hybrid/src/userlist.c
+  1.40      +8 -0      tcm-hybrid/src/wingate.c
+
+
+
 db          2002/05/26 03:30:55 EDT	(20020526_16)
 
   Modified files:

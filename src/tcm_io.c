@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.40 2002/05/26 06:57:31 db Exp $
+ * $Id: tcm_io.c,v 1.41 2002/05/26 07:13:11 db Exp $
  */
 
 #include <stdio.h>
@@ -846,6 +846,7 @@ close_connection(int connnum)
   connections[connnum].io_read_function = NULL; /* blow up real good */
   connections[connnum].io_write_function = NULL; /* blow up real good */
   connections[connnum].io_close_function = NULL; /* blow up real good */
+  connections[connnum].user_state = 0;
 
   if ((connnum + 1) == maxconns)
     {
@@ -859,6 +860,7 @@ close_connection(int connnum)
   connections[connnum].user[0] = '\0';
   connections[connnum].host[0] = '\0';
   connections[connnum].nick[0] = '\0';
+  connections[connnum].ip[0] = '\0';
   connections[connnum].registered_nick[0] = '\0';
 }
 

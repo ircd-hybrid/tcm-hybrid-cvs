@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.37 2002/05/26 06:57:31 db Exp $ */
+/* $Id: wingate.c,v 1.38 2002/05/26 07:13:11 db Exp $ */
 
 
 #include <netdb.h>
@@ -49,18 +49,21 @@
 int act_wingate;
 static void report_open_wingate(int i);
 static void wingate_start_test(struct plus_c_info *info);
+static void read_wingate(int i);
 #endif
 
 #ifdef DETECT_SOCKS
 int act_socks;
 static void report_open_socks(int i);
 static void socks_start_test(struct plus_c_info *info_p, int socksversion);
+static void read_socks(int i);
 #endif
 
 #ifdef DETECT_SQUID
 int act_squid;
 static void report_open_squid(int i);
 static void squid_start_test(struct plus_c_info *info_p, int port);
+static void read_squid(int i);
 #endif
 
 
@@ -203,11 +206,19 @@ squid_start_test(struct plus_c_info *info_p, int port)
   strncpy(connections[found_slot].user, info_p->user, MAX_USER-1);
   strncpy(connections[found_slot].host, info_p->host, MAX_HOST-1);
   strncpy(connections[found_slot].nick, info_p->nick, MAX_NICK-1);
+  strncpy(connections[found_slot].ip, info_p->ip, MAX_IP-1);
 
-  connections[found_slot].io_read_function = NULL;
+  connections[found_slot].io_read_function = read_squid;
   connections[found_slot].io_write_function = NULL;
-  connections[found_slot].socket = connect_to_given_ip_port(&socketname, port);
-  return;
+  if (inet_aton(info_p->ip, &socketname.sin_addr)) 
+    {
+      connections[found_slot].socket =
+	connect_to_given_ip_port(&socketname, port);
+    }
+  else
+    {
+      close_connection(found_slot);
+    }
 }
 #endif
 
@@ -246,6 +257,36 @@ read_wingate(int i)
 
   close_connection(i);
   connections[i].user_state = 0;
+}
+#endif
+
+#ifdef DETECT_SQUID
+static void
+read_squid(int i)
+{
+  struct stat buf;
+
+  if (connections[i].user_state != SQUID_READING)
+    {
+      if (fstat(connections[i].socket, &buf) < 0)
+	{
+	  close_connection(i);
+	}
+      else
+	{
+	  print_to_socket(connections[i].socket,
+			  "CONNECT %s:%d HTTP/1.0\r\n\r\n",
+			  SOCKS_CHECKIP, SOCKS_CHECKPORT);
+	  connections[i].user_state = SQUID_READING;
+	}
+      return;
+    }
+
+  if (strstr(connections[i].buffer, SQUID_STRING) != NULL)
+    {
+      report_open_squid(i);
+    }
+  close_connection(i);
 }
 #endif
 
@@ -352,39 +393,6 @@ default:
 break;
 }
 #endif
-#ifdef DETECT_SQUID
-  {
-      struct stat buf;
-
-      if (fstat(connections[i].socket, &buf) < 0)
-      {
-        close(connections[i].socket);
-        connections[i].state = 0;
-        connections[i].socket = INVALID;
-      }
-      else
-      {
-        print_to_socket(connections[i].socket,
-			"CONNECT %s:%d HTTP/1.0\r\n\r\n",
-                        SOCKS_CHECKIP, SOCKS_CHECKPORT);
-        connections[i].state = SQUID_READING;
-        connections[i].connect_time = current_time;
-      }
-    }
-
-        if (strstr(buffer, SQUID_STRING) != NULL)
-        {
-          report_open_squid(i);
-          continue;
-        }
-      else
-      {
-        close(connections[i].socket);
-        connections[i].state = 0;
-        connections[i].socket = INVALID;
-}
-}
-#endif
 }
 
 #endif
@@ -443,31 +451,31 @@ static void report_open_wingate(int i)
 }
 #endif
 
-#if notyet
-#ifdef DETECT_SOCKS
-static
-void report_open_socks(int i)
-{
-  if (config_entries.debug && outfile)
-    fprintf(outfile, "DEBUG: Found open socks proxy at %s\n", socks[i].host);
-
-  handle_action(act_socks, 0, connections[i].nick, connections[i].user,
-		connections[i].host, connections[i].ip, 0);
-  log("Open socks proxy %s\n",socks[i].host);
-}
-#endif
-
 #ifdef DETECT_SQUID
 static
 void report_open_squid(int i)
 {
   if (config_entries.debug && outfile)
-    fprintf(outfile, "DEBUG: Found open squid proxy at %s\n", squid[i].host);
+    fprintf(outfile, "DEBUG: Found open squid proxy at %s\n",
+	    connections[i].host);
 
   handle_action(act_squid, 0, connections[i].nick, connections[i].user,
 		connections[i].host, connections[i].ip, 0);
-  log("Open squid proxy %s\n", squid[i].host);
+  log("Open squid proxy %s\n", connections[i].host);
+}
 #endif
+
+#ifdef DETECT_SOCKS
+static
+void report_open_socks(int i)
+{
+  if (config_entries.debug && outfile)
+    fprintf(outfile, "DEBUG: Found open socks proxy at %s\n", 
+	    connections[i].host);
+
+  handle_action(act_socks, 0, connections[i].nick, connections[i].user,
+		connections[i].host, connections[i].ip, 0);
+  log("Open socks proxy %s\n", connections[i].host);
 }
 #endif
 

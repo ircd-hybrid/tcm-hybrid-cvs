@@ -1,3 +1,16 @@
+leeh        2002/06/05 11:01:33 EDT	(20020605_10)
+
+  Modified files:
+    src                  clones.c parse.c 
+  Log:
+  - couple of unused variables
+  
+  Revision  Changes    Path
+  1.16      +3 -4      tcm-hybrid/src/clones.c
+  1.62      +0 -11     tcm-hybrid/src/parse.c
+
+
+
 db          2002/06/05 10:55:22 EDT	(20020605_9)
 
   Modified files:

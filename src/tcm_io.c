@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.66 2002/05/28 18:16:14 db Exp $
+ * $Id: tcm_io.c,v 1.67 2002/05/28 18:18:28 db Exp $
  */
 
 #include <stdio.h>
@@ -1113,6 +1113,8 @@ void
 init_connections(void)
 {
   int i;
+
+  maxconns = 0;
 
   for (i=0; i < MAXDCCCONNS+1; i++)
     {

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.68 2002/05/28 18:47:16 leeh Exp $
+ * $Id: tcm_io.c,v 1.69 2002/05/28 21:10:27 bill Exp $
  */
 
 #include <stdio.h>
@@ -571,9 +571,6 @@ va_print_to_socket(int sock, const char *format, va_list va)
   if (msgbuf[strlen(msgbuf)-1] != '\n')
     strcat(msgbuf, "\n");
   send(sock, msgbuf, strlen(msgbuf), 0);
-#ifdef DEBUGMODE
-  printf("-> %s", msgbuf);
-#endif
 }
 
 /*
@@ -748,10 +745,10 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
       return (0);
     }
   connections[i].state = S_CONNECTING;
-  connections[i].io_read_function = finish_dcc_chat;
-  connections[i].io_write_function = NULL;
+  connections[i].io_write_function = finish_dcc_chat;
+  connections[i].io_read_function = NULL;
   connections[i].io_close_function = close_connection;
-  FD_SET(connections[i].socket, &readfds);
+  FD_SET(connections[i].socket, &writefds);
 
   return (1);
 }
@@ -786,8 +783,6 @@ finish_accept_dcc_chat(int i)
 
   connections[i].last_message_time = current_time;
   connections[i].nbuf = 0;
-
-  finish_dcc_chat(i);
 }
 
 /*
@@ -801,8 +796,6 @@ finish_accept_dcc_chat(int i)
 static void
 finish_dcc_chat(int i)
 {
-  print_motd(connections[i].socket);
-
   report(SEND_ALL,
          CHANNEL_REPORT_ROUTINE,
          "Oper %s (%s@%s) has connected\n",
@@ -810,13 +803,16 @@ finish_dcc_chat(int i)
          connections[i].user,
          connections[i].host);
 
-  print_to_socket(connections[i].socket,
-		  "Connected.  Send '.help' for commands.");
   connections[i].io_read_function = parse_client;
   connections[i].state = S_CLIENT;
   connections[i].io_write_function = NULL;
   connections[i].io_close_function = close_dcc_connection;
   connections[i].time_out = 0;
+  FD_SET(connections[i].socket, &readfds);
+
+  print_motd(connections[i].socket);
+  print_to_socket(connections[i].socket,
+                  "Connected.  Send '.help' for commands.");
 }
 
 /*
@@ -830,10 +826,12 @@ finish_dcc_chat(int i)
 static void
 close_dcc_connection(int connnum)
 {
-  send_to_all(SEND_ALL,
-	       "Oper %s (%s@%s) has disconnected",
-               connections[connnum].nick, connections[connnum].user,
-               connections[connnum].host);
+  report(SEND_ALL,
+         CHANNEL_REPORT_ROUTINE,
+         "Oper %s (%s@%s) has connected\n",
+         connections[i].nick,
+         connections[i].user,
+         connections[i].host);
 
   close_connection(connnum);
 }

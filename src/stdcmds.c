@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.101 2002/11/27 02:50:59 bill Exp $ */
+/* $Id: stdcmds.c,v 1.102 2002/12/29 09:41:20 bill Exp $ */
 
 #include "setup.h"
 
@@ -47,9 +47,14 @@
 void
 oper()
 {
-  send_to_server("OPER %s %s",
-          config_entries.oper_nick_config,
-          config_entries.oper_pass_config);
+#ifdef HAVE_LIBCRYPTO
+  if (config_entries.oper_keyfile[0] != '\0')
+    send_to_server("CHALLENGE %s", config_entries.oper_nick_config);
+  else
+#endif
+    send_to_server("OPER %s %s",
+                   config_entries.oper_nick_config,
+                   config_entries.oper_pass_config);
 }
 
 void

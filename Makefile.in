@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.24 2002/05/24 18:50:46 leeh Exp $
+# $Id: Makefile.in,v 1.25 2002/12/29 09:41:13 bill Exp $
 CC = @CC@
 RM = @RM@
 MKDEP = ${CC} -MM
@@ -109,7 +109,7 @@ distclean:
  		cd $$i;\
 		${MAKE} distclean; cd ..;\
 	done
-	${RM} -f Makefile config.status config.cache config.log include/setup.h etc/tcm.pid
+	${RM} -f Makefile configure.lineno config.status config.cache config.log include/setup.h etc/tcm.pid
 	${RM} -f DEBUG bin/tcm bin/mkpasswd etc/*.pref logs/*log logs/clone_log_* logs/tcm.log*
 	${RM} -f ktrace.out tcm.core core
 

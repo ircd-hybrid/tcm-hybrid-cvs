@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.145 2002/09/11 17:55:39 db Exp $
+ * $Id: userlist.c,v 1.146 2002/12/29 09:41:20 bill Exp $
  */
 
 #include <errno.h>
@@ -527,8 +527,23 @@ load_config_file(char *file_name)
       break;
 
     case 'o':case 'O':
-      strlcpy(config_entries.oper_nick_config, argv[1], MAX_NICK);
-      strlcpy(config_entries.oper_pass_config, argv[2], MAX_CONFIG);
+      strlcpy(config_entries.oper_nick_config, argv[1],
+              sizeof(config_entries.oper_nick_config));
+#ifdef HAVE_LIBCRYPTO
+      memset(&config_entries.oper_keyfile, 0,
+             sizeof(config_entries.oper_keyfile));
+
+      if (argc >= 4)
+      {
+        strlcpy(config_entries.oper_keyfile, argv[2],
+                sizeof(config_entries.oper_keyfile));
+        strlcpy(config_entries.oper_pass_config, argv[3],
+                sizeof(config_entries.oper_pass_config));
+      }
+      else
+#endif
+        strlcpy(config_entries.oper_pass_config, argv[2],
+                sizeof(config_entries.oper_pass_config));
       break;
 
     case 'u':case 'U':
@@ -607,8 +622,17 @@ load_config_file(char *file_name)
 
   if(config_entries.oper_pass_config[0] == '\0')
   {
-    fprintf(stderr,"I need an operpass (O:) in %s\n",CONFIG_FILE);
+#ifdef HAVE_LIBCRYPTO
+    /* could be a pwless keyfile */
+    if (config_entries.oper_keyfile[0] == '\0')
+    {
+      fprintf(stderr,"I need an operpass (O:) in %s\n",CONFIG_FILE);
+      error_in_config = YES;
+    }
+#else
+    fprintf(stderr, "I need an operpass (O:) in %s\n", CONFIG_FILE);
     error_in_config = YES;
+#endif
   }
 
   if(config_entries.server_name[0] == '\0')

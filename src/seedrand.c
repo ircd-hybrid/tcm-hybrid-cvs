@@ -1,9 +1,9 @@
 /*
  * seedrand 0.1
  *
- * Copyright (c) 2002 Bill Jonus
+ * Copyright (c) 2002-2003 Bill Jonus
  *
- * $Id: seedrand.c,v 1.4 2002/11/15 00:09:51 bill Exp $
+ * $Id: seedrand.c,v 1.5 2002/12/29 09:41:20 bill Exp $
  */
 
 #include <assert.h>
@@ -288,7 +288,11 @@ int score(char *string)
     }
   }
 
-  if (strcasestr(string, "dcc") != NULL)
+#ifdef HAVE_STRCASESTR
+  if (strcasestr(string, "DCC") != NULL)
+#else
+  if (strstr(string, "DCC") != NULL)
+#endif
   {
 #ifdef DEBUGMODE
     printf("-1300\tdcc bot\n");

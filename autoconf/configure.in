@@ -1,4 +1,4 @@
-dnl $Id: configure.in,v 1.22 2002/06/09 02:10:23 wcampbel Exp $
+dnl $Id: configure.in,v 1.23 2002/12/29 09:41:15 bill Exp $
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(include/tcm.h)
 
@@ -39,6 +39,7 @@ dnl Replace `main' with a function in -lnsl:
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(resolv, inet_aton)
+AC_CHECK_LIB(crypto, RSA_private_decrypt)
 AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(crypt, crypt,,))
 
 AC_CHECK_FUNC(dlopen,, AC_CHECK_LIB(dl, dlopen))
@@ -46,16 +47,14 @@ AC_CHECK_FUNC(dlopen,, AC_CHECK_LIB(dl, dlopen))
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/socketvar.h sys/stream.h crypt.h sys/resource.h getopt.h)
-AC_CHECK_HEADERS(sys/select.h)
+AC_CHECK_HEADERS(sys/select.h regex.h)
 
-dnl Check for regex.h - if found, assume regexec() and regcomp()
-AC_CHECK_HEADER(regex.h, AC_DEFINE(HAVE_REGEX_H), AC_MSG_WARN(regex.h could not be found - regex matching will not be implemented))
 dnl Check for stdarg.h - if we can't find it, halt configure
 AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - tcm-hybrid will not compile without it **))
 
 dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
-AC_CHECK_FUNCS(setrlimit strlcat strlcpy)
+AC_CHECK_FUNCS(setrlimit strlcat strlcpy strcasestr)
 
 AC_OUTPUT(Makefile src/Makefile tools/Makefile modules/Makefile)
 

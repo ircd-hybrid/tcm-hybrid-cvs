@@ -1,13 +1,19 @@
-# $Id: tcm.cf,v 1.31 2002/12/10 16:35:42 bill Exp $
+# $Id: tcm.cf,v 1.32 2002/12/29 09:41:16 bill Exp $
 # Username for the bot
 U:db
 
 # virtual host name if needed
 ##V:irc.foozle.org
 
-# O line for the bot with password
-# Sorry, the password cannot be encrypted
+# O line for typical OPER <nick> <pw> setup
 O:dianora:Nope
+
+# O line for CHALLENGE (with keyphrase)
+O:bill:etc/rsa.key:my_keyphrase
+
+# O line for CHALLENGE (without keyphrase)
+# Note: the trailing ':' *must* be present
+O:bill:etc/rsa.key:
 
 # Server for the tcm 
 S:irc.frizzle.net:6666

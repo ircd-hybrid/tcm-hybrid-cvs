@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.207 2002/12/28 06:01:58 bill Exp $
+ * $Id: bothunt.c,v 1.208 2002/12/29 09:41:20 bill Exp $
  */
 
 #include <stdio.h>
@@ -38,10 +38,7 @@
 
 #ifdef HAVE_REGEX_H
 #include <regex.h>
-#define REGCOMP_FLAGS REG_EXTENDED
-#define REGEXEC_FLAGS 0
 #endif
-
 static void check_nick_flood(char *snotice);
 static void cs_clones(char *snotice);
 static void link_look_notice(char *snotice);

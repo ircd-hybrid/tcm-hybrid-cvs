@@ -5,7 +5,7 @@
 ** Some code Copyright: Jonathan George, Kai Seidler, ircd-hybrid Team,
 **                      IRCnet IRCD developers.
 **
-** $Id: match.h,v 1.1 2002/04/16 21:32:58 wcampbel Exp $
+** $Id: match.h,v 1.2 2002/12/29 09:41:18 bill Exp $
 */
 
 #ifndef MATCH_H
@@ -24,5 +24,12 @@ int match(char *, char *);
 char *collapse(char *);
 int mycmp(char *, char *);
 int myncmp(char *, char *, int);
+
+#ifdef HAVE_REGEX_H
+#define REGCOMP_FLAGS REG_EXTENDED
+#define REGEXEC_FLAGS 0
+#else
+#undef REGEX_SIZE
+#endif
 
 #endif

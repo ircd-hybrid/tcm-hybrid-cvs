@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.33 2002/10/04 00:28:52 bill Exp $
+# $Id: Makefile.in,v 1.34 2002/12/29 09:41:20 bill Exp $
 
 CC = @CC@
 RM = @RM@
@@ -29,6 +29,7 @@ SOURCES =       actions.c	\
 		match.c		\
 		modules.c	\
 		parse.c		\
+		respond.c	\
 		seedrand.c	\
 		serv_commands.c	\
 		services.c	\

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.58 2002/09/20 05:42:59 bill Exp $
+ * $Id: hash.c,v 1.59 2002/12/29 09:41:20 bill Exp $
  */
 
 #include <stdio.h>
@@ -34,8 +34,6 @@
 
 #ifdef HAVE_REGEX_H
 #include <regex.h>
-#define REGCOMP_FLAGS REG_EXTENDED
-#define REGEXEC_FLAGS 0
 #endif
 
 #ifndef INADDR_NONE

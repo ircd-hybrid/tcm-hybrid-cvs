@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.84 2002/12/10 16:35:45 bill Exp $
+ * $Id: parse.c,v 1.85 2002/12/29 09:41:20 bill Exp $
  */
 
 #include <stdio.h>
@@ -20,6 +20,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "setup.h"
 #include "tcm.h"
 #include "event.h"
 #include "bothunt.h"
@@ -36,6 +37,10 @@
 #include "modules.h"
 #include "handler.h"
 #include "dcc.h"
+
+#ifdef HAVE_LIBCRYPTO
+int do_challenge(char *challenge_string);
+#endif
 
 static void do_init(void);
 static int  split_args(char *, char *argv[]);
@@ -364,6 +369,12 @@ process_server(struct source_client *source_p, char *function, char *param)
       if (!strcasecmp(argv[4], tcm_status.my_class))
         tcm_status.ping_time = atoi(argv[5]) * 2 + 15;
       break;
+
+#ifdef HAVE_LIBCRYPTO
+    case RPL_RSACHALLENGE:
+      do_challenge(argv[3]);
+      break;
+#endif
 
     case ERR_NICKNAMEINUSE:
       on_nick_taken();

@@ -1,3 +1,18 @@
+leeh        2002/06/21 11:34:16 EDT	(20020621_14)
+
+  Modified files:
+    include              bothunt.h 
+    src                  bothunt.c parse.c 
+  Log:
+  - ripped stats e support, use E: lines in userlist.cf
+  
+  Revision  Changes    Path
+  1.52      +0 -1      tcm-hybrid/include/bothunt.h
+  1.172     +0 -34     tcm-hybrid/src/bothunt.c
+  1.75      +0 -5      tcm-hybrid/src/parse.c
+
+
+
 leeh        2002/06/21 11:20:54 EDT	(20020621_13)
 
   Modified files:

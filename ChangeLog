@@ -1,3 +1,17 @@
+bill        2003/04/14 05:30:20 EDT	(20030414_1)
+
+  Modified files:
+    src                  dcc_commands.c hash.c 
+  Log:
+  - added -c optional param to .testline, which forces the clearing of pending status for testline
+  - made clone action's unique logging respect ircwarn/dccwarn from the clone action
+  
+  Revision  Changes    Path
+  1.153     +11 -1     tcm-hybrid/src/dcc_commands.c
+  1.68      +24 -14    tcm-hybrid/src/hash.c
+
+
+
 bill        2003/04/14 04:50:38 EDT	(20030414_0)
 
   Modified files:

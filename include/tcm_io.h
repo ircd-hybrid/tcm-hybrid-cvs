@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.23 2002/05/26 23:15:00 db Exp $
+ * $Id: tcm_io.h,v 1.24 2002/05/26 23:33:47 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -43,7 +43,7 @@ struct connection {
 #define	S_CLIENT		3
 
 extern struct connection connections[];
-int find_free_connection_slot(const char *nick);
+int find_free_connection_slot(void);
 
 extern	int initiated_dcc_socket;
 extern	time_t initiated_dcc_socket_time;

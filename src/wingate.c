@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.42 2002/05/26 19:27:09 db Exp $ */
+/* $Id: wingate.c,v 1.43 2002/05/26 23:33:50 db Exp $ */
 
 
 #include <netdb.h>
@@ -120,7 +120,7 @@ wingate_start_test(struct plus_c_info *info_p)
   int found_slot;
   struct sockaddr_in socketname;
 
-  found_slot = find_free_connection_slot(NULL);
+  found_slot = find_free_connection_slot();
   if (found_slot < 0)
     return;
 
@@ -156,7 +156,7 @@ socks_start_test(struct plus_c_info *info_p, int socksversion)
   int found_slot;
   struct sockaddr_in socketname;
 
-  found_slot = find_free_connection_slot(NULL);
+  found_slot = find_free_connection_slot();
   if (found_slot < 0)
     return;
 
@@ -192,7 +192,7 @@ squid_start_test(struct plus_c_info *info_p, int port)
   int found_slot;
   struct sockaddr_in socketname;
 
-  found_slot = find_free_connection_slot(NULL);
+  found_slot = find_free_connection_slot();
   if (found_slot < 0)
     return;
 

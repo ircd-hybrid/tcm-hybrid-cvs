@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.46 2002/05/26 23:15:03 db Exp $
+ * $Id: tcm_io.c,v 1.47 2002/05/26 23:33:50 db Exp $
  */
 
 #include <stdio.h>
@@ -362,14 +362,14 @@ linkclosed(int connnum, int argc, char *argv[])
 /*
  * find_free_connection_slot
  *
- * inputs       - nick
+ * inputs       - none
  *              - host
  * output       - none
- * side effects - finds a free connection slot to use
+ * side effects - finds a free connection slot to use, -1 if none found
  */
 
 int
-find_free_connection_slot(const char *nick)
+find_free_connection_slot(void)
 {
   int i;
 
@@ -385,8 +385,6 @@ find_free_connection_slot(const char *nick)
 
   if(i > MAXDCCCONNS)
   {
-    if (nick != NULL)
-      notice(nick,"Max users on tcm, dcc chat rejected\n");
     return(-1);
   }
 
@@ -410,9 +408,11 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
   int result = -1;
   int i;
 
-  i = find_free_connection_slot(nick);
-  if (i < 0)
-    return;
+  if ((i = find_free_connection_slot()) < 0)
+    {
+      notice(nick,"Max users on tcm, dcc chat rejected\n");
+      return;
+    }
 
   notice(nick, "Chat requested");
   strncpy(connections[i].nick, nick, MAX_NICK);
@@ -421,7 +421,6 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
 
   if ((connections[i].socket = socket(PF_INET,SOCK_STREAM,0)) < 0)
   {
-    fprintf(stderr, "Error on open()\n");
     notice(nick,"Error on open");
     return;
   }
@@ -444,14 +443,12 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
   if (result < 0)
   {
     close(connections[i].socket);
-    fprintf(stderr, "Cannot bind result = %d errno = %d\n", result, errno);
     notice(nick,"Cannot DCC chat");
     return;
   }
 
   if (listen(connections[i].socket,4) < 0)
   {
-    fprintf(stderr,"Cannot listen\n");
     notice(nick,"Cannot DCC chat");
     return;
   }
@@ -711,9 +708,11 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   char *user;
   char *host;
 
-  i = find_free_connection_slot(nick);
-  if (i < 0)
-    return(-1);
+  if ((i = find_free_connection_slot()) < 0)
+    {
+      notice(nick,"Max users on tcm, dcc chat rejected\n");
+      return(-1);
+    }
 
   if ((p = strchr(userhost,'@')) != NULL)
   {
@@ -733,7 +732,7 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   if(isoper(user,host) == 0)
   {
     notice(nick,"You are not an operator");
-    return (0);
+    return (-1);
   }
 
   connections[i].set_modes = 0;
@@ -756,7 +755,7 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   connections[i].io_close_function = close_connection;
   FD_SET(connections[i].socket, &readfds);
 
-  return 1;
+  return (1);
 }
 
 /*
@@ -780,7 +779,6 @@ finish_accept_dcc_chat(int i)
                      (socklen_t *)&addrlen)) < 0 )
   {
     notice(connections[i].nick, "Error in DCC chat\n");
-    fprintf(stderr, "Error in remote connect on accept()\n");
     close(sock);
     return;
   }

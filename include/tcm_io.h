@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.27 2002/05/28 11:52:35 leeh Exp $
+ * $Id: tcm_io.h,v 1.28 2002/05/28 15:10:13 leeh Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -18,11 +18,11 @@ struct connection {
   char	buffer[BUFFERSIZE];
   int	nbuf;			/* number in buffer */
   int	socket;
-  int   state;
+  int   state;                  /* indicates type of connection */
+  int	curr_state;             /* indicates sent ping, socks etc */
   void	(*io_read_function)(int connect_id);
   void	(*io_write_function)(int connect_id);
   void	(*io_close_function)(int connect_id);
-  int	user_state;
   int	set_modes;		/* for set options */
   char	user[MAX_USER];
   char	host[MAX_HOST];
@@ -41,6 +41,8 @@ struct connection {
 #define	S_CONNECTING		1
 #define	S_SERVER		2
 #define	S_CLIENT		3
+
+#define S_PINGSENT		1
 
 extern struct connection connections[];
 int find_free_connection_slot(void);

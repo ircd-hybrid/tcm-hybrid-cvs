@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.48 2002/05/28 00:35:10 db Exp $ */
+/* $Id: wingate.c,v 1.49 2002/05/28 15:10:16 leeh Exp $ */
 
 
 #include <netdb.h>
@@ -164,9 +164,9 @@ socks_start_test(struct plus_c_info *info_p, int socksversion)
     return;
 
   if (socksversion == 4)
-    connections[found_slot].user_state = SOCKS4_CONNECTING;
+    connections[found_slot].curr_state = SOCKS4_CONNECTING;
   else if(socksversion == 5)
-    connections[found_slot].user_state = SOCKS5_CONNECTING;
+    connections[found_slot].curr_state = SOCKS5_CONNECTING;
   else
     return;
 
@@ -198,7 +198,7 @@ squid_start_test(struct plus_c_info *info_p, int port)
   if ((found_slot = find_free_connection_slot()) < 0)
     return;
 
-  connections[found_slot].user_state = SQUID_CONNECTING;
+  connections[found_slot].curr_state = SQUID_CONNECTING;
   strncpy(connections[found_slot].user, info_p->user, MAX_USER-1);
   strncpy(connections[found_slot].host, info_p->host, MAX_HOST-1);
   strncpy(connections[found_slot].nick, info_p->nick, MAX_NICK-1);
@@ -252,7 +252,7 @@ read_wingate(int i)
     report_open_wingate(i);
 
   close_connection(i);
-  connections[i].user_state = 0;
+  connections[i].curr_state = 0;
 }
 #endif
 
@@ -262,7 +262,7 @@ read_squid(int i)
 {
   struct stat buf;
 
-  if (connections[i].user_state != SQUID_READING)
+  if (connections[i].curr_state != SQUID_READING)
     {
       if (fstat(connections[i].socket, &buf) < 0)
 	{
@@ -273,7 +273,7 @@ read_squid(int i)
 	  print_to_socket(connections[i].socket,
 			  "CONNECT %s:%d HTTP/1.0\r\n\r\n",
 			  SOCKS_CHECKIP, SOCKS_CHECKPORT);
-	  connections[i].user_state = SQUID_READING;
+	  connections[i].curr_state = SQUID_READING;
 	}
       return;
     }
@@ -295,7 +295,7 @@ read_socks(int i)
 {
   unsigned char tmp[SMALL_BUFF];
 
-  switch (connections[i].user_state)
+  switch (connections[i].curr_state)
     {
     case SOCKS5_CONNECTING:
       tmp[0] = 5; /* socks version */
@@ -307,7 +307,7 @@ read_socks(int i)
 	  close_connection(i);
 	  break;
 	} 
-      connections[i].user_state = SOCKS5_SENTVERSION;
+      connections[i].curr_state = SOCKS5_SENTVERSION;
       break;
 
     case SOCKS5_SENTVERSION:

@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.60 2002/05/27 11:41:56 leeh Exp $
+ * $Id: config.h,v 1.61 2002/05/28 15:10:13 leeh Exp $
  */
 
 /*
@@ -329,5 +329,8 @@ for .kflood would be the #define for REASON_FLOOD etc. */
  *       determine the ping-frequency value in
  *       the Y: lines.
  */
-#define SERVER_TIME_OUT 300
+#define SERVER_TIME_OUT 30
+
+/* default ping timeout when initially connecting to server */
+#define SERVER_TIME_OUT_CONNECT 60
 #endif

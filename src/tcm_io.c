@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.61 2002/05/28 11:52:38 leeh Exp $
+ * $Id: tcm_io.c,v 1.62 2002/05/28 15:10:16 leeh Exp $
  */
 
 #include <stdio.h>
@@ -106,21 +106,33 @@ read_packet(void)
 	    if(connections[i].io_write_function != NULL)
 	      FD_SET(connections[i].socket, &writefds);
 
-	    if (connections[i].time_out != 0 &&
-		current_time > (connections[i].last_message_time
-				+ connections[i].time_out))
+	    if(i == server_id && connections[i].time_out)
+	    {
+              if(current_time > (connections[i].last_message_time
+                                + connections[i].time_out))
 	      {
-		/* timer expired */
-		if (i == server_id) 
-		  {
-		    tcm_log(L_ERR, "read_packet() ping time out");
-		    send_to_all(SEND_ALL, "PING time out on server");
-		  }
-		if (connections[i].io_close_function != NULL)
-		  (connections[i].io_close_function)(i);
+                tcm_log(L_ERR, "read_packet() ping time out");
+		send_to_all(SEND_ALL, "PING time out on server");
+
+		if(connections[i].io_close_function != NULL)
+                  (connections[i].io_close_function)(i);
 		else
-		  close_connection(i);
+                  close_connection(i);
 	      }
+
+	      /* not sent a ping, and we've actually connected to the server */
+	      else if(connections[i].curr_state != S_PINGSENT &&
+                      connections[i].state == S_SERVER)
+	      {
+                /* no data, send a PING */
+                if(current_time > (connections[i].last_message_time
+                                   + (connections[i].time_out / 2)))
+		{
+                  print_to_server("PING tcm");
+		  connections[i].curr_state = S_PINGSENT;
+		}
+	      }
+	    }
 	  }
       }
 
@@ -166,6 +178,10 @@ read_packet(void)
               {
                 tscanned = 0;
                 connections[i].last_message_time = current_time;
+
+		if(connections[i].curr_state == S_PINGSENT)
+                  connections[i].curr_state = 0;
+
 		while ((nscanned =
 			get_line(incomingbuff+tscanned,
 				 &nread, &connections[i])))
@@ -553,6 +569,9 @@ va_print_to_socket(int sock, const char *format, va_list va)
   if (msgbuf[strlen(msgbuf)-1] != '\n')
     strcat(msgbuf, "\n");
   send(sock, msgbuf, strlen(msgbuf), 0);
+#ifdef DEBUGMODE
+  printf("-> %s", msgbuf);
+#endif
 }
 
 /*
@@ -835,10 +854,10 @@ close_connection(int connnum)
 
   connections[connnum].socket = INVALID;
   connections[connnum].state = S_IDLE;
+  connections[connnum].curr_state = 0;
   connections[connnum].io_read_function = NULL;	 /* blow up real good */
   connections[connnum].io_write_function = NULL; /* blow up real good */
   connections[connnum].io_close_function = NULL; /* blow up real good */
-  connections[connnum].user_state = 0;
   connections[connnum].time_out = 0;
 
   if ((connnum + 1) == maxconns)
@@ -906,14 +925,7 @@ connect_to_server(const char *hostport)
   connections[i].io_close_function = server_link_closed;
   connections[i].socket = connect_to_given_ip_port(&socketname, port);
 
-  if (pingtime)
-  {
-    connections[i].time_out = pingtime;
-  }
-  else
-  {
-    connections[i].time_out = SERVER_TIME_OUT;
-  }
+  connections[i].time_out = SERVER_TIME_OUT_CONNECT;
 
   current_time = time(NULL);
   connections[server_id].last_message_time = current_time;
@@ -934,7 +946,13 @@ signon_to_server (int unused)
   connections[server_id].io_read_function = parse_server;
   connections[server_id].io_write_function = NULL;
   connections[server_id].state = S_SERVER;
+  connections[server_id].curr_state = S_PINGSENT;
   connections[server_id].nbuf = 0;
+
+  if (pingtime)
+    connections[server_id].time_out = pingtime;
+  else
+    connections[server_id].time_out = SERVER_TIME_OUT;
 
   if (*mynick == '\0')
     strcpy (mynick,config_entries.dfltnick);
@@ -1098,7 +1116,7 @@ init_connections(void)
     {
       connections[i].socket = INVALID;
       connections[i].state = S_IDLE;
-      connections[i].user_state = 0;
+      connections[i].curr_state = 0;
       connections[i].user[0] = '\0';
       connections[i].host[0] = '\0';
       connections[i].nick[0] = '\0';

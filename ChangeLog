@@ -1,3 +1,21 @@
+db          2002/05/26 19:15:05 EDT	(20020527_0)
+
+  Modified files:
+    include              tcm_io.h 
+    src                  main.c parse.c tcm_io.c 
+  Log:
+  - got rid of incoming_connnum global.
+  - added send_to_partyline
+  - changed connection states to, S_IDLE, S_CONNECTING, S_SERVER S_CLIENT
+  
+  Revision  Changes    Path
+  1.23      +5 -2      tcm-hybrid/include/tcm_io.h
+  1.82      +0 -4      tcm-hybrid/src/main.c
+  1.29      +1 -1      tcm-hybrid/src/parse.c
+  1.46      +32 -10    tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/26 16:44:45 EDT	(20020526_23)
 
   Modified files:

@@ -1,3 +1,7 @@
+*** 20010722_4 by wcampbel
+Fix make lint in the tools/ Makefile
+
+
 *** 20010722_3 by wcampbel
 Updated dependencies
 

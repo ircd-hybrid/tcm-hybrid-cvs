@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.25 2002/03/06 05:16:25 bill Exp $ */
+/* $Id: main.c,v 1.26 2002/03/06 10:58:57 einride Exp $ */
 
 #include "setup.h"
 
@@ -636,7 +636,7 @@ int main(int argc, char *argv[])
   signal(SIGTERM,sighandlr);
   signal(SIGINT,sighandlr);
   signal(SIGHUP,reload_user_list);
-
+  signal(SIGPIPE, SIG_IGN);
   /* pick up the name of a pid file from the tcm.cf file */
 #ifdef DEBUGMODE
   config_entries.debug=1;

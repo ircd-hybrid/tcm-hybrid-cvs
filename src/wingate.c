@@ -1,6 +1,5 @@
-/* $Id: wingate.c,v 1.18 2002/03/06 05:16:22 bill Exp $ */
+/* $Id: wingate.c,v 1.19 2002/03/06 10:58:55 einride Exp $ */
 
-#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
 
 #include <netdb.h>
 #include <unistd.h>
@@ -19,6 +18,7 @@
 #include "logging.h"
 #include "stdcmds.h"
 
+#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
 #undef REPORT_WINGATES_TO_CHANNEL
 #undef REPORT_SOCKS_TO_CHANNEL
 
@@ -479,13 +479,13 @@ void _modinit()
   add_common_function(F_CONFIG, _config);
   wingate_class_list_index = 0;
 #ifdef DETECT_WINGATE
-  add_action("wingate", "kline 60", REASON_WINGATE);
+  add_action("wingate", "warn", REASON_WINGATE);
   set_action_type("wingate", R_WINGATE);
   for (i=0;i<MAXWINGATES;++i)
     wingate[i].socket = INVALID;
 #endif
 #ifdef DETECT_SOCKS
-  add_action("socks", "kline 60", "Open SOCKS");
+  add_action("socks", "warn", "Open SOCKS");
   set_action_type("socks", R_SOCKS);
   for (i=0;i<MAXWINGATES;++i)
     {

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.85 2002/05/27 20:15:40 leeh Exp $
+ * $Id: userlist.c,v 1.86 2002/05/27 20:26:45 leeh Exp $
  *
  */
 
@@ -137,7 +137,7 @@ set_umode(int user, int admin, const char *umode)
       }
     }
 
-    /* an admin is allowed to set temp privs as well */
+    /* this allows us to set privs as well as flags */
     if(admin)
     {
       for(j = 0; umode_privs[j].umode; j++)
@@ -222,18 +222,19 @@ void m_umode(int connnum, int argc, char *argv[])
 
     if((argv[2][0] == '+') || (argv[2][0] == '-'))
     {
-      if(user_conn >= 0)
+      if(user >= 0)
       {
         set_umode(user, 1, argv[2]);
 
-	print_to_socket(connections[connnum].socket,
-			"User flags for %s are now: %s",
-			argv[1], type_show(get_umodes_current(user)));
-	print_to_socket(connections[user_conn].socket,
-			"Your flags are now: %s (changed by %s)",
-			type_show(get_umodes_current(user)),
-			connections[connnum].registered_nick);
-	return;
+        print_to_socket(connections[connnum].socket,
+	  	        "User flags for %s are now: %s",
+		        argv[1], type_show(get_umodes_current(user)));
+
+        if(user_conn >= 0)
+          print_to_socket(connections[user_conn].socket,
+			  "Your flags are now: %s (changed by %s)",
+			  type_show(get_umodes_current(user)),
+			  connections[connnum].registered_nick);
       }
       else
         print_to_socket(connections[connnum].socket, 
@@ -991,47 +992,24 @@ type_show(unsigned long type)
 {
   static char type_string[SMALL_BUFF];
   char *p;
+  int i;
 
-  memset(&type_string, 0, sizeof(type_string));
   p = type_string;
 
   *p++ = 'O';
 
-  if(type & TYPE_KLINE)
-    *p++ = 'K';
-  if(type & TYPE_SUSPENDED)
-    *p++ = 'S';
-  if(type & TYPE_ADMIN)
-    *p++ = 'M';
-  if(type & TYPE_INVM)
-    *p++ = 'I';
+  for(i = 0; umode_privs[i].umode; i++)
+  {
+    if(type & umode_privs[i].type)
+      *p++ = umode_privs[i].umode;
+  }
 
-#ifndef NO_D_LINE_SUPPORT
-  if(type & TYPE_DLINE)
-    *p++ = 'D';
-#endif
-#ifdef ENABLE_W_FLAG
-  if(type & TYPE_WALLOPS)
-    *p++ = 'W';
-#endif
-
-  if(type & TYPE_PARTYLINE)
-    *p++ = 'p';
-  if(type & TYPE_WARN)
-    *p++ = 'w';
-  if(type & TYPE_ECHO)
-    *p++ = 'e';
-  if(type & TYPE_INVS)
-    *p++ = 'i';
-  if(type & TYPE_LOCOPS)
-    *p++ = 'o';
-  if(type & TYPE_VIEW_KLINES)
-    *p++ = 'k';
-  if(type & TYPE_SPY)
-    *p++ = 'y';
-  if(type & TYPE_SERVERS)
-    *p++ = 'x';
-
+  for(i = 0; umode_flags[i].umode; i++)
+  {
+    if(type & umode_flags[i].type)
+      *p++ = umode_flags[i].umode;
+  }
+  
   *p = '\0';
   return(type_string);
 }

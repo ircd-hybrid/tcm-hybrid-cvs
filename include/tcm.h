@@ -38,8 +38,6 @@
  char placef[16][30];
  int placel[16];
  #define placed { add_placed(__FILE__, __LINE__); }
-#else
- #define placed { (void *) NULL; }
 #endif
 
 #define SET_PRIVMSG	1	/* See privmsg's to the tcm */

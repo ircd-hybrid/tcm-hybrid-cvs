@@ -28,7 +28,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: userlist.c,v 1.4 2000/12/08 23:22:31 bill Exp $";
+static char *version="$Id: userlist.c,v 1.5 2001/02/04 01:55:43 wcampbel Exp $";
 
 #ifdef NEXT
 char *strdup(char *);
@@ -52,6 +52,7 @@ int  ban_list_index;
 
 #ifdef DETECT_WINGATE
 extern struct wingates wingate[];
+static void load_a_wingate_class(char *class);
 #endif
 
 #ifdef DETECT_SOCKS
@@ -63,8 +64,13 @@ static void load_a_user(char *,int);
 static void load_a_tcm(char *);
 static void load_a_host(char *);
 static void load_f_line(char *);
-static void load_a_wingate_class(char *class);
-static void add_action(char *value, char *action, char *reason,int message);
+static void add_action(char *value, char *act, char *reason,int message);
+
+#if 0
+/* Not used currently */
+static int flags_by_userhost(char *user, char *host);
+static int f_lined(char *user, char *host, int type);
+#endif
 
 struct f_entry *flines;
 
@@ -85,7 +91,7 @@ void load_config_file(char *file_name)
   char line[MAX_BUFF];
   char *key;			/* key/value pairs as found in config file */
   char *value;
-  char *action;
+  char *act;
   char *reason;
   char *message_ascii;
   int  message;
@@ -224,13 +230,13 @@ void load_config_file(char *file_name)
 	    break;
 
 	case 'a':case 'A':
-	    action = splitc(value, ':');
-	    if(!action)
+	    act = splitc(value, ':');
+	    if(!act)
 	      {
 		/* missing action */
 		break;
 	      }
-	    reason = splitc( action, ':');
+	    reason = splitc( act, ':');
 
 	    message = 0;
 
@@ -250,7 +256,7 @@ void load_config_file(char *file_name)
 		  }
 	      }
 
-	    add_action(value, action, reason, message);
+	    add_action(value, act, reason, message);
 	    break;
 
 	case 'o':case 'O':
@@ -421,7 +427,7 @@ void load_prefs(void)
   char line[MAX_BUFF];
   char *key;
   char *value;
-  char *action;
+  char *act;
   char *reason;
   char *message_ascii;
   int  message;
@@ -445,13 +451,13 @@ void load_prefs(void)
       switch(*key)
 	{
 	case 'a':case 'A':
-	  action = splitc(value, ':');
-	  if(!action)
+	  act = splitc(value, ':');
+	  if(!act)
 	    {
 	      /* missing action */
 	      break;
 	    }
-	  reason = splitc( action, ':');
+	  reason = splitc( act, ':');
 	  message = 0;
 
 	  if(reason)
@@ -463,7 +469,7 @@ void load_prefs(void)
 		}
 	    }
 
-	  add_action(value, action, reason, message);
+	  add_action(value, act, reason, message);
 	  break;
 
 	  break;
@@ -572,12 +578,12 @@ void save_prefs(void)
  * side effects -
  */
 
-static void add_action(char *value, char *action, char *reason, int message)
+static void add_action(char *value, char *act, char *reason, int message)
 {
 
   if (!strcasecmp(value, "clone"))
     {
-	strncpy(config_entries.clone_act, action, 
+	strncpy(config_entries.clone_act, act, 
 		sizeof(config_entries.clone_act));
       
       if(reason)
@@ -593,7 +599,7 @@ static void add_action(char *value, char *action, char *reason, int message)
 #ifdef AUTO_DLINE
   else if (!strcasecmp(value, "vclone"))
     {
-	strncpy(config_entries.clone_act, action, 
+	strncpy(config_entries.clone_act, act, 
 		sizeof(config_entries.vclone_act));
       
       if(reason)
@@ -608,7 +614,7 @@ static void add_action(char *value, char *action, char *reason, int message)
 #endif
   else if (!strcasecmp(value, "cflood"))
     {
-        strncpy(config_entries.cflood_act, action,
+        strncpy(config_entries.cflood_act, act,
 		sizeof(config_entries.cflood_act));
 
 	if(reason)
@@ -621,7 +627,7 @@ static void add_action(char *value, char *action, char *reason, int message)
     }
   else if (!strcasecmp(value, "sclone"))
     {
-	strncpy(config_entries.sclone_act, action, 
+	strncpy(config_entries.sclone_act, act, 
 		sizeof(config_entries.sclone_act));
       
       if(reason)
@@ -635,7 +641,7 @@ static void add_action(char *value, char *action, char *reason, int message)
     }
   else if (!strcasecmp(value, "flood"))
     {
-	strncpy(config_entries.flood_act, action, 
+	strncpy(config_entries.flood_act, act, 
 		sizeof(config_entries.flood_act));
       
       if(reason)
@@ -649,7 +655,7 @@ static void add_action(char *value, char *action, char *reason, int message)
     }
   else if (!strcasecmp(value, "ctcp"))
     {
-	strncpy(config_entries.ctcp_act, action, 
+	strncpy(config_entries.ctcp_act, act, 
 		sizeof(config_entries.ctcp_act));
       
       if(reason)
@@ -663,7 +669,7 @@ static void add_action(char *value, char *action, char *reason, int message)
     }
   else if (!strcasecmp(value, "link"))
     {
-	strncpy(config_entries.link_act, action, 
+	strncpy(config_entries.link_act, act, 
 		sizeof(config_entries.link_act));
       
       if(reason)
@@ -677,7 +683,7 @@ static void add_action(char *value, char *action, char *reason, int message)
     }
   else if (!strcasecmp(value, "bot"))
     {
-	strncpy(config_entries.bot_act, action, 
+	strncpy(config_entries.bot_act, act, 
 		sizeof(config_entries.bot_act));
       
       if(reason)
@@ -691,7 +697,7 @@ static void add_action(char *value, char *action, char *reason, int message)
     }
   else if (!strcasecmp(value, "spoof"))
     {
-	strncpy(config_entries.spoof_act, action, 
+	strncpy(config_entries.spoof_act, act, 
 		sizeof(config_entries.spoof_act));
       
       if(reason)
@@ -705,7 +711,7 @@ static void add_action(char *value, char *action, char *reason, int message)
     }
   else if (!strcasecmp(value, "spambot"))
     {
-	strncpy(config_entries.spambot_act, action, 
+	strncpy(config_entries.spambot_act, act, 
 		sizeof(config_entries.spambot_act));
 
       if(reason)
@@ -720,7 +726,7 @@ static void add_action(char *value, char *action, char *reason, int message)
 #ifdef DETECT_WINGATE
   else if (!strcasecmp(value, "wingate"))
     {
-	strncpy(config_entries.wingate_act, action, 
+	strncpy(config_entries.wingate_act, act, 
 		sizeof(config_entries.wingate_act));
       
       if(reason)
@@ -736,7 +742,7 @@ static void add_action(char *value, char *action, char *reason, int message)
 #ifdef DETECT_SOCKS
   else if (!strcasecmp(value, "socks"))
     {
-	strncpy(config_entries.socks_act, action,
+	strncpy(config_entries.socks_act, act,
 		sizeof(config_entries.socks_act));
       
       if(reason)
@@ -752,7 +758,7 @@ static void add_action(char *value, char *action, char *reason, int message)
 #ifdef SERVICES_DRONES
   else if (!strcasecmp(value, "drones"))
     {
-	strncpy(config_entries.drones_act, action,
+	strncpy(config_entries.drones_act, act,
 		sizeof(config_entries.drones_act));
       if(reason)
 	strncpy(config_entries.drones_reason, reason, 
@@ -966,14 +972,14 @@ static void load_a_user(char *line,int link_tcm)
     if(type)
       {
 	unsigned long type_int;
-	char *p;
-	p = type;
+	char *q;
+	q = type;
 
 	type_int = TYPE_ECHO;
 
-	while(*p)
+	while(*q)
 	  {
-	    switch(*p)
+	    switch(*q)
 	      {
 	      case 's':
 		type_int |= TYPE_STAT;
@@ -1028,7 +1034,7 @@ static void load_a_user(char *line,int link_tcm)
 	      default:
 		break;
 	      }
-	    p++;
+	    q++;
 	  }
 
 	if(link_tcm)
@@ -1055,7 +1061,7 @@ static void load_a_user(char *line,int link_tcm)
  * side effects	- userlist is updated
  */
 
-static void load_a_wingate_class(char *class)
+void load_a_wingate_class(char *class)
   {
     if( wingate_class_list_index == (MAXWINGATES - 1))
 	return;
@@ -1160,7 +1166,9 @@ static void load_f_line(char *line) {
   char *vltn, *p, *uhost;
   struct f_entry *temp, *f = flines, *old = NULL;
   int type=0;
+#ifdef DEBUGMODE
   placed;
+#endif
 
   if (!(p = strchr(line, ':'))) return;
   if (!(temp = (struct f_entry *)malloc(sizeof(struct f_entry)))) return;
@@ -1206,7 +1214,9 @@ static void load_a_host(char *line)
   char *host;
   char *user;
   char *p;
+#ifdef DEBUGMODE
   placed;
+#endif
 
   if(host_list_index == MAXHOSTS)
     return;
@@ -1435,12 +1445,14 @@ int isbanned(char *user,char *host)
  * side effects
  */
 
-void ban_manipulate(int socket,char flag,char *userhost)
+void ban_manipulate(int sock,char flag,char *userhost)
 {
   char *user;
   char *host;
   int  i;
+#ifdef DEBUGMODE
   placed;
+#endif
 
   if( !(user = strtok(userhost,"@")) )
     return;
@@ -1452,7 +1464,7 @@ void ban_manipulate(int socket,char flag,char *userhost)
     {
       if(isbanned(user,host))
 	{
-	  prnt(socket,"%s@%s is already banned.\n",user,host);
+	  prnt(sock,"%s@%s is already banned.\n",user,host);
 	  return;
 	}
       for(i=0; i < MAXBANS; i++)
@@ -1476,7 +1488,7 @@ void ban_manipulate(int socket,char flag,char *userhost)
 	  strncpy(banlist[i].host, host, sizeof(banlist[i].host));
 	}
 
-      prnt(socket,"%s@%s now banned.\n", user, host);
+      prnt(sock,"%s@%s now banned.\n", user, host);
     }
   else
     {
@@ -1489,11 +1501,13 @@ void ban_manipulate(int socket,char flag,char *userhost)
 	    {
 	      banlist[i].user[0] = 0;
 	      banlist[i].host[0] = 0;
-	      prnt(socket, "%s@%s is removed.\n", user, host);
+	      prnt(sock, "%s@%s is removed.\n", user, host);
 	    }
 	}
     }
 }
+
+#if 0
 
 /*
  * flags_by_userhost()
@@ -1502,6 +1516,7 @@ void ban_manipulate(int socket,char flag,char *userhost)
  *		- host
  * outputs	- type of user by hostmask provided
  * side effects	- NONE
+ * NOTE:  Not used currently
  */
 
 int flags_by_userhost(char *user, char *host)
@@ -1519,6 +1534,7 @@ int flags_by_userhost(char *user, char *host)
     }
   return 0;
 }
+#endif
 
 /*
  * islegal_pass()
@@ -1628,6 +1644,8 @@ int islinkedbot(int connnum, char *botname, char *password)
   return(0);
 }
 
+#if 0
+/* Not used currently */
 int f_lined(char *user, char *host, int type) {
   struct f_entry *temp;
   char uhost[MAX_NICK+2+MAX_HOST];
@@ -1640,6 +1658,7 @@ int f_lined(char *user, char *host, int type) {
   }
   return 0;
 }
+#endif
 
 /* Checks for ok hosts to block auto-kline - Phisher */
 /*

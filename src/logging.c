@@ -35,7 +35,7 @@
 #include "bothunt.h"
 #include "logging.h"
 
-static char *version="$Id: logging.c,v 1.2 2000/09/02 05:42:37 lusky Exp $";
+static char *version="$Id: logging.c,v 1.3 2001/02/04 01:55:43 wcampbel Exp $";
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file
@@ -68,7 +68,7 @@ static FILE *initlog(void)
   FILE *last_log_fp;
   FILE *email_fp;
   FILE *log_to_email_fp;
-  FILE *logging_fp;
+  FILE *l_fp;
 
 #ifdef LOGFILE
   last_filename[0] = '\0';
@@ -93,7 +93,7 @@ static FILE *initlog(void)
 		(broken_up_time->tm_mon)+1,broken_up_time->tm_mday,
 		broken_up_time->tm_year + 1900);
 
-  if( !(logging_fp = fopen(filename,"a")) )
+  if( !(l_fp = fopen(filename,"a")) )
     return (FILE *)NULL;
 
   if(!config_entries.email_config[0])
@@ -128,10 +128,10 @@ static FILE *initlog(void)
       (void)fclose(last_log_fp);
     }
 #else
-  logging_fp = (FILE *)NULL;
+  l_fp = (FILE *)NULL;
 #endif
 
-  return logging_fp;
+  return l_fp;
 }
 
 /*
@@ -444,18 +444,18 @@ void log_problem(char *function_name,char *reason)
 void log(char *format,...)
 {
   char msg[MAX_BUFF];
-  FILE *logging_fp;
+  FILE *l_fp;
   va_list va;
 
   va_start(va,format);
 
-  if( (logging_fp = initlog()) )
+  if( (l_fp = initlog()) )
     {
-      timestamp_log(logging_fp);
+      timestamp_log(l_fp);
       vsnprintf(msg,sizeof(msg),format, va);
 
-      fputs(msg,logging_fp);
-      (void)fclose(logging_fp);
+      fputs(msg,l_fp);
+      (void)fclose(l_fp);
     }
   va_end(va);
 }
@@ -468,12 +468,12 @@ void log(char *format,...)
  * side effects	- uptime of tcm and opered up time is printed to socket
  */
 
-void report_uptime(int socket)
+void report_uptime(int sock)
 {
-  prnt(socket, "*** tcm has been up for %s\n",
+  prnt(sock, "*** tcm has been up for %s\n",
        durtn((double) time(NULL)-startup_time));
 
-  prnt(socket, "*** tcm has been opered up for %s\n",
+  prnt(sock, "*** tcm has been opered up for %s\n",
        durtn((double) time(NULL)-oper_time));
 }
 

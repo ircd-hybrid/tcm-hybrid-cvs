@@ -58,7 +58,8 @@
 #define CONFIG_FILE "tcm.cf"
 #define USERLIST_FILE "userlist.cf"
 
-#define HELP_FILE "help"
+#define HELP_PATH "help"        /* No / at the end */
+#define HELP_FILE "help"        /* Inside of HELP_PATH */
 #define MOTD_FILE "motd.txt"
 #define PREF_FILE "tcm.pref"
 

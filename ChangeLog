@@ -1,3 +1,15 @@
+leeh        2002/06/07 07:25:09 EDT	(20020607_5)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  - use MAX_USERHOST instead of MAX_USER+MAX_HOST
+  
+  Revision  Changes    Path
+  1.156     +9 -11     tcm-hybrid/src/bothunt.c
+
+
+
 leeh        2002/06/07 07:22:03 EDT	(20020607_4)
 
   Modified files:

@@ -1,3 +1,16 @@
+db          2002/05/21 21:40:12 EDT	(20020522_1)
+
+  Modified files:
+    src                  logging.c 
+  Log:
+  - removed a pile of casts on NULLs
+  - removed unnecessary spaces
+  
+  Revision  Changes    Path
+  1.24      +16 -16    tcm-hybrid/src/logging.c
+
+
+
 wcampbel    2002/05/21 21:34:32 EDT	(20020522_0)
 
   Modified files:

@@ -1,3 +1,17 @@
+db          2002/05/26 03:26:09 EDT	(20020526_15)
+
+  Modified files:
+    src                  tcm_io.c wingate.c 
+  Log:
+  - more cleanups in wingate.c
+  - made writefds/readfds static
+  
+  Revision  Changes    Path
+  1.42      +3 -3      tcm-hybrid/src/tcm_io.c
+  1.39      +3 -5      tcm-hybrid/src/wingate.c
+
+
+
 db          2002/05/26 03:13:13 EDT	(20020526_14)
 
   Modified files:

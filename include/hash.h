@@ -1,17 +1,16 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.9 2002/05/30 01:45:27 db Exp $ */
+/* $Id: hash.h,v 1.10 2002/05/30 18:22:12 db Exp $ */
 
 #define HASHTABLESIZE 3001
 
-extern struct hashrec *usertable[HASHTABLESIZE];
-extern struct hashrec *hosttable[HASHTABLESIZE];
-extern struct hashrec *domaintable[HASHTABLESIZE];
-extern struct hashrec *iptable[HASHTABLESIZE];
+extern struct hashrec *user_table[HASHTABLESIZE];
+extern struct hashrec *host_table[HASHTABLESIZE];
+extern struct hashrec *domain_table[HASHTABLESIZE];
+extern struct hashrec *ip_table[HASHTABLESIZE];
 
-
-struct hashrec {
+struct userentry {
   char nick[MAX_NICK];
   char user[MAX_USER];
   char host[MAX_HOST];
@@ -25,6 +24,10 @@ struct hashrec {
   time_t connecttime;
   time_t reporttime;
   int  link_count;
+};
+
+struct hashrec {
+  struct userentry *info;
   struct hashrec *next;
 };
 
@@ -34,18 +37,17 @@ struct sortarray
   int count;
 };
 
-void freehash(void);
 int  removefromhash(struct hashrec *table[], char *key, char *hostmatch,
 		    char *usermatch, char *nickmatch);
 
-void addtohash(struct hashrec *table[], char *key, struct hashrec *item);
-void updatehash(struct hashrec**,char *,char *, char *); 
-void adduserhost(struct plus_c_info *, int, int);
-void removeuserhost(char *, struct plus_c_info *);
-void updateuserhost(char *nick1, char *nick2, char *userhost);
+void add_to_hash_table(struct hashrec *table[], const char *key,
+		       struct hashrec *item);
+void add_user_host(struct plus_c_info *, int, int);
+void remove_user_host(char *, struct plus_c_info *);
+void update_nick(char *nick1, char *nick2);
 
-struct hashrec *find_nick(const char * nick);
-struct hashrec *find_host(const char * host);
+struct userentry *find_nick(const char * nick);
+struct userentry *find_host(const char * host);
 
 void list_nicks(int sock,char *nick,int regex);
 void list_users(int sock,char *userhost,int regex);

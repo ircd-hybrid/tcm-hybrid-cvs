@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.138 2002/05/30 04:48:50 bill Exp $
+ * $Id: bothunt.c,v 1.139 2002/05/30 18:22:14 db Exp $
  */
 
 #include <stdio.h>
@@ -179,7 +179,7 @@ on_trace_user(int argc, char *argv[])
 
   /* XXX */
   userinfo.nick = argv[5]; /* XXX */
-  adduserhost(&userinfo,YES,is_oper);
+  add_user_host(&userinfo,YES,is_oper);
 }
 
 /* 
@@ -545,13 +545,13 @@ on_server_notice(int argc, char *argv[])
 
     strcpy((char *)&userinfo.class, p);
 
-    adduserhost(&userinfo, NO, NO);
+    add_user_host(&userinfo, NO, NO);
     break;
 
   /* Client exiting: bill (bill@ummm.E) [e?] [255.255.255.255]*/
   case EXITING:
     chopuh(NO,q,&userinfo);
-    removeuserhost(q,&userinfo);
+    remove_user_host(q,&userinfo);
     break;
 
   /* Unauthorized client connection from bill[bill@localhost] [127.0.0.1]
@@ -1289,8 +1289,8 @@ check_nick_flood(char *snotice)
 
       if ((nick2 = strtok(NULL," ")) == NULL)
 	return;
-      add_to_nick_change_table(user_host,nick2);
-      updateuserhost(nick1,nick2,user_host);
+      add_to_nick_change_table(user_host, nick2);
+      update_nick(nick1, nick2);
 
       return;
     }
@@ -1313,16 +1313,8 @@ check_nick_flood(char *snotice)
   if ((p = strrchr(user_host,']')) != NULL)
     *p = '\0';
 
-/* N.B.
- * hendrix's original code munges the user_host variable
- * so, add_to_nick_change must occur BEFORE
- * updateuserhost is called. grrrrrrrrrrrr
- * I hate order dependencies of calls.. but there you are.
- * This caused a bug in v0.1
- *
- */
   add_to_nick_change_table(user_host,nick2);
-  updateuserhost(nick1,nick2,user_host);
+  update_nick(nick1, nick2);
 }
 
 /*

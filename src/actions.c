@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.14 2002/05/30 16:36:01 leeh Exp $
+ * $Id: actions.c,v 1.15 2002/05/30 18:22:14 db Exp $
  */
 
 #include "setup.h"
@@ -335,7 +335,7 @@ handle_action(int actionid, int idented, char *nick, char *user,
   char comment[MAX_BUFF];
   char *userhost;
   char *p;
-  struct hashrec * userptr;
+  struct userentry * userptr;
 
   if (!user && !host && nick)
     {
@@ -546,7 +546,7 @@ find_action(char *name)
 char *
 get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
 {
-  struct hashrec *userptr;
+  struct userentry *userptr;
   static char newuserhost[MAX_USER+MAX_HOST+2]; /* one for @, one for \0 */
   char *user;
   char *host;

@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.41 2002/05/29 06:26:13 db Exp $
+ * $Id: logging.c,v 1.42 2002/05/30 18:22:15 db Exp $
  *
  * - db
  */
@@ -528,7 +528,7 @@ logfailure(char *nickuh,int botreject)
  */
 
 void 
-kline_report(char *server_notice)
+kline_report(const char *server_notice)
 {
   FILE *fp_log;
   struct tm *broken_up_time;
@@ -543,7 +543,7 @@ kline_report(char *server_notice)
 /* Logging klines is important -bill */
 
 #ifdef KILL_KLINE_LOG
-  if( (fp_log = fopen(KILL_KLINE_LOG,"a")) )
+  if ((fp_log = fopen(KILL_KLINE_LOG,"a")) != NULL)
     {
       fprintf(fp_log,"%02d/%02d/%d %02d:%02d %s\n",
 	      (broken_up_time->tm_mon)+1,

@@ -1,3 +1,8 @@
+*** 20011026_5 by db
+- cleanups, these mallocs were not needed at all.
+
+
+
 *** 20011026_4 by bill
 - fixed all warnings caused by src/ files
 - updated dependancy files

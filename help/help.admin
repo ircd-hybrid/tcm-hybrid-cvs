@@ -31,7 +31,7 @@
     Saves tcm prefs (actions) you must be registered and an admin to use this.
  - .load
     Load tcm prefs (actions) any oper may use this.
- - .tcminfo
+ - .info
     Show information about the tcm and the server it monitors.
  - .uptime
     Show the tcm uptime.

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.157 2002/06/07 16:32:29 db Exp $
+ * $Id: bothunt.c,v 1.158 2002/06/08 01:52:44 db Exp $
  */
 
 #include <stdio.h>
@@ -1027,9 +1027,10 @@ connect_flood_notice(char *snotice)
 		handle_action(act_cflood, nick_reported, user, host, 0, 0);
 	    }
 	  else if ((connect_flood[i].last_connect + MAX_CONNECT_TIME)
-		   < current_time) {
-	    connect_flood[i].user_host[0] = '\0';
-	  }
+		   < current_time)
+	    {
+	      connect_flood[i].user_host[0] = '\0';
+	    }
 	}
       else if (first_empty_entry < 0)
 	{

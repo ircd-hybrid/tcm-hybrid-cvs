@@ -1,3 +1,26 @@
+db          2002/05/25 18:03:02 EDT	(20020525_33)
+
+  Modified files:
+    include              tcm_io.h 
+    src                  bothunt.c main.c parse.c tcm_io.c 
+  Log:
+  redid more io
+  - first off if a socket is INVALID it won't be in the readlist!
+  - added state variable to connections
+  - redid how dcc chat and msg .chat are done
+  
+    Need to rethink out I/O handlers...
+  Thats next
+  
+  Revision  Changes    Path
+  1.14      +7 -1      tcm-hybrid/include/tcm_io.h
+  1.102     +2 -2      tcm-hybrid/src/bothunt.c
+  1.73      +1 -1      tcm-hybrid/src/main.c
+  1.22      +0 -12     tcm-hybrid/src/parse.c
+  1.31      +103 -111  tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/25 15:22:48 EDT	(20020525_32)
 
   Modified files:

@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.45 2003/01/26 01:16:59 wiz Exp $
+ * $Id: actions.c,v 1.46 2003/02/02 20:37:54 wiz Exp $
  */
 
 #include "setup.h"
@@ -633,33 +633,27 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
   switch(actions[actionid].hoststrip & HOSTSTRIP_HOST)
   {
     case HOSTSTRIP_HOST_BLOCK:
-      /* its a host */
-      if (inet_addr(host) == INADDR_NONE)
-      {
-        s = strchr(host, '.');
-
-	/* it could be an ipv6 host */
-	if(s == NULL)
-	  {
-	    if ((s = strchr(host, ':')) == NULL)
-	      return NULL;
-	  }
-
-	snprintf(p, MAX_HOST, "*%s", s);
-      }
-
-      /* IP */
-      else
-      {
-        s = strrchr(host, '.');
-
-	if(s == NULL)
-          return NULL;
-
-	*s = '\0';
-	snprintf(p, MAX_HOST, "%s%s", host, strchr(host, ':') ? "/64" : ".*");
-      }
-      break;
+	if (inet_addr(host) == INADDR_NONE && (s = strchr(host, '.')) != NULL) {
+/* host */	snprintf(p, MAX_HOST, "*%s", s);
+	} else if ((s = strrchr(host, '.')) != NULL) {
+		*s = '\0';
+/* ipv4 */	snprintf(p, MAX_HOST, "%s%s", host, strchr(host, ':') ? "/64" : ".*");
+#if defined(IPV6) && defined (VIRTUAL_IPV6)
+	} else if (strchr(host, ':') != NULL) {
+		u_int16_t words[8];
+		char buf6[MAX_IP];
+/* ipv6 */
+		strlcpy(buf6, host, MAX_IP);
+		if (inet_pton6(buf6, (char *)&words)) {
+			words[4] = words[5] = words[6] = words[7] = 0;
+			inet_ntop6((char *)&words, buf6, MAX_IP);
+			snprintf(p, MAX_HOST, "%s/64", buf6);
+		}
+#endif
+	} else {
+/* dunno */	return NULL;
+	}
+	break;
 
     case HOSTSTRIP_HOST_AS_IS:
     default:

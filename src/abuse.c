@@ -34,7 +34,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.8 2001/04/02 04:05:24 db Exp $";
+static char *version="$Id: abuse.c,v 1.9 2001/04/02 05:34:54 db Exp $";
 
 /*
  * do_a_kline()
@@ -176,9 +176,6 @@ void suggest_kill_kline(int reason,
   char suggested_user[MAX_USER+1];
   char *suggested_host;
   char *p;
-  int  warn;
-
-  warn = YES;
 
   /* Don't kill or kline exempted users */  
   if(okhost(user, host))
@@ -223,7 +220,6 @@ void suggest_kill_kline(int reason,
        {
 	 if(strncasecmp(config_entries.cflood_act,"kline",5) == 0)
 	   {
-	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
 	       "Connect flooder detected %s@%s,auto-klining...\n",
                suggested_user, suggested_host);
@@ -235,7 +231,6 @@ void suggest_kill_kline(int reason,
 	   }
 	 else if (strncasecmp(config_entries.cflood_act, "dline", 5) == 0)
 	   {
-	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
 		"Connect flooder detected %s@%s,auto-\002d\002lining...\n",
 		suggested_user, host);
@@ -244,13 +239,14 @@ void suggest_kill_kline(int reason,
 		host,
 		config_entries.cflood_reason);
 	   }
+	 else if (strncasecmp(config_entries.cflood_act, "warn", 4) == 0)
+	   {
+	     sendtoalldcc(SEND_WARN_ONLY,
+			  "*** Connect flooder detected from %s@%s.\n.kclone %s@%s\n",
+			  suggested_user, suggested_host,
+			  suggested_user, suggested_host);
+	   }
        } 
-
-     if(warn)
-       sendtoalldcc(SEND_WARN_ONLY,
-	    "*** Connect flooder detected from %s@%s.\n.kclone %s@%s\n",
-		    suggested_user, suggested_host,
-		    suggested_user, suggested_host);
      break;
 
 
@@ -259,7 +255,6 @@ void suggest_kill_kline(int reason,
        {
 	 if(strncasecmp(config_entries.sclone_act,"kline",5) == 0)
 	   {
-	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
 	       "Multi-server clones detected from %s@%s,auto-klining...\n",
                suggested_user, suggested_host);
@@ -269,13 +264,15 @@ void suggest_kill_kline(int reason,
 		    suggested_user, suggested_host,
 		    config_entries.sclone_reason);
 	   }
-       } 
+	 else if(strncasecmp(config_entries.sclone_act,"warn",4) == 0)
+	   {
+	     sendtoalldcc(SEND_WARN_ONLY,
+			  "*** Multi-server clones detected from %s@%s.\n.kclone %s@%s\n",
+			  suggested_user, suggested_host,
+			  suggested_user, suggested_host);
+	   }
 
-     if(warn)
-       sendtoalldcc(SEND_WARN_ONLY,
-	    "*** Multi-server clones detected from %s@%s.\n.kclone %s@%s\n",
-		    suggested_user, suggested_host,
-		    suggested_user, suggested_host);
+       } 
      break;
 
 #ifdef AUTO_DLINE
@@ -284,7 +281,6 @@ void suggest_kill_kline(int reason,
        {
 	 if(strncasecmp(config_entries.clone_act,"dline",5) == 0)
 	   {
-	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
                "Virtual hosted clones detected from %s, auto-dlining...\n",
 			  suggested_host);
@@ -296,7 +292,6 @@ void suggest_kill_kline(int reason,
 	   }
 	 else if(strncasecmp(config_entries.clone_act,"kline",5) == 0)
 	   {
-	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
                "Virtual hosted clones detected from %s, auto-klining...\n",
 			  suggested_host);
@@ -306,14 +301,16 @@ void suggest_kill_kline(int reason,
 		    suggested_host,
 		    config_entries.vclone_reason);
 	   }
+	 else if(strncasecmp(config_entries.clone_act,"warn",4) == 0)
+	   {
+	     sendtoalldcc(SEND_WARN_ONLY,
+			  "*** Virtual hosted clones detected, coming from %s.\n.kdline %s\n",
+			  suggested_host,
+			  suggested_host);
+	   }
        } 
-
-     if(warn)
-       sendtoalldcc(SEND_WARN_ONLY,
-		    "*** Virtual hosted clones detected, coming from %s.\n.kdline %s\n",
-		    suggested_host,
-		    suggested_host);
      break;
+
 #endif
 
    case R_CLONES:
@@ -323,7 +320,6 @@ void suggest_kill_kline(int reason,
 	   {
 	     if( (identd && !different) || (!identd) )
 	       {
-		 warn = NO;
 		 sendtoalldcc(SEND_OPERS_ONLY,
 			      "Clones detected from %s@%s, Auto-klining\n",
 			      suggested_user,
@@ -335,13 +331,14 @@ void suggest_kill_kline(int reason,
 			config_entries.clone_reason);
 	       }
 	   }
+	 else if(strncasecmp(config_entries.clone_act,"warn",4) == 0)
+	   {
+	     sendtoalldcc(SEND_WARN_ONLY,
+			  "*** Clones detected, coming from %s@%s.\n.kclone %s@%s\n",
+			  suggested_user, suggested_host,
+			  suggested_user, suggested_host);
+	   }
        } 
-
-     if(warn)
-       sendtoalldcc(SEND_WARN_ONLY,
-		    "*** Clones detected, coming from %s@%s.\n.kclone %s@%s\n",
-		    suggested_user, suggested_host,
-		    suggested_user, suggested_host);
      break;
 
    case R_FLOOD:
@@ -349,7 +346,6 @@ void suggest_kill_kline(int reason,
        {
 	 if(strncasecmp(config_entries.flood_act,"kline",5) == 0)
 	   {
-	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
 			  "Flooding detected from %s!%s@%s, auto-klining...\n",
 			  nick,suggested_user, suggested_host);
@@ -361,18 +357,18 @@ void suggest_kill_kline(int reason,
 	   }
 	 else if(strncasecmp(config_entries.flood_act,"kill",4) == 0)
 	   {
-	     warn = NO;
 	     toserv("KILL %s :%s\n",
 		    nick,config_entries.flood_reason);
 	   }
+	 else if(strncasecmp(config_entries.flood_act,"warn",4) == 0)
+	   {
+	     sendtoalldcc(SEND_WARN_ONLY,
+			  "*** Flooding detected, coming from %s!%s@%s.\n.kflood %s@%s\n",
+			  nick,
+			  suggested_user, suggested_host,
+			  suggested_user, suggested_host);
+	   }
        }
-
-     if(warn)
-       sendtoalldcc(SEND_WARN_ONLY,
-	    "*** Flooding detected, coming from %s!%s@%s.\n.kflood %s@%s\n",
-		    nick,
-		    suggested_user, suggested_host,
-		    suggested_user, suggested_host);
      break;
 
    case R_CTCP:
@@ -380,7 +376,6 @@ void suggest_kill_kline(int reason,
        {
 	 if(strncasecmp(config_entries.ctcp_act,"kline",5) == 0)
 	   {
-	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
 			  "CTCP Flooding detected from %s!%s@%s, auto-klining...\n",
 			  nick,
@@ -394,17 +389,17 @@ void suggest_kill_kline(int reason,
 	   }
 	 else if(strncasecmp(config_entries.ctcp_act,"kill",4) == 0)
 	   {
-	     warn = NO;
 	     toserv("KILL %s :%s\n",
 		    nick,config_entries.ctcp_reason);
 	   }
+	 else if(strncasecmp(config_entries.ctcp_act,"warn",4) == 0)
+	   {
+	     sendtoalldcc(SEND_WARN_ONLY,
+			  "*** CTCP Flooding detected, coming from %s@%s.\n.kflood %s@%s\n",
+			  suggested_user, suggested_host,
+			  suggested_user, suggested_host);
+	   }
        }
-
-     if(warn)
-       sendtoalldcc(SEND_WARN_ONLY,
-		    "*** CTCP Flooding detected, coming from %s@%s.\n.kflood %s@%s\n",
-		    suggested_user, suggested_host,
-		    suggested_user, suggested_host);
      break;
 
    case R_SPOOF:
@@ -412,15 +407,15 @@ void suggest_kill_kline(int reason,
        {
 	 if(strncasecmp(config_entries.spoof_act,"kill",4) == 0)
 	   {
-	     warn = NO;
 	     toserv("KILL %s :%s\n",
 		  nick,config_entries.spoof_reason);
 	   }
+	 else if(strncasecmp(config_entries.spoof_act,"warn",4) == 0)
+	   {
+	     sendtoalldcc(SEND_WARN_ONLY,
+			  "*** Spoofer detected %s\n", nick );
+	   }
        }
-
-     if(warn)
-       sendtoalldcc(SEND_WARN_ONLY,
-		    "*** Spoofer detected %s\n", nick );
      break;
 
    case R_SPAMBOT:
@@ -428,7 +423,6 @@ void suggest_kill_kline(int reason,
        {
 	 if(strncasecmp(config_entries.spambot_act,"kline",5) == 0)
 	   {
-	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
 			  "Spambot detected from %s!%s@%s, auto-klining...\n",
 			  nick, suggested_user, suggested_host);
@@ -441,18 +435,18 @@ void suggest_kill_kline(int reason,
 	   }
 	 else if(strncasecmp(config_entries.spambot_act,"kill",4) == 0)
 	   {
-	     warn = NO;
 	     toserv("KILL %s :%s\n",
 		    nick,config_entries.spambot_reason);
 	   }
+	 else if(strncasecmp(config_entries.spambot_act,"warn",4) == 0)
+	   {
+	     sendtoalldcc(SEND_WARN_ONLY,
+			  "*** Spambot detected, coming from %s!%s@%s.\n.kline %s@%s\n",
+			  nick,
+			  suggested_user, suggested_host,
+			  suggested_user, suggested_host);
+	   }
        }
-
-     if(warn)
-       sendtoalldcc(SEND_WARN_ONLY,
-		    "*** Spambot detected, coming from %s!%s@%s.\n.kline %s@%s\n",
-		    nick,
-		    suggested_user, suggested_host,
-		    suggested_user, suggested_host);
      break;
  
  case R_LINK:
@@ -460,7 +454,6 @@ void suggest_kill_kline(int reason,
      {
        if(strncasecmp(config_entries.link_act,"kline",5) == 0)
 	 {
-	   warn = NO;
 	   sendtoalldcc(SEND_OPERS_ONLY,
 			"Link Looker detected from %s!%s@%s, auto-klining...\n",
 			nick,
@@ -473,18 +466,18 @@ void suggest_kill_kline(int reason,
 	 }
        else if(strncasecmp(config_entries.link_act,"kill",4) == 0)
 	 {
-	   warn = NO;
 	   toserv("KILL %s :%s\n",
 		  config_entries.link_reason );
 	 }
+       else if(strncasecmp(config_entries.link_act,"warn",4) == 0)       
+	 {
+	   sendtoalldcc(SEND_WARN_ONLY,
+			"*** Link Looker detected, coming from %s!%s@%s.\n.klink %s@%s\n",
+			nick,
+			suggested_user, suggested_host,
+			suggested_user, suggested_host);
+	 }
      }
-
-   if(warn)
-     sendtoalldcc(SEND_WARN_ONLY,
-		  "*** Link Looker detected, coming from %s!%s@%s.\n.klink %s@%s\n",
-		  nick,
-		  suggested_user, suggested_host,
-		  suggested_user, suggested_host);
      break;
 
 #ifdef DETECT_WINGATE
@@ -493,7 +486,6 @@ void suggest_kill_kline(int reason,
      {
        if(strncasecmp(config_entries.wingate_act,"kline",5) == 0)
 	 {
-	   warn = NO;
 	   sendtoalldcc(SEND_OPERS_ONLY,
 			"open wingate detected from %s!%s@%s, auto-klining...\n",
 			nick,
@@ -504,14 +496,15 @@ void suggest_kill_kline(int reason,
 		  suggested_user, suggested_host,
 		  config_entries.wingate_reason);
 	 }
+       else if(strncasecmp(config_entries.wingate_act,"warn",4) == 0)
+	 {
+	   sendtoalldcc(SEND_WARN_ONLY,
+			"*** Open socks detected detected from %s!%s@%s.\n.kline %s@%s\n",
+			nick,
+			suggested_user, suggested_host,
+			suggested_user, suggested_host);
+	 }
      }
-
-   if(warn)
-     sendtoalldcc(SEND_WARN_ONLY,
-		  "*** Open socks detected detected from %s!%s@%s.\n.kline %s@%s\n",
-		  nick,
-		  suggested_user, suggested_host,
-		  suggested_user, suggested_host);
      break;
 #endif
 
@@ -521,7 +514,6 @@ void suggest_kill_kline(int reason,
      {
        if(strncasecmp(config_entries.socks_act,"kline",5) == 0)
 	 {
-	   warn = NO;
 	   sendtoalldcc(SEND_OPERS_ONLY,
 			"open socks detected from %s!%s@%s, auto-klining...\n",
 			nick,
@@ -532,14 +524,15 @@ void suggest_kill_kline(int reason,
 		  suggested_user, suggested_host,
 		  config_entries.socks_reason);
 	 }
+       else if(strncasecmp(config_entries.socks_act,"warn",4) == 0)
+	 {
+	   sendtoalldcc(SEND_WARN_ONLY,
+			"*** Open socks detected detected from %s!%s@%s.\n.kline %s@%s\n",
+			nick,
+			suggested_user, suggested_host,
+			suggested_user, suggested_host);
+	 }
      }
-
-   if(warn)
-     sendtoalldcc(SEND_WARN_ONLY,
-		  "*** Open socks detected detected from %s!%s@%s.\n.kline %s@%s\n",
-		  nick,
-		  suggested_user, suggested_host,
-		  suggested_user, suggested_host);
      break;
 #endif
 
@@ -548,7 +541,6 @@ void suggest_kill_kline(int reason,
        {
 	 if(strncasecmp(config_entries.bot_act,"kline",5) == 0)
 	   {
-	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
 			  "Bot detected from %s!%s@%s, auto-klining...\n",
 			  nick,
@@ -559,14 +551,15 @@ void suggest_kill_kline(int reason,
 		    suggested_user, suggested_host,
 		    config_entries.bot_reason);
 	   }
+	 else if(strncasecmp(config_entries.bot_act,"warn",4) == 0)
+	   {
+	     sendtoalldcc(SEND_WARN_ONLY,
+			  "*** Bot detected, coming from %s!%s@%s.\n.kbot %s@%s\n",
+			  nick,
+			  suggested_user, suggested_host,
+			  suggested_user, suggested_host);
+	   }
        }
-
-     if(warn)
-       sendtoalldcc(SEND_WARN_ONLY,
-		    "*** Bot detected, coming from %s!%s@%s.\n.kbot %s@%s\n",
-		    nick,
-		    suggested_user, suggested_host,
-		    suggested_user, suggested_host);
      break;
 
  default:

@@ -1,4 +1,4 @@
-# $Id: userlist.cf,v 1.20 2002/05/24 18:29:14 leeh Exp $
+# $Id: userlist.cf,v 1.21 2002/05/26 16:10:22 leeh Exp $
 # userlist.cf file
 #
 # each line is colon separated
@@ -19,7 +19,6 @@
 #   +/-M will give the user the admin privs
 #   +/-K will allows this oper to .kline
 #   +/-D will allows this oper to .dline
-#   +/-G will allows this oper to .gline
 #   +/-I will, if set, override the dyanmic i flag
 #   +/-W will allow this user to see WALLOPS and OPERWALL (this is only used
 #         if ENABLE_W_FLAG is defined)
@@ -37,17 +36,13 @@
 #
 # Examples:
 #
-# db@*db.net has oper kline and gline privs
+# db@*db.net has oper kline and dline privs
 #
-O:db@*.db.net:diane:notrealpassword:KG
+O:db@*.db.net:diane:notrealpassword:KD
 #
-# bill@*.parodius.com has oper remote kline gline and is invisible to irc users
+# bill@*.parodius.com has oper remote kline dline and is invisible to irc users
 #
-O:bill@*.parodius.com:pro:notrealpassword:KGi
-#
-# db@*bsd.org has oper and remote kline but no gline privs
-#
-O:db@*bsd.org:diane:notrealpassword:K
+O:bill@*.parodius.com:pro:notrealpassword:KDi
 
 # E-lines
 #  The format for these are as follows:

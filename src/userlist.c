@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.76 2002/05/26 13:09:22 leeh Exp $
+ * $Id: userlist.c,v 1.77 2002/05/26 16:10:28 leeh Exp $
  *
  */
 
@@ -623,9 +623,6 @@ load_a_user(char *line)
               case 'x':
                 type_int |= TYPE_SERVERS;
                 break;
-	      case 'G':
-		type_int |= TYPE_GLINE;
-		break;
 	      case 'K':
 		type_int |= TYPE_KLINE;
 		break;
@@ -825,8 +822,6 @@ type_show(unsigned long type)
 
   if(type & TYPE_KLINE)
     *p++ = 'K';
-  if(type & TYPE_GLINE)
-    *p++ = 'G';
   if(type & TYPE_SUSPENDED)
     *p++ = 'S';
   if(type & TYPE_ADMIN)

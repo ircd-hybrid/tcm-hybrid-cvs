@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.91 2002/05/26 13:09:22 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.92 2002/05/26 16:10:28 leeh Exp $ */
 
 #include "setup.h"
 
@@ -1107,13 +1107,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	break;
 #endif
 
-      case 'G':
-	if (connections[connnum].type & TYPE_ADMIN)
-	  type = TYPE_GLINE ;
-	else
-	  type = 0;
-	break;
-
 #ifdef ENABLE_W_FLAG
       case 'W':
         if (connections[connnum].type & TYPE_ADMIN)
@@ -1168,7 +1161,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
 #ifndef NO_D_LINE_SUPPORT
 	  case 'D': type = TYPE_DLINE; break;
 #endif
-	  case 'G': type = TYPE_GLINE; break;
 	  case 'I': type = TYPE_INVM; break;
 	  case 'K': type = TYPE_KLINE; break;
 	  case 'S': type = TYPE_SUSPENDED; break;
@@ -1254,7 +1246,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
 	    {
 	    case 'I': type = TYPE_INVM; break;
 	    case 'K': type = TYPE_KLINE; break;
-	    case 'G': type = TYPE_GLINE; break;
 #ifndef NO_D_LINE_SUPPORT
 	    case 'D': type = TYPE_DLINE; break;
 #endif

@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.33 2002/05/26 15:25:57 db Exp $ */
+/* $Id: bothunt.h,v 1.34 2002/05/26 16:10:24 leeh Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -19,17 +19,6 @@ struct plus_c_info
 /* XXXX */
 void _config(int, int, char *argv[]);
 void _reload_wingate(int, int, char *argv[]);
-
-struct banned_info
-{
-  char user[MAX_USER+1];
-  char host[MAX_HOST+1];
-  char reason[MAX_REASON+1];
-  char who[MAX_WHO+1];
-  char server[MAX_DOMAIN+1];
-  time_t when;
-  struct banned_info *next;
-};
 
 #define IGNORE		-1
 #define CONNECT		 0
@@ -121,7 +110,6 @@ void report_failures(int sock, int num);
 void report_domains(int sock, int num);
 void report_vbots(int sock,int nclones);
 
-void m_gline(int connnum, int argc, char *argv[]);
 extern void init_bothunt(void);
 extern void _reload_bothunt(int connnum, int argc, char *argv[]);
 extern void _ontraceuser(int connnum, int argc, char *argv[]);

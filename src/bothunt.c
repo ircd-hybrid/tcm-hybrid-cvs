@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.109 2002/05/26 15:26:00 db Exp $
+ * $Id: bothunt.c,v 1.110 2002/05/26 16:10:27 leeh Exp $
  */
 
 #include <stdio.h>
@@ -106,87 +106,6 @@ struct msg_to_action msgs_to_mon[] = {
 };	
 
 struct connect_flood_entry connect_flood[CONNECT_FLOOD_TABLE_SIZE];
-
-struct banned_info glines[MAXBANS];
-
-/*
- * find_banned_host
- *
- * inputs	- user
- * 		- hostname
- * output	- return index of user@host found in glines, or -1
- *		  if not found
- * side effects	-
- */
-static int
-find_banned_host(char *user, char *host)
-{
-  int i;
-
-  for (i=0; i < MAXBANS; i++)
-  {
-    if (glines[i].user[0] != '\0' && glines[i].host[0] != '\0')
-    {
-      if (!strcmp(user, glines[i].user) && !strcmp(host, glines[i].host))
-        return i;
-    }
-  }
-  /* There was no match above, so we KNOW match == NO - Hwy */
-  return -1;
-}
-
-/*
- * remove_gline
- *
- * inputs	- user
- * 		- hostname
- * output	- none
- * side effects	-
- */
-static void
-remove_gline(char *user, char *host)
-{
-  int i;
-  if ((i = find_banned_host(user, host)) == -1)
-    return;
-
-  glines[i].user[0] = '\0';
-  glines[i].host[0] = '\0';
-  glines[i].next = NULL;
-  glines[i].when = 0;
-}
-
-/*
- * gline_request
- *
- * inputs	- username
- *		- hostname
- *		- reason 
- *		- who did the gline
- *		- when 
- * output	- ??
- * side effects	-
- */
-static int
-gline_request(char *user, char *host, char *reason, char *who)
-{
-  int i;
-
-  if (find_banned_host(user, host) != -1) return 0;
-
-  /* find an empty spot for this new request */
-  for (i=0; i < MAXBANS; i++)
-    if (glines[i].user[0] == '\0')
-      break;
-
-  strlcpy(glines[i].user, user, MAX_USER);
-  strlcpy(glines[i].host, host, MAX_HOST);
-  strlcpy(glines[i].reason, reason, MAX_REASON);
-  strlcpy(glines[i].who, who, MAX_WHO);
-  glines[i].when = current_time;
-
-  return 1;
-}
 
 /*
  * _ontraceuser()
@@ -582,7 +501,6 @@ onservnotice(int connnum, int argc, char *argv[])
     if ((p = strrchr(q, ']')) == NULL)
       return;
     *p = '\0'; 
-    gline_request(user, host, q, nick);
     send_to_all(SEND_KLINE_NOTICES,
                  "GLINE for %s@%s by %s [%s]: %s", user, host, nick, target, q);
     return;
@@ -610,7 +528,6 @@ onservnotice(int connnum, int argc, char *argv[])
     send_to_all(SEND_KLINE_NOTICES,
 		 "G-line for %s@%s triggered by %s: %s", user, host,
                  message+14, p);
-    remove_gline(user, host);
     return;
   }
 
@@ -645,12 +562,6 @@ onservnotice(int connnum, int argc, char *argv[])
       return;
     *q = '\0';
     send_to_all(SEND_KLINE_NOTICES, "*** %s is clearing g-lines", nick);
-    for (a=0;a<MAXBANS;++a)
-    {
-      xfree(glines[i].user);
-      xfree(glines[i].host);
-      glines[i].when = 0;
-    }
     return;
   }
   else if (strstr(p, "garbage collecting"))
@@ -2778,119 +2689,6 @@ void _reload_bothunt(int connnum, int argc, char *argv[])
 {
  if (!amianoper) oper();
 }
-
-/*
- * m_gline
- *
- * inputs	- connection number
- *		- argc count
- *		- arguments
- * output	- none
- * side effects -
- */
-void
-m_gline(int connnum, int argc, char *argv[])
-{
-  int i;
-  int number_nonwilds=0;
-  char *p;
-  char *hostname;
-  char gline_reason[MAX_REASON];
-
-  if (!(connections[connnum].type & TYPE_GLINE))
-  {
-    print_to_socket(connections[connnum].socket,
-		    "You do not have %s access", argv[0]);
-    return;
-  }
-
-  if (argc == 1)
-  {
-    for (i=0; i < MAXBANS; i++)
-    { 
-      if (glines[i].user[0] && glines[i].host[0])
-        print_to_socket(connections[connnum].socket, "%d) %s@%s :%s -- %s",
-			i+1,
-			glines[i].user,
-			glines[i].host, glines[i].reason, glines[i].who);
-    }
-    return;
-  }
-
-  if (argc == 2)
-  {
-    if ((i = atoi(argv[1])) && glines[i-1].user[0] && glines[i-1].host[0])
-    {
-      print_to_server("GLINE %s@%s :%s", glines[i-1].user, glines[i-1].host,
-             (glines[i-1].reason[0] == '\0') ? "No reason" : glines[i-1].reason);
-      return;
-    }
-    else
-    {
-      for (p = argv[1], number_nonwilds=0; *p; p++)
-	{
-	  if (*p != '?' && *p != '*')
-	    number_nonwilds++;
-	}
-
-      if (number_nonwilds < 4)
-      {
-        print_to_socket(connections[connnum].socket,
-        "Please include at least 4 non-wildcard characters in the user@host\n");
-        return;
-      }
-
-      if ((hostname = strchr(argv[1], '@')) == NULL)
-      {
-        print_to_socket(connections[connnum].socket,
-             "Please include a \'@\' in the user@host\n");
-        return;
-      }
-      *hostname++ = '\0';
-      print_to_server("GLINE %s@%s :No reason", argv[1], hostname);
-      return;
-    }
-  }
-  else if (argc >= 3)
-  {
-    if ((i = atoi(argv[1])) && glines[i-1].user[0] && glines[i-1].host[0])
-    {
-      expand_args(gline_reason, MAX_REASON, argc-2, argv+2);
-      print_to_server("GLINE %s@%s :%s", glines[i-1].user, glines[i-1].host,
-             (*gline_reason == ':') ? gline_reason+1 : gline_reason);
-      return;
-    }
-    else
-    {
-      for(p = argv[1], number_nonwilds=0; *p; p++)
-        {
-          if (*p != '?' && *p != '*')
-            number_nonwilds++;
-        }
-
-      if (number_nonwilds < 4)
-      {
-        print_to_socket(connections[connnum].socket,
-      "Please include at least 4 non-wildcard characters with the user@host\n");
-        return;
-      }
-      if ((hostname = strchr(argv[1], '@')) == NULL)
-      {
-        print_to_socket(connections[connnum].socket,
-             "Please include a \'@\' with the user@host\n");
-        return;
-      }
-
-      expand_args(gline_reason, MAX_REASON, argc, argv);
-      print_to_server("GLINE %s@%s :%s", argv[1], hostname, gline_reason);
-      return;
-    }
-  }
-}
-
-struct dcc_command gline_msgtab = {
- "gline", NULL, {m_unregistered, m_gline, m_gline}
-};
 
 void init_bothunt(void)
 {

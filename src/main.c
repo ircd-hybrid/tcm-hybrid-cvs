@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.79 2002/05/26 02:55:10 db Exp $ */
+/* $Id: main.c,v 1.80 2002/05/26 16:10:28 leeh Exp $ */
 
 #include "setup.h"
 
@@ -235,10 +235,6 @@ main(int argc, char *argv[])
 
 #ifdef SERVICES
   init_services();
-#endif
-
-#ifdef GLINES
-  add_dcc_handler(&gline_msgtab);
 #endif
 
   init_bothunt();

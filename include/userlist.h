@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.39 2002/05/26 05:48:01 db Exp $ */
+/* $Id: userlist.h,v 1.40 2002/05/26 16:10:24 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -217,7 +217,6 @@ extern int tcm_list_index;
 
 #define TYPE_OPER		0x00001	/* user has registered as an oper */
 #define TYPE_KLINE		0x00002 /* user has .kline privs */
-#define TYPE_GLINE		0x00004	/* user has .gline privs */ 
 #define TYPE_SERVERS            0x00008 /* user sees server intro/quits */
 #define TYPE_PARTYLINE		0x00010	/* user wants to be on partyline */
 #define TYPE_WARN		0x00080	/* user sees clone reports */

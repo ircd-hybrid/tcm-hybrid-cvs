@@ -1,3 +1,19 @@
+db          2002/05/24 22:33:38 EDT	(20020525_1)
+
+  Modified files:
+    include              bothunt.h serverif.h tcm_io.h 
+    src                  wingate.c 
+  Log:
+  - move extern struct connections[] into tcm_io.h
+  
+  Revision  Changes    Path
+  1.28      +0 -3      tcm-hybrid/include/bothunt.h
+  1.22      +0 -16     tcm-hybrid/include/serverif.h
+  1.8       +19 -0     tcm-hybrid/include/tcm_io.h
+  1.33      +15 -7     tcm-hybrid/src/wingate.c
+
+
+
 leeh        2002/05/24 22:16:53 EDT	(20020525_0)
 
   Modified files:

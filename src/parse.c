@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.65 2002/06/05 22:46:34 leeh Exp $
+ * $Id: parse.c,v 1.66 2002/06/05 22:54:18 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -61,7 +61,7 @@ parse_server(int conn_num)
   struct source_client source_p;
   char *buffer = connections[conn_num].buffer;
   char *p;
-  char *source;
+  char *source = NULL;
   char *function;
   char *body = NULL;
 
@@ -105,7 +105,7 @@ parse_server(int conn_num)
   if (config_entries.debug && outfile)
   {
     fprintf(outfile, ">source=[%s] function=[%s] body=[%s]\n",
-            source, function, body);        /* - zaph */
+            (source == NULL) ? "<NULL>" : source, function, body); /* - zaph */
     fflush(outfile);
   }
 

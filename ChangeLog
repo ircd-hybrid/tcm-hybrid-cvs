@@ -1,3 +1,23 @@
+leeh        2002/06/04 20:10:58 EDT	(20020605_1)
+
+  Modified files:
+    include              dcc.h parse.h tcm_io.h 
+    src                  dcc.c parse.c tcm_io.c 
+  Log:
+  - introduced a source_p, rewrote parse_server.
+    argv[0] is now always the source
+    argv[1] is now always the command.
+  
+  Revision  Changes    Path
+  1.5       +2 -2      tcm-hybrid/include/dcc.h
+  1.20      +7 -0      tcm-hybrid/include/parse.h
+  1.37      +1 -1      tcm-hybrid/include/tcm_io.h
+  1.7       +9 -14     tcm-hybrid/src/dcc.c
+  1.54      +60 -66    tcm-hybrid/src/parse.c
+  1.86      +2 -2      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/06/04 19:49:48 EDT	(20020605_0)
 
   Modified files:

@@ -1,3 +1,14 @@
+# Ok, I'm putting the news in here, since no one ever reads the README.
+#  If you're planning to use this with ircd-comstud, you must make sure
+#  you do the following:
+#   /quote set SHOW_NICKCHANGES yes
+#   /quote set CLIENTCONNECT yes
+#
+#  If you do not do these commands, the tcm will not know when clients
+#  connect, and it will not know when they change nicknames.
+#
+#		-pro (proggy@earthling.net) 11/10/2000
+
 # Username for the bot
 U:db
 # virtual host name if needed

@@ -1,3 +1,17 @@
+wcampbel    2002/05/06 08:50:56 EDT	(20020506_1)
+
+  Modified files:
+    modules              bothunt.c commands.c serverif.c 
+  Log:
+  Some cleanups of the toserv() calls done.
+  
+  Revision  Changes    Path
+  1.65      +2 -9      tcm-hybrid/modules/bothunt.c
+  1.48      +4 -3      tcm-hybrid/modules/commands.c
+  1.56      +5 -6      tcm-hybrid/modules/serverif.c
+
+
+
 wcampbel    2002/05/05 22:12:00 EDT	(20020506_0)
 
   Modified files:

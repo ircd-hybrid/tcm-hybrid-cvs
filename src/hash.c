@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.61 2003/01/19 01:18:40 wiz Exp $
+ * $Id: hash.c,v 1.62 2003/01/26 01:16:59 wiz Exp $
  */
 
 #include <stdio.h>
@@ -635,10 +635,10 @@ check_host_clones(char *host)
   if(reportedclones)
   {
     report(FLAGS_WARN,
-	   "%d more possible clones (%d total) from %s:",
+	   "%d more possible clones (%d total) from %s",
 	   clonecount, clonecount+reportedclones, host);
 
-    tcm_log(L_NORM, "%d more possible clones (%d total) from %s:",
+    tcm_log(L_NORM, "%d more possible clones (%d total) from %s",
 	clonecount, clonecount+reportedclones, host);
   }
   else
@@ -771,22 +771,24 @@ check_virtual_host_clones(char *ip_class_c)
   if(reportedclones)
     {
       report(FLAGS_WARN,
-	     "%d more possible virtual host clones (%d total) from %s.*:",
-	     clonecount, clonecount+reportedclones, ip_class_c);
+	     "%d more possible virtual host clones (%d total) from %s%s",
+	     clonecount, clonecount+reportedclones, ip_class_c,
+	     strchr(ip_class_c, ':') ? "/64" : ".*");
 
       tcm_log(L_NORM, 
-	      "%d more possible virtual host clones (%d total) from %s.*:",
-	      clonecount, clonecount+reportedclones, ip_class_c);
+	      "%d more possible virtual host clones (%d total) from %s%s",
+	      clonecount, clonecount+reportedclones, ip_class_c,
+	      strchr(ip_class_c, ':') ? "/64" : ".*");
     }
   else
     {
       report(FLAGS_WARN,
-	     "Possible virtual host clones from %s.* detected: %d connects in %d seconds",
-	     ip_class_c, clonecount, now - oldest);
+	     "Possible virtual host clones from %s%s detected: %d connects in %d seconds",
+	     ip_class_c, strchr(ip_class_c, ':') ? "/64" : ".*", clonecount, now - oldest);
 
       tcm_log(L_NORM,
-              "Possible virtual host clones from %s.* detected: %d connects in %d seconds",
-	      ip_class_c, clonecount, now - oldest);
+              "Possible virtual host clones from %s%s detected: %d connects in %d seconds",
+	      ip_class_c, strchr(ip_class_c, ':') ? "/64" : ".*", clonecount, now - oldest);
     }
 
   clonecount = 0;

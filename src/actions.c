@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.44 2002/12/30 07:31:36 bill Exp $
+ * $Id: actions.c,v 1.45 2003/01/26 01:16:59 wiz Exp $
  */
 
 #include "setup.h"
@@ -657,7 +657,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
           return NULL;
 
 	*s = '\0';
-	snprintf(p, MAX_HOST, "%s.*", host);
+	snprintf(p, MAX_HOST, "%s%s", host, strchr(host, ':') ? "/64" : ".*");
       }
       break;
 

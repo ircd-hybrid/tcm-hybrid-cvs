@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.58 2002/05/29 06:26:10 db Exp $ */
+/* $Id: userlist.h,v 1.59 2002/05/29 13:10:40 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -123,18 +123,15 @@ void exemption_summary();
 #define FLAGS_SUSPENDED		0x00020 /* user is suspended */
 
 /* send second */
-#define FLAGS_SERVERS           0x00100 /* user sees server intro/quits */
-#define FLAGS_PRIVMSG		0x00200 /* user wants to see privmsgs */
-#define FLAGS_NOTICE		0x00400 /* user wants to see notices */
-#define FLAGS_WARN		0x00800	/* user sees clone reports */
-#define FLAGS_LOCOPS		0x01000 /* user sees LOCOPS */
-#define FLAGS_ADMIN		0x02000 /* user is an adminstrator */
-#define FLAGS_SPY		0x04000 /* links, motd, info requests */
+#define FLAGS_ALL		0x00100 /* notices destined for all users */
+#define FLAGS_SERVERS           0x00200 /* user sees server intro/quits */
+#define FLAGS_PRIVMSG		0x00400 /* user wants to see privmsgs */
+#define FLAGS_NOTICE		0x00800 /* user wants to see notices */
+#define FLAGS_WARN		0x01000	/* user sees clone reports */
+#define FLAGS_LOCOPS		0x02000 /* user sees LOCOPS */
+#define FLAGS_ADMIN		0x04000 /* user is an adminstrator */
+#define FLAGS_SPY		0x08000 /* links, motd, info requests */
 #define FLAGS_VIEW_KLINES	0x10000 /* user see's klines/unklines */
-
-#define FLAGS_ALL		0x1FFFF /* XXX not quite right too tired */
-
-
 #define FLAGS_WALLOPS		0x20000 /* user can see OPERWALL */
 
 

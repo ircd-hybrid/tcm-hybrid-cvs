@@ -1,7 +1,7 @@
 /*  tcm-hybrid/src/tools.c by fl_
  *  Copyright (C) 2002 ircd-hybrid development team
  *
- *  $Id: tools.c,v 1.6 2002/06/24 16:21:51 leeh Exp $
+ *  $Id: tools.c,v 1.7 2003/03/29 10:06:06 bill Exp $
  */
 
 #include <stdlib.h>
@@ -41,6 +41,7 @@ dlink_add(void *data, dlink_node *m, dlink_list *list)
     list->tail = m;
 
   list->head = m;
+  list->count++;
 }
 
 void
@@ -56,6 +57,7 @@ dlink_add_tail(void *data, dlink_node *m, dlink_list *list)
     list->tail->next = m;
 
   list->tail = m;
+  list->count++;
 }
 
 void
@@ -72,6 +74,8 @@ dlink_delete(dlink_node *m, dlink_list *list)
     list->tail = m->prev;
   else
     m->next->prev = m->prev;
+
+  list->count--;
 }
 
 dlink_node *
@@ -88,3 +92,8 @@ dlink_find(void *data, dlink_list *list)
   return NULL;
 }
 
+int
+dlink_length(dlink_list *list)
+{
+  return list->count;
+}

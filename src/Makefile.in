@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.35 2003/01/19 01:18:40 wiz Exp $
+# $Id: Makefile.in,v 1.36 2003/03/29 10:06:05 bill Exp $
 
 CC = @CC@
 RM = @RM@
@@ -19,6 +19,7 @@ LDFLAGS = @LDFLAGS@
 SOURCES =       actions.c	\
 		bothunt.c       \
 		clones.c	\
+		client_list.c	\
 		dcc.c		\
 		dcc_commands.c	\
 		event.c		\

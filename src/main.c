@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.131 2003/02/26 10:25:40 bill Exp $ */
+/* $Id: main.c,v 1.132 2003/03/29 10:06:06 bill Exp $ */
 
 #include "setup.h"
 
@@ -167,6 +167,8 @@ main(int argc, char *argv[])
 #ifdef SERVICES
   init_services();
 #endif
+
+  init_client_lists();
 
   if (config_entries.conffile)
     load_config_file(config_entries.conffile);

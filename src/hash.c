@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.64 2003/02/26 10:25:40 bill Exp $
+ * $Id: hash.c,v 1.65 2003/03/29 10:06:05 bill Exp $
  */
 
 #include <stdio.h>
@@ -31,6 +31,7 @@
 #include "actions.h"
 #include "match.h"
 #include "wingate.h"
+#include "client_list.h"
 
 #ifdef IPV6
 #include "ipv6.h"
@@ -496,6 +497,9 @@ find_domain(char* host)
   int i = 0;
  
   ip_domain = host;
+
+  if (BadPtr(host))
+    return NULL;
 
   if(isdigit((int)*ip_domain))
   {
@@ -1223,25 +1227,27 @@ list_nicks(struct connection *connection_p, char *nick, int regex)
  * inputs       - struct connection pointer
  *              - uhost to match on
  *              - regex or no?
- *		- list to save results to
+ *		- action to take
+ *		- list name to perform action on
  * output       - NONE
  * side effects -
  */
 
 void 
 kill_or_list_users(struct connection *connection_p, char *userhost, int regex,
-		   int kill_users, const char *reason)
+		   int action, char *list_name, const char *reason)
 {
   struct hash_rec *ptr;
+  struct client_list *list;
+  struct user_entry *user;
+  char uhost[MAX_USERHOST], *rsn = BadPtr(reason) ? "No reason" : (char *)reason;
+  int numfound = 0, i, idx;
+  dlink_node *dptr;
+
 #ifdef HAVE_REGEX_H
   regex_t reg;
   regmatch_t m[1];
-#endif
-  char uhost[MAX_USERHOST];
-  int i;
-  int numfound = 0;
 
-#ifdef HAVE_REGEX_H
   if(regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
   {
     char errbuf[REGEX_SIZE];
@@ -1251,12 +1257,45 @@ kill_or_list_users(struct connection *connection_p, char *userhost, int regex,
     return;
   }
 #endif
+
   if(!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
+  {
+    send_to_connection(connection_p,
+                       "Listing all users is not recommended.  To do it anyway, use '.list ?*@*'.");
+    return;
+  }
+
+  if(action == KILL && list_name != NULL)
+  {
+    if((i = find_list(list_name)) == -1)
     {
-      send_to_connection(connection_p,
-"Listing all users is not recommended.  To do it anyway, use '.list ?*@*'.");
+      send_to_connection(connection_p, "No such list.");
       return;
     }
+    list = &client_lists[i];
+
+    DLINK_FOREACH(dptr, list->dlink.head)
+    {
+      user = dptr->data;
+      if (numfound++ == 0)
+        tcm_log(L_NORM, "killlisted list %s", list_name);
+
+      send_to_server("KILL %s :%s", user->nick, rsn);
+    }
+    return;
+  }
+  else if (action == DUMP && list_name != NULL)
+  {
+    print_list(connection_p, list_name);
+    return;
+  }
+
+  if (action == MAKE)
+  {
+    if ((idx = find_list(list_name)) == -1 &&
+        (create_list(connection_p, list_name) != NULL))
+      idx = find_list(list_name);
+  }
 
   for (i=0; i < HASHTABLESIZE; ++i)
   {
@@ -1272,22 +1311,21 @@ kill_or_list_users(struct connection *connection_p, char *userhost, int regex,
       if(match(userhost, uhost) == 0)
 #endif 
       {
-	if(kill_users)
-	  {
-	    if(numfound == 0)
-	      {
-		numfound++;
-		tcm_log(L_NORM, "killlisted %s", uhost);
-	      }
-	    send_to_server("KILL %s :%s", ptr->info->nick, reason);
-	  }
-	else
-	  {
-	    if(numfound == 0)
-	      send_to_connection(connection_p,
-				 "The following clients match %s:", userhost);
+        switch (action)
+        {
+          case KILL:
+            if(numfound++ == 0)
+              tcm_log(L_NORM, "killlisted %s", uhost);
 
-	    numfound++;
+            send_to_server("KILL %s :%s", ptr->info->nick, reason);
+            break;
+
+          case DUMP:
+            if (numfound++ == 0)
+              send_to_connection(connection_p,
+                                 "The following clients match %s:",
+                                 userhost);
+
 	    if(ptr->info->ip_host[0] > '9' || ptr->info->ip_host[0] < '0')
 	      send_to_connection(connection_p,
 				 "  %s (%s@%s) {%s}", ptr->info->nick,
@@ -1298,10 +1336,29 @@ kill_or_list_users(struct connection *connection_p, char *userhost, int regex,
 				 "  %s (%s@%s) [%s] {%s}", ptr->info->nick,
 				 ptr->info->username, ptr->info->host,
 				 ptr->info->ip_host, ptr->info->class);
-	  }
+            break;
+
+          case MAKE:
+            if (numfound++ == 0)
+              send_to_connection(connection_p,
+                                 "Adding matches to list %s",
+                                 list_name);
+
+            if (!add_client_to_list(ptr->info, idx))
+            {
+              send_to_connection(connection_p,
+                                 "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                                 ptr->info->nick, ptr->info->username, ptr->info->host,
+                                 ptr->info->ip_host, ptr->info->class);
+              continue;
+            }
+          default:
+            break;
+	}
       }
     }
   }
+
   if(numfound > 0)
     send_to_connection(connection_p,
 		       "%d matches for %s found", numfound, userhost);

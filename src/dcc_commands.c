@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.149 2003/02/26 10:25:40 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.150 2003/03/29 10:06:05 bill Exp $ */
 
 #include "setup.h"
 
@@ -44,6 +44,8 @@
 #include "actions.h"
 #include "handler.h"
 #include "hash.h"
+#include "tools.h"
+#include "client_list.h"
 
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>
@@ -56,6 +58,7 @@ static void print_help(struct connection *connection_p, char *text);
 
 static void m_class(struct connection *connection_p, int argc, char *argv[]);
 static void m_classt(struct connection *connection_p, int argc, char *argv[]);
+static void m_listdump(struct connection *connection_p, int argc, char *argv[]);
 static void m_killlist(struct connection *connection_p, int argc,
 		       char *argv[]);
 static void m_kline(struct connection *connection_p, int argc, char **argv);
@@ -127,6 +130,18 @@ m_classt(struct connection *connection_p, int argc, char *argv[])
 }
 
 void
+m_listdump(struct connection *connection_p, int argc, char *argv[])
+{
+  if (argc != 2)
+  {
+    send_to_connection(connection_p, "Usage: %s <list name>", argv[0]);
+    return;
+  }
+
+  print_list(connection_p, argv[1]);
+}
+
+void
 m_killlist(struct connection *connection_p, int argc, char *argv[])
 {
   char reason[MAX_REASON];
@@ -135,7 +150,8 @@ m_killlist(struct connection *connection_p, int argc, char *argv[])
   if ((argc < 2) || (argc < 4 && (strcasecmp(argv[1], "-r") == 0)))
   {
     send_to_connection(connection_p,
-		       "Usage: .killlist [-r] <wildcarded/regex userhost> <reason>");
+                       "Usage: %s <[wildcard userhost]|[-r regex]|[-l list]> [reason]",
+                       argv[0]);
     return;
   }
 
@@ -147,7 +163,7 @@ m_killlist(struct connection *connection_p, int argc, char *argv[])
   if (argc < 2)
   {
     send_to_connection(connection_p,
-		       "Usage: %s <wildcarded userhost> <reason>",
+                       "Usage: %s <[wildcard userhost]|[-l list]> [reason]",
 		       argv[0]);
     return;
   }
@@ -173,22 +189,37 @@ m_killlist(struct connection *connection_p, int argc, char *argv[])
   {
     send_to_all(NULL, FLAGS_ALL, "*** killlist %s :%s by %s", argv[2],
                 reason, connection_p->registered_nick);
-    kill_or_list_users(connection_p, argv[2], YES, YES, reason);
+    kill_or_list_users(connection_p, argv[2], YES, KILL, NULL, reason);
   }
   else
 #endif
+  if (strcasecmp(argv[1], "-l") == 0)
+  {
+    if (argc <= 2 || BadPtr(argv[2]))
+    {
+      send_to_connection(connection_p, "No such list.");
+      return;
+    }
+    send_to_all(NULL, FLAGS_ALL, "*** killlist -l %s :%s by %s", argv[2],
+                reason, connection_p->registered_nick);
+    kill_or_list_users(connection_p, argv[1], NO, KILL, argv[2], reason);
+  }
+  else
   {
     send_to_all(NULL, FLAGS_ALL, "*** killlist %s :%s by %s", argv[1],
                 reason, connection_p->registered_nick);
-    kill_or_list_users(connection_p, argv[1], NO, YES, reason);
+    kill_or_list_users(connection_p, argv[1], NO, KILL, NULL, reason);
   }
 }
 
 void
 m_kline(struct connection *connection_p, int argc, char *argv[])
 {
-  char buff[MAX_BUFF];
-  int kline_time;
+  char buff[MAX_BUFF], *userhost = NULL;
+  int kline_time, idx;
+  struct client_list *list;
+  struct user_entry *user;
+  dlink_node *ptr;
 
   if (!(connection_p->type & FLAGS_KLINE))
   {
@@ -197,29 +228,94 @@ m_kline(struct connection *connection_p, int argc, char *argv[])
     return;
   }
 
-  if (argc < 3)
+  /*
+   * .kline
+   */
+  if (argc < 2)
     send_to_connection(connection_p,
-		       "Usage: %s [time] <[nick]|[user@host]> [reason]",
+		       "Usage: %s [time] <[nick]|[user@host]|[-l listname]> [reason]",
 		       argv[0]);
   else
   {
     if ((kline_time = atoi(argv[1])))
     {
-      if (argc >= 4)
+      /* .kline 1440 -l lamers */
+      /* .kline 1440 -l drones Drones */
+      /* .kline 1440 billy-jon a b c */
+      if (!strcasecmp(argv[2], "-l"))
       {
-	expand_args(buff, MAX_BUFF, argc-3, argv+3);
+        if ((idx = find_list(argv[3])) == -1)
+        {
+          send_to_connection(connection_p, "No such list.");
+          return;
+        }
+        if (argc >= 5)
+          expand_args(buff, sizeof(buff), argc-4, argv+4);
+        else
+          snprintf(buff, sizeof(buff), "No reason");
+        list = &client_lists[idx];
+        DLINK_FOREACH(ptr, list->dlink.head)
+        {
+          user = ptr->data;
+          if ((userhost = get_method_userhost(-1, NULL, user->username,
+                                              user->host)) == NULL)
+          {
+            send_to_connection(connection_p, "Error in get_method_userhost().  Aborting...");
+            continue;
+          }
+          send_to_server("KLINE %s %s :%s", argv[1], userhost, buff);
+        }
       }
+      /* .kline 1440 billy-jon */
+      /* .kline 1440 billy-jon a b c */
       else
-        snprintf(buff, sizeof(buff), "No reason");
+      {
+        if (argc >= 4)
+	  expand_args(buff, MAX_BUFF, argc-3, argv+3);
+        else
+          snprintf(buff, sizeof(buff), "No reason");
+      }
       do_a_kline(kline_time, argv[2], buff, connection_p);
     }
     else
     {
-      if (argc >= 3)
+      /* .kline -l lamers */
+      /* .kline -l drones Drones */
+      if (!strcasecmp(argv[1], "-l"))
       {
-	expand_args(buff, MAX_BUFF, argc-2, argv+2);
+        if ((idx = find_list(argv[2])) == -1)
+        {
+          send_to_connection(connection_p, "No such list.");
+          return;
+        }
+        if (argc >= 4)
+          expand_args(buff, sizeof(buff), argc-3, argv+3);
+        else
+          snprintf(buff, sizeof(buff), "No reason");
+        list = &client_lists[idx];
+        DLINK_FOREACH(ptr, list->dlink.head)
+        {
+          user = ptr->data;
+          if ((userhost = get_method_userhost(-1, NULL, user->username,
+                                              user->host)) == NULL)
+          {
+            send_to_connection(connection_p, "Error in get_method_userhost().  Aborting...");
+            continue;
+          }
+          send_to_server("KLINE %s :%s", userhost, buff);
+        }
       }
-      do_a_kline(0, argv[1], buff, connection_p);
+      /* .kline billy-jon */
+      /* .kline billy-jon a b c */
+      /* .kline *@ummm.E a b c */
+      else
+      {
+        if (argc >= 3)
+          expand_args(buff, sizeof(buff), argc-2, argv+2);
+        else
+          snprintf(buff, sizeof(buff), "No reason");
+        do_a_kline(0, argv[1], buff, connection_p);
+      }
     }
   }
 }
@@ -263,11 +359,14 @@ m_kaction(struct connection *connection_p, int argc, char *argv[])
   char *userhost;
   char *p;
   int actionid;
+  struct client_list *list;
+  dlink_node *ptr;
+  struct user_entry *user;
 
   if(argc < 2)
   {
     send_to_connection(connection_p,
-		       "Usage: %s [time] <[nick]|[user@host]>", argv[0]);
+		       "Usage: %s [time] <[nick]|[user@host]|[-l listname]>", argv[0]);
     return;
   }
 
@@ -290,6 +389,39 @@ m_kaction(struct connection *connection_p, int argc, char *argv[])
   }
   else
   {
+    if ((argc == 3 && !strcasecmp(argv[1], "-l")) ||
+        (argc == 4 && !strcasecmp(argv[2], "-l")))
+    {
+      if ((actionid = find_list(argv[argc - 2])) == -1)
+      {
+        send_to_connection(connection_p, "No such list.");
+        return;
+      }
+      list = &client_lists[actionid];
+      if (list->name[0] == '\0')
+      {
+        send_to_connection(connection_p, "No such list.");
+        return;
+      }
+      DLINK_FOREACH(ptr, list->dlink.head)
+      {
+        user = ptr->data;
+        if ((userhost = get_method_userhost(actionid, NULL, user->username,
+                                            user->host)) == NULL)
+        {
+          send_to_connection(connection_p,
+                             "Error in get_method_userhost().  Aborting...");
+          continue;
+        }
+
+        if (argc == 3)
+          send_to_server("KLINE %s :%s",
+                         userhost, actions[actionid].reason);
+        else
+          send_to_server("KLINE %s %s :%s",
+                         argv[1], userhost, actions[actionid].reason);
+      }
+    }
     if((p = strchr(argv[2], '@')) != NULL)
     {
       *p++ = '\0';
@@ -698,20 +830,49 @@ void
 m_list(struct connection *connection_p, int argc, char *argv[])
 {
 #ifdef HAVE_REGEX_H
-  if((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+  if(argc < 2)
+  {
     send_to_connection(connection_p,
-	"Usage: %s [-r] <wildcarded/regex userhost>", argv[0]);
+                       "Usage: %s [-l list] <[wildcard userhost]|[-r regex]>",
+                       argv[0]);
+    return;
+  }
+
+  if(strcasecmp(argv[1], "-l") == 0)
+  {
+    if (argc <= 3 ||
+        (!strcasecmp(argv[3], "-r") && argc <= 4))
+    {
+      send_to_connection(connection_p,
+                         "Usage: %s [-l list] <[wildcarded userhost]|[-r regex]>",
+                         argv[0]);
+      return;
+    }
+    if (strcasecmp(argv[3], "-r") == 0)
+      kill_or_list_users(connection_p, argv[4], YES, MAKE, argv[2], NULL);
+    else
+      kill_or_list_users(connection_p, argv[3], NO, MAKE, argv[2], NULL);
+  }
   else if(argc == 2)
-    kill_or_list_users(connection_p, argv[1], NO, NO, NULL);
+    kill_or_list_users(connection_p, argv[1], NO, DUMP, NULL, NULL);
   else
-    kill_or_list_users(connection_p, argv[2], YES, NO, NULL);
+    kill_or_list_users(connection_p, argv[2], YES, DUMP, NULL, NULL);
 #else
   if(argc < 2)
     send_to_connection(connection_p,
-		       "Usage: %s <wildcarded userhost>",
-         argv[0]);
+		       "Usage: %s <[wildcard userhost]|[-l list]>",
+                       argv[0]);
+  else if(strcasecmp(argv[1], "-l") == 0)
+  {
+    if (argc <= 2 || BadPtr(argv[2]))
+    {
+      send_to_connection(connection_p, "No such list.");
+      return;
+    }
+    kill_or_list_users(connection_p, argv[2], NO, DUMP, argv[2], NULL);
+  }
   else
-    kill_or_list_users(connection_p, argv[1], NO, NO, NULL);
+    kill_or_list_users(connection_p, argv[1], NO, DUMP, NULL, NULL);
 #endif
 }
 
@@ -742,29 +903,71 @@ m_ulist(struct connection *connection_p, int argc, char *argv[])
   char buf[MAX_BUFF];
 
 #ifdef HAVE_REGEX_H
-  if((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+  if(!(argc >= 2) || !(argc <= 5) ||
+     !(strcasecmp(argv[1], "-l") == 0 && argc >= 5 && strcasecmp(argv[3], "-r") == 0) ||
+     !(strcasecmp(argv[1], "-l") == 0 && argc >= 4 && strcasecmp(argv[3], "-r") != 0) ||
+     !(strcasecmp(argv[1], "-l") != 0 && argc >= 3 && strcasecmp(argv[1], "-r") == 0) ||
+     !(strcasecmp(argv[1], "-l") != 0 && argc >= 2 && strcasecmp(argv[1], "-r") != 0))
+  {
     send_to_connection(connection_p,
-		       "Usage: %s [-r] <wildcarded/regex username>", argv[0]);
+                       "Usage: %s [-l list] <[wildcard username]|[-r regex]>",
+                       argv[0]);
+    return;
+  }
+
+  if(strcasecmp(argv[1], "-l") == 0)
+  {
+    if (argc < 5)
+    {
+      snprintf(buf, sizeof(buf), "%s@*", argv[3]);
+      kill_or_list_users(connection_p, buf, NO, MAKE, argv[2], NULL);
+    }
+    else
+    {
+      snprintf(buf, sizeof(buf), "%s@*", argv[4]);
+      kill_or_list_users(connection_p, buf, YES, MAKE, argv[2], NULL);
+    }
+  }
   else if(argc == 2)
   {
-    snprintf(buf, MAX_BUFF, "%s@*", argv[1]);
-    kill_or_list_users(connection_p, buf, NO, NO, NULL);
+    snprintf(buf, sizeof(buf), "%s@*", argv[1]);
+    kill_or_list_users(connection_p, buf, NO, DUMP, NULL, NULL);
+  }
+  else if(strcasecmp(argv[1], "-r") == 0)
+  {
+    snprintf(buf, sizeof(buf), "%s@*", argv[2]);
+    kill_or_list_users(connection_p, buf, YES, DUMP, NULL, NULL);
   }
   else
   {
-    snprintf(buf, MAX_BUFF, "%s@*", argv[2]);
-    kill_or_list_users(connection_p, buf, YES, NO, NULL);
+    send_to_connection(connection_p,
+                       "Usage: %s [-l list] <[wildcard username]|[-r regex]>",
+                       argv[0]);
+    return;
   }
 #else
-  if(argc < 2)
-    send_to_connection(&connection_p, "Usage: %s <wildcarded username>",
-         argv[0]);
+  if(!(argc >= 2) || !(argc <= 4) ||
+     !(strcasecmp(argv[1], "-l") == 0 && argc >= 4) ||
+     !(strcasecmp(argv[1], "-l") != 0 && argc >= 2))
+  {
+    send_to_connection(&connection_p,
+                      "Usage: %s [-l list] <wildcard username>",
+                       argv[0]);
+    return;
+  }
+
+  if (argc > 2)
+  {
+    snprintf(buf, sizeof(buf), "%s@*", argv[3]);
+    kill_or_list_users(connection_p, buf, NO, MAKE, argv[2], NULL);
+  }
   else
   {
-    snprintf(buf, MAX_BUFF, "%s@*", argv[1]);
-    kill_or_list_users(connection_p, argv[1], NO, NO, NULL);
+    snprintf(buf, sizeof(buf), "%s@*", argv[1]);
+    kill_or_list_users(connection_p, buf, NO, DUMP, NULL, NULL);
   }
-#endif
+#endif /* HAVE_REGEX_H */
+
 }
 
 void
@@ -773,29 +976,71 @@ m_hlist(struct connection *connection_p, int argc, char *argv[])
   char buf[MAX_BUFF];
 
 #ifdef HAVE_REGEX_H
-  if((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
-    send_to_connection(connection_p, "Usage: %s [-r] <wildcarded/regex host>",
+  if (!(argc >= 2) || !(argc <= 5) ||
+      !(strcasecmp(argv[1], "-l") == 0 && argc >= 5 && strcasecmp(argv[3], "-r") == 0) ||
+      !(strcasecmp(argv[1], "-l") == 0 && argc >= 4 && strcasecmp(argv[3], "-r") != 0) ||
+      !(strcasecmp(argv[1], "-l") != 0 && argc >= 3 && strcasecmp(argv[1], "-r") == 0) ||
+      !(strcasecmp(argv[1], "-l") != 0 && argc >= 2 && strcasecmp(argv[1], "-r") != 0))
+  {
+    send_to_connection(connection_p,
+                       "Usage: %s [-l list] <[wildcard host]|[-r regex]>",
 		       argv[0]);
+    return;
+  }
+
+  if(strcasecmp(argv[1], "-l") == 0)
+  {
+    if (argc < 5)
+    {
+      snprintf(buf, sizeof(buf), "*@%s", argv[3]);
+      kill_or_list_users(connection_p, buf, NO, MAKE, argv[2], NULL);
+    }
+    else
+    {
+      snprintf(buf, sizeof(buf), "*@%s", argv[4]);
+      kill_or_list_users(connection_p, buf, YES, MAKE, argv[2], NULL);
+    }
+  }
   else if(argc == 2)
   {
-    snprintf(buf, MAX_BUFF, "*@%s", argv[1]);
-    kill_or_list_users(connection_p, buf, NO, NO, NULL);
+    snprintf(buf, sizeof(buf), "*@%s", argv[1]);
+    kill_or_list_users(connection_p, buf, NO, DUMP, NULL, NULL);
+  }
+  else if(strcasecmp(argv[1], "-r") == 0)
+  {
+    snprintf(buf, sizeof(buf), "*@%s", argv[2]);
+    kill_or_list_users(connection_p, buf, YES, DUMP, NULL, NULL);
   }
   else
   {
-    snprintf(buf, MAX_BUFF, "*@%s", argv[2]);
-    kill_or_list_users(connection_p, buf, YES, NO, NULL);
+    send_to_connection(connection_p,
+                       "Usage: %s [-l list] <[wildcard host]|[-r regex]>",
+                       argv[0]);
+    return;
   }
 #else
-  if(argc < 2)
-    send_to_connection(connection_p, "Usage: %s <wildcarded host>",
-         argv[0]);
+  if (!(argc >= 2) || !(argc <= 4) ||
+      !(strcasecmp(argv[1], "-l") == 0 && argc >= 4) ||
+      !(strcasecmp(argv[1], "-l") != 0 && argc >= 2))
+  {
+    send_to_connection(connection_p,
+                       "Usage: %s [-l list] <wildcard host>",
+                       argv[0]);
+    return;
+  }
+
+  if (argc > 2)
+  {
+    snprintf(buf, sizeof(buf), "*@%s", argv[3]);
+    kill_or_list_users(connection_p, buf, NO, MAKE, argv[2], NULL);
+  }
   else
   {
-    snprintf(buf, MAX_BUFF, "*@%s", argv[1]);
-    kill_or_list_users(connection_p, argv[1], NO, NO, NULL);
+    snprintf(buf, sizeof(buf), "*@%s", argv[1]);
+    kill_or_list_users(connection_p, buf, NO, DUMP, NULL, NULL);
   }
-#endif
+#endif /* HAVE_REGEX_H */
+
 }
 
 #ifdef DEBUGMODE
@@ -1020,6 +1265,9 @@ struct dcc_command class_msgtab = {
 struct dcc_command classt_msgtab = {
  "classt", NULL, {m_unregistered, m_classt, m_classt}
 };
+struct dcc_command listdump_msgtab = {
+ "listdump", NULL, {m_unregistered, m_listdump, m_listdump}
+};
 struct dcc_command killlist_msgtab = {
  "killlist", NULL, {m_unregistered, m_killlist, m_killlist}
 };
@@ -1182,6 +1430,7 @@ init_commands(void)
 {
   add_dcc_handler(&class_msgtab);
   add_dcc_handler(&classt_msgtab);
+  add_dcc_handler(&listdump_msgtab);
   add_dcc_handler(&killlist_msgtab);
   add_dcc_handler(&kline_msgtab);
   add_dcc_handler(&kclone_msgtab);

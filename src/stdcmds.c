@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.102 2002/12/29 09:41:20 bill Exp $ */
+/* $Id: stdcmds.c,v 1.103 2003/03/29 10:06:06 bill Exp $ */
 
 #include "setup.h"
 
@@ -196,13 +196,13 @@ void
 do_a_kline(int kline_time, char *pattern,
 	   char *reason, struct connection *connection_p)
 {
-  if(pattern == NULL || pattern[0] == '\0')
+  if(BadPtr(pattern))
   {
     send_to_connection(connection_p, "KLINE failed.  No user@host.");
     return;
   }
 
-  if(reason == NULL || reason[0] == '\0')
+  if(BadPtr(reason))
   {
     send_to_connection(connection_p, "KLINE failed.  No reason.");
     return;

@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.58 2003/01/19 01:18:38 wiz Exp $ */
+/* $Id: tcm.h,v 1.59 2003/03/29 10:06:03 bill Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -87,5 +87,6 @@ void xfree(void *);
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
+#define  BadPtr(x) (!(x) || (*(x) == '\0'))
 
 #endif

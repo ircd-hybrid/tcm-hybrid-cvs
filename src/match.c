@@ -1,5 +1,5 @@
 /* match.c - IRCnet derived match() function
- * $Id: match.c,v 1.2 2002/06/01 02:00:08 wcampbel Exp $
+ * $Id: match.c,v 1.3 2003/03/29 10:06:06 bill Exp $
  */
 
 /* Original header */
@@ -26,10 +26,10 @@
 #include <sys/types.h>
 #include <ctype.h>
 #include "match.h"
+#include "tcm.h"
 
 /* Self containment for NoteServ-Hybrid, tcm, and Stats. */
 
-#define  BadPtr(x) (!(x) || (*(x) == '\0'))
 #define PRINT 1
 #define CNTRL 2
 #define ALPHA 4

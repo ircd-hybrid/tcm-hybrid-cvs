@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.49 2003/02/12 02:42:14 bill Exp $
+ * $Id: actions.c,v 1.50 2003/03/29 10:06:05 bill Exp $
  */
 
 
@@ -553,6 +553,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
   char *host;
   char *p;
   char *s;
+  int hoststrip;
   
   if(valid_string(m_user) && valid_string(m_host))
   {
@@ -578,9 +579,10 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
 
   p = newuserhost;
 
+  hoststrip = (actionid == -1) ? HS_DEFAULT : actions[actionid].hoststrip;
   if(user[0] == '~')
   {
-    switch(actions[actionid].hoststrip & HOSTSTRIP_NOIDENT)
+    switch(hoststrip & HOSTSTRIP_NOIDENT)
     {
       case HOSTSTRIP_NOIDENT_PREFIXED:
         s = user;
@@ -605,7 +607,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
   }
   else
   {
-    switch(actions[actionid].hoststrip & HOSTSTRIP_IDENT)
+    switch(hoststrip & HOSTSTRIP_IDENT)
     {
       case HOSTSTRIP_IDENT_PREFIXED:
         s = user;
@@ -631,7 +633,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
 
   *p++ = '@';
 
-  switch(actions[actionid].hoststrip & HOSTSTRIP_HOST)
+  switch(hoststrip & HOSTSTRIP_HOST)
   {
     case HOSTSTRIP_HOST_BLOCK:
 	if (inet_addr(host) == INADDR_NONE && (s = strchr(host, '.')) != NULL) {

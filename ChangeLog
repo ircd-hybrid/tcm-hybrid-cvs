@@ -1,3 +1,9 @@
+*** 20011026_4 by bill
+- fixed all warnings caused by src/ files
+- updated dependancy files
+- fixes for modules/ warnings to come
+
+
 *** 20011026_3 by bill
 - missing string.h which caused warnings on compile
 

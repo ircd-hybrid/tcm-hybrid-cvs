@@ -8,6 +8,8 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
+#include "setup.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -21,7 +23,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 
-#ifndef SOL26
+#ifdef HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
 #endif
 
@@ -44,13 +46,13 @@
 #include "stdcmds.h"
 #include "commands.h"
 #include "wild.h"
-#include "include/serno.h"
+#include "serno.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.3 2000/09/02 04:50:47 lusky Exp $";
+static char *version="$Id: serverif.c,v 1.4 2000/09/02 05:42:37 lusky Exp $";
 
 extern int errno;          /* The Unix internal error number */
 

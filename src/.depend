@@ -1,16 +1,18 @@
-serverif.o: serverif.c config.h tcm.h token.h bothunt.h userlist.h \
- abuse.h serverif.h logging.h stdcmds.h commands.h wild.h \
- include/serno.h
+serverif.o: serverif.c include/setup.h config.h tcm.h token.h \
+ bothunt.h userlist.h abuse.h serverif.h logging.h stdcmds.h \
+ commands.h wild.h include/serno.h
 stdcmds.o: stdcmds.c config.h tcm.h logging.h serverif.h stdcmds.h
 wild.o: wild.c wild.h
-bothunt.o: bothunt.c config.h tcm.h stdcmds.h abuse.h serverif.h \
- bothunt.h userlist.h token.h logging.h wild.h include/serno.h
-commands.o: commands.c config.h tcm.h token.h bothunt.h userlist.h \
- serverif.h logging.h commands.h abuse.h stdcmds.h
-abuse.o: abuse.c config.h tcm.h token.h bothunt.h userlist.h \
- serverif.h logging.h abuse.h
+bothunt.o: bothunt.c include/setup.h config.h tcm.h stdcmds.h abuse.h \
+ serverif.h bothunt.h userlist.h token.h logging.h wild.h \
+ include/serno.h
+commands.o: commands.c include/setup.h config.h tcm.h token.h \
+ bothunt.h userlist.h serverif.h logging.h commands.h abuse.h \
+ stdcmds.h
+abuse.o: abuse.c include/setup.h config.h tcm.h token.h bothunt.h \
+ userlist.h serverif.h logging.h abuse.h
 userlist.o: userlist.c config.h token.h tcm.h serverif.h userlist.h \
  logging.h stdcmds.h wild.h abuse.h
 token.o: token.c config.h tcm.h token.h bothunt.h
-logging.o: logging.c config.h tcm.h userlist.h serverif.h bothunt.h \
- logging.h
+logging.o: logging.c include/setup.h config.h tcm.h userlist.h \
+ serverif.h bothunt.h logging.h

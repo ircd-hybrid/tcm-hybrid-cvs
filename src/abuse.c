@@ -1,3 +1,5 @@
+#include "setup.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -9,7 +11,7 @@
 #include <sys/socket.h>
 #include <stdarg.h>
 
-#ifndef SOL26
+#ifdef HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
 #endif
 
@@ -32,7 +34,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.1 2000/09/02 04:30:48 bill Exp $";
+static char *version="$Id: abuse.c,v 1.2 2000/09/02 05:42:35 lusky Exp $";
 
 /*
  * do_a_kline()

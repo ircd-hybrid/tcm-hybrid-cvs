@@ -1,3 +1,5 @@
+#include "setup.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,7 +13,7 @@
 #include <sys/socket.h>
 #include <stdarg.h>
 
-#ifndef SOL26
+#ifdef HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
 #endif
 
@@ -38,7 +40,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.1 2000/09/02 04:30:50 bill Exp $";
+static char *version="$Id: commands.c,v 1.2 2000/09/02 05:42:36 lusky Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 

@@ -5,6 +5,8 @@
  * - db
  */
 
+#include "setup.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -15,7 +17,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#ifndef SOL26
+#ifdef HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
 #endif
 
@@ -33,7 +35,7 @@
 #include "bothunt.h"
 #include "logging.h"
 
-static char *version="$Id: logging.c,v 1.1 2000/09/02 04:30:49 bill Exp $";
+static char *version="$Id: logging.c,v 1.2 2000/09/02 05:42:37 lusky Exp $";
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file

@@ -1,0 +1,19 @@
+CC=@CC@
+RM=@RM@
+TCMLIBS=@LIBS@
+INCLUDEDIR=-I../include
+
+.c.o:
+	${CC} ${CPPFLAGS} ${CFLAGS} -c $<
+
+all: mkpass
+
+mkpass: mkpass.o
+	$(CC) $(LDFLAGS) -o mkpass mkpass.o ${TCMLIBS}
+
+clean:
+	${RM} -f mkpass *.o *~ *core
+
+distclean: clean
+	${RM} -f Makefile
+

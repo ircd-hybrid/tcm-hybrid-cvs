@@ -1,0 +1,53 @@
+
+CC = @CC@
+RM = @RM@
+MKDEP = ${CC} -MM
+
+TCMLIBS = @LIBS@
+INCLUDES = -I./include
+CPPFLAGS = ${INCLUDES} @CPPFLAGS@
+
+# Any other defines you need, add below.
+DEFINES =
+
+# -O for optimization.  Can't debug.  Use -g for debuggable code.
+CFLAGS = -g -O2
+
+###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
+
+SOURCES = 	serverif.c\
+		stdcmds.c\
+		wild.c\
+		bothunt.c\
+		commands.c\
+		abuse.c\
+		userlist.c\
+		token.c\
+		logging.c\
+
+OBJECTS = ${SOURCES:.c=.o}
+
+all: tcm tools
+
+clean: 
+	${RM} -f *.o tcm core tcm.core *~ DEBUG *.log clone_log_* tcm.pid *.pref
+	cd tools; ${MAKE} clean; cd ..
+	-@if [ -f include/setup.h ] ; then \
+	echo "To really restart installation, make distclean" ; \
+	fi
+
+distclean: clean
+	${RM} -f Makefile config.status config.cache config.log include/setup.h
+	cd tools; ${MAKE} distclean; cd ..
+
+.c.o:
+	${CC} ${CPPFLAGS} ${CFLAGS} ${DEFINES} -c $<
+
+tcm: ${OBJECTS}
+	${CC} ${CFLAGS} -o tcm ${OBJECTS} ${TCMLIBS}
+
+depend:
+	${MKDEP} ${INCLUDES} ${SOURCES} > .depend
+
+include .depend
+

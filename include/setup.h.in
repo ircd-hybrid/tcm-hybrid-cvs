@@ -1,0 +1,22 @@
+/* include/setup.h.in.  Generated automatically from configure.in by autoheader.  */
+
+/* Define if you need to in order for stat and other things to work.  */
+#undef _POSIX_SOURCE
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if you have the <sys/socketvar.h> header file.  */
+#undef HAVE_SYS_SOCKETVAR_H
+
+/* Define if you have the descrypt library (-ldescrypt).  */
+#undef HAVE_LIBDESCRYPT
+
+/* Define if you have the nsl library (-lnsl).  */
+#undef HAVE_LIBNSL
+
+/* Define if you have the resolv library (-lresolv).  */
+#undef HAVE_LIBRESOLV
+
+/* Define if you have the socket library (-lsocket).  */
+#undef HAVE_LIBSOCKET

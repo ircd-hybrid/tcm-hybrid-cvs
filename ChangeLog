@@ -1,3 +1,42 @@
+bill        2004/06/02 16:05:57 EDT	(20040602_2)
+
+  Modified files:
+    etc                  .cvsignore 
+    src                  Makefile.in conf.c dcc_commands.c hash.c 
+                         main.c userlist.c 
+  Added files:
+    help                 help.class help.classt help.kclone 
+                         help.kdrone help.kflood help.kill 
+                         help.killlist help.kline help.kspam 
+                         help.list help.nfind 
+  Log:
+  - made regex client listing functions use getopt()
+  - added some documentation on a per-command basis
+  - fixed .classt
+  - removed useless kbot
+  
+  Revision  Changes    Path
+  1.2       +1 -0      tcm-hybrid/etc/.cvsignore
+  1.1       +6 -0      tcm-hybrid/help/help.class (new)
+  1.1       +6 -0      tcm-hybrid/help/help.classt (new)
+  1.1       +6 -0      tcm-hybrid/help/help.kclone (new)
+  1.1       +6 -0      tcm-hybrid/help/help.kdrone (new)
+  1.1       +6 -0      tcm-hybrid/help/help.kflood (new)
+  1.1       +3 -0      tcm-hybrid/help/help.kill (new)
+  1.1       +7 -0      tcm-hybrid/help/help.killlist (new)
+  1.1       +6 -0      tcm-hybrid/help/help.kline (new)
+  1.1       +6 -0      tcm-hybrid/help/help.kspam (new)
+  1.1       +7 -0      tcm-hybrid/help/help.list (new)
+  1.1       +7 -0      tcm-hybrid/help/help.nfind (new)
+  1.42      +1 -1      tcm-hybrid/src/Makefile.in
+  1.2       +1 -1      tcm-hybrid/src/conf.c
+  1.156     +186 -185  tcm-hybrid/src/dcc_commands.c
+  1.73      +5 -3      tcm-hybrid/src/hash.c
+  1.139     +0 -4      tcm-hybrid/src/main.c
+  1.155     +3 -54     tcm-hybrid/src/userlist.c
+
+
+
 bill        2004/06/01 22:01:48 EDT	(20040602_1)
 
   Added files:

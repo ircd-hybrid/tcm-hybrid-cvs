@@ -1,3 +1,22 @@
+leeh        2002/06/05 08:29:07 EDT	(20020605_6)
+
+  Modified files:
+    include              userlist.h 
+    src                  dcc_commands.c parse.c userlist.c 
+  Log:
+  - merged handle_save() and m_save()
+  - save umodes in m_save()
+  - added FLAGS_VALID to determine if a users prefs are valid or not.
+    this will remove all existing prefs files made before this date.
+  
+  Revision  Changes    Path
+  1.66      +18 -16    tcm-hybrid/include/userlist.h
+  1.121     +4 -21     tcm-hybrid/src/dcc_commands.c
+  1.59      +3 -4      tcm-hybrid/src/parse.c
+  1.111     +11 -1     tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/05 07:43:55 EDT	(20020605_5)
 
   Modified files:

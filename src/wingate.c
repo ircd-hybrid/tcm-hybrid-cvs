@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.57 2002/06/09 02:10:27 wcampbel Exp $ */
+/* $Id: wingate.c,v 1.58 2002/06/21 13:45:22 leeh Exp $ */
 
 
 #include <netdb.h>
@@ -445,7 +445,7 @@ static void report_open_wingate(int i)
   handle_action(act_wingate,
 		connections[i].nick, connections[i].user,
 		connections[i].host, connections[i].ip, 0);
-  tcm_log(L_NORM, "Open Wingate %s!%s@%s\n",
+  tcm_log(L_NORM, "Open Wingate %s!%s@%s",
 	  connections[i].nick, connections[i].user, connections[i].host);
 }
 #endif
@@ -460,7 +460,7 @@ void report_open_squid(int i)
 
   handle_action(act_squid, connections[i].nick, connections[i].user,
 		connections[i].host, connections[i].ip, 0);
-  tcm_log(L_NORM, "Open squid proxy %s\n", connections[i].host);
+  tcm_log(L_NORM, "Open squid proxy %s", connections[i].host);
 }
 #endif
 
@@ -474,7 +474,7 @@ void report_open_socks(int i)
 
   handle_action(act_socks, connections[i].nick, connections[i].user,
 		connections[i].host, connections[i].ip, 0);
-  tcm_log(L_NORM, "Open socks proxy %s\n", connections[i].host);
+  tcm_log(L_NORM, "Open socks proxy %s", connections[i].host);
 }
 #endif
 

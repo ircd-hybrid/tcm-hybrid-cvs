@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.87 2002/06/07 11:20:15 leeh Exp $
+ * $Id: tcm_io.c,v 1.88 2002/06/21 13:45:22 leeh Exp $
  */
 
 #include <stdio.h>
@@ -597,13 +597,13 @@ connect_to_server(const char *server, const int port)
 
   if ((server_id = find_free_connection_slot()) < 0)
     {
-      tcm_log(L_ERR, "Could not find a free connection slot!\n");
+      tcm_log(L_ERR, "Could not find a free connection slot!");
       return (INVALID);
     }
 
   if ((remote_hostent = gethostbyname (server)) == NULL)
     {
-      printf ("error: unknown host: %s\n", server);
+      printf("error: unknown host: %s\n", server);
       return (INVALID);
     }
 
@@ -681,8 +681,7 @@ connect_to_given_ip_port(struct sockaddr_in *socketname, int port)
   /* open an inet socket */
   if ((sock = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
-      send_to_all(FLAGS_ALL,
-		   "Can't assign fd for socket\n");
+      send_to_all(FLAGS_ALL, "Can't assign fd for socket");
       return(INVALID);
     }
 
@@ -799,20 +798,20 @@ show_stats_p(const char *nick)
       if(has_umode(i, FLAGS_OPER))
 	{
 #ifdef HIDE_OPER_HOST
-	  notice(nick,
-		 "%s - idle %lu\n",
-		 connections[i].nick,
-		 time(NULL) - connections[i].last_message_time );
+	  notice(nick, "%s - idle %lu",
+		 connections[i].nick, 
+		 time(NULL) - connections[i].last_message_time);
 #else 
 	  notice(nick,
-		 "%s (%s@%s) idle %lu\n",
+		 "%s (%s@%s) idle %lu",
 		 connections[i].nick, connections[i].user, connections[i].host,
-		 time(NULL) - connections[i].last_message_time );
+		 time(NULL) - connections[i].last_message_time);
 #endif
 	  number_of_tcm_opers++;
 	}
     }
-  notice(nick,"Number of tcm opers %d\n", number_of_tcm_opers);
+
+  notice(nick,"Number of tcm opers %d", number_of_tcm_opers);
 
   if (config_entries.statspmsg[0])
     notice(nick, config_entries.statspmsg);

@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.47 2002/06/07 16:32:29 db Exp $
+ * $Id: logging.c,v 1.48 2002/06/21 13:45:22 leeh Exp $
  *
  * - db
  */
@@ -320,7 +320,6 @@ date_stamp(void)
  * output	- NONE
  * side effects	- log entry is made 
  */
-
 void
 tcm_log(int level, const char *format,...)
 {
@@ -349,6 +348,7 @@ tcm_log(int level, const char *format,...)
   va_start(va,format);
   vfprintf(l_fp, format, va);
   va_end(va);
+  fprintf(l_fp, "\n");
   fclose(l_fp);
 }
 

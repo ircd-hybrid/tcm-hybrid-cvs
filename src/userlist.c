@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.118 2002/06/21 13:14:49 leeh Exp $
+ * $Id: userlist.c,v 1.119 2002/06/21 13:45:22 leeh Exp $
  *
  */
 
@@ -1137,7 +1137,7 @@ reload_user_list(int sig)
 
   init_opers();
 
-  send_to_all(FLAGS_ALL, "*** Caught SIGHUP ***\n");
+  send_to_all(FLAGS_ALL, "*** Caught SIGHUP ***");
 }
 
 #ifdef DEBUGMODE

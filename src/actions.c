@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.28 2002/06/07 11:20:13 leeh Exp $
+ * $Id: actions.c,v 1.29 2002/06/21 13:45:21 leeh Exp $
  */
 
 #include "setup.h"
@@ -348,23 +348,22 @@ handle_action(int actionid, char *nick, char *user,
       strchr(user, '*') || strchr(user, '?')) 
     {
       if ((actionid < 0) || (actionid >= MAX_ACTIONS))
-	tcm_log(L_WARN,
-		"handle_action: action is %i\n", actionid);
+	tcm_log(L_WARN, "handle_action: action is %i", actionid);
       else if (!user)
-	tcm_log(L_WARN,
-		"handle_action(%s): user is NULL\n", actions[actionid].name);
+	tcm_log(L_WARN, "handle_action(%s): user is NULL",
+                actions[actionid].name);
       else if (!host)
-	tcm_log(L_WARN,
-		"handle_action(%s): host is NULL\n", actions[actionid].name);
+	tcm_log(L_WARN, "handle_action(%s): host is NULL", 
+                actions[actionid].name);
       else if (host[0] != '\0')
-	tcm_log(L_WARN,
-		"handle_action(%s): host is empty\n", actions[actionid].name);
+	tcm_log(L_WARN, "handle_action(%s): host is empty", 
+                actions[actionid].name);
       else if (strchr(host, '*') || strchr(host, '?'))
-	tcm_log(L_WARN, "handle_action(%s): host contains wildchars (%s)\n",
-	    actions[actionid].name, host);
+	tcm_log(L_WARN, "handle_action(%s): host contains wildchars (%s)",
+	        actions[actionid].name, host);
       else if (strchr(user, '*') || strchr(user, '?'))
-	tcm_log(L_WARN, "handle_action(%s): user contains wildchars (%s)\n",
-	    actions[actionid].name, user);
+	tcm_log(L_WARN, "handle_action(%s): user contains wildchars (%s)",
+	        actions[actionid].name, user);
       return;
     }
 
@@ -372,7 +371,7 @@ handle_action(int actionid, char *nick, char *user,
   if (!actions[actionid].method)
     {
       tcm_log(L_WARN, 
-	      "handle_action(%s): method field is 0\n",
+	      "handle_action(%s): method field is 0",
 	      actions[actionid].name);
       return;
     }
@@ -420,8 +419,8 @@ handle_action(int actionid, char *nick, char *user,
 	      if (!userptr || !userptr->ip_host[0])
 		{
 		  /* We couldn't find one either, revert to a k-line */
-		  tcm_log(L_WARN,
-	  "handle_action(%s): Reverting to k-line, couldn't find IP for %s",
+		  tcm_log(L_WARN, 
+                "handle_action(%s): Reverting to k-line, couldn't find IP for %s",
 		      actions[actionid].name, host);
 
 		  print_to_server("KLINE *@%s :%s", host,

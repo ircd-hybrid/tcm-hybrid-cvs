@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.167 2002/06/21 13:14:49 leeh Exp $
+ * $Id: bothunt.c,v 1.168 2002/06/21 13:45:21 leeh Exp $
  */
 
 #include <stdio.h>
@@ -990,7 +990,7 @@ void cs_nick_flood(char *snotice)
     return;
 
   send_to_all(FLAGS_WARN, "CS nick flood user_host = [%s@%s]", user, host);
-  tcm_log(L_NORM, "%s", "CS nick flood user_host = [%s@%s]\n", user, host);
+  tcm_log(L_NORM, "%s", "CS nick flood user_host = [%s@%s]", user, host);
   handle_action(act_flood, nick_reported, user, host, 0, 0);
 }
 
@@ -1022,7 +1022,7 @@ cs_clones(char *snotice)
     return;
 
   send_to_all(FLAGS_WARN, "CS clones user_host = [%s]", user_host);
-  tcm_log(L_NORM, "CS clones = [%s]\n", user_host);
+  tcm_log(L_NORM, "CS clones = [%s]", user_host);
 
   handle_action(act_clone, "", user, host, 0, 0);
 }
@@ -1238,7 +1238,7 @@ add_to_nick_change_table(char *user_host,char *last_nick)
 		      
 	    handle_action(act_flood, last_nick, user, host, 0, 0);
 	    tcm_log(L_NORM,
-		"nick flood %s (%s) %d in %d seconds (%02d/%02d/%d %2.2d:%2.2d:%2.2d)\n",
+		"nick flood %s (%s) %d in %d seconds (%02d/%02d/%d %2.2d:%2.2d:%2.2d)",
 		nick_changes[i].user_host,
 		nick_changes[i].last_nick,
 		nick_changes[i].nick_change_count,
@@ -1593,10 +1593,14 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
           /* no [, no (, god knows what the seperator is */
           if((uh = strchr(nickuserhost,'(')) == NULL)
             {
+
+              /* XXX - stderr?  shouldnt this be a logfile? --fl_ */
+#if 0
               (void)fprintf(stderr,
                             "You have VERY badly screwed up +c output!\n");
               (void)fprintf(stderr,
                             "1st case nickuserhost = [%s]\n", nickuserhost);
+#endif
               return;           /*screwy...prolly core in the caller*/
             }
 
@@ -1610,11 +1614,14 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
             }
           else
             {
+	      /* XXX - stderr? logfile? */
+#if 0
               (void)fprintf(stderr,
                             "You have VERY badly screwed up +c output!\n");
               (void)fprintf(stderr,
                             "No ending ')' nickuserhost = [%s]\n",
                             nickuserhost);
+#endif
               /* No ending ')' found, but lets try it anyway */
             }
 

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.125 2002/06/20 23:46:13 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.126 2002/06/21 13:45:21 leeh Exp $ */
 
 #include "setup.h"
 
@@ -428,8 +428,7 @@ m_die(int connnum, int argc, char *argv[])
 {
   send_to_all( FLAGS_ALL, "I've been ordered to quit irc, goodbye.");
   print_to_server("QUIT :Dead by request!");
-  tcm_log(L_ERR,
-	  "DIEd by oper %s\n", connections[connnum].registered_nick);
+  tcm_log(L_ERR, "DIEd by oper %s", connections[connnum].registered_nick);
   exit(1);
 }
 
@@ -438,8 +437,7 @@ m_restart(int connnum, int argc, char *argv[])
 {
   send_to_all( FLAGS_ALL, "I've been ordered to restart.");
   print_to_server("QUIT :Restart by request!");
-  tcm_log(L_ERR,
-	  "RESTART by oper %s", connections[connnum].registered_nick);
+  tcm_log(L_ERR, "RESTART by oper %s", connections[connnum].registered_nick);
   sleep(1);
   execv(SPATH, NULL);
 }
@@ -490,9 +488,9 @@ m_unkline(int connnum, int argc, char *argv[])
 		    "Usage: %s <user@host>", argv[0]);
   else
   {
-    tcm_log(L_NORM, "UNKLINE %s attempted by oper %s", argv[1],
-        connections[connnum].registered_nick);
-    send_to_all( FLAGS_VIEW_KLINES, "UNKLINE %s attempted by oper %s", 
+    tcm_log(L_NORM, "UNKLINE %s attempted by oper %s",
+            argv[1], connections[connnum].registered_nick);
+    send_to_all(FLAGS_VIEW_KLINES, "UNKLINE %s attempted by oper %s", 
                  argv[1], connections[connnum].registered_nick);
     print_to_server("UNKLINE %s",argv[1]);
   }
@@ -818,12 +816,10 @@ list_opers(int sock)
     if(userlist[i].user[0] == 0)
       break;
 
-    print_to_socket(sock,
-	 "(%s) %s@%s %s\n",
-	 (userlist[i].usernick) ? userlist[i].usernick:"unknown",
-	 userlist[i].user,
-	 userlist[i].host,
-	 type_show(userlist[i].type));
+    print_to_socket(sock, "(%s) %s@%s %s",
+  	            (userlist[i].usernick) ? userlist[i].usernick : "unknown",
+	            userlist[i].user, userlist[i].host, 
+		    type_show(userlist[i].type));
   }
 }
 

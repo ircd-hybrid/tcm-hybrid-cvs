@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.32 2002/06/20 23:46:13 leeh Exp $
+ * $Id: hash.c,v 1.33 2002/06/21 13:45:21 leeh Exp $
  */
 
 #include <stdio.h>
@@ -594,7 +594,7 @@ check_host_clones(char *host)
 	   "%d more possible clones (%d total) from %s:\n",
 	   clonecount, clonecount+reportedclones, host);
 
-    tcm_log(L_NORM, "%d more possible clones (%d total) from %s:\n",
+    tcm_log(L_NORM, "%d more possible clones (%d total) from %s:",
 	clonecount, clonecount+reportedclones, host);
   }
   else
@@ -605,7 +605,7 @@ check_host_clones(char *host)
 	   host, clonecount, now - oldest);
 
     tcm_log(L_NORM, 
-	    "Possible clones from %s detected: %d connects in %d seconds\n",
+	    "Possible clones from %s detected: %d connects in %d seconds",
 	    host, clonecount, now - oldest);
   }
 
@@ -621,14 +621,14 @@ check_host_clones(char *host)
       if(clonecount == 1)
       {
 	(void)snprintf(notice1, MAX_BUFF,
-		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
+		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)",
 		       find->info->nick, find->info->user, find->info->host,
 		       tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
       }
       else
       {
 	(void)snprintf(notice0, MAX_BUFF,
-		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
+		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)",
 		       find->info->nick, find->info->user, find->info->host,
 		       tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
       }
@@ -667,7 +667,7 @@ check_host_clones(char *host)
         if(notice0[0] != '\0')
         {
 	  send_to_all(FLAGS_WARN, "%s", notice0);
-	  tcm_log(L_NORM, "  [etc.]\n");
+	  tcm_log(L_NORM, "  [etc.]");
         }
       }
     }
@@ -733,7 +733,7 @@ check_virtual_host_clones(char *ip_class_c)
 	     clonecount, clonecount+reportedclones, ip_class_c);
 
       tcm_log(L_NORM, 
-	      "%d more possible virtual host clones (%d total) from %s.*:\n",
+	      "%d more possible virtual host clones (%d total) from %s.*:",
 	      clonecount, clonecount+reportedclones, ip_class_c);
     }
   else
@@ -744,7 +744,7 @@ check_virtual_host_clones(char *ip_class_c)
 	     ip_class_c, clonecount, now - oldest);
 
       tcm_log(L_NORM,
-"Possible virtual host clones from %s.* detected: %d connects in %d seconds\n",
+              "Possible virtual host clones from %s.* detected: %d connects in %d seconds",
 	      ip_class_c, clonecount, now - oldest);
     }
 
@@ -774,7 +774,7 @@ check_virtual_host_clones(char *ip_class_c)
 	  if(clonecount == 1)
 	    {
 	      (void)snprintf(notice1,MAX_BUFF - 1,
-			     "  %s is %s@%s [%s] (%2.2d:%2.2d:%2.2d)\n",
+			     "  %s is %s@%s [%s] (%2.2d:%2.2d:%2.2d)",
 			     find->info->nick, find->info->user,
 			     find->info->host, find->info->ip_host,
 			     tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
@@ -782,7 +782,7 @@ check_virtual_host_clones(char *ip_class_c)
           else
 	    {
 	      (void)snprintf(notice0,MAX_BUFF - 1,
-			     "  %s is %s@%s [%s] (%2.2d:%2.2d:%2.2d)\n",
+			     "  %s is %s@%s [%s] (%2.2d:%2.2d:%2.2d)",
 			     find->info->nick, find->info->user,
 			     find->info->host, find->info->ip_host,
 			     tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
@@ -806,7 +806,7 @@ check_virtual_host_clones(char *ip_class_c)
 	    ;
 	  else if(clonecount == 2)
 	    {
-	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s", notice1);
+	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s\n", notice1);
 	      tcm_log(L_NORM, "%s", notice1);
 
 	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s", notice0);
@@ -814,13 +814,13 @@ check_virtual_host_clones(char *ip_class_c)
 	    }
 	  else if(clonecount < 5)
 	    {
-	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s", notice0);
+	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s\n", notice0);
 	      tcm_log(L_NORM, "%s", notice0);
 	    }
 	  else if(clonecount == 5)
 	    {
 	      send_to_all(FLAGS_WARN, "%s", notice0);
-	      tcm_log(L_NORM, "  [etc.]\n");
+	      tcm_log(L_NORM, "  [etc.]");
 	    }
 	}
 
@@ -902,7 +902,7 @@ kill_add_report(char *server_notice)
 	    {
 	      send_to_all(FLAGS_VIEW_KLINES, "%s killed by %s: %s",
 			  nick, by, reason);
-	      tcm_log(L_NORM, "%s killed by %s: %s\n",
+	      tcm_log(L_NORM, "%s killed by %s: %s",
 		      nick, by, reason);
 	      break;
 	    }
@@ -1167,7 +1167,7 @@ kill_or_list_users(int sock, char *userhost, int regex,
 	    if(numfound == 0)
 	      {
 		numfound++;
-		tcm_log(L_NORM, "killlisted %s\n", uhost);
+		tcm_log(L_NORM, "killlisted %s", uhost);
 	      }
 	    print_to_server("KILL %s :%s", ptr->info->nick, reason);
 	  }

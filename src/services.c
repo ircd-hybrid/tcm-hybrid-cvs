@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.18 2002/06/07 10:58:06 leeh Exp $
+ * $Id: services.c,v 1.19 2002/06/21 13:45:22 leeh Exp $
  */
 
 #include <stdio.h>
@@ -100,8 +100,8 @@ services_handler(struct source_client *source_p, int argc, char *argv[])
     privmsg(config_entries.defchannel, "%s reports drone %s", SERVICES_NAME, nick);
 
     handle_action(act_drone, nick, user, host, 0, 0);
-    tcm_log(L_NORM,
-	    "%s reports drone %s [%s@%s]", SERVICES_NAME, nick, user, host);
+    tcm_log(L_NORM, "%s reports drone %s [%s@%s]",
+            SERVICES_NAME, nick, user, host);
     return;
   }
 #endif

@@ -1,3 +1,18 @@
+bill        2002/12/12 14:30:28 EST	(20021212_0)
+
+  Modified files:
+    include              actions.h 
+    src                  actions.c services.c 
+  Log:
+  - if sclone/drone actions do not report to dcc/irc, do not report to dcc/irc
+  
+  Revision  Changes    Path
+  1.17      +14 -14    tcm-hybrid/include/actions.h
+  1.42      +0 -14     tcm-hybrid/src/actions.c
+  1.25      +7 -6      tcm-hybrid/src/services.c
+
+
+
 bill        2002/12/10 11:35:46 EST	(20021210_0)
 
   Modified files:

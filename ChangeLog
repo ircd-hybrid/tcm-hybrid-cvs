@@ -1,3 +1,15 @@
+bill        2002/05/08 16:39:19 EDT	(20020508_2)
+
+  Modified files:
+    modules              commands.c 
+  Log:
+  - removed m_k<action> from commands.c
+  
+  Revision  Changes    Path
+  1.50      +1 -86     tcm-hybrid/modules/commands.c
+
+
+
 bill        2002/05/08 16:01:27 EDT	(20020508_1)
 
   Modified files:

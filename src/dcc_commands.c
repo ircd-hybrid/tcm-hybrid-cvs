@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.78 2002/05/25 12:34:23 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.79 2002/05/25 15:08:09 leeh Exp $ */
 
 #include "setup.h"
 
@@ -986,53 +986,6 @@ m_hlist(int connnum, int argc, char *argv[])
 #endif
 }
 #endif
-
-/*
-** dccproc()
-**   Handles processing of dcc chat commands
-*/
-void 
-dccproc(int connnum, int argc, char *argv[])
-{
-  char buff[MAX_BUFF];
-  char dccbuff[MAX_BUFF];
-  char who_did_command[2*MAX_NICK];
-  int len;
-  int i;
-  char *buffer, *p;
-
-  if (argv[0][0] == '.')
-  {
-    print_to_socket(connections[connnum].socket, 
-		    "Unknown command [%s]", argv[0]+1);
-    return;
-  }
-  p = buff;
-  for (i = 0; i < argc; i++)
-  {
-    len = sprintf(p, "%s ", argv[i]);
-    p += len;
-  }
-  /* blow away last ' ' */
-  *--p = '\0';
-
-  buffer=buff;
-
-  who_did_command[0] = '\0';
-
-  snprintf(dccbuff, sizeof(dccbuff) - 1,"<%s@%s> %s",
-           connections[connnum].nick, config_entries.dfltnick, buffer);
-
-  if(connections[connnum].type & TYPE_PARTYLINE)
-    send_to_all( SEND_ALL, "%s", dccbuff);
-  else
-  {
-    print_to_socket(connections[connnum].socket,
-                    "You are not +p, not sending to chat line");
-  }
-
-  return;
-}
 
 /*
  * set_actions

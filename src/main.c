@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.62 2002/05/25 12:34:23 leeh Exp $ */
+/* $Id: main.c,v 1.63 2002/05/25 15:08:09 leeh Exp $ */
 
 #include "setup.h"
 
@@ -490,40 +490,6 @@ setup_corefile(void)
   }
 }
 #endif
-
-/*
- * expand_args
- *
- * inputs	- pointer to output
- *		- max length of output
- *		- argc
- *		- *argv[]
- * output	- none
- * side effects	- This function takes a set of argv[] and expands
- *		  it back out. basically the reverse of parse_args().
- */
-void
-expand_args(char *output, int maxlen, int argc, char *argv[])
-{
-  int curlen=0;
-  int len;
-  int i;
-
-  for (i = 0; i < argc; i++)
-  {
-    len = strlen(argv[i]) + 1;
-    if ((len + curlen) >= maxlen) 
-      {
-	*output = '\0';
-	return;
-      }
-    sprintf(output,"%s ", argv[i]);
-    output += len;
-    curlen += len;
-  }
-  /* blow away last ' ' */
-  *--output = '\0';
-}
 
 /*
  * strlcat and strlcpy were ripped from openssh 2.5.1p2

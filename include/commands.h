@@ -1,32 +1,9 @@
 #ifndef __COMMANDS_H
 #define __COMMANDS_H
 
-/* $Id: commands.h,v 1.12 2002/05/24 18:50:49 leeh Exp $ */
+/* $Id: commands.h,v 1.13 2002/05/25 15:08:06 leeh Exp $ */
 
 void init_allow_nick();
-void dccproc(int connnum, int argc, char *argv[]);	
-
-#define MAX_MSG_HASH  200
-typedef void (*TcmMessageHandler)(int connum, int argc, char *argv[]);
-
-struct TcmMessageHash
-{
-  char   *cmd;
-  struct TcmMessage      *msg;
-  struct TcmMessageHash  *next;
-};
-
-struct TcmMessageHash msg_hash_table[MAX_MSG_HASH];
-
-struct TcmMessage
-{
-  char  *cmd;
-  unsigned int  parameters; /* minimum number of params */
-  unsigned int  maxpara;    /* maximum number of params */
-
-  /* handlers: oper, registered oper, admin */
-  TcmMessageHandler handlers[3];
-};
 
 extern void init_commands(void);
 

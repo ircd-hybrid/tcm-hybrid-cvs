@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.32 2002/05/24 20:52:40 leeh Exp $ */
+/* $Id: tcm.h,v 1.33 2002/05/25 15:08:06 leeh Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -82,7 +82,6 @@ void set_action_method(int action, int method);
 void set_action_strip(int action, int hoststrip);
 int find_action(char *name);
 
-void expand_args(char *output, int maxlen, int argc, char *argv[]);
 /* Fixes for broken operating systems */
 #ifndef HAVE_STRLCAT
 size_t strlcat(char *, const char *, size_t);

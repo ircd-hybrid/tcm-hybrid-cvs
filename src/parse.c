@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.16 2002/05/25 02:37:37 db Exp $
+ * $Id: parse.c,v 1.17 2002/05/25 15:08:09 leeh Exp $
  */
 
 #include <stdio.h>
@@ -134,25 +134,8 @@ void
 parse_client(int i, int argc, char *argv[])
 {
   struct dcc_command *ptr;
-  int j;
 
-  for (j = 0; j < MAX_MSG_HASH; j++)
-    {
-      if (msg_hash_table[j].msg != NULL)
-        {
-          if (strcasecmp(msg_hash_table[j].cmd, argv[0]) == 0)
-            {
-              if (connections[i].type & TYPE_ADMIN)
-                msg_hash_table[j].msg->handlers[2](i, argc, argv);
-              else if (connections[i].type & TYPE_OPER)
-                msg_hash_table[j].msg->handlers[1](i, argc, argv);
-              else
-                msg_hash_table[j].msg->handlers[0](i, argc, argv);
-              return;
-            }
-        }
-    }
-
+  /* command */
   if(argv[0][0] == '.')
   {
     if((ptr = find_dcc_handler(argv[0] + 1)))
@@ -163,14 +146,105 @@ parse_client(int i, int argc, char *argv[])
         ptr->handler[1](i, argc, argv);
       else
         ptr->handler[0](i, argc, argv);
-
-      return;
     }
+    /* command not found */
+    else
+      print_to_socket(connections[i].socket,
+		      "Unknown command [%s]", argv[0] + 1);
+
+    return;
   }
 
-    
-  dccproc(i, argc, argv);
+  /* message to partyline */
+  else
+  {
+    if(connections[i].type & TYPE_PARTYLINE)
+    {
+      char buff[MAX_BUFF];
+
+      expand_args(buff, MAX_BUFF-1, argc, argv);
+
+      send_to_all(SEND_ALL, "<%s> %s", connections[i].nick, buff);
+    }
+    else
+      print_to_socket(connections[i].socket,
+		      "You are not +p, not sending to chat line");
+  }
 }
+
+/*
+ * expand_args
+ *
+ * inputs       - pointer to output
+ *              - max length of output
+ *              - argc
+ *              - *argv[]
+ * output       - none
+ * side effects - This function takes a set of argv[] and expands
+ *                it back out. basically the reverse of parse_args().
+ */
+void
+expand_args(char *output, int maxlen, int argc, char *argv[])
+{
+  int curlen=0;
+  int len;
+  int i;
+
+  for (i = 0; i < argc; i++)
+  {
+    len = strlen(argv[i]) + 1;
+    if ((len + curlen) >= maxlen)
+      {
+        *output = '\0';
+        return;
+      }
+    sprintf(output,"%s ", argv[i]);
+    output += len;
+    curlen += len;
+  }
+  /* blow away last ' ' */
+  *--output = '\0';
+}
+
+/*
+ * parse_args
+ *
+ * inputs       - input buffer to parse into argvs
+ *              - array of pointers to char *
+ * outputs      - number of argvs (argc)
+ *              - passed argvs back in input argv
+ * side effects - none
+ */
+int
+parse_args(char *buffer, char *argv[])
+{
+  int argc = 0;
+  char *r;
+  char *s;
+
+  /* sanity test the buffer first */
+  if (*buffer == '\0')
+    return(0);
+
+  if (EOL(*buffer))
+    return(0);
+
+  r = buffer;
+  s = strchr(r, ' ');
+
+  for (; (argc < MAX_ARGV-1) && s; s=strchr(r, ' '))
+  {
+    *s = '\0';
+    argv[argc++] = r;
+    r = s+1;
+  }
+
+  if (*r != '\0')
+    argv[argc++] = r;
+
+  return(argc);
+}
+
 
 /*
  * proc()

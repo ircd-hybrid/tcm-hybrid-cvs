@@ -1,9 +1,14 @@
-/* $Id: parse.h,v 1.2 2002/05/23 08:57:49 einride Exp $ */
+/* $Id: parse.h,v 1.3 2002/05/25 15:08:06 leeh Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
+#define EOL(c) ((c=='\r')||(c=='\n'))
+
 extern void parse_server(void);
 extern void parse_client(int, int, char *argv[]);
+
+extern void expand_args(char *, int, int, char *argv[]);
+extern int parse_args(char *, char *argv[]);
 
 extern void _wallops(int connnum, int argc, char *argv[]);
 extern void _onjoin(int connnum, int argc, char *argv[]);

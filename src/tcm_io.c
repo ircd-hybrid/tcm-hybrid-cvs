@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.19 2002/05/25 06:39:30 db Exp $
+ * $Id: tcm_io.c,v 1.20 2002/05/25 15:08:09 leeh Exp $
  */
 
 #include <stdio.h>
@@ -53,9 +53,6 @@
 #include "serno.h"
 #include "patchlevel.h"
 
-#define EOL(c) ((c=='\r')||(c=='\n'))
-
-static int parse_args(char *, char *argv[]);
 static int get_line(char *inbuf,int *len, struct connection *connections_p);
 static int connect_to_dcc_ip(const char *nick, const char *hostport);
 static void connect_remote_client(char *, char *, char *, int);
@@ -337,47 +334,6 @@ get_line(char *in, int *len, struct connection *connections_p)
     }
 
   return (0);
-}
-
-/*
- * parse_args
- *
- * inputs       - input buffer to parse into argvs
- *              - array of pointers to char *
- * outputs      - number of argvs (argc)
- *              - passed argvs back in input argv
- * side effects - none
- */
-
-static int
-parse_args(char *buffer, char *argv[])
-{
-  int argc = 0;
-  char *r;
-  char *s;
-
-  /* sanity test the buffer first */
-
-  if (*buffer == '\0')
-    return(0);
-
-  if (EOL(*buffer))
-    return(0);
-
-  r = buffer;
-  s = strchr(r, ' ');
-
-  for (; (argc < MAX_ARGV-1) && s; s=strchr(r, ' '))
-  {
-    *s = '\0';
-    argv[argc++] = r;
-    r = s+1;
-  }
-
-  if (*r != '\0')
-    argv[argc++] = r;
-
-  return(argc);
 }
 
 /*

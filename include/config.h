@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.84 2003/03/29 00:22:54 bill Exp $
+ * $Id: config.h,v 1.85 2003/03/30 00:47:39 bill Exp $
  */
 
 /*
@@ -94,6 +94,9 @@
 /* For FreeBSD and OpenBSD, this is suggested by zartik */
 /* #define HOW_TO_MAIL "/usr/bin/mail -s" */
 
+/* Lifetime, in seconds, of client lists
+   Leave undefined if you do not want list expiration */
+#define CLIENT_LIST_LIFE	(60 * 60 * 3)
 
 /*
  * tcm normally catches clones because they rapidly connect, and

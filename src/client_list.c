@@ -1,7 +1,7 @@
 /*
  * client_list.c: contains routines for managing lists of clients
  *
- * $Id: client_list.c,v 1.2 2003/03/30 00:27:27 bill Exp $
+ * $Id: client_list.c,v 1.3 2003/03/30 00:47:41 bill Exp $
  */
 
 #include "tcm.h"
@@ -11,9 +11,15 @@
 #include "userlist.h"
 #include "hash.h"
 #include "client_list.h"
+#include "handler.h"
+#include "modules.h"
 
 static int find_empty();
 static void init_list(int index);
+#ifdef CLIENT_LIST_LIFE
+void expire_lists();
+#endif
+struct dcc_command remove_msgtab;
 
 static int
 find_empty()
@@ -51,7 +57,27 @@ init_client_lists()
  
   for (a=0; a<MAX_LISTS; ++a)
     init_list(a);
+
+#ifdef CLIENT_LIST_LIFE
+  eventAdd("expire_lists", expire_lists, NULL, 60);
+#endif
+  add_dcc_handler(&remove_msgtab);
 }
+
+#ifdef CLIENT_LIST_LIFE
+void
+expire_lists()
+{
+  time_t now = time(NULL);
+  int idx;
+
+  for (idx=0; idx<MAX_LISTS; ++idx)
+  {
+    if ((now - client_lists[idx].creation_time) > CLIENT_LIST_LIFE)
+      init_list(idx);
+  }
+}
+#endif
 
 void
 print_list(struct connection *connection_p, char *name)
@@ -184,7 +210,7 @@ del_client_from_list(struct user_entry *user, int idx)
     }
   }
 
-  return 0;
+  return 1;
 }
 
 void
@@ -231,3 +257,50 @@ find_list(char *name)
 
   return -1;
 }
+
+void
+m_remove(struct connection *connection_p, int argc, char *argv[])
+{
+  struct user_entry *user;
+  int idx;
+  dlink_node *ptr;
+
+  if (argc < 2)
+  {
+    send_to_connection(connection_p,
+                       "Usage: %s <list name> <wildcard nick>",
+                       argv[0]);
+    return;
+  }
+
+  if ((idx = find_list(argv[1])) == -1)
+  {
+    send_to_connection(connection_p,
+                       "No such list.");
+    return;
+  }
+
+  DLINK_FOREACH(ptr, client_lists[idx].dlink.head)
+  {
+    user = ptr->data;
+
+    if (match(argv[2], user->nick) == 0)
+    {
+      if (!del_client_from_list(user, idx))
+      {
+        send_to_connection(connection_p,
+                           "Failed to remove %s (%s@%s) [%s] {%s} from the list",
+                           user->nick, user->username, user->host, user->ip_host, user->class);
+        continue;
+      }
+      else
+        send_to_connection(connection_p,
+                           "  - %s (%s@%s) [%s] {%s}",
+                           user->nick, user->username, user->host, user->ip_host, user->class);
+    }
+  }
+}
+
+struct dcc_command remove_msgtab = {
+ "remove", NULL, {m_unregistered, m_remove, m_remove}
+};

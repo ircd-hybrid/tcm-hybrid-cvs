@@ -1,3 +1,18 @@
+bill        2002/04/02 19:24:13 EST	(20020403_0)
+
+  Modified files:
+    .                    Makefile.in 
+    src                  stdcmds.c 
+  Log:
+  - make install was broken by the change
+  - typo in regex matching
+  
+  Revision  Changes    Path
+  1.18      +28 -36    tcm-hybrid/Makefile.in
+  1.41      +7 -11     tcm-hybrid/src/stdcmds.c
+
+
+
 bill        2002/04/02 18:58:12 EST	(20020402_1)
 
   Modified files:

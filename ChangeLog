@@ -1,3 +1,15 @@
+wcampbel    2002/05/31 21:54:11 EDT	(20020601_2)
+
+  Modified files:
+    include              config.h 
+  Log:
+  Remove the last vestiges of WANT_*LIST
+  
+  Revision  Changes    Path
+  1.65      +0 -6      tcm-hybrid/include/config.h
+
+
+
 wcampbel    2002/05/31 21:46:21 EDT	(20020601_1)
 
   Modified files:

@@ -1,3 +1,7 @@
+*** 20010703_1 by wcampbel
+Add in the .cvsignore files
+
+
 *** 20010702_2 by wcampbel
 Cleaned up some things lint found
 Added make lint

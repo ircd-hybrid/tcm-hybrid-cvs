@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.26 2001/10/31 04:01:42 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.27 2001/10/31 04:50:03 bill Exp $ */
 
 #include "setup.h"
 
@@ -903,29 +903,6 @@ dccproc(int connnum, int argc, char *argv[])
 
     break;
 
-  case K_AUTOPILOT:
-    if (!(connections[connnum].type & TYPE_OPER))
-      not_authorized(connections[connnum].socket);
-    else
-    {
-      if(config_entries.autopilot)
-	{
-	  sendtoalldcc(SEND_OPERS_ONLY, "autopilot is now OFF");
-	  config_entries.autopilot = NO;
-	  prnt(connections[connnum].socket, "autopilot is now OFF");
-	  log("AUTOPILOT turned off by oper %s", who_did_command);
-	}
-      else
-	{
-	  sendtoalldcc(SEND_OPERS_ONLY, "autopilot is now ON");
-	  config_entries.autopilot = YES;
-	  prnt(connections[connnum].socket, "autopilot is now ON");
-	  
-	  log("AUTOPILOT turned on by oper %s", who_did_command);
-	}
-    }
-    break;
-
   case K_LOCOPS:
     if (!(connections[connnum].type & TYPE_OPER))
       not_authorized(connections[connnum].socket);
@@ -1026,7 +1003,7 @@ dccproc(int connnum, int argc, char *argv[])
     {
       if (argc < 2)
       {
-	prnt(connections[connnum].socket,"Usage: .quote <server message>\n");
+	prnt(connections[connnum].socket,"Usage: %s <server message>\n", argv[0]);
 	return;
       }
 

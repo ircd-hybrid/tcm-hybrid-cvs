@@ -5,7 +5,7 @@
  *
  * - Dianora db@db.net
  *
- * $Id: token.c,v 1.19 2001/10/29 03:56:31 db Exp $
+ * $Id: token.c,v 1.20 2001/10/31 04:50:03 bill Exp $
  *
  */
 
@@ -106,7 +106,6 @@ struct command_token command_table[] =
   {"info",	   K_INFO},
   {"vmulti",	   K_VMULTI},
   {"uptime",	   K_UPTIME},
-  {"autopilot",	   K_AUTOPILOT},
 #ifdef ENABLE_QUOTE
   {"quote",        K_QUOTE},
   {"raw",          K_QUOTE},

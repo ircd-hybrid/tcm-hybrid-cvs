@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.33 2001/10/30 15:37:58 bill Exp $ */
+/* $Id: bothunt.c,v 1.34 2001/10/31 04:50:03 bill Exp $ */
 
 #include "setup.h"
 
@@ -1211,11 +1211,6 @@ char makeconn(char *hostport,char *nick,char *userhost)
   connections[i].last_message_time = time(NULL);
 
   print_motd(connections[i].socket);
-
-  if (config_entries.autopilot)
-    prnt(connections[i].socket,"autopilot is ON\n");
-  else
-    prnt(connections[i].socket,"autopilot is OFF\n");
 
   type = "User";
   if (connections[i].type & TYPE_OPER)

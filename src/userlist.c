@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.31 2001/10/29 03:56:31 db Exp $
+ * $Id: userlist.c,v 1.32 2001/10/31 04:50:03 bill Exp $
  *
  */
 
@@ -87,7 +87,6 @@ void load_config_file(char *file_name)
   config_entries.hybrid = NO;
   config_entries.hybrid_version = 0;
 
-  config_entries.autopilot = YES;
   config_entries.opers_only = YES;
 
   config_entries.tcm_pid_file[0] = '\0';

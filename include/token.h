@@ -3,7 +3,7 @@
 
 /* tokens */
 
-/* $Id: token.h,v 1.12 2001/10/29 00:12:13 wcampbel Exp $ */
+/* $Id: token.h,v 1.13 2001/10/31 04:50:03 bill Exp $ */
 
 #define K_CLONES   	1
 #define K_NFLOOD   	2
@@ -63,7 +63,7 @@
 #define K_VMULTI	56
 #define K_KDRONE	57
 #define K_UPTIME        58
-#define K_AUTOPILOT     59
+/*			59 */
 #define K_QUOTE         60
 
 char *splitc (char *rest, char divider);

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.111 2002/05/26 17:44:01 leeh Exp $
+ * $Id: bothunt.c,v 1.112 2002/05/27 00:42:12 db Exp $
  */
 
 #include <stdio.h>
@@ -801,7 +801,7 @@ onservnotice(int connnum, int argc, char *argv[])
     send_to_all(SEND_ALL, "I am banned from %s.  Exiting..", 
 		 config_entries.rserver_name[0] ?
 		 config_entries.rserver_name : config_entries.server_name);
-    log_problem("onservnotice", "Banned from server.  Exiting.");
+    log_problem("onservnotice Banned from server.  Exiting.");
     exit(-1);
     /* NOT REACHED */
     break;

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.82 2002/05/26 23:15:02 db Exp $ */
+/* $Id: main.c,v 1.83 2002/05/27 00:42:13 db Exp $ */
 
 #include "setup.h"
 
@@ -331,11 +331,13 @@ main(int argc, char *argv[])
 	   exit(1);
 	 }
     }
-  connections[0].socket = connect_to_server(serverhost);
-  if (connections[0].socket == INVALID)
-    exit(1);
-  connections[0].nbuf = 0;
-  connections[0].type = 0;
+
+  if(connect_to_server(serverhost) < 0)
+    {
+      log_problem("Could not connect to server at startup\n");
+      exit(1);
+    }
+
   maxconns = 1;
 
   if(config_entries.virtual_host_config[0])
@@ -356,8 +358,6 @@ main(int argc, char *argv[])
   /* enter the main IO loop */
   while(!quit)
     read_packet();
-
-  linkclosed(0, 0, NULL);
 
   if(config_entries.debug && outfile)
     {

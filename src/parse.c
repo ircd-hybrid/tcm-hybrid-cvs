@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.29 2002/05/26 23:15:02 db Exp $
+ * $Id: parse.c,v 1.30 2002/05/27 00:42:13 db Exp $
  */
 
 #include <stdio.h>
@@ -37,7 +37,7 @@
 
 
 static void do_init(void);
-static void proc(char *source,char *function, char *body);
+static void proc(int conn_num, char *source, char *function, char *body);
 static void privmsgproc(char *nick,char *userhost, int argc, char *argv[]);
 static void send_umodes(char *nick);
 static void onkick(char *nick);
@@ -56,12 +56,12 @@ int  maxconns = 0;
  */
 
 void
-parse_server(int unused)
+parse_server(int conn_num)
 {
-  char *buffer = connections[0].buffer;
+  char *buffer = connections[conn_num].buffer;
   char *p;
   char *source;
-  char *fctn;
+  char *function;
   char *body = NULL;
 
   if (*buffer == ':')
@@ -71,9 +71,9 @@ parse_server(int unused)
     {
       *p = '\0';
       p++;
-      fctn = p;
+      function = p;
 
-      if ((p = strchr(fctn,' ')) != NULL)
+      if ((p = strchr(function, ' ')) != NULL)
       {
         *p = '\0';
         p++;
@@ -87,9 +87,9 @@ parse_server(int unused)
   {
     source = "";
 
-    fctn = buffer;
+    function = buffer;
 
-    if ((p = strchr(fctn,' ')) != NULL)
+    if ((p = strchr(function,' ')) != NULL)
     {
       *p = '\0';
       p++;
@@ -101,12 +101,12 @@ parse_server(int unused)
 
   if (config_entries.debug && outfile)
   {
-    fprintf(outfile, ">source=[%s] fctn=[%s] body=[%s]\n",
-            source, fctn, body);        /* - zaph */
+    fprintf(outfile, ">source=[%s] function=[%s] body=[%s]\n",
+            source, function, body);        /* - zaph */
     fflush(outfile);
   }
 
-  proc(source,fctn,body);
+  proc(conn_num, source, function, body);
 }
 
 /*
@@ -262,7 +262,7 @@ parse_args(char *buffer, char *argv[])
  *     signals that may be ongoing.
  */
 static
-void proc(char *source,char *fctn,char *param)
+void proc(int conn_num, char *source,char *fctn,char *param)
 {
   struct serv_command *ptr;
   char *userhost;
@@ -335,8 +335,7 @@ void proc(char *source,char *fctn,char *param)
     {
       if (strstr(argv[1], "collision)"))
         onnicktaken();
-
-      linkclosed(0, argc, argv);
+      server_link_closed(conn_num);
     }
   }
 
@@ -388,8 +387,7 @@ void proc(char *source,char *fctn,char *param)
       break;
 
     case  ERR_NOTREGISTERED:
-      argv[0] = "Not registered";
-      linkclosed(0, 1, argv);
+      server_link_closed(conn_num);
       break;
 	
     case ERR_CHANNELISFULL: case ERR_INVITEONLYCHAN:
@@ -453,8 +451,7 @@ void proc(char *source,char *fctn,char *param)
     /* cant oper */
     case ERR_PASSWDMISMATCH:
     case ERR_NOOPERHOST:
-      argv[0] = "Can't oper";
-      linkclosed(0, 1, argv);
+      server_link_closed(conn_num);
       break;
 	
     case RPL_STATSELINE:

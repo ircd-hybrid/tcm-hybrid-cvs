@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.47 2002/05/26 23:33:50 db Exp $
+ * $Id: tcm_io.c,v 1.48 2002/05/27 00:42:13 db Exp $
  */
 
 #include <stdio.h>
@@ -66,6 +66,7 @@ static fd_set writefds;		/* file descriptor set for use with select */
 
 struct connection connections[MAXDCCCONNS+1]; /*plus 1 for the server, silly*/
 int pingtime;
+static int server_id;
 
 /*
  * read_packet()
@@ -98,7 +99,7 @@ read_packet(void)
   }
 
   current_time = time(NULL);
-  connections[0].last_message_time = current_time;
+  connections[server_id].last_message_time = current_time;
 
   eventAdd("check_clones", check_clones, NULL, CLONE_CHECK_TIME);
 
@@ -106,21 +107,20 @@ read_packet(void)
   {
     current_time = time(NULL);
 
-    if (current_time > (connections[0].last_message_time + server_time_out))
+    if (current_time > (connections[server_id].last_message_time
+			+ server_time_out))
     {
       /* timer expired */
       send_to_all(SEND_ALL, "PING time out on server");
-      log_problem("read_packet()", "ping time out");
-      argv[0] = "ping time out";
-      linkclosed(0, 1, argv);
-      /* try reconnecting */
+      log_problem("read_packet() ping time out");
+      server_link_closed(0);
       return;
     }
 
     FD_ZERO (&readfds);
     FD_ZERO (&writefds);
 
-    for (i = 0; i < MAXDCCCONNS; i++)
+    for (i = 0; i < maxconns; i++)
       {
 	if (connections[i].state != S_IDLE)
 	  {
@@ -143,7 +143,7 @@ read_packet(void)
 
     if (select_result > 0)
     {
-      for (i=0; i < MAXDCCCONNS; i++)
+      for (i=0; i < maxconns; i++)
       {
 	if (connections[i].state != S_IDLE &&
 	    FD_ISSET(connections[i].socket, &writefds))
@@ -157,7 +157,6 @@ read_packet(void)
           {
 	    if (connections[i].state == S_CONNECTING)
 	      {
-		/*		connections[i].state = S_ACTIVE; */
 		(connections[i].io_read_function)(i);
 		continue;
 	      }
@@ -167,18 +166,7 @@ read_packet(void)
 
             if (nread == 0)
               {
-                if (i == 0)
-                  {
-                    argv[0] = "Eof from server";
-                    linkclosed(0, 1, argv);
-                    /* try reconnecting */
-                    return;
-                  }
-                else
-                  {
-		    if (connections[i].io_close_function != NULL)
-		      (connections[i].io_close_function)(i);
-                  }
+		(connections[i].io_close_function)(i);
               }
             else if (nread > 0)
               {
@@ -202,13 +190,7 @@ read_packet(void)
     {
       if (errno != EINTR)
       {
-        send_to_all(SEND_ALL, "Select error: %s (%d)",
-                     strerror(errno), errno);
-        (void)snprintf(dccbuff, sizeof(dccbuff) - 1,"select error %d", errno);
-        log_problem("read_packet()", dccbuff);
-        argv[0] = "select error";
-        linkclosed(0, 1, argv);
-	connections[0].state = S_IDLE;
+	exit(-1);	/* XXX select error is fatal! */
       }
     }
   }
@@ -317,47 +299,35 @@ get_line(char *in, int *len, struct connection *connections_p)
 }
 
 /*
- * linkclosed()
+ * server_link_closed()
+ *
+ * inputs	- connection id
+ * output	- none
+ * side effects	-
+ *
  *   Called when an error has causes the server to close our link.
  *   Parameters:
- *   Returns: void
- *
  *     Close the old dead socket.  If we haven't already reconnected
  *     5 times, wait 5 seconds, reconnect to the server, and re-signon.
  */
 void
-linkclosed(int connnum, int argc, char *argv[])
+server_link_closed(int conn_num)
 {
-  char reason[MAX_BUFF];
-
-  if (argc == 0)
-  {
-    log_problem("linkclosed()", "argc == 0 !");
-    exit(0);
-  }
-
-  expand_args(reason, MAX_BUFF-1, argc, argv);
-
-  (void)close(connections[0].socket);
-  eventInit();                  /* event.c stolen from ircd */
-  log_problem("linkclosed()", reason);
-
+  (void)close(connections[conn_num].socket);
+  eventInit();
+  log_problem("server_link_closed()");
   amianoper = NO;
-
-  log_problem("linkclosed()", "sleeping 30");
   sleep(30);
 
-  connections[0].socket = connect_to_server(serverhost);
-
-  if (connections[0].socket == INVALID)
+  connect_to_server(serverhost);
+  if (connections[conn_num].socket == INVALID)
     {
-      log_problem("linkclosed()", "invalid socket quitting");
+      log_problem("server_link_closed() invalid socket quitting");
       quit = YES;
       return;
     }
+  server_id = INVALID;
 }
-
-
 
 /*
  * find_free_connection_slot
@@ -373,7 +343,7 @@ find_free_connection_slot(void)
 {
   int i;
 
-  for (i=1; i < MAXDCCCONNS+1; ++i)
+  for (i = 0; i < MAXDCCCONNS+1; ++i)
     {
       if (connections[i].state == S_IDLE)
 	{
@@ -554,7 +524,8 @@ privmsg(const char *target, const char *format, ...)
 static void
 va_print_to_server(const char *format, va_list va)
 {
-  va_print_to_socket(connections[0].socket, format, va);
+  if (server_id != INVALID)
+    va_print_to_socket(connections[server_id].socket, format, va);
 }
 
 /*
@@ -883,17 +854,25 @@ close_connection(int connnum)
  * input	- pointer to string giving hostname:port OR
  * output	- socket or -1 if no socket
  * side effects	- Sets up a socket and connects to the given host and port
- *		  or given DCC chat IP
  */
 int
 connect_to_server(const char *hostport)
 {
   struct sockaddr_in socketname;
+  int i;
   int port = 6667;
   char server[MAX_HOST];
   struct hostent *remote_hostent;
   char *p;
 
+  if ((i = find_free_connection_slot()) < 0)
+    {
+      /* This is a fatal error */
+      log_problem("Could not find a free connection slot!\n");
+      exit(-1);
+    }
+
+  server_id = i;
   /* Parse serverhost to look for port number */
   strcpy(server, hostport);
 
@@ -913,11 +892,12 @@ connect_to_server(const char *hostport)
 	  (void *) remote_hostent->h_addr,
 	  remote_hostent->h_length);
 
-  connections[0].state = S_CONNECTING;
-  connections[0].io_read_function = signon_to_server;
-  connections[0].io_write_function = NULL;
-  return(connect_to_given_ip_port(&socketname, port));
-
+  connections[i].state = S_CONNECTING;
+  connections[i].io_read_function = signon_to_server;
+  connections[i].io_write_function = NULL;
+  connections[i].io_close_function = server_link_closed;
+  connections[i].socket = connect_to_given_ip_port(&socketname, port);
+  return(connections[i].socket);
 }
 
 /*
@@ -931,10 +911,11 @@ connect_to_server(const char *hostport)
 static void
 signon_to_server (int unused)
 {
-  connections[0].io_read_function = parse_server;
-  connections[0].io_write_function = NULL;
-  connections[0].state = S_SERVER;
-  connections[0].nbuf = 0;
+  connections[server_id].io_read_function = parse_server;
+  connections[server_id].io_write_function = NULL;
+  connections[server_id].state = S_SERVER;
+  connections[server_id].nbuf = 0;
+
   if (*mynick == '\0')
     strcpy (mynick,config_entries.dfltnick);
 

@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.33 2002/05/26 02:55:10 db Exp $
+ * $Id: logging.c,v 1.34 2002/05/27 00:42:13 db Exp $
  *
  * - db
  */
@@ -633,22 +633,22 @@ kill_add_report(char *server_notice)
 char *
 date_stamp(void)
 {
-  time_t current_time;
   struct tm *broken_up_time;
   static char date_stamp_string[SMALL_BUFF];
 
-  current_time = time(NULL);
   broken_up_time = localtime(&current_time);
 
 #ifdef CALVIN
-  (void)snprintf(date_stamp_string,sizeof(date_stamp_string) - 1,"%04d%02d%02d",
-		broken_up_time->tm_year+1900,
-		(broken_up_time->tm_mon)+1,
-		broken_up_time->tm_mday);
+  (void)snprintf(date_stamp_string,
+		 sizeof(date_stamp_string) - 1,"%04d%02d%02d",
+		 broken_up_time->tm_year+1900,
+		 (broken_up_time->tm_mon)+1,
+		 broken_up_time->tm_mday);
 #else
-  (void)snprintf(date_stamp_string,sizeof(date_stamp_string) - 1,"%02d/%02d/%d",
-		(broken_up_time->tm_mon)+1,broken_up_time->tm_mday,
-		broken_up_time->tm_year+1900);
+  (void)snprintf(date_stamp_string,
+		 sizeof(date_stamp_string) - 1,"%02d/%02d/%d",
+		 (broken_up_time->tm_mon)+1,broken_up_time->tm_mday,
+		 broken_up_time->tm_year+1900);
 #endif
 
   return(date_stamp_string);
@@ -664,16 +664,19 @@ date_stamp(void)
  */
 
 void 
-log_problem(char *function_name,char *reason)
+log_problem(const char *format, ...)
 {
+  va_list va;
   FILE *error_fp;
 
-  if( (error_fp = fopen(ERROR_LOG,"a")) )
+  va_start(va,format);
+  if ((error_fp = fopen(ERROR_LOG,"a")) != NULL)
     {
       timestamp_log(error_fp);
-      (void)fprintf(error_fp,"%s - %s\n",function_name, reason);
-      (void)fclose(error_fp);
+      vfprintf(error_fp, format, va);
+      fclose(error_fp);
     }
+  va_end(va);
 }
 
 /*
@@ -686,20 +689,16 @@ log_problem(char *function_name,char *reason)
  */
 
 void
-log(char *format,...)
+log(const char *format,...)
 {
-  char msg[MAX_BUFF];
   FILE *l_fp;
   va_list va;
 
   va_start(va,format);
-
-  if( (l_fp = initlog()) )
+  if ((l_fp = initlog()) != NULL)
     {
       timestamp_log(l_fp);
-      vsnprintf(msg,sizeof(msg),format, va);
-
-      fputs(msg,l_fp);
+      vfprintf(l_fp, format, va);
       (void)fclose(l_fp);
     }
   va_end(va);

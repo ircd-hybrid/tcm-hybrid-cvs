@@ -7,7 +7,7 @@
 #
 ADMIN=`whoami`
 RUN_PATH="/home/pro/tcm-hybrid"
-PIDFILE="tcm.pid"
+PIDFILE="etc/tcm.pid"
  
 DATE=`date +%D-%R`
 export PATH=$PATH:/usr/sbin:/bin:.
@@ -22,6 +22,6 @@ then
     if [ ! -f /tmp/tcm.stay.dead ]
     then
         echo "auto-starting tcm at $DATE" | mail -s "Restarting tcm" $ADMIN
-        tcm
+        bin/tcm
     fi
 fi

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.185 2002/06/24 02:35:56 wcampbel Exp $
+ * $Id: bothunt.c,v 1.186 2002/06/24 14:56:09 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1407,10 +1407,7 @@ get_user_host(char **user_p, char **host_p, char *user_host)
   char *end_p;
   char *p;
 
-  /*
-   *  Lets try and get it right folks... [user@host] or (user@host)
-   */
-
+  /* either: [user@host] (user@host) or just user@host */
   if (*user == '[')
     {
       user++;
@@ -1426,10 +1423,6 @@ get_user_host(char **user_p, char **host_p, char *user_host)
 	return(NULL);
       *p++ = '\0';
       end_p = p;
-    }
-  else
-    {
-      return(NULL);
     }
 
   *user_p = user;

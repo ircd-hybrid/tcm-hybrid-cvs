@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.138 2002/06/24 02:35:56 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.139 2002/06/24 14:56:09 leeh Exp $ */
 
 #include "setup.h"
 
@@ -308,10 +308,10 @@ m_register(struct connection *connection_p, int argc, char *argv[])
 
 void m_opers(struct connection *connection_p, int argc, char *argv[])
 {
-  slink_node *ptr;
+  dlink_node *ptr;
   struct oper_entry *user;
 
-  for(ptr = user_list; ptr; ptr = ptr->next)
+  for(ptr = user_list.head; ptr; ptr = ptr->next)
   {
     user = ptr->data;
 
@@ -350,12 +350,12 @@ m_uptime(struct connection *connection_p, int argc, char *argv[])
 void
 m_exempts(struct connection *connection_p, int argc, char *argv[])
 {
-  slink_node *ptr;
+  dlink_node *ptr;
   struct exempt_entry *exempt;
   char buf[512];
   int n;
 
-  for(ptr = exempt_list; ptr; ptr = ptr->next)
+  for(ptr = exempt_list.head; ptr; ptr = ptr->next)
   {
     exempt = ptr->data;
     sprintf(buf, "%s@%s is exempted for:", exempt->username, exempt->host);
@@ -1006,10 +1006,10 @@ init_commands(void)
 int
 is_legal_pass(struct connection *connection_p, char *password)
 {
-  slink_node *ptr;
+  dlink_node *ptr;
   struct oper_entry *user;
 
-  for(ptr = user_list; ptr; ptr = ptr->next)
+  for(ptr = user_list.head; ptr; ptr = ptr->next)
   {
     user = ptr->data;
 

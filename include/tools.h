@@ -1,22 +1,28 @@
-/* $Id: tools.h,v 1.2 2002/06/21 23:14:01 leeh Exp $ */
+/* $Id: tools.h,v 1.3 2002/06/24 14:56:06 leeh Exp $ */
 #ifndef __TOOLS_H
 #define __TOOLS_H
 
-typedef struct _slink_node slink_node;
+typedef struct _dlink_node dlink_node;
+typedef struct _dlink_list dlink_list;
 
-struct _slink_node
+struct _dlink_node
 {
   void *data;
-  slink_node *next;
+  dlink_node *next;
+  dlink_node *prev;
 };
 
-slink_node *slink_create(void);
-void slink_add(void *data, slink_node *m, slink_node **list);
-void slink_add_tail(void *data, slink_node *m, slink_node **list);
+struct _dlink_list
+{
+  dlink_node *head;
+  dlink_node *tail;
+};
 
-void slink_delete(void *data, slink_node *m, slink_node *prev, 
-		  slink_node *list);
-slink_node *slink_find(void *data, slink_node *list);
+dlink_node *dlink_create(void);
+void dlink_add(void *data, dlink_node *m, dlink_list *list);
+void dlink_add_tail(void *data, dlink_node *m, dlink_list *list);
+void dlink_delete(void *data, dlink_node *m, dlink_list *list);
+dlink_node *dlink_find(void *data, dlink_list *list);
 
 #endif
 

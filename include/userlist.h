@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.83 2002/06/24 00:40:15 db Exp $ */
+/* $Id: userlist.h,v 1.84 2002/06/24 14:56:06 leeh Exp $ */
 
 #include "tools.h"
 
@@ -99,9 +99,9 @@ int  wingate_class(char *class);
 /* local_ip is clearly not going to be an unsigned long FIX THIS -db */
 unsigned long local_ip(char *ourhostname);
 
-struct slink_node;
-slink_node *exempt_list;
-slink_node *user_list;
+struct dlink_list;
+dlink_list exempt_list;
+dlink_list user_list;
 
 #ifdef DEBUGMODE
 void exempt_summary();

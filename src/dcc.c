@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.18 2002/06/24 00:40:20 db Exp $
+ * $Id: dcc.c,v 1.19 2002/06/24 14:56:09 leeh Exp $
  */
 
 #include <stdio.h>
@@ -273,14 +273,14 @@ finish_incoming_dcc_chat(struct connection *new_conn)
 static void
 finish_dcc_chat(struct connection *new_conn)
 {
-  slink_node *ptr;
+  dlink_node *ptr;
   struct oper_entry *user;
 
   report(FLAGS_ALL,
          "Oper %s (%s@%s) has connected",
          new_conn->nick, new_conn->username, new_conn->host);
 
-  for(ptr = user_list; ptr; ptr = ptr->next)
+  for(ptr = user_list.head; ptr; ptr = ptr->next)
   {
     user = ptr->data;
 

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.137 2002/06/24 10:35:50 leeh Exp $
+ * $Id: userlist.c,v 1.138 2002/06/24 14:56:10 leeh Exp $
  *
  */
 
@@ -49,7 +49,10 @@ static void m_umode(struct connection *, int, char *argv[]);
 static void set_umode_connection(struct connection *, int, const char *);
 static void set_umode_userlist(char *, const char *);
 
+/* XXX - use later */
+#ifdef FOOB
 static void save_umodes(struct oper_entry *);
+#endif
 
 struct dcc_command umode_msgtab = {
   "umode", NULL, {m_unregistered, m_umode, m_umode}
@@ -259,13 +262,13 @@ set_umode_connection(struct connection *user_conn,
 void
 set_umode_userlist(char *nick, const char *umode)
 {
-  slink_node *ptr;
+  dlink_node *ptr;
   struct oper_entry *user;
   int plus = 1;
   int i;
   int j;
 
-  for(ptr = user_list; ptr; ptr = ptr->next)
+  for(ptr = user_list.head; ptr; ptr = ptr->next)
   {
     user = ptr->data;
 
@@ -321,10 +324,10 @@ set_umode_userlist(char *nick, const char *umode)
 struct oper_entry *
 find_user_in_userlist(const char *username)
 {
-  slink_node *ptr;
+  dlink_node *ptr;
   struct oper_entry *user;
 
-  for(ptr = user_list; ptr; ptr = ptr->next)
+  for(ptr = user_list.head; ptr; ptr = ptr->next)
   {
     user = ptr->data;
 
@@ -380,6 +383,8 @@ get_umodes_from_prefs(struct oper_entry *user)
   }
 }
 
+#ifdef FOOB
+/* XXX - use later */
 /* save_umodes()
  *
  * input	-
@@ -404,6 +409,7 @@ save_umodes(struct oper_entry *user)
     send_to_all(FLAGS_ALL, "Couldn't open %s for writing", user_pref);
   }
 }
+#endif
     
 /*
  * load_config_file
@@ -855,7 +861,7 @@ void
 add_oper(char *username, char *host, char *usernick, 
          char *password, char *type)
 {
-  slink_node *ptr;
+  dlink_node *ptr;
   struct oper_entry *user;
 
   if(strcmp(host, "*") == 0)
@@ -864,7 +870,7 @@ add_oper(char *username, char *host, char *usernick,
   if(is_an_oper(username, host))
     return;
 
-  ptr = slink_create();
+  ptr = dlink_create();
   user = (struct oper_entry *) xmalloc(sizeof(struct oper_entry));
   memset(user, 0, sizeof(struct oper_entry));
 
@@ -880,19 +886,19 @@ add_oper(char *username, char *host, char *usernick,
     get_umodes_from_prefs(user);
   }
 
-  slink_add_tail(user, ptr, &user_list);
+  dlink_add_tail(user, ptr, &user_list);
 }
 
 void
 add_exempt(char *username, char *host, int type)
 {
-  slink_node *ptr;
+  dlink_node *ptr;
   struct exempt_entry *exempt;
 
   if(strcmp(host, "*") == 0)
     return;
 
-  ptr = slink_create();
+  ptr = dlink_create();
   exempt = (struct exempt_entry *) xmalloc(sizeof(struct exempt_entry));
   memset(exempt, 0, sizeof(struct exempt_entry));
 
@@ -904,7 +910,7 @@ add_exempt(char *username, char *host, int type)
   else
     exempt->type = 0xFFFFFFFF;
 
-  slink_add(exempt, ptr, &exempt_list);
+  dlink_add(exempt, ptr, &exempt_list);
 }
 
 static void
@@ -958,28 +964,28 @@ load_e_line(char *line)
 void
 clear_userlist()
 {
-  slink_node *ptr;
-  slink_node *next_ptr;
+  dlink_node *ptr;
+  dlink_node *next_ptr;
 
   wingate_class_list_index = 0;
   memset((void *)wingate_class_list, 0, sizeof(wingate_class_list));
 
-  for(ptr = user_list; ptr; ptr = next_ptr)
+  for(ptr = user_list.head; ptr; ptr = next_ptr)
   {
     next_ptr = ptr->next;
     xfree(ptr->data);
     xfree(ptr);
   }
 
-  for(ptr = exempt_list; ptr; ptr = next_ptr)
+  for(ptr = exempt_list.head; ptr; ptr = next_ptr)
   {
     next_ptr = ptr->next;
     xfree(ptr->data);
     xfree(ptr);
   }
 
-  user_list = NULL;
-  exempt_list = NULL;
+  user_list.head = user_list.tail = NULL;
+  exempt_list.head = exempt_list.tail = NULL;
 }
 
 /*
@@ -993,10 +999,10 @@ clear_userlist()
 int
 is_an_oper(char *username, char *host)
 {
-  slink_node *ptr;
+  dlink_node *ptr;
   struct oper_entry *user;
 
-  for(ptr = user_list; ptr; ptr = ptr->next)
+  for(ptr = user_list.head; ptr; ptr = ptr->next)
   {
     user = ptr->data;
 
@@ -1019,11 +1025,11 @@ is_an_oper(char *username, char *host)
 int
 ok_host(char *username, char *host, int type)
 {
-  slink_node *ptr;
+  dlink_node *ptr;
   struct exempt_entry *exempt;
   int ok;
 
-  for(ptr = exempt_list; ptr; ptr = ptr->next)
+  for(ptr = exempt_list.head; ptr; ptr = ptr->next)
   {
     exempt = ptr->data;
     ok = 0;
@@ -1123,7 +1129,7 @@ reload_userlist(void)
 void
 exempt_summary()
 {
-  slink_node *ptr;
+  dlink_node *ptr;
   struct exempt_entry *exempt;
   int i;
 

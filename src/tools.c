@@ -1,71 +1,81 @@
 /*  tcm-hybrid/src/tools.c by fl_
  *  Copyright (C) 2002 ircd-hybrid development team
  *
- *  $Id: tools.c,v 1.3 2002/06/21 23:14:04 leeh Exp $
+ *  $Id: tools.c,v 1.4 2002/06/24 14:56:10 leeh Exp $
  */
 
 #include <stdlib.h>
 #include "tcm.h"
 #include "tools.h"
 
-slink_node *
-slink_create(void)
+dlink_node *
+dlink_create(void)
 {
-  slink_node *m;
+  dlink_node *m;
 
-  m = (slink_node *) xmalloc(sizeof(slink_node));
+  m = (dlink_node *) xmalloc(sizeof(dlink_node));
   m->data = NULL;
   m->next = NULL;
+  m->prev = NULL;
 
   return m;
 }
 
 void
-slink_add(void *data, slink_node *m, slink_node **list)
+dlink_add(void *data, dlink_node *m, dlink_list *list)
 {
   m->data = data;
-  m->next = *list;
-  *list = m;
+  m->next = list->head;
+  m->prev = NULL;
+
+  if(list->head != NULL)
+    list->head->prev = m;
+  else if(list->tail == NULL)
+    list->tail = m;
+
+  list->head = m;
 }
 
 void
-slink_add_tail(void *data, slink_node *m, slink_node **list)
+dlink_add_tail(void *data, dlink_node *m, dlink_list *list)
 {
-  slink_node *ptr;
-
-  ptr = *list;
   m->data = data;
   m->next = NULL;
-
-  if(ptr == NULL)
-  {
-    *list = m;
-  }
-  else
-  {
-    while(ptr->next)
-      ptr = ptr->next;
+  m->prev = list->tail;
   
-    ptr->next = m;
-  }
+  if(list->head == NULL)
+    list->head = m;
+  else if(list->tail != NULL)
+    list->tail->next = m;
+
+  list->tail = m;
 }
 
 void
-slink_delete(void *data, slink_node *m, slink_node *prev,
-            slink_node *list)
+dlink_delete(void *data, dlink_node *m, dlink_list *list)
 {
-  if(prev)
-    prev->next = m->next;
+  /* item is at head */
+  if(m->prev == NULL)
+    list->head = m->next;
+
+  /* item is at tail */
+  else if(m->next == NULL)
+    list->tail = m->prev;
+
+  /* item is in middle somewhere */
   else
-    list = m->next;
+  {
+    m->next->prev = m->prev;
+    m->prev->next = m->next;
+  }
 }
 
-slink_node *
-slink_find(void *data, slink_node *list)
+dlink_node *
+dlink_find(void *data, dlink_list *list)
 {
-  slink_node *ptr;
+  dlink_node *ptr;
 
-  for(ptr = list; ptr; ptr = list->next)
+  for(ptr = list->head; ptr; ptr = ptr->next)
   {
     if(ptr->data == data)
       return ptr;

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.55 2002/05/20 01:15:54 db Exp $
+ * $Id: userlist.c,v 1.56 2002/05/20 19:05:11 wcampbel Exp $
  *
  */
 
@@ -588,6 +588,10 @@ static void load_a_user(char *line)
 
     if((p = strchr(host,' ')) != NULL)
       *p = '\0';
+
+    /* Don't allow *@* or user@* O: lines */
+    if (strcmp(host, "*") == 0)
+      return;
 
     userlist[user_list_index].usernick[0] = 0;
     userlist[user_list_index].password[0] = 0;

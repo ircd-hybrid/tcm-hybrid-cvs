@@ -1,3 +1,19 @@
+bill        2004/05/20 05:26:28 EDT	(20040520_0)
+
+  Modified files:
+    include              config.h 
+    src                  bothunt.c 
+  Log:
+  - more pointer arithmetic type fixes
+  - more system notice handling
+  - progressing towards more uniform dcc output by tcm
+  
+  Revision  Changes    Path
+  1.89      +0 -3      tcm-hybrid/include/config.h
+  1.226     +46 -55    tcm-hybrid/src/bothunt.c
+
+
+
 bill        2004/05/19 05:58:15 EDT	(20040519_0)
 
   Modified files:

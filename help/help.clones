@@ -4,8 +4,8 @@ Note:  Opers as defined in this file are people with TCM O: lines (or
     each condition that can cause a kline or kill can be individually
     configured now. typing .actions will show all actions. 
     To set individual action 
-    e.g. .action clones kline 60:Please do not clone here
- - .bots,.multi (OPERS ONLY)
+    e.g. .action clones kline 60 :Please do not clone here
+ - .bots,.multi [n] (OPERS ONLY)
     Report any userhost with multiple connections on this server.
  - .vbots [n] (OPERS ONLY)
     Report any ip blocks with multiple connections on this server
@@ -15,9 +15,9 @@ Note:  Opers as defined in this file are people with TCM O: lines (or
  - .list <wildcarded userhost>  (OPERS ONLY)
     List all connected users who match the given userhost (which
     may contain wildcards). 
- -  .umulti (OPERS ONLY)
+ -  .umulti [n] (OPERS ONLY)
     List users with multiple hosts with same user names.
- -  .hmulti (OPERS ONLY)
+ -  .hmulti [n] (OPERS ONLY)
     List hosts with multiple users.
  - .nfind <wildcarded nick> (OPERS ONLY)
     List all nicks which match the given wildcarded nick

@@ -56,7 +56,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.11 2001/10/11 17:03:43 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.12 2001/10/11 17:29:04 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -580,12 +580,7 @@ void onservnotice(int connnum, int argc, char *argv[])
       break;
 
     case UNAUTHORIZED:
-      p = strstr(q,"from");
-      if (p)
-        {
-	  q = p+5;
-	}
-      logfailure(q,0);
+      logfailure(argv[10],0);
       break;
     case REJECTING:
       bot_reject(q);

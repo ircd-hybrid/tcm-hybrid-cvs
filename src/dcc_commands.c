@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.4 2001/09/22 04:47:37 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.5 2001/09/22 23:01:33 bill Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -96,6 +96,7 @@ void dccproc(int connnum, int argc, char *argv[])
   int ignore_bot = NO;
   char *command, *buffer;
   int kline_time;
+  struct common_function *temp;
 #ifndef NO_D_LINE_SUPPORT
   char *reason;
   char *pattern;  /* u@h or nick */
@@ -203,16 +204,11 @@ void dccproc(int connnum, int argc, char *argv[])
 
     case K_REHASH:
       sendtoalldcc(SEND_ALL_USERS,"rehash requested by %s\n",who_did_command);
-      initopers();
-      if(config_entries.hybrid && (config_entries.hybrid_version >= 6))
-	{
-	  toserv("STATS I\n");
-	}
+      if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
+	toserv("STATS I\n");
       else
-	{
-	  toserv("STATS E\n");
-	  toserv("STATS F\n");
-	}
+	toserv("STATS E\nSTATS F\n");
+      initopers();
       break;
 
     case K_TRACE:
@@ -575,7 +571,7 @@ void dccproc(int connnum, int argc, char *argv[])
                   snprintf(dccbuff, sizeof(dccbuff), "%s", argv[2]);
 
                 kline_time = atoi(argv[2]);
-                for (i=4;i<argc;++i)
+                for (i=3;i<argc;++i)
                   {
                     strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
                     strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
@@ -764,7 +760,8 @@ void dccproc(int connnum, int argc, char *argv[])
 
       case K_CLOSE:
 	prnt(connections[connnum].socket,"Closing connection\n");
-	closeconn(connnum);
+        for (temp=dcc_signoff;temp;temp=temp->next)
+          temp->function(connnum, 0, NULL);
 	break;
 
 /* Added by ParaGod */
@@ -887,6 +884,16 @@ void dccproc(int connnum, int argc, char *argv[])
 
       sendtoalldcc(SEND_OPERS_ONLY, "UNKLINE %s attempted by oper %s", argv[1],who_did_command);
       toserv("UNKLINE %s\n",argv[1]);
+      break;
+
+    case K_VMULTI:
+      if (!(connections[connnum].type & TYPE_OPER))
+        {
+          not_authorized(connections[connnum].socket);
+          return;
+        }
+      if (argc >= 2) report_vmulti(connections[connnum].socket, atoi(argv[1]));
+      else report_vmulti(connections[connnum].socket, 3);
       break;
 
 #ifndef NO_D_LINE_SUPPORT
@@ -1123,8 +1130,6 @@ static int not_legal_remote(int type)
 static void set_actions(int sock, char *key, char *act, int time, char *reason)
 {
   int index;
-  printf("sock: %d key: \"%s\" act: \"%s\" time: %d reason: \"%s\" sizeof(actions): %d\n",
-         sock, key, act, time, reason, MAX_ACTIONS);
   if (!key)
     {
       prnt(sock, "Current actions:\n");
@@ -1869,6 +1874,7 @@ static void handle_disconnect(int sock,char *nickname,char *who_did_command)
 {
   char *type;
   int  i;
+  struct common_function *temp;
 
   if (!nickname)
     prnt(sock,
@@ -1892,7 +1898,8 @@ static void handle_disconnect(int sock,char *nickname,char *who_did_command)
 	    prnt(sock,
 		 "You have been disconnected by oper %s\n",
 		 who_did_command);
-	    closeconn(i);
+            for (temp=dcc_signoff;temp;temp=temp->next)
+              temp->function(i, 0, NULL);
 	  }
     }
 }

@@ -79,7 +79,6 @@ struct config_list {
   char virtual_host_config[MAX_CONFIG];
   char oper_nick_config[MAX_CONFIG];
   char oper_pass_config[MAX_CONFIG];
-  char server_config[MAX_CONFIG];
   char server_name[MAX_CONFIG];
   char rserver_name[MAX_CONFIG];
   char server_port[MAX_CONFIG];
@@ -93,32 +92,7 @@ struct config_list {
   char defchannel[MAX_CHANNEL];		/* Channel tcm will use. */
   char defchannel_key[MAX_CONFIG];	/* key for Channel tcm will use. */
   char dfltnick[MAX_NICK];		/* Nickname tcm will use */
-  char clone_act[MAX_CONFIG];
-  char clone_reason[MAX_CONFIG];
-  char vclone_act[MAX_CONFIG];
-  char vclone_reason[MAX_CONFIG];
-  char sclone_act[MAX_CONFIG];		/* services clone action */
-  char sclone_reason[MAX_CONFIG];	
-  char cflood_act[MAX_CONFIG];		/* connect drone action */
-  char cflood_reason[MAX_CONFIG];
-  char flood_act[MAX_CONFIG];
-  char flood_reason[MAX_CONFIG];
-  char ctcp_act[MAX_CONFIG];		/* ctcp flood action */
-  char ctcp_reason[MAX_CONFIG];
-  char link_act[MAX_CONFIG];
-  char link_reason[MAX_CONFIG];
   int  channel_report;			/* bit map of flags */
-  char bot_act[MAX_CONFIG];
-  char bot_reason[MAX_CONFIG];
-  char spoof_act[MAX_CONFIG];
-  char spoof_reason[MAX_CONFIG];
-  char spambot_act[MAX_CONFIG];
-  char spambot_reason[MAX_CONFIG];
-
-#ifdef SERVICES_DRONES
-  char drones_act[MAX_CONFIG];
-  char drones_reason[MAX_CONFIG];
-#endif
 
   char statspmsg[MAX_CONFIG];
 

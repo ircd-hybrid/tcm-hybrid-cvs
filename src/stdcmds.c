@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.6 2001/09/22 04:47:37 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.7 2001/09/22 23:01:33 bill Exp $";
 
 int doingtrace = NO;
 
@@ -168,7 +168,7 @@ void prnt(int sock, ...)
 
   if(config_entries.debug)
     {
-//      (void)printf("-> %s",msgbuf);     /* - zaph */
+      (void)printf("-> %s",msgbuf);     /* - zaph */
       if(outfile)
         (void)fprintf(outfile,"%s",msgbuf);
     }
@@ -180,6 +180,13 @@ void prnt(int sock, ...)
  * certain things.  The names are quite self explanatory, so I am not going
  * to document each.  By no means are they complex.
  */
+
+void oper()
+{
+  toserv("OPER %s %s\n",
+          config_entries.oper_nick_config,
+          config_entries.oper_pass_config);
+}
 
 void op(char *chan,char *nick)
 {
@@ -436,6 +443,12 @@ void suggest_action(int type,
   if(okhost(user, host))
     return;
 
+  printf("suggest_action(%lx, \"%s\", \"%s\", \"%s\", %s, %s)\n", type, nick, user, host,
+         different ? "YES" : "NO", identd ? "YES" : "NO");
+  for (index=0;index<MAX_ACTIONS;++index)
+    if (actions[index].type == type) printf("name: \"%s\"\n", actions[index].name);
+
+  return;
   if (strchr(host,'*'))
     {
       report(SEND_ALL_USERS,

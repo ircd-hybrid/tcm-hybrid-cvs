@@ -40,7 +40,7 @@
 #include "bothunt.h"
 #include "logging.h"
 
-static char *version="$Id: logging.c,v 1.12 2001/09/22 04:47:37 bill Exp $";
+static char *version="$Id: logging.c,v 1.13 2001/09/22 23:01:33 bill Exp $";
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file
@@ -192,8 +192,7 @@ void chopuh(int istrace,char *nickuserhost,struct plus_c_info *userinfo)
                             nickuserhost);
               /* No ending ')' found, but lets try it anyway */
             }
-          userinfo->user = uh;
-
+          userinfo->user = uh+1;
           if( (p = strchr(userinfo->user,'@')) )
             {
               *p = '\0';

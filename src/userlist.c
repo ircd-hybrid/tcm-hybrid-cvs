@@ -6,6 +6,8 @@
  *  - rudimentary remote tcm linking added
  */
 
+#include <fcntl.h>
+#include <errno.h>
 #include <ctype.h>
 #include <netinet/in.h>
 #include <signal.h>
@@ -33,7 +35,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.16 2001/09/22 04:47:37 bill Exp $";
+static char *version="$Id: userlist.c,v 1.17 2001/09/22 23:01:33 bill Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct tcm_file_entry tcmlist[MAXTCMS];
@@ -76,7 +78,6 @@ void load_config_file(char *file_name)
   FILE *fp;
   char line[MAX_BUFF];
   char *key;			/* key/value pairs as found in config file */
-  char *value;
   char *act;
   char *reason;
   char *message_ascii;
@@ -85,6 +86,7 @@ void load_config_file(char *file_name)
   char *p;
   char *q;
   int error_in_config;		/* flag if error was found in config file */
+  struct common_function *temp;
 
   error_in_config = NO;
 
@@ -99,7 +101,6 @@ void load_config_file(char *file_name)
   config_entries.virtual_host_config[0] = '\0';
   config_entries.oper_nick_config[0] = '\0';
   config_entries.oper_pass_config[0] = '\0';
-  config_entries.server_config[0] = '\0';
   config_entries.server_pass[0] = '\0';
   config_entries.ircname_config[0] = '\0';
   config_entries.defchannel[0] = '\0';
@@ -108,46 +109,6 @@ void load_config_file(char *file_name)
 
   config_entries.channel_report = 
     CHANNEL_REPORT_ROUTINE | CHANNEL_REPORT_CLONES;
-
-  strcpy(config_entries.sclone_act, "kline 60");
-  strncpy(config_entries.sclone_reason, REASON_AUTO_MULTI_SERVER_CLONES,
-	  sizeof(config_entries.sclone_reason) - 1);
-
-  config_entries.vclone_act[0] = '\0';
-  config_entries.vclone_reason[0] = '\0';
-
-  strcpy(config_entries.clone_act, "kline 60");
-  strncpy(config_entries.clone_reason,REASON_KCLONE,
-	  sizeof(config_entries.clone_reason) - 1);
-
-  strcpy(config_entries.flood_act,"kline 60");
-  strncpy(config_entries.flood_reason,REASON_KFLOOD,
-	  sizeof(config_entries.flood_reason) - 1 );
-
-  strcpy(config_entries.ctcp_act,"kline 60");
-  strncpy(config_entries.ctcp_reason,REASON_CTCP,
-	  sizeof(config_entries.flood_reason) - 1 );
-
-  strcpy(config_entries.link_act,"kline 60");
-  strncpy(config_entries.link_reason,REASON_LINK,
-	  sizeof(config_entries.link_reason) - 1 );
-
-  strcpy(config_entries.bot_act,"kline");
-  strncpy(config_entries.bot_reason,REASON_KBOT,
-	  sizeof(config_entries.bot_reason) - 1 );
-
-  strcpy(config_entries.spoof_act,"kline 60");
-  strncpy(config_entries.spoof_reason,"spoofer",
-	  sizeof(config_entries.spoof_reason) - 1 );
-
-  config_entries.spambot_act[0] = '\0';
-  config_entries.spambot_reason[0] = '\0';
-
-#ifdef SERVICES_DRONES
-  config_entries.drones_act[0] = '\0';
-  strncpy(config_entries.drones_reason,REASON_DRONES,
-	 sizeof(config_entries.drones_reason) - 1 );
-#endif
 
   strncpy(config_entries.userlist_config,USERLIST_FILE,MAX_CONFIG-1);
 
@@ -174,8 +135,10 @@ void load_config_file(char *file_name)
           ++argc;
         }
       if (!(argv[argc] = (char *)malloc(200))) gracefuldie(0, __FILE__, __LINE__);
-      snprintf(argv[argc], sizeof(argv[argc]), "%s", p);
+      snprintf(argv[argc], 200, "%s", p);
       ++argc;
+      if (argv[argc-1][strlen(argv[argc-1])-1] == '\n') 
+        argv[argc-1][strlen(argv[argc-1])-1] = '\0';
 
       for (temp=config;temp;temp=temp->next)
         temp->function(0, argc, argv);
@@ -183,161 +146,89 @@ void load_config_file(char *file_name)
       if(line[0] == '#')
 	continue;
 
-      if( !(key = strtok(line,":")) )
-	continue;
-
-      if( !(value = strtok((char *)NULL,"\r\n")) )
-	continue;
-
-      switch(*key)
+      switch(argv[0][0])
 	{
 	case 'd':case 'D':
-          if(config_entries.debug && outfile)
-            {
-              (void)fprintf(outfile, "opers_only = [%s]\n", value );
-            }
-	  if(strcasecmp(value,"YES") == 0)
+          if (config_entries.debug && outfile)
+            (void)fprintf(outfile, "opers_only = [%s]\n", argv[1]);
+	  if (!strcasecmp(argv[1],"YES"))
 	    config_entries.opers_only = YES;
 	  else
 	    config_entries.opers_only = NO;
 	  break;
 
 	case 'e':case 'E':
-	  if(config_entries.debug && outfile)
-	    {
-	      (void)fprintf(outfile, "email address = [%s]\n", value );
-	    }
-          strncpy(config_entries.email_config,value,MAX_CONFIG-1);
+	  if (config_entries.debug && outfile)
+	    (void)fprintf(outfile, "email address = [%s]\n", argv[1]);
+          strncpy(config_entries.email_config,argv[1],MAX_CONFIG-1);
 	break;
 
 	case 'f':case 'F':
-	  if(config_entries.debug && outfile)
-	    {
-	      (void)fprintf(outfile, "tcm.pid file name = [%s]\n",
-			    config_entries.tcm_pid_file);
-	    }
-	  strncpy(config_entries.tcm_pid_file,value,MAX_CONFIG-1);
+	  if (config_entries.debug && outfile)
+	    (void)fprintf(outfile, "tcm.pid file name = [%s]\n", argv[1]);
+	  strncpy(config_entries.tcm_pid_file,argv[1],MAX_CONFIG-1);
 	  break;
 
 	case 'l':case 'L':
-	  if(config_entries.debug && outfile)
-	    {
-	      fprintf(outfile, "userlist = [%s]\n", value );
-	    }
-	  strncpy(config_entries.userlist_config,value,MAX_CONFIG-1);
+	  if (config_entries.debug && outfile)
+            fprintf(outfile, "userlist = [%s]\n", argv[1]);
+	  strncpy(config_entries.userlist_config,argv[1],MAX_CONFIG-1);
 	  break;
 
 	case 'm':case 'M':
-	    strncpy(config_entries.statspmsg,
-		    value,sizeof(config_entries.statspmsg));
-	    break;
-
-	case 'a':case 'A':
-	    act = splitc(value, ':');
-	    if(!act)
-	      {
-		/* missing action */
-		break;
-	      }
-	    reason = splitc( act, ':');
-
-	    message = 0;
-
-	    if(reason)
-	      {
-		message_ascii = splitc( reason, ':');
-		if(message_ascii)
-		  {
-		    if(!strcasecmp(message_ascii,"yes"))
-		      {
-			message = 1;
-		      }
-		    else if(!strcasecmp(message_ascii,"no"))
-		      {
-			message = -1;
-		      }
-		  }
-	      }
-
-//	    add_action(value, act, reason, message);
+	    strncpy(config_entries.statspmsg, argv[1],sizeof(config_entries.statspmsg));
 	    break;
 
 	case 'o':case 'O':
-	  {
-	    char *oper_nick;
-	    char *oper_pass;
-
-	    if( !(oper_nick = strtok(value,":\r\n")) )
-	      continue;
-
-	    if( !(oper_pass = strtok((char *)NULL,":\r\n")) )
-	      continue;
-
-	    strncpy(config_entries.oper_nick_config,oper_nick,MAX_NICK);
-	    strncpy(config_entries.oper_pass_config,oper_pass,MAX_CONFIG-1);
-	  }
+          strncpy(config_entries.oper_nick_config,argv[1],MAX_NICK);
+	  strncpy(config_entries.oper_pass_config,argv[2],MAX_CONFIG-1);
 	  break;
 
 	case 'p':case 'P':
-	  config_entries.tcm_port = atoi(value);
+	  config_entries.tcm_port = atoi(argv[1]);
 	  break;
 
 	case 'u':case 'U':
-	  if(config_entries.debug && outfile)
-	    {
-	      fprintf(outfile, "user name = [%s]\n", value );
-	    }
-	  strncpy(config_entries.username_config,value,MAX_CONFIG-1);
+	  if (config_entries.debug && outfile)
+	    fprintf(outfile, "user name = [%s]\n", argv[1]);
+	  strncpy(config_entries.username_config,argv[1],MAX_CONFIG-1);
 	  break;
 
 	case 'v':case 'V':
-	  if(config_entries.debug && outfile)
-	    {
-	      fprintf(outfile, "virtual host name = [%s]\n", value );
-	    }
-	  strncpy(config_entries.virtual_host_config,value,MAX_CONFIG-1);
+	  if (config_entries.debug && outfile)
+	    fprintf(outfile, "virtual host name = [%s]\n", argv[1]);
+	  strncpy(config_entries.virtual_host_config,argv[1],MAX_CONFIG-1);
 	  break;
 
 	case 's':case 'S':
-	  if(config_entries.debug && outfile)
-	    {
-	      fprintf(outfile, "server = [%s]\n", value);
-	    }
-	  strncpy(config_entries.server_config,value,MAX_CONFIG-1);
+	  if (config_entries.debug && outfile)
+	    fprintf(outfile, "server = [%s]\n", argv[1]);
+	  strncpy(config_entries.server_name,argv[1],MAX_CONFIG-1);
+          if (argc > 2) strncpy(config_entries.server_port,argv[2],MAX_CONFIG-1);
+          if (argc > 3) strncpy(config_entries.server_pass,argv[3],MAX_CONFIG-1);
 	  break;
 
 	case 'n':case 'N':
-	  if(config_entries.debug && outfile)
-	    {
-	      fprintf(outfile, "nick for tcm = [%s]\n", value );
-	    }
-	  strncpy(config_entries.dfltnick,value,MAX_NICK-1);
+	  if (config_entries.debug && outfile)
+	    fprintf(outfile, "nick for tcm = [%s]\n", argv[1]);
+	  strncpy(config_entries.dfltnick,argv[1],MAX_NICK-1);
 	  break;
 
 	case 'i':case 'I':
-	  if(config_entries.debug && outfile)
-	    {
-	      fprintf(outfile, "IRCNAME = [%s]\n", value );
-	    }
-	  strncpy(config_entries.ircname_config,value,MAX_CONFIG-1);
+	  if (config_entries.debug && outfile)
+	    fprintf(outfile, "IRCNAME = [%s]\n", argv[1]);
+	  strncpy(config_entries.ircname_config,argv[1],MAX_CONFIG-1);
 	  break;
 
 	case 'c':case 'C':
-	  if(config_entries.debug && outfile)
-	    {
-	      fprintf(outfile, "Channel = [%s]\n", value);
-	    }
+	  if (config_entries.debug && outfile)
+	    fprintf(outfile, "Channel = [%s]\n", argv[1]);
 
-	  if((p = strchr(value,':')))
-	    {
-	      *p = '\0';
-	      p++;
-	      strncpy(config_entries.defchannel_key,p,MAX_CONFIG-1);
-	    }
+          if (argc > 2)
+	    strncpy(config_entries.defchannel_key,p,MAX_CONFIG-1);
 	  else
 	    config_entries.defchannel_key[0] = '\0';
-
-	  strncpy(config_entries.defchannel,value,MAX_CHANNEL-1);
+	  strncpy(config_entries.defchannel,argv[1],MAX_CHANNEL-1);
 	  break;
 
 	default:
@@ -345,11 +236,6 @@ void load_config_file(char *file_name)
 	}
     }
 
-  if(!config_entries.clone_act[0])
-    {
-      /* "warn" is absolutely way below length of clone_act */
-      strcpy(config_entries.clone_act, "warn" );
-    }
   if(config_entries.username_config[0] == '\0')
     {
       fprintf(stderr,"I need a username (U:) in %s\n",CONFIG_FILE);
@@ -368,30 +254,15 @@ void load_config_file(char *file_name)
       error_in_config = YES;
     }
 
-  if(config_entries.server_config[0] == '\0')
+  if(config_entries.server_name[0] == '\0')
     {
       fprintf(stderr,"I need a server (S:) in %s\n",CONFIG_FILE);
       error_in_config = YES;
     }
 
-  strcpy(config_entries.server_name,config_entries.server_config);
-
-  if( (p = strchr(config_entries.server_name,':')) )
+  if(config_entries.server_port[0] == '\0')
     {
-      *p = '\0';
-      p++;
-      if( (q = strchr(p,':')) )
-	{
-	  *q = '\0';
-	  q++;
-	  strncpy(config_entries.server_pass,q,MAX_CONFIG);
-	}
-      strncpy(config_entries.server_port,p,MAX_CONFIG);
-    }
-  else
-    {
-      fprintf(stderr,"I need a port in the server line (S:) in %s\n",
-	      CONFIG_FILE);
+      fprintf(stderr,"I need a port in the server line (S:) in %s\n",CONFIG_FILE);
       error_in_config = YES;
     }
 
@@ -421,62 +292,39 @@ void load_config_file(char *file_name)
 void load_prefs(void)
 {
   FILE *fp;
-  char line[MAX_BUFF];
+  char line[MAX_BUFF], *argv[20];
   char *key;
   char *value;
   char *act;
   char *reason;
   char *message_ascii;
-  int  message;
+  int  message, argc;
+  struct common_function *temp;
 
-  if( !(fp = fopen(PREF_FILE,"r")) )
-    {
-      return;
-    }
+  if (!(fp = fopen(PREF_FILE,"r")))
+    return;
 
   while(fgets(line, MAX_BUFF-1,fp))
     {
-      if(line[0] == '#')
-	continue;
-
-      if( !(key = strtok(line,":")) )
-	continue;
-      
-      if( !(value = strtok((char *)NULL,"\r\n")) )
-	continue;
-
-      switch(*key)
-	{
-	case 'a':case 'A':
-	  act = splitc(value, ':');
-	  if(!act)
-	    {
-	      /* missing action */
-	      break;
-	    }
-	  reason = splitc( act, ':');
-	  message = 0;
-
-	  if(reason)
-	    {
-	      message_ascii = splitc( reason, ':');
-	      if(message_ascii)
-		{
-		  message = atoi(message_ascii);
-		}
-	    }
-
-//	  add_action(value, act, reason, message);
-	  break;
-
-	  break;
-	default:
-	  break;
-	}
+      argc=0;
+      key = line;
+      value = strchr(key, ':');
+      for (;value;value=strchr(key, ':'))
+        {
+          *value = '\0';
+          if (!(argv[argc] = (char *)malloc(200))) gracefuldie(0, __FILE__, __LINE__);
+          snprintf(argv[argc], 200, "%s", key);
+          key = value+1;
+          ++argc;
+        }
+      if (!(argv[argc] = (char *)malloc(200))) gracefuldie(0, __FILE__, __LINE__);
+      snprintf(argv[argc], 200, "%s", key);
+      ++argc;
+      for (temp=config;temp;temp=temp->next)
+        temp->function(0, argc, argv);
     }
 
   (void)fclose(fp);
-
   config_entries.channel_report |= CHANNEL_REPORT_ROUTINE;
 }
 
@@ -501,184 +349,8 @@ void save_prefs(void)
   for (temp=prefsave;temp;temp=temp->next)
     temp->function(fp, 0, NULL);
 
-  (void)fclose(fp);
+  close(fp);
 }
-
-#if 0
-/*
- * add_action
- *
- * inputs	- pointer to keyword ("clone" "sclone" etc.)
- *		- pointer to action
- * 		- pointer to reason to associate with action
- *		- int flagging message to channel or not
- *		  -1 NO +1 YES 0 don't change
- * output	- none
- * side effects -
- */
-
-static void add_action(char *value, char *act, char *reason, int message)
-{
-
-  if (!strcasecmp(value, "clone"))
-    {
-	strncpy(config_entries.clone_act, act, 
-		sizeof(config_entries.clone_act));
-      
-      if(reason)
-	strncpy(config_entries.clone_reason, reason, 
-		sizeof(config_entries.clone_reason));
-
-      if(message > 0)
-	config_entries.channel_report |= CHANNEL_REPORT_CLONES;
-      else if(message <= 0)
-	config_entries.channel_report &= ~CHANNEL_REPORT_CLONES;
-
-    }
-#ifdef AUTO_DLINE
-  else if (!strcasecmp(value, "vclone"))
-    {
-	strncpy(config_entries.clone_act, act, 
-		sizeof(config_entries.vclone_act));
-      
-      if(reason)
-	strncpy(config_entries.clone_reason, reason, 
-		sizeof(config_entries.vclone_reason));
-
-      if(message > 0)
-	config_entries.channel_report |= CHANNEL_REPORT_VCLONES;
-      else if(message <= 0)
-	config_entries.channel_report &= ~CHANNEL_REPORT_VCLONES;
-    }
-#endif
-  else if (!strcasecmp(value, "cflood"))
-    {
-        strncpy(config_entries.cflood_act, act,
-		sizeof(config_entries.cflood_act));
-
-	if(reason)
-	  strncpy(config_entries.cflood_reason, reason,
-		  sizeof(config_entries.cflood_reason));
-	if(message > 0)
-	  config_entries.channel_report |= CHANNEL_REPORT_CFLOOD;
-	else
-	  config_entries.channel_report &= ~CHANNEL_REPORT_CFLOOD;
-    }
-  else if (!strcasecmp(value, "sclone"))
-    {
-	strncpy(config_entries.sclone_act, act, 
-		sizeof(config_entries.sclone_act));
-      
-      if(reason)
-	strncpy(config_entries.sclone_reason, reason, 
-		sizeof(config_entries.sclone_reason));
-
-      if(message > 0)
-	config_entries.channel_report |= CHANNEL_REPORT_SCLONES;
-      else if(message <= 0)
-	config_entries.channel_report &= ~CHANNEL_REPORT_SCLONES;
-    }
-  else if (!strcasecmp(value, "flood"))
-    {
-	strncpy(config_entries.flood_act, act, 
-		sizeof(config_entries.flood_act));
-      
-      if(reason)
-	strncpy(config_entries.flood_reason, reason, 
-		sizeof(config_entries.flood_reason));
-
-      if(message > 0)
-	config_entries.channel_report |= CHANNEL_REPORT_FLOOD;
-      else if(message <= 0)
-	config_entries.channel_report &= ~CHANNEL_REPORT_FLOOD;
-    }
-  else if (!strcasecmp(value, "ctcp"))
-    {
-	strncpy(config_entries.ctcp_act, act, 
-		sizeof(config_entries.ctcp_act));
-      
-      if(reason)
-	strncpy(config_entries.ctcp_reason, reason, 
-		sizeof(config_entries.ctcp_reason));
-
-      if(message > 0)
-	config_entries.channel_report |= CHANNEL_REPORT_CTCP;
-      else if(message <= 0)
-	config_entries.channel_report &= ~CHANNEL_REPORT_CTCP;
-    }
-  else if (!strcasecmp(value, "link"))
-    {
-	strncpy(config_entries.link_act, act, 
-		sizeof(config_entries.link_act));
-      
-      if(reason)
-	strncpy(config_entries.link_reason, reason, 
-		sizeof(config_entries.link_reason));
-
-      if(message > 0)
-	config_entries.channel_report |= CHANNEL_REPORT_LINK;
-      else if(message <= 0)
-	config_entries.channel_report &= ~CHANNEL_REPORT_LINK;
-    }
-  else if (!strcasecmp(value, "bot"))
-    {
-	strncpy(config_entries.bot_act, act, 
-		sizeof(config_entries.bot_act));
-      
-      if(reason)
-	strncpy(config_entries.bot_reason, reason, 
-		sizeof(config_entries.bot_reason));
-
-      if(message > 0)
-	config_entries.channel_report |= CHANNEL_REPORT_BOT;
-      else if(message <= 0)
-	config_entries.channel_report &= ~CHANNEL_REPORT_BOT;
-    }
-  else if (!strcasecmp(value, "spoof"))
-    {
-	strncpy(config_entries.spoof_act, act, 
-		sizeof(config_entries.spoof_act));
-      
-      if(reason)
-	strncpy(config_entries.spoof_reason, reason, 
-		sizeof(config_entries.spoof_reason));
-
-      if(message > 0)
-	config_entries.channel_report |= CHANNEL_REPORT_SPOOF;
-      else if(message <= 0)
-	config_entries.channel_report &= ~CHANNEL_REPORT_SPOOF;
-    }
-  else if (!strcasecmp(value, "spambot"))
-    {
-	strncpy(config_entries.spambot_act, act, 
-		sizeof(config_entries.spambot_act));
-
-      if(reason)
-	strncpy(config_entries.spambot_reason, reason, 
-		sizeof(config_entries.spambot_reason));
-
-      if(message > 0)
-	config_entries.channel_report |= CHANNEL_REPORT_SPAMBOT;
-      else if(message <= 0)
-	config_entries.channel_report &= ~CHANNEL_REPORT_SPAMBOT;
-    }
-#ifdef SERVICES_DRONES
-  else if (!strcasecmp(value, "drones"))
-    {
-	strncpy(config_entries.drones_act, act,
-		sizeof(config_entries.drones_act));
-      if(reason)
-	strncpy(config_entries.drones_reason, reason, 
-		sizeof(config_entries.drones_reason));
-
-      if(message > 0)
-	config_entries.channel_report |= CHANNEL_REPORT_DRONE;
-      else if(message <= 0)
-	config_entries.channel_report &= ~CHANNEL_REPORT_DRONE;
-    }
-#endif
-}
-#endif
 
 /*
  * load_userlist
@@ -1030,17 +702,6 @@ int str2type(char *vltn) {
   int ret;
   if (!(ret = get_action_type(vltn))) return 0;
   return ret;
-
-
-/*  if (!strcasecmp(vltn, "clone")) return R_CLONES;
-  else if (!strcasecmp(vltn, "sclone")) return R_SCLONES;
-  else if (!strcasecmp(vltn, "flood")) return R_FLOOD;
-  else if (!strcasecmp(vltn, "ctcp")) return R_CTCP;
-  else if (!strcasecmp(vltn, "link")) return R_LINK;
-  else if (!strcasecmp(vltn, "bot")) return R_BOTS;
-  else if (!strcasecmp(vltn, "spoof")) return R_SPOOF;
-  else if (!strcasecmp(vltn, "spambot")) return R_SPAMBOT;
-  else return 0;*/
 }
 
 /*
@@ -1426,59 +1087,6 @@ int islegal_pass(int connect_id,char *password)
 #endif
 	    }
 	}
-    }
-  return(0);
-}
-
-/*
- * islinkedbot()
- *
- * inputs	- connection number, botname, password
- * output		- privs if linkedbot 0 if not
- * side effects	- NONE
- */
-
-int islinkedbot(int connnum, char *botname, char *password)
-{
-  int i = 0;
-  int j;
-
-  while ((userlist[i].user[0]) && (i < (MAXDCCCONNS -1)) )
-    {
-      if (
-	  (userlist[i].type & TYPE_TCM) && /* if its a tcm */
-	  (
-	   (!wldcmp(userlist[i].user,connections[connnum].user)) &&
-	   (!wldcmp(userlist[i].host,connections[connnum].host))
-	  )
-	 )
-	{
-	  if(!userlist[i].usernick[0]) continue;
-	  if(!userlist[i].password[0]) continue;
-
-	  if( (strcasecmp(botname,userlist[i].usernick) == 0 ) &&
-	     (strcmp(password,userlist[i].password) == 0 ) )
-	    {
-	      /* 
-		 Close any other duplicate connections using same botnick
-	       */
-
-	      for(j = 0; j < MAXDCCCONNS+1; j++)
-		{
-		  if(connections[j].user)
-		     {
-		       if(!strcasecmp(connections[j].nick,botname))
-			 {
-			   closeconn(j);
-			 }
-		     }
-		}
-
-	      strcpy(connections[connnum].nick,botname);
-	      return(userlist[i].type);
-	    }
-	}
-      i++;
     }
   return(0);
 }

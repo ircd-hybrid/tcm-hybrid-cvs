@@ -59,7 +59,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.2 2001/09/20 19:52:30 bill Exp $";
+static char *version="$Id: main.c,v 1.3 2001/09/22 23:01:33 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -372,10 +372,9 @@ void sendtoalldcc(int type,...)
  * side effects	- connection on connection number connnum is closed.
  */
 
-void closeconn(int connnum)
+void closeconn(int connnum, int argc, char *argv[])
 {
   int i;
-  struct common_function *temp;
 #ifdef DEBUGMODE
   placed;
 #endif
@@ -396,9 +395,6 @@ void closeconn(int connnum)
 	  break;
       maxconns = i+1;
     }
-
-  for (temp=dcc_signoff;temp;temp=temp->next)
-    temp->function(connnum, 0, NULL);
     
   connections[connnum].user[0] = '\0';
   connections[connnum].host[0] = '\0';
@@ -524,6 +520,20 @@ void set_action_type(char *name, int type)
   else actions[index].type = type;
 }
 
+void set_action_method(char *name, char *method)
+{
+  int index;
+  if ((index = get_action(name)) == -1) return;
+  snprintf(actions[index].method, sizeof(actions[index].method), "%s", method);
+}
+
+void set_action_reason(char *name, char *reason)
+{
+  int index;
+  if ((index = get_action(name)) == -1) return;
+  snprintf(actions[index].reason, sizeof(actions[index].reason), "%s", reason);
+}
+
 int get_action(char *name)
 {
   int index;
@@ -538,6 +548,27 @@ int get_action_type(char *name)
   int index;
   if ((index = get_action(name)) == -1) return 0;
   else return actions[index].type;
+}
+
+int action_log(char *name)
+{
+  int index;
+  if ((index = get_action(name)) == -1) return 0;
+  return (actions[index].report ? YES : NO);
+}
+
+char *get_action_method(char *name)
+{
+  int index;
+  if ((index = get_action(name)) == -1) return NULL;
+  return actions[index].method;
+}
+
+char *get_action_reason(char *name)
+{
+  int index;
+  if ((index = get_action(name)) == -1) return NULL;
+  return actions[index].reason;
 }
 
 /*
@@ -558,7 +589,7 @@ int get_action_type(char *name)
 int main(int argc, char *argv[])
 {
   int i;
-  char c, *temp_b[2];
+  char c;
   extern char *optarg;
   extern int optind;
   struct common_function *temp;
@@ -570,13 +601,6 @@ int main(int argc, char *argv[])
 #ifdef DEBUGMODE		/* initialize debug list */
   for(i=0;i<16;++i) placed;
   i=0;
-#endif
-
-#if 0
-  if(argc < 2)
-    load_config_file(CONFIG_FILE);
-  else
-    load_config_file(argv[1]);
 #endif
 
   config_entries.conffile=NULL;
@@ -612,10 +636,10 @@ int main(int argc, char *argv[])
     load_config_file(config_entries.conffile);
   else
     load_config_file(CONFIG_FILE);
-
   load_prefs();
 
-  strcpy(serverhost,config_entries.server_config); /* Load up desired server */
+  snprintf(serverhost,sizeof(serverhost), "%s:%d", config_entries.server_name, 
+           atoi(config_entries.server_port));
 
   for (i=0;i<MAXDCCCONNS+1;++i)
     {
@@ -724,17 +748,16 @@ int main(int argc, char *argv[])
     }
   *mynick = '\0';
 
-  temp_b[0] = config_entries.server_name;
-  temp_b[1] = config_entries.rserver_name;
   amianoper = NO;
   startup_time = time(NULL);
-  for (temp=signon;temp;temp=temp->next)
-    temp->function(0, 0, NULL);
   init_allow_nick();
   modules_init();
+  dcc_signoff->function = closeconn;
+  dcc_signoff->next = (struct common_function *)NULL;
+  dcc_signoff->type = F_DCC_SIGNOFF;
   load_all_modules(YES);
   for (temp=signon;temp;temp=temp->next)
-    temp->function(0, 2, temp_b);
+    temp->function(0, 0, NULL);
 
   while(!quit)
     {
@@ -743,7 +766,7 @@ int main(int argc, char *argv[])
     }
 
   for (temp=signoff;temp;temp=temp->next)
-    temp->function(0, 2, temp_b);
+    temp->function(0, 0, NULL);
 
   if(config_entries.debug && outfile)
     {

@@ -47,7 +47,7 @@ distclean:
 		${MAKE} distclean; cd ..;\
 	done
 	${RM} -f Makefile config.status config.cache config.log include/setup.h etc/tcm.pid
-	${RM} -f DEBUG bin/tcm bin/mkpasswd etc/*.pref logs/*.log logs/clone_log_*
+	${RM} -f DEBUG bin/tcm bin/mkpasswd etc/*.pref logs/*log logs/clone_log_*
 	@echo "all:" > Makefile
 	@echo "	@echo \"Run ./configure first, dumby\"" >> Makefile
 

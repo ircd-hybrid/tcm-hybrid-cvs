@@ -54,7 +54,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.5 2001/09/22 04:47:37 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.6 2001/09/22 23:01:33 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -81,6 +81,16 @@ static char removefromhash(struct hashrec *table[], char *key, char *hostmatch,
 #ifdef DETECT_DNS_SPOOFERS
 static int   host_is_ip(char *host_name);
 #endif
+
+#define R_CLONE		0x001
+#define R_VCLONE	0x002
+#define R_FLOOD         0x008
+#define R_LINK          0x010
+#define R_BOT		0x020
+#define R_CTCP          0x100
+#define R_SPOOF         0x200
+#define R_SPAMBOT       0x400
+#define R_CFLOOD        0x800
 
 char *msgs_to_mon[] = {
   "Client connecting: ", 
@@ -408,7 +418,7 @@ void on_stats_i(int connnum, int argc, char *argv[])
   char *host;
   char *p;
   char body[MAX_BUFF];
-  int  alpha;
+  int  alpha, ok=NO, spoofed=NO;
 
   for (alpha=0;alpha<argc;++alpha)
     {
@@ -422,37 +432,26 @@ void on_stats_i(int connnum, int argc, char *argv[])
   if( host_list_index == (MAXHOSTS - 1))
     return;
 
-  if( !( p = strchr(body,'@')) )	/* find the u@h part */
+  if( !( p = strchr(argv[6],'@')) )	/* find the u@h part */
     return;
 
   *p = '\0';				/* blast the '@' */
-  host = p;
-  host++;				/* host part is past the '@' */
+  host = p+1;				/* host part is past the '@' */
 
-  while(p != body)			/* scan down for first ' ' */
-    {
-      if(*p == ' ')
-	break;
-      p--;
-    }
-
-  if( p == body )			/* bah not found */
-    return;
-
-  p++;
+  p = user = argv[6];
 
   /* if client is exempt, mark it as such in the exemption list */
-
-  if( !(p = strchr(p,'>')) )
-    return;
 
   for(;*p;p++)
     {
       switch(*p)
 	{
-	case '=':case '!':case '-':case '$':
+	case '=':
+          spoofed=YES;
+        case '<':case '-':case '$':
 	case '%':case '^':case '&':case '>':
-	case '<':
+	case '_':
+          ok=YES;
 	  break;
 
 	default:
@@ -462,21 +461,16 @@ void on_stats_i(int connnum, int argc, char *argv[])
       if(alpha)
 	break;
     }
-
   user = p;
-
-  if( !(p = strchr(host,' ')) )		/* blast ' ' following the host */
-    return;
-  *p = '\0';
-
-
-  strncpy(hostlist[host_list_index].user, user,
-	  sizeof(hostlist[host_list_index].user));
-
-  strncpy(hostlist[host_list_index].host, host,
-	  sizeof(hostlist[host_list_index].host));
-
-  host_list_index++;
+  if (ok)
+    {
+      strncpy(hostlist[host_list_index].user, user,sizeof(hostlist[host_list_index].user));
+      if (spoofed)
+        strncpy(hostlist[host_list_index].host, argv[4], sizeof(hostlist[host_list_index].host));
+      else
+        strncpy(hostlist[host_list_index].host, host, sizeof(hostlist[host_list_index].host));
+      host_list_index++;
+    }
 }
 
 /* 
@@ -862,7 +856,7 @@ void onservnotice(int connnum, int argc, char *argv[])
       break;
 
     default:
-      sendtoalldcc(SEND_OPERS_NOTICES_ONLY, q);
+      sendtoalldcc(SEND_OPERS_NOTICES_ONLY, "%s", message);
       break;
     }
 }
@@ -1460,18 +1454,14 @@ static int obvious_dns_spoof( char *nick, struct plus_c_info *userinfo)
  *
  */
 
+  if (okhost(userinfo->user, userinfo->host)) return NO;
   if ( (p = strrchr(userinfo->host,'.')) )
     {
       p++;
       len = strlen(p);
       if(len > 3)
 	{
-	  suggest_action("spoof",
-			     nick,
-			     "<unknown>",
-			     "<unknown>",
-			     NO,
-			     YES);
+	  suggest_action(get_action_type("spoof"), nick, userinfo->user, userinfo->ip, NO,YES);
 	  return YES;
 	}
 
@@ -1492,7 +1482,8 @@ static int obvious_dns_spoof( char *nick, struct plus_c_info *userinfo)
 
 	  if(!legal_top_level)
 	    {
-	      suggest_action(get_action_type("spoof"), nick, "<unknown>", "<unknown>", NO, YES);
+	      suggest_action(get_action_type("spoof"), nick, userinfo->user, userinfo->ip,
+                             NO, YES);
 	      return YES;
 	    }
 	}
@@ -1500,19 +1491,19 @@ static int obvious_dns_spoof( char *nick, struct plus_c_info *userinfo)
 
   if( (strchr(userinfo->host,'@')) )
     {
-      suggest_action(get_action_type("spoof"), nick, "<unknown>", "<unknown>", NO, YES);
+      suggest_action(get_action_type("spoof"), nick, userinfo->user, userinfo->ip, NO, YES);
       return YES;
     }
 
   if(strchr(userinfo->host,'*'))
     {
-      suggest_action(get_action_type("spoof"), nick, "<unknown>", "<unknown>", NO, YES);
+      suggest_action(get_action_type("spoof"), nick, userinfo->user, userinfo->ip, NO, YES);
       return YES;
     }
 
   if( (strchr(userinfo->host,'?')) )
     {
-      suggest_action(get_action_type("spoof"), nick, "<unknown>", "<unknown>", NO, YES);
+      suggest_action(get_action_type("spoof"), nick, userinfo->user, userinfo->ip, NO, YES);
       return YES;
     }
 
@@ -1975,7 +1966,7 @@ static void connect_flood_notice(char *server_notice)
 		{
 		  if (connect_flood[i].connect_count >= MAX_CONNECT_FAILS)
 		    {
-		      if (!strncasecmp(get_action_method("cflood"), "dline", 5))
+		      if (!strncasecmp((char *)get_action_method("cflood"), "dline", 5))
 			suggest_action(get_action_type("cflood"), nick_reported, user, ip,
                                        NO, YES);
 		      else
@@ -2151,10 +2142,6 @@ static void link_look_notice(char *server_notice)
 		  log("possible LINK LOOKER  = %s [%s]\n",
 		      nick_reported,user_host);
 
-/*
- * Changed code to conform to clone_act
- * -bill
- */
 		  if ( !okhost(user,host) )
 		    {
 		      if(*user == '~')
@@ -2780,9 +2767,10 @@ static void stats_notice(char *server_notice)
 
 void _reload_bothunt(int connnum, int argc, char *argv[])
 {
- placed;
- initopers();
- inithash();
+#ifdef DEBUGMODE
+  placed;
+#endif
+ if (!amianoper) oper();
 }
 
 void _prefsave_bothunt(int connnum, int argc, char *argv[])
@@ -2825,7 +2813,7 @@ void _prefsave_bothunt(int connnum, int argc, char *argv[])
 
 void _config_bothunt(int connnum, int argc, char *argv[])
 {
-  if (argv[0] != 'A' && argv[0] != 'a') return;
+  if (*argv[0] != 'A' && *argv[0] != 'a') return;
 
   if (!strcasecmp(argv[1], "cflood") || !strcasecmp(argv[1], "spambot") || 
       !strcasecmp(argv[1], "clone")  || !strcasecmp(argv[1], "ctcp") || 
@@ -2859,11 +2847,19 @@ void _modinit()
   memset(&nick_changes,0,sizeof(nick_changes));
   init_link_look_table();
   add_action("cflood", "dline", "Connect flooding", YES);
-  add_action("spambot", "warn", "Spamming is prohibited", YES);
-  add_action("clone", "kline", "Cloning is prohibited", YES);
-  add_action("ctcp", "kline", "CTCP flooding", YES);
-  add_action("flood", "kline", "Flooding is prohibited", YES);
-  add_action("link", "kline 180", "Link lookers are prohibited", YES);
-  add_action("bot", "kline", "Bots are prohibited", YES);
+  set_action_type("cflood", R_CFLOOD);
   add_action("vclone", "warn", "Cloning is prohibited", YES);
+  set_action_type("vclone", R_VCLONE);
+  add_action("flood", "kline", "Flooding is prohibited", YES);
+  set_action_type("flood", R_FLOOD);
+  add_action("link", "kline 180", "Link lookers are prohibited", YES);
+  set_action_type("link", R_LINK);
+  add_action("bot", "kline", "Bots are prohibited", YES);
+  set_action_type("bot", R_BOT);
+  add_action("ctcp", "kline", "CTCP flooding", YES);
+  set_action_type("ctcp", R_CTCP);
+  add_action("spambot", "warn", "Spamming is prohibited", YES);
+  set_action_type("spambot", R_SPAMBOT);
+  add_action("clone", "kline", "Cloning is prohibited", YES);
+  set_action_type("clone", R_CLONE);
 }

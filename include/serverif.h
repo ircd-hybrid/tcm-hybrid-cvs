@@ -62,7 +62,7 @@ void report(int type, int channel_report_flag, char *format, ... );
 void sighandlr(int sig);
 void gracefuldie(int, char*, int);	
 char makeconn(char *,char *,char *);
-void closeconn(int);
+void closeconn(int, int, char **);
 void init_allow_nick();
 
 void init_remote_tcm_listen(void);

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.3 2002/05/23 06:41:55 db Exp $
+ * $Id: tcm_io.c,v 1.4 2002/05/23 16:05:51 leeh Exp $
  */
 
 #include <stdio.h>
@@ -194,14 +194,13 @@ read_packet(void)
                 connections[i].last_message_time = CurrentTime;
                 if (i == 0)
                   {
-#ifdef DEBUGMODE
-                    printf("<- %s\n", connections[i].buffer);
-#endif
                     while ((nscanned =
                             get_line(incomingbuff+tscanned,
                                      &nread, &connections[i])))
                       {
-
+#ifdef DEBUGMODE
+                        printf("<- %s\n", connections[i].buffer);
+#endif
                         parse_server();
                         tscanned += nscanned;
                       }

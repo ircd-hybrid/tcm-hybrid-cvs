@@ -1,3 +1,15 @@
+db          2002/05/25 12:10:49 EDT	(20020525_16)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - fix comment is all
+  
+  Revision  Changes    Path
+  1.23      +1 -1      tcm-hybrid/src/tcm_io.c
+
+
+
 wcampbel    2002/05/25 12:08:46 EDT	(20020525_15)
 
   Modified files:

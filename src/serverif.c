@@ -52,7 +52,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.12 2001/04/02 04:05:26 db Exp $";
+static char *version="$Id: serverif.c,v 1.13 2001/04/03 04:49:25 db Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -1120,7 +1120,7 @@ static void on_services_notice(char *body)
 	     SERVICES_NAME,
 	     parm1);
 
-      if(config_entries.drones_act[0])
+      if(config_entries.drones_act[0] && config_entries.autopilot)
 	toserv("%s *@%s :%s\n",
 	       config_entries.drones_act,
 	       host,

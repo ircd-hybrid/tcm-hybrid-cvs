@@ -63,7 +63,6 @@
 #define HELP_PATH "help"        /* No / at the end */
 #define HELP_FILE "help"        /* Inside of HELP_PATH */
 #define MOTD_FILE "etc/motd.txt"
-#define PREF_FILE "etc/tcm.pref"
 
 #define LOGFILE "logs/tcm.log"
 #define LAST_LOG_NAME "logs/last_log_name"

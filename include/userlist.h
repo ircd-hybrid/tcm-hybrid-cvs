@@ -133,7 +133,6 @@ void load_config_file(char *);
 void clear_userlist(void);
 int  wingate_class(char *class);
 void ban_manipulate(int sock,char flag,char *userlist);
-void load_prefs(void);
 void save_prefs(void);
 int  islegal_pass(int connect_id,char *password);
 int  okhost(char *,char *);

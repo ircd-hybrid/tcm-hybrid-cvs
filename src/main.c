@@ -59,7 +59,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.5 2001/10/11 16:04:57 bill Exp $";
+static char *version="$Id: main.c,v 1.6 2001/10/14 00:02:10 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -105,7 +105,6 @@ void init_hash_tables(void)
   if (continuous) memset(continuous,0,sizeof(struct common_function));
   if (scontinuous) memset(scontinuous,0,sizeof(struct common_function));
   if (config) memset(config,0,sizeof(struct common_function));
-  if (prefsave) memset(prefsave,0,sizeof(struct common_function));
   if (action) memset(action,0,sizeof(struct common_function));
   if (reload) memset(reload,0,sizeof(struct common_function));
   if (wallops) memset(wallops,0,sizeof(struct common_function));
@@ -543,7 +542,7 @@ int get_action(char *name)
   int index;
   for (index=0;index<MAX_ACTIONS;++index)
     if (!strcasecmp(name, actions[index].name)) break;
-  if (strcasecmp(name, actions[index].name)) return 0;
+  if (strcasecmp(name, actions[index].name)) return -1;
   return index;
 }
 
@@ -655,7 +654,6 @@ int main(int argc, char *argv[])
   else
     load_config_file(CONFIG_FILE);
   load_userlist();
-  load_prefs();
 
   snprintf(serverhost,sizeof(serverhost), "%s:%d", config_entries.server_name, 
            atoi(config_entries.server_port));

@@ -51,7 +51,7 @@
 #define K_ACTION	50
 #define K_MOTD		51
 #define K_SAVE		52
-#define K_LOAD		53
+/*			53 */
 #define K_LOCOPS        54
 #define K_INFO          55
 #define K_VMULTI	56

@@ -56,7 +56,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.15 2001/10/11 22:16:44 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.16 2001/10/14 00:02:10 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -2592,47 +2592,8 @@ void _reload_bothunt(int connnum, int argc, char *argv[])
  if (!amianoper) oper();
 }
 
-void _prefsave_bothunt(int connnum, int argc, char *argv[])
-{
-  char buffer[1024];
-  if (buffer[0]) memset((char *)&buffer,0,sizeof(buffer));
-
-  snprintf(buffer, sizeof(buffer), "A:cflood:%s:%s:%d\n", get_action_method("cflood"),
-           get_action_reason("cflood"), action_log("cflood"));
-  write(connnum, buffer, strlen(buffer));
-
-  snprintf(buffer, sizeof(buffer), "A:spambot:%s:%s:%d\n", get_action_method("spambot"),
-           get_action_reason("spambot"), action_log("spambot"));
-  write(connnum, buffer, strlen(buffer));
-
-  snprintf(buffer, sizeof(buffer), "A:clone:%s:%s:%d\n", get_action_method("clone"),
-           get_action_reason("clone"), action_log("clone"));
-  write(connnum, buffer, strlen(buffer));
-
-  snprintf(buffer, sizeof(buffer), "A:ctcp:%s:%s:%d\n", get_action_method("ctcp"),
-           get_action_reason("ctcp"), action_log("ctcp"));
-  write(connnum, buffer, strlen(buffer));
-
-  snprintf(buffer, sizeof(buffer), "A:flood:%s:%s:%d\n", get_action_method("flood"),
-           get_action_reason("flood"), action_log("flood"));
-  write(connnum, buffer, strlen(buffer));
-
-  snprintf(buffer, sizeof(buffer), "A:link:%s:%s:%d\n", get_action_method("link"),
-           get_action_reason("link"), action_log("link"));
-  write(connnum, buffer, strlen(buffer));
-
-  snprintf(buffer, sizeof(buffer), "A:bot:%s:%s:%d\n", get_action_method("bot"),
-           get_action_reason("bot"), action_log("bot"));
-  write(connnum, buffer, strlen(buffer));
-
-  snprintf(buffer, sizeof(buffer), "A:vclone:%s:%s:%d\n", get_action_method("vclone"),
-           get_action_reason("vclone"), action_log("vclone"));
-  write(connnum, buffer, strlen(buffer));
-}
-
 void _modinit()
 {
-  add_common_function(F_PREFSAVE, _prefsave_bothunt);
   add_common_function(F_RELOAD, _reload_bothunt);
   add_common_function(F_SERVER_NOTICE, onservnotice);
   add_common_function(F_ONCTCP, _onctcp);

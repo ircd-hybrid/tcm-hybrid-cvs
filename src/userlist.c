@@ -16,6 +16,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include "config.h"
 #include "token.h"
@@ -35,7 +36,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.19 2001/10/10 19:46:32 bill Exp $";
+static char *version="$Id: userlist.c,v 1.20 2001/10/14 00:02:10 bill Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct tcm_file_entry tcmlist[MAXTCMS];
@@ -282,52 +283,6 @@ void load_config_file(char *file_name)
 }
 
 /*
- * load_prefs
- *
- * inputs	- NONE
- * output	- NONE
- * side effects - action table is affected
- */
-void load_prefs(void)
-{
-  FILE *fp;
-  char line[MAX_BUFF], *argv[20];
-  char *key;
-  char *value;
-  char *act;
-  char *reason;
-  char *message_ascii;
-  int  message, argc;
-  struct common_function *temp;
-
-  if (!(fp = fopen(PREF_FILE,"r")))
-    return;
-
-  while(fgets(line, MAX_BUFF-1,fp))
-    {
-      argc=0;
-      key = line;
-      value = strchr(key, ':');
-      for (;value;value=strchr(key, ':'))
-        {
-          *value = '\0';
-          if (!(argv[argc] = (char *)malloc(200))) gracefuldie(0, __FILE__, __LINE__);
-          snprintf(argv[argc], 200, "%s", key);
-          key = value+1;
-          ++argc;
-        }
-      if (!(argv[argc] = (char *)malloc(200))) gracefuldie(0, __FILE__, __LINE__);
-      snprintf(argv[argc], 200, "%s", key);
-      ++argc;
-      for (temp=config;temp;temp=temp->next)
-        temp->function(0, argc, argv);
-    }
-
-  (void)fclose(fp);
-  config_entries.channel_report |= CHANNEL_REPORT_ROUTINE;
-}
-
-/*
  * save_prefs
  *
  * inputs	- NONE
@@ -336,19 +291,149 @@ void load_prefs(void)
  */
 void save_prefs(void)
 {
-  int fp;
+  FILE *fp;
+  struct stat *buf;
   struct common_function *temp;
+  char *argv[20], *frombuff, *tobuff, *p, *q, filename[80];
+  int argc=0, a, fd, mode;
 
-  if ((fp = open(PREF_FILE,O_CREAT)) == -1)
+  if (!(fp = fopen(CONFIG_FILE,"r")))
     {
-      sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s: %s\n", PREF_FILE, strerror(errno));
+      sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s: %s\n", CONFIG_FILE, strerror(errno));
       return;
     }
 
-  for (temp=prefsave;temp;temp=temp->next)
-    temp->function(fp, 0, NULL);
+  snprintf(filename, sizeof(filename), "%s.%d", CONFIG_FILE, getpid());
+  if ((fd = open(filename, O_CREAT|O_WRONLY)) == -1)
+    {
+      sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s: %s\n", filename, strerror(errno));
+      fclose(fp);
+      return;
+    }
 
-  close(fp);
+  if (!(frombuff=(char *)malloc(4096)))
+    {
+      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in save_prefs");
+      fclose(fp);
+      close(fd);
+      gracefuldie(0, __FILE__, __LINE__);
+    }
+  if (!(tobuff=(char *)malloc(4096)))
+    {
+      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in save_prefs");
+      fclose(fp);
+      close(fd);
+      free(frombuff);
+      gracefuldie(0, __FILE__, __LINE__);
+    }
+  if ((stat(CONFIG_FILE, buf)) == -1)
+    {
+      sendtoalldcc(SEND_ALL_USERS, "stat() on %s failed: %s", CONFIG_FILE, strerror(errno));
+      fclose(fp);
+      close(fd);
+      free(frombuff);
+      free(tobuff);
+      gracefuldie(0, __FILE__, __LINE__);      
+    }
+  mode = buf->st_mode;
+
+  while (!feof(fp))
+    {
+      memset(tobuff, 0, 4096);
+      memset(frombuff, 0, 4096);
+      argc=0;
+      fgets(frombuff, 4096, fp);
+      p = frombuff;
+      for (q=strchr(p, ':');q;q=strchr(p, ':'))
+        {
+          *q = '\0';
+          if (!(argv[argc] = (char *)malloc(200)))
+            {
+              sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in save_prefs");
+              fclose(fp);
+              close(fd);
+              free(tobuff);
+              free(frombuff);
+              for (a=0;a<argc;++a)
+                free(argv[a]);
+              gracefuldie(0, __FILE__, __LINE__);
+            }
+          snprintf(argv[argc], 200, "%s", p);
+          p = q+1;
+          ++argc;
+        }
+
+      if (!(argv[argc] = (char *)malloc(200)))
+        {
+          sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in save_prefs");
+          fclose(fp);
+          close(fd);
+          free(tobuff);
+          free(frombuff);
+          for (a=0;a<argc;++a)
+            free(argv[a]);
+          gracefuldie(0, __FILE__, __LINE__);
+        }
+      snprintf(argv[argc], 200, "%s", p);
+      ++argc;
+
+      switch (argv[0][0])
+        {
+          case 'A': case 'a':
+            if ((a = get_action(argv[1])) != -1)
+              {
+                sprintf(tobuff, "%s:%s:%s", argv[0], actions[a].name, actions[a].method);
+                if (actions[a].reason[0])
+                  {
+                    strcat(tobuff, ":");
+                    strcat(tobuff, actions[a].reason);
+                  }
+                if (actions[a].report)
+                  strcat(tobuff, ":YES");
+                strcat(tobuff, "\n");
+                if ((write(fd, tobuff, strlen(tobuff))) == -1)
+                  {
+                    sendtoalldcc(SEND_ALL_USERS, "Error writing to file %s: %s", filename,
+                                 strerror(errno));
+                    fclose(fp);
+                    if (fd) close(fd);
+                    free(tobuff);
+                    free(frombuff);
+                    for (a=0;a<argc;++a)
+                      free(argv[a]);
+                    return;
+                  }
+                break;
+              }
+          default:
+            sprintf(tobuff, "%s:", argv[0]);
+            for (a=1;a<argc;++a)
+              {
+                strcat(tobuff, argv[a]);
+                strcat(tobuff, ":");
+              }
+            if (tobuff[strlen(tobuff)-1] == ':') tobuff[strlen(tobuff)-1] = '\0';
+//            strcat(tobuff, "\n");
+            if ((write(fd, tobuff, strlen(tobuff))) == -1)
+              {
+                sendtoalldcc(SEND_ALL_USERS, "Error writing to file %s: %s", filename,
+                             strerror(errno));
+                fclose(fp);
+                if (fd) close(fd);
+                free(tobuff);
+                free(frombuff);
+                for (a=0;a<argc;++a)
+                  free(argv[a]);
+                return;
+              }
+        }
+    }
+  close(fd);
+  fclose(fp);
+  if (rename(filename, CONFIG_FILE))
+    sendtoalldcc(SEND_ALL_USERS, "Error renaming new config file.  Changes may be lost.  %s",
+                 strerror(errno));
+  chmod(CONFIG_FILE, mode);
 }
 
 /*
@@ -1188,7 +1273,6 @@ void reload_user_list(int sig)
     temp->function(sig, 0, NULL);
   clear_userlist();
   load_userlist();
-  load_prefs();
   sendtoalldcc(SEND_ALL_USERS, "*** Caught SIGHUP ***\n");
 }
 

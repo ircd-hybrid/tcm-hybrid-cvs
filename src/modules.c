@@ -137,9 +137,6 @@ void add_common_function(int type, void *function)
       case F_CONFIG:
         temp = config;
         break;
-      case F_PREFSAVE:
-        temp = prefsave;
-        break;
       case F_ACTION:
         temp = action;
         break;
@@ -222,9 +219,6 @@ void add_common_function(int type, void *function)
         case F_CONFIG:
           config = temp;
           break;
-        case F_PREFSAVE:
-          prefsave = temp;
-          break;
         case F_ACTION:
           action = temp;
           break;
@@ -297,8 +291,6 @@ void modules_init(void) {
     scontinuous = (struct common_function *) malloc(sizeof(struct common_function));
   if (config == NULL)
     config = (struct common_function *) malloc(sizeof(struct common_function));
-  if (prefsave == NULL)
-    prefsave = (struct common_function *) malloc(sizeof(struct common_function));
   if (action == NULL)
     action = (struct common_function *) malloc(sizeof(struct common_function));
   if (reload == NULL)

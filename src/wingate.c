@@ -396,31 +396,6 @@ void _reload_wingate(int connnum, int argc, char *argv[])
 #endif
 }
 
-void _prefsave(int connnum, int argc, char *argv[])
-{
-  int i;
-#ifdef DETECT_WINGATE
-  i = get_action("wingate");
- #ifdef REPORT_WINGATES_TO_CHANNEL
-  fprintf((FILE *)connnum, "A:%s:%s:%s:%d\n", actions[i].name, actions[i].method,
-          actions[i].reason, 1);
- #else
-  fprintf((FILE *)connnum, "A:%s:%s:%s:%d\n", actions[i].name, actions[i].method,
-          actions[i].reason, 0);
- #endif
-#endif
-#ifdef DETECT_SOCKS
-  i = get_action("socks");
- #ifdef REPORT_SOCKS_TO_CHANNEL
-  fprintf((FILE *)connnum, "A:%s:%s:%s:%d\n", actions[i].name, actions[i].method,
-          actions[i].reason, 1);
- #else
-  fprintf((FILE *)connnum, "A:%s:%s:%s:%d\n", actions[i].name, actions[i].method,
-          actions[i].reason, 0);
- #endif
-#endif
-}
-
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
 /*
  * wingate_class
@@ -473,7 +448,6 @@ static void report_open_socks(int i)
 void _modinit()
 {
   int i;
-  add_common_function(F_PREFSAVE, _prefsave);
   add_common_function(F_RELOAD, _reload_wingate);
   add_common_function(F_USER_SIGNON, _user_signon);
   add_common_function(F_CONTINUOUS, _continuous);

@@ -24,7 +24,6 @@ struct common_function *upper_continuous;
 struct common_function *continuous;
 struct common_function *scontinuous;
 struct common_function *config;
-struct common_function *prefsave;
 struct common_function *action;
 struct common_function *reload;
 struct common_function *wallops;
@@ -49,7 +48,7 @@ struct common_function *statso;
 #define F_CONTINUOUS		9
 #define F_SCONTINUOUS		10
 #define F_CONFIG		11
-#define F_PREFSAVE		12
+/*				12 */
 #define F_ACTION		13
 #define F_RELOAD		14
 #define F_WALLOPS		15

@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.12 2001/10/12 02:32:40 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.13 2001/10/14 00:02:10 bill Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -64,7 +64,6 @@ static void list_opers(int sock);
 static void list_tcmlist(int sock);
 static void list_connections(int sock);
 static void list_exemptions(int sock);
-static void handle_allow(int sock, char *param, char *who_did_command);
 static void handle_disconnect(int sock,char *param2,char *who_did_command);
 static void handle_save(int sock,char *nick);
 static void handle_gline(int sock,char *pattern,char *reason,
@@ -740,13 +739,6 @@ void dccproc(int connnum, int argc, char *argv[])
       break;
 #endif
      
-    case K_ALLOW:
-      if (connections[connnum].type & TYPE_REGISTERED)
-        handle_allow(connections[connnum].socket,argv[1],who_did_command);
-      else
-        prnt(connections[connnum].socket,"You aren't registered\n");
-      break;
-
       case K_UMODE:
 
         if (!(connections[connnum].type & TYPE_REGISTERED))
@@ -813,19 +805,8 @@ void dccproc(int connnum, int argc, char *argv[])
 	if(connections[connnum].type & TYPE_ADMIN)
 	  handle_save(connections[connnum].socket,connections[connnum].nick);
 	else
-	  prnt(connections[connnum].socket, "You don't have admin priv. to save tcm.pref file\n");
-        break;
-
-      case K_LOAD:
-	if (connections[connnum].type & TYPE_OPER)
-	  {
-	    prnt(connections[connnum].socket, "Loading tcm.pref file\n");
-	    sendtoalldcc(SEND_OPERS_ONLY, "%s is loading tcm.pref\n",
-			 connections[connnum].nick);
-	    load_prefs();
-	  }
-	else
-	  prnt(connections[connnum].socket, "You don't have oper priv. to load tcm.pref file\n");
+	  prnt(connections[connnum].socket, "You don't have admin priv. to save %s file\n", 
+               CONFIG_FILE);
         break;
 
       case K_CLOSE:
@@ -1221,7 +1202,7 @@ static void set_actions(int sock, char *key, char *act, int time, char *reason)
     {
       for (index=0;index<MAX_ACTIONS;++index)
         {
-          if (!wldcmp(key, actions[index].name))
+          if (!wldcmp(key, actions[index].name) && actions[index].name[0])
             {
              if (act)
                {
@@ -1230,8 +1211,8 @@ static void set_actions(int sock, char *key, char *act, int time, char *reason)
                  else snprintf(actions[index].method, sizeof(actions[index].method), "%s",
                                act, time);
                }
-             if (reason) snprintf(actions[index].reason, sizeof(actions[index].reason), "%s",
-                                  reason);
+             if (reason && reason[0]) snprintf(actions[index].reason, 
+                                               sizeof(actions[index].reason), "%s", reason);
              if (!strcasecmp(actions[index].method, "warn"))
                 prnt(sock, "%s action: %s\n", actions[index].name, actions[index].method);
               else
@@ -1843,54 +1824,6 @@ static void list_exemptions(int sock)
 }
 
 /*
- * handle_allow
- *
- * inputs	- socket
- *		- param 
- *		- who did the command
- * output	- NONE
- * side effects	- user is warned they aren't an oper
- */
-
-static void handle_allow(int sock, char *param, char *who_did_command)
-{
-  int i;
-  int found_one=NO;
-
-  if(param)
-    {
-      if(*param == '-')
-	sendtoalldcc(SEND_OPERS_ONLY,
-		     "allow of %s turned off by %s\n",
-		     param+1,
-		     who_did_command);
-      else
-	sendtoalldcc(SEND_OPERS_ONLY,
-		     "allow of %s turned on by %s\n",
-		     param,
-		     who_did_command);
-		
-      setup_allow(param);
-    }
-  else
-    {
-      for(i = 0; i < MAX_ALLOW_SIZE; i++ )
-	{
-	  if(allow_nick[i][0] != '-')
-	    {
-	      found_one = YES;
-	      prnt(sock,"allowed: %s\n",allow_nick[i]);
-	    }
-	}
-	      
-      if(!found_one)
-	{
-	  prnt(sock,"There are no tcm allows in place\n");
-	}
-    }
-}
-
-/*
  * list_connections
  *
  * inputs	- socket
@@ -1985,8 +1918,8 @@ static void handle_disconnect(int sock,char *nickname,char *who_did_command)
 
 static void handle_save(int sock,char *nick)
 {
-  prnt(sock, "Saving tcm.pref file\n");
-  sendtoalldcc(SEND_OPERS_ONLY, "%s is saving tcm.pref\n", nick);
+  prnt(sock, "Saving %s file\n", CONFIG_FILE);
+  sendtoalldcc(SEND_OPERS_ONLY, "%s is saving %s\n", nick, CONFIG_FILE);
   save_prefs();
 }
 

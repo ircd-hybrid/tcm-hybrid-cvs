@@ -50,11 +50,6 @@
 
 #define FOREVER for(;;)	
 
-/*
- * retry time between attempts to re-init the TCM listen port
- */
-#define REMOTE_TCM_CHECK_TIME 60
-
 time_t startup_time, oper_time;
 
 char mychannel[MAX_CHANNEL];

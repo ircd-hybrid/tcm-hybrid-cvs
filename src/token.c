@@ -23,7 +23,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: token.c,v 1.15 2001/10/18 01:50:14 wcampbel Exp $";
+static char *version="$Id: token.c,v 1.16 2001/10/20 22:13:56 db Exp $";
 
 static int hash_cmd(char *);
 
@@ -85,7 +85,6 @@ struct command_token command_table[] =
   {"cycle",        K_CYCLE},
   {"die",          K_DIE},
   {"restart",      K_RESTART},
-  {"tcmintro",     K_TCMINTRO},
   {"set",          K_SET},
   {"unkline",      K_UNKLINE},
   {"dkline",       K_DLINE},
@@ -123,7 +122,8 @@ struct command_token command_table[] =
  * side effects	- initalize the token hash table
  */
 
-void init_tokenizer()
+void 
+init_tokenizer()
 {
   int i;
   int hash;
@@ -168,7 +168,8 @@ void init_tokenizer()
  * side effects	- return a token number from given input string
  */
 
-int get_token(char *token_in)
+int 
+get_token(char *token_in)
 {
   struct command_hash *hash_ptr;
 
@@ -190,7 +191,8 @@ int get_token(char *token_in)
  * side effects	- NONE
  */
 
-static int hash_cmd(char *string)
+static int 
+hash_cmd(char *string)
 {
   int hash = 0;
 
@@ -203,7 +205,8 @@ static int hash_cmd(char *string)
   return( hash & MAX_COMMAND_HASH);
 }
 
-char* splitc ( char *rest, char divider)
+char* 
+splitc ( char *rest, char divider)
 {
   char *p;
 
@@ -217,12 +220,14 @@ char* splitc ( char *rest, char divider)
   return p;
 }
 
-char* split (char *rest)
+char* 
+split (char *rest)
 {
   return ( splitc(rest, ' ') );
 }
 
-int occurance(char *string, char find)
+int 
+occurance(char *string, char find)
 {
   int a=0, found=0;
 #ifdef DEBUGMODE

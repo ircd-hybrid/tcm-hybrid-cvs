@@ -44,11 +44,10 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.16 2001/10/18 01:50:14 wcampbel Exp $";
+static char *version="$Id: dcc_commands.c,v 1.17 2001/10/20 22:13:56 db Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
-static int not_legal_remote(int);
 static void set_actions(int sock, char *key, char *act, int time, char *reason);
 static void send_to_nick(char *to_nick,char *buffer);
 static void setup_allow(char *nick);
@@ -77,7 +76,8 @@ extern char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 ** dccproc()
 **   Handles processing of dcc chat commands
 */
-void dccproc(int connnum, int argc, char *argv[])
+void 
+dccproc(int connnum, int argc, char *argv[])
 {
 
 /* *sigh* maximum allow for MAXIMUM sprintf limit */
@@ -114,10 +114,6 @@ void dccproc(int connnum, int argc, char *argv[])
   if (buff[strlen(buff)-1] == ' ') buff[strlen(buff)-1] = '\0';
   buffer=buff;
 
-  route_entry.to_nick[0] = '\0';
-  route_entry.to_tcm[0] = '\0';
-  route_entry.from_nick[0] = '\0';
-  route_entry.from_tcm[0] = '\0';
   who_did_command[0] = '\0';
 
   /* remote message, either to a tcm command parser,
@@ -203,7 +199,6 @@ void dccproc(int connnum, int argc, char *argv[])
       break;
 
     case K_REHASH:
-      notice("billy-jon", "HEY!\n");
       sendtoalldcc(SEND_ALL_USERS,"Rehash requested by %s",who_did_command);
 
       if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
@@ -1053,7 +1048,8 @@ void dccproc(int connnum, int argc, char *argv[])
  * side effects	- nick is added to botnick allow list
  */
 
-static void setup_allow(char *nick)
+static void 
+setup_allow(char *nick)
 {
   char botnick[MAX_NICK+4];	/* Allow room for '<' and '>' */
   int i=0;
@@ -1121,7 +1117,8 @@ static void setup_allow(char *nick)
  * side effects	- NONE
  */
 
-static void send_to_nick(char *to_nick,char *buffer)
+static void 
+send_to_nick(char *to_nick,char *buffer)
 {
   int i;
   char dccbuff[DCCBUFF_SIZE];
@@ -1149,7 +1146,8 @@ static void send_to_nick(char *to_nick,char *buffer)
  * side effects	- NONE
  */
 
-static int test_ignore(char *line)
+static int 
+test_ignore(char *line)
 {
   char botnick[MAX_NICK+4];	/* Allow room for '<' and '>' */
   int i;
@@ -1180,30 +1178,6 @@ static int test_ignore(char *line)
 }
 
 /*
- * not_legal_remote()
- *
- * inputs	- type of connection making request
- * output	- YES if its not a legal remote command,
- *		  i.e. connection has no remote privs
- * side effects	- NONE
- */
-
-static int not_legal_remote(int type)
-{
-#ifdef DEBUGMODE
-  placed;
-#endif
-
-  if( !(route_entry.to_nick[0]) ) /* not routing,
-				   * its a kill etc. on local server
-				   */
-    return (NO);
-  if(type & TYPE_CAN_REMOTE)
-    return (NO);
-  return(YES);
-}
-
-/*
  * set_actions
  *
  * inputs	- 
@@ -1211,7 +1185,8 @@ static int not_legal_remote(int type)
  * side effects -
  */
 
-static void set_actions(int sock, char *key, char *act, int time, char *reason)
+static void 
+set_actions(int sock, char *key, char *act, int time, char *reason)
 {
   int index;
   if (!key)
@@ -1266,7 +1241,8 @@ static void set_actions(int sock, char *key, char *act, int time, char *reason)
  * side effects    - none
  */
 
-static int is_kline_time(char *p)
+static int 
+is_kline_time(char *p)
 {
   int result = 0;
 #ifdef DEBUGMODE
@@ -1305,7 +1281,8 @@ static int is_kline_time(char *p)
  * side effects	-
  */
 
-static void set_umode(int connnum, char *flags, char *registered_nick)
+static void 
+set_umode(int connnum, char *flags, char *registered_nick)
 {
   int i;
   int reversing = NO;
@@ -1543,7 +1520,8 @@ static void set_umode(int connnum, char *flags, char *registered_nick)
  * side effect	- 
  */
 
-static void save_umodes(char *registered_nick, unsigned long type)
+static void 
+save_umodes(char *registered_nick, unsigned long type)
 {
   FILE *fp;
   char user_pref[MAX_BUFF];
@@ -1570,7 +1548,8 @@ static void save_umodes(char *registered_nick, unsigned long type)
  * side effect	- 
  */
 
-static void load_umodes(int connect_id)
+static void 
+load_umodes(int connect_id)
 {
   FILE *fp;
   char user_pref[MAX_BUFF];
@@ -1626,7 +1605,8 @@ static void load_umodes(int connect_id)
  * side effect	- 
  */
 
-static unsigned long find_user_umodes(char *registered_nick)
+static unsigned long 
+find_user_umodes(char *registered_nick)
 {
   FILE *fp;
   char user_pref[MAX_BUFF];
@@ -1667,7 +1647,8 @@ static unsigned long find_user_umodes(char *registered_nick)
  * side effect	- 
  */
 
-static void show_user_umodes(int sock, char *registered_nick)
+static void 
+show_user_umodes(int sock, char *registered_nick)
 {
   FILE *fp;
   char user_pref[MAX_BUFF];
@@ -1734,7 +1715,8 @@ static void show_user_umodes(int sock, char *registered_nick)
  * side effects	- user is warned they aren't an oper
  */
 
-static void register_oper(int connnum, char *password, char *who_did_command)
+static void
+register_oper(int connnum, char *password, char *who_did_command)
 {
   if(password)
     {
@@ -1786,7 +1768,8 @@ static void register_oper(int connnum, char *password, char *who_did_command)
  * side effects	- list current opers on socket
  */
 
-static void list_opers(int sock)
+static void 
+list_opers(int sock)
 {
   int i;
   
@@ -1824,7 +1807,8 @@ static void list_opers(int sock)
  * side effects	- list tcm list on socket
  */
 
-static void list_tcmlist(int sock)
+static void 
+list_tcmlist(int sock)
 {
   int i;
   
@@ -1844,7 +1828,8 @@ static void list_tcmlist(int sock)
  * side effects	- list current exemptions on socket
  */
 
-static void list_exemptions(int sock)
+static void 
+list_exemptions(int sock)
 {
   int i;
 
@@ -1864,7 +1849,8 @@ static void list_exemptions(int sock)
  * side effects	- active connections are listed to socket
  */
 
-static void list_connections(int sock)
+static void 
+list_connections(int sock)
 {
   int i;
 
@@ -1906,7 +1892,8 @@ static void list_connections(int sock)
  * side effects	- disconnect user
  */
 
-static void handle_disconnect(int sock,char *nickname,char *who_did_command)
+static void 
+handle_disconnect(int sock,char *nickname,char *who_did_command)
 {
   char *type;
   int  i;
@@ -1949,7 +1936,8 @@ static void handle_disconnect(int sock,char *nickname,char *who_did_command)
  * side effects	- save tcm prefs
  */
 
-static void handle_save(int sock,char *nick)
+static void 
+handle_save(int sock,char *nick)
 {
   prnt(sock, "Saving %s file\n", CONFIG_FILE);
   sendtoalldcc(SEND_OPERS_ONLY, "%s is saving %s\n", nick, CONFIG_FILE);
@@ -1967,7 +1955,8 @@ static void handle_save(int sock,char *nick)
  * side effects	- 
  */
 
-static void handle_gline(int sock,char *pattern,char *reason,
+static void 
+handle_gline(int sock,char *pattern,char *reason,
 			 char *who_did_command)
 {
   char dccbuff[MAX_BUFF];
@@ -2016,12 +2005,14 @@ static void handle_gline(int sock,char *pattern,char *reason,
  * side effects	- user is warned they aren't an oper
  */
 
-static void not_authorized(int sock)
+static void 
+not_authorized(int sock)
 {
   prnt(sock,"Only authorized opers may use this command\n");
 }
 
-void _modinit()
+void 
+_modinit()
 {
   add_common_function(F_DCC, dccproc);
 }

@@ -29,14 +29,6 @@ struct connection {
 extern int isbanned(char *,char *);
 #endif
 
-struct 
-{
-  char to_nick[MAX_NICK+1];
-  char to_tcm[MAX_NICK+1];
-  char from_nick[MAX_NICK+1];
-  char from_tcm[MAX_NICK+1];
-}route_entry;
-
 /*
  * services struct
  * Used to store info about global clones derived from services.us

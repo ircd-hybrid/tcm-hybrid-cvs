@@ -59,7 +59,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.8 2001/10/18 01:24:48 wcampbel Exp $";
+static char *version="$Id: main.c,v 1.9 2001/10/20 22:13:56 db Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -788,57 +788,6 @@ int main(int argc, char *argv[])
     }
 
   return 0;
-}
-
-/* 
- * init_remote_tcm_listen
- *
- * inputs	- NONE
- * output	- NONE
- * side effects	- just listen on tcm_port port. nothing fancy.
- *
- */
-
-void init_remote_tcm_listen(void)
-{
-  struct sockaddr_in socketname;
-
-/* 
- * If its an invalid port, i.e. less than 1024 or -1 do not listen
- * This will disable remote tcm linking entirely
- */
-
-  if(config_entries.tcm_port <= 1024)
-    {
-      remote_tcm_socket = -1;
-      return;
-    }
-
-  memset(&socketname,0,sizeof(struct sockaddr));
-  socketname.sin_family = AF_INET;
-  socketname.sin_addr.s_addr = INADDR_ANY;
-  socketname.sin_port = htons(config_entries.tcm_port);
-
-  if( (remote_tcm_socket = socket(PF_INET,SOCK_STREAM,6)) < 0)
-    {
-      log_problem("init_remote_tcm_list","Cannot create socket for remote tcm");
-      return;
-    }
-
-  if(bind(remote_tcm_socket,(struct sockaddr *)&socketname,
-	  sizeof(socketname)) < 0)
-    {
-      fprintf(stderr,"Can't bind TCM_PORT %d\n",TCM_PORT);
-      log_problem("init_remote_tcm_list","Can't bind tcm port");
-      return;
-    }
-
-  if ( listen(remote_tcm_socket,4) < 0 )
-    {
-      fprintf(stderr,"Can't listen on TCM_PORT\n");
-      log_problem("init_remote_tcm_list","Can't listen on tcm port");
-      return;
-    }
 }
 
 static void init_debug(int sig)

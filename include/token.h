@@ -32,7 +32,6 @@
 #define K_OP      	29
 #define K_CYCLE   	30
 #define K_DIE     	31
-#define K_TCMINTRO   	32
 #define K_RESTART       33
 #define K_DLINE		34
 #define K_EXEMPTIONS	35

@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.16 2001/10/17 02:26:12 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.17 2001/10/20 22:13:56 db Exp $";
 
 int doingtrace = NO;
 
@@ -1522,12 +1522,6 @@ void do_a_kline(char *command_name,int kline_time, char *pattern,
 {
 #ifdef DEBUGMODE
   placed;
-#endif
-
-#ifdef RESTRICT_REMOTE_KLINE
-  if( route_entry.to_nick[0] )
-    sendtoalldcc(SEND_OPERS_ONLY, "remote kline restricted on %s\n",
-                 config_entries.dfltnick);
 #endif
 
   if(pattern == NULL)

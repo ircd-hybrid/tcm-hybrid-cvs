@@ -3,7 +3,7 @@
  *
  * Temp K: dynamic hosts, perm everyone else
  *
- * $Id: skline.c,v 1.2 2003/06/01 01:19:05 bill Exp $
+ * $Id: skline.c,v 1.3 2003/11/29 19:46:44 bill Exp $
  */
 
 #include <stdio.h>
@@ -98,9 +98,9 @@ init_dynamic_info()
 void
 clear_dynamic_info()
 {
-  dlink_node *ptr;
+  dlink_node *ptr, *next_ptr;
 
-  DLINK_FOREACH(ptr, dynamic_hosts.head)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, dynamic_hosts.head)
   {
     dlink_delete(ptr, &dynamic_hosts);
     xfree(ptr->data);

@@ -1,7 +1,7 @@
 /* handler.c
  *
  * contains the code for the dcc and server command handlers
- * $Id: handler.c,v 1.7 2002/06/07 06:21:51 db Exp $
+ * $Id: handler.c,v 1.8 2002/09/13 18:35:04 bill Exp $
  */
 
 #include <assert.h>
@@ -36,8 +36,6 @@ static int hash_command(const char *);
 void
 init_handlers(void)
 {
-  memset(dcc_command_table, 0, sizeof(struct dcc_command) * MAX_HASH);
-  memset(serv_command_table, 0, sizeof(struct serv_command) * MAX_HASH);
   serv_numeric_table = NULL;
   serv_notice_table = NULL;
 }

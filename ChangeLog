@@ -1,3 +1,16 @@
+leeh        2002/06/26 08:21:37 EDT	(20020626_1)
+
+  Modified files:
+    src                  bothunt.c userlist.c 
+  Log:
+  - added back the kline notices for +w people
+  
+  Revision  Changes    Path
+  1.188     +3 -12     tcm-hybrid/src/bothunt.c
+  1.140     +5 -1      tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/26 07:52:53 EDT	(20020626_0)
 
   Modified files:

@@ -1,3 +1,9 @@
+*** 20010221_1 by wcampbel
+Misc. documentation updates
+Release version 2.5.2, as a number of things have been done since 2.5.1
+release
+
+
 *** 20010203_2 by wcampbel
 Format string bugs...
 We must find out what that 0 byte log file bug is...even if it means

@@ -1,3 +1,19 @@
+leeh        2002/06/23 14:34:28 EDT	(20020623_3)
+
+  Modified files:
+    include              hash.h 
+    src                  bothunt.c hash.c 
+  Log:
+  - we have xmalloc() to check for memory failure.
+  - removed a pointless isoper variable in the user struct
+  
+  Revision  Changes    Path
+  1.22      +1 -2      tcm-hybrid/include/hash.h
+  1.179     +2 -8      tcm-hybrid/src/bothunt.c
+  1.40      +8 -10     tcm-hybrid/src/hash.c
+
+
+
 leeh        2002/06/23 14:09:54 EDT	(20020623_2)
 
   Modified files:

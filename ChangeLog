@@ -1,3 +1,17 @@
+db          2002/05/27 20:20:25 EDT	(20020528_5)
+
+  Modified files:
+    src                  bothunt.c tcm_io.c 
+  Log:
+  - fixed bug in tcm_io.c
+  - cleanups in bothunt.c
+  
+  Revision  Changes    Path
+  1.123     +17 -14    tcm-hybrid/src/bothunt.c
+  1.57      +1 -3      tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/27 20:03:04 EDT	(20020528_4)
 
   Modified files:

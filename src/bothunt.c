@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.117 2002/05/27 21:19:26 db Exp $
+ * $Id: bothunt.c,v 1.118 2002/05/27 21:45:48 db Exp $
  */
 
 #include <stdio.h>
@@ -1623,7 +1623,7 @@ check_reconnect_clones(char *host)
   if (host == NULL)  /* I don't know how this could happen.  ::shrug:: */
     return;
 
-  for ( i=0; i<RECONNECT_CLONE_TABLE_SIZE ; ++i )
+  for (i=0; i<RECONNECT_CLONE_TABLE_SIZE ; ++i)
   {
     if (!strcasecmp(reconnect_clone[i].host, host))
     {
@@ -1652,7 +1652,7 @@ check_reconnect_clones(char *host)
     }
   }
 
-  for ( i=0 ; i < RECONNECT_CLONE_TABLE_SIZE ; ++i )
+  for (i=0 ; i < RECONNECT_CLONE_TABLE_SIZE ; ++i)
   {
     if (!reconnect_clone[i].host[0])
     {
@@ -1740,7 +1740,7 @@ check_host_clones(char *host)
 	    host, clonecount, now - oldest);
   }
 
-  for( find = hosttable[ind],clonecount = 0; find; find = find->collision)
+  for(find = hosttable[ind],clonecount = 0; find; find = find->collision)
   {
     if ((strcmp(find->info->host,host) == 0) &&
 	(now - find->info->connecttime < CLONECONNECTFREQ + 1) &&
@@ -1909,7 +1909,7 @@ check_virtual_host_clones(char *ip_class_c)
   clonecount = 0;
 
   memset(&user, 0, sizeof(user));
-  for ( find = iptable[ind]; find; find = find->collision )
+  for (find = iptable[ind]; find; find = find->collision)
     {
       if (!strcmp(find->info->ip_class_c,ip_class_c) &&
 	  (now - find->info->connecttime < CLONECONNECTFREQ + 1) &&
@@ -2813,8 +2813,8 @@ check_clones(void *unused)
     for (top = userptr = domaintable[i]; userptr; userptr = userptr->collision)
     {
       /* Ensure we haven't already checked this user & domain */
-      for( temp = top, numfound = 0; temp != userptr;
-           temp = temp->collision )
+      for(temp = top, numfound = 0; temp != userptr;
+	  temp = temp->collision)
       {
         if (!strcmp(temp->info->user,userptr->info->user) &&
             !strcmp(temp->info->domain,userptr->info->domain))
@@ -2823,7 +2823,7 @@ check_clones(void *unused)
 
       if (temp == userptr)
       {
-        for( temp = temp->collision; temp; temp = temp->collision )
+        for(temp = temp->collision; temp; temp = temp->collision)
         {
           if (!strcmp(temp->info->user,userptr->info->user) &&
               !strcmp(temp->info->domain,userptr->info->domain))
@@ -2859,12 +2859,12 @@ report_vbots(int sock,int nclones)
   nclones-=2;  /* ::sigh:: I have no idea */
   for (i=0;i<HASHTABLESIZE;++i)
     {
-      for( top = userptr = iptable[i]; userptr;
-           userptr = userptr->collision )
+      for(top = userptr = iptable[i]; userptr;
+	  userptr = userptr->collision)
         {
           /* Ensure we haven't already checked this user & domain */
-          for( temp = top, numfound = 0; temp != userptr;
-               temp = temp->collision )
+          for(temp = top, numfound = 0; temp != userptr;
+	      temp = temp->collision)
             {
               if (!strcmp(temp->info->user,userptr->info->user) &&
                   !strcmp(temp->info->ip_class_c,userptr->info->ip_class_c))
@@ -2926,7 +2926,7 @@ report_domains(int sock,int num)
   int found;
   int foundany = NO;
 
-  for ( i = 0; i < HASHTABLESIZE; i++ )
+  for (i = 0; i < HASHTABLESIZE; i++)
     {
       for( userptr = hosttable[i]; userptr; userptr = userptr->collision )
         {
@@ -3025,7 +3025,7 @@ freehash(void)
   struct hashrec *ptr;
   int i;
 
-  for (i=0;i<HASHTABLESIZE;i++)
+  for (i=0; i<HASHTABLESIZE; i++)
     {
       ptr = usertable[i];
       free_hash_links(ptr);
@@ -3069,7 +3069,7 @@ find_nick(const char * nick)
 
   for (i=0;i<HASHTABLESIZE;++i)
     {
-      for( userptr = domaintable[i]; userptr; userptr = userptr->collision )
+      for(userptr = domaintable[i]; userptr; userptr = userptr->collision)
 	{
 	  if (!wldcmp((char *)nick, userptr->info->nick))
 	    return userptr;
@@ -3095,7 +3095,7 @@ find_host(const char * host)
 
   for (i=0; i<HASHTABLESIZE; ++i)
     {
-      for( userptr = domaintable[i]; userptr; userptr = userptr->collision )
+      for(userptr = domaintable[i]; userptr; userptr = userptr->collision)
 	{
 	  if (!wldcmp((char *)host, userptr->info->host))
 	    return userptr;
@@ -3122,9 +3122,9 @@ list_class(int sock,char *class_to_find,int total_only)
   int num_found=0;
   int num_unknown=0;
 
-  for ( i=0; i < HASHTABLESIZE; ++i )
+  for (i=0; i < HASHTABLESIZE; ++i)
     {
-      for( userptr = domaintable[i]; userptr; userptr = userptr->collision )
+      for(userptr = domaintable[i]; userptr; userptr = userptr->collision)
         {
           if(!strcmp(userptr->info->class, "unknown"))
             num_unknown++;
@@ -3189,9 +3189,9 @@ list_nicks(int sock,char *nick,int regex)
   }
 #endif
 
-  for (i=0;i<HASHTABLESIZE;++i)
+  for (i=0; i<HASHTABLESIZE; ++i)
     {
-      for( userptr = domaintable[i]; userptr; userptr = userptr->collision )
+      for(userptr = domaintable[i]; userptr; userptr = userptr->collision)
         {
 #ifdef HAVE_REGEX_H
           if ((regex == YES &&
@@ -3264,9 +3264,9 @@ list_users(int sock,char *userhost,int regex)
       return;
     }
 
-  for ( i=0; i < HASHTABLESIZE; ++i)
+  for (i=0; i < HASHTABLESIZE; ++i)
   {
-    for( ipptr = iptable[i]; ipptr; ipptr = ipptr->collision )
+    for (ipptr = iptable[i]; ipptr; ipptr = ipptr->collision)
     {
       snprintf(uhost, 1024, "%s@%s", ipptr->info->user, ipptr->info->host);
 #ifdef HAVE_REGEX_H
@@ -3335,9 +3335,9 @@ list_virtual_users(int sock,char *userhost,int regex)
       return;
     }
 
-  for ( i=0; i < HASHTABLESIZE; ++i)
+  for (i=0; i < HASHTABLESIZE; ++i)
   {
-    for( ipptr = iptable[i]; ipptr; ipptr = ipptr->collision )
+    for(ipptr = iptable[i]; ipptr; ipptr = ipptr->collision)
     {
       snprintf(uhost, 1024, "%s@%s", ipptr->info->user, ipptr->info->ip_host);
 #ifdef HAVE_REGEX_H
@@ -3430,8 +3430,8 @@ void report_multi_host(int sock,int nclones)
         {
           /* Ensure we haven't already checked this user & domain */
            
-          for( temp = top, numfound = 0; temp != userptr;
-               temp = temp->collision)
+          for(temp = top, numfound = 0; temp != userptr;
+	      temp = temp->collision)
             {
               if (!strcmp(temp->info->host,userptr->info->host))
                 break;
@@ -3439,7 +3439,7 @@ void report_multi_host(int sock,int nclones)
     
           if (temp == userptr)
             {
-              for ( temp = userptr; temp; temp = temp->collision )
+              for (temp = userptr; temp; temp = temp->collision)
                 {
                   if (!strcmp(temp->info->host,userptr->info->host))
                     numfound++; /* - zaph & Dianora :-) */
@@ -3485,14 +3485,14 @@ void report_multi(int sock,int nclones)
   int foundany = NO;
 
   nclones-=2;  /* maybe someday i'll figure out why this is nessecary */
-  for (i=0;i<HASHTABLESIZE;++i)
+  for (i=0; i<HASHTABLESIZE; ++i)
     {
-      for( top = userptr = domaintable[i]; userptr;
-           userptr = userptr->collision )
+      for(top = userptr = domaintable[i]; userptr;
+	  userptr = userptr->collision)
         {
           /* Ensure we haven't already checked this user & domain */
-          for( temp = top, numfound = 0; temp != userptr;
-               temp = temp->collision )
+          for(temp = top, numfound = 0; temp != userptr;
+	      temp = temp->collision)
             {
               if (!strcmp(temp->info->user,userptr->info->user) &&
                   !strcmp(temp->info->domain,userptr->info->domain))
@@ -3501,7 +3501,7 @@ void report_multi(int sock,int nclones)
 
           if (temp == userptr)
             {
-              for( temp = temp->collision; temp; temp = temp->collision )
+              for(temp = temp->collision; temp; temp = temp->collision)
                 {
                   if (!strcmp(temp->info->user,userptr->info->user) &&
                       !strcmp(temp->info->domain,userptr->info->domain))
@@ -3554,13 +3554,13 @@ void report_multi_user(int sock,int nclones)
   nclones-=1;
   for (i=0;i<HASHTABLESIZE;++i)
     {
-      for( top = userptr = usertable[i]; userptr;
-           userptr = userptr->collision )
+      for (top = userptr = usertable[i]; userptr;
+           userptr = userptr->collision)
         {
           numfound = 0;
           /* Ensure we haven't already checked this user & domain */
 
-          for( temp = top; temp != userptr; temp = temp->collision )
+          for(temp = top; temp != userptr; temp = temp->collision)
             {
               if (!match(temp->info->user,userptr->info->user))
                 break;
@@ -3569,7 +3569,7 @@ void report_multi_user(int sock,int nclones)
           if (temp == userptr)
             {
               numfound=1;       /* fixed minor boo boo -bill */
-              for( temp = temp->collision; temp; temp = temp->collision )
+              for(temp = temp->collision; temp; temp = temp->collision)
                 {
                   if (!match(temp->info->user,userptr->info->user))
                     numfound++; /* - zaph & Dianora :-) */
@@ -3625,7 +3625,7 @@ void report_multi_virtuals(int sock,int nclones)
   nclones-=1;
   for (i=0;i<HASHTABLESIZE;++i)
     {
-      for ( top = userptr = iptable[i]; userptr; userptr = userptr->collision )
+      for (top = userptr = iptable[i]; userptr; userptr = userptr->collision)
         {
           numfound = 0;
 
@@ -3638,7 +3638,7 @@ void report_multi_virtuals(int sock,int nclones)
           if (temp == userptr)
             {
               numfound=1;
-              for( temp = temp->collision; temp; temp = temp->collision )
+              for(temp = temp->collision; temp; temp = temp->collision)
                 {
                   if (!strcmp(temp->info->ip_class_c,
                               userptr->info->ip_class_c))
@@ -3692,9 +3692,9 @@ void report_mem(int sock)
 
   /*  hosttable,domaintable,iptable */
 
-  for( i = 0; i < HASHTABLESIZE; i++ )
+  for(i = 0; i < HASHTABLESIZE; i++)
     {
-      for( current = hosttable[i]; current; current = current->collision )
+      for(current = hosttable[i]; current; current = current->collision)
         {
           total_hosttable += sizeof(struct hashrec);
           count_hosttable++;
@@ -3704,9 +3704,9 @@ void report_mem(int sock)
         }
     }
 
-  for( i = 0; i < HASHTABLESIZE; i++ )
+  for(i = 0; i < HASHTABLESIZE; i++)
     {
-      for( current = domaintable[i]; current; current = current->collision )
+      for(current = domaintable[i]; current; current = current->collision)
         {
           total_domaintable += sizeof(struct hashrec);
           count_domaintable++;
@@ -3714,9 +3714,9 @@ void report_mem(int sock)
     }
 
 #ifdef VIRTUAL
-  for( i = 0; i < HASHTABLESIZE; i++ )
+  for(i = 0; i < HASHTABLESIZE; i++)
     {
-      for( current = iptable[i]; current; current = current->collision )
+      for(current = iptable[i]; current; current = current->collision)
         {
           total_iptable += sizeof(struct hashrec);
           count_iptable++;
@@ -3724,9 +3724,9 @@ void report_mem(int sock)
     }
 #endif
 
-  for( i = 0; i < HASHTABLESIZE; i++ )
+  for(i = 0; i < HASHTABLESIZE; i++)
     {
-      for( current = usertable[i]; current; current = current->collision )
+      for(current = usertable[i]; current; current = current->collision)
         {
           total_usertable += sizeof(struct hashrec);
           count_usertable++;
@@ -3782,13 +3782,13 @@ report_clones(int sock)
   if(sock < 0)
     return;
 
-  for ( i = 0; i < HASHTABLESIZE; ++i)
+  for (i = 0; i < HASHTABLESIZE; ++i)
     {
-      for( top = userptr = hosttable[i]; userptr; userptr = userptr->collision)
+      for(top = userptr = hosttable[i]; userptr; userptr = userptr->collision)
         {
           /* Ensure we haven't already checked this host */
-          for( temp = top, numfound = 0; temp != userptr;
-               temp = temp->collision )
+          for(temp = top, numfound = 0; temp != userptr;
+               temp = temp->collision)
             {
               if (!strcmp(temp->info->host,userptr->info->host))
                 break;
@@ -3797,7 +3797,7 @@ report_clones(int sock)
           if (temp == userptr)
             {
               connfromhost[numfound++] = temp->info->connecttime;
-              for( temp = temp->collision; temp; temp = temp->collision )
+              for(temp = temp->collision; temp; temp = temp->collision)
                 {
                   if (!strcmp(temp->info->host,userptr->info->host) &&
                       numfound < MAXFROMHOST)
@@ -3806,9 +3806,9 @@ report_clones(int sock)
 
               if (numfound > 2)
                 {
-                  for (k=numfound-1;k>1;--k)
+                  for (k=numfound-1; k>1; --k)
                     {
-                      for (j=0;j<numfound-k;++j)
+                      for (j=0; j<numfound-k; ++j)
                         {
                           if (connfromhost[j] &&
                               connfromhost[j] - connfromhost[j+k] <= (k+1)
@@ -3869,9 +3869,9 @@ report_nick_flooders(int sock)
 
   current_time = time((time_t *)NULL);
 
-  for( i = 0; i < NICK_CHANGE_TABLE_SIZE; i++ )
+  for(i = 0; i < NICK_CHANGE_TABLE_SIZE; i++)
     {
-      if( nick_changes[i].user_host[0] )
+      if (nick_changes[i].user_host[0])
         {
           time_difference = current_time - nick_changes[i].last_nick_change;
 

@@ -68,6 +68,19 @@ int wingate_class_list_index;
 
 extern time_t cur_time;
 
+void _scontinuous(int connnum, int argc, char *argv[]);
+void _continuous(int connnum, int argc, char *argv[]);
+void _user_signon(int connnum, int argc, char *argv[]);
+void _reload_wingate(int connnum, int argc, char *argv[]);
+void _modinit();
+
+#ifdef DETECT_WINGATE
+int wingate_bindsocket(char *nick,char *user,char *host,char *ip);
+#endif
+#ifdef DETECT_SOCKS
+int socks_bindsocket(char *nick,char *user,char *host,char *ip);
+#endif
+
 #ifdef DETECT_WINGATE
 /*
 ** wingate_bindsocket()

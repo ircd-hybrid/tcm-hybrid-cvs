@@ -12,6 +12,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <stdarg.h>
+#include <time.h>
 
 #ifdef HAVE_SYS_STREAM_H
 # include <sys/stream.h>
@@ -45,11 +46,11 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.19 2001/10/27 15:12:43 db Exp $";
+static char *version="$Id: dcc_commands.c,v 1.20 2001/10/27 16:17:21 bill Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
-static void set_actions(int sock, char *key, char *act, int time, char *reason);
+static void set_actions(int sock, char *key, char *act, int duration, char *reason);
 static void save_umodes(char *registered_nick, unsigned long type);
 static void load_umodes(int connect_id);
 static unsigned long find_user_umodes(char *nick);
@@ -62,6 +63,8 @@ static void list_connections(int sock);
 static void list_exemptions(int sock);
 static void handle_disconnect(int sock,char *param2,char *who_did_command);
 static void handle_save(int sock,char *nick);
+
+void _modinit();
 
 extern struct connection connections[];
 extern struct s_testline testlines;
@@ -432,7 +435,9 @@ dccproc(int connnum, int argc, char *argv[])
     case K_KILL:
       {
 	char *reason;
+#ifdef NO_D_LINE_SUPPORT
         char *pattern;  /* u@h or nick */
+#endif
 	
 	if( connections[connnum].type & TYPE_REGISTERED )
 	  {
@@ -1042,47 +1047,47 @@ dccproc(int connnum, int argc, char *argv[])
  */
 
 static void 
-set_actions(int sock, char *key, char *act, int time, char *reason)
+set_actions(int sock, char *key, char *act, int duration, char *reason)
 {
-  int index;
+  int i;
   if (!key)
     {
       prnt(sock, "Current actions:\n");
-      for (index=0;index<MAX_ACTIONS;++index)
+      for (i=0;i<MAX_ACTIONS;++i)
         {
-          if (actions[index].name[0])
+          if (actions[i].name[0])
             {
-              if (!strcasecmp(actions[index].method, "warn"))
-                prnt(sock, "%s action: %s\n", actions[index].name, actions[index].method);
+              if (!strcasecmp(actions[i].method, "warn"))
+                prnt(sock, "%s action: %s\n", actions[i].name, actions[i].method);
               else
-                prnt(sock, "%s action: %s :%s\n", actions[index].name, actions[index].method,
-                     actions[index].reason);
-              if (actions[index].report)
+                prnt(sock, "%s action: %s :%s\n", actions[i].name, actions[i].method,
+                     actions[i].reason);
+              if (actions[i].report)
                 prnt(sock, " Reported to channel\n");
             }
         }
     }
   else
     {
-      for (index=0;index<MAX_ACTIONS;++index)
+      for (i=0;i<MAX_ACTIONS;++i)
         {
-          if (!wldcmp(key, actions[index].name) && actions[index].name[0])
+          if (!wldcmp(key, actions[i].name) && actions[i].name[0])
             {
              if (act)
                {
-                 if (time) snprintf(actions[index].method, sizeof(actions[index].method),
-                                    "%s %d", act, time);
-                 else snprintf(actions[index].method, sizeof(actions[index].method), "%s",
+                 if (duration) snprintf(actions[i].method, sizeof(actions[i].method),
+                                        "%s %d", act, duration);
+                 else snprintf(actions[i].method, sizeof(actions[i].method), "%s",
                                act);
                }
-             if (reason && reason[0]) snprintf(actions[index].reason, 
-                                               sizeof(actions[index].reason), "%s", reason);
-             if (!strcasecmp(actions[index].method, "warn"))
-                prnt(sock, "%s action: %s\n", actions[index].name, actions[index].method);
+             if (reason && reason[0]) snprintf(actions[i].reason, 
+                                               sizeof(actions[i].reason), "%s", reason);
+             if (!strcasecmp(actions[i].method, "warn"))
+                prnt(sock, "%s action: %s\n", actions[i].name, actions[i].method);
               else
-                prnt(sock, "%s action: %s :%s\n", actions[index].name, actions[index].method,
-                     actions[index].reason);
-              if (actions[index].report)
+                prnt(sock, "%s action: %s :%s\n", actions[i].name, actions[i].method,
+                     actions[i].reason);
+              if (actions[i].report)
                 prnt(sock, " Reported to channel\n");
             }
         }

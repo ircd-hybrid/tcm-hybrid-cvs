@@ -80,8 +80,8 @@ void mod_del_cmd(struct TcmMessage *msg);
 void add_common_function(int type, void *function);
 void modules_init(void);
 int findmodule(char *name);
-int load_all_modules(int log);
-int load_a_module(char *name, int log);
-int unload_a_module(char *name, int log);
+int load_all_modules(int logit);
+int load_a_module(char *name, int logit);
+int unload_a_module(char *name, int logit);
 
 #endif

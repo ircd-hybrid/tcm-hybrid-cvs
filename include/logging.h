@@ -4,7 +4,7 @@
 extern FILE *logging_fp; 
 extern FILE *outfile;
 
-void kline_report(char *server_notice);
+void kline_report(char *snotice);
 void log_kline(char *,char *,int ,char *,char *);
 void logfailure(char *,int );
 void kline_add_report(char *);

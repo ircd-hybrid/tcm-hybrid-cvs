@@ -63,6 +63,7 @@ struct banned_info
 #define INVALIDUH	33
 #define SERVER		34
 #define FAILEDOPER	35
+#define INFOREQUESTED	36
 
 #define CLONECONNECTCOUNT 3
 #define CLONECONNECTFREQ  30

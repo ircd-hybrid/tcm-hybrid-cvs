@@ -60,7 +60,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.12 2001/10/27 15:57:34 db Exp $";
+static char *version="$Id: main.c,v 1.13 2001/10/27 16:17:21 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -90,6 +90,17 @@ void write_debug();
 #endif
 
 static void init_debug(int sig);
+
+void init_hash_tables(void);
+void add_action(char *name, char *method, char *reason);
+void set_action_type(char *name, int type);
+void set_action_reason(char *name, char *reason);
+void set_action_method(char *name, char *method);
+int action_log(char *name);
+int get_action_type(char *name);
+int get_action(char *name);
+char *get_action_method(char *name);
+char *get_action_reason(char *name);
 
 /*
  * init_hash_tables
@@ -527,60 +538,60 @@ void add_action(char *name, char *method, char *reason)
 
 void set_action_type(char *name, int type)
 {
-  int index;
-  if ((index = get_action(name)) == -1) return;
-  else actions[index].type = type;
+  int i;
+  if ((i = get_action(name)) == -1) return;
+  else actions[i].type = type;
 }
 
 void set_action_method(char *name, char *method)
 {
-  int index;
-  if ((index = get_action(name)) == -1) return;
-  snprintf(actions[index].method, sizeof(actions[index].method), "%s", method);
+  int i;
+  if ((i = get_action(name)) == -1) return;
+  snprintf(actions[i].method, sizeof(actions[i].method), "%s", method);
 }
 
 void set_action_reason(char *name, char *reason)
 {
-  int index;
-  if ((index = get_action(name)) == -1) return;
-  snprintf(actions[index].reason, sizeof(actions[index].reason), "%s", reason);
+  int i;
+  if ((i = get_action(name)) == -1) return;
+  snprintf(actions[i].reason, sizeof(actions[i].reason), "%s", reason);
 }
 
 int get_action(char *name)
 {
-  int index;
-  for (index=0;index<MAX_ACTIONS;++index)
-    if (!strcasecmp(name, actions[index].name)) break;
-  if (strcasecmp(name, actions[index].name)) return -1;
-  return index;
+  int i;
+  for (i=0 ; i<MAX_ACTIONS ; ++i)
+    if (!strcasecmp(name, actions[i].name)) break;
+  if (strcasecmp(name, actions[i].name)) return -1;
+  return i;
 }
 
 int get_action_type(char *name)
 {
-  int index;
-  if ((index = get_action(name)) == -1) return 0;
-  else return actions[index].type;
+  int i;
+  if ((i = get_action(name)) == -1) return 0;
+  else return actions[i].type;
 }
 
 int action_log(char *name)
 {
-  int index;
-  if ((index = get_action(name)) == -1) return 0;
-  return (actions[index].report ? YES : NO);
+  int i;
+  if ((i = get_action(name)) == -1) return 0;
+  return (actions[i].report ? YES : NO);
 }
 
 char *get_action_method(char *name)
 {
-  int index;
-  if ((index = get_action(name)) == -1) return NULL;
-  return actions[index].method;
+  int i;
+  if ((i = get_action(name)) == -1) return NULL;
+  return actions[i].method;
 }
 
 char *get_action_reason(char *name)
 {
-  int index;
-  if ((index = get_action(name)) == -1) return NULL;
-  return actions[index].reason;
+  int i;
+  if ((i = get_action(name)) == -1) return NULL;
+  return actions[i].reason;
 }
 
 /*

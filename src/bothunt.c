@@ -57,26 +57,36 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.25 2001/10/27 15:57:34 db Exp $";
+static char *version="$Id: bothunt.c,v 1.26 2001/10/27 16:17:21 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
-static void  check_nick_flood( char *server_notice );
-static void  cs_nick_flood( char *server_notice );
-static void  cs_clones( char *server_notice );
-static void  link_look_notice( char *server_notice );
-static void  connect_flood_notice( char *server_notice );
+static void  check_nick_flood( char *snotice );
+static void  cs_nick_flood( char *snotice );
+static void  cs_clones( char *snotice );
+static void  link_look_notice( char *snotice );
+static void  connect_flood_notice( char *snotice );
 static void  add_to_nick_change_table( char *user_host, char *last_nick );
 static void  bot_reject( char *text );
 static void  adduserhost( char *, struct plus_c_info *, int, int);
 static void  removeuserhost( char *, struct plus_c_info *);
 static void  updateuserhost( char *nick1, char *nick2, char *userhost);
 static void  updatehash(struct hashrec**,char *,char *,char *); 
-static void  stats_notice(char *server_notice);
+static void  stats_notice(char *snotice);
 static int hash_func(char *string);
 static void addtohash(struct hashrec *table[],char *key,struct userentry *item);
 static char removefromhash(struct hashrec *table[], char *key, char *hostmatch,
                     char *usermatch, char *nickmatch);
+
+void _ontraceuser(int connnum, int argc, char *argv[]);
+void _ontraceclass(int connnum, int argc, char *argv[]);
+void _onctcp(int connnum, int argc, char *argv[]);
+void on_stats_o(int connnum, int argc, char *argv[]);
+void on_stats_e(int connnum, int argc, char *argv[]);
+void on_stats_i(int connnum, int argc, char *argv[]);
+void onservnotice(int connnum, int argc, char *argv[]);
+void _reload_bothunt(int connnum, int argc, char *argv[]);
+void _modinit();
 
 #define R_CLONE		0x001
 #define R_VCLONE	0x002
@@ -125,6 +135,7 @@ char *msgs_to_mon[] = {
   "Invalid username:",
   "Server",
   "Failed OPER attempt",
+  "info requested by",
   (char *)NULL
 };	
 
@@ -230,13 +241,10 @@ static int gline_request(char *user, char *host, char *reason, time_t *when)
   time_t current_time;
   if (find_banned_host(user, host) != -1) return 0;
 
-  /* XXX huh? */
+  /* find an empty spot for this new request */
   for (i=0; i < MAXBANS; i++)
     if (glines[i].user == NULL)
       break;
-
-  if (glines[i].user == NULL)
-    return 0;
 
   if ((glines[i].user = (char *) malloc(MAX_USER)) == NULL)
     {
@@ -581,52 +589,6 @@ void on_stats_i(int connnum, int argc, char *argv[])
 	    host, sizeof(hostlist[host_list_index].host));
     host_list_index++;
   }
-}
-
-/* 
- * on_stats_k()
- *
- * inputs	- body of server message
- * output	- none
- * side effects	- 
- * 
- */
-
-void on_stats_k(int connnum, int argc, char *argv[])
-{
-  char *user;
-  char *host;
-  char *p;
-  char body[MAX_BUFF];
-  int i;
-  int len;
-
-  p = body;
-  for (i = 0; i < argc; i++)
-  {
-    len = sprintf(p, "%s ", argv[i]);
-    p += len;
-  }
-  /* blow away last ' ' */
-  *--p = '\0';
-
-  if ((p = strchr(body,' ')) == NULL)
-    return;
-  p++;
-
-  host = p;
-  if ((p = strchr(host,' ')) == NULL)
-    return;
-  *p++ = '\0';
-
-  if ((p = strchr(p, ' ')) == NULL)
-    return;
-  p++;
-
-  user = p;
-  if ((p = strchr(user, ' ')) == NULL)
-    return;
-  *p++ = '\0';
 }
 
 /*
@@ -1138,22 +1100,17 @@ void onservnotice(int connnum, int argc, char *argv[])
       break;
 
     case FAILEDOPER:
-      snprintf(message, sizeof(message), "%s", argv[7]);
-      for (a=8;a<argc-3;++a)
-      {
-	strcat((char *)&message, argv[a]);
-	strcat((char *)&message, " ");
-      }
-      if (message[strlen(message)-1] == ' ')
-	message[strlen(message)-1] = '\0';
       sendtoalldcc(SEND_WARN_ONLY,
-		   "*** Failed oper attempt by %s!%s: %s", argv[10], argv[11],
-                   message);
+		   "*** Failed oper attempt by %s %s", argv[argc-2], argv[argc-1]);
+      break;
+
+    case INFOREQUESTED:
+      sendtoalldcc(SEND_OPERS_STATS_ONLY, "[INFO requested by %s %s]", argv[9], argv[10]);
       break;
 
     default:
       if ((p = strstr(message, "*** Notice -- ")))
-	p += 15;
+	p += 14;
       else
 	p = message;
       sendtoalldcc(SEND_OPERS_NOTICES_ONLY, "Notice: %s", p);
@@ -2131,7 +2088,7 @@ void check_virtual_host_clones(char *ip_class_c)
     }
 }
 
-static void connect_flood_notice(char *server_notice)
+static void connect_flood_notice(char *snotice)
 {
   char *nick_reported;
   char *user_host;
@@ -2145,9 +2102,9 @@ static void connect_flood_notice(char *server_notice)
   int i, ident=NO;
 
   current_time = time(NULL);
-  server_notice +=5;
+  snotice +=5;
 
-  p=nick_reported=server_notice;
+  p=nick_reported=snotice;
   while (*p != ' ' && *p != '[') ++p;
   user_host=p+1;
   *p = '\0';
@@ -2248,7 +2205,7 @@ static void connect_flood_notice(char *server_notice)
  * LT and CS do not. sorry guys for missing that. :-(
  *  Jan 1 1997  - Dianora
  */
-static void link_look_notice(char *server_notice)
+static void link_look_notice(char *snotice)
 {
   char *nick_reported;
   char *user_host;
@@ -2265,7 +2222,7 @@ static void link_look_notice(char *server_notice)
 
   current_time = time(NULL);
 
-  p = strstr(server_notice,"requested by");
+  p = strstr(snotice,"requested by");
 
   if (!p)
     return;
@@ -2425,7 +2382,7 @@ static void link_look_notice(char *server_notice)
  */
 
 #ifdef BOT_WARN
-void bot_report_kline(char *server_notice,char *type_of_bot)
+void bot_report_kline(char *snotice,char *type_of_bot)
 {
   char *p;			/* scratch variable */
   char *nick;			/* found nick */
@@ -2433,7 +2390,7 @@ void bot_report_kline(char *server_notice,char *type_of_bot)
   char *user;			/* user */
   char *host;			/* host */
 
-  if ( !(nick = strtok(server_notice," ")) )
+  if ( !(nick = strtok(snotice," ")) )
     return;
 
   if ( !(user_host = strtok(NULL," ")) )
@@ -2476,7 +2433,7 @@ void bot_report_kline(char *server_notice,char *type_of_bot)
  * go figure.
  *
  */
-static void cs_nick_flood(char *server_notice)
+static void cs_nick_flood(char *snotice)
 {
   char *nick_reported;
   char *user_host;
@@ -2484,7 +2441,7 @@ static void cs_nick_flood(char *server_notice)
   char *host;
   char *p;
 
-  if ( !(nick_reported = strtok(server_notice," ")) )
+  if ( !(nick_reported = strtok(snotice," ")) )
     return;
 
   if ( !(user_host = strtok(NULL," ")) )
@@ -2536,7 +2493,7 @@ static void cs_nick_flood(char *server_notice)
  * connected opers are dcc'ed a suggested kline
  *
  */
-static void cs_clones(char *server_notice)
+static void cs_clones(char *snotice)
 {
   int identd = YES;
   char *user;
@@ -2544,7 +2501,7 @@ static void cs_clones(char *server_notice)
   char *p;
   char *user_host;
 
-  if ( !(strtok(server_notice," ") == NULL) )
+  if ( !(strtok(snotice," ") == NULL) )
     return;
 
   if ( !(user_host = strtok(NULL," ")) )
@@ -2592,14 +2549,14 @@ static void cs_clones(char *server_notice)
  *
  */
 
-static void check_nick_flood(char *server_notice)
+static void check_nick_flood(char *snotice)
 {
   char *p;
   char *nick1;
   char *nick2;
   char *user_host;
 
-  if ( !(p = strtok(server_notice," ")) )	/* Throw away the "From" */
+  if ( !(p = strtok(snotice," ")) )	/* Throw away the "From" */
     return;
 
   if (strcasecmp(p,"From"))	/* This isn't an LT notice */
@@ -2905,7 +2862,7 @@ static void bot_reject(char *text)
  * side effects 	-
  */
 
-static void stats_notice(char *server_notice)
+static void stats_notice(char *snotice)
 {
   char *nick;
   char *fulluh;
@@ -2917,9 +2874,9 @@ static void stats_notice(char *server_notice)
   placed;
 #endif
 
-  stat = *server_notice;
+  stat = *snotice;
 
-  if ((nick = strstr(server_notice,"by")) == NULL)
+  if ((nick = strstr(snotice,"by")) == NULL)
     return;
 
   nick += 3;
@@ -3002,7 +2959,6 @@ void _modinit()
   add_common_function(F_ONTRACEUSER, _ontraceuser);
   add_common_function(F_ONTRACECLASS, _ontraceclass);
   add_common_function(F_STATSI, on_stats_i);
-  add_common_function(F_STATSK, on_stats_k);
   add_common_function(F_STATSE, on_stats_e);
   add_common_function(F_STATSO, on_stats_o);
   memset(&usertable,0,sizeof(usertable));

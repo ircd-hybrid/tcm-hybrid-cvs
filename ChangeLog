@@ -1,3 +1,8 @@
+*** 20010722_13 by wcampbel
+Add .quote/.raw commands.  They are disabled by default, and not
+saupported by the developers.
+
+
 *** 20010722_12 by wcampbel
 Fixed a couple bugs spotted by Stephen Olsen (Inglish) with .action
 

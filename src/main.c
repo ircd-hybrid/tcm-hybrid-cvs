@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.83 2002/05/27 00:42:13 db Exp $ */
+/* $Id: main.c,v 1.84 2002/05/27 01:37:42 db Exp $ */
 
 #include "setup.h"
 
@@ -334,7 +334,7 @@ main(int argc, char *argv[])
 
   if(connect_to_server(serverhost) < 0)
     {
-      log_problem("Could not connect to server at startup\n");
+      tcm_log(L_ERR, "Could not connect to server at startup\n");
       exit(1);
     }
 

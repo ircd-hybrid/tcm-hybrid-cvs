@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.50 2002/05/27 00:57:49 db Exp $
+ * $Id: tcm_io.c,v 1.51 2002/05/27 01:37:42 db Exp $
  */
 
 #include <stdio.h>
@@ -111,7 +111,7 @@ read_packet(void)
     {
       /* timer expired */
       send_to_all(SEND_ALL, "PING time out on server");
-      log_problem("read_packet() ping time out");
+      tcm_log(L_ERR, "read_packet() ping time out");
       server_link_closed(0);
       return;
     }
@@ -314,14 +314,14 @@ server_link_closed(int conn_num)
 {
   (void)close(connections[conn_num].socket);
   eventInit();
-  log_problem("server_link_closed()");
+  tcm_log(L_ERR, "server_link_closed()");
   amianoper = NO;
   sleep(30);
 
   connect_to_server(serverhost);
   if (connections[conn_num].socket == INVALID)
     {
-      log_problem("server_link_closed() invalid socket quitting");
+      tcm_log(L_ERR, "server_link_closed() invalid socket quitting");
       quit = YES;
       return;
     }
@@ -868,7 +868,7 @@ connect_to_server(const char *hostport)
   if ((i = find_free_connection_slot()) < 0)
     {
       /* This is a fatal error */
-      log_problem("Could not find a free connection slot!\n");
+      tcm_log(L_ERR, "Could not find a free connection slot!\n");
       exit(-1);
     }
 

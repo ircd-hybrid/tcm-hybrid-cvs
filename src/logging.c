@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.34 2002/05/27 00:42:13 db Exp $
+ * $Id: logging.c,v 1.35 2002/05/27 01:37:42 db Exp $
  *
  * - db
  */
@@ -655,53 +655,44 @@ date_stamp(void)
 }
 
 /*
- * log_problem()
+ * tcm_log()
  *
- * inputs	- function name to report
- *		  reason of problem
- * output	- NONE
- * side effects	- log entry is made 
- */
-
-void 
-log_problem(const char *format, ...)
-{
-  va_list va;
-  FILE *error_fp;
-
-  va_start(va,format);
-  if ((error_fp = fopen(ERROR_LOG,"a")) != NULL)
-    {
-      timestamp_log(error_fp);
-      vfprintf(error_fp, format, va);
-      fclose(error_fp);
-    }
-  va_end(va);
-}
-
-/*
- * log()
- *
- * inputs	- format string
+ * inputs	- log level
+ *		- format string
  *		- args to format
  * output	- NONE
  * side effects	- log entry is made 
  */
 
 void
-log(const char *format,...)
+tcm_log(int level, const char *format,...)
 {
   FILE *l_fp;
   va_list va;
 
-  va_start(va,format);
-  if ((l_fp = initlog()) != NULL)
+ if(level == L_NORM)
     {
-      timestamp_log(l_fp);
-      vfprintf(l_fp, format, va);
-      (void)fclose(l_fp);
+      if ((l_fp = initlog()) == NULL)
+	return;
     }
+ else if (level == L_WARN)
+    {
+      if ((l_fp = fopen(WARN_LOG,"a")) == NULL)
+	return;
+    }
+ else if (level == L_ERR)
+    {
+      if ((l_fp = fopen(ERROR_LOG,"a")) == NULL)
+	return;
+    }
+ else 
+   return;
+
+  timestamp_log(l_fp);
+  va_start(va,format);
+  vfprintf(l_fp, format, va);
   va_end(va);
+  fclose(l_fp);
 }
 
 /*

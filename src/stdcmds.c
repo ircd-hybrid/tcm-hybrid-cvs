@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.75 2002/05/26 17:44:01 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.76 2002/05/27 01:37:42 db Exp $ */
 
 #include "setup.h"
 
@@ -305,18 +305,22 @@ handle_action(int actionid, int idented, char *nick, char *user,
       strchr(user, '*') || strchr(user, '?')) 
     {
       if ((actionid < 0) || (actionid >= MAX_ACTIONS))
-	log("handle_action: action is %i\n", actionid);
+	tcm_log(L_WARN,
+		"handle_action: action is %i\n", actionid);
       else if (!user)
-	log("handle_action(%s): user is NULL\n", actions[actionid].name);
+	tcm_log(L_WARN,
+		"handle_action(%s): user is NULL\n", actions[actionid].name);
       else if (!host)
-	log("handle_action(%s): host is NULL\n", actions[actionid].name);
-      else if (!host[0])
-	log("handle_action(%s): host is empty\n", actions[actionid].name);
+	tcm_log(L_WARN,
+		"handle_action(%s): host is NULL\n", actions[actionid].name);
+      else if (host[0] != '\0')
+	tcm_log(L_WARN,
+		"handle_action(%s): host is empty\n", actions[actionid].name);
       else if (strchr(host, '*') || strchr(host, '?'))
-	log("handle_action(%s): host contains wildchars (%s)\n",
+	tcm_log(L_WARN, "handle_action(%s): host contains wildchars (%s)\n",
 	    actions[actionid].name, host);
       else if (strchr(user, '*') || strchr(user, '?'))
-	log("handle_action(%s): user contains wildchars (%s)\n",
+	tcm_log(L_WARN, "handle_action(%s): user contains wildchars (%s)\n",
 	    actions[actionid].name, user);
       return;
     }
@@ -324,7 +328,9 @@ handle_action(int actionid, int idented, char *nick, char *user,
   /* Valid action? */
   if (!actions[actionid].method)
     {
-      log("handle_action(%s): method field is 0\n", actions[actionid].name);
+      tcm_log(L_WARN, 
+	      "handle_action(%s): method field is 0\n",
+	      actions[actionid].name);
       return;
     }
 
@@ -343,8 +349,9 @@ handle_action(int actionid, int idented, char *nick, char *user,
 	    /* Host without dots?  */
 	    strncpy(newhost, host, sizeof(newhost));
 	    newhost[sizeof(newhost)-1] = 0;
-	    log("handle_action(%s): '%s' appears to be a weird host\n",
-		actions[actionid].name, host);
+	    tcm_log(L_WARN,
+		    "handle_action(%s): '%s' appears to be a weird host\n",
+		    actions[actionid].name, host);
 	    return;
 	  }
 	newhost[0] = '*';
@@ -452,7 +459,8 @@ handle_action(int actionid, int idented, char *nick, char *user,
 	      if (!userptr || !userptr->info || !userptr->info->ip_host[0])
 		{
 		  /* We couldn't find one either, revert to a k-line */
-		  log("handle_action(%s): Reverting to k-line, couldn't find IP for %s\n",
+		  tcm_log(L_WARN,
+	  "handle_action(%s): Reverting to k-line, couldn't find IP for %s\n",
 		      actions[actionid].name, host);
 		  actions[actionid].method |= METHOD_KLINE;
 		  handle_action(actionid, idented, nick, user, 
@@ -832,7 +840,7 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
 #endif
       {
         if (!numfound++)
-          log("killlisted %s\n", fulluh);
+          tcm_log(L_NORM, "killlisted %s\n", fulluh);
         print_to_server("KILL %s :%s", userptr->info->nick, reason);
       }
     }

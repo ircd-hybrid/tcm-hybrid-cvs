@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.112 2002/05/27 00:42:12 db Exp $
+ * $Id: bothunt.c,v 1.113 2002/05/27 01:37:41 db Exp $
  */
 
 #include <stdio.h>
@@ -801,7 +801,7 @@ onservnotice(int connnum, int argc, char *argv[])
     send_to_all(SEND_ALL, "I am banned from %s.  Exiting..", 
 		 config_entries.rserver_name[0] ?
 		 config_entries.rserver_name : config_entries.server_name);
-    log_problem("onservnotice Banned from server.  Exiting.");
+    tcm_log(L_ERR, "onservnotice Banned from server.  Exiting.");
     exit(-1);
     /* NOT REACHED */
     break;
@@ -1743,7 +1743,7 @@ check_host_clones(char *host)
 	   "%d more possible clones (%d total) from %s:\n",
 	   clonecount, clonecount+reportedclones, host);
 
-    log("%d more possible clones (%d total) from %s:\n",
+    tcm_log(L_NORM, "%d more possible clones (%d total) from %s:\n",
 	clonecount, clonecount+reportedclones, host);
   }
   else
@@ -1753,8 +1753,9 @@ check_host_clones(char *host)
 	   "Possible clones from %s detected: %d connects in %d seconds\n",
 	   host, clonecount, now - oldest);
 
-    log("Possible clones from %s detected: %d connects in %d seconds\n",
-	host, clonecount, now - oldest);
+    tcm_log(L_NORM, 
+	    "Possible clones from %s detected: %d connects in %d seconds\n",
+	    host, clonecount, now - oldest);
   }
 
   for( find = hosttable[ind],clonecount = 0; find; find = find->collision)
@@ -1820,13 +1821,13 @@ check_host_clones(char *host)
         if (notice1[0])
         {
   	  report(SEND_WARN, CHANNEL_REPORT_CLONES, "%s", notice1);
-	  log("%s", notice1);
+	  tcm_log(L_NORM, "%s", notice1);
         }
 	/* I haven't figured out why all these are nessecary, but I know they are */
 	if (notice0[0])
         {
           report(SEND_WARN, CHANNEL_REPORT_CLONES, "%s", notice0);
-  	  log("%s", notice0);
+  	  tcm_log(L_NORM, "%s", notice0);
         }
       }
       else if (clonecount < 5)
@@ -1834,7 +1835,7 @@ check_host_clones(char *host)
         if (notice0[0])
         {
 	  report(SEND_WARN, CHANNEL_REPORT_CLONES, "%s", notice0);
-	  log("%s", notice0);
+	  tcm_log(L_NORM, "%s", notice0);
         }
       }
       else if (clonecount == 5)
@@ -1842,7 +1843,7 @@ check_host_clones(char *host)
         if (notice0[0])
         {
 	  send_to_all( SEND_WARN, "%s", notice0);
-	  log("  [etc.]\n");
+	  tcm_log(L_NORM, "  [etc.]\n");
         }
       }
     }
@@ -1907,8 +1908,9 @@ check_virtual_host_clones(char *ip_class_c)
 	     "%d more possible virtual host clones (%d total) from %s.*:\n",
 	     clonecount, clonecount+reportedclones, ip_class_c);
 
-      log("%d more possible virtual host clones (%d total) from %s.*:\n",
-	  clonecount, clonecount+reportedclones, ip_class_c);
+      tcm_log(L_NORM, 
+	      "%d more possible virtual host clones (%d total) from %s.*:\n",
+	      clonecount, clonecount+reportedclones, ip_class_c);
     }
   else
     {
@@ -1917,8 +1919,9 @@ check_virtual_host_clones(char *ip_class_c)
 	     "Possible virtual host clones from %s.* detected: %d connects in %d seconds\n",
 	     ip_class_c, clonecount, now - oldest);
 
-      log("Possible virtual host clones from %s.* detected: %d connects in %d seconds\n",
-	    ip_class_c, clonecount, now - oldest);
+      tcm_log(L_NORM,
+"Possible virtual host clones from %s.* detected: %d connects in %d seconds\n",
+	      ip_class_c, clonecount, now - oldest);
     }
 
   clonecount = 0;
@@ -1988,20 +1991,20 @@ check_virtual_host_clones(char *ip_class_c)
 	  else if (clonecount == 2)
 	    {
 	      report(SEND_WARN, CHANNEL_REPORT_VCLONES, "%s", notice1);
-	      log("%s", notice1);
+	      tcm_log(L_NORM, "%s", notice1);
 
 	      report(SEND_WARN, CHANNEL_REPORT_VCLONES, "%s", notice0);
-	      log("%s", notice0);
+	      tcm_log(L_NORM, "%s", notice0);
 	    }
 	  else if (clonecount < 5)
 	    {
 	      report(SEND_WARN, CHANNEL_REPORT_VCLONES, "%s", notice0);
-	      log("%s", notice0);
+	      tcm_log(L_NORM, "%s", notice0);
 	    }
 	  else if (clonecount == 5)
 	    {
 	      send_to_all(SEND_WARN, "%s", notice0);
-	      log("  [etc.]\n");
+	      tcm_log(L_NORM, "  [etc.]\n");
 	    }
 	}
 
@@ -2277,7 +2280,7 @@ void cs_nick_flood(char *snotice)
 
   send_to_all(SEND_WARN, "CS nick flood user_host = [%s]", user_host);
 
-  log("CS nick flood user_host = [%s]\n", user_host);
+  tcm_log(L_NORM, "CS nick flood user_host = [%s]\n", user_host);
 
 
   if ( !(user = strtok(user_host,"@")) )
@@ -2327,7 +2330,7 @@ cs_clones(char *snotice)
     }
 
   send_to_all(SEND_WARN, "CS clones user_host = [%s]", user_host);
-  log("CS clones = [%s]\n", user_host);
+  tcm_log(L_NORM, "CS clones = [%s]\n", user_host);
 
   user = user_host;
 
@@ -2564,7 +2567,7 @@ add_to_nick_change_table(char *user_host,char *last_nick)
 	      return;
 		      
 	    handle_action(act_flood, (*user_host != '~'), last_nick, user, host, 0, 0);
-	    log(
+	    tcm_log(L_NORM,
 		"nick flood %s (%s) %d in %d seconds (%02d/%02d/%d %2.2d:%2.2d:%2.2d)\n",
 		nick_changes[i].user_host,
 		nick_changes[i].last_nick,

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.93 2002/05/26 20:44:42 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.94 2002/05/27 01:37:41 db Exp $ */
 
 #include "setup.h"
 
@@ -584,7 +584,8 @@ m_die(int connnum, int argc, char *argv[])
 {
   send_to_all( SEND_ALL, "I've been ordered to quit irc, goodbye.");
   print_to_server("QUIT :Dead by request!");
-  log("DIEd by oper %s\n", connections[connnum].registered_nick);
+  tcm_log(L_ERR,
+	  "DIEd by oper %s\n", connections[connnum].registered_nick);
   exit(1);
 }
 
@@ -593,7 +594,8 @@ m_restart(int connnum, int argc, char *argv[])
 {
   send_to_all( SEND_ALL, "I've been ordered to restart.");
   print_to_server("QUIT :Restart by request!");
-  log("RESTART by oper %s", connections[connnum].registered_nick);
+  tcm_log(L_ERR,
+	  "RESTART by oper %s", connections[connnum].registered_nick);
   sleep(1);
   execv(SPATH, NULL);
 }
@@ -644,7 +646,7 @@ m_unkline(int connnum, int argc, char *argv[])
 		    "Usage: %s <user@host>", argv[0]);
   else
   {
-    log("UNKLINE %s attempted by oper %s", argv[1],
+    tcm_log(L_NORM, "UNKLINE %s attempted by oper %s", argv[1],
         connections[connnum].registered_nick);
     send_to_all( SEND_KLINE_NOTICES, "UNKLINE %s attempted by oper %s", 
                  argv[1], connections[connnum].registered_nick);

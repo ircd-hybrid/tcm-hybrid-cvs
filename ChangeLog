@@ -1,3 +1,15 @@
+wcampbel    2002/05/31 21:46:21 EDT	(20020601_1)
+
+  Modified files:
+    include              userlist.h 
+  Log:
+  Another cleanup from lint
+  
+  Revision  Changes    Path
+  1.61      +1 -1      tcm-hybrid/include/userlist.h
+
+
+
 wcampbel    2002/05/31 21:12:31 EDT	(20020601_0)
 
   Modified files:

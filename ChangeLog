@@ -1,3 +1,17 @@
+leeh        2002/06/20 21:07:46 EDT	(20020621_2)
+
+  Modified files:
+    src                  main.c parse.c userlist.c 
+  Log:
+  - attempt at fixing the userlist bug
+  
+  Revision  Changes    Path
+  1.115     +0 -1      tcm-hybrid/src/main.c
+  1.73      +2 -2      tcm-hybrid/src/parse.c
+  1.116     +0 -1      tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/20 20:04:12 EDT	(20020621_1)
 
   Modified files:

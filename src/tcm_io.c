@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.73 2002/05/29 13:36:43 leeh Exp $
+ * $Id: tcm_io.c,v 1.74 2002/05/29 16:05:10 db Exp $
  */
 
 #include <stdio.h>
@@ -92,7 +92,6 @@ read_packet(void)
   FOREVER
   {
     current_time = time(NULL);
-
 
     FD_ZERO (&readfds);
     FD_ZERO (&writefds);
@@ -406,9 +405,9 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
     }
 
   notice(nick, "Chat requested");
-  strncpy(connections[i].nick, nick, MAX_NICK);
-  strncpy(connections[i].user, user, MAX_USER);
-  strncpy(connections[i].host, host, MAX_HOST);
+  strlcpy(connections[i].nick, nick, MAX_NICK);
+  strlcpy(connections[i].user, user, MAX_USER);
+  strlcpy(connections[i].host, host, MAX_HOST);
 
   if ((connections[i].socket = socket(PF_INET,SOCK_STREAM,0)) < 0)
   {
@@ -600,7 +599,7 @@ send_to_all(int send_umode, const char *format,...)
 	    va_print_to_socket(connections[i].socket, format, va);
 	}
     }
-    va_end(va);
+  va_end(va);
 }
 
 /*
@@ -677,12 +676,9 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   }
 
   connections[i].set_modes = 0;
-  strncpy(connections[i].nick,nick,MAX_NICK-1);
-  connections[i].nick[MAX_NICK-1] = '\0';
-  strncpy(connections[i].user,user,MAX_USER-1);
-  connections[i].user[MAX_USER-1] = '\0';
-  strncpy(connections[i].host,host,MAX_HOST-1);
-  connections[i].host[MAX_HOST-1] = '\0';
+  strlcpy(connections[i].nick,nick,MAX_NICK);
+  strlcpy(connections[i].user,user,MAX_USER);
+  strlcpy(connections[i].host,host,MAX_HOST);
   connections[i].last_message_time = time(NULL);
   connections[i].socket = connect_to_dcc_ip(nick, hostport);
   if (connections[i].socket == INVALID)
@@ -777,8 +773,7 @@ close_dcc_connection(int connnum)
   report(FLAGS_ALL,
          CHANNEL_REPORT_ROUTINE,
          "Oper %s (%s@%s) has disconnected",
-         connections[connnum].nick,
-         connections[connnum].user,
+         connections[connnum].nick, connections[connnum].user,
          connections[connnum].host);
 
   close_connection(connnum);
@@ -800,13 +795,7 @@ close_connection(int connnum)
   if (connections[connnum].socket != INVALID)
     close(connections[connnum].socket);
 
-  connections[connnum].socket = INVALID;
-  connections[connnum].state = S_IDLE;
-  connections[connnum].curr_state = 0;
-  connections[connnum].io_read_function = NULL;	 /* blow up real good */
-  connections[connnum].io_write_function = NULL; /* blow up real good */
-  connections[connnum].io_close_function = NULL; /* blow up real good */
-  connections[connnum].time_out = 0;
+  memset((void *)&connections[connnum], 0, sizeof(connections[connnum]));
 
   if ((connnum + 1) == maxconns)
     {
@@ -815,12 +804,6 @@ close_connection(int connnum)
 	  break;
       maxconns = i+1;
     }
-
-  connections[connnum].user[0] = '\0';
-  connections[connnum].host[0] = '\0';
-  connections[connnum].nick[0] = '\0';
-  connections[connnum].ip[0] = '\0';
-  connections[connnum].registered_nick[0] = '\0';
 }
 
 /*
@@ -1058,22 +1041,8 @@ connect_to_given_ip_port(struct sockaddr_in *socketname, int port)
 void
 init_connections(void)
 {
-  int i;
-
   maxconns = 0;
-
-  for (i=0; i < MAXDCCCONNS+1; i++)
-    {
-      connections[i].socket = INVALID;
-      connections[i].state = S_IDLE;
-      connections[i].curr_state = 0;
-      connections[i].user[0] = '\0';
-      connections[i].host[0] = '\0';
-      connections[i].nick[0] = '\0';
-      connections[i].ip[0] = '\0';
-      connections[i].registered_nick[0] = '\0';
-      connections[i].time_out = 0;
-    }
+  memset((void *)connections, 0, sizeof(connections));
 }
 
 int
@@ -1127,9 +1096,7 @@ show_stats_p(const char *nick)
 #else 
 	  notice(nick,
 		 "%s (%s@%s) idle %lu\n",
-		 connections[i].nick,
-		 connections[i].user,
-		 connections[i].host,
+		 connections[i].nick, connections[i].user, connections[i].host,
 		 time(NULL) - connections[i].last_message_time );
 #endif
 	  number_of_tcm_opers++;
@@ -1165,10 +1132,8 @@ list_connections(int sock)
 	user = find_user_in_userlist(connections[i].registered_nick);
 	print_to_socket(sock,
 	     "%s/%s %s (%s@%s) is connected - idle: %ld",
-	     connections[i].nick,
-	     connections[i].registered_nick,
-	     type_show(userlist[user].type),
-	     connections[i].user,
+	     connections[i].nick, connections[i].registered_nick,
+	     type_show(userlist[user].type), connections[i].user,
 	     connections[i].host,
 	     time((time_t *)NULL)-connections[i].last_message_time );
       }
@@ -1176,9 +1141,7 @@ list_connections(int sock)
       {
 	print_to_socket(sock,
 	     "%s O (%s@%s) is connected - idle: %ld",
-	     connections[i].nick,
-	     connections[i].user,
-	     connections[i].host,
+	     connections[i].nick, connections[i].user, connections[i].host,
 	     time((time_t *)NULL)-connections[i].last_message_time  );
       }
     }

@@ -1,3 +1,8 @@
+*** 20010721_1 by wcampbel
+Add a few more bugs to the BUGS list
+Add a check for crypt.h, needed for some (lame) Linux distributions
+
+
 *** 20010703_1 by wcampbel
 Add in the .cvsignore files
 

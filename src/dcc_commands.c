@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.59 2002/05/19 21:08:19 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.60 2002/05/19 21:13:29 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -1868,7 +1868,7 @@ struct TcmMessage who_msgtab = {
 };
 struct TcmMessage disconnect_msgtab = {
  ".disconnect", 0, 0,
- {m_disconnect, m_disconnect, m_disconnect, m_disconnect}
+ {m_unregistered, m_not_oper, m_not_admin, m_disconnect}
 };
 struct TcmMessage quit_msgtab = {
  ".quit", 0, 0,

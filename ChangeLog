@@ -1,3 +1,23 @@
+leeh        2002/06/21 10:16:32 EDT	(20020621_11)
+
+  Modified files:
+    include              userlist.h 
+    src                  actions.c dcc_commands.c services.c 
+                         stdcmds.c userlist.c 
+  Log:
+  - renamed defchannel to channel, as were not gunna end up in random
+    channels.
+  
+  Revision  Changes    Path
+  1.70      +2 -2      tcm-hybrid/include/userlist.h
+  1.31      +3 -3      tcm-hybrid/src/actions.c
+  1.127     +2 -2      tcm-hybrid/src/dcc_commands.c
+  1.21      +4 -4      tcm-hybrid/src/services.c
+  1.93      +5 -5      tcm-hybrid/src/stdcmds.c
+  1.121     +4 -4      tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/21 10:13:48 EDT	(20020621_10)
 
   Modified files:

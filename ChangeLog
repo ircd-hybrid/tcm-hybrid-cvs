@@ -1,3 +1,15 @@
+bill        2003/01/21 21:50:51 EST	(20030122_0)
+
+  Modified files:
+    .                    Makefile.in 
+  Log:
+  - be sure to copy the main help file, also.  pointed out by markalso
+  
+  Revision  Changes    Path
+  1.26      +1 -1      tcm-hybrid/Makefile.in
+
+
+
 bill        2003/01/20 01:16:23 EST	(20030120_0)
 
   Modified files:

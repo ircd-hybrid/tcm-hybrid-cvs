@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.137 2002/06/24 00:40:20 db Exp $ */
+/* $Id: dcc_commands.c,v 1.138 2002/06/24 02:35:56 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -386,8 +386,6 @@ m_disconnect(struct connection *connection_p, int argc, char *argv[])
     send_to_connection(connection_p, "Usage: %s <nick>", argv[0]);
   else
   {
-    int i;
-
     found_user = find_user_in_connections(argv[1]);
 
     if(found_user != NULL)

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.43 2002/06/24 00:40:21 db Exp $
+ * $Id: hash.c,v 1.44 2002/06/24 02:35:56 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -30,6 +30,7 @@
 #include "hash.h"
 #include "actions.h"
 #include "match.h"
+#include "wingate.h"
 
 #ifdef HAVE_REGEX_H
 #include <regex.h>

@@ -40,7 +40,7 @@ hash.o: hash.c ../include/setup.h ../include/config.h ../include/tcm.h \
  ../include/bothunt.h ../include/userlist.h ../include/tools.h \
  ../include/logging.h ../include/wild.h ../include/serno.h \
  ../include/patchlevel.h ../include/hash.h ../include/actions.h \
- ../include/match.h
+ ../include/match.h ../include/wingate.h
 logging.o: logging.c ../include/setup.h ../include/config.h \
  ../include/tcm.h ../include/userlist.h ../include/tools.h \
  ../include/tcm_io.h ../include/bothunt.h ../include/parse.h \

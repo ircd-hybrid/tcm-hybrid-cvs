@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.184 2002/06/24 00:40:20 db Exp $
+ * $Id: bothunt.c,v 1.185 2002/06/24 02:35:56 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -1426,6 +1426,10 @@ get_user_host(char **user_p, char **host_p, char *user_host)
 	return(NULL);
       *p++ = '\0';
       end_p = p;
+    }
+  else
+    {
+      return(NULL);
     }
 
   *user_p = user;

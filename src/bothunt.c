@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.116 2002/05/27 21:02:34 db Exp $
+ * $Id: bothunt.c,v 1.117 2002/05/27 21:19:26 db Exp $
  */
 
 #include <stdio.h>
@@ -3071,7 +3071,7 @@ find_nick(const char * nick)
     {
       for( userptr = domaintable[i]; userptr; userptr = userptr->collision )
 	{
-	  if (!wldcmp(nick, userptr->info->nick))
+	  if (!wldcmp((char *)nick, userptr->info->nick))
 	    return userptr;
 	}
     }
@@ -3085,7 +3085,7 @@ find_nick(const char * nick)
  *
  */
 struct hashrec *
-find_host(char * host)
+find_host(const char * host)
 {
   int i;
   struct hashrec * userptr;
@@ -3097,7 +3097,7 @@ find_host(char * host)
     {
       for( userptr = domaintable[i]; userptr; userptr = userptr->collision )
 	{
-	  if (!wldcmp(host, userptr->info->host))
+	  if (!wldcmp((char *)host, userptr->info->host))
 	    return userptr;
 	}
     }

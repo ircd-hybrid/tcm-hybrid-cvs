@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.36 2002/05/27 21:02:30 db Exp $ */
+/* $Id: bothunt.h,v 1.37 2002/05/27 21:19:24 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -125,5 +125,8 @@ extern void onservnotice(int connnum, int argc, char *argv[]);
 extern struct s_testline testlines;
 extern int doingtrace;
 extern char myclass[MAX_CLASS]; /* XXX ewww */
+
+/* XXX candidates for hash.c/hash.h */
 struct hashrec *find_nick(const char * nick);
+struct hashrec *find_host(const char * host);
 #endif

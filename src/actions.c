@@ -25,7 +25,7 @@
 
 /* actions.c
  *
- * $Id: actions.c,v 1.1 2002/05/27 21:02:34 db Exp $
+ * $Id: actions.c,v 1.2 2002/05/27 21:19:26 db Exp $
  */
 
 /*
@@ -46,7 +46,7 @@ handle_action(int actionid, int idented, char *nick, char *user,
 {
   char newhost[MAX_HOST];
   char newuser[MAX_USER];
-  char comment[512];
+  char comment[MAX_BUFF];
   char *p;
   struct hashrec * userptr;
 
@@ -104,24 +104,25 @@ handle_action(int actionid, int idented, char *nick, char *user,
   switch (actions[actionid].hoststrip & HOSTSTRIP_HOST)
     {
     case HOSTSTRIP_HOST_BLOCK:
-      if (inet_addr(host) == INADDR_NONE) {
-	p = host;
-	while (*p && (*p != '.'))
-	  p++;
-	if (!*p)
-	  {
-	    /* Host without dots?  */
-	    strncpy(newhost, host, sizeof(newhost));
-	    newhost[sizeof(newhost)-1] = 0;
-	    tcm_log(L_WARN,
-		    "handle_action(%s): '%s' appears to be a weird host\n",
-		    actions[actionid].name, host);
-	    return;
-	  }
-	newhost[0] = '*';
-	newhost[1] = 0;
-	strncat(newhost, host, sizeof(newhost));
-      }
+      if (inet_addr(host) == INADDR_NONE)
+	{
+	  p = host;
+	  while (*p && (*p != '.'))
+	    p++;
+	  if (!*p)
+	    {
+	      /* Host without dots?  */
+	      strncpy(newhost, host, sizeof(newhost));
+	      newhost[sizeof(newhost)-1] = 0;
+	      tcm_log(L_WARN,
+		      "handle_action(%s): '%s' appears to be a weird host\n",
+		      actions[actionid].name, host);
+	      return;
+	    }
+	  newhost[0] = '*';
+	  newhost[1] = '\0';
+	  strncat(newhost, host, sizeof(newhost));
+	}
       else
 	{
 	  strncpy(newhost, host, sizeof(newhost)-3);
@@ -131,7 +132,7 @@ handle_action(int actionid, int idented, char *nick, char *user,
 	  if (*p)
 	    {
 	      p[1] = '*';
-	      p[2] = 0;
+	      p[2] = '\0';
 	    }
 	}
       break;
@@ -289,17 +290,19 @@ handle_action(int actionid, int idented, char *nick, char *user,
   if (actions[actionid].method & METHOD_IRC_WARN)
     {
       if (addcmt && addcmt[0])
-	privmsg(config_entries.defchannel, "*** %s violation (%s) from %s (%s@%s): %s",
-		      actions[actionid].name, addcmt,
-		      (nick && nick[0]) ? nick : "<unknown>", 
-		      (user && user[0]) ? user : "<unknown>",
-		      host, comment);
+	privmsg(config_entries.defchannel,
+		"*** %s violation (%s) from %s (%s@%s): %s",
+		actions[actionid].name, addcmt,
+		(nick && nick[0]) ? nick : "<unknown>", 
+		(user && user[0]) ? user : "<unknown>",
+		host, comment);
       else
-	privmsg(config_entries.defchannel, "*** %s violation from %s (%s@%s): %s",
-		      actions[actionid].name, 
-		      (nick && nick[0]) ? nick : "<unknown>", 
-		      (user && user[0]) ? user : "<unknown>",
-		      host, comment);
+	privmsg(config_entries.defchannel,
+		"*** %s violation from %s (%s@%s): %s",
+		actions[actionid].name, 
+		(nick && nick[0]) ? nick : "<unknown>", 
+		(user && user[0]) ? user : "<unknown>",
+		host, comment);
     }
 }
 		  

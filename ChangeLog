@@ -1,3 +1,19 @@
+jmallett    2002/05/25 12:27:29 EDT	(20020525_19)
+
+  Modified files:
+    include              serverif.h 
+    src                  commands.c main.c tcm_io.c 
+  Log:
+  Remove bogus arguments to closeconn().
+  
+  Revision  Changes    Path
+  1.24      +1 -1      tcm-hybrid/include/serverif.h
+  1.84      +2 -2      tcm-hybrid/src/commands.c
+  1.68      +1 -1      tcm-hybrid/src/main.c
+  1.25      +1 -1      tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/25 12:21:10 EDT	(20020525_18)
 
   Modified files:

@@ -1,4 +1,4 @@
-/* $Id: setup.h.in,v 1.5 2002/05/20 00:52:49 wcampbel Exp $ */
+/* $Id: setup.h.in,v 1.6 2002/05/22 12:38:11 wcampbel Exp $ */
 /* include/setup.h.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define if you need to in order for stat and other things to work.  */
@@ -21,6 +21,12 @@
 
 /* Define if you have the setrlimit function.  */
 #undef HAVE_SETRLIMIT
+
+/* Define if you have the strlcat function.  */
+#undef HAVE_STRLCAT
+
+/* Define if you have the strlcpy function.  */
+#undef HAVE_STRLCPY
 
 /* Define if you have the descrypt library (-ldescrypt).  */
 #undef HAVE_LIBDESCRYPT

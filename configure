@@ -1881,7 +1881,7 @@ echo "$ac_t""$ac_cv_prog_gcc_traditional" 1>&6
   fi
 fi
 
-for ac_func in setrlimit
+for ac_func in setrlimit strlcat strlcpy
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:1888: checking for $ac_func" >&5

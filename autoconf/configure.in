@@ -1,4 +1,4 @@
-dnl $Id: configure.in,v 1.16 2002/05/20 12:46:28 wcampbel Exp $
+dnl $Id: configure.in,v 1.17 2002/05/22 12:38:09 wcampbel Exp $
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(include/tcm.h)
 
@@ -53,7 +53,7 @@ AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - tcm-hy
 
 dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
-AC_CHECK_FUNCS(setrlimit)
+AC_CHECK_FUNCS(setrlimit strlcat strlcpy)
 
 AC_OUTPUT(Makefile src/Makefile tools/Makefile modules/Makefile)
 

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.179 2002/06/23 18:34:26 leeh Exp $
+ * $Id: bothunt.c,v 1.180 2002/06/23 19:15:06 leeh Exp $
  */
 
 #include <stdio.h>
@@ -507,6 +507,10 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* Client exiting: bill (bill@ummm.E) [e?] [255.255.255.255]*/
   case EXITING:
     chopuh(IS_NOT_FROM_TRACE, q, &userinfo);
+    if((q = strchr(p, ' ')) != NULL)
+      *q = '\0';
+
+    strlcpy(userinfo.nick, p, MAX_NICK);
     remove_user_host(q,&userinfo);
     break;
 

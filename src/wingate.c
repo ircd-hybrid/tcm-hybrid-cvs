@@ -271,7 +271,7 @@ void _scontinuous(int connnum, int argc, char *argv[])
                   buffer[nread] = '\0';
                   if ((p = (char *)strchr(buffer,'W')))
                     {
-                      if (strncasecmp(p,"Wingate>",8) == 0)
+                      if (strncasecmp(p,"Wingate> ",9) == 0)
                         open_wingate = YES;
                     }
                   else if( (p = (char *)strchr(buffer,'T')) )

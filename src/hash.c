@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.4 2002/05/29 00:59:26 leeh Exp $
+ * $Id: hash.c,v 1.5 2002/05/29 01:19:32 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1069,62 +1069,6 @@ kill_add_report(char *server_notice)
 }
 
 
-#ifdef VIRTUAL
-void
-report_vbots(int sock,int nclones)
-{
-  struct hashrec *userptr,*top,*temp;
-  int numfound,i;
-  int foundany = NO;
-
-  nclones-=2;  /* ::sigh:: I have no idea */
-  for (i=0;i<HASHTABLESIZE;++i)
-    {
-      for(top = userptr = iptable[i]; userptr;
-	  userptr = userptr->collision)
-        {
-          /* Ensure we haven't already checked this user & domain */
-          for(temp = top, numfound = 0; temp != userptr;
-	      temp = temp->collision)
-            {
-              if (!strcmp(temp->info->user,userptr->info->user) &&
-                  !strcmp(temp->info->ip_class_c,userptr->info->ip_class_c))
-                break;
-            }
-
-          if (temp == userptr)
-            {
-              for (temp = temp->collision; temp; temp = temp->collision)
-                {
-                  if (!strcmp(temp->info->user,userptr->info->user) &&
-                      !strcmp(temp->info->ip_class_c,userptr->info->ip_class_c))
-                    numfound++; /* - zaph & Dianora :-) */
-                }
-
-              if ( numfound > nclones )
-                {
-                  if (!foundany)
-                    {
-                      foundany = YES;
-                      print_to_socket(sock,
-                           "Multiple clients from the following userhosts:\n");
-                    }
-                  numfound++;   /* - zaph and next line*/
-                  print_to_socket(sock,
-                       " %s %2d connections -- %s@%s.* {%s}\n",
-                       (numfound-nclones > 2) ? "==>" :
-                       "   ",numfound,userptr->info->user,
-                       userptr->info->ip_class_c,
-                       userptr->info->class);
-                }
-            }
-        }
-    }
-  if (!foundany)
-    print_to_socket(sock, "No multiple logins found.\n");
-}
-#endif
-
 /*
  * report_domains
  * input        - sock
@@ -1398,73 +1342,6 @@ list_users(int sock,char *userhost,int regex)
     print_to_socket(sock, "No matches for %s found\n", userhost);
 }
 
-/*
- * list_virtual_users()
- *
- * inputs       - socket to reply on
- *              - ipblock to match on
- *              - regex or no?
- * output       - NONE
- * side effects -
- */
-
-void 
-list_virtual_users(int sock,char *userhost,int regex)
-{
-  struct hashrec *ipptr;
-#ifdef HAVE_REGEX_H
-  regex_t reg;
-  regmatch_t m[1];
-#endif
-  char uhost[1024];
-  int i,numfound = 0;
-
-#ifdef HAVE_REGEX_H
-  if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
-  {
-    char errbuf[REGEX_SIZE];
-    regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE); 
-    print_to_socket(sock, "Error compiling regular expression: %s\n",
-		    errbuf);
-    return;
-  }
-#endif
-  if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
-    {
-      print_to_socket(sock,
-"Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.\n");
-      return;
-    }
-
-  for (i=0; i < HASHTABLESIZE; ++i)
-  {
-    for(ipptr = iptable[i]; ipptr; ipptr = ipptr->collision)
-    {
-      snprintf(uhost, 1024, "%s@%s", ipptr->info->user, ipptr->info->ip_host);
-#ifdef HAVE_REGEX_H
-      if ((regex == YES &&
-          !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS))
-          || (regex == NO && !match(userhost, uhost)))
-#else
-      if (!match(userhost, uhost))
-#endif 
-      {
-        if (!numfound++)
-          print_to_socket(sock, "The following clients match %s:\n", userhost);
-
-        print_to_socket(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
-             ipptr->info->user, ipptr->info->host, ipptr->info->ip_host,
-             ipptr->info->class);
-      }
-    }
-  }
-  if (numfound > 0)
-    print_to_socket(sock, "%d match%sfor %s found\n", numfound,
-         (numfound > 1 ? "es " : " "), userhost);
-  else
-    print_to_socket(sock, "No matches for %s found\n", userhost);
-}
-
 void kill_list_users(int sock, char *userhost, char *reason, int regex)
 {
   struct hashrec *userptr;
@@ -1510,75 +1387,6 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
   else
     print_to_socket(sock, "No matches for %s found\n", userhost);
 }
-
-/*
- * report_multi_virtuals()
- *
- * inputs       - socket to print out
- *              - number to consider as clone
- * output       - NONE
- * side effects -
- */
-
-#ifdef VIRTUAL
-void report_multi_virtuals(int sock,int nclones)
-{
-  struct hashrec *userptr;
-  struct hashrec *top;
-  struct hashrec *temp;
-  int numfound;
-  int i;
-  int foundany = 0;
-
-  if(!nclones)
-    nclones = 5;
-
-  nclones-=1;
-  for (i=0;i<HASHTABLESIZE;++i)
-    {
-      for (top = userptr = iptable[i]; userptr; userptr = userptr->collision)
-        {
-          numfound = 0;
-
-          for (temp = top; temp != userptr; temp = temp->collision)
-            {
-              if (!strcmp(temp->info->ip_class_c,userptr->info->ip_class_c))
-                break;
-            }
-
-          if (temp == userptr)
-            {
-              numfound=1;
-              for(temp = temp->collision; temp; temp = temp->collision)
-                {
-                  if (!strcmp(temp->info->ip_class_c,
-                              userptr->info->ip_class_c))
-                    numfound++; /* - zaph & Dianora :-) */
-                }
-
-              if (numfound > nclones)
-                {
-                  if (!foundany)
-                    {
-                      print_to_socket(sock,
-                           "Multiple clients from the following ip blocks:\n");
-                      foundany = YES;
-                    }
-
-                  print_to_socket(sock,
-                       " %s %2d connections -- %s.*\n",
-                       (numfound-nclones > 3) ? "==>" : "   ",
-                       numfound,
-                       userptr->info->ip_class_c);
-                }
-            }
-        }
-    }
-
-  if (!foundany)
-    print_to_socket(sock, "No multiple virtual logins found.\n");
-}
-#endif
 
 /*
  * report_mem()

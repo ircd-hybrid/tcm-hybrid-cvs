@@ -1,7 +1,7 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.7 2002/05/29 00:59:22 leeh Exp $ */
+/* $Id: hash.h,v 1.8 2002/05/29 01:19:29 leeh Exp $ */
 
 #define HASHTABLESIZE 3001
 
@@ -53,12 +53,8 @@ struct hashrec *find_nick(const char * nick);
 struct hashrec *find_host(const char * host);
 
 void list_nicks(int sock,char *nick,int regex);
-void list_virtual_users(int sock,char *userhost,int regex);
 void list_users(int sock,char *userhost,int regex);
 void kill_list_users(int sock,char *userhost,char *reason,int regex);
-#ifdef VIRTUAL
-void report_multi_virtuals(int sock,int nclones);
-#endif
 void report_mem(int sock);
 void report_failures(int sock,int num);
 
@@ -67,9 +63,7 @@ void check_reconnect_clones(char *);
 
 void report_failures(int sock, int num);
 void report_domains(int sock, int num);
-void report_vbots(int sock,int nclones);
 void kill_add_report(char *);
-void report_vbots(int sock,int nclones);
 void report_domains(int sock,int num);
 void list_class(int sock,char *class_to_find,int total_only);
 #endif

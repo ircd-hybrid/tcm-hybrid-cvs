@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.109 2002/05/29 00:59:25 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.110 2002/05/29 01:19:32 leeh Exp $ */
 
 #include "setup.h"
 
@@ -57,27 +57,6 @@ static void list_exemptions(int sock);
 static void handle_save(int sock,char *nick);
 static int  is_legal_pass(int connect_id,char *password);
 static void print_help(int sock,char *text);
-
-void
-m_vlist(int connnum, int argc, char *argv[])
-{
-#ifdef HAVE_REGEX_H
-  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
-    print_to_socket(connections[connnum].socket,
-		    "Usage: %s <wildcarded/regexp ip>",
-		    argv[0]);
-  else if (argc == 2)
-    list_virtual_users(connections[connnum].socket, argv[1], NO);
-  else
-    list_virtual_users(connections[connnum].socket, argv[2], YES);
-#else
-  if (argc < 2)
-    print_to_socket(connections[connnum].socket, 
-		    "Usage %s <wildcarded ip>", argv[0]);
-  else
-    list_virtual_users(connections[connnum].socket, argv[1], NO);
-#endif
-}
 
 void
 m_class(int connnum, int argc, char *argv[])
@@ -574,15 +553,6 @@ m_unkline(int connnum, int argc, char *argv[])
   }
 }
 
-void
-m_vbots(int connnum, int argc, char *argv[])
-{
-  if (argc >= 2)
-    report_vbots(connections[connnum].socket, atoi(argv[1]));
-  else
-    report_vbots(connections[connnum].socket, 3);
-}
-
 #ifndef NO_D_LINE_SUPPORT
 void
 m_dline(int connnum, int argc, char *argv[])
@@ -724,16 +694,6 @@ m_events(int connnum, int argc, char *argv[])
 {
   show_events(connections[connnum].socket);
 }
-
-#ifdef VIRTUAL
-void m_vmulti(int connnum, int argc, char *argv[])
-{
-  if (argc >= 2)
-    report_multi_virtuals(connections[connnum].socket, atoi(argv[1]));
-  else
-    report_multi_virtuals(connections[connnum].socket, 3);
-}
-#endif
 
 void
 m_nfind(int connnum, int argc, char *argv[])
@@ -1098,9 +1058,6 @@ handle_save(int sock,char *nick)
  * ircd-hybrid-7 loadable module code goes here
  */
 #else
-struct dcc_command vlist_msgtab = {
- "vlist", NULL, {m_unregistered, m_vlist, m_vlist}
-};
 struct dcc_command class_msgtab = {
  "class", NULL, {m_unregistered, m_class, m_class}
 };
@@ -1209,9 +1166,6 @@ struct dcc_command locops_msgtab = {
 struct dcc_command unkline_msgtab = {
  "unkline", NULL, {m_unregistered, m_unkline, m_unkline}
 };
-struct dcc_command vbots_msgtab = {
- "vbots", NULL, {m_unregistered, m_vbots, m_vbots}
-};
 #ifndef NO_D_LINE_SUPPORT
 struct dcc_command dline_msgtab = {
  "dline", NULL, {m_unregistered, m_dline, m_dline}
@@ -1243,11 +1197,6 @@ struct dcc_command domains_msgtab = {
 struct dcc_command events_msgtab = {
  "events", NULL, {m_unregistered, m_events, m_events}
 };
-#ifdef VIRTUAL
-struct dcc_command vmulti_msgtab = {
- "vmulti", NULL, {m_unregistered, m_vmulti, m_vmulti}
-};
-#endif
 struct dcc_command nfind_msgtab = {
  "nfind", NULL, {m_unregistered, m_nfind, m_nfind}
 };
@@ -1265,7 +1214,6 @@ struct dcc_command hlist_msgtab = {
 void 
 init_commands(void)
 {
-  add_dcc_handler(&vlist_msgtab);
   add_dcc_handler(&class_msgtab);
   add_dcc_handler(&classt_msgtab);
   add_dcc_handler(&killlist_msgtab);
@@ -1300,7 +1248,6 @@ init_commands(void)
   add_dcc_handler(&info_msgtab);
   add_dcc_handler(&locops_msgtab);
   add_dcc_handler(&unkline_msgtab);
-  add_dcc_handler(&vbots_msgtab);
 #ifndef NO_D_LINE_SUPPORT
   add_dcc_handler(&dline_msgtab);
 #endif
@@ -1314,9 +1261,6 @@ init_commands(void)
   add_dcc_handler(&failures_msgtab);
   add_dcc_handler(&domains_msgtab);
   add_dcc_handler(&events_msgtab);
-#ifdef VIRTUAL
-  add_dcc_handler(&vmulti_msgtab);
-#endif
   add_dcc_handler(&nfind_msgtab);
   add_dcc_handler(&list_msgtab);
   add_dcc_handler(&ulist_msgtab);

@@ -1,7 +1,7 @@
 #ifndef __COMMANDS_H
 #define __COMMANDS_H
 
-/* $Id: commands.h,v 1.18 2002/05/29 00:59:22 leeh Exp $ */
+/* $Id: commands.h,v 1.19 2002/05/29 01:19:29 leeh Exp $ */
 
 void init_allow_nick();
 
@@ -11,7 +11,6 @@ extern void init_commands(void);
 extern void init_wingates(void);
 #endif
 
-void m_vlist(int connnum, int argc, char *argv[]);
 void m_class(int connnum, int argc, char *argv[]);
 void m_classt(int connnum, int argc, char *argv[]);
 void m_killlist(int connnum, int argc, char *argv[]);
@@ -47,7 +46,6 @@ void m_restart(int connnum, int argc, char *argv[]);
 void m_info(int connnum, int argc, char *argv[]);
 void m_locops(int connnum, int argc, char *argv[]);
 void m_unkline(int connnum, int argc, char *argv[]);
-void m_vbots(int connnum, int argc, char *argv[]);
 void m_dline(int connnum, int argc, char *argv[]);
 void m_quote(int connnum, int argc, char *argv[]);
 void m_mem(int connnum, int argc, char *argv[]);
@@ -56,7 +54,6 @@ void m_rehash(int connnum, int argc, char *argv[]);
 void m_trace(int connnum, int argc, char *argv[]);
 void m_failures(int connnum, int argc, char *argv[]);
 void m_domains(int connnum, int argc, char *argv[]);
-void m_vmulti(int connnum, int argc, char *argv[]);
 void m_nfind(int connnum, int argc, char *argv[]);
 void m_list(int connnum, int argc, char *argv[]);
 void m_ulist(int connnum, int argc, char *argv[]);

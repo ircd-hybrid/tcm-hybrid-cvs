@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.26 2002/05/29 00:59:25 leeh Exp $
+# $Id: Makefile.in,v 1.27 2002/05/29 01:19:32 leeh Exp $
 
 CC = @CC@
 RM = @RM@
@@ -32,6 +32,7 @@ SOURCES =       actions.c	\
                 stdcmds.c       \
                 tcm_io.c        \
                 userlist.c      \
+		vclones.c	\
                 wild.c		\
 		wingate.c
 

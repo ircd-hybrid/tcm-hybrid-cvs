@@ -37,7 +37,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.23 2001/10/27 01:53:59 bill Exp $";
+static char *version="$Id: userlist.c,v 1.24 2001/10/27 15:57:34 db Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct tcm_file_entry tcmlist[MAXTCMS];
@@ -391,11 +391,13 @@ void save_prefs(void)
                 strcat(tobuff, argv[a]);
                 strcat(tobuff, ":");
               }
-            if (tobuff[strlen(tobuff)-1] == ':') tobuff[strlen(tobuff)-1] = '\0';
-//            strcat(tobuff, "\n");
+            if (tobuff[strlen(tobuff)-1] == ':')
+	      tobuff[strlen(tobuff)-1] = '\0';
+
             if ((write(fd, tobuff, strlen(tobuff))) == -1)
               {
-                sendtoalldcc(SEND_ALL_USERS, "Error writing to file %s: %s", filename,
+                sendtoalldcc(SEND_ALL_USERS, 
+			     "Error writing to file %s: %s", filename,
                              strerror(errno));
                 fclose(fp);
                 if (fd) close(fd);
@@ -405,6 +407,7 @@ void save_prefs(void)
                   free(argv[a]);
                 return;
               }
+	    break;
         }
     }
   close(fd);

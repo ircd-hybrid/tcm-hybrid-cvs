@@ -455,21 +455,13 @@ void _modinit()
   add_common_function(F_SCONTINUOUS, _scontinuous);
   wingate_class_list_index = 0;
 #ifdef DETECT_WINGATE
-#ifdef REPORT_WINGATES_TO_CHANNEL
-  add_action("wingate", "kline 60", REASON_WINGATE, YES);
-#else
-  add_action("wingate", "kline 60", REASON_WINGATE, NO);
-#endif
+  add_action("wingate", "kline 60", REASON_WINGATE);
   set_action_type("wingate", R_WINGATE);
   for (i=0;i<MAXWINGATES;++i)
     wingate[i].socket = INVALID;
 #endif
 #ifdef DETECT_SOCKS
-#ifdef REPORT_SOCKS_TO_CHANNEL
-  add_action("socks", "kline 60", "Open SOCKS", YES);
-#else
-  add_action("socks", "kline 60", "Open SOCKS", NO);
-#endif
+  add_action("socks", "kline 60", "Open SOCKS");
   set_action_type("socks", R_SOCKS);
   for (i=0;i<MAXWINGATES;++i)
     {

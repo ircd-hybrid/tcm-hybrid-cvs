@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.24 2001/10/27 15:12:43 db Exp $";
+static char *version="$Id: bothunt.c,v 1.25 2001/10/27 15:57:34 db Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -3013,21 +3013,21 @@ void _modinit()
 #endif
   memset(&nick_changes,0,sizeof(nick_changes));
   init_link_look_table();
-  add_action("cflood", "dline", "Connect flooding", YES);
+  add_action("cflood", "dline", "Connect flooding");
   set_action_type("cflood", R_CFLOOD);
-  add_action("vclone", "warn", "Cloning is prohibited", YES);
+  add_action("vclone", "warn", "Cloning is prohibited");
   set_action_type("vclone", R_VCLONE);
-  add_action("flood", "kline", "Flooding is prohibited", YES);
+  add_action("flood", "kline", "Flooding is prohibited");
   set_action_type("flood", R_FLOOD);
-  add_action("link", "kline 180", "Link lookers are prohibited", YES);
+  add_action("link", "kline 180", "Link lookers are prohibited");
   set_action_type("link", R_LINK);
-  add_action("bot", "kline", "Bots are prohibited", YES);
+  add_action("bot", "kline", "Bots are prohibited");
   set_action_type("bot", R_BOT);
-  add_action("ctcp", "kline", "CTCP flooding", YES);
+  add_action("ctcp", "kline", "CTCP flooding");
   set_action_type("ctcp", R_CTCP);
-  add_action("spambot", "warn", "Spamming is prohibited", YES);
+  add_action("spambot", "warn", "Spamming is prohibited");
   set_action_type("spambot", R_SPAMBOT);
-  add_action("clone", "kline", "Cloning is prohibited", YES);
+  add_action("clone", "kline", "Cloning is prohibited");
   set_action_type("clone", R_CLONE);
   if (connections[0].socket)
   {

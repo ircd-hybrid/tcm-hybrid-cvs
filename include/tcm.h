@@ -72,7 +72,7 @@ void m_not_admin(int connnum, int argc, char *argv[]);
 #endif
 
 void init_hash_tables(void);
-void add_action(char *name, char *method, char *reason, int report);
+void add_action(char *name, char *method, char *reason);
 void set_action_type(char *name, int type);
 void set_action_reason(char *name, char *reason);
 void set_action_method(char *name, char *method);

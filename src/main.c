@@ -60,7 +60,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.11 2001/10/27 02:45:27 wcampbel Exp $";
+static char *version="$Id: main.c,v 1.12 2001/10/27 15:57:34 db Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -90,17 +90,6 @@ void write_debug();
 #endif
 
 static void init_debug(int sig);
-
-void init_hash_tables(void);
-void add_action(char *name, char *method, char *reason, int report);
-void set_action_type(char *name, int type);
-void set_action_reason(char *name, char *reason);
-void set_action_method(char *name, char *method);
-int action_log(char *name);
-int get_action_type(char *name);
-int get_action(char *name);
-char *get_action_method(char *name);
-char *get_action_reason(char *name);
 
 /*
  * init_hash_tables
@@ -509,14 +498,17 @@ void gracefuldie(int sig, char *file, int line)
   exit(1);
 }
 
-void add_action(char *name, char *method, char *reason, int report)
+void add_action(char *name, char *method, char *reason)
 {
   int i;
-  if (!name) return;
+
+  if (name == NULL)
+    return;
 
   for (i=0;i<MAX_ACTIONS;++i)
     {
-      if (!actions[i].method[0]) break;
+      if (!actions[i].method[0])
+	break;
     }
   if (actions[i].method[0])
     {
@@ -895,15 +887,19 @@ void write_debug()
 #ifdef IRCD_HYBRID
 
 #else
-void m_unregistered(int connnum, int argc, char *argv[]) {
+
+void m_unregistered(int connnum, int argc, char *argv[])
+{
   prnt(connnum, "You have not registered\n");
 }
 
-void m_not_oper(int connnum, int argc, char *argv[]) {
+void m_not_oper(int connnum, int argc, char *argv[])
+{
   prnt(connnum, "Only authorized opers may use this command\n");
 }
 
-void m_not_admin(int connnum, int argc, char *argv[]) {
+void m_not_admin(int connnum, int argc, char *argv[])
+{
   prnt(connnum, "Only authorized admins may use this command\n");
 }
 #endif

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.113 2002/05/27 01:37:41 db Exp $
+ * $Id: bothunt.c,v 1.114 2002/05/27 05:03:14 db Exp $
  */
 
 #include <stdio.h>
@@ -1075,57 +1075,6 @@ onservnotice(int connnum, int argc, char *argv[])
 }
 
 
-/*
- * _onctcp
- * inputs	- nick
- *		- user@host
- * 		- text argument
- * output	- NONE
- *
- */
-
-void
-_onctcp(int connnum, int argc, char *argv[])
-{
-  char *hold, *nick, *port, *a;
-  char *msg=argv[3]+1;
-  char dccbuff[MAX_BUFF];
-
-  nick = argv[0];
-  hold = nick + strlen(nick) + 1;
-  if (strncasecmp(msg,"PING",4) == 0)
-  {
-    notice(nick, "%s", argv[3]);
-    return;
-  }
-  else if (strncasecmp(msg,"VERSION",7) == 0)
-  {
-    notice(nick,"\001VERSION %s(%s)\001",VERSION,SERIALNUM);
-  }
-  else if (strncasecmp(msg, "DCC CHAT", 8) == 0)
-  {
-    /* the -6 saves room for the :port */
-    snprintf(dccbuff, MAX_BUFF-7, "#%s", argv[3]+15);
-    if ((port = strrchr(argv[3], ' ')) == NULL)
-    {
-      notice(nick, "Invalid port specified for DCC CHAT.  Not funny.");
-      return;
-    }
-    ++port;
-    if ((a = strrchr(port, '\001')) != NULL)
-      *a = '\0';
-
-    strcat(dccbuff, ":");
-    strcat(dccbuff, port);
-
-    if (accept_dcc_connection(dccbuff, nick, hold) < 0)
-    {
-      notice(nick, "\001DCC REJECT CHAT chat\001");
-      notice(nick,"DCC CHAT connection failed");
-      return;
-    }
-  }
-}
 
 /*
  * hash_func()

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.32 2002/05/27 02:59:27 db Exp $
+ * $Id: parse.c,v 1.33 2002/05/27 05:03:14 db Exp $
  */
 
 #include <stdio.h>
@@ -35,14 +35,16 @@
 #include "patchlevel.h"
 #include "modules.h"
 
-
 static void do_init(void);
 static void process_server(int conn_num,
 			   char *source, char *function, char *body);
-static void privmsgproc(char *nick,char *userhost, int argc, char *argv[]);
+static void process_privmsg(char *nick, char *userhost,
+			    int argc, char *argv[]);
 static void send_umodes(char *nick);
-static void on_kick(const char *nick);
+static void on_join(char *nick, char *channel);
+static void on_kick(char *nick);
 static void on_nick(char *old_nick, char *new_nick);
+static void on_ctcp(int connnum, int argc, char *argv[]);
 static void wallops(int connnum, int argc, char *argv[]);
 static void on_nick_taken(void);
 static void cannot_join(char *channel);
@@ -71,14 +73,12 @@ parse_server(int conn_num)
     source = buffer+1;
     if ((p = strchr(buffer,' ')) != NULL)
     {
-      *p = '\0';
-      p++;
+      *p++ = '\0';
       function = p;
 
       if ((p = strchr(function, ' ')) != NULL)
       {
-        *p = '\0';
-        p++;
+        *p++ = '\0';
         body = p;
       }
     }
@@ -93,8 +93,7 @@ parse_server(int conn_num)
 
     if ((p = strchr(function,' ')) != NULL)
     {
-      *p = '\0';
-      p++;
+      *p++ = '\0';
       body = p;
     }
     else
@@ -128,8 +127,7 @@ parse_client(int i)
   int argc;
   char *argv[MAX_ARGV];
 
-  argc = parse_args(connections[i].buffer, argv);
-  if (argc == 0)
+  if ((argc = parse_args(connections[i].buffer, argv)) == 0)
     return;
 
   /* command */
@@ -149,7 +147,6 @@ parse_client(int i)
       print_to_socket(connections[i].socket,
 		      "Unknown command [%s]", argv[0] + 1);
 
-    return;
   }
   /* message to partyline */
   else
@@ -166,7 +163,6 @@ parse_client(int i)
       print_to_socket(connections[i].socket,
 		      "You are not +p, not sending to chat line");
   }
-  return;
 }
 
 /*
@@ -304,12 +300,6 @@ process_server(int conn_num, char *source, char *function, char *param)
       argv[argc++] = p;
   }
 
-  if((ptr = find_serv_handler(argv[1])) != NULL)
-  {
-    for(; ptr; ptr = ptr->next_cmd)
-      ptr->handler(argc, argv);
-  }
-		    
   numeric=0;
 
   if (strcmp(argv[1],"PRIVMSG") == 0)
@@ -319,9 +309,9 @@ process_server(int conn_num, char *source, char *function, char *param)
       if ((userhost = strchr(argv[0], '!')) != NULL)
         *userhost++ = '\0';
       if (argv[3][0] == '\001')       /* it's a CTCP something */
-        _onctcp(0, argc, argv);
+        on_ctcp(0, argc, argv);
       else
-        privmsgproc(source,userhost,argc,argv);
+        process_privmsg(source,userhost,argc,argv);
     }
   }
 
@@ -346,7 +336,7 @@ process_server(int conn_num, char *source, char *function, char *param)
   }
   else if ((strcmp(argv[1],"JOIN")) == 0)
   {
-    _onjoin(0, argc, argv);
+    on_join(argv[0], argv[2]);
   }
   else if ((strcmp(argv[1],"KICK")) == 0)
   {
@@ -458,7 +448,7 @@ process_server(int conn_num, char *source, char *function, char *param)
 }
 
 /*
- * privmsgproc()
+ * process_privmsg()
  *
  * inputs       - nick
  *              - user@host string
@@ -467,8 +457,8 @@ process_server(int conn_num, char *source, char *function, char *param)
  * side effects -
  */
 
-void
-privmsgproc(char *nick, char *userhost, int argc, char *argv[])
+static void
+process_privmsg(char *nick, char *userhost, int argc, char *argv[])
 {
   char *user;   /* user portion */
   char *host;   /* host portion */
@@ -565,7 +555,7 @@ send_umodes(char *nick)
 }
 
 /*
- * _onjoin()
+ * on_join()
  *
  * inputs       - nick, channel, as char string pointers
  * output       - NONE
@@ -573,10 +563,8 @@ send_umodes(char *nick)
  */
 
 void
-_onjoin(int connnum, int argc, char *argv[])
+on_join(char *nick, char *channel)
 {
-  char *channel = argv[2];
-  char *nick = argv[0];
   char *p;
 
   if (*channel == ':')
@@ -588,8 +576,7 @@ _onjoin(int connnum, int argc, char *argv[])
   *p = '\0';
   if (strcmp(mynick, nick) == 0)
   {
-    strncpy(mychannel,channel,MAX_CHANNEL-1);
-    mychannel[MAX_CHANNEL-1] = 0;
+    strlcpy(mychannel,channel,MAX_CHANNEL);
   }
 }
 
@@ -602,7 +589,7 @@ _onjoin(int connnum, int argc, char *argv[])
  */
 
 static void
-on_kick(const char *nick)
+on_kick(char *nick)
 {
   if (strcmp(mynick,nick) == 0)
   {
@@ -702,6 +689,57 @@ cannot_join(char *channel)
             config_entries.defchannel_key);
 }
 
+/*
+ * on_ctcp
+ * inputs	- nick
+ *		- user@host
+ * 		- text argument
+ * output	- NONE
+ *
+ */
+
+static void
+on_ctcp(int connnum, int argc, char *argv[])
+{
+  char *hold, *nick, *port, *a;
+  char *msg=argv[3]+1;
+  char dccbuff[MAX_BUFF];
+
+  nick = argv[0];
+  hold = nick + strlen(nick) + 1;
+  if (strncasecmp(msg,"PING",4) == 0)
+  {
+    notice(nick, "%s", argv[3]);
+    return;
+  }
+  else if (strncasecmp(msg,"VERSION",7) == 0)
+  {
+    notice(nick,"\001VERSION %s(%s)\001",VERSION,SERIALNUM);
+  }
+  else if (strncasecmp(msg, "DCC CHAT", 8) == 0)
+  {
+    /* the -6 saves room for the :port */
+    snprintf(dccbuff, MAX_BUFF-7, "#%s", argv[3]+15);
+    if ((port = strrchr(argv[3], ' ')) == NULL)
+    {
+      notice(nick, "Invalid port specified for DCC CHAT.  Not funny.");
+      return;
+    }
+    ++port;
+    if ((a = strrchr(port, '\001')) != NULL)
+      *a = '\0';
+
+    strcat(dccbuff, ":");
+    strcat(dccbuff, port);
+
+    if (accept_dcc_connection(dccbuff, nick, hold) < 0)
+    {
+      notice(nick, "\001DCC REJECT CHAT chat\001");
+      notice(nick,"DCC CHAT connection failed");
+      return;
+    }
+  }
+}
 
 /*
  * check_clones

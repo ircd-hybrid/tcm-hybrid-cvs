@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.82 2003/02/26 10:25:38 bill Exp $
+ * $Id: config.h,v 1.83 2003/02/26 23:20:06 bill Exp $
  */
 
 /*
@@ -23,10 +23,11 @@
 #undef VIRTUAL_IPV6
 
 /*
- * AGGRESSIVE_GECOS, undefine this if you do not want your tcm
- * to perform a WHO on all users, building a gecos listing.
+ * AGGRESSIVE_GECOS, define this if you want your tcm to
+ * perform a WHO on all users, building a gecos listing.
+ * WARNING! This can severly lag your tcm on larger servers
  */
-#define AGGRESSIVE_GECOS
+#undef AGGRESSIVE_GECOS
 
 /*
  * USE_CRYPT, define this if you want your oper passwords to be encrypted

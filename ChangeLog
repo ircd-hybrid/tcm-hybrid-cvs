@@ -1,3 +1,30 @@
+wcampbel    2002/05/17 22:21:16 EDT	(20020518_1)
+
+  Modified files:
+    etc                  tcm.cf 
+    include              stdcmds.h userlist.h 
+    modules              bothunt.c commands.c serverif.c 
+    src                  stdcmds.c userlist.c 
+  Log:
+  Add a mode field to the C: line in tcm.cf, allowing the administrator
+  to specify a set of modes to try to maintain in it's channel.
+  
+  Also, redid how tcm sets modes and keys with a single set_modes() call.
+  
+  Removed set_key() and (almost) all explicit channel MODE commands.
+  
+  Revision  Changes    Path
+  1.24      +7 -0      tcm-hybrid/etc/tcm.cf
+  1.18      +1 -1      tcm-hybrid/include/stdcmds.h
+  1.30      +2 -0      tcm-hybrid/include/userlist.h
+  1.71      +2 -1      tcm-hybrid/modules/bothunt.c
+  1.56      +2 -3      tcm-hybrid/modules/commands.c
+  1.61      +12 -25    tcm-hybrid/modules/serverif.c
+  1.56      +13 -3     tcm-hybrid/src/stdcmds.c
+  1.52      +6 -1      tcm-hybrid/src/userlist.c
+
+
+
 wcampbel    2002/05/17 19:35:35 EDT	(20020518_0)
 
   Modified files:

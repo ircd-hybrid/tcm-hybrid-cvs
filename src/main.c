@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.115 2002/06/21 01:07:43 leeh Exp $ */
+/* $Id: main.c,v 1.116 2002/06/21 12:58:53 leeh Exp $ */
 
 #include "setup.h"
 
@@ -277,8 +277,6 @@ main(int argc, char *argv[])
   tcm_status.am_opered = 0;
   tcm_status.ping_time = 0;
   tcm_status.doing_trace = 0;
-
-  reload_bothunt();
 
   /* enter the main IO loop */
   read_packet();

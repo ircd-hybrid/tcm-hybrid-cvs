@@ -1,3 +1,7 @@
+*** 20011028_4 by wcampbel
+Removed TYPE_TCM and all it's related trash
+
+
 *** 20011028_3 by wcampbel
 Cleaned up more cruft/lint/moldy code/BLOAT
 

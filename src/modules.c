@@ -265,7 +265,6 @@ void add_common_function(int type, void *function)
           return;
           break;
       }
-  printf("done.\n");
 }
 
 #endif

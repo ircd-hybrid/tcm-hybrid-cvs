@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.28 2002/05/25 17:52:04 db Exp $
+ * $Id: tcm_io.c,v 1.29 2002/05/25 19:13:26 jmallett Exp $
  */
 
 #include <stdio.h>
@@ -156,7 +156,8 @@ read_packet(void)
 
       for (i=0; i < MAXDCCCONNS; i++)
       {
-          if (FD_ISSET(connections[i].socket, &readfds))
+          if (connections[i].socket != INVALID &&
+              FD_ISSET(connections[i].socket, &readfds))
           {
 	    if (i == 0)
 	      {

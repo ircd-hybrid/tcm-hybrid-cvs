@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.69 2002/06/06 22:40:31 db Exp $
+ * $Id: parse.c,v 1.70 2002/06/07 10:46:07 leeh Exp $
  */
 
 #include <stdio.h>
@@ -380,8 +380,6 @@ process_server(struct source_client *source_p, char *function, char *param)
       break;
 	
     case RPL_MYINFO:
-      strncpy(config_entries.rserver_name, argv[3], MAX_CONFIG);
-
       if ((p = strstr(argv[4],"hybrid")))
       {
         config_entries.hybrid = YES;

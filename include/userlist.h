@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.66 2002/06/05 12:29:02 leeh Exp $ */
+/* $Id: userlist.h,v 1.67 2002/06/07 10:46:03 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -37,7 +37,6 @@ struct config_list {
   char oper_nick_config[MAX_CONFIG];
   char oper_pass_config[MAX_CONFIG];
   char server_name[MAX_CONFIG];
-  char rserver_name[MAX_CONFIG];
   char server_port[MAX_CONFIG];
   char server_pass[MAX_CONFIG];
   char port_config[MAX_CONFIG];

@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.16 2002/06/05 14:43:38 leeh Exp $
+ * $Id: services.c,v 1.17 2002/06/07 10:46:07 leeh Exp $
  */
 
 #include <stdio.h>
@@ -139,7 +139,7 @@ services_handler(struct source_client *source_p, int argc, char *argv[])
   p -= 2;
 
   if((strncmp(p, "on", 2) == 0) &&
-     (strcasecmp(config_entries.rserver_name, p+3) == 0))
+     (strcasecmp(tcm_status.my_server, p+3) == 0))
   {	    
     nick = argv[3] + 1;
 
@@ -178,7 +178,7 @@ check_services(void *unused)
 {
   privmsg(SERVICES_NICK,"clones %d", SERVICES_CLONE_THRESHOLD);
 #ifdef SERVICES_DRONES
-  privmsg(SERVICES_NICK,"drones %s", config_entries.rserver_name);
+  privmsg(SERVICES_NICK,"drones %s", tcm_status.my_server);
 #endif
 }
 

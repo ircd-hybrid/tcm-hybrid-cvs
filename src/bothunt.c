@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.152 2002/06/05 15:10:25 leeh Exp $
+ * $Id: bothunt.c,v 1.153 2002/06/07 10:46:06 leeh Exp $
  */
 
 #include <stdio.h>
@@ -316,7 +316,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   char *p, *message;
   char *q = NULL;
 
-  if(strcasecmp(source_p->name, config_entries.rserver_name) != 0)
+  if(strcasecmp(source_p->name, tcm_status.my_server) != 0)
     return;
 
   p = message = argv[argc-1];
@@ -646,7 +646,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     *p = '\0';
     target = p+9;
 
-    if (strcasecmp(config_entries.rserver_name,from_server) == 0)
+    if (strcasecmp(tcm_status.my_server, from_server) == 0)
     {
       send_to_all(FLAGS_WARN,
 		   "*** Flooder %s (%s@%s) target: %s",
@@ -689,8 +689,8 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* *** Banned: this is a test (2002/04/11 15.10) */
   case BANNED:
     send_to_all(FLAGS_ALL, "I am banned from %s.  Exiting..", 
-		 config_entries.rserver_name[0] ?
-		 config_entries.rserver_name : config_entries.server_name);
+		 tcm_status.my_server ?
+		 tcm_status.my_server : config_entries.server_name);
     tcm_log(L_ERR, "%s", "onservnotice Banned from server.  Exiting.");
     exit(-1);
     /* NOT REACHED */
@@ -719,8 +719,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     *q = '\0';
     q+=9;
 
-    if (strcasecmp(from_server, config_entries.rserver_name) &&
-        strcasecmp(from_server, config_entries.server_name))
+    if (strcasecmp(from_server, tcm_status.my_server))
       return;
 
     send_to_all(FLAGS_WARN, "Possible drone flooder: %s!%s@%s target: %s",

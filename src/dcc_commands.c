@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.121 2002/06/05 12:29:05 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.122 2002/06/07 10:46:06 leeh Exp $ */
 
 #include "setup.h"
 
@@ -448,7 +448,7 @@ void
 m_info(int connnum, int argc, char *argv[])
 {
   print_to_socket(connections[connnum].socket, "real server name [%s]",
-       config_entries.rserver_name);
+                  tcm_status.my_server);
   if (config_entries.hybrid)
     print_to_socket(connections[connnum].socket, "Hybrid server version %d",
          config_entries.hybrid_version);

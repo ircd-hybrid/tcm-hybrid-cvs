@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.112 2002/06/06 22:40:31 db Exp $ */
+/* $Id: main.c,v 1.113 2002/06/07 10:46:06 leeh Exp $ */
 
 #include "setup.h"
 
@@ -275,6 +275,7 @@ main(int argc, char *argv[])
   /* XXX move into init_tcm_status() later */
   tcm_status.my_class[0] = '\0';
   tcm_status.my_nick[0] = '\0';
+  tcm_status.my_server[0] = '\0';
   tcm_status.am_opered = 0;
   tcm_status.ping_time = 0;
   tcm_status.doing_trace = 0;

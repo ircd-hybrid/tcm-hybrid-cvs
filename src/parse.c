@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.3 2002/05/23 08:57:51 einride Exp $
+ * $Id: parse.c,v 1.4 2002/05/23 09:50:59 leeh Exp $
  */
 
 #include <stdio.h>
@@ -19,22 +19,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#ifdef HAVE_SYS_STREAM_H
-# include <sys/stream.h>
-#endif
-
-#ifdef HAVE_SYS_SOCKETVAR_H
-# include <sys/socketvar.h>
-#endif
-
-#ifdef AIX
-# include <sys/select.h>
-#endif
-
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <fcntl.h>
 #include "config.h"
 #include "tcm.h"
 #include "event.h"

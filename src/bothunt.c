@@ -1,11 +1,7 @@
-/*
+/* bothunt.c
  *
+ * $Id: bothunt.c,v 1.84 2002/05/23 09:50:59 leeh Exp $
  */
-
-
-/* $Id: bothunt.c,v 1.83 2002/05/23 06:41:55 db Exp $ */
-
-#include "setup.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,20 +12,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
-
-#ifdef HAVE_SYS_STREAM_H
-# include <sys/stream.h>
-#endif
-
-#ifdef HAVE_SYS_SOCKETVAR_H
-#include <sys/socketvar.h>
-#endif
-
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 #include <time.h>
 
+#include "setup.h"
 #include "config.h"
 #include "tcm.h"
 #include "stdcmds.h"
@@ -48,8 +33,6 @@
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
-
-char *_version="20012009";
 
 static char* find_domain( char* domain );
 static void  check_nick_flood( char *snotice );
@@ -76,7 +59,8 @@ static void check_reconnect_clones(char *);
 int act_cflood, act_vclone, act_flood, act_link,
   act_bot, act_spambot, act_clone, act_rclone;
 
-struct msg_to_action {
+struct msg_to_action
+{
   char *msg_to_mon;
   int  action;
 };
@@ -85,7 +69,6 @@ struct msg_to_action msgs_to_mon[] = {
   {"Client connecting: ", CONNECT},
   {"Client exiting: ", EXITING},
   {"Unauthorized ", UNAUTHORIZED},
-  /* lee smells like cheese.  filthy brit. */
   {"Unauthorised client connection", UNAUTHORIZED},
   {"Nick change:", NICKCHANGE},
   {"Nick flooding detected by:", CS_NICKFLOODING},

@@ -1,3 +1,39 @@
+bill        2003/05/31 21:19:09 EDT	(20030601_0)
+
+  Modified files:
+    include              config.h skline.h 
+    src                  .depend actions.c bothunt.c client_list.c 
+                         hash.c main.c parse.c respond.c 
+                         seedrand.c skline.c userlist.c 
+    tools                mkpasswd.c 
+  Added files:
+    include              respond.h seedrand.h 
+  Log:
+  - added respond.h and seedrand.h to fix some compiler warnings
+  - various cleanups, removed some un-used variables
+  - updated depend files
+  - always look for gecos, unless we're running hybrid and a version < 7
+  
+  Revision  Changes    Path
+  1.86      +1 -2      tcm-hybrid/include/config.h
+  1.1       +14 -0     tcm-hybrid/include/respond.h (new)
+  1.1       +14 -0     tcm-hybrid/include/seedrand.h (new)
+  1.2       +5 -0      tcm-hybrid/include/skline.h
+  1.39      +15 -9     tcm-hybrid/src/.depend
+  1.52      +1 -0      tcm-hybrid/src/actions.c
+  1.222     +2 -35     tcm-hybrid/src/bothunt.c
+  1.6       +29 -23    tcm-hybrid/src/client_list.c
+  1.69      +0 -1      tcm-hybrid/src/hash.c
+  1.134     +2 -0      tcm-hybrid/src/main.c
+  1.88      +1 -2      tcm-hybrid/src/parse.c
+  1.2       +5 -0      tcm-hybrid/src/respond.c
+  1.6       +40 -15    tcm-hybrid/src/seedrand.c
+  1.2       +1 -0      tcm-hybrid/src/skline.c
+  1.150     +1 -0      tcm-hybrid/src/userlist.c
+  1.3       +1 -2      tcm-hybrid/tools/mkpasswd.c
+
+
+
 bill        2003/05/16 12:23:32 EDT	(20030516_0)
 
   Modified files:

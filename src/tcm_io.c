@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.42 2002/05/26 07:26:07 db Exp $
+ * $Id: tcm_io.c,v 1.43 2002/05/26 07:30:54 db Exp $
  */
 
 #include <stdio.h>
@@ -142,10 +142,6 @@ read_packet(void)
 
     if (select_result > 0)
     {
-#if 0
-      _scontinuous(0, 0, NULL);
-#endif
-
       for (i=0; i < MAXDCCCONNS; i++)
       {
 	if (connections[i].state != S_IDLE &&
@@ -182,9 +178,6 @@ read_packet(void)
                   {
 		    if (connections[i].io_close_function != NULL)
 		      (connections[i].io_close_function)(i);
-#if 0
-                    close_connection(i);
-#endif
                   }
               }
             else if (nread > 0)
@@ -1083,9 +1076,11 @@ init_connections(void)
     {
       connections[i].socket = INVALID;
       connections[i].state = S_IDLE;
+      connections[i].user_state = 0;
       connections[i].user[0] = '\0';
       connections[i].host[0] = '\0';
       connections[i].nick[0] = '\0';
+      connections[i].ip[0] = '\0';
       connections[i].registered_nick[0] = '\0';
     }
 }

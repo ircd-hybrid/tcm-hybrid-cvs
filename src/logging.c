@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.54 2002/12/10 16:35:45 bill Exp $
+ * $Id: logging.c,v 1.55 2002/12/30 07:31:36 bill Exp $
  *
  * - db
  */
@@ -269,8 +269,10 @@ log_failure(struct user_entry *userinfo)
     {
       ptr = (struct failrec *)xmalloc(sizeof(struct failrec));
 
-      strlcpy(ptr->username, userinfo->username, MAX_USER);
-      strlcpy(ptr->host, userinfo->host, MAX_HOST);
+      strlcpy(ptr->username, userinfo->username,
+              sizeof(ptr->username));
+      strlcpy(ptr->host, userinfo->host,
+              sizeof(ptr->host));
       ptr->failcount = 0;
       ptr->next = failures;
       failures = ptr;

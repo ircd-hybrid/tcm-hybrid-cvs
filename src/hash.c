@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.59 2002/12/29 09:41:20 bill Exp $
+ * $Id: hash.c,v 1.60 2002/12/30 07:31:36 bill Exp $
  */
 
 #include <stdio.h>
@@ -278,17 +278,24 @@ add_user_host(struct user_entry *user_info, int fromtrace)
   new_user = (struct user_entry *)xmalloc(sizeof(struct user_entry));
   memset(new_user, 0, sizeof(struct user_entry));
 
-  strlcpy(new_user->nick, user_info->nick, MAX_NICK);
-  strlcpy(new_user->username, user_info->username, MAX_USER);
-  strlcpy(new_user->host, user_info->host, MAX_HOST);
-  strlcpy(new_user->class, user_info->class, MAX_CLASS);
+  strlcpy(new_user->nick, user_info->nick,
+          sizeof(new_user->nick));
+  strlcpy(new_user->username, user_info->username,
+          sizeof(new_user->username));
+  strlcpy(new_user->host, user_info->host,
+          sizeof(new_user->host));
+  strlcpy(new_user->class, user_info->class,
+          sizeof(new_user->class));
 
 #ifdef VIRTUAL
   if(user_info->ip_host[0] != '\0')
-    strlcpy(new_user->ip_host, user_info->ip_host, MAX_IP);
+    strlcpy(new_user->ip_host, user_info->ip_host,
+            sizeof(new_user->ip_host));
   else
-    strcpy(new_user->ip_host,"0.0.0.0");
-  strlcpy(new_user->ip_class_c, new_user->ip_host, MAX_IP);
+    strlcpy(new_user->ip_host, "0.0.0.0",
+            sizeof(new_user->ip_host));
+  strlcpy(new_user->ip_class_c, new_user->ip_host,
+          sizeof(new_user->ip_class_c));
   make_ip_class_c(new_user->ip_class_c);
 #endif
 
@@ -302,12 +309,14 @@ add_user_host(struct user_entry *user_info, int fromtrace)
    * server.
    */
   if (fromtrace == NO)
-    strlcpy(new_user->gecos, user_info->gecos, MAX_GECOS);
+    strlcpy(new_user->gecos, user_info->gecos,
+            sizeof(new_user->gecos));
 
   /* Determine the domain name */
   domain = find_domain(user_info->host);
 
-  strlcpy(new_user->domain, domain, MAX_HOST);
+  strlcpy(new_user->domain, domain,
+          sizeof(new_user->domain));
 
   /* Add it to the hash tables */
   add_to_hash_table(user_table, new_user->username, new_user);
@@ -403,9 +412,11 @@ remove_user_host(struct user_entry *user_info)
 
 #ifdef VIRTUAL
   if(user_info->ip_host[0])
-    strlcpy(ip_class_c, user_info->ip_host, MAX_IP);
+    strlcpy(ip_class_c, user_info->ip_host,
+            sizeof(ip_class_c));
   else
-    strcpy(ip_class_c, "0.0.0.0");
+    strlcpy(ip_class_c, "0.0.0.0",
+            sizeof(ip_class_c));
   make_ip_class_c(ip_class_c);
   if(!remove_from_hash_table(ip_table, ip_class_c,
 			      user_info->host, user_info->username, 
@@ -889,7 +900,8 @@ update_nick(char *user, char *host, char *old_nick, char *new_nick)
        (strcmp(find->info->host,host) == 0) &&
        (strcmp(find->info->nick, old_nick) == 0))
     {
-      strlcpy(find->info->nick, new_nick, MAX_NICK);
+      strlcpy(find->info->nick, new_nick,
+              sizeof(find->info->nick));
       return;
     }
   }

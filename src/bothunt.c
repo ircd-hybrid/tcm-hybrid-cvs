@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.208 2002/12/29 09:41:20 bill Exp $
+ * $Id: bothunt.c,v 1.209 2002/12/30 07:31:36 bill Exp $
  */
 
 #include <stdio.h>
@@ -179,7 +179,7 @@ on_trace_user(int argc, char *argv[])
   if (argv[6][0] == '[')
   {
     ip_ptr = argv[7]+1;
-    strlcpy(userinfo.nick, argv[5], MAX_NICK);
+    strlcpy(userinfo.nick, argv[5], sizeof(userinfo.nick));
     chopuh(IS_FROM_TRACE, argv[6], &userinfo);
   }
   else
@@ -187,18 +187,19 @@ on_trace_user(int argc, char *argv[])
     ip_ptr = argv[6]+1;
     chopuh(IS_FROM_TRACE, argv[5], &userinfo);
     /* we can do this because chopuh() has put a \0 after the nick */ 
-    strlcpy(userinfo.nick, argv[5], MAX_NICK);
+    strlcpy(userinfo.nick, argv[5], sizeof(userinfo.nick));
   }
 
   if ((right_bracket_ptr = strrchr(ip_ptr, ')')) == NULL)
     return; 
   *right_bracket_ptr = '\0';
 
-  strlcpy(userinfo.class, argv[4], MAX_CLASS);
-  strlcpy(userinfo.ip_host, ip_ptr, MAX_IP);
+  strlcpy(userinfo.class, argv[4], sizeof(userinfo.class));
+  strlcpy(userinfo.ip_host, ip_ptr, sizeof(userinfo.ip_host));
 
   if (!strcmp(userinfo.nick, tcm_status.my_nick))
-    strlcpy(tcm_status.my_class, userinfo.class, MAX_CLASS);
+    strlcpy(tcm_status.my_class, userinfo.class,
+            sizeof(tcm_status.my_class));
 
   add_user_host(&userinfo, YES);
 }
@@ -494,12 +495,12 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *q++ = '\0';
 
-    strlcpy(userinfo.nick, p, MAX_NICK);
+    strlcpy(userinfo.nick, p, sizeof(userinfo.nick));
 
     if ((p = get_user_host(&user, &host, q)) == NULL)
       return;
-    strlcpy(userinfo.username, user, MAX_USER);
-    strlcpy(userinfo.host, host, MAX_HOST);
+    strlcpy(userinfo.username, user, sizeof(userinfo.username));
+    strlcpy(userinfo.host, host, sizeof(userinfo.host));
 
     if ((q = strchr(p, '[')) == NULL)
       return;
@@ -510,7 +511,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *q++ = '\0';
 
-    strlcpy(userinfo.ip_host, p, MAX_IP);
+    strlcpy(userinfo.ip_host, p, sizeof(userinfo.ip_host));
 
     if ((p = strchr(q, '{')) == NULL)
       return;
@@ -518,7 +519,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((q = strchr(p, '}')) == NULL)
       return;
     *q = '\0';
-    strlcpy(userinfo.class, p, MAX_CLASS);
+    strlcpy(userinfo.class, p, sizeof(userinfo.class));
 
     if (config_entries.hybrid == YES && config_entries.hybrid_version >= 7)
     {
@@ -526,7 +527,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       if ((p = strrchr(q, ']')) == NULL)
         return;
       *p = '\0';
-      strlcpy(userinfo.gecos, q, MAX_GECOS);
+      strlcpy(userinfo.gecos, q, sizeof(userinfo.gecos));
     }
     else
     {
@@ -545,11 +546,11 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *q++ = '\0';
 
-    strlcpy(userinfo.nick, p, MAX_NICK);
+    strlcpy(userinfo.nick, p, sizeof(userinfo.nick));
     if ((p = get_user_host(&user, &host, q)) == NULL)
       return;
-    strlcpy(userinfo.username, user, MAX_USER);
-    strlcpy(userinfo.host, host, MAX_HOST);
+    strlcpy(userinfo.username, user, sizeof(userinfo.username));
+    strlcpy(userinfo.host, host, sizeof(userinfo.host));
 
     if ((q = strrchr(p, '[')) == NULL)
       return;
@@ -559,9 +560,9 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *p = '\0';
 
-    strlcpy(userinfo.ip_host, q, MAX_IP);
+    strlcpy(userinfo.ip_host, q, sizeof(userinfo.ip_host));
 #ifdef VIRTUAL
-    strlcpy(userinfo.ip_class_c, q, MAX_IP);
+    strlcpy(userinfo.ip_class_c, q, sizeof(userinfo.ip_class_c));
 #endif
 
     remove_user_host(&userinfo);
@@ -936,9 +937,12 @@ connect_flood_notice(char *snotice, char *reason)
     {
       if (first_empty_entry >= 0)
 	{
-	  strlcpy(connect_flood[first_empty_entry].user, user, MAX_USER);
-	  strlcpy(connect_flood[first_empty_entry].host, host, MAX_HOST);
-          strlcpy(connect_flood[first_empty_entry].ip, p, MAX_HOST);
+	  strlcpy(connect_flood[first_empty_entry].user, user, 
+                  sizeof(connect_flood[first_empty_entry].user));
+	  strlcpy(connect_flood[first_empty_entry].host, host,
+                  sizeof(connect_flood[first_empty_entry].host));
+          strlcpy(connect_flood[first_empty_entry].ip, p,
+                  sizeof(connect_flood[first_empty_entry].ip));
 	  connect_flood[first_empty_entry].last_connect = current_time;
 	  connect_flood[first_empty_entry].connect_count = 0;
 	}
@@ -1026,8 +1030,10 @@ link_look_notice(char *snotice)
 
   if (!found_entry && first_empty_entry >= 0)
   {
-    strlcpy(link_look[first_empty_entry].user,user,MAX_USER);
-    strlcpy(link_look[first_empty_entry].host,host,MAX_HOST);
+    strlcpy(link_look[first_empty_entry].user, user,
+            sizeof(link_look[first_empty_entry].user));
+    strlcpy(link_look[first_empty_entry].host, host,
+            sizeof(link_look[first_empty_entry].host));
     link_look[first_empty_entry].last_link_look = current_time;
     link_look[first_empty_entry].link_look_count = 1;
   }
@@ -1082,8 +1088,10 @@ jupe_joins_notice(char *nick, char *user, char *host, char *channel)
 
   if ((found_entry == NO) && (first_empty >= 0))
   {
-    strlcpy(jupe_joins[first_empty].user, user, MAX_USER);
-    strlcpy(jupe_joins[first_empty].host, host, MAX_HOST);
+    strlcpy(jupe_joins[first_empty].user, user,
+            sizeof(jupe_joins[first_empty].user));
+    strlcpy(jupe_joins[first_empty].host, host,
+            sizeof(jupe_joins[first_empty].host));
     jupe_joins[first_empty].last_jupe_join = current_time;
     jupe_joins[first_empty].join_count = 1;
   }
@@ -1266,7 +1274,8 @@ add_to_nick_change_table(char *user, char *host,char *last_nick)
 	      (strcasecmp(nick_changes[i].host, host) == 0))
 	  {
 	    nick_changes[i].last_nick_change = current_time;
-	    (void)strlcpy(nick_changes[i].last_nick, last_nick, MAX_NICK);
+	    strlcpy(nick_changes[i].last_nick, last_nick,
+                    sizeof(nick_changes[i].last_nick));
 	    nick_changes[i].nick_change_count++;
 	  }
 

@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.20 2002/09/26 16:17:48 bill Exp $
+ * $Id: dcc.c,v 1.21 2002/12/30 07:31:36 bill Exp $
  */
 
 #include <stdio.h>
@@ -80,9 +80,12 @@ initiate_dcc_chat(struct source_client *source_p)
     }
 
   notice(source_p->name, "Chat requested");
-  strlcpy(new_conn->nick, source_p->name, MAX_NICK);
-  strlcpy(new_conn->username, source_p->username, MAX_USER);
-  strlcpy(new_conn->host, source_p->host, MAX_HOST);
+  strlcpy(new_conn->nick, source_p->name,
+          sizeof(new_conn->nick));
+  strlcpy(new_conn->username, source_p->username,
+          sizeof(new_conn->username));
+  strlcpy(new_conn->host, source_p->host,
+          sizeof(new_conn->host));
 
   if ((new_conn->socket = socket(PF_INET,SOCK_STREAM,0)) < 0)
   {
@@ -162,9 +165,12 @@ accept_dcc_connection(struct source_client *source_p,
     }
 
   new_conn->set_modes = 0;
-  strlcpy(new_conn->nick, source_p->name, MAX_NICK);
-  strlcpy(new_conn->username, source_p->username, MAX_USER);
-  strlcpy(new_conn->host, source_p->host, MAX_HOST);
+  strlcpy(new_conn->nick, source_p->name,
+          sizeof(new_conn->nick));
+  strlcpy(new_conn->username, source_p->username,
+          sizeof(new_conn->username));
+  strlcpy(new_conn->host, source_p->host,
+          sizeof(new_conn->host));
   new_conn->last_message_time = current_time;
 
   (void)sscanf(host_ip, "%lu", &remoteaddr);

@@ -1,4 +1,4 @@
-/* $Id: serv_commands.c,v 1.6 2002/09/24 15:22:36 bill Exp $ */
+/* $Id: serv_commands.c,v 1.7 2002/12/30 07:31:36 bill Exp $ */
 
 #include "setup.h"
 
@@ -90,7 +90,8 @@ ms_join(struct source_client *source_p, int argc, char *argv[])
     argv[2]++;
 
   if(strcmp(tcm_status.my_nick, source_p->name) == 0)
-    strlcpy(tcm_status.my_channel, argv[2], MAX_CHANNEL);
+    strlcpy(tcm_status.my_channel, argv[2],
+            sizeof(tcm_status.my_channel));
 }
 
 void

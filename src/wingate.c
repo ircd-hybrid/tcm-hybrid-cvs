@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.63 2002/06/24 02:30:39 db Exp $ */
+/* $Id: wingate.c,v 1.64 2002/12/30 07:31:36 bill Exp $ */
 
 
 #include <netdb.h>
@@ -131,10 +131,14 @@ wingate_start_test(struct user_entry *info_p)
 
   n_open_wingate_fds++;
 
-  strlcpy(found_p->username, info_p->username, MAX_USER);
-  strlcpy(found_p->host, info_p->host, MAX_HOST);
-  strlcpy(found_p->nick, info_p->nick, MAX_NICK);
-  strlcpy(found_p->ip, info_p->ip_host, MAX_IP);
+  strlcpy(found_p->username, info_p->username,
+          sizeof(found_p->username));
+  strlcpy(found_p->host, info_p->host,
+          sizeof(found_p->host));
+  strlcpy(found_p->nick, info_p->nick,
+          sizeof(found_p->nick));
+  strlcpy(found_p->ip, info_p->ip_host,
+          sizeof(found_p->ip));
   found_p->io_read_function = read_wingate;
   found_p->io_write_function = NULL;
   found_p->io_close_function = NULL;
@@ -181,10 +185,14 @@ socks_start_test(struct user_entry *info_p, int socksversion)
   else
     return;
 
-  strlcpy(found_p->username, info_p->username, MAX_USER);
-  strlcpy(found_p->host, info_p->host, MAX_HOST);
-  strlcpy(found_p->nick, info_p->nick, MAX_NICK);
-  strlcpy(found_p->ip, info_p->ip_host, MAX_IP);
+  strlcpy(found_p->username, info_p->username,
+          sizeof(found_p->username));
+  strlcpy(found_p->host, info_p->host,
+          sizeof(found_p->host));
+  strlcpy(found_p->nick, info_p->nick,
+          sizeof(found_p->nick));
+  strlcpy(found_p->ip, info_p->ip_host,
+          sizeof(found_p->ip));
   found_p->io_read_function = NULL;
   found_p->io_write_function = NULL;
   found_p->io_close_function = NULL;
@@ -215,10 +223,14 @@ squid_start_test(struct user_entry *info_p, int port)
   n_open_squid_fds++;
 
   found_p->curr_state = SQUID_CONNECTING;
-  strlcpy(found_p->username, info_p->username, MAX_USER);
-  strlcpy(found_p->host, info_p->host, MAX_HOST);
-  strlcpy(found_p->nick, info_p->nick, MAX_NICK);
-  strlcpy(found_p->ip, info_p->ip_host, MAX_IP);
+  strlcpy(found_p->username, info_p->username,
+          sizeof(found_p->username));
+  strlcpy(found_p->host, info_p->host,
+          sizeof(found_p->host));
+  strlcpy(found_p->nick, info_p->nick,
+          sizeof(found_p->nick));
+  strlcpy(found_p->ip, info_p->ip_host,
+          sizeof(found_p->ip));
   found_p->io_read_function = read_squid;
   found_p->io_write_function = NULL; 
   found_p->io_close_function = NULL;

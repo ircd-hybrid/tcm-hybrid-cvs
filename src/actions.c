@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.43 2002/12/19 02:26:07 bill Exp $
+ * $Id: actions.c,v 1.44 2002/12/30 07:31:36 bill Exp $
  */
 
 #include "setup.h"
@@ -325,22 +325,22 @@ handle_action(int actionid, char *g_nick, char *g_username,
    */
   if (g_nick != NULL)
   {
-    strlcpy(l_nick, g_nick, MAX_NICK);
+    strlcpy(l_nick, g_nick, sizeof(l_nick));
     nick = l_nick;
   }
   if (g_username != NULL)
   {
-    strlcpy(l_username, g_username, MAX_USER);
+    strlcpy(l_username, g_username, sizeof(l_username));
     username = l_username;
   }
   if (g_host != NULL)
   {
-    strlcpy(l_host, g_host, MAX_HOST);
+    strlcpy(l_host, g_host, sizeof(l_host));
     host = l_host;
   }
   if (g_ip != NULL)
   {
-    strlcpy(l_ip, g_ip, MAX_HOST);
+    strlcpy(l_ip, g_ip, sizeof(l_ip));
     ip = l_ip;
   }
 
@@ -445,7 +445,7 @@ handle_action(int actionid, char *g_nick, char *g_username,
 				 actions[actionid].reason : "Automated K-Line");
 		  return;
 		}
-              strlcpy(l_ip, userptr->ip_host, MAX_HOST);
+              strlcpy(l_ip, userptr->ip_host, sizeof(l_ip));
               ip = l_ip;
 	    }
 

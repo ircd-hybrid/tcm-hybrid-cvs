@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.25 2002/09/20 04:22:42 bill Exp $
+ * $Id: clones.c,v 1.26 2002/12/30 07:31:36 bill Exp $
  */
 
 #include <assert.h>
@@ -240,9 +240,11 @@ check_reconnect_clones(char *host, char *ip)
   {
     if (!reconnect_clone[i].host[0])
     {
-      strlcpy(reconnect_clone[i].host, host, MAX_HOST);
+      strlcpy(reconnect_clone[i].host, host,
+              sizeof(reconnect_clone[i].host));
       if (ip != NULL)
-        strlcpy(reconnect_clone[i].ip, ip, MAX_HOST);
+        strlcpy(reconnect_clone[i].ip, ip,
+                sizeof(reconnect_clone[i].ip));
       reconnect_clone[i].first = current_time;
       reconnect_clone[i].count = 1;
     }

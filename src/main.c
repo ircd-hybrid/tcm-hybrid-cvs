@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.129 2002/09/20 04:22:43 bill Exp $ */
+/* $Id: main.c,v 1.130 2002/12/30 07:31:36 bill Exp $ */
 
 #include "setup.h"
 
@@ -258,22 +258,18 @@ main(int argc, char *argv[])
   tcm_status.n_of_fds_open=0;
   tcm_status.max_fds = 128; 	/* XXX */
 
-  if(connect_to_server(config_entries.server_name,
-		       atoi(config_entries.server_port)) == NULL)
-    {
-      tcm_log(L_ERR, "Could not connect to server at startup");
-      exit(1);
-    }
+  if (connect_to_server(config_entries.server_name,
+                        atoi(config_entries.server_port)) == NULL)
+  {
+    tcm_log(L_ERR, "Could not connect to server at startup");
+    exit(1);
+  }
 
-  if(config_entries.virtual_host_config[0] != '\0')
-    {
-      strlcpy(tcm_status.my_hostname, config_entries.virtual_host_config,
-	      MAX_HOST);
-    }
+  if (config_entries.virtual_host_config[0] != '\0')
+    strlcpy(tcm_status.my_hostname, config_entries.virtual_host_config,
+            sizeof(tcm_status.my_hostname));
   else
-    {
-      gethostname(tcm_status.my_hostname,MAX_HOST-1);
-    }
+    gethostname(tcm_status.my_hostname, MAX_HOST-1);
 
   /* enter the main IO loop */
   read_packet();

@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.146 2002/12/29 09:41:20 bill Exp $
+ * $Id: userlist.c,v 1.147 2002/12/30 07:31:36 bill Exp $
  */
 
 #include <errno.h>
@@ -464,7 +464,8 @@ load_config_file(char *file_name)
   config_entries.dfltnick[0] = '\0';
   config_entries.email_config[0] = '\0';
 
-  strlcpy(config_entries.userlist_config, USERLIST_FILE, MAX_CONFIG);
+  strlcpy(config_entries.userlist_config, USERLIST_FILE,
+          sizeof(config_entries.userlist_config));
 
   if((fp = fopen(file_name,"r")) == NULL)
   {
@@ -502,21 +503,25 @@ load_config_file(char *file_name)
       break;
 
     case 'e':case 'E':
-      strlcpy(config_entries.email_config, argv[1], MAX_CONFIG);
+      strlcpy(config_entries.email_config, argv[1],
+              sizeof(config_entries.email_config));
       break;
 
     case 'f':case 'F':
       if (config_entries.debug && outfile)
 	(void)fprintf(outfile, "tcm.pid file name = [%s]\n", argv[1]);
-      strlcpy(config_entries.tcm_pid_file, argv[1], MAX_CONFIG);
+      strlcpy(config_entries.tcm_pid_file, argv[1],
+              sizeof(config_entries.tcm_pid_file));
       break;
 
     case 'l':case 'L':
-      strlcpy(config_entries.userlist_config, argv[1], MAX_CONFIG);
+      strlcpy(config_entries.userlist_config, argv[1],
+              sizeof(config_entries.userlist_config));
       break;
 
     case 'm':case 'M':
-      strlcpy(config_entries.statspmsg, argv[1], sizeof(config_entries.statspmsg));
+      strlcpy(config_entries.statspmsg, argv[1],
+              sizeof(config_entries.statspmsg));
       for ( a = 2 ; a < argc ; ++a )
       {
 	strcat(config_entries.statspmsg, ":");
@@ -550,39 +555,47 @@ load_config_file(char *file_name)
       if (config_entries.debug && outfile)
 	fprintf(outfile, "user name = [%s]\n", argv[1]);
 
-      strlcpy(config_entries.username_config, argv[1], MAX_CONFIG);
+      strlcpy(config_entries.username_config, argv[1],
+              sizeof(config_entries.username_config));
       break;
 
     case 'v':case 'V':
       if (config_entries.debug && outfile)
 	fprintf(outfile, "virtual host name = [%s]\n", argv[1]);
 
-      strlcpy(config_entries.virtual_host_config, argv[1], MAX_CONFIG);
+      strlcpy(config_entries.virtual_host_config, argv[1],
+              sizeof(config_entries.virtual_host_config));
       break;
 
     case 's':case 'S':
       if (config_entries.debug && outfile)
 	fprintf(outfile, "server = [%s]\n", argv[1]);
-      strlcpy(config_entries.server_name,argv[1],MAX_CONFIG);
-      strlcpy(tcm_status.my_server, argv[1], MAX_HOST);
+      strlcpy(config_entries.server_name, argv[1],
+              sizeof(config_entries.server_name));
+      strlcpy(tcm_status.my_server, argv[1],
+              sizeof(tcm_status.my_server));
 
       if (argc > 2)
-	strlcpy(config_entries.server_port, argv[2], MAX_CONFIG);
+	strlcpy(config_entries.server_port, argv[2],
+                sizeof(config_entries.server_port));
 
       if (argc > 3)
-	strlcpy(config_entries.server_pass, argv[3], MAX_CONFIG);
+	strlcpy(config_entries.server_pass, argv[3],
+                sizeof(config_entries.server_pass));
       break;
 
     case 'n':case 'N':
       if (config_entries.debug && outfile)
 	fprintf(outfile, "nick for tcm = [%s]\n", argv[1]);
-      strlcpy(config_entries.dfltnick, argv[1], MAX_NICK);
+      strlcpy(config_entries.dfltnick, argv[1],
+              sizeof(config_entries.dfltnick));
       break;
 
     case 'i':case 'I':
       if (config_entries.debug && outfile)
 	fprintf(outfile, "IRCNAME = [%s]\n", argv[1]);
-      strlcpy(config_entries.ircname_config, argv[1], MAX_CONFIG);
+      strlcpy(config_entries.ircname_config, argv[1],
+              sizeof(config_entries.ircname_config));
       break;
 
     case 'c':case 'C':
@@ -590,16 +603,18 @@ load_config_file(char *file_name)
 	fprintf(outfile, "Channel = [%s]\n", argv[1]);
 
       if (argc > 2)
-	strlcpy(config_entries.channel_key, argv[2], MAX_CONFIG);
+	strlcpy(config_entries.channel_key, argv[2],
+                sizeof(config_entries.channel_key));
       else
 	config_entries.channel_key[0] = '\0';
 
-      strlcpy(config_entries.channel, argv[1], MAX_CHANNEL);
+      strlcpy(config_entries.channel, argv[1],
+              sizeof(config_entries.channel));
       break;
 
     case 'w': case 'W':
       strlcpy(wingate_class_list[wingate_class_list_index], argv[1],
-	      MAX_CLASS);
+              sizeof(wingate_class_list[wingate_class_list_index]));
       wingate_class_list_index++;
       break;
 

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.85 2002/12/29 09:41:20 bill Exp $
+ * $Id: parse.c,v 1.86 2002/12/30 07:31:36 bill Exp $
  */
 
 #include <stdio.h>
@@ -361,8 +361,10 @@ process_server(struct source_client *source_p, char *function, char *param)
       if((p = strchr(q, '!')) != NULL)
         *p = '\0';
 
-      strlcpy(tcm_status.my_nick, q, MAX_NICK);
-      strlcpy(tcm_status.my_server, source_p->name, MAX_HOST);
+      strlcpy(tcm_status.my_nick, q,
+              sizeof(tcm_status.my_nick));
+      strlcpy(tcm_status.my_server, source_p->name,
+              sizeof(tcm_status.my_server));
       break;
 
     case RPL_STATSYLINE:

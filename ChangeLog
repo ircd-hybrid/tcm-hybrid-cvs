@@ -1,3 +1,25 @@
+leeh        2002/06/22 14:21:51 EDT	(20020622_7)
+
+  Modified files:
+    include              tcm_io.h userlist.h 
+    src                  dcc.c dcc_commands.c logging.c main.c 
+                         parse.c tcm_io.c userlist.c 
+  Log:
+  - redo the userlist stuff, again.
+  
+  Revision  Changes    Path
+  1.40      +1 -0      tcm-hybrid/include/tcm_io.h
+  1.81      +0 -4      tcm-hybrid/include/userlist.h
+  1.16      +17 -31    tcm-hybrid/src/dcc.c
+  1.135     +14 -20    tcm-hybrid/src/dcc_commands.c
+  1.50      +1 -1      tcm-hybrid/src/logging.c
+  1.120     +0 -2      tcm-hybrid/src/main.c
+  1.78      +3 -3      tcm-hybrid/src/parse.c
+  1.91      +8 -15     tcm-hybrid/src/tcm_io.c
+  1.132     +100 -132  tcm-hybrid/src/userlist.c
+
+
+
 db          2002/06/22 10:04:50 EDT	(20020622_6)
 
   Modified files:

@@ -1,3 +1,35 @@
+db          2002/06/23 17:09:21 EDT	(20020623_7)
+
+  Modified files:
+    include              tcm_io.h 
+    src                  actions.c bothunt.c clones.c dcc.c 
+                         dcc_commands.c event.c hash.c logging.c 
+                         modules.c parse.c stdcmds.c tcm_io.c 
+                         userlist.c vclones.c wingate.c 
+  Log:
+  - converted print_to_server -> send_to_server
+    print_to_socket -> send_to_connection
+  
+  Revision  Changes    Path
+  1.41      +2 -2      tcm-hybrid/include/tcm_io.h
+  1.33      +10 -10    tcm-hybrid/src/actions.c
+  1.183     +5 -5      tcm-hybrid/src/bothunt.c
+  1.20      +12 -12    tcm-hybrid/src/clones.c
+  1.17      +1 -1      tcm-hybrid/src/dcc.c
+  1.136     +55 -55    tcm-hybrid/src/dcc_commands.c
+  1.8       +4 -4      tcm-hybrid/src/event.c
+  1.42      +29 -29    tcm-hybrid/src/hash.c
+  1.52      +2 -2      tcm-hybrid/src/logging.c
+  1.50      +9 -9      tcm-hybrid/src/modules.c
+  1.80      +6 -6      tcm-hybrid/src/parse.c
+  1.96      +16 -16    tcm-hybrid/src/stdcmds.c
+  1.92      +23 -23    tcm-hybrid/src/tcm_io.c
+  1.133     +13 -13    tcm-hybrid/src/userlist.c
+  1.13      +13 -13    tcm-hybrid/src/vclones.c
+  1.60      +4 -4      tcm-hybrid/src/wingate.c
+
+
+
 db          2002/06/23 15:50:19 EDT	(20020623_6)
 
   Modified files:

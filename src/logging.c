@@ -28,6 +28,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <time.h>
 #include "config.h"
 #include "tcm.h"
 #include "userlist.h"
@@ -35,7 +36,7 @@
 #include "bothunt.h"
 #include "logging.h"
 
-static char *version="$Id: logging.c,v 1.5 2001/04/02 04:05:26 db Exp $";
+static char *version="$Id: logging.c,v 1.6 2001/06/17 05:13:20 jdc Exp $";
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file

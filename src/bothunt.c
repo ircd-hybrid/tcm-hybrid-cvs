@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.197 2002/08/11 22:46:30 wcampbel Exp $
+ * $Id: bothunt.c,v 1.198 2002/08/12 17:52:28 bill Exp $
  */
 
 #include <stdio.h>
@@ -559,17 +559,17 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Nick change: From bill to aa [bill@ummm.E] */
   case NICKCHANGE:
-    check_nick_flood(q);
+    check_nick_flood(p);
     break;
 
   /* LINKS '' requested by bill (bill@ummm.E) [irc.bill.eagan.mn.us] */
   case LINK_LOOK:
-    link_look_notice(q);
+    link_look_notice(p);
     break;
 
   /* STATS p requested by bill (bill@ummm.E) [irc.bill.eagan.mn.us] */
   case STATS:
-    stats_notice(q);
+    stats_notice(p);
     break;
 
   case SIGNAL:

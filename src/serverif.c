@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.23 2001/07/22 18:44:47 wcampbel Exp $";
+static char *version="$Id: serverif.c,v 1.24 2001/07/23 18:33:44 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -457,7 +457,7 @@ void prnt(int sock, ...)
   if (msgbuf[strlen(msgbuf)-1] != '\n') strncat(msgbuf, "\n\0", 2);
   if(route_entry.to_nick[0])
     {
-      (void)sprintf(dccbuff,":%s@%s %s@%s %s",
+      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,":%s@%s %s@%s %s",
 		    route_entry.to_nick,
 		    route_entry.to_tcm,
 		    config_entries.dfltnick,
@@ -562,25 +562,26 @@ void sendtoalldcc(int type,...)
       if((msgbuf[0] == 'o' || msgbuf[0] == 'O')
 	 && msgbuf[1] == ':')
 	{
-	  (void)sprintf(tcm_msg,"%s\n",msgbuf);
+	  (void)snprintf(tcm_msg,sizeof(tcm_msg) - 1,"%s\n",msgbuf);
 	}
       else
 	{
 	  /* command prefix, goes straight through */
 	  
 	  if(msgbuf[0] == '.')
-	    (void)sprintf(tcm_msg,"%s\n",msgbuf);
+	    (void)snprintf(tcm_msg,sizeof(tcm_msg) - 1,"%s\n",msgbuf);
 	  
 	  /* Missing a leading '<', we prepend the tcmnick as <tcmnick> */
 	  else if(msgbuf[0] != '<')
 	    {
-	      (void)sprintf(tcm_msg,"<%s> %s\n",config_entries.dfltnick,msgbuf);
+	      (void)snprintf(tcm_msg,sizeof(tcm_msg) - 1,"<%s> %s\n",
+                             config_entries.dfltnick,msgbuf);
 	      local_tcm = YES;
 	    }
 
 	  /* anything else already has a leading "<" or "O:<" */
 	  else
-	    (void)sprintf(tcm_msg,"%s\n",msgbuf);
+	    (void)snprintf(tcm_msg,sizeof(tcm_msg) - 1,"%s\n",msgbuf);
 	}
     }
 
@@ -992,7 +993,8 @@ void rdpt(void)
 	    }
 	  else if(select_result < 0)
 	    {
-	      (void)sprintf(dccbuff,"select error %d",errno);
+	      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,"select error %d",
+                             errno);
 	      log_problem("rdpt()",dccbuff);
 	      linkclosed("select error");
 	    }
@@ -2467,7 +2469,8 @@ static void connect_remote_tcm(int connnum)
        */
 
 #ifdef SHOW_POTENTIAL_CONNECTIONS
-      (void)sprintf(dccbuff,"tcm connection from %s\n", connections[i].host); 
+      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,"tcm connection from %s\n",
+                     connections[i].host); 
       report(SEND_ALL_USERS,
 	     CHANNEL_REPORT_ROUTINE,
 	     "tcm connection from %s\n",
@@ -2753,15 +2756,15 @@ void write_debug()
       fprintf(stderr, "Error writing DEBUG: %s\n", strerror(errno));
       return;
     }
-  snprintf(buff, sizeof(buff),
+  snprintf(buff, sizeof(buff) - 1,
 	   "DEBUG Wrote %s\nFunction History:\n", ctime(&now));
   write(x, buff, strlen(buff));
   for(a=0;a<15;++a)
     {
-      snprintf(buff, sizeof(buff), " %s/%d\n", placef[a], placel[a]);
+      snprintf(buff, sizeof(buff) - 1, " %s/%d\n", placef[a], placel[a]);
       write(x, buff, strlen(buff));
     }
-  snprintf(buff, sizeof(buff),
+  snprintf(buff, sizeof(buff) - 1,
 	   "Last function:\t%s/%d\n", placef[15], placel[15]);
   write(x, buff, strlen(buff));
   close(x);
@@ -2858,7 +2861,8 @@ static void onnicktaken(void)
 {
   char randnick[MAX_NICK];
 
-  (void)sprintf(randnick,"%s%1d",config_entries.dfltnick, random() % 10);
+  (void)snprintf(randnick,sizeof(randnick) - 1,"%s%1d",config_entries.dfltnick,
+                 random() % 10);
 
   if (!*mychannel)
     {
@@ -2892,12 +2896,14 @@ static void cannotjoin(char *channel)
   int i;
 
   if (!strcmp(channel,config_entries.defchannel))
-    (void)sprintf(newchan,"%.78s2",config_entries.defchannel);
+    (void)snprintf(newchan,sizeof(newchan) - 1,"%.78s2",
+                  config_entries.defchannel);
   else
     {
       channel += strlen(config_entries.defchannel);
       i = atoi(channel);
-      (void)sprintf(newchan,"%.78s%1d",config_entries.defchannel,i+1);
+      (void)snprintf(newchan,sizeof(newchan) - 1,"%.78s%1d",
+                     config_entries.defchannel,i+1);
     }
 
   if(config_entries.defchannel_key[0])

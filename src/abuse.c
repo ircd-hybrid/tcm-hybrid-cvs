@@ -38,7 +38,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.12 2001/07/03 03:47:01 wcampbel Exp $";
+static char *version="$Id: abuse.c,v 1.13 2001/07/23 18:33:42 wcampbel Exp $";
 
 /*
  * do_a_kline()
@@ -658,15 +658,17 @@ char *format_reason(char *reason)
   static char reason_result[COMMENT_BUFF];
 
 #ifdef CALVIN
-  (void)sprintf(reason_result,"%s_%s",reason,date_stamp());
+  (void)snprintf(reason_result,sizeof(reason_result) - 1,"%s_%s",reason,
+                 date_stamp());
 #else
   if(config_entries.hybrid)
     {
-      (void)sprintf(reason_result,"%s",reason);
+      (void)snprintf(reason_result,sizeof(reason_result) - 1,"%s",reason);
     }
   else
     {
-      (void)sprintf(reason_result,"%s %s",reason,date_stamp());
+      (void)snprintf(reason_result,sizeof(reason_result) - 1,"%s %s",reason,
+                     date_stamp());
     }
 #endif
 

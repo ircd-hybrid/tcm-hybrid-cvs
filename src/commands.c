@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.15 2001/07/22 20:10:01 wcampbel Exp $";
+static char *version="$Id: commands.c,v 1.16 2001/07/23 18:33:43 wcampbel Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -191,7 +191,7 @@ void dccproc(int connnum)
 	  else
 	    {
 	      /* Directed to someone on another tcm */
-	      (void)sprintf(dccbuff,":%s@%s %s@%s %s\n",
+	      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,":%s@%s %s@%s %s\n",
 			to_nick,
 			to_tcm,
 			from_nick,
@@ -215,7 +215,7 @@ void dccproc(int connnum)
 	  while(*buffer == ' ')
 	    buffer++;
 
-	  (void)sprintf(dccbuff,":%s@%s %s@%s %s\n",
+	  (void)snprintf(dccbuff,sizeof(dccbuff) - 1,":%s@%s %s@%s %s\n",
 			to_nick,
 			to_nick,
 			connections[connnum].nick,
@@ -228,7 +228,7 @@ void dccproc(int connnum)
     }
   else
     {
-      (void)sprintf(who_did_command,"%s@%s",
+      (void)snprintf(who_did_command,sizeof(who_did_command) - 1, "%s@%s",
 		    connections[connnum].nick,config_entries.dfltnick);
 
     }
@@ -245,7 +245,7 @@ void dccproc(int connnum)
 	    }
 	  else
 	    {
-	      (void)sprintf(dccbuff,"o:<%s@%s> %s",
+	      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,"o:<%s@%s> %s",
 			    connections[connnum].nick,config_entries.dfltnick,
 			    buffer+2);
 	    }
@@ -259,7 +259,7 @@ void dccproc(int connnum)
 	    }
 	  else
 	    {
-	      (void)sprintf(dccbuff,"<%s@%s> %s",
+	      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,"<%s@%s> %s",
 			    connections[connnum].nick,
 			    config_entries.dfltnick,
 			    buffer);
@@ -314,7 +314,7 @@ void dccproc(int connnum)
 	  /* Directed to someone on another tcm */
 	  if(param3)
 	    {
-	      (void)sprintf(dccbuff,":%s@%s %s .%s %s\n",
+	      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,":%s@%s %s .%s %s\n",
 			    param2+1,
 			    param2+1,
 			    who_did_command,
@@ -323,7 +323,7 @@ void dccproc(int connnum)
 	    }
 	  else
 	    {
-	      (void)sprintf(dccbuff,":%s@%s %s .%s\n",
+	      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,":%s@%s %s .%s\n",
 			    param2+1,
 			    param2+1,
 			    who_did_command,
@@ -515,7 +515,7 @@ void dccproc(int connnum)
 		 "Usage: .list <wildcarded user>\n");
 	  else
 	    {
-	      sprintf(fulluh,"%s@*", param2 );
+	      snprintf(fulluh,sizeof(fulluh) - 1,"%s@*", param2 );
 	      list_users(connections[connnum].socket,fulluh);
 	    }
 	}
@@ -533,7 +533,7 @@ void dccproc(int connnum)
 		 "Usage: .list <wildcarded host>\n");
 	  else
 	    {
-	      sprintf(fulluh,"*@%s", param2 );
+	      snprintf(fulluh,sizeof(fulluh) - 1,"*@%s", param2 );
 	      list_users(connections[connnum].socket,fulluh);
 	    }
 	}
@@ -1128,11 +1128,11 @@ void dccproc(int connnum)
 		  continue;
 
 		if(tcmlist[j].port == 0)
-		  (void)sprintf(dccbuff,"%s:%d",
+		  (void)snprintf(dccbuff,sizeof(dccbuff) - 1,"%s:%d",
 				tcmlist[j].host,
 				TCM_PORT);
 		else
-		  (void)sprintf(dccbuff,"%s:%d",
+		  (void)snprintf(dccbuff,sizeof(dccbuff) - 1,"%s:%d",
 				tcmlist[j].host,
 				tcmlist[j].port);
 
@@ -1157,7 +1157,8 @@ void dccproc(int connnum)
 				 tcmlist[j].theirnick,
 				 config_entries.dfltnick,
 				 tcmlist[j].password);
-			    (void)sprintf(dccbuff,".TCMINTRO %s %s ",
+			    (void)snprintf(dccbuff,sizeof(dccbuff) - 1,
+                                          ".TCMINTRO %s %s ",
 					  config_entries.dfltnick,
 					  tcmlist[j].theirnick);
 
@@ -1242,7 +1243,8 @@ void dccproc(int connnum)
    "!%s! Routing loop tcm [%s] linking in [%s] finding already present [%s]\n",
 			   config_entries.dfltnick,param2,newtcm,tcmnick);
 
-		(void)sprintf(dccbuff,":%s@%s -@%s .disconnect %s\n",
+		(void)snprintf(dccbuff,sizeof(dccbuff) - 1,
+                            ":%s@%s -@%s .disconnect %s\n",
 			    param2,
 			    param2,
 			    config_entries.dfltnick,
@@ -2831,7 +2833,7 @@ static void save_umodes(char *registered_nick, unsigned long type)
   FILE *fp;
   char user_pref[MAX_BUFF];
 
-  (void)sprintf(user_pref,"etc/%s.pref",registered_nick);
+  (void)snprintf(user_pref,sizeof(user_pref) - 1,"etc/%s.pref",registered_nick);
 
   if(!(fp = fopen(user_pref,"w")))
     {
@@ -2861,7 +2863,7 @@ static void load_umodes(int connect_id)
   char *p;
   unsigned long type;
 
-  (void)sprintf(user_pref,"etc/%s.pref",
+  (void)snprintf(user_pref,sizeof(user_pref) - 1,"etc/%s.pref",
                 connections[connect_id].registered_nick);
 
   if(!(fp = fopen(user_pref,"r")))
@@ -2917,7 +2919,7 @@ static unsigned long find_user_umodes(char *registered_nick)
   char *p;
   int  unsigned long type;
 
-  (void)sprintf(user_pref,"etc/%s.pref",registered_nick);
+  (void)snprintf(user_pref,sizeof(user_pref) - 1,"etc/%s.pref",registered_nick);
 
   if(!(fp = fopen(user_pref,"r")))
     {
@@ -2980,7 +2982,7 @@ static void show_user_umodes(int sock, char *registered_nick)
       return;
     }
      
-  (void)sprintf(user_pref,"etc/%s.pref",registered_nick);
+  (void)snprintf(user_pref,sizeof(user_pref) - 1,"etc/%s.pref",registered_nick);
 
   if(!(fp = fopen(user_pref,"r")))
     {
@@ -3321,7 +3323,7 @@ static void handle_gline(int sock,char *pattern,char *reason,
 		 format_reason(reason),
 		 who_did_command);
 
-	  sprintf(dccbuff,".KLINE %s :%s by %s\n",
+	  snprintf(dccbuff,sizeof(dccbuff) - 1,".KLINE %s :%s by %s\n",
 		  pattern,format_reason(reason),who_did_command);
 
 	  sendto_all_linkedbots(dccbuff);

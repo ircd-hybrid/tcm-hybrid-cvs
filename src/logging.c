@@ -40,7 +40,7 @@
 #include "bothunt.h"
 #include "logging.h"
 
-static char *version="$Id: logging.c,v 1.7 2001/06/18 16:20:14 kreator Exp $";
+static char *version="$Id: logging.c,v 1.8 2001/07/23 18:33:44 wcampbel Exp $";
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file
@@ -94,7 +94,7 @@ static FILE *initlog(void)
   current_time = time((time_t *)NULL);
   broken_up_time = localtime(&current_time);
 
-  (void)sprintf(filename,"%s_%02d_%02d_%04d",LOGFILE,
+  (void)snprintf(filename,sizeof(filename) - 1,"%s_%02d_%02d_%04d",LOGFILE,
 		(broken_up_time->tm_mon)+1,broken_up_time->tm_mday,
 		broken_up_time->tm_year + 1900);
 
@@ -112,8 +112,8 @@ static FILE *initlog(void)
 #ifdef HOW_TO_MAIL
   if( (strcmp(last_filename,filename)) != 0 )
     {
-      (void)sprintf(command,"%s \"clone report\" %s",HOW_TO_MAIL,
-		    config_entries.email_config);
+      (void)snprintf(command,sizeof(command) - 1,"%s \"clone report\" %s",
+                     HOW_TO_MAIL, config_entries.email_config);
       if( (email_fp = popen(command,"w")) )
 	{
 	  if( (log_to_email_fp = fopen(last_filename,"r")) )
@@ -401,12 +401,12 @@ char *date_stamp(void)
   broken_up_time = localtime(&current_time);
 
 #ifdef CALVIN
-  (void)sprintf(date_stamp_string,"%04d%02d%02d",
+  (void)snprintf(date_stamp_string,sizeof(date_stamp_string) - 1,"%04d%02d%02d",
 		broken_up_time->tm_year+1900,
 		(broken_up_time->tm_mon)+1,
 		broken_up_time->tm_mday);
 #else
-  (void)sprintf(date_stamp_string,"%02d/%02d/%d",
+  (void)snprintf(date_stamp_string,sizeof(date_stamp_string) - 1,"%02d/%02d/%d",
 		(broken_up_time->tm_mon)+1,broken_up_time->tm_mday,
 		broken_up_time->tm_year+1900);
 #endif
@@ -516,37 +516,37 @@ static char *durtn(double a)
 
  if (years)
    {
-     sprintf(tmp, "%dy ", years);
+     snprintf(tmp,sizeof(tmp) - 1,"%dy ", years);
      strcat(result, tmp);
    }
 
  if (weeks)
    {
-     sprintf(tmp, "%dw ", weeks);
+     snprintf(tmp,sizeof(tmp) - 1,"%dw ", weeks);
      strcat(result, tmp);
    }
 
  if (days)
    {
-     sprintf(tmp, "%dd ", days);
+     snprintf(tmp,sizeof(tmp) - 1,"%dd ", days);
      strcat(result, tmp);
    }
 
  if (hours)
    {
-     sprintf(tmp, "%dh ", hours);
+     snprintf(tmp,sizeof(tmp) - 1,"%dh ", hours);
      strcat(result, tmp);
    }
 
  if (minutes)
    {
-     sprintf(tmp, "%dm ", minutes);
+     snprintf(tmp,sizeof(tmp) - 1,"%dm ", minutes);
      strcat(result, tmp);
    }
 
  if (seconds)
    {
-     sprintf(tmp, "%ds ", seconds);
+     snprintf(tmp,sizeof(tmp) - 1,"%ds ", seconds);
      strcat(result, tmp);
    }
 

@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.32 2002/05/24 20:52:44 leeh Exp $ */
+/* $Id: wingate.c,v 1.33 2002/05/25 02:33:37 db Exp $ */
 
 
 #include <netdb.h>
@@ -22,7 +22,6 @@
 #ifdef DEBUGMODE
 #include <stdlib.h>   /* needed for atoi() */
 #include <errno.h>    /* needed for errno, obviously. */
-#include "serverif.h" /* need connections[] struct for m_proxy() */
 #endif
 
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
@@ -88,10 +87,12 @@ void m_proxy(int connnum, int argc, char *argv[])
   if (argc <= 2)
   {
 #ifdef DETECT_SQUID
-    print_to_socket(connections[connnum].socket, "Usage: %s <type> <host> [port]\n",
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <type> <host> [port]",
                     argv[0]);
 #else
-    print_to_socket(connections[connnum].socket, "Usage: %s <type> <host>\n", argv[0]);
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s <type> <host>", argv[0]);
 #endif
     return;
   }
@@ -106,7 +107,8 @@ void m_proxy(int connnum, int argc, char *argv[])
 #ifdef DETECT_SQUID
   if (argc != 4)
   {
-    print_to_socket(connections[connnum].socket, "Usage: %s squid <host> [port]\n",
+    print_to_socket(connections[connnum].socket,
+		    "Usage: %s squid <host> [port]",
                     argv[0]);
     return;
   }
@@ -492,8 +494,13 @@ _scontinuous(int connnum, int argc, char *argv[])
 	      case SOCKS4_CONNECTING:
 		tmp[0] = 4; /* socks v4 */
 		tmp[1] = 1; /* connect */
-		*((unsigned short *) (tmp+2)) = htons(SOCKS_CHECKPORT); /* Connect to port */
-		*((unsigned int *) (tmp+4)) = inet_addr(SOCKS_CHECKIP); /* Connect to ip */
+
+		*((unsigned short *) (tmp+2)) =
+		  htons(SOCKS_CHECKPORT); /* Connect to port */
+
+		*((unsigned int *) (tmp+4)) = 
+		  inet_addr(SOCKS_CHECKIP); /* Connect to ip */
+
 		strcpy(tmp+8, "tcm"); /* Dummy username */
 		if (write(socks[i].socket, tmp, 12)!=12) {
 		  close(socks[i].socket);
@@ -563,7 +570,8 @@ _scontinuous(int connnum, int argc, char *argv[])
       }
       else
       {
-        print_to_socket(squid[i].socket, "CONNECT %s:%d HTTP/1.0\r\n\r\n",
+        print_to_socket(squid[i].socket,
+			"CONNECT %s:%d HTTP/1.0\r\n\r\n",
                         SOCKS_CHECKIP, SOCKS_CHECKPORT);
         squid[i].state = SQUID_READING;
         squid[i].connect_time = current_time;

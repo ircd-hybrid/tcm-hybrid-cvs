@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.27 2002/05/23 06:41:52 db Exp $ */
+/* $Id: bothunt.h,v 1.28 2002/05/25 02:33:34 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -117,9 +117,7 @@ void report_domains(int sock, int num);
 void report_vbots(int sock,int nclones);
 int  makeconn(char *,char *,char *);
 void m_gline(int connnum, int argc, char *argv[]);
-
 extern void init_bothunt(void);
-
 extern void _reload_bothunt(int connnum, int argc, char *argv[]);
 extern void _ontraceuser(int connnum, int argc, char *argv[]);
 extern void _ontraceclass(int connnum, int argc, char *argv[]);
@@ -128,7 +126,6 @@ extern void on_stats_o(int connnum, int argc, char *argv[]);
 extern void on_stats_e(int connnum, int argc, char *argv[]);
 extern void on_stats_i(int connnum, int argc, char *argv[]);
 extern void onservnotice(int connnum, int argc, char *argv[]);
-extern struct connection connections[];
 extern struct s_testline testlines;
 extern int doingtrace;
 

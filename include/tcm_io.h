@@ -2,10 +2,29 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.7 2002/05/24 18:29:16 leeh Exp $
+ * $Id: tcm_io.h,v 1.8 2002/05/25 02:33:34 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
+
+/*
+ * This structure defines who is connected to this tcm.
+ */
+
+struct connection {
+  char buffer[BUFFERSIZE];
+  int  nbuf;			/* number in buffer */
+  int  socket;
+  int  type;			/* why was this a char? -bill */
+  int  set_modes;		/* for set options */
+  char user[MAX_USER];
+  char host[MAX_HOST];
+  char nick[MAX_NICK+2];	/* allow + 2 for incoming tcm names */
+  char registered_nick[MAX_NICK+2]; /* allow + 2  */
+  time_t last_message_time;
+};
+
+extern struct connection connections[];
 
 extern int initiated_dcc_socket;
 extern time_t initiated_dcc_socket_time;

@@ -1,7 +1,7 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
-/* $Id: serverif.h,v 1.21 2002/05/24 04:04:17 db Exp $ */
+/* $Id: serverif.h,v 1.22 2002/05/25 02:33:34 db Exp $ */
 
 /*
  * default ping timeout time from server
@@ -12,22 +12,6 @@
 #define SERVER_TIME_OUT 300
 int pingtime;
 
-/*
- * This structure defines who is connected to this tcm.
- */
-
-struct connection {
-  char buffer[BUFFERSIZE];
-  int  nbuf;			/* number in buffer */
-  int  socket;
-  int  type;			/* why was this a char? -bill */
-  int  set_modes;		/* for set options */
-  char user[MAX_USER];
-  char host[MAX_HOST];
-  char nick[MAX_NICK+2];	/* allow + 2 for incoming tcm names */
-  char registered_nick[MAX_NICK+2]; /* allow + 2  */
-  time_t last_message_time;
-};
 
 #ifndef OPERS_ONLY
 extern int isbanned(char *,char *);

@@ -1,3 +1,19 @@
+leeh        2002/05/27 16:15:42 EDT	(20020527_16)
+
+  Modified files:
+    include              userlist.h 
+    src                  main.c userlist.c 
+  Log:
+  - use umodes purely in the userlist struct
+  - ripped init_userlist, none of the things in it did anything anyway.
+  
+  Revision  Changes    Path
+  1.44      +2 -8      tcm-hybrid/include/userlist.h
+  1.86      +1 -1      tcm-hybrid/src/main.c
+  1.85      +56 -131   tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/27 13:42:08 EDT	(20020527_15)
 
   Modified files:

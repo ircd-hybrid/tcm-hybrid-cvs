@@ -1,3 +1,9 @@
+*** 20010721_2 by wcampbel
+I did a repo-move for the *.h files into include/
+This is what else needed to be done to make it work...
+Next is the icky src files...
+
+
 *** 20010721_1 by wcampbel
 Add a few more bugs to the BUGS list
 Add a check for crypt.h, needed for some (lame) Linux distributions

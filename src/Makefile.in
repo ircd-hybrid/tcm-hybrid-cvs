@@ -30,9 +30,7 @@ SOURCES = 	serverif.c\
 
 OBJECTS = ${SOURCES:.c=.o}
 
-all: tcm
-
-build: tcm
+all: build
 
 clean: 
 	${RM} -f *.o tcm core tcm.core *~
@@ -43,8 +41,8 @@ distclean:
 .c.o:
 	${CC} ${CPPFLAGS} ${CFLAGS} ${DEFINES} -c $<
 
-tcm: ${OBJECTS}
-	${CC} ${CFLAGS} -o ../tcm ${OBJECTS} ${TCMLIBS}
+build: ${OBJECTS}
+	${CC} ${CFLAGS} -o ../bin/tcm ${OBJECTS} ${TCMLIBS}
 
 lint:
 	lint -aacgprxhH $(CPPFLAGS) $(SOURCES) >../lint.out

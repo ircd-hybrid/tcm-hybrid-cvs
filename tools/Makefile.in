@@ -11,7 +11,7 @@ all: mkpasswd
 build: all
 
 mkpasswd: mkpasswd.o
-	$(CC) $(LDFLAGS) -o ../mkpasswd mkpasswd.o ${TCMLIBS}
+	$(CC) $(LDFLAGS) -o ../bin/mkpasswd mkpasswd.o ${TCMLIBS}
 
 clean:
 	${RM} -f *.o *~ *core

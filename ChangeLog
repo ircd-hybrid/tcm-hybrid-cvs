@@ -1,3 +1,8 @@
+*** 20010614_1 by db
+- just upped version
+
+
+
 *** 20010603_3 by db
 patch sent in by Walter Campbell
 1.  Document that USE_CRYPT is enabled by default

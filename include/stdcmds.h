@@ -1,7 +1,7 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.20 2002/05/25 06:39:26 db Exp $ */
+/* $Id: stdcmds.h,v 1.21 2002/05/25 23:27:50 db Exp $ */
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
@@ -22,6 +22,7 @@ void report_multi_user(int sock,int nclones);
 #ifdef VIRTUAL
 void report_multi_virtuals(int sock,int nclones);
 #endif
+void report(int type, int channel_send_flag, char *format,...);
 void report_mem(int sock);
 void report_clones(int sock);
 void report_nick_flooders(int sock);

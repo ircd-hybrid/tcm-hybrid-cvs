@@ -1,7 +1,7 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.26 2002/05/25 22:25:07 leeh Exp $ */
+/* $Id: modules.h,v 1.27 2002/05/25 23:27:50 db Exp $ */
 
 #define MAX_HASH 256
 
@@ -54,10 +54,7 @@ void del_numeric_handler(struct serv_numeric *);
 
 void m_unregistered(int connnum, int argc, char *argv[]);
 void m_not_admin(int connnum, int argc, char *argv[]);
-
-extern void report(int type, int channel_send_flag, char *format,...);
-extern char *date_stamp(void);
-
+extern int load_all_modules(int log);
 void m_modload(int connnum, int argc, char *argv[]);
 void m_modunload(int connnum, int argc, char *argv[]);
 void m_modreload(int connnum, int argc, char *argv[]);

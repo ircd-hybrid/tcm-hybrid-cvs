@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.73 2002/05/25 22:02:59 db Exp $ */
+/* $Id: main.c,v 1.74 2002/05/25 23:27:54 db Exp $ */
 
 #include "setup.h"
 
@@ -45,6 +45,7 @@
 #include "serno.h"
 #include "patchlevel.h"
 #include "parse.h"
+#include "logging.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
@@ -52,14 +53,6 @@
 
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
-#endif
-
-extern FILE *outfile;
-extern struct a_entry actions[MAX_ACTIONS+1];
-extern int load_all_modules(int log);
-
-#ifdef SERVICES
-extern int act_drone, act_sclone;
 #endif
 
 struct connection connections[MAXDCCCONNS+1]; /* plus 1 for the server, silly */

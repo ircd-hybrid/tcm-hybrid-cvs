@@ -1,8 +1,8 @@
-/* $Id: parse.h,v 1.3 2002/05/25 15:08:06 leeh Exp $ */
+/* $Id: parse.h,v 1.4 2002/05/25 23:27:50 db Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
-#define EOL(c) ((c=='\r')||(c=='\n'))
+
 
 extern void parse_server(void);
 extern void parse_client(int, int, char *argv[]);
@@ -18,6 +18,8 @@ extern void check_clones(void *);
 
 #ifdef SERVICES
 extern void check_services(void *);
+extern struct a_entry actions[MAX_ACTIONS+1];
+extern int act_drone, act_sclone;
 #endif
 
 #endif

@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.72 2002/05/25 17:45:15 jmallett Exp $ */
+/* $Id: stdcmds.c,v 1.73 2002/05/25 23:27:54 db Exp $ */
 
 #include "setup.h"
 
@@ -249,7 +249,9 @@ report(int type, int channel_send_flag, char *format,...)
  * Returns a hashrec for the given nick, or NULL if not found
  *
  */
-struct hashrec * find_nick(char * nick) {
+struct hashrec *
+find_nick(char * nick)
+{
   int i;
   struct hashrec * userptr;
   if (!nick)
@@ -269,7 +271,8 @@ struct hashrec * find_nick(char * nick) {
  * Returns first hashrec for the given host, or NULL if not found
  *
  */
-struct hashrec * find_host(char * host) {
+struct hashrec *
+find_host(char * host) {
   int i;
   struct hashrec * userptr;
   if (!host)

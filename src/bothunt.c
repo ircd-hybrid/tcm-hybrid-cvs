@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.103 2002/05/25 23:11:10 leeh Exp $
+ * $Id: bothunt.c,v 1.104 2002/05/25 23:27:53 db Exp $
  */
 
 #include <stdio.h>
@@ -52,6 +52,8 @@ static void check_host_clones(char *);
 static void check_virtual_host_clones(char *);
 #endif
 static void check_reconnect_clones(char *);
+
+struct s_testline testlines;
 
 int act_cflood, act_vclone, act_flood, act_link,
   act_bot, act_spambot, act_clone, act_rclone;

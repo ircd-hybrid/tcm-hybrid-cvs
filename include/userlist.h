@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.37 2002/05/24 18:29:16 leeh Exp $ */
+/* $Id: userlist.h,v 1.38 2002/05/25 23:27:50 db Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -261,6 +261,8 @@ struct config_list config_entries;
 #define CHANNEL_REPORT_CFLOOD	0x1000
 
 
+char * get_method_names(int method);
+int get_method_number(char * name);
 #endif
 
 

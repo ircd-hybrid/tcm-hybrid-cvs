@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.14 2002/05/25 22:02:57 db Exp $
+ * $Id: tcm_io.h,v 1.15 2002/05/25 23:27:50 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -70,5 +70,7 @@ extern	int connect_to_given_ip_port(struct sockaddr_in *, int );
 #define SEND_KLINE_NOTICES	0x080 /* klines/unklines */
 #define SEND_ADMINS		0x100 /* admin stuff like modload */
 #define SEND_SERVERS		0x200 /* server splits/joins */
+
+#define EOL(c) ((c=='\r')||(c=='\n'))
 
 #endif

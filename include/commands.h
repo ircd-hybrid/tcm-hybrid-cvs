@@ -1,7 +1,7 @@
 #ifndef __COMMANDS_H
 #define __COMMANDS_H
 
-/* $Id: commands.h,v 1.14 2002/05/25 16:49:15 wcampbel Exp $ */
+/* $Id: commands.h,v 1.15 2002/05/25 23:27:50 db Exp $ */
 
 void init_allow_nick();
 
@@ -66,5 +66,6 @@ void m_nfind(int connnum, int argc, char *argv[]);
 void m_list(int connnum, int argc, char *argv[]);
 void m_ulist(int connnum, int argc, char *argv[]);
 void m_hlist(int connnum, int argc, char *argv[]);
+
 
 #endif

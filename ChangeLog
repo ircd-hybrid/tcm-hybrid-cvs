@@ -1,3 +1,18 @@
+einride     2002/05/08 17:00:48 EDT	(20020508_5)
+
+  Modified files:
+    include              userlist.h 
+    src                  stdcmds.c 
+  Log:
+  idents longer than 8 chars truncated if hoststrip field set to "prefix"
+  default hoststrip for ctcp flooders changed
+  
+  Revision  Changes    Path
+  1.28      +1 -1      tcm-hybrid/include/userlist.h
+  1.53      +7 -1      tcm-hybrid/src/stdcmds.c
+
+
+
 bill        2002/05/08 16:55:39 EDT	(20020508_4)
 
   Modified files:

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.152 2003/04/09 05:02:54 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.153 2003/04/14 09:30:19 bill Exp $ */
 
 #include "setup.h"
 
@@ -485,9 +485,19 @@ m_testline(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc < 2)
   {
-    send_to_connection(connection_p, "Usage: %s <mask>", argv[0]);
+    send_to_connection(connection_p, "Usage: %s <[mask]|[-c]>", argv[0]);
     return;
   }
+
+  if (strcasecmp(argv[1], "-c") == 0)
+  {
+    memset((char *)&config_entries.testline_umask, 0,
+           sizeof(config_entries.testline_umask));
+    config_entries.testline_cnctn = NULL;
+    send_to_connection(connection_p, "testline cleared");
+    return;
+  }
+
   if (config_entries.testline_cnctn != NULL)
   {
     send_to_connection(connection_p, "Error: Pending testline on %s", config_entries.testline_umask);

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.67 2003/04/09 05:02:54 bill Exp $
+ * $Id: hash.c,v 1.68 2003/04/14 09:30:19 bill Exp $
  */
 
 #include <stdio.h>
@@ -650,13 +650,15 @@ check_host_clones(char *host)
   }
   else
   {
-    report(FLAGS_WARN,
-	   "Possible clones from %s detected: %d connects in %d seconds",
-	   host, clonecount, now - oldest);
+    if (actions[act_clone].method & METHOD_IRC_WARN)
+      report(FLAGS_WARN,
+	     "Possible clones from %s detected: %d connects in %d seconds",
+	     host, clonecount, now - oldest);
 
-    tcm_log(L_NORM, 
-	    "Possible clones from %s detected: %d connects in %d seconds",
-	    host, clonecount, now - oldest);
+    if (actions[act_clone].method & METHOD_DCC_WARN)
+      tcm_log(L_NORM, 
+	      "Possible clones from %s detected: %d connects in %d seconds",
+	      host, clonecount, now - oldest);
   }
 
   for (find = host_table[ind],clonecount = 0; find; find = find->next)
@@ -695,29 +697,37 @@ check_host_clones(char *host)
       {
         if(notice1[0] != '\0')
         {
-  	  report(FLAGS_WARN, "%s", notice1);
-	  tcm_log(L_NORM, "%s", notice1);
+          if (actions[act_clone].method & METHOD_IRC_WARN)
+  	    report(FLAGS_WARN, "%s", notice1);
+          if (actions[act_clone].method & METHOD_DCC_WARN)
+	    tcm_log(L_NORM, "%s", notice1);
         }
 	if(notice0[0] != '\0')
         {
-          report(FLAGS_WARN, "%s", notice0);
-  	  tcm_log(L_NORM, "%s", notice0);
+          if (actions[act_clone].method & METHOD_IRC_WARN)
+            report(FLAGS_WARN, "%s", notice0);
+          if (actions[act_clone].method & METHOD_DCC_WARN)
+  	    tcm_log(L_NORM, "%s", notice0);
         }
       }
       else if(clonecount < 5)
       {
         if(notice0[0] != '\0')
         {
-	  report(FLAGS_WARN, "%s", notice0);
-	  tcm_log(L_NORM, "%s", notice0);
+          if (actions[act_clone].method & METHOD_IRC_WARN)
+	    report(FLAGS_WARN, "%s", notice0);
+          if (actions[act_clone].method & METHOD_DCC_WARN)
+	    tcm_log(L_NORM, "%s", notice0);
         }
       }
       else if(clonecount == 5)
       {
         if(notice0[0] != '\0')
         {
-	  send_to_all(NULL, FLAGS_WARN, "%s", notice0);
-	  tcm_log(L_NORM, "  [etc.]");
+          if (actions[act_clone].method & METHOD_IRC_WARN)
+	    send_to_all(NULL, FLAGS_WARN, "%s", notice0);
+          if (actions[act_clone].method & METHOD_DCC_WARN)
+	    tcm_log(L_NORM, "  [etc.]");
         }
       }
     }

@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.43 2002/05/20 00:52:49 wcampbel Exp $
+ * $Id: config.h,v 1.44 2002/05/20 05:30:56 db Exp $
  */
 
 /*
@@ -310,4 +310,6 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 /* Do not touch these unless you know what you are doing */
 #define SPATH DPATH "/bin/tcm"
 
+/* only needed if HAVE_REGEX_H is defined */
+#define REGEX_SIZE 1024
 #endif

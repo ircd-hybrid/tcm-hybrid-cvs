@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.39 2002/05/20 01:59:55 db Exp $ */
+/* $Id: main.c,v 1.40 2002/05/20 05:31:03 db Exp $ */
 
 #include "setup.h"
 
@@ -89,16 +89,6 @@ void set_action_method(int action, int method);
 void set_action_strip(int action, int hoststrip);
 void set_action_time(int action, int klinetime);
 
-#if 0
-/* XXX - unused */
-int action_log(char *name);
-#endif
-
-#if 0
-/* XXX - unused */
-char *get_action_reason(char *name);
-#endif
-
 #ifdef HAVE_SETRLIMIT
 static void setup_corefile(void);
 #endif
@@ -110,7 +100,8 @@ static void setup_corefile(void);
  * output       - none
  * side effects -
  */
-void init_hash_tables(void)
+void
+init_hash_tables(void)
 {
   if (signon)
     memset(signon,0,sizeof(struct common_function));
@@ -150,10 +141,11 @@ void init_hash_tables(void)
 }
 
 /*
-** bindsocket()
-**   Sets up a socket and connects to the given host and port
-*/
-int bindsocket(char *hostport)
+ * bindsocket()
+ *   Sets up a socket and connects to the given host and port
+ */
+int
+bindsocket(char *hostport)
 {
   int plug;
   struct sockaddr_in socketname;
@@ -280,7 +272,8 @@ int bindsocket(char *hostport)
  *
  */
 
-void sendtoalldcc(int type,char *format,...)
+void
+sendtoalldcc(int type,char *format,...)
 {
   va_list va;
   char msgbuf[MAX_BUFF];
@@ -376,7 +369,8 @@ void sendtoalldcc(int type,char *format,...)
  * side effects	- connection on connection number connnum is closed.
  */
 
-void closeconn(int connnum, int argc, char *argv[])
+void
+closeconn(int connnum, int argc, char *argv[])
 {
   int i;
 
@@ -404,38 +398,8 @@ void closeconn(int connnum, int argc, char *argv[])
   connections[connnum].registered_nick[0] = '\0';
 }
 
-/*
-** gracefuldie()
-**   Called when we encounter a segmentation fault.
-**   Parameters: None
-**   Returns: void
-**   PDL:
-**     While debugging, I got so many seg faults that it pissed me off enough
-**     to write this.  When dying from a seg fault, open files are not closed.
-**     This means I lose the last 8K or so that was appended to the debug
-**     logfile, including the thing that caused the seg fault.  This will
-**     close the file before dying... Not too much more graceful, I agree.
-*/
-void gracefuldie(int sig, char *file, int line)
-{
-  if(config_entries.debug && outfile)
-    {
-      fprintf(outfile, "gracefuldie() %s/%d\n", file, line);
-      fclose(outfile);
-      fprintf(stderr, "gracefuldie() %s/%d", file, line);
-      if (sig) fprintf(stderr, " sig: %d\n", sig);
-      else
-	fprintf(stderr, "\n");
-    }
-
-  if (sig != SIGTERM) {
-    toserv("QUIT :Woo hoo!  TCM crash!\n");
-    abort();
-  } else toserv("QUIT :Leaving\n");
-  exit(1);
-}
-
-int add_action(char *name)
+int
+add_action(char *name)
 {
   int i;
 
@@ -461,30 +425,38 @@ int add_action(char *name)
   return i;
 }
 
-void set_action_time(int action, int klinetime) {
+void
+set_action_time(int action, int klinetime)
+{
   if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name[0]))
     actions[action].klinetime = klinetime;
 }
 
-void set_action_strip(int action, int hoststrip)
+void
+set_action_strip(int action, int hoststrip)
 {
   if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name[0]))
     actions[action].hoststrip = hoststrip;
 }
 
-void set_action_method(int action, int method)
+void
+set_action_method(int action, int method)
 {
   if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name[0]))
     actions[action].method = method;    
 }
 
-void set_action_reason(int action, char *reason)
+void
+set_action_reason(int action, char *reason)
 {
-  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name[0]) && reason && reason[0])
-    snprintf(actions[action].reason, sizeof(actions[action].reason), "%s", reason);
+  if ((action>=0) && (action < MAX_ACTIONS) &&
+      (actions[action].name[0]) && reason && reason[0])
+    snprintf(actions[action].reason,
+	     sizeof(actions[action].reason), "%s", reason);
 }
 
-int find_action(char *name)
+int
+find_action(char *name)
 {
   int i;
   for (i=0 ; i<MAX_ACTIONS ; ++i)
@@ -492,26 +464,6 @@ int find_action(char *name)
       return i;
   return -1;
 }
-
-#if 0
-/* XXX - unused */
-int action_log(char *name)
-{
-  int i;
-  if ((i = get_action(name)) == -1) return 0;
-  return (actions[i].report ? YES : NO);
-}
-#endif
-
-#if 0
-/* XXX - unused */
-char *get_action_reason(char *name)
-{
-  int i;
-  if ((i = get_action(name)) == -1) return NULL;
-  return actions[i].reason;
-}
-#endif
 
 /*
  * main()
@@ -718,7 +670,8 @@ main(int argc, char *argv[])
   return 0;
 }
 
-static void init_debug(int sig)
+static void 
+init_debug(int sig)
 {
   if(config_entries.debug && outfile)
     {
@@ -740,36 +693,25 @@ static void init_debug(int sig)
     }
 }
 
-#if 0
-void sighandlr(int sig)
-{
-  if (sig == SIGINT)
-    {
-      toserv("QUIT :Ctrl+C; Exiting...\n");
-      gracefuldie(0, __FILE__, __LINE__);
-    }
-  else
-    gracefuldie(sig, __FILE__, __LINE__);
-  signal(sig, sighandlr);
-}
-#endif
-
 #ifdef IRCD_HYBRID
 
 #else
 
-void m_unregistered(int connnum, int argc, char *argv[])
+void
+m_unregistered(int connnum, int argc, char *argv[])
 {
   prnt(connections[connnum].socket, "You have not registered\n");
 }
 
-void m_not_oper(int connnum, int argc, char *argv[])
+void
+m_not_oper(int connnum, int argc, char *argv[])
 {
   prnt(connections[connnum].socket,
        "Only authorized opers may use this command\n");
 }
 
-void m_not_admin(int connnum, int argc, char *argv[])
+void
+m_not_admin(int connnum, int argc, char *argv[])
 {
   prnt(connections[connnum].socket,
        "Only authorized admins may use this command\n");
@@ -787,7 +729,8 @@ void m_not_admin(int connnum, int argc, char *argv[])
  *
  * Stolen from Hyb6.2 - Hwy
  */
-static void setup_corefile(void)
+static void 
+setup_corefile(void)
 {
   struct rlimit rlim; /* resource limits */
 

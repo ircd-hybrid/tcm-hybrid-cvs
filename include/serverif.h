@@ -1,7 +1,7 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
-/* $Id: serverif.h,v 1.16 2002/05/20 01:59:49 db Exp $ */
+/* $Id: serverif.h,v 1.17 2002/05/20 05:30:57 db Exp $ */
 
 /*
  * default ping timeout time from server
@@ -42,7 +42,6 @@ char myclass[100];
 
 struct services_entry
 {
-  time_t last_checked_time;
   char   cloning_host[MAX_HOST];
   char   last_cloning_host[MAX_HOST];
   char   user_count[SMALL_BUFF];

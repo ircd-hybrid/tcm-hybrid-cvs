@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.22 2002/05/20 01:29:30 db Exp $
+ * $Id: logging.c,v 1.23 2002/05/20 05:31:03 db Exp $
  *
  * - db
  */
@@ -478,7 +478,7 @@ logfailure(char *nickuh,int botreject)
         {
           prnt(connections[0].socket,"Ran out of memory in logfailure\n");
           sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in logfailure");
-          gracefuldie(0, __FILE__, __LINE__);
+	  exit(0);
         }
 
       strncpy(tmp->user,userinfo.user,11);

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.61 2002/05/20 01:15:51 db Exp $ */
+/* $Id: dcc_commands.c,v 1.62 2002/05/20 05:30:59 db Exp $ */
 
 #include "setup.h"
 
@@ -31,6 +31,7 @@
 #include <fcntl.h>
 #include "config.h"
 #include "tcm.h"
+#include "event.h"
 #include "token.h"
 #include "bothunt.h"
 #include "userlist.h"
@@ -857,6 +858,11 @@ void m_bots(int connnum, int argc, char *argv[])
     report_multi(connections[connnum].socket, atoi(argv[1]));
   else
     report_multi(connections[connnum].socket, 3);
+}
+
+void m_events(int connnum, int argc, char *argv[])
+{
+  show_events(connections[connnum].socket);
 }
 
 #ifdef VIRTUAL
@@ -1968,6 +1974,10 @@ struct TcmMessage bots_msgtab = {
  ".bots", 0, 1,
  {m_unregistered, m_not_oper, m_bots, m_bots}
 };
+struct TcmMessage events_msgtab = {
+ ".events", 0, 1,
+ {m_unregistered, m_not_oper, m_events, m_events}
+};
 #ifdef VIRTUAL
 struct TcmMessage vmulti_msgtab = {
  ".vmulti", 0, 1,
@@ -2065,6 +2075,7 @@ _modinit()
   mod_add_cmd(&failures_msgtab);
   mod_add_cmd(&domains_msgtab);
   mod_add_cmd(&bots_msgtab);
+  mod_add_cmd(&events_msgtab);
 #ifdef VIRTUAL
   mod_add_cmd(&vmulti_msgtab);
 #endif

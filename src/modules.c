@@ -2,7 +2,7 @@
  * much of this code has been copied (though none ver batum)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.23 2002/05/09 13:02:38 wcampbel Exp $B
+ * $Id: modules.c,v 1.24 2002/05/20 05:31:03 db Exp $B
  *
  */
 
@@ -402,8 +402,8 @@ int load_all_modules(int log)
 
   if (!(module_dir = opendir(MODULE_DIRECTORY)))
     {
-      gracefuldie(0, __FILE__, __LINE__);
-      return 0;
+      /* XXX some sort of more useful error would be nice here */
+      exit(-1);
     }
   while ((mdirent = readdir(module_dir)))
     {

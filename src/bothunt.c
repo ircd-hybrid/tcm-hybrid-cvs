@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.73 2002/05/20 00:21:31 db Exp $ */
+/* $Id: bothunt.c,v 1.74 2002/05/20 05:30:59 db Exp $ */
 
 #include "setup.h"
 
@@ -239,24 +239,24 @@ static int gline_request(char *user, char *host, char *reason, char *who,
   if ((glines[i].user = (char *) malloc(MAX_USER)) == NULL)
   {
     sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host()");
-    gracefuldie(0, __FILE__, __LINE__);
+    exit(-1);
   }
 
   if ((glines[i].host = (char *) malloc(MAX_HOST)) == NULL)
   {
     sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host()");
-    gracefuldie(0, __FILE__, __LINE__);
+    exit(-1);
   }
 
   if ((glines[i].reason = (char *) malloc(1024)) == NULL)
   {
     sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host()");
-    gracefuldie(0, __FILE__, __LINE__);
+    exit(-1);
   }
   if ((glines[i].who = (char *) malloc(1024)) == NULL)
   {
     sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host()");
-    gracefuldie(0, __FILE__, __LINE__);
+    exit(-1);
   }
 
   strncpy(glines[i].user, user, MAX_USER);
@@ -1037,7 +1037,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 		 config_entries.rserver_name[0] ?
 		 config_entries.rserver_name : config_entries.server_name);
     log_problem("onservnotice", "Banned from server.  Exiting.");
-    gracefuldie(0, __FILE__, __LINE__);
+    exit(-1);
     /* NOT REACHED */
     break;
 
@@ -1501,7 +1501,7 @@ void addtohash(struct hashrec *table[],char *key,struct userentry *item)
   {
     prnt(connections[0].socket,"Ran out of memory in addtohash\n");
     sendtoalldcc(SEND_ALL_USERS,"Ran out of memory in addtohash\n");
-    gracefuldie(0, __FILE__, __LINE__);
+    exit(-1);
   }
 
   newhashrec->info = item;
@@ -1784,7 +1784,7 @@ static void adduserhost(char *nick,
     fprintf(outfile, "Ran out of memory in adduserhost\n");
     prnt(connections[0].socket,"QUIT :Ran out of memory in adduserhost\n");
     sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in adduserhost\n");
-    gracefuldie(0, __FILE__, __LINE__);
+    exit(-1);
   }
 
   strncpy(newuser->nick,nick,MAX_NICK);

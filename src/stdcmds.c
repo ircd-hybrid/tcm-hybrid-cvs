@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.57 2002/05/19 14:27:28 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.58 2002/05/20 05:31:03 db Exp $ */
 
 #include "setup.h"
 
@@ -385,206 +385,251 @@ struct hashrec * find_host(char * host) {
  * Note that if an ip is passed, it *must* be a valid ip, no checks for that
  */
 
-void handle_action(int actionid, int idented, char *nick, char *user, char *host, char *ip, char * addcmt) {
+void
+handle_action(int actionid, int idented, char *nick, char *user,
+	      char *host, char *ip, char * addcmt)
+{
   char newhost[MAX_HOST];
   char newuser[MAX_USER];
   char comment[512];
   char *p;
   struct hashrec * userptr;
 
-  if (!user && !host && nick) {
-    userptr = find_nick(nick);
-    if (userptr) {
-      user = userptr->info->user;
-      host = userptr->info->host;
-      ip = userptr->info->ip_host;
-      if (!strcmp(ip, "255.255.255.255"))
-	ip = 0;
+  if (!user && !host && nick)
+    {
+      userptr = find_nick(nick);
+      if (userptr)
+	{
+	  user = userptr->info->user;
+	  host = userptr->info->host;
+	  ip = userptr->info->ip_host;
+	  if (!strcmp(ip, "255.255.255.255"))
+	    ip = 0;
+	}
     }
-  }
 
-  // Sane input?
-  if ((actionid < 0) || (actionid >= MAX_ACTIONS) || !user || !host || !host[0]
-      || strchr(host, '*') || strchr(host, '?') || strchr(user, '*') || strchr(user, '?')) 
-  {
-    if ((actionid < 0) || (actionid >= MAX_ACTIONS))
-      log("handle_action: action is %i\n", actionid);
-    else if (!user)
-      log("handle_action(%s): user is NULL\n", actions[actionid].name);
-    else if (!host)
-      log("handle_action(%s): host is NULL\n", actions[actionid].name);
-    else if (!host[0])
-      log("handle_action(%s): host is empty\n", actions[actionid].name);
-    else if (strchr(host, '*') || strchr(host, '?'))
-      log("handle_action(%s): host contains wildchars (%s)\n", actions[actionid].name, host);
-    else if (strchr(user, '*') || strchr(user, '?'))
-      log("handle_action(%s): user contains wildchars (%s)\n", actions[actionid].name, user);
-    return;
-  }
+  /* Sane input? */
+  if ((actionid < 0) || (actionid >= MAX_ACTIONS) ||
+      !user || !host || !host[0] ||
+      strchr(host, '*') || strchr(host, '?') ||
+      strchr(user, '*') || strchr(user, '?')) 
+    {
+      if ((actionid < 0) || (actionid >= MAX_ACTIONS))
+	log("handle_action: action is %i\n", actionid);
+      else if (!user)
+	log("handle_action(%s): user is NULL\n", actions[actionid].name);
+      else if (!host)
+	log("handle_action(%s): host is NULL\n", actions[actionid].name);
+      else if (!host[0])
+	log("handle_action(%s): host is empty\n", actions[actionid].name);
+      else if (strchr(host, '*') || strchr(host, '?'))
+	log("handle_action(%s): host contains wildchars (%s)\n",
+	    actions[actionid].name, host);
+      else if (strchr(user, '*') || strchr(user, '?'))
+	log("handle_action(%s): user contains wildchars (%s)\n",
+	    actions[actionid].name, user);
+      return;
+    }
 
-  // Valid action?
-  if (!actions[actionid].method) {
-    log("handle_action(%s): method field is 0\n", actions[actionid].name);
-    return;
-  }
+  /* Valid action? */
+  if (!actions[actionid].method)
+    {
+      log("handle_action(%s): method field is 0\n", actions[actionid].name);
+      return;
+    }
 
-  // Use hoststrip to create a k-line mask.
-  // First the host
-  switch (actions[actionid].hoststrip & HOSTSTRIP_HOST) {
-  case HOSTSTRIP_HOST_BLOCK:
-    if (inet_addr(host) == INADDR_NONE) {
-      p = host;
-      while (*p && (*p != '.'))
-	p++;
-      if (!*p) {
-	// Host without dots? 
-	strncpy(newhost, host, sizeof(newhost));
-	newhost[sizeof(newhost)-1] = 0;
-	log("handle_action(%s): '%s' appears to be a weird host\n", actions[actionid].name, host);
-	return;
+  /* Use hoststrip to create a k-line mask.
+   * First the host
+   */
+  switch (actions[actionid].hoststrip & HOSTSTRIP_HOST)
+    {
+    case HOSTSTRIP_HOST_BLOCK:
+      if (inet_addr(host) == INADDR_NONE) {
+	p = host;
+	while (*p && (*p != '.'))
+	  p++;
+	if (!*p)
+	  {
+	    /* Host without dots?  */
+	    strncpy(newhost, host, sizeof(newhost));
+	    newhost[sizeof(newhost)-1] = 0;
+	    log("handle_action(%s): '%s' appears to be a weird host\n",
+		actions[actionid].name, host);
+	    return;
+	  }
+	newhost[0] = '*';
+	newhost[1] = 0;
+	strncat(newhost, host, sizeof(newhost));
       }
-      newhost[0] = '*';
-      newhost[1] = 0;
-      strncat(newhost, host, sizeof(newhost));
-    } else {
-      strncpy(newhost, host, sizeof(newhost)-3);
-      newhost[sizeof(newhost)-4] = 0; // This HAVE to be useless, but oh well.
-      p = strrchr(newhost, '.');
-      if (*p) {
-	p[1] = '*';
-	p[2] = 0;
-      }
+      else
+	{
+	  strncpy(newhost, host, sizeof(newhost)-3);
+	  /* This HAS to be useless, but oh well.*/
+	  newhost[sizeof(newhost)-4] = 0;
+	  p = strrchr(newhost, '.');
+	  if (*p)
+	    {
+	      p[1] = '*';
+	      p[2] = 0;
+	    }
+	}
+      break;
+    case HOSTSTRIP_HOST_AS_IS:
+    default:
+      strncpy(newhost, host, sizeof(newhost));
+      newhost[sizeof(newhost)-1] = 0;
+      break;
     }
-    break;
-  case HOSTSTRIP_HOST_AS_IS:
-  default:
-    strncpy(newhost, host, sizeof(newhost));
-    newhost[sizeof(newhost)-1] = 0;
-    break;
-  }
 
-  if (idented) {
-    switch(actions[actionid].hoststrip & HOSTSTRIP_IDENT) {
-    case HOSTSTRIP_IDENT_PREFIXED:
-      p = user;
-      if (strlen(p)>8) 
-        p += strlen(user)-8;
-      strncpy(newuser+1, p, sizeof(newuser)-1);
-      newuser[0] = '*';
-      newuser[sizeof(newuser)-1] = 0;
-      break;
-    case HOSTSTRIP_IDENT_ALL:
-      strcpy(newuser, "*");
-      break;
-    case HOSTSTRIP_IDENT_AS_IS:
-    default:
-      strncpy(newuser, user, sizeof(newuser));
-      newuser[sizeof(newuser)-1] = 0;
-      break;
+  if (idented)
+    {
+      switch(actions[actionid].hoststrip & HOSTSTRIP_IDENT)
+	{
+	case HOSTSTRIP_IDENT_PREFIXED:
+	  p = user;
+	  if (strlen(p)>8) 
+	    p += strlen(user)-8;
+	  strncpy(newuser+1, p, sizeof(newuser)-1);
+	  newuser[0] = '*';
+	  newuser[sizeof(newuser)-1] = 0;
+	  break;
+	case HOSTSTRIP_IDENT_ALL:
+	  strcpy(newuser, "*");
+	  break;
+	case HOSTSTRIP_IDENT_AS_IS:
+	default:
+	  strncpy(newuser, user, sizeof(newuser));
+	  newuser[sizeof(newuser)-1] = 0;
+	  break;
+	}
     }
-  } else {
-    switch(actions[actionid].hoststrip & HOSTSTRIP_NOIDENT) {
-    case HOSTSTRIP_NOIDENT_PREFIXED:
-      p = user;
-      if (strlen(p)>8)
-        p += strlen(user)-8;
-      strncpy(newuser+1, user, sizeof(newuser)-1);
-      newuser[0] = '*';
-      newuser[sizeof(newuser)-1] = 0;
-      break;
-    case HOSTSTRIP_NOIDENT_ALL:
-      strcpy(newuser, "~*");
-      break;
-    case HOSTSTRIP_NOIDENT_UNIDENTED:
-    default:
-      strcpy(newuser, "*~*");
-      break;
+  else
+    {
+      switch(actions[actionid].hoststrip & HOSTSTRIP_NOIDENT)
+	{
+	case HOSTSTRIP_NOIDENT_PREFIXED:
+	  p = user;
+	  if (strlen(p)>8)
+	    p += strlen(user)-8;
+	  strncpy(newuser+1, user, sizeof(newuser)-1);
+	  newuser[0] = '*';
+	  newuser[sizeof(newuser)-1] = 0;
+	  break;
+	case HOSTSTRIP_NOIDENT_ALL:
+	  strcpy(newuser, "~*");
+	  break;
+	case HOSTSTRIP_NOIDENT_UNIDENTED:
+	default:
+	  strcpy(newuser, "*~*");
+	  break;
+	}
     }
-  }
   strcpy(comment, "No actions taken");
 
 
-  if (!okhost(user[0] ? user : "*", host, actionid)) {
-
-    // Now process the event, we got the needed data
-    if (actions[actionid].method & METHOD_TKLINE) {    
-      // In case the actions temp k-line time isnt set, set a default
-      if (actions[actionid].klinetime<=0) 
-	actions[actionid].klinetime = 60;
-      else if (actions[actionid].klinetime>14400) 
-	actions[actionid].klinetime = 14400;
-      toserv("KLINE %d %s@%s :%s\n", actions[actionid].klinetime, newuser, newhost, 
-	     actions[actionid].reason ? actions[actionid].reason : "Automated temporary K-Line");    
-      snprintf(comment, sizeof(comment), "%d minutes temporary k-line of %s@%s", actions[actionid].klinetime, newuser, newhost);
-    } else if (actions[actionid].method & METHOD_KLINE) {
-      toserv("KLINE %s@%s :%s\n", newuser, newhost, 
-	     actions[actionid].reason ? actions[actionid].reason : "Automated K-Line");    
-      snprintf(comment, sizeof(comment), "Permanent k-line of %s@%s", newuser, newhost);
-    } else if (actions[actionid].method & METHOD_DLINE) {
-      if ((inet_addr(host) == INADDR_NONE) && (!ip)) {
-	/* We don't have any IP, so look it up from our tables */
-	userptr = find_host(host);
-	if (!userptr || !userptr->info || !userptr->info->ip_host[0]) {
-	  /* We couldn't find one either, revert to a k-line */
-	  log("handle_action(%s): Reverting to k-line, couldn't find IP for %s\n",
-	      actions[actionid].name, host);
-	  actions[actionid].method |= METHOD_KLINE;
-	  handle_action(actionid, idented, nick, user, host, 0, addcmt);
-	  actions[actionid].method &= ~METHOD_KLINE;
-	  return;
+  if (!okhost(user[0] ? user : "*", host, actionid))
+    {
+      /* Now process the event, we got the needed data */
+      if (actions[actionid].method & METHOD_TKLINE)
+	{    
+	  /* In case the actions temp k-line time isnt set, set a default */
+	  if (actions[actionid].klinetime<=0) 
+	    actions[actionid].klinetime = 60;
+	  else if (actions[actionid].klinetime>14400) 
+	    actions[actionid].klinetime = 14400;
+	  toserv("KLINE %d %s@%s :%s\n",
+		 actions[actionid].klinetime, newuser, newhost, 
+		 actions[actionid].reason ?
+		 actions[actionid].reason : "Automated temporary K-Line");    
+	  snprintf(comment, sizeof(comment),
+		   "%d minutes temporary k-line of %s@%s",
+		   actions[actionid].klinetime, newuser, newhost);
 	}
-	handle_action(actionid, idented, nick, user, host, userptr->info->ip_host, addcmt);
-	return;
-      }
-      if (inet_addr(host) == INADDR_NONE) {
-	/* Oks, passed host isn't in IP form.
-	 * Let's move the passed ip to newhost, then mask it if needed
-	 */
-	strcpy(newhost, ip);
-	if ((actions[actionid].hoststrip & HOSTSTRIP_HOST) == HOSTSTRIP_HOST_BLOCK) {
-	  p = strrchr(newhost, '.');
-	  p++;
-	  strcpy(p, "*");
+      else if (actions[actionid].method & METHOD_KLINE)
+	{
+	  toserv("KLINE %s@%s :%s\n", newuser, newhost, 
+		 actions[actionid].reason ? 
+		 actions[actionid].reason : "Automated K-Line");    
+	  snprintf(comment, sizeof(comment),
+		   "Permanent k-line of %s@%s", newuser, newhost);
 	}
-      }
+      else if (actions[actionid].method & METHOD_DLINE)
+	{
+	  if ((inet_addr(host) == INADDR_NONE) && (!ip))
+	    {
+	      /* We don't have any IP, so look it up from our tables */
+	      userptr = find_host(host);
+	      if (!userptr || !userptr->info || !userptr->info->ip_host[0])
+		{
+		  /* We couldn't find one either, revert to a k-line */
+		  log("handle_action(%s): Reverting to k-line, couldn't find IP for %s\n",
+		      actions[actionid].name, host);
+		  actions[actionid].method |= METHOD_KLINE;
+		  handle_action(actionid, idented, nick, user, 
+				host, 0, addcmt);
+		  actions[actionid].method &= ~METHOD_KLINE;
+		  return;
+		}
+	      handle_action(actionid, idented, nick, user,
+			    host, userptr->info->ip_host, addcmt);
+	      return;
+	    }
+	  if (inet_addr(host) == INADDR_NONE)
+	    {
+	      /* Oks, passed host isn't in IP form.
+	       * Let's move the passed ip to newhost, then mask it if needed
+	       */
+	      strcpy(newhost, ip);
+	      if ((actions[actionid].hoststrip & HOSTSTRIP_HOST)
+		  == HOSTSTRIP_HOST_BLOCK) {
+		p = strrchr(newhost, '.');
+		p++;
+		strcpy(p, "*");
+	      }
+	    }
 
-      toserv("DLINE %s :%s\n", newhost, 
-	     actions[actionid].reason ? actions[actionid].reason : "Automated D-Line");    
-      snprintf(comment, sizeof(comment), "D-line of %s", newhost);    
+	  toserv("DLINE %s :%s\n", newhost, 
+		 actions[actionid].reason ?
+		 actions[actionid].reason : "Automated D-Line");    
+	  snprintf(comment, sizeof(comment), "D-line of %s", newhost);    
+	}
     }
-  } else {
-    strcpy(comment, "Exempted host - no actions taken");
-  }
-  if (actions[actionid].method & METHOD_DCC_WARN) {
-    if (addcmt && addcmt[0])
-      sendtoalldcc(SEND_WARN_ONLY, "*** %s violation (%s) from %s (%s@%s): %s", 
-		   actions[actionid].name, addcmt,
-		   (nick && nick[0]) ? nick : "<unknown>", 
-		   (user && user[0]) ? user : "<unknown>",
-		   host, comment);
-    else
-      sendtoalldcc(SEND_WARN_ONLY, "*** %s violation from %s (%s@%s): %s", 
-		   actions[actionid].name, 
-		   (nick && nick[0]) ? nick : "<unknown>", 
-		   (user && user[0]) ? user : "<unknown>",
-		   host, comment);
+  else
+    {
+      strcpy(comment, "Exempted host - no actions taken");
+    }
 
-  }
-  if (actions[actionid].method & METHOD_IRC_WARN) {
-    if (addcmt && addcmt[0])
-      msg_mychannel("*** %s violation (%s) from %s (%s@%s): %s\n",
-		    actions[actionid].name, addcmt,
-		    (nick && nick[0]) ? nick : "<unknown>", 
-		    (user && user[0]) ? user : "<unknown>",
-		    host, comment);
-    else
-      msg_mychannel("*** %s violation from %s (%s@%s): %s\n",
-		    actions[actionid].name, 
-		    (nick && nick[0]) ? nick : "<unknown>", 
-		    (user && user[0]) ? user : "<unknown>",
-		    host, comment);
-    
-  }
+  if (actions[actionid].method & METHOD_DCC_WARN)
+    {
+      if (addcmt && addcmt[0])
+	sendtoalldcc(SEND_WARN_ONLY, "*** %s violation (%s) from %s (%s@%s): %s", 
+		     actions[actionid].name, addcmt,
+		     (nick && nick[0]) ? nick : "<unknown>", 
+		     (user && user[0]) ? user : "<unknown>",
+		     host, comment);
+      else
+	sendtoalldcc(SEND_WARN_ONLY, "*** %s violation from %s (%s@%s): %s", 
+		     actions[actionid].name, 
+		     (nick && nick[0]) ? nick : "<unknown>", 
+		     (user && user[0]) ? user : "<unknown>",
+		     host, comment);
+
+    }
+  if (actions[actionid].method & METHOD_IRC_WARN)
+    {
+      if (addcmt && addcmt[0])
+	msg_mychannel("*** %s violation (%s) from %s (%s@%s): %s\n",
+		      actions[actionid].name, addcmt,
+		      (nick && nick[0]) ? nick : "<unknown>", 
+		      (user && user[0]) ? user : "<unknown>",
+		      host, comment);
+      else
+	msg_mychannel("*** %s violation from %s (%s@%s): %s\n",
+		      actions[actionid].name, 
+		      (nick && nick[0]) ? nick : "<unknown>", 
+		      (user && user[0]) ? user : "<unknown>",
+		      host, comment);
+    }
 }
 		  
 
@@ -636,7 +681,7 @@ print_motd(int sock)
   FILE *userfile;
   char line[MAX_BUFF];
 
-  if( !(userfile = fopen(MOTD_FILE,"r")) )
+  if((userfile = fopen(MOTD_FILE,"r")) == NULL)
     {
       prnt(sock,"No MOTD\n");
       return;
@@ -837,12 +882,12 @@ list_virtual_users(int sock,char *userhost,int regex)
 #ifdef HAVE_REGEX_H
   if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
   {
-    if ((errbuf = (char *)malloc(1024)) == NULL)
+    if ((errbuf = (char *)malloc(REGEX_SIZE)) == NULL)
     {
       sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
       exit(0);
     }
-    regerror(i, (regex_t *)&reg, errbuf, 1024); 
+    regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE); 
     prnt(sock, "Error compiling regular expression: %s\n", errbuf);
     free(errbuf);
     return;
@@ -898,12 +943,12 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
 #ifdef HAVE_REGEX_H
   if (regex == YES && (i=regcomp((regex_t *)&reg, userhost, 1)))
   {
-    if ((errbuf = (char *)malloc(1024)) == NULL)
+    if ((errbuf = (char *)malloc(REGEX_SIZE)) == NULL)
     {
       sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in kill_list_users()\n");
       exit(0);
     }
-    regerror(i, (regex_t *)&reg, errbuf, 1024);
+    regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE);
     prnt(sock, "Error compiling regular expression: %s\n", errbuf);
     free(errbuf);
     return;

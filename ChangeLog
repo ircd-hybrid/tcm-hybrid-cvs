@@ -1,3 +1,9 @@
+*** 20010403_2 by db
+- corrected drone code to honour autopilot as well
+- corrected examples.
+
+
+
 *** 20010403_1 by db
 - removed extra print to opers about cfloods
 - fixed spam warning to suggest .kspam

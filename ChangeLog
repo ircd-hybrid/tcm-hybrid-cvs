@@ -1,3 +1,19 @@
+db          2002/05/20 12:58:58 EDT	(20020520_9)
+
+  Modified files:
+    modules              serverif.c 
+  Added files:
+    include              numeric.h 
+  Log:
+  - added numeric.h make serverif.c use numeric.h. I got tired of raw
+    numeric decimals.
+  
+  Revision  Changes    Path
+  1.1       +247 -0    tcm-hybrid/include/numeric.h (new)
+  1.69      +20 -18    tcm-hybrid/modules/serverif.c
+
+
+
 wcampbel    2002/05/20 08:58:30 EDT	(20020520_8)
 
   Modified files:

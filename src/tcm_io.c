@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.49 2002/05/27 00:56:09 db Exp $
+ * $Id: tcm_io.c,v 1.50 2002/05/27 00:57:49 db Exp $
  */
 
 #include <stdio.h>
@@ -84,7 +84,6 @@ read_packet(void)
   char incomingbuff[BUFFERSIZE];
   char dccbuff[DCCBUFF_SIZE];
   int  nread=0;
-  char *argv[MAX_ARGV];
   int  i;
   int  server_time_out;
   struct timeval read_time_out;

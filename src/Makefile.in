@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.29 2002/06/01 01:12:27 wcampbel Exp $
+# $Id: Makefile.in,v 1.30 2002/06/03 21:49:36 leeh Exp $
 
 CC = @CC@
 RM = @RM@
@@ -19,8 +19,8 @@ LDFLAGS = @LDFLAGS@
 SOURCES =       actions.c	\
 		bothunt.c       \
 		clones.c	\
-		commands.c	\
 		dcc.c		\
+		dcc_commands.c	\
                 event.c         \
 		handler.c	\
                 hash.c		\
@@ -29,6 +29,7 @@ SOURCES =       actions.c	\
                 match.c         \
                 modules.c       \
                 parse.c         \
+		serv_commands.c	\
 		services.c	\
                 stdcmds.c       \
                 tcm_io.c        \

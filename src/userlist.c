@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.56 2002/05/20 19:05:11 wcampbel Exp $
+ * $Id: userlist.c,v 1.57 2002/05/21 00:46:49 wcampbel Exp $
  *
  */
 
@@ -1002,9 +1002,13 @@ void reload_user_list(int sig)
 
   for (temp=reload; temp; temp=temp->next)
     temp->function(sig, 0, NULL);
-  clear_userlist();
-  load_userlist();
-  toserv("STATS Y\n");
+  if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
+    toserv("STATS I\nSTATS Y\n");
+  else
+    toserv("STATS E\nSTATS F\nSTATS Y\n");
+
+  initopers();
+
   sendtoalldcc(SEND_ALL_USERS, "*** Caught SIGHUP ***\n");
 }
 

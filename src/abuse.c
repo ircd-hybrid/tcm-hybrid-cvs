@@ -34,7 +34,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.3 2000/12/08 23:22:29 bill Exp $";
+static char *version="$Id: abuse.c,v 1.4 2000/12/10 00:28:09 bill Exp $";
 
 /*
  * do_a_kline()
@@ -206,7 +206,7 @@ void suggest_kill_kline(int reason,
     {
       strcpy(suggested_user,"~*");
     }
-
+  suggested_host=suggest_host(host);
 /* 
  * Completely redone to conform to A: in config.
  * 	-pro 6/2000

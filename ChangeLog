@@ -1,3 +1,10 @@
+*** 20010919_1 by bill
+- another major leaped towards modularization
+   current brokenness: 
+    ELF file's phentsize not the expected size
+   for all modules on load
+
+
 *** 20010918_2 by bill
 - first commit towards modularization
   note: this tcm does *not* work, and yes I know it compiles

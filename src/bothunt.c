@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.175 2002/06/22 10:21:20 leeh Exp $
+ * $Id: bothunt.c,v 1.176 2002/06/22 14:04:47 db Exp $
  */
 
 #include <stdio.h>
@@ -47,7 +47,7 @@ static void cs_nick_flood(char *snotice);
 static void cs_clones(char *snotice);
 static void link_look_notice(char *snotice);
 static void connect_flood_notice(char *snotice, char *reason);
-static void add_to_nick_change_table(char *user_host, char *last_nick);
+static void add_to_nick_change_table(char *user, char *host, char *last_nick);
 static void stats_notice(char *snotice);
 static void chopuh(int istrace,char *nickuserhost,struct user_entry *userinfo);
 #define IS_FROM_TRACE		YES
@@ -59,19 +59,43 @@ struct serv_command servnotice_msgtab = {
 
 struct s_testline testlines;
 
+/* Nick change flood detect */
 struct nick_change_entry
 {
-  char user_host[MAX_USERHOST];
+  char user[MAX_USER];
+  char host[MAX_HOST];
   char last_nick[MAX_NICK];
   int  nick_change_count;
   time_t first_nick_change;
   time_t last_nick_change;
   int noticed;
 };
-
-
 static struct nick_change_entry nick_changes[NICK_CHANGE_TABLE_SIZE];
 
+/* Link look flood detect */
+#define LINK_LOOK_TABLE_SIZE 10
+struct link_look_entry
+{
+  char user[MAX_USER];
+  char host[MAX_HOST];
+  int  link_look_count;
+  time_t last_link_look;
+};
+static struct link_look_entry link_look[LINK_LOOK_TABLE_SIZE];
+
+/* Connect flood detect */
+#define CONNECT_FLOOD_TABLE_SIZE 30
+struct connect_flood_entry
+{
+  char user[MAX_USER];
+  char host[MAX_HOST];
+  char ip[MAX_IP];
+  int  connect_count;
+  time_t last_connect;
+};
+static struct connect_flood_entry connect_flood[CONNECT_FLOOD_TABLE_SIZE];
+
+struct reconnect_clone_entry reconnect_clone[RECONNECT_CLONE_TABLE_SIZE];
 
 struct msg_to_action
 {
@@ -121,7 +145,6 @@ struct msg_to_action msgs_to_mon[] = {
   {NULL, 0, INVALID}
 };	
 
-struct connect_flood_entry connect_flood[CONNECT_FLOOD_TABLE_SIZE];
 
 /*
  * on_trace_user()
@@ -845,7 +868,6 @@ link_look_notice(char *snotice)
   char *nick_reported;
   char *user;
   char *host;
-  char user_host[MAX_USERHOST];
   char *seen_user_host;
   int first_empty_entry = -1;
   int found_entry = NO;
@@ -866,19 +888,14 @@ link_look_notice(char *snotice)
   send_to_all(FLAGS_SPY, "[LINKS by %s (%s@%s)]",
 	       nick_reported, user, host ); /* - zaph */
 
-  snprintf(user_host, MAX_USERHOST, "%s@%s", user, host);
-
   for(i = 0; i < MAX_LINK_LOOKS; i++ )
     {
-      if (link_look[i].user_host[0])
+      if (link_look[i].user[0] != '\0')
 	{
-	  if (!strcasecmp(link_look[i].user_host,user_host))
+	  if ((strcasecmp(link_look[i].user,user) != 0) &&
+	      (strcasecmp(link_look[i].host,host) != 0))
 	    {
 	      found_entry = YES;
-	  
-	      /* if its an old old entry, let it drop to 0, then start counting
-	       * (this should be very unlikely case)
-	       */
 
 	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
 		{
@@ -892,7 +909,8 @@ link_look_notice(char *snotice)
 		  handle_action(act_link,
 				nick_reported, user, host, 0, 0);
 		  /* the client is dead now */
-		  link_look[i].user_host[0] = '\0';
+		  link_look[i].user[0] = '\0';
+		  link_look[i].host[0] = '\0';
 		}
 	      else
 		{
@@ -903,7 +921,8 @@ link_look_notice(char *snotice)
 	    {
 	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
 		{
-		  link_look[i].user_host[0] = '\0';
+		  link_look[i].user[0] = '\0';
+		  link_look[i].host[0] = '\0';
 		}
 	    }
 	}
@@ -923,8 +942,8 @@ link_look_notice(char *snotice)
       if (first_empty_entry >= 0)
 	{
 	  /* XXX */
-	  strlcpy(link_look[first_empty_entry].user_host,user_host,
-		  MAX_USERHOST);
+	  strlcpy(link_look[first_empty_entry].user,user,MAX_USER);
+	  strlcpy(link_look[first_empty_entry].user,host,MAX_USER);
 	  link_look[first_empty_entry].last_link_look = current_time;
           link_look[first_empty_entry].link_look_count = 1;
 	}
@@ -1014,22 +1033,24 @@ check_nick_flood(char *snotice)
   char *nick1;
   char *nick2;
   char *user_host;
+  char *user;
+  char *host;
 
   if ((p = strtok(snotice," ")) == NULL)	/* Throw away the "From" */
     return;
 
-  if (strcasecmp(p,"From"))	/* This isn't an LT notice */
+  if (strcasecmp(p,"From") != 0)
     {
       nick1 = p;	/* This _should_ be nick1 */
 
       if ((user_host = strtok(NULL," ")) == NULL)	/* (user@host) */
 	return;
 
-      if (*user_host == '(')
-	user_host++;
-
       if ((p = strrchr(user_host,')')) != NULL)
 	*p = '\0';
+
+      if (get_user_host(&user, &host, user_host) == 0)
+	return;
 
       if ((p = strtok(NULL," ")) == NULL)
 	return;
@@ -1051,32 +1072,9 @@ check_nick_flood(char *snotice)
 
       if ((nick2 = strtok(NULL," ")) == NULL)
 	return;
-      add_to_nick_change_table(user_host, nick2);
-      update_nick(user_host, nick1, nick2);
-
-      return;
+      add_to_nick_change_table(user, host, nick2);
+      update_nick(user, host, nick1, nick2);
     }
-
-  if ((nick1 = strtok(NULL," ")) == NULL)
-    return;
-
-  if ((p = strtok(NULL," ")) == NULL)	/* Throw away the "to" */
-    return;
-
-  if ((nick2 = strtok(NULL," ")) == NULL)	/* This _should_ be nick2 */
-    return;
-
-  if ((user_host = strtok(NULL," ")) == NULL)	/* u@h  */
-    return;
-
-  if (*user_host == '[')
-    user_host++;
-
-  if ((p = strrchr(user_host,']')) != NULL)
-    *p = '\0';
-
-  add_to_nick_change_table(user_host,nick2);
-  update_nick(user_host, nick1, nick2);
 }
 
 /*
@@ -1093,7 +1091,7 @@ init_link_look_table()
   int i;
 
   for(i = 0; i < LINK_LOOK_TABLE_SIZE; i++)
-    link_look[i].user_host[0] = '\0';
+    link_look[i].host[0] = link_look[i].user[0] = '\0';
 }
 
 /*
@@ -1135,18 +1133,14 @@ init_link_look_table()
  */
 
 static void
-add_to_nick_change_table(char *user_host,char *last_nick)
+add_to_nick_change_table(char *user, char *host,char *last_nick)
 {
-  char *user;
-  char *host;
   int i;
   int found_empty_entry=-1;
-  struct tm *tmrec;
-
 
   for(i = 0; i < NICK_CHANGE_TABLE_SIZE; i++)
   {
-    if (nick_changes[i].user_host[0])
+    if (nick_changes[i].user[0] != '\0')
     {
       time_t time_difference;
       int time_ticks;
@@ -1156,7 +1150,8 @@ add_to_nick_change_table(char *user_host,char *last_nick)
       /* is it stale ? */
       if (time_difference >= NICK_CHANGE_T2_TIME)
       {
-	nick_changes[i].user_host[0] = '\0';
+	nick_changes[i].user[0] = '\0';
+	nick_changes[i].host[0] = '\0';
 	nick_changes[i].noticed = NO;
       }
       else
@@ -1167,7 +1162,8 @@ add_to_nick_change_table(char *user_host,char *last_nick)
 	/* is it stale? */
 	if (time_ticks >= nick_changes[i].nick_change_count)
 	{
-	  nick_changes[i].user_host[0] = '\0';
+	  nick_changes[i].user[0] = '\0';
+	  nick_changes[i].host[0] = '\0';
 	  nick_changes[i].noticed = NO;
 	}
 	else
@@ -1175,7 +1171,8 @@ add_to_nick_change_table(char *user_host,char *last_nick)
 	  /* just decrement 10 second units of nick changes */
 	  nick_changes[i].nick_change_count -= time_ticks;
 
-	  if ((strcasecmp(nick_changes[i].user_host,user_host)) == 0)
+	  if ((strcasecmp(nick_changes[i].user, user) == 0) &&
+	      (strcasecmp(nick_changes[i].host, host) == 0))
 	  {
 	    nick_changes[i].last_nick_change = current_time;
 	    (void)strlcpy(nick_changes[i].last_nick, last_nick, MAX_NICK);
@@ -1188,40 +1185,26 @@ add_to_nick_change_table(char *user_host,char *last_nick)
 	       NICK_CHANGE_MAX_COUNT)
 	      && !nick_changes[i].noticed)
 	  {
-	    tmrec = localtime(&nick_changes[i].last_nick_change);
-
 	    send_to_all(FLAGS_WARN,
-		 "nick flood %s (%s) %d in %d seconds (%2.2d:%2.2d:%2.2d)",
-			 nick_changes[i].user_host,
-			 nick_changes[i].last_nick,
-			 nick_changes[i].nick_change_count,
-			 nick_changes[i].last_nick_change-
-			 nick_changes[i].first_nick_change,
-			 tmrec->tm_hour,
-			 tmrec->tm_min,
-			 tmrec->tm_sec);
+			"nick flood %s@%s (%s) %d in %d seconds (%s)",
+			nick_changes[i].user,
+			nick_changes[i].host,
+			nick_changes[i].last_nick,
+			nick_changes[i].nick_change_count,
+			nick_changes[i].last_nick_change -
+			nick_changes[i].first_nick_change,
+			hour_minute_second(nick_changes[i].last_nick_change));
 
-	    
-	    if ((user = strtok(user_host,"@")) == NULL)
-	      return;
-	    if ((host = strtok(NULL,"")) == NULL)
-	      return;
-		      
 	    handle_action(act_flood, last_nick, user, host, 0, 0);
 	    tcm_log(L_NORM,
-		"nick flood %s (%s) %d in %d seconds (%02d/%02d/%d %2.2d:%2.2d:%2.2d)",
-		nick_changes[i].user_host,
-		nick_changes[i].last_nick,
-		nick_changes[i].nick_change_count,
-		nick_changes[i].last_nick_change-
-		nick_changes[i].first_nick_change,
-		tmrec->tm_mon+1,
-		tmrec->tm_mday,
-		tmrec->tm_year+1900,
-		tmrec->tm_hour,
-		tmrec->tm_min,
-		tmrec->tm_sec);
-
+		    "nick flood %s@%s (%s) %d in %d seconds (%s)",
+		    nick_changes[i].user,
+		    nick_changes[i].host,
+		    nick_changes[i].last_nick,
+		    nick_changes[i].nick_change_count,
+		    nick_changes[i].last_nick_change -
+		    nick_changes[i].first_nick_change,
+		    date_stamp());
 	    nick_changes[i].noticed = YES;
 	  }
 	}
@@ -1315,7 +1298,8 @@ clear_bothunt(void)
 
   for(i = 0; i < NICK_CHANGE_TABLE_SIZE; i++)
     {
-      nick_changes[i].user_host[0] = '\0';
+      nick_changes[i].user[0] = '\0';
+      nick_changes[i].host[0] = '\0';
       nick_changes[i].noticed = NO;
     }
 }
@@ -1342,14 +1326,14 @@ report_nick_flooders(int sock)
 
   for(i = 0; i < NICK_CHANGE_TABLE_SIZE; i++)
     {
-      if (nick_changes[i].user_host[0])
+      if (nick_changes[i].user[0] != '\0')
         {
           time_difference = current_time - nick_changes[i].last_nick_change;
 
           /* is it stale ? */
-          if( time_difference >= NICK_CHANGE_T2_TIME )
+          if(time_difference >= NICK_CHANGE_T2_TIME)
             {
-              nick_changes[i].user_host[0] = '\0';
+              nick_changes[i].user[0] = nick_changes[i].host[0] = '\0';
             }
           else
             {
@@ -1359,7 +1343,7 @@ report_nick_flooders(int sock)
               /* is it stale? */
               if(time_ticks >= nick_changes[i].nick_change_count)
                 {
-                  nick_changes[i].user_host[0] = '\0';
+		  nick_changes[i].user[0] = nick_changes[i].host[0] = '\0';
                 }
               else
                 {
@@ -1368,12 +1352,13 @@ report_nick_flooders(int sock)
                   if( nick_changes[i].nick_change_count > 1 )
                     {
                       print_to_socket(sock,
-                           "user: %s (%s) %d in %d",
-                           nick_changes[i].user_host,
-                           nick_changes[i].last_nick,
-                           nick_changes[i].nick_change_count,
-                           nick_changes[i].last_nick_change  -
-                           nick_changes[i].first_nick_change);
+				      "user: %s@%s (%s) %d in %d",
+				      nick_changes[i].user,
+				      nick_changes[i].host,
+				      nick_changes[i].last_nick,
+				      nick_changes[i].nick_change_count,
+				      nick_changes[i].last_nick_change  -
+				      nick_changes[i].first_nick_change);
                       reported_nick_flooder = YES;
                     }
                 }
@@ -1545,7 +1530,7 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
     {
       if((uh = strchr(nickuserhost,'[')) == NULL)
         {
-          /* no [, no (, god knows what the seperator is */
+          /* no [, no (, god knows what the separator is */
           if((uh = strchr(nickuserhost,'(')) == NULL)
             {
 
@@ -1587,7 +1572,7 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
           return;
         }
 
-      /* there *was* a [ as the seperator, uh points to it */
+      /* there *was* a [ as the separator, uh points to it */
 
       /* theres another one.  ugh. */
       if (strchr(uh+1,'[') != NULL)

@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.73 2002/06/22 10:23:01 leeh Exp $
+ * $Id: config.h,v 1.74 2002/06/22 14:04:44 db Exp $
  */
 
 /*
@@ -36,20 +36,14 @@
 #undef HIDE_OPER_IN_KLINES
 
 /*
- * lagged.org use something called "Calvin" for auto expiring of k-lines.
- * if you want support for this, define the following.
- */
-#undef CALVIN
-
-/*
  *  If you don't like the idea of any remote oper including those on the
  * tcm, being able to D line, define this
  */
 #undef NO_D_LINE_SUPPORT
 
 /*
- * The default tcm config file , can be overridden with a file name
- *  argument to tcm
+ * The default tcm config file, can be overridden with a file name
+ * argument to tcm.
  */
 
 #define MODULE_DIRECTORY "modules/"
@@ -323,5 +317,8 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 
 /* default DCC timeout */
 #define DCC_TIMEOUT 30
+
+/* XXX */
+#define RECONNECT_CLONE_TABLE_SIZE 50
 
 #endif

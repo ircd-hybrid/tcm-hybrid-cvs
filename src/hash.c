@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.36 2002/06/22 10:21:20 leeh Exp $
+ * $Id: hash.c,v 1.37 2002/06/22 14:04:48 db Exp $
  */
 
 #include <stdio.h>
@@ -826,51 +826,42 @@ check_virtual_host_clones(char *ip_class_c)
 /*
  * update_nick
  * 
- * inputs -	- original nick
+ * inputs -	- user
+ *		- host
+ *		- original nick
  *		- new nick
  * output	- NONE
- * side effects - A user has changed nicks. update the nick
+ * side effects - An user has changed nicks. update the nick
+ *
+ * There are presently four hash tables:
+ * one for username, one for hostname, one for domain and one for IP.
+ * each hashtable consists of hash_rec(s). Each hash_rec points
+ * to =one= common user_entry. This is why there is a link_count
+ * in the user_entry. It suffices to find the user_entry that
+ * has the old nick, then update it. It really wouldn't matter
+ * (except possibly for speed) if the user hash is searched, the host hash
+ * is searched, or... whatever.
+ * - Dianora
+ *
  */
 void
-update_nick(char *userhost, char *old_nick, char *new_nick)
+update_nick(char *user, char *host, char *old_nick, char *new_nick)
 {
   struct hash_rec *find;
   unsigned int hash_val;
-  char *username;
-  char *host;
 
-  username = userhost;
-
-  /* XXX - should we make an error? */
-  if((host = strchr(userhost, '@')) == NULL)
-    return;
-
-  *host++ = '\0';
-
-  hash_val = hash_func(username);
+  hash_val = hash_func(user);
   
   for(find = user_table[hash_val]; find; find = find->next)
   {
-    if(strcmp(find->info->nick, old_nick) == 0)
+    if((strcmp(find->info->user,user) == 0) &&
+       (strcmp(find->info->host,host) == 0) &&
+       (strcmp(find->info->nick, old_nick) == 0))
     {
       strlcpy(find->info->nick, new_nick, MAX_NICK);
-      break;
+      return;
     }
   }
-
-  hash_val = hash_func(host);
-
-  /* XXX - does the hashtable have one entry for all? */
-  for(find = user_table[hash_val]; find; find = find->next)
-  {
-    if(strcmp(find->info->nick, old_nick) == 0)
-    {
-      strlcpy(find->info->nick, new_nick, MAX_NICK);
-      break;
-    }
-  }
-
-  /* XXX - domain table? */
 }
 
 /*

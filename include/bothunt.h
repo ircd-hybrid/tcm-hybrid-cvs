@@ -1,12 +1,20 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.52 2002/06/21 15:34:12 leeh Exp $ */
+/* $Id: bothunt.h,v 1.53 2002/06/22 14:04:44 db Exp $ */
 
-void report_mem(int);
-void print_motd(int);		
 
 struct source_client;
+
+/* reconnect clone detect */
+
+struct reconnect_clone_entry
+{
+  char host [MAX_HOST];
+  int count;
+  time_t first;
+};
+extern struct reconnect_clone_entry reconnect_clone[];
 
 /* XXXX */
 void _config(int, int, char *argv[]);
@@ -86,39 +94,8 @@ void _config(int, int, char *argv[]);
 #define CLONERECONCOUNT   5	/* this many reconnects */
 #define CLONERECONFREQ    15    /* in this many seconds */
 
-#define RECONNECT_CLONE_TABLE_SIZE 50
-
-struct reconnect_clone_entry
-{
-  char host [MAX_HOST];
-  int count;
-  time_t first;
-};
-
-struct reconnect_clone_entry reconnect_clone[RECONNECT_CLONE_TABLE_SIZE];
-
-#define LINK_LOOK_TABLE_SIZE 10
-
-struct link_look_entry
-{
-  char user_host[MAX_USERHOST];
-  int  link_look_count;
-  time_t last_link_look;
-};
-
-struct link_look_entry link_look[LINK_LOOK_TABLE_SIZE];
-
-#define CONNECT_FLOOD_TABLE_SIZE 30
-
-struct connect_flood_entry
-{
-  char user[MAX_USER];
-  char host[MAX_HOST];
-  char ip[MAX_IP];
-  int  connect_count;
-  time_t last_connect;
-};
-
+void report_mem(int sock);
+void print_motd(int sock);
 void report_nick_flooders(int sock);
 void init_link_look_table(void);
 void init_bothunt(void);

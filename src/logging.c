@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.48 2002/06/21 13:45:22 leeh Exp $
+ * $Id: logging.c,v 1.49 2002/06/22 14:04:48 db Exp $
  *
  * - db
  */
@@ -186,7 +186,7 @@ log_kline(char *command_name, char *pattern, int  kline_time,
   FILE *fp_log;
 
 #ifdef KILL_KLINE_LOG
-  if( (fp_log = fopen(KILL_KLINE_LOG,"a")) )
+  if((fp_log = fopen(KILL_KLINE_LOG,"a")) != NULL)
     {
       if(config_entries.hybrid)
 	{
@@ -295,20 +295,42 @@ date_stamp(void)
 
   broken_up_time = localtime(&current_time);
 
-#ifdef CALVIN
   (void)snprintf(date_stamp_string,
 		 sizeof(date_stamp_string) - 1,"%04d%02d%02d",
 		 broken_up_time->tm_year+1900,
 		 (broken_up_time->tm_mon)+1,
 		 broken_up_time->tm_mday);
-#else
-  (void)snprintf(date_stamp_string,
-		 sizeof(date_stamp_string) - 1,"%02d/%02d/%d",
-		 (broken_up_time->tm_mon)+1,broken_up_time->tm_mday,
-		 broken_up_time->tm_year+1900);
-#endif
 
   return(date_stamp_string);
+}
+
+/*
+ * hour_minute_second
+ *
+ * inputs	- NULL means provide localtime, otherwise, use given time
+ * output	- A pointer to a static char array containing
+ *		  hour:minute:second
+ * side effects	- NONE
+ */
+
+char *
+hour_minute_second(time_t time_val)
+{
+  struct tm *broken_up_time;
+  static char time_string[SMALL_BUFF];
+
+  if(time_val == NULL)
+    broken_up_time = localtime(&current_time);
+  else
+    broken_up_time = localtime(&time_val);
+
+  (void)snprintf(time_string,
+		 sizeof(time_string) - 1,"%2.2d:%2.2d:%s.2d",
+		 broken_up_time->tm_hour,
+		 broken_up_time->tm_min,
+		 broken_up_time->tm_sec);
+
+  return(time_string);
 }
 
 /*

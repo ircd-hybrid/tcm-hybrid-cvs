@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.42 2001/11/24 00:07:53 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.43 2001/11/29 03:09:43 bill Exp $ */
 
 #include "setup.h"
 
@@ -2169,7 +2169,7 @@ static void connect_flood_notice(char *snotice)
   time_t current_time;
   int first_empty_entry = -1;
   int found_entry = NO;
-  int i, ident=NO;
+  int i, ident=YES;
 
   current_time = time(NULL);
   snotice +=5;

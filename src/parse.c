@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.34 2002/05/27 21:02:35 db Exp $
+ * $Id: parse.c,v 1.35 2002/05/27 21:25:12 leeh Exp $
  */
 
 #include <stdio.h>
@@ -357,6 +357,14 @@ process_server(int conn_num, char *source, char *function, char *param)
   if(isdigit((int) function[0]) && isdigit((int) function[1]) &&
      isdigit((int) function[2]))
     numeric = atoi(function);
+
+  if(numeric > 0)
+  {
+    struct serv_numeric *ptr;
+
+    for(ptr = serv_numeric_table; ptr; ptr = ptr->next)
+      ptr->handler(numeric, argc, argv);
+  }
 
   switch(numeric)
   {

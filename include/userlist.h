@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.45 2002/05/27 21:02:30 db Exp $ */
+/* $Id: userlist.h,v 1.46 2002/05/27 21:25:09 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -70,14 +70,6 @@ struct auth_file_entry
   char usernick[MAX_NICK];
   char password[MAX_CONFIG];
   unsigned long type;
-};
-
-struct tcm_file_entry
-{
-  char host[MAX_HOST];
-  char theirnick[MAX_NICK];
-  char password[MAX_CONFIG];
-  int  port;
 };
 
 struct exception_entry
@@ -154,7 +146,6 @@ struct config_list config_entries;
 #define CHANNEL_REPORT_BOT	0x0400
 #define CHANNEL_REPORT_SPAMBOT	0x0800
 #define CHANNEL_REPORT_CFLOOD	0x1000
-
 
 #endif
 

@@ -1,3 +1,23 @@
+bill        2002/04/05 21:00:20 EST	(20020406_0)
+
+  Modified files:
+    include              bothunt.h 
+    modules              bothunt.c serverif.c 
+    src                  logging.c stdcmds.c 
+  Log:
+  - added .gline command
+  - beautified gline logging
+  - fixed infinite loop in kill notice parsing
+  
+  Revision  Changes    Path
+  1.22      +15 -15    tcm-hybrid/include/bothunt.h
+  1.53      +161 -75   tcm-hybrid/modules/bothunt.c
+  1.48      +9 -6      tcm-hybrid/modules/serverif.c
+  1.20      +3 -1      tcm-hybrid/src/logging.c
+  1.42      +1 -1      tcm-hybrid/src/stdcmds.c
+
+
+
 bill        2002/04/04 18:46:18 EST	(20020404_3)
 
   Modified files:

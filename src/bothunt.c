@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.75 2002/05/20 21:51:14 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.76 2002/05/21 02:12:57 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -879,7 +879,7 @@ void onservnotice(int connnum, int argc, char *argv[])
     if ((p = strchr(q, ' ')) == NULL)
       return;
     *p = '\0';
-    p+=5;
+    p+=6;
     sendtoalldcc(SEND_LINK_ONLY, "SQUIT for %s from %s\n", q, p);
     break;
 

@@ -1,3 +1,24 @@
+db          2002/05/30 16:54:10 EDT	(20020530_10)
+
+  Modified files:
+    include              hash.h logging.h 
+    src                  actions.c bothunt.c clones.c hash.c 
+                         logging.c vclones.c 
+  Log:
+  ihateruntogethervariablenames
+  
+  Revision  Changes    Path
+  1.12      +16 -16    tcm-hybrid/include/hash.h
+  1.13      +2 -2      tcm-hybrid/include/logging.h
+  1.16      +2 -2      tcm-hybrid/src/actions.c
+  1.141     +2 -2      tcm-hybrid/src/bothunt.c
+  1.7       +9 -9      tcm-hybrid/src/clones.c
+  1.11      +48 -48    tcm-hybrid/src/hash.c
+  1.44      +2 -2      tcm-hybrid/src/logging.c
+  1.5       +5 -5      tcm-hybrid/src/vclones.c
+
+
+
 db          2002/05/30 14:59:40 EDT	(20020530_9)
 
   Modified files:

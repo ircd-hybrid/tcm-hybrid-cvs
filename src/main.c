@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.71 2002/05/25 17:34:32 db Exp $ */
+/* $Id: main.c,v 1.72 2002/05/25 17:45:14 jmallett Exp $ */
 
 #include "setup.h"
 
@@ -79,6 +79,8 @@ int  incoming_connnum;	      /* current connection number incoming */
 unsigned long totalmem;
 /* number of xmallocations */
 unsigned long numalloc;
+/* numer of xfrees */
+unsigned long numfree;
 
 #ifdef DEBUGMODE
 void write_debug();
@@ -582,4 +584,20 @@ xmalloc(size_t size)
 
   return ret;
 }
-  
+
+/*
+ * xfree()
+ * inputs	- allocated memory to free
+ * outputs	- none
+ * side effects	- memory passed is no longer allocated
+ */
+
+void
+xfree(void *p)
+{
+    numfree++;
+    if (p != NULL)
+      { 
+        free(p);
+      }
+}

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.100 2002/05/25 17:08:11 wcampbel Exp $
+ * $Id: bothunt.c,v 1.101 2002/05/25 17:45:14 jmallett Exp $
  */
 
 #include <stdio.h>
@@ -642,8 +642,8 @@ onservnotice(int connnum, int argc, char *argv[])
     send_to_all(SEND_KLINE_NOTICES, "*** %s is clearing g-lines", nick);
     for (a=0;a<MAXBANS;++a)
     {
-      free(glines[i].user);
-      free(glines[i].host);
+      xfree(glines[i].user);
+      xfree(glines[i].host);
       glines[i].when = 0;
     }
     return;
@@ -1299,11 +1299,11 @@ removefromhash(struct hashrec *table[],
 	find->info->link_count--;
 	if (find->info->link_count == 0)
 	  {
-	    (void)free(find->info);
+            xfree(find->info);
 	  }
       }
 
-      (void)free(find);
+      xfree(find);
       return 1;		/* Found the item */
     }
     prev = find;

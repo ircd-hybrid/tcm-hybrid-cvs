@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.71 2002/05/25 16:32:39 jmallett Exp $ */
+/* $Id: stdcmds.c,v 1.72 2002/05/25 17:45:15 jmallett Exp $ */
 
 #include "setup.h"
 
@@ -73,10 +73,10 @@ free_hash_links(struct hashrec *ptr)
 
       if(ptr->info->link_count == 0)
         {
-          (void)free(ptr->info);
+          xfree(ptr->info);
         }
 
-      (void)free(ptr);
+      xfree(ptr);
       ptr = next_ptr;
     }
 }
@@ -1201,6 +1201,8 @@ void report_mem(int sock)
   print_to_socket(sock,"Total memory allocated over time %lu\n", totalmem);
   print_to_socket(sock,"Average memory allocated in %lu allocations %lu\n",
 	numalloc, totalmem/numalloc);
+  print_to_socket(sock,"Average allocated memory not freed %lu in %lu frees\n",
+	(totalmem/numalloc)*(numalloc-numfree), numfree);
 }
 
 /*

@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.31 2002/05/25 16:14:36 jmallett Exp $
+ * $Id: logging.c,v 1.32 2002/05/25 17:45:14 jmallett Exp $
  *
  * - db
  */
@@ -453,7 +453,7 @@ logclear(void)
     {
         hold = tmp->next;
         failures = hold;
-        free(tmp);
+        xfree(tmp);
     }
 }
         

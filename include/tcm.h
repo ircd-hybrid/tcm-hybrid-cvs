@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.37 2002/05/25 16:32:36 jmallett Exp $ */
+/* $Id: tcm.h,v 1.38 2002/05/25 17:45:12 jmallett Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -70,6 +70,7 @@ int maxconns;
 
 extern unsigned long totalmem;
 extern unsigned long numalloc;
+extern unsigned long numfree;
 
 int add_action(char *name);
 void set_action_time(int action, int klinetime);
@@ -87,6 +88,7 @@ size_t strlcat(char *, const char *, size_t);
 size_t strlcpy(char *, const char *, size_t);
 #endif
 
-extern void *xmalloc(size_t);
+void *xmalloc(size_t);
+void xfree(void *);
 
 #endif

@@ -1,3 +1,15 @@
+wcampbel    2002/05/25 12:08:46 EDT	(20020525_15)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  Fix privmsg(), needed for msg tcm .chat
+  
+  Revision  Changes    Path
+  1.22      +2 -2      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/25 11:57:58 EDT	(20020525_14)
 
   Modified files:

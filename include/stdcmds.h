@@ -1,7 +1,7 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.24 2002/05/27 21:02:30 db Exp $ */
+/* $Id: stdcmds.h,v 1.25 2002/05/27 22:03:22 db Exp $ */
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
@@ -11,25 +11,8 @@ void leave(char *chan);
 void newnick(char *nick);
 void print_motd(int sock);
 
-/* XXXX go into bothunt.h ? */
-void list_nicks(int sock,char *nick,int regex);
-void list_virtual_users(int sock,char *userhost,int regex);
-void list_users(int sock,char *userhost,int regex);
-void kill_list_users(int sock,char *userhost,char *reason,int regex);
-void report_multi_host(int sock,int nclones);
-void report_multi(int sock,int nclones);
-void report_multi_user(int sock,int nclones);
-#ifdef VIRTUAL
-void report_multi_virtuals(int sock,int nclones);
-#endif
-void report(int type, int channel_send_flag, char *format,...);
-void report_mem(int sock);
-void report_clones(int sock);
-void report_nick_flooders(int sock);
-void report_failures(int sock,int num);
 void do_a_kline(char *command_name,int kline_time, char *pattern, char *reason,
                 char *who_did_command);
-
 
 void initopers(void);
 void inithash(void);

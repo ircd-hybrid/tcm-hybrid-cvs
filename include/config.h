@@ -169,14 +169,18 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
  * If you have hybrid 5 or later, the IP is given on the +c
  * on the connect message.
  *
- * Don't define this for now, its very buggy...
+ * Note:  This should not be used on servers with a large user base,
+ *	  because it will try to gethostbyname() every client you have.
+ *	  This will lag your tcm considerably, and may even cause it to
+ *	  ping timeout.
+ *		-pro (pro@oc12.net)
  */
-#define DETECT_DNS_SPOOFERS
+#undef DETECT_DNS_SPOOFERS
 
 /*
  * define this to flag wingates
  */
-#define DETECT_WINGATE
+#define DETECT_WINGATES
 
 /*
  * define this to flag open socks

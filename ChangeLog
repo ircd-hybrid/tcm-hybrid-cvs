@@ -1,3 +1,15 @@
+db          2002/05/31 23:49:25 EDT	(20020601_6)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  - oops. make sure -> next is NULL after malloc
+  
+  Revision  Changes    Path
+  1.19      +1 -0      tcm-hybrid/src/hash.c
+
+
+
 db          2002/05/31 23:40:51 EDT	(20020601_5)
 
   Modified files:

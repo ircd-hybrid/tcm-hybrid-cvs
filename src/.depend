@@ -58,7 +58,8 @@ main.o: main.c ../include/setup.h ../include/config.h ../include/tcm.h \
  ../include/userlist.h ../include/bothunt.h ../include/modules.h \
  ../include/stdcmds.h ../include/wild.h ../include/serno.h \
  ../include/patchlevel.h ../include/parse.h ../include/hash.h \
- ../include/logging.h ../include/actions.h ../include/handler.h
+ ../include/logging.h ../include/actions.h ../include/handler.h \
+ ../include/skline.h
 match.o: match.c ../include/match.h ../include/tcm.h \
  ../include/config.h
 modules.o: modules.c ../include/config.h ../include/tcm.h \
@@ -92,6 +93,7 @@ services.o: services.c ../include/config.h ../include/tcm.h \
  ../include/stdcmds.h ../include/wild.h ../include/tcm_io.h \
  ../include/serno.h ../include/patchlevel.h ../include/modules.h \
  ../include/actions.h ../include/handler.h
+skline.o: skline.c ../include/tools.h
 stdcmds.o: stdcmds.c ../include/setup.h ../include/config.h \
  ../include/tcm.h ../include/tcm_io.h ../include/tools.h \
  ../include/parse.h ../include/logging.h ../include/stdcmds.h \

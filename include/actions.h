@@ -1,7 +1,7 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.20 2003/02/12 02:42:12 bill Exp $ */
+/* $Id: actions.h,v 1.21 2003/04/14 08:50:34 bill Exp $ */
 
 #define MAX_ACTIONS	16
 
@@ -74,7 +74,7 @@ int get_method_number(char *);
 /* Methods of handling an event */
 #define METHOD_DCC_WARN              0x0001
 #define METHOD_IRC_WARN              0x0002
-#define METHOD_TKLINE                0x0004
+#define METHOD_SKLINE                0x0004
 #define METHOD_KLINE                 0x0008
 #define METHOD_DLINE                 0x0010
 

@@ -1,4 +1,4 @@
-# $Id: tcm.cf,v 1.33 2003/02/12 02:42:10 bill Exp $
+# $Id: tcm.cf,v 1.34 2003/04/14 08:50:31 bill Exp $
 # Username for the bot
 U:db
 
@@ -51,7 +51,8 @@ C:&frizzle.net
 #
 #   Possible values for action:
 #	- kline	        <kline the user using the proper message>
-#       - tkline time   <temp kline the user using the proper message>
+#       - kline time    <temp kline the user using the proper message>
+#       - skline time	<employ tcm's smart klines using the proper message>
 #	- dline         <dline the user with the same proper message>
 #	- dccwarn       <warn +w users on the tcm>
 #       - ircwarn       <warn the tcm's channel>
@@ -68,7 +69,7 @@ A:cflood:dline dccwarn ircwarn:Connection flooding
 A:vclone:ircwarn dccwarn tkline 180:Cloning is prohibited
 A:flood:tkline 180:Flooding is prohibited
 A:link:dccwarn tkline 180:Link Lookers are prohibited
-A:spam:tkline 1440:Spamming is prohibited
+A:spam:skline 1440:Spamming is prohibited
 A:clone:tkline 1440:Cloning is prohibited
 A:rclone:ircwarn dccwarn tkline 240:Reconnect flood
 A:sclone:tkline 180:Clones on multiple servers
@@ -100,3 +101,5 @@ W:9
 #L:phoenix1/userlist.cf
 #L:phoenix2/userlist.cf                                        
 
+# location of dynamic hostmask list
+D:etc/dynamic.hosts

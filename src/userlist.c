@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.148 2003/02/26 10:25:40 bill Exp $
+ * $Id: userlist.c,v 1.149 2003/04/14 08:50:36 bill Exp $
  */
 
 #include <errno.h>
@@ -502,6 +502,11 @@ load_config_file(char *file_name)
     {
     case 'a':case 'A':
       set_action(argc, argv);
+      break;
+
+    case 'd':case 'D':
+      strlcpy(config_entries.dynamic_config, argv[1],
+              sizeof(config_entries.dynamic_config));
       break;
 
     case 'e':case 'E':
@@ -1161,6 +1166,8 @@ reload_userlist(void)
 {
   clear_userlist();
   load_userlist();
+  clear_dynamic_info();
+  load_dynamic_info(config_entries.dynamic_config);
 
   send_to_server("STATS Y");
   send_to_server("STATS O");

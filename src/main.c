@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.132 2003/03/29 10:06:06 bill Exp $ */
+/* $Id: main.c,v 1.133 2003/04/14 08:50:36 bill Exp $ */
 
 #include "setup.h"
 
@@ -51,6 +51,7 @@
 #include "logging.h"
 #include "actions.h"
 #include "handler.h"
+#include "skline.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
@@ -157,18 +158,17 @@ main(int argc, char *argv[])
   init_vclones();
   init_seedrand();
   init_serv_commands();
+  init_bothunt();
+  init_client_lists();
+  init_dynamic_info();
 
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
   init_wingates();
 #endif
 
-  init_bothunt();
-
 #ifdef SERVICES
   init_services();
 #endif
-
-  init_client_lists();
 
   if (config_entries.conffile)
     load_config_file(config_entries.conffile);

@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.50 2003/03/29 10:06:05 bill Exp $
+ * $Id: actions.c,v 1.51 2003/04/14 08:50:36 bill Exp $
  */
 
 
@@ -190,7 +190,10 @@ update_action(struct connection *connection_p, int argc, char *argv[])
     return;
 
   if((actionid = find_action(argv[1])) < 0)
+  {
+    send_to_connection(connection_p, "No such action");
     return;
+  }
 
   actions[actionid].method = 0;
   actions[actionid].klinetime = 0;
@@ -402,29 +405,88 @@ handle_action(int actionid, char *g_nick, char *g_username,
       /* Now process the event, we got the needed data */
       if (actions[actionid].method & METHOD_KLINE)
 	{
-	  send_to_server("KLINE %s :%s", userhost,
-		 actions[actionid].reason ? 
-		 actions[actionid].reason : "Automated K-Line");
+          if (actions[actionid].klinetime)
+          {
+            if (actions[actionid].klinetime < 0)
+              actions[actionid].klinetime = 60;
+            else if (actions[actionid].klinetime > 14400)
+              actions[actionid].klinetime = 14400;
 
-	  snprintf(comment, sizeof(comment),
-		   "Permanent k-line of %s", userhost);
+            send_to_server("KLINE %d %s :%s",
+                           actions[actionid].klinetime, userhost,
+                           actions[actionid].reason[0] ?
+                           actions[actionid].reason : "Automated temporary K-Line");
+
+            snprintf(comment, sizeof(comment),
+                     "%d minutes temporary K-Line of %s",
+                     actions[actionid].klinetime, userhost);
+          }
+          else
+          {
+	    send_to_server("KLINE %s :%s", userhost,
+		           actions[actionid].reason[0] ? 
+		           actions[actionid].reason : "Automated K-Line");
+
+	    snprintf(comment, sizeof(comment),
+		     "Permanent K-Line of %s", userhost);
+          }
 	}
-      else if (actions[actionid].method & METHOD_TKLINE)
-	{    
-	  /* In case the actions temp k-line time isnt set, set a default */
-	  if (actions[actionid].klinetime <= 0) 
-	    actions[actionid].klinetime = 60;
-	  else if (actions[actionid].klinetime > 14400) 
-	    actions[actionid].klinetime = 14400;
+      else if (actions[actionid].method & METHOD_SKLINE)
+	{
+          if (actions[actionid].klinetime < 0)
+            actions[actionid].klinetime = 60;
+          if (actions[actionid].klinetime > 14400)
+            actions[actionid].klinetime = 14400;
 
-	  send_to_server("KLINE %d %s :%s",
-			 actions[actionid].klinetime, userhost,
-			 actions[actionid].reason ?
-			 actions[actionid].reason : "Automated temporary K-Line");
+          /* SKLINE CODE HERE */
+          if (dynamic_empty() == YES)
+          {
+            tcm_log(L_WARN,
+                    "handle_action(%s): Reverting to K-Line, dynamic hostmask list is empty",
+                    actions[actionid].name);
 
-	  snprintf(comment, sizeof(comment),
-		   "%d minutes temporary k-line of %s",
-		   actions[actionid].klinetime, userhost);
+            if (actions[actionid].klinetime)
+            {
+              send_to_server("KLINE %d %s :%s",
+                             actions[actionid].klinetime, userhost,
+                             actions[actionid].reason[0] ?
+                             actions[actionid].reason : "Automated temporary K-Line");
+              snprintf(comment, sizeof(comment),
+                       "%d minutes temporary K-Line of %s",
+                       actions[actionid].klinetime, userhost);
+            }
+            else
+            {
+              send_to_server("KLINE %s :%s",
+                             userhost,
+                             actions[actionid].reason[0] ?
+                             actions[actionid].reason : "Automated K-Line");
+              snprintf(comment, sizeof(comment),
+                       "Permanent K-Line of %s", userhost);
+            }
+          }
+          else
+          {
+            if (isdynamic(host))
+            {
+              send_to_server("KLINE %d %s :%s",
+                             actions[actionid].klinetime, userhost,
+                             actions[actionid].reason[0] ?
+                             actions[actionid].reason : "Automated temporary K-Line");
+              snprintf(comment, sizeof(comment),
+                       "%d minutes temporary K-Line of %s",
+                       actions[actionid].klinetime, userhost);
+            }
+            else
+            {
+              send_to_server("KLINE %s :%s",
+                             userhost,
+                             actions[actionid].reason[0] ?
+                             actions[actionid].reason : "Automated K-Line");
+              snprintf(comment, sizeof(comment),
+                       "Permanent K-Line of %s", userhost);
+            }
+          }
 	}
       else if (actions[actionid].method & METHOD_DLINE)
 	{
@@ -466,9 +528,7 @@ handle_action(int actionid, char *g_nick, char *g_username,
 	}
     }
   else
-    {
-      return;
-    }
+    return;
 
   /* kludge, ugh, but these have their own notices */
   if((strcasecmp(actions[actionid].name, "sclone") == 0) ||
@@ -675,8 +735,8 @@ get_method_number (char * methodname)
 {
   if (!strcasecmp(methodname, "kline"))
     return METHOD_KLINE;
-  else if (!strcasecmp(methodname, "tkline"))
-    return METHOD_TKLINE;
+  else if (!strcasecmp(methodname, "skline"))
+    return METHOD_SKLINE;
   else if (!strcasecmp(methodname, "dline"))
     return METHOD_DLINE;
   else if (!strcasecmp(methodname, "ircwarn"))
@@ -702,8 +762,8 @@ get_method_names(int method)
     strcat(namebuf, "dline ");
   if (method & METHOD_KLINE)
     strcat(namebuf, "kline ");
-  if (method & METHOD_TKLINE)
-    strcat(namebuf, "tkline ");
+  if (method & METHOD_SKLINE)
+    strcat(namebuf, "skline ");
   if (namebuf[0])
     namebuf[strlen(namebuf)-1] = '\0';
   return namebuf;

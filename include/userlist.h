@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.92 2003/02/26 10:25:38 bill Exp $ */
+/* $Id: userlist.h,v 1.93 2003/04/14 08:50:34 bill Exp $ */
 
 #include "setup.h"
 #include "tools.h"
@@ -54,6 +54,7 @@ struct config_list {
   char ircname_config[MAX_CONFIG];
   char email_config[MAX_CONFIG];
   char userlist_config[MAX_CONFIG];
+  char dynamic_config[MAX_CONFIG];
   int  debug;
   char channel[MAX_CHANNEL];		/* Channel tcm will use. */
   char channel_key[MAX_CONFIG];		/* key for Channel tcm will use. */

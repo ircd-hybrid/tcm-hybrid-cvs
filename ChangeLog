@@ -1,3 +1,15 @@
+bill        2003/01/15 20:27:11 EST	(20030116_0)
+
+  Modified files:
+    src                  vclones.c 
+  Log:
+  - m_vlist() would call report_vbots() for some reason.  fixed.
+  
+  Revision  Changes    Path
+  1.16      +1 -1      tcm-hybrid/src/vclones.c
+
+
+
 jmallett    2003/01/03 21:36:49 EST	(20030104_0)
 
   Modified files:

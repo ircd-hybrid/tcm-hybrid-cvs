@@ -31,7 +31,7 @@ dcc_commands.o: dcc_commands.c ../include/setup.h ../include/config.h \
  ../include/actions.h ../include/handler.h ../include/hash.h
 event.o: event.c ../include/tcm.h ../include/config.h \
  ../include/event.h ../include/stdcmds.h ../include/tcm_io.h \
- ../include/tools.h
+ ../include/tools.h ../include/userlist.h
 handler.o: handler.c ../include/config.h ../include/tcm.h \
  ../include/tcm_io.h ../include/tools.h ../include/bothunt.h \
  ../include/modules.h ../include/stdcmds.h ../include/wild.h \
@@ -64,6 +64,9 @@ parse.o: parse.c ../include/config.h ../include/tcm.h \
  ../include/wild.h ../include/tcm_io.h ../include/serno.h \
  ../include/patchlevel.h ../include/modules.h ../include/handler.h \
  ../include/dcc.h
+seedrand.o: seedrand.c ../include/tcm.h ../include/config.h \
+ ../include/tcm_io.h ../include/tools.h ../include/handler.h \
+ ../include/hash.h ../include/modules.h
 serv_commands.o: serv_commands.c ../include/setup.h \
  ../include/config.h ../include/tcm.h ../include/event.h \
  ../include/parse.h ../include/bothunt.h ../include/userlist.h \

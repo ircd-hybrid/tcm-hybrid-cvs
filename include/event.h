@@ -6,7 +6,7 @@
  *
  *  The original never had a GPL REMOVED with pleasure -db
  *
- *  $Id: event.h,v 1.2 2002/06/24 00:40:15 db Exp $
+ *  $Id: event.h,v 1.3 2002/09/19 22:14:59 bill Exp $
  */
 
 #ifndef __EVENT_H__
@@ -31,7 +31,6 @@ struct ev_entry
   const char *name;
   time_t frequency;
   time_t when;
-  struct ev_entry *next;
   int active;
 };
 

@@ -23,7 +23,7 @@
  *  developed and/or copyrighted by other sources.  Please see the
  *  CREDITS file for full details.
  *
- *  $Id: event.c,v 1.9 2002/06/24 00:40:21 db Exp $
+ *  $Id: event.c,v 1.10 2002/09/19 22:15:00 bill Exp $
  */
 
 /*
@@ -42,6 +42,7 @@
 #include "event.h"
 #include "stdcmds.h"
 #include "tcm_io.h"
+#include "userlist.h"
 
 static const char *last_event_ran = NULL;
 struct ev_entry event_table[MAX_EVENTS];
@@ -65,7 +66,7 @@ eventAdd(const char *name, EVH *func, void *arg, time_t when)
   
   /* find first inactive index, or use next index */
   for (i = 0; i < event_count; i++)
-    if (!event_table[i].active)
+    if (event_table[i].active != YES)
       break;
 
   if (i >= event_count)
@@ -76,7 +77,7 @@ eventAdd(const char *name, EVH *func, void *arg, time_t when)
   event_table[i].arg = arg;
   event_table[i].when = current_time + when;
   event_table[i].frequency = when; 
-  event_table[i].active = 1;
+  event_table[i].active = YES;
 
   if ((event_table[i].when < event_time_min) || (event_time_min == -1))
     event_time_min = event_table[i].when;
@@ -103,7 +104,7 @@ eventDelete(EVH *func, void *arg)
   event_table[i].name = NULL;
   event_table[i].func = NULL;
   event_table[i].arg = NULL;
-  event_table[i].active = 0;
+  event_table[i].active = NO;
 }
 
 /* 
@@ -149,7 +150,12 @@ eventRun(void)
 
   for (i = 0; i < event_count; i++)
     {
-      if (event_table[i].active && (event_table[i].when <= current_time))
+      if ((event_table[i].active != YES) && (event_table[i].active != NO))
+        {
+          send_to_all(NULL, FLAGS_ADMIN, "*** Event table corruption: active is not YES or NO (func:0x%lx) (active:%d)",
+                      event_table[i].func, event_table[i].active);
+        }
+      else if ((event_table[i].active == YES) && (event_table[i].when <= current_time))
         {
           last_event_ran = event_table[i].name;
           event_table[i].func(event_table[i].arg);

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.58 2002/05/28 01:07:57 db Exp $
+ * $Id: tcm_io.c,v 1.59 2002/05/28 03:26:58 db Exp $
  */
 
 #include <stdio.h>
@@ -306,7 +306,8 @@ get_line(char *in, int *len, struct connection *connections_p)
 void
 server_link_closed(int conn_num)
 {
-  (void)close(connections[conn_num].socket);
+  server_id = INVALID;
+  close_connection(conn_num);
 
   /* XXX Should not clear out events at this point ? */
 #if wrong
@@ -315,7 +316,7 @@ server_link_closed(int conn_num)
 
   tcm_log(L_ERR, "server_link_closed()");
   amianoper = NO;
-  sleep(5);
+  sleep(30);
 
   connect_to_server(serverhost);
   if (connections[conn_num].socket == INVALID)
@@ -324,7 +325,6 @@ server_link_closed(int conn_num)
       quit = YES;
       return;
     }
-  server_id = INVALID;
 }
 
 /*

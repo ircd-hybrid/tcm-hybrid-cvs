@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.2 2002/05/28 00:35:09 db Exp $
+ * $Id: hash.c,v 1.3 2002/05/28 03:26:58 db Exp $
  */
 
 #include <stdio.h>
@@ -1404,7 +1404,8 @@ list_users(int sock,char *userhost,int regex)
   regmatch_t m[1];
 #endif
   char uhost[1024];
-  int i, numfound = 0;
+  int i;
+  int numfound = 0;
 
 #ifdef HAVE_REGEX_H
   if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))

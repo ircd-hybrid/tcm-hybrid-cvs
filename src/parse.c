@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.17 2002/05/25 15:08:09 leeh Exp $
+ * $Id: parse.c,v 1.18 2002/05/25 16:21:07 leeh Exp $
  */
 
 #include <stdio.h>
@@ -22,7 +22,6 @@
 #include "config.h"
 #include "tcm.h"
 #include "event.h"
-#include "token.h"
 #include "bothunt.h"
 #include "userlist.h"
 #include "serverif.h"
@@ -602,31 +601,27 @@ privmsgproc(char *nick, char *userhost, int argc, char *argv[])
     return;
   }
 
-  token = get_token(argv[3]+1);
-
   if (!isoper(user,host))
   {
     notice(nick,"You are not an operator");
     return;
   }
 
-  switch(token)
+  if(strncmp(argv[3], ".chat", 5) == 0)
   {
-  case K_CHAT:
-    if (initiated_dcc_socket > 0)
+    if(initiated_dcc_socket > 0)
     {
-      if ((initiated_dcc_socket_time + 60) < time(NULL))
+      if((initiated_dcc_socket_time + 60) < current_time)
       {
-        (void)close(initiated_dcc_socket);
-        initiated_dcc_socket = -1;
-        initiate_dcc_chat(nick,user,host);
+        close(initiated_dcc_socket);
+	initiated_dcc_socket = -1;
+	initiate_dcc_chat(nick, user, host);
       }
       else
         notice(nick,"Unable to dcc chat right now, wait a minute");
     }
     else
-      initiate_dcc_chat(nick,user,host);
-    break;
+     initiate_dcc_chat(nick, user, host);
   }
 }
 

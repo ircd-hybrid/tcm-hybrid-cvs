@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.66 2002/05/25 16:14:36 jmallett Exp $ */
+/* $Id: main.c,v 1.67 2002/05/25 16:21:07 leeh Exp $ */
 
 #include "setup.h"
 
@@ -57,8 +57,6 @@
 extern FILE *outfile;
 extern struct a_entry actions[MAX_ACTIONS+1];
 extern int load_all_modules(int log);
-extern void init_tokenizer(void);
-extern void modules_init(void);
 
 #ifdef SERVICES
 extern int act_drone, act_sclone;
@@ -230,7 +228,6 @@ main(int argc, char *argv[])
 #ifdef HAVE_SETRLIMIT
   setup_corefile();
 #endif
-  init_tokenizer();		/* in token.c */
   init_userlist();
   eventInit();			/* event.c stolen from ircd */
 

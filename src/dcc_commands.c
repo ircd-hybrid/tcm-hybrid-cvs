@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.82 2002/05/25 16:14:35 jmallett Exp $ */
+/* $Id: dcc_commands.c,v 1.83 2002/05/25 16:21:06 leeh Exp $ */
 
 #include "setup.h"
 
@@ -32,7 +32,6 @@
 #include "config.h"
 #include "tcm.h"
 #include "event.h"
-#include "token.h"
 #include "bothunt.h"
 #include "userlist.h"
 #include "serverif.h"

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.23 2002/05/25 16:10:47 db Exp $
+ * $Id: tcm_io.c,v 1.24 2002/05/25 16:21:07 leeh Exp $
  */
 
 #include <stdio.h>
@@ -39,7 +39,6 @@
 #include "tcm.h"
 #include "parse.h"
 #include "event.h"
-#include "token.h"
 #include "bothunt.h"
 #include "userlist.h"
 #include "serverif.h"

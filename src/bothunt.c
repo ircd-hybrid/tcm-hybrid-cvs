@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.98 2002/05/25 15:49:38 leeh Exp $
+ * $Id: bothunt.c,v 1.99 2002/05/25 16:21:06 leeh Exp $
  */
 
 #include <stdio.h>
@@ -21,7 +21,6 @@
 #include "serverif.h"
 #include "bothunt.h"
 #include "userlist.h"
-#include "token.h"
 #include "logging.h"
 #include "wild.h"
 #include "serno.h"

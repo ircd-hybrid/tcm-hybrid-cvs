@@ -39,4 +39,6 @@
     Print the tcm's MOTD.
  - .locops
     Issue a LOCOPS message to the server.
-
+ - .testline <mask>
+    Issue a TESTLINE command to the server for the mask provided
+    NOTE:  Only works on Hybrid 6 or higher

@@ -1,3 +1,15 @@
+bill        2004/06/03 16:39:11 EDT	(20040603_5)
+
+  Modified files:
+    src                  dcc_commands.c 
+  Log:
+  - apparantely optreset is not standardized, so remove it
+  
+  Revision  Changes    Path
+  1.159     +5 -5      tcm-hybrid/src/dcc_commands.c
+
+
+
 bill        2004/06/03 16:23:46 EDT	(20040603_4)
 
   Modified files:

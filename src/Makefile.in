@@ -33,11 +33,14 @@ OBJECTS = ${SOURCES:.c=.o}
 all: tcm tools
 
 clean: 
-	${RM} -f *.o tcm core tcm.core *~ DEBUG *.log clone_log_* tcm.pid *.pref
+	${RM} -f *.o tcm core tcm.core *~
 	cd tools; ${MAKE} clean; cd ..
 	-@if [ -f include/setup.h ] ; then \
 	echo "To really restart installation, make distclean" ; \
 	fi
+
+cleandata:
+	${RM} -f DEBUG *.log clone_log_* tcm.pid *.pref
 
 distclean: clean
 	${RM} -f Makefile config.status config.cache config.log include/setup.h

@@ -1,3 +1,7 @@
+*** 20011028_6 by wcampbel
+TYPE_CAN_REMOTE is gone (BLOAT!)
+
+
 *** 20011028_5 by wcampbel
 <dollar>Id<dollar>'ed everything properly
 Removed more crud related to linking and remote tcm opers

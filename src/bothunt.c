@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.168 2002/06/21 13:45:21 leeh Exp $
+ * $Id: bothunt.c,v 1.169 2002/06/21 14:07:37 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1318,22 +1318,6 @@ stats_notice(char *snotice)
   send_to_all(FLAGS_SPY, "[STATS %c requested by %s (%s)]",
 	       stat, nick, fulluh);
 }
-
-/*
- * reload_bothunt
- *
- * inputs	- none
- * output	- none
- * side effects	-
- */
-
-void
-reload_bothunt(void)
-{
-  if (!tcm_status.am_opered)
-    oper();
-}
-
 
 void
 init_bothunt(void)

@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.50 2002/06/09 16:23:16 db Exp $ */
+/* $Id: bothunt.h,v 1.51 2002/06/21 14:07:34 leeh Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -120,11 +120,9 @@ struct connect_flood_entry
 };
 
 void report_nick_flooders(int sock);
-void report(int type, int channel_send_flag, char *format,...);
 void init_link_look_table(void);
 void init_bothunt(void);
 void clear_bothunt(void);
-void reload_bothunt(void);
 void on_trace_user(int argc, char *argv[]);
 void on_stats_e(int argc, char *argv[]);
 void on_stats_i(int argc, char *argv[]);

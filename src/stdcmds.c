@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.90 2002/06/05 15:10:26 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.91 2002/06/21 14:07:38 leeh Exp $ */
 
 #include "setup.h"
 
@@ -93,7 +93,7 @@ newnick(char *nick)
  */
 
 void 
-report(int type, int channel_send_flag, char *format,...)
+report(int type, char *format,...)
 {
   char msg[MAX_BUFF];
   va_list va;
@@ -104,12 +104,8 @@ report(int type, int channel_send_flag, char *format,...)
   /* Probably not a format string bug, but I'm calling it this way
   ** for safety sake - Hwy
   */
-  send_to_all(type, "%s",msg);
-
-  if(channel_send_flag & config_entries.channel_report)
-    {
-      privmsg(config_entries.defchannel, "%s", msg);
-    }
+  send_to_all(type, "%s", msg);
+  privmsg(config_entries.defchannel, "%s", msg);
 
   va_end(va);
 }

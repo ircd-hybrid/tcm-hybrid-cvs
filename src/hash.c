@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.33 2002/06/21 13:45:21 leeh Exp $
+ * $Id: hash.c,v 1.34 2002/06/21 14:07:38 leeh Exp $
  */
 
 #include <stdio.h>
@@ -590,7 +590,6 @@ check_host_clones(char *host)
   if(reportedclones)
   {
     report(FLAGS_WARN,
-	   CHANNEL_REPORT_CLONES,
 	   "%d more possible clones (%d total) from %s:\n",
 	   clonecount, clonecount+reportedclones, host);
 
@@ -600,7 +599,6 @@ check_host_clones(char *host)
   else
   {
     report(FLAGS_WARN,
-	   CHANNEL_REPORT_CLONES,
 	   "Possible clones from %s detected: %d connects in %d seconds\n",
 	   host, clonecount, now - oldest);
 
@@ -645,12 +643,12 @@ check_host_clones(char *host)
       {
         if(notice1[0] != '\0')
         {
-  	  report(FLAGS_WARN, CHANNEL_REPORT_CLONES, "%s", notice1);
+  	  report(FLAGS_WARN, "%s", notice1);
 	  tcm_log(L_NORM, "%s", notice1);
         }
 	if(notice0[0] != '\0')
         {
-          report(FLAGS_WARN, CHANNEL_REPORT_CLONES, "%s", notice0);
+          report(FLAGS_WARN, "%s", notice0);
   	  tcm_log(L_NORM, "%s", notice0);
         }
       }
@@ -658,7 +656,7 @@ check_host_clones(char *host)
       {
         if(notice0[0] != '\0')
         {
-	  report(FLAGS_WARN, CHANNEL_REPORT_CLONES, "%s", notice0);
+	  report(FLAGS_WARN, "%s", notice0);
 	  tcm_log(L_NORM, "%s", notice0);
         }
       }
@@ -728,7 +726,6 @@ check_virtual_host_clones(char *ip_class_c)
   if(reportedclones)
     {
       report(FLAGS_WARN,
-	     CHANNEL_REPORT_VCLONES,
 	     "%d more possible virtual host clones (%d total) from %s.*:\n",
 	     clonecount, clonecount+reportedclones, ip_class_c);
 
@@ -739,7 +736,6 @@ check_virtual_host_clones(char *ip_class_c)
   else
     {
       report(FLAGS_WARN,
-	     CHANNEL_REPORT_VCLONES,
 	     "Possible virtual host clones from %s.* detected: %d connects in %d seconds\n",
 	     ip_class_c, clonecount, now - oldest);
 
@@ -806,15 +802,15 @@ check_virtual_host_clones(char *ip_class_c)
 	    ;
 	  else if(clonecount == 2)
 	    {
-	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s\n", notice1);
+	      report(FLAGS_WARN, "%s\n", notice1);
 	      tcm_log(L_NORM, "%s", notice1);
 
-	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s", notice0);
+	      report(FLAGS_WARN, "%s", notice0);
 	      tcm_log(L_NORM, "%s", notice0);
 	    }
 	  else if(clonecount < 5)
 	    {
-	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s\n", notice0);
+	      report(FLAGS_WARN, "%s\n", notice0);
 	      tcm_log(L_NORM, "%s", notice0);
 	    }
 	  else if(clonecount == 5)

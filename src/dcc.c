@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.12 2002/06/07 12:58:29 db Exp $
+ * $Id: dcc.c,v 1.13 2002/06/21 14:07:38 leeh Exp $
  */
 
 #include <stdio.h>
@@ -272,7 +272,6 @@ static void
 finish_dcc_chat(int i)
 {
   report(FLAGS_ALL,
-         CHANNEL_REPORT_ROUTINE,
          "Oper %s (%s@%s) has connected\n",
          connections[i].nick,
          connections[i].user,
@@ -301,7 +300,6 @@ static void
 close_dcc_connection(int connnum)
 {
   report(FLAGS_ALL,
-         CHANNEL_REPORT_ROUTINE,
          "Oper %s (%s@%s) has disconnected",
          connections[connnum].nick, connections[connnum].user,
          connections[connnum].host);

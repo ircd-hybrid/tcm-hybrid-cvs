@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.68 2002/06/07 11:20:10 leeh Exp $ */
+/* $Id: userlist.h,v 1.69 2002/06/21 14:07:34 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -47,7 +47,6 @@ struct config_list {
   char defchannel[MAX_CHANNEL];		/* Channel tcm will use. */
   char defchannel_key[MAX_CONFIG];	/* key for Channel tcm will use. */
   char dfltnick[MAX_NICK];		/* Nickname tcm will use */
-  int  channel_report;			/* bit map of flags */
 
   char statspmsg[MAX_CONFIG];
 
@@ -139,20 +138,6 @@ int  is_an_oper(char *user, char *host);
 void reload_user_list(int sig);
 
 struct config_list config_entries;
-
-/* channel_report flags */
-#define CHANNEL_REPORT_CLONES	0x0001
-#define CHANNEL_REPORT_VCLONES	0x0002
-#define CHANNEL_REPORT_SCLONES  0x0004
-#define CHANNEL_REPORT_FLOOD	0x0008
-#define CHANNEL_REPORT_LINK	0x0020
-#define CHANNEL_REPORT_WINGATE	0x0040
-#define CHANNEL_REPORT_SOCKS	0x0080
-#define CHANNEL_REPORT_DRONE	0x0100
-#define CHANNEL_REPORT_ROUTINE	0x0200
-#define CHANNEL_REPORT_BOT	0x0400
-#define CHANNEL_REPORT_SPAMBOT	0x0800
-#define CHANNEL_REPORT_CFLOOD	0x1000
 
 #endif
 

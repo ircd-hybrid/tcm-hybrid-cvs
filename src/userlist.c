@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.119 2002/06/21 13:45:22 leeh Exp $
+ * $Id: userlist.c,v 1.120 2002/06/21 14:07:38 leeh Exp $
  *
  */
 
@@ -441,9 +441,6 @@ load_config_file(char *file_name)
   config_entries.defchannel[0] = '\0';
   config_entries.dfltnick[0] = '\0';
   config_entries.email_config[0] = '\0';
-
-  config_entries.channel_report = 
-    CHANNEL_REPORT_ROUTINE | CHANNEL_REPORT_CLONES;
 
   strlcpy(config_entries.userlist_config, USERLIST_FILE, MAX_CONFIG);
 
@@ -1118,7 +1115,6 @@ reload_user_list(int sig)
   if(sig != SIGHUP)     /* should never happen */
     return;
 
-  reload_bothunt();
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
   _reload_wingate(sig, 0, NULL);
 #endif

@@ -1,3 +1,19 @@
+db          2002/06/06 18:40:33 EDT	(20020606_3)
+
+  Modified files:
+    src                  dcc.c main.c parse.c 
+  Log:
+  - removed a bogus comment
+  - changed a strncpy to strlcpy
+  - changed fork() code to use a switch in main.c
+  
+  Revision  Changes    Path
+  1.11      +2 -4      tcm-hybrid/src/dcc.c
+  1.112     +10 -11    tcm-hybrid/src/main.c
+  1.69      +0 -3      tcm-hybrid/src/parse.c
+
+
+
 leeh        2002/06/06 14:52:48 EDT	(20020606_2)
 
   Modified files:

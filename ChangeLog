@@ -1,3 +1,24 @@
+wcampbel    2002/05/19 20:52:53 EDT	(20020520_1)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              config.h setup.h.in 
+    src                  main.c 
+  Log:
+  Remove the last remnants of FORCE_CORE
+  Use autoconf to protect setup_corefile() on systems that don't have
+    setrlimit()
+  
+  Revision  Changes    Path
+  1.15      +2 -1      tcm-hybrid/autoconf/configure.in
+  1.15      +56 -1     tcm-hybrid/configure
+  1.43      +0 -6      tcm-hybrid/include/config.h
+  1.5       +7 -1      tcm-hybrid/include/setup.h.in
+  1.38      +8 -0      tcm-hybrid/src/main.c
+
+
+
 db          2002/05/19 20:21:36 EDT	(20020520_0)
 
   Modified files:

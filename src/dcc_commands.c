@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.32 2001/11/26 20:50:33 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.33 2001/12/11 07:00:52 db Exp $ */
 
 #include "setup.h"
 
@@ -2143,7 +2143,7 @@ print_help(int sock,char *text)
 
   if(!text || (*text == '\0'))
     {
-      if( !(userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) )
+      if( (userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) == NULL )
         {
           prnt(sock,"Help is not currently available\n");
           return;
@@ -2156,7 +2156,7 @@ print_help(int sock,char *text)
 
       if (*text == '\0')
         {
-          if( !(userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) )
+          if( (userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) == NULL )
             {
               prnt(sock,"Help is not currently available\n");
               return;
@@ -2165,7 +2165,7 @@ print_help(int sock,char *text)
 
       (void)snprintf(help_file,sizeof(help_file) - 1,"%s/%s.%s",
                      HELP_PATH,HELP_FILE,text);
-      if( !(userfile = fopen(help_file,"r")) )
+      if( (userfile = fopen(help_file,"r")) == NULL)
         {
           prnt(sock,"Help for '%s' is not currently available\n",text);
           return;

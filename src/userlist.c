@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.37 2001/11/29 05:07:40 bill Exp $
+ * $Id: userlist.c,v 1.38 2001/12/11 07:00:55 db Exp $
  *
  */
 
@@ -72,11 +72,12 @@ static void load_e_line(char *);
  *	  and if any found, tcm is terminated...
  */
 
-void load_config_file(char *file_name)
+void 
+load_config_file(char *file_name)
 {
   FILE *fp;
   char line[MAX_BUFF];
-  char *argv[20];
+  char *argv[MAX_ARGV];
   int  argc, a;
   char *p;
   char *q;
@@ -105,171 +106,173 @@ void load_config_file(char *file_name)
 
   strncpy(config_entries.userlist_config,USERLIST_FILE,MAX_CONFIG-1);
 
-  if( !(fp = fopen(file_name,"r")) )
-    {
-      fprintf(stderr,"GACK! I don't know who I am or anything!!\n");
-      fprintf(stderr,"tcm can't find %s file\n",file_name);
-      exit(1);
-    }
+  if((fp = fopen(file_name,"r")) == NULL)
+  {
+    fprintf(stderr,"GACK! I don't know who I am or anything!!\n");
+    fprintf(stderr,"tcm can't find %s file\n",file_name);
+    exit(1);
+  }
 
   while(fgets(line, MAX_BUFF-1,fp))
+  {
+    if(line[0] == '#')
+      continue;
+
+    /* zap newlines */
+    if ((p = strchr(line,'\n')) != NULL)
+      *p = '\0';
+
+    if (*line == '\0')
+      continue;
+
+    p = line;
+    argc=0;
+
+    for (q = strchr(p, ':'); q; q=strchr(p, ':'))
     {
-      argc=0;
-      p = line;
-      q = strchr(p, ':');
-      for (;q;q=strchr(p, ':'))
-        {
-          *q = '\0';
-          if (!(argv[argc] = (char *)malloc(200))) gracefuldie(0, __FILE__, __LINE__);
-          snprintf(argv[argc], 200, "%s", p);
-          p = q+1;
-          ++argc;
-        }
-      if (!(argv[argc] = (char *)malloc(200))) gracefuldie(0, __FILE__, __LINE__);
-      snprintf(argv[argc], 200, "%s", p);
-      ++argc;
-      if (argv[argc-1][strlen(argv[argc-1])-1] == '\n') 
-        argv[argc-1][strlen(argv[argc-1])-1] = '\0';
-
-      if(line[0] == '#')
-	continue;
-
-      switch(argv[0][0])
-	{
-        case 'a':case 'A':
-          set_action_method(argv[1], argv[2]);
-          if (argc >=3)
-            set_action_reason(argv[1], argv[3]);
-          break;
-
-	case 'd':case 'D':
-          if (config_entries.debug && outfile)
-            (void)fprintf(outfile, "opers_only = [%s]\n", argv[1]);
-	  if (!strcasecmp(argv[1],"YES"))
-	    config_entries.opers_only = YES;
-	  else
-	    config_entries.opers_only = NO;
-	  break;
-
-	case 'e':case 'E':
-          strncpy(config_entries.email_config,argv[1],MAX_CONFIG-1);
-	  break;
-
-	case 'f':case 'F':
-	  if (config_entries.debug && outfile)
-	    (void)fprintf(outfile, "tcm.pid file name = [%s]\n", argv[1]);
-	  strncpy(config_entries.tcm_pid_file,argv[1],MAX_CONFIG-1);
-	  break;
-
-	case 'l':case 'L':
-	  strncpy(config_entries.userlist_config,argv[1],MAX_CONFIG-1);
-	  break;
-
-	case 'm':case 'M':
-	  strncpy(config_entries.statspmsg, argv[1],sizeof(config_entries.statspmsg));          
-          for ( a = 2 ; a < argc ; ++a )
-          {
-            strcat(config_entries.statspmsg, ":");
-            strcat(config_entries.statspmsg, argv[a]);
-          }
-          if (config_entries.statspmsg[strlen(config_entries.statspmsg)-1] == ':')
-            config_entries.statspmsg[strlen(config_entries.statspmsg)-1] = '\0';
-	  break;
-
-	case 'o':case 'O':
-          strncpy(config_entries.oper_nick_config,argv[1],MAX_NICK);
-	  strncpy(config_entries.oper_pass_config,argv[2],MAX_CONFIG-1);
-	  break;
-
-	case 'u':case 'U':
-	  if (config_entries.debug && outfile)
-	    fprintf(outfile, "user name = [%s]\n", argv[1]);
-	  strncpy(config_entries.username_config,argv[1],MAX_CONFIG-1);
-	  break;
-
-	case 'v':case 'V':
-	  if (config_entries.debug && outfile)
-	    fprintf(outfile, "virtual host name = [%s]\n", argv[1]);
-	  strncpy(config_entries.virtual_host_config,argv[1],MAX_CONFIG-1);
-	  break;
-
-	case 's':case 'S':
-	  if (config_entries.debug && outfile)
-	    fprintf(outfile, "server = [%s]\n", argv[1]);
-	  strncpy(config_entries.server_name,argv[1],MAX_CONFIG-1);
-          if (argc > 2) strncpy(config_entries.server_port,argv[2],MAX_CONFIG-1);
-          if (argc > 3) strncpy(config_entries.server_pass,argv[3],MAX_CONFIG-1);
-	  break;
-
-	case 'n':case 'N':
-	  if (config_entries.debug && outfile)
-	    fprintf(outfile, "nick for tcm = [%s]\n", argv[1]);
-	  strncpy(config_entries.dfltnick,argv[1],MAX_NICK-1);
-	  break;
-
-	case 'i':case 'I':
-	  if (config_entries.debug && outfile)
-	    fprintf(outfile, "IRCNAME = [%s]\n", argv[1]);
-	  strncpy(config_entries.ircname_config,argv[1],MAX_CONFIG-1);
-	  break;
-
-	case 'c':case 'C':
-	  if (config_entries.debug && outfile)
-	    fprintf(outfile, "Channel = [%s]\n", argv[1]);
-
-          if (argc > 2)
-	    strncpy(config_entries.defchannel_key,p,MAX_CONFIG-1);
-	  else
-	    config_entries.defchannel_key[0] = '\0';
-	  strncpy(config_entries.defchannel,argv[1],MAX_CHANNEL-1);
-	  break;
-
-	default:
-	  break;
-	}
+      argv[argc++] = p;
+      *q = '\0';
+      p = q+1;
     }
+    argv[argc++] = p;
+
+    switch(argv[0][0])
+    {
+    case 'a':case 'A':
+      set_action_method(argv[1], argv[2]);
+      if (argc >=3)
+	set_action_reason(argv[1], argv[3]);
+      break;
+
+    case 'd':case 'D':
+      if (config_entries.debug && outfile)
+	(void)fprintf(outfile, "opers_only = [%s]\n", argv[1]);
+      if (strcasecmp(argv[1],"YES") == 0)
+	config_entries.opers_only = YES;
+      else
+	config_entries.opers_only = NO;
+      break;
+
+    case 'e':case 'E':
+      strncpy(config_entries.email_config,argv[1],MAX_CONFIG-1);
+      break;
+
+    case 'f':case 'F':
+      if (config_entries.debug && outfile)
+	(void)fprintf(outfile, "tcm.pid file name = [%s]\n", argv[1]);
+      strncpy(config_entries.tcm_pid_file,argv[1],MAX_CONFIG-1);
+      break;
+
+    case 'l':case 'L':
+      strncpy(config_entries.userlist_config,argv[1],MAX_CONFIG-1);
+      break;
+
+    case 'm':case 'M':
+      strncpy(config_entries.statspmsg, argv[1],sizeof(config_entries.statspmsg));          
+      for ( a = 2 ; a < argc ; ++a )
+      {
+	strcat(config_entries.statspmsg, ":");
+	strcat(config_entries.statspmsg, argv[a]);
+      }
+      if (config_entries.statspmsg[strlen(config_entries.statspmsg)-1] == ':')
+	config_entries.statspmsg[strlen(config_entries.statspmsg)-1] = '\0';
+      break;
+
+    case 'o':case 'O':
+      strncpy(config_entries.oper_nick_config,argv[1],MAX_NICK);
+      strncpy(config_entries.oper_pass_config,argv[2],MAX_CONFIG-1);
+      break;
+
+    case 'u':case 'U':
+      if (config_entries.debug && outfile)
+	fprintf(outfile, "user name = [%s]\n", argv[1]);
+      strncpy(config_entries.username_config,argv[1],MAX_CONFIG-1);
+      break;
+
+    case 'v':case 'V':
+      if (config_entries.debug && outfile)
+	fprintf(outfile, "virtual host name = [%s]\n", argv[1]);
+      strncpy(config_entries.virtual_host_config,argv[1],MAX_CONFIG-1);
+      break;
+
+    case 's':case 'S':
+      if (config_entries.debug && outfile)
+	fprintf(outfile, "server = [%s]\n", argv[1]);
+      strncpy(config_entries.server_name,argv[1],MAX_CONFIG-1);
+      if (argc > 2) strncpy(config_entries.server_port,argv[2],MAX_CONFIG-1);
+      if (argc > 3) strncpy(config_entries.server_pass,argv[3],MAX_CONFIG-1);
+      break;
+
+    case 'n':case 'N':
+      if (config_entries.debug && outfile)
+	fprintf(outfile, "nick for tcm = [%s]\n", argv[1]);
+      strncpy(config_entries.dfltnick,argv[1],MAX_NICK-1);
+      break;
+
+    case 'i':case 'I':
+      if (config_entries.debug && outfile)
+	fprintf(outfile, "IRCNAME = [%s]\n", argv[1]);
+      strncpy(config_entries.ircname_config,argv[1],MAX_CONFIG-1);
+      break;
+
+    case 'c':case 'C':
+      if (config_entries.debug && outfile)
+	fprintf(outfile, "Channel = [%s]\n", argv[1]);
+
+      if (argc > 2)
+	strncpy(config_entries.defchannel_key,p,MAX_CONFIG-1);
+      else
+	config_entries.defchannel_key[0] = '\0';
+      strncpy(config_entries.defchannel,argv[1],MAX_CHANNEL-1);
+      break;
+
+    default:
+      break;
+    }
+  }
 
   if(config_entries.username_config[0] == '\0')
-    {
-      fprintf(stderr,"I need a username (U:) in %s\n",CONFIG_FILE);
-      error_in_config = YES;
-    }
+  {
+    fprintf(stderr,"I need a username (U:) in %s\n",CONFIG_FILE);
+    error_in_config = YES;
+  }
 
   if(config_entries.oper_nick_config[0] == '\0')
-    {
-      fprintf(stderr,"I need an opernick (O:) in %s\n",CONFIG_FILE);
-      error_in_config = YES;
-    }
+  {
+    fprintf(stderr,"I need an opernick (O:) in %s\n",CONFIG_FILE);
+    error_in_config = YES;
+  }
 
   if(config_entries.oper_pass_config[0] == '\0')
-    {
-      fprintf(stderr,"I need an operpass (O:) in %s\n",CONFIG_FILE);
-      error_in_config = YES;
-    }
+  {
+    fprintf(stderr,"I need an operpass (O:) in %s\n",CONFIG_FILE);
+    error_in_config = YES;
+  }
 
   if(config_entries.server_name[0] == '\0')
-    {
-      fprintf(stderr,"I need a server (S:) in %s\n",CONFIG_FILE);
-      error_in_config = YES;
-    }
+  {
+    fprintf(stderr,"I need a server (S:) in %s\n",CONFIG_FILE);
+    error_in_config = YES;
+  }
 
   if(config_entries.server_port[0] == '\0')
-    {
-      fprintf(stderr,"I need a port in the server line (S:) in %s\n",CONFIG_FILE);
-      error_in_config = YES;
-    }
+  {
+    fprintf(stderr,"I need a port in the server line (S:) in %s\n",
+	    CONFIG_FILE);
+    error_in_config = YES;
+  }
 
   if(config_entries.ircname_config[0] == '\0')
-    {
-      fprintf(stderr,"I need an ircname (I:) in %s\n",CONFIG_FILE);
-      error_in_config = YES;
-    }
+  {
+    fprintf(stderr,"I need an ircname (I:) in %s\n",CONFIG_FILE);
+    error_in_config = YES;
+  }
 
   if(config_entries.dfltnick[0] == '\0')
-    {
-      fprintf(stderr,"I need a nick (N:) in %s\n", CONFIG_FILE);
-      error_in_config = YES;
-    }
+  {
+    fprintf(stderr,"I need a nick (N:) in %s\n", CONFIG_FILE);
+    error_in_config = YES;
+  }
 
   if(error_in_config)
     exit(1);
@@ -282,140 +285,80 @@ void load_config_file(char *file_name)
  * output	- NONE
  * side effects - action table is affected
  */
-void save_prefs(void)
+void 
+save_prefs(void)
 {
-  FILE *fp;
-  char *argv[20], *frombuff, *tobuff, *p, *q, filename[80];
-  int argc=0, a, fd;
+  FILE *fp_in;
+  FILE *fp_out;
+  char *argv[MAX_ARGV];
+  char frombuff[MAX_BUFF];
+  char *p, *q, filename[80];
+  int argc=0, a;
 
-  if (!(fp = fopen(CONFIG_FILE,"r")))
-    {
-      sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s: %s\n", CONFIG_FILE, strerror(errno));
-      return;
-    }
+  if ((fp_in = fopen(CONFIG_FILE,"r")) == NULL)
+  {
+    sendtoalldcc(SEND_ALL_USERS,
+		 "Couldn't open %s: %s\n", CONFIG_FILE, strerror(errno));
+    return;
+  }
 
   snprintf(filename, sizeof(filename), "%s.%d", CONFIG_FILE, getpid());
-  if ((fd = open(filename, O_CREAT|O_WRONLY)) == -1)
+
+  if ((fp_out = fopen(filename, "w")) == NULL)
+  {
+    sendtoalldcc(SEND_ALL_USERS, 
+		 "Couldn't open %s: %s\n", filename, strerror(errno));
+    fclose(fp_in);
+    return;
+  }
+
+  while (fgets(frombuff, MAX_BUFF-1, fp_in))
+  {
+    /* zap newlines */
+    if ((p = strchr(frombuff,'\n')) != NULL)
+      *p = '\0';
+
+    argc = 0;
+    p = frombuff;
+
+    for (q=strchr(p, ':'); q; q=strchr(p, ':'))
     {
-      sendtoalldcc(SEND_ALL_USERS, "Couldn't open %s: %s\n", filename, strerror(errno));
-      fclose(fp);
-      return;
+      argv[argc++] = p;
+      *q = '\0';
+      p = q+1;
     }
+    argv[argc++] = p;
 
-  if (!(frombuff=(char *)malloc(4096)))
+    switch (argv[0][0])
     {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in save_prefs");
-      fclose(fp);
-      close(fd);
-      gracefuldie(0, __FILE__, __LINE__);
+    case 'A': case 'a':
+      if ((a = get_action(argv[1])) != -1)
+      {
+	/* XXX needs error check */
+	fprintf(fp_out, "A:%s:%s:%s:%s:%s\n",
+		actions[a].name, actions[a].method,
+		(actions[a].reason[0] ? actions[a].reason : ""),
+		(actions[a].report ? "YES" : ""));
+      }
+      break;
+    default:
+      fprintf (fp_out, "%s:", argv[0]);
+      for (a=1; a < argc-1 ; a++)
+      {
+	fprintf (fp_out, "%s:", argv[a]);
+      }
+      a++;
+      fprintf (fp_out, "%s\n", argv[a]);
+      break;
     }
-  if (!(tobuff=(char *)malloc(4096)))
-    {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in save_prefs");
-      fclose(fp);
-      close(fd);
-      free(frombuff);
-      gracefuldie(0, __FILE__, __LINE__);
-    }
+  }
 
-  while (!feof(fp))
-    {
-      memset(tobuff, 0, 4096);
-      memset(frombuff, 0, 4096);
-      argc=0;
-      fgets(frombuff, 4096, fp);
-      p = frombuff;
-      for (q=strchr(p, ':');q;q=strchr(p, ':'))
-        {
-          *q = '\0';
-          if (!(argv[argc] = (char *)malloc(200)))
-            {
-              sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in save_prefs");
-              fclose(fp);
-              close(fd);
-              free(tobuff);
-              free(frombuff);
-              for (a=0;a<argc;++a)
-                free(argv[a]);
-              gracefuldie(0, __FILE__, __LINE__);
-            }
-          snprintf(argv[argc], 200, "%s", p);
-          p = q+1;
-          ++argc;
-        }
+  fclose(fp_in);
+  fclose(fp_out);
 
-      if (!(argv[argc] = (char *)malloc(200)))
-        {
-          sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in save_prefs");
-          fclose(fp);
-          close(fd);
-          free(tobuff);
-          free(frombuff);
-          for (a=0;a<argc;++a)
-            free(argv[a]);
-          gracefuldie(0, __FILE__, __LINE__);
-        }
-      snprintf(argv[argc], 200, "%s", p);
-      ++argc;
-
-      switch (argv[0][0])
-        {
-          case 'A': case 'a':
-            if ((a = get_action(argv[1])) != -1)
-              {
-                sprintf(tobuff, "%s:%s:%s", argv[0], actions[a].name, actions[a].method);
-                if (actions[a].reason[0])
-                  {
-                    strcat(tobuff, ":");
-                    strcat(tobuff, actions[a].reason);
-                  }
-                if (actions[a].report)
-                  strcat(tobuff, ":YES");
-                strcat(tobuff, "\n");
-                if ((write(fd, tobuff, strlen(tobuff))) == -1)
-                  {
-                    sendtoalldcc(SEND_ALL_USERS, "Error writing to file %s: %s", filename,
-                                 strerror(errno));
-                    fclose(fp);
-                    if (fd) close(fd);
-                    free(tobuff);
-                    free(frombuff);
-                    for (a=0;a<argc;++a)
-                      free(argv[a]);
-                    return;
-                  }
-                break;
-              }
-          default:
-            sprintf(tobuff, "%s:", argv[0]);
-            for (a=1;a<argc;++a)
-              {
-                strcat(tobuff, argv[a]);
-                strcat(tobuff, ":");
-              }
-            if (tobuff[strlen(tobuff)-1] == ':')
-	      tobuff[strlen(tobuff)-1] = '\0';
-
-            if ((write(fd, tobuff, strlen(tobuff))) == -1)
-              {
-                sendtoalldcc(SEND_ALL_USERS, 
-			     "Error writing to file %s: %s", filename,
-                             strerror(errno));
-                fclose(fp);
-                if (fd) close(fd);
-                free(tobuff);
-                free(frombuff);
-                for (a=0;a<argc;++a)
-                  free(argv[a]);
-                return;
-              }
-	    break;
-        }
-    }
-  close(fd);
-  fclose(fp);
   if (rename(filename, CONFIG_FILE))
-    sendtoalldcc(SEND_ALL_USERS, "Error renaming new config file.  Changes may be lost.  %s",
+    sendtoalldcc(SEND_ALL_USERS,
+		 "Error renaming new config file.  Changes may be lost.  %s",
                  strerror(errno));
   chmod(CONFIG_FILE, 0600);
 }
@@ -433,7 +376,7 @@ void load_userlist()
   FILE *userfile;
   char line[MAX_BUFF];
 
-  if ( !(userfile = fopen(config_entries.userlist_config,"r")) )
+  if ((userfile = fopen(config_entries.userlist_config,"r")) == NULL)
     {
       fprintf(stderr,"Cannot read %s\n",config_entries.userlist_config);
       return;

@@ -1,3 +1,7 @@
+*** 20011023_2 by bill
+- updated default M: to goto http://www.ircd-hybrid.org/tcm/
+
+
 *** 20011023_1 by bill
 - found and fixed mem leak
 - fixed parse error in server link/unlink messages

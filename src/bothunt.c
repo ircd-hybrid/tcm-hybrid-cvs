@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.95 2002/05/25 06:39:29 db Exp $
+ * $Id: bothunt.c,v 1.96 2002/05/25 06:42:16 db Exp $
  */
 
 #include <stdio.h>
@@ -249,7 +249,8 @@ _ontraceuser(int connnum, int argc, char *argv[])
   adduserhost(argv[5],&userinfo,YES,is_oper);
 }
 
-void _ontraceclass(int connnum, int argc, char *argv[])
+void
+_ontraceclass(int connnum, int argc, char *argv[])
 {
   if (doingtrace)
   {
@@ -273,7 +274,8 @@ void _ontraceclass(int connnum, int argc, char *argv[])
  * the guilty)
  */
 
-void on_stats_o(int connnum, int argc, char *argv[])
+void
+on_stats_o(int connnum, int argc, char *argv[])
 {
   char *user_at_host;
   char *user;
@@ -2351,7 +2353,8 @@ link_look_notice(char *snotice)
  * go figure.
  *
  */
-static void cs_nick_flood(char *snotice)
+static
+void cs_nick_flood(char *snotice)
 {
   char *nick_reported;
   char *user_host;
@@ -2461,7 +2464,8 @@ cs_clones(char *snotice)
  *
  */
 
-static void check_nick_flood(char *snotice)
+static void
+check_nick_flood(char *snotice)
 {
   char *p;
   char *nick1;

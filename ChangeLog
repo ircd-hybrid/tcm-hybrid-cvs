@@ -1,3 +1,15 @@
+jmallett    2002/05/25 12:29:16 EDT	(20020525_20)
+
+  Modified files:
+    src                  main.c 
+  Log:
+  Account for overflow in the xmalloc stats.
+  
+  Revision  Changes    Path
+  1.69      +4 -0      tcm-hybrid/src/main.c
+
+
+
 jmallett    2002/05/25 12:27:29 EDT	(20020525_19)
 
   Modified files:

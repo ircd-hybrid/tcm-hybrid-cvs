@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.37 2002/05/25 02:37:37 db Exp $B
+ * $Id: modules.c,v 1.38 2002/05/25 08:05:26 jmallett Exp $B
  *
  */
 
@@ -30,6 +30,10 @@
 
 #ifndef RTLD_NOW
 #define RTLD_NOW RTLD_LAZY  /* apparantely openbsd has problems here */
+#endif
+
+#ifndef	RTLD_GLOBAL
+#define	RTLD_GLOBAL RTLD_LAZY
 #endif
 
 const int max_mods = MODS_INCREMENT;
@@ -219,11 +223,6 @@ int load_a_module(char *name, int log)
     }
   modlist[i].address = modpointer;
   modlist[i].version = ver;
-  if (!(modlist[i].name = (char *)malloc(30)))
-    {
-      send_to_all(SEND_ALL, "Ran out of memory in load_a_module");
-      exit(1);
-    }
   strcpy(modlist[i].name, name);
   initmod();
   
@@ -256,7 +255,6 @@ int unload_a_module(char *name, int log)
     unloadmod();
 
   dlclose(modlist[modindex].address);
-  modlist[modindex].name = NULL;
   modlist[modindex].version = NULL;
   modlist[modindex].address = NULL;
 

@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.67 2002/05/25 06:39:29 db Exp $ */
+/* $Id: stdcmds.c,v 1.68 2002/05/25 08:05:26 jmallett Exp $ */
 
 #include "setup.h"
 
@@ -624,7 +624,6 @@ list_nicks(int sock,char *nick,int regex)
 {
   struct hashrec *userptr;
 #ifdef HAVE_REGEX_H
-  char *errbuf=NULL;
   regex_t reg;
   regmatch_t m[1];
 #endif
@@ -634,14 +633,9 @@ list_nicks(int sock,char *nick,int regex)
 #ifdef HAVE_REGEX_H
   if (regex == YES && (i=regcomp((regex_t *)&reg, nick, 1)))
   {
-    if ((errbuf = (char *)malloc(1024)) == NULL)
-    {
-      send_to_all(SEND_ALL, "Ran out of memory in list_nicks()");
-      exit(0);
-    }
+    char errbuf[1024];
     regerror(i, (regex_t *)&reg, errbuf, 1024); 
     print_to_socket(sock, "Error compiling regular expression: %s\n", errbuf);
-    free(errbuf);
     return;
   }
 #endif
@@ -680,10 +674,6 @@ list_nicks(int sock,char *nick,int regex)
   else
     print_to_socket(sock,
 		    "No matches for %s found\n",nick);
-#ifdef HAVE_REGEX_H
-  if (errbuf != NULL)
-    free(errbuf);
-#endif
 }
 
 /*
@@ -702,30 +692,19 @@ list_users(int sock,char *userhost,int regex)
 {
   struct hashrec *ipptr;
 #ifdef HAVE_REGEX_H
-  char *errbuf=NULL;
   regex_t reg;
   regmatch_t m[1];
 #endif
-  char *uhost;
+  char uhost[1024];
   int i, numfound = 0;
-  if ((uhost = (char *)malloc(1024)) == NULL)
-  {
-    send_to_all(SEND_ALL, "Ran out of memory in list_users()\n");
-    exit(0);
-  }
 
 #ifdef HAVE_REGEX_H
   if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
   {
-    if ((errbuf = (char *)malloc(1024)) == NULL)
-    {
-      send_to_all(SEND_ALL, "Ran out of memory in list_users()");
-      exit(0);
-    }
+    char errbuf[1024];
     regerror(i, (regex_t *)&reg, errbuf, 1024); 
     print_to_socket(sock, "Error compiling regular expression: %s\n",
 		    errbuf);
-    free(errbuf);
     return;
   }
 #endif
@@ -767,7 +746,6 @@ list_users(int sock,char *userhost,int regex)
 		    (numfound > 1 ? "es " : " "), userhost);
   else
     print_to_socket(sock, "No matches for %s found\n", userhost);
-  free(uhost);
 }
 
 /*
@@ -785,31 +763,19 @@ list_virtual_users(int sock,char *userhost,int regex)
 {
   struct hashrec *ipptr;
 #ifdef HAVE_REGEX_H
-  char *errbuf;
   regex_t reg;
   regmatch_t m[1];
 #endif
-  char *uhost;
+  char uhost[1024];
   int i,numfound = 0;
-
-  if ((uhost = (char *)malloc(1024)) == NULL)
-  {
-    send_to_all(SEND_ALL, "Ran out of memory in list_users()");
-    exit(0);
-  }
 
 #ifdef HAVE_REGEX_H
   if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
   {
-    if ((errbuf = (char *)malloc(REGEX_SIZE)) == NULL)
-    {
-      send_to_all(SEND_ALL, "Ran out of memory in list_users()");
-      exit(0);
-    }
+    char errbuf[REGEX_SIZE];
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE); 
     print_to_socket(sock, "Error compiling regular expression: %s\n",
 		    errbuf);
-    free(errbuf);
     return;
   }
 #endif
@@ -847,14 +813,12 @@ list_virtual_users(int sock,char *userhost,int regex)
          (numfound > 1 ? "es " : " "), userhost);
   else
     print_to_socket(sock, "No matches for %s found\n", userhost);
-  free(uhost);
 }
 
 void kill_list_users(int sock, char *userhost, char *reason, int regex)
 {
   struct hashrec *userptr;
 #ifdef HAVE_REGEX_H
-  char *errbuf=NULL;
   regex_t reg;
   regmatch_t m[1];
 #endif
@@ -864,14 +828,9 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
 #ifdef HAVE_REGEX_H
   if (regex == YES && (i=regcomp((regex_t *)&reg, userhost, 1)))
   {
-    if ((errbuf = (char *)malloc(REGEX_SIZE)) == NULL)
-    {
-      send_to_all(SEND_ALL, "Ran out of memory in kill_list_users()");
-      exit(0);
-    }
+    char errbuf[REGEX_SIZE];
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE);
     print_to_socket(sock, "Error compiling regular expression: %s\n", errbuf);
-    free(errbuf);
     return;
   }
 #endif
@@ -900,10 +859,6 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
     print_to_socket(sock, "%d matches for %s found\n", userhost);
   else
     print_to_socket(sock, "No matches for %s found\n", userhost);
-#ifdef HAVE_REGEX_H
-  if (errbuf != NULL)
-    free(errbuf);
-#endif
 }
 
 /*

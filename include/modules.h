@@ -1,13 +1,13 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.21 2002/05/25 02:16:49 leeh Exp $ */
+/* $Id: modules.h,v 1.22 2002/05/25 08:05:24 jmallett Exp $ */
 
 #define MAX_HASH 256
 
 struct module
 {
-  char *name;
+  char name[30];
   char *version;
   void *address;
 };

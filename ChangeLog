@@ -1,3 +1,14 @@
+*** 20010203_1 by wcampbel
+Massive cleanup part 4 of 4.  tcm compiles cleanly (except for the version
+variables) with -Wall -Wunused...... and SHOULD be pretty clean now.  I'll
+run it through lint soon, then will start going through and cleaning up the
+rest of the code.  We'll see how it goes...
+
+Oh, I forgot to mention I added usermode +l to the MODE command it sends to
+the server when it connects.  This allows tcm to see LOCOPS messages when
+it is run against a Hybrid 7 server.
+
+
 *** 20010202_1 by wcampbel
 Massive cleanup part 3
 

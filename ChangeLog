@@ -1,3 +1,19 @@
+bill        2002/08/09 12:21:27 EDT	(20020809_1)
+
+  Modified files:
+    src                  bothunt.c hash.c 
+  Log:
+  - fixed a typo in hash.c that caused unwanted truncating of usernames
+    (this is one of the causes to our usertables loosing sync with reality)
+  - with the addition of the quit message to the client disconnect notice in -7,
+    we had to redo how we get the ip from the notice
+  
+  Revision  Changes    Path
+  1.193     +8 -6      tcm-hybrid/src/bothunt.c
+  1.50      +1 -1      tcm-hybrid/src/hash.c
+
+
+
 wcampbel    2002/08/08 21:53:58 EDT	(20020809_0)
 
   Modified files:

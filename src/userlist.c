@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.40 2001/12/12 23:08:16 einride Exp $
+ * $Id: userlist.c,v 1.41 2001/12/12 23:19:56 db Exp $
  *
  */
 
@@ -395,11 +395,7 @@ void load_userlist()
  * i.e.
  *  u@h:nick:password:3 for opers
  *
- * h:nick:password:okb o for opers, 2 for remote kline, b for bot
- *
- * - 4 is for bot -
- * i.e.
- *  h:nick:password:7   for remote tcm's
+ * h:nick:password:ok o for opers, 2 for remote kline
  *
  */
 

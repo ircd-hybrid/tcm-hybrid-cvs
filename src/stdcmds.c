@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.65 2002/05/24 15:17:49 db Exp $ */
+/* $Id: stdcmds.c,v 1.66 2002/05/25 02:37:37 db Exp $ */
 
 #include "setup.h"
 
@@ -54,9 +54,6 @@
 #endif
 
 int doingtrace = NO;
-
-extern struct connection connections[];
-
 void freehash(void);
 
 /*

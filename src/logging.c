@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.28 2002/05/24 15:17:48 db Exp $
+ * $Id: logging.c,v 1.29 2002/05/25 02:37:37 db Exp $
  *
  * - db
  */
@@ -45,7 +45,6 @@ FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file
 			    */
 
-extern struct connection connections[];
 
 static FILE *initlog(void);
 static void timestamp_log(FILE *);

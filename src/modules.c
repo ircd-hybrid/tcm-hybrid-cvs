@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.36 2002/05/25 02:16:51 leeh Exp $B
+ * $Id: modules.c,v 1.37 2002/05/25 02:37:37 db Exp $B
  *
  */
 
@@ -37,8 +37,6 @@ static const char unknown_ver[] = "<unknown>";
 struct module modlist[MODS_INCREMENT];
 
 static int hash_command(const char *);
-
-extern struct connection connections[];
 
 void modules_init(void)
 {

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.15 2002/05/25 02:16:52 leeh Exp $
+ * $Id: parse.c,v 1.16 2002/05/25 02:37:37 db Exp $
  */
 
 #include <stdio.h>
@@ -49,8 +49,6 @@ static void cannotjoin(char *channel);
 #ifdef SERVICES
 static void on_services_notice(int argc, char *argv[]);
 #endif
-
-extern struct connection connections[MAXDCCCONNS+1];
 
 int  maxconns = 0;
 int act_drone, act_sclone;

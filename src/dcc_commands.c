@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.75 2002/05/24 20:52:43 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.76 2002/05/25 02:37:36 db Exp $ */
 
 #include "setup.h"
 
@@ -67,7 +67,6 @@ static void handle_save(int sock,char *nick);
 static int  islegal_pass(int connect_id,char *password);
 static void print_help(int sock,char *text);
 
-extern struct connection connections[];
 extern struct s_testline testlines;
 extern char * get_method_names(int method);
 extern int get_method_number(char * name);

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.67 2002/05/24 20:52:44 leeh Exp $
+ * $Id: userlist.c,v 1.68 2002/05/25 02:37:37 db Exp $
  *
  */
 
@@ -42,7 +42,6 @@
 
 struct auth_file_entry userlist[MAXUSERS];
 struct exception_entry hostlist[MAXHOSTS];
-extern struct connection connections[];
 
 int  user_list_index;
 int  tcm_list_index;

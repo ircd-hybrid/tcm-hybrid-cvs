@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.129 2002/06/21 16:46:46 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.130 2002/06/21 18:36:35 leeh Exp $ */
 
 #include "setup.h"
 
@@ -819,19 +819,21 @@ list_opers(int sock)
 static void 
 list_exemptions(int sock)
 {
-  int i, n;
+  slink_node *ptr;
+  struct exception_entry *exempt;
   char buf[512];
+  int n;
 
-  for (i=0; i<MAXHOSTS; i++)
+  for(ptr = exempt_list; ptr; ptr = ptr->next)
   {
-    if(exempt_list[i].host[0] == 0)
-      break;
-
-    sprintf(buf, "%s@%s is exempted for:", exempt_list[i].user, exempt_list[i].host);
+    exempt = ptr->data;
+    sprintf(buf, "%s@%s is exempted for:", exempt->user, exempt->host);
 
     for (n=0;actions[n].name[0];n++)
-      if((1 << n) & exempt_list[i].type)
+    {
+      if((1 << n) & exempt->type)
 	snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " %s", actions[n].name);
+    }
 
     print_to_socket(sock, "%s", buf);
   }

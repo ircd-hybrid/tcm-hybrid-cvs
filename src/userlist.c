@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.125 2002/06/21 16:46:47 leeh Exp $
+ * $Id: userlist.c,v 1.126 2002/06/21 18:36:35 leeh Exp $
  *
  */
 
@@ -38,16 +38,16 @@
 #include "handler.h"
 
 struct auth_file_entry userlist[MAXUSERS];
-struct exception_entry exempt_list[MAXHOSTS];
 char wingate_class_list[MAXWINGATE][MAX_CLASS];
 
 int	user_list_index;
-int	exempt_list_index;
 int	wingate_class_list_index;
 
 static void load_a_user(char *);
 static void load_e_line(char *);
 static void add_oper(char *, char *, char *, char *, int);
+
+static void clear_exempts(void);
 
 static void m_umode(int, int, char *argv[]);
 
@@ -890,23 +890,24 @@ add_oper(char *user, char *host, char *usernick, char *password, int type)
 void
 add_exemption(char *user, char *host, int type)
 {
+  slink_node *ptr;
+  struct exception_entry *exempt;
+
   if(strcmp(host, "*") == 0)
     return;
 
-  if(exempt_list_index >= (MAXHOSTS-1))
-    return;
+  ptr = slink_create();
+  exempt = (struct exception_entry *) xmalloc(sizeof(struct exception_entry));
 
-  strlcpy(exempt_list[exempt_list_index].user, user,
-          sizeof(exempt_list[exempt_list_index].user));
-  strlcpy(exempt_list[exempt_list_index].host, host,
-          sizeof(exempt_list[exempt_list_index].host));
+  strlcpy(exempt->user, user, sizeof(exempt->user));
+  strlcpy(exempt->host, host, sizeof(exempt->host));
 
   if(type)
-    exempt_list[exempt_list_index].type = type;
+    exempt->type = type;
   else
-    exempt_list[exempt_list_index].type = 0xFFFFFFFF;
+    exempt->type = 0xFFFFFFFF;
 
-  exempt_list_index++;
+  slink_add(exempt, ptr, &exempt_list);
 }
 
 static void
@@ -915,9 +916,6 @@ load_e_line(char *line)
   char *vltn, *p, *uhost, *q;
   unsigned int type=0, i;
   /* E:actionmask[ actionmask]:user@hostmask */
-
-  if(exempt_list_index >= (MAXHOSTS-1))
-    return;
 
   if ((p = strchr(line, ':')) == NULL)
     return;
@@ -964,14 +962,29 @@ void
 clear_userlist()
 {
   user_list_index = 0;
-  exempt_list_index = 0;
   wingate_class_list_index = 0;
 
   memset((void *)userlist, 0, sizeof(userlist));
-  memset((void *)exempt_list, 0, sizeof(exempt_list));
   memset((void *)wingate_class_list, 0, sizeof(wingate_class_list));
 }
 
+void
+clear_exempts(void)
+{
+  slink_node *ptr;
+  slink_node *next_ptr;
+
+  for(ptr = exempt_list; ptr; ptr = next_ptr)
+  {
+    next_ptr = ptr->next;
+
+    xfree(ptr->data);
+    xfree(ptr);
+  }
+
+  exempt_list = NULL;
+}
+  
 /*
  * is_an_oper()
  *
@@ -1009,32 +1022,41 @@ is_an_oper(char *user,char *host)
 int
 ok_host(char *user,char *host, int type)
 {
-  int i, ok;
+  slink_node *ptr;
+  struct exception_entry *exempt;
+  int ok;
 
-  for(i=0;exempt_list[i].user[0];i++)
+  for(ptr = exempt_list; ptr; ptr = ptr->next)
+  {
+    exempt = ptr->data;
+    ok = 0;
+    
+    if (strchr(user, '?') || strchr(user, '*'))
     {
-      ok = 0;
-      if (strchr(user, '?') || strchr(user, '*'))
-      {
-        if (!wldwld(exempt_list[i].user, user))
-          ok++;
-      }
-      else
-        if (!wldcmp(exempt_list[i].user, user))
-          ok++;
-
-      if (strchr(host, '?') || strchr(host, '*'))
-      {
-        if (!wldwld(exempt_list[i].host, host))
-          ok++;
-      }
-      else
-        if (!wldcmp(exempt_list[i].host, host))
-          ok++;
-
-      if (ok == 2 && (exempt_list[i].type & (1 << type)))
-        return(YES);
+      if(wldwld(exempt->user, user) == 0)
+        ok++;
     }
+    else
+    {
+      if(wldcmp(exempt->user, user) == 0)
+        ok++;
+    }
+
+    if (strchr(host, '?') || strchr(host, '*'))
+    {
+      if(wldwld(exempt->host, host) == 0)
+        ok++;
+    }
+    else
+    {
+      if(wldcmp(exempt->host, host) == 0)
+        ok++;
+    }
+
+    if(ok == 2 && (exempt->type & (1 << type)))
+      return(YES);
+  }
+
   return(NO);
 }
 
@@ -1087,6 +1109,7 @@ reload_userlist(void)
 #endif
 
   clear_userlist();
+  clear_exempts();
   load_userlist();
 
   print_to_server("STATS Y");
@@ -1110,20 +1133,25 @@ reload_userlist(void)
 void
 exemption_summary()
 {
-  int i, j;
+  slink_node *ptr;
+  struct exception_entry *exempt;
+  int i;
 
-  for (i=0;i<MAX_ACTIONS;++i)
+  for (i = 0; i < MAX_ACTIONS; i++)
   {
     if (actions[i].name[0] == '\0')
      break;
+
     printf("%s:", actions[i].name);
-    for (j=0;j<MAXHOSTS;++j)
+
+    for(ptr = exempt_list; ptr; ptr = ptr->next)
     {
-      if (exempt_list[j].user[0] == '\0')
-        break;
-      if (exempt_list[j].type & i)
-        printf(" %s@%s", exempt_list[j].user, exempt_list[j].host);
+      exempt = ptr->data;
+
+      if(exempt->type & i)
+        printf(" %s@%s", exempt->user, exempt->host);
     }
+
     printf("\n");
   }
 }

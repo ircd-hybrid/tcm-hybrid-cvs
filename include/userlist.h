@@ -1,7 +1,9 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.74 2002/06/21 16:46:43 leeh Exp $ */
+/* $Id: userlist.h,v 1.75 2002/06/21 18:36:32 leeh Exp $ */
+
+#include "tools.h"
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -106,8 +108,8 @@ unsigned long local_ip(char *ourhostname);
 extern struct auth_file_entry userlist[];
 extern int user_list_index;
 
-extern struct exception_entry exempt_list[];	/* defined in userlist.c */
-extern int exempt_list_index;
+struct slink_node;
+slink_node *exempt_list;
 
 #ifdef DEBUGMODE
 void exemption_summary();

@@ -26,8 +26,8 @@ all: tcm
 
 build: tcm
 
-clean: cleandata
-	@${RM} -f DEBUG
+clean:
+	@${RM} -f DEBUG etc/tcm.pid
 	@for i in $(SUBDIRS); do \
 		echo "Cleaning $$i";\
 		cd $$i;\

@@ -54,7 +54,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.3 2001/09/20 19:52:29 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.4 2001/09/21 04:57:49 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -1248,51 +1248,50 @@ char makeconn(char *hostport,char *nick,char *userhost)
 void _onctcp(int connnum, int argc, char *argv[])
 {
   char *hold, *nick;
-  char *msg=argv[3];
+  char *msg=argv[3]+2;
   char dccbuff[DCCBUFF_SIZE];
   int i;
 
   nick = argv[0] + 1;
   if ((hold = strchr(argv[0], '!'))) *hold = '\0';
   if (dccbuff[0] != '\0') memset(&dccbuff, 0, sizeof(dccbuff));
-  dccbuff[0] = '#';
+  for (i=4;i<argc;++i)
+    {
+      strncat(dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
+      strncat(dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
+    }
+  if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
+  if (dccbuff[strlen(dccbuff)-1] == '\001') dccbuff[strlen(dccbuff)-1] = '\0';
+  printf("%d %d %d %d\n", msg[0], msg[1], msg[2], msg[3]);
   if (!strncasecmp(msg,"PING",4))
     {
-      for (i=0;i<argc;++i)
-        {
-          strncat(dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
-          strncat(dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
-        }
-      if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
       notice(nick, "\001PING %s\001\n", dccbuff);
       return;
     }
-#if 0
-  else if (!strncasecmp(text,"VERSION",7))
+  else if (!strncasecmp(msg,"VERSION",7))
     {
       notice(nick,"\001VERSION %s(%s)\001",VERSION,SERIALNUM);
     }
-  else if (!strncasecmp(text,"DCC CHAT",8))
+  else if (!strncasecmp(msg,"DCC CHAT",8))
     {
-      text += 9;
-      if( (hold = strchr(text,' ')) )  /* Skip word 'Chat' */
-	{
-	  text = hold+1;
-	  if( (hold = strchr(text,' ')) )
-	    {
-	      *(hold++) = ':';
-	      strncpy(dccbuff+1,text,119);
-	      if (atoi(hold) < 1024)
-		notice(nick,
-		       "Invalid port specified for DCC CHAT.  Not funny.");
-	      else if (!makeconn(dccbuff,nick,userhost))
-		notice(nick,"DCC CHAT connection failed");
-	      return;
-	    }
+      nick = argv[0]+1;
+      if ((hold = strchr(nick, '!'))) *hold = '\0';
+      else return;
+      ++hold;
+      if (!(msg = strrchr((char *)&dccbuff, ' '))) return;
+      ++msg;
+      if (atoi(msg) < 1024)
+        {
+          notice(nick, "Invalid port specified for DCC CHAT. Not funny.");
+          return;
+        }
+      printf("makeconn(\"%s\", \"%s\", \"%s\")\n", msg, nick, hold);
+      if (!makeconn(msg, nick, hold))
+        {
+	  notice(nick,"DCC CHAT connection failed");
+	  return;
 	}
-      notice(nick,"Unable to DCC CHAT.  Invalid protocol.");
     }
-#endif
 }
 
 int hash_func(char *string)

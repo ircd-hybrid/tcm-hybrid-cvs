@@ -1,3 +1,16 @@
+bill        2002/03/04 16:10:13 EST	(20020304_0)
+
+  Modified files:
+    modules              serverif.c 
+  Log:
+  Submitted by:   Stian Sletner <stian@sletner.com>
+  - fix in services-drone detection (was crashing normon almost daily)
+  
+  Revision  Changes    Path
+  1.39      +1 -0      tcm-hybrid/modules/serverif.c
+
+
+
 bill        2002/02/24 02:45:05 EST	(20020224_0)
 
   Modified files:

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.67 2002/05/25 16:21:07 leeh Exp $ */
+/* $Id: main.c,v 1.68 2002/05/25 16:27:27 jmallett Exp $ */
 
 #include "setup.h"
 
@@ -104,7 +104,7 @@ static void setup_corefile(void);
  */
 
 void
-closeconn(int connnum, int argc, char *argv[])
+closeconn(int connnum)
 {
   int i;
 

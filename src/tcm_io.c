@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.24 2002/05/25 16:21:07 leeh Exp $
+ * $Id: tcm_io.c,v 1.25 2002/05/25 16:27:27 jmallett Exp $
  */
 
 #include <stdio.h>
@@ -181,7 +181,7 @@ read_packet(void)
                   }
                 else
                   {
-                    closeconn(i, 0, NULL);
+                    closeconn(i);
                   }
               }
             else if (nread > 0)

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.83 2002/05/25 16:21:06 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.84 2002/05/25 16:27:27 jmallett Exp $ */
 
 #include "setup.h"
 
@@ -592,7 +592,7 @@ void
 m_close(int connnum, int argc, char *argv[])
 {
   print_to_socket(connections[connnum].socket, "Closing connection");
-  closeconn(connnum, 0, NULL);
+  closeconn(connnum);
 }
 
 void
@@ -1671,7 +1671,7 @@ handle_disconnect(int sock, char *nickname, char *who_did_command)
 	print_to_socket(sock, "Disconnecting oper %s", connections[i].nick);
 	print_to_socket(sock, "You have been disconnected by oper %s", 
 			who_did_command);
-	closeconn(i, 0, NULL);
+	closeconn(i);
       }
   }
 }

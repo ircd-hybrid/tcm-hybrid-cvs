@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.68 2002/06/06 18:52:46 leeh Exp $
+ * $Id: parse.c,v 1.69 2002/06/06 22:40:31 db Exp $
  */
 
 #include <stdio.h>
@@ -256,9 +256,6 @@ split_args(char *buffer, char *argv[])
  *     nickname directly affected by this message.  You can kind of figure
  *     the rest of the giant 'if' statement out.  Occasionally we need to
  *     parse additional parameters out of the body.  
- *     ADDED: watch out for partial PRIVMSGs received from the
- *     server... hold them up and make sure to stay synced with the timer
- *     signals that may be ongoing.
  */
 static void
 process_server(struct source_client *source_p, char *function, char *param)

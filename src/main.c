@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.111 2002/06/05 15:10:26 leeh Exp $ */
+/* $Id: main.c,v 1.112 2002/06/06 22:40:31 db Exp $ */
 
 #include "setup.h"
 
@@ -200,19 +200,13 @@ main(int argc, char *argv[])
 
   if(!config_entries.debug && !config_entries.nofork)
     {
-      i = fork();
-      if (i == -1)
+      switch ((i = fork()))
 	{
+	case -1:
 	  fprintf(stderr, "ERROR: Cannot fork process\n");
 	  exit(-1);
-	}
-      else if (i)
-	{
-	  printf("Launched into background (pid:%d)\n", i);
-	  exit(0);
-	}
-      else if ( i == 0 )
-	{
+	  break;
+	case 0:
 	  /* someone is still using one of these... tsk tsk */
 #if 0
 	  close(0);
@@ -220,6 +214,11 @@ main(int argc, char *argv[])
 	  close(2);
 #endif
 	  (void)setsid(); /* really should disassociate */
+	  break;
+	default:
+	  printf("Launched into background (pid:%d)\n", i);
+	  exit(0);
+	  break;
 	}
     }
 
@@ -262,7 +261,7 @@ main(int argc, char *argv[])
 
   if(config_entries.virtual_host_config[0] != '\0')
     {
-      strncpy(tcm_status.my_hostname,
+      strlcpy(tcm_status.my_hostname,
 	      config_entries.virtual_host_config,
 	      MAX_HOST-1);
     }

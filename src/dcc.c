@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.10 2002/06/05 15:10:25 leeh Exp $
+ * $Id: dcc.c,v 1.11 2002/06/06 22:40:30 db Exp $
  */
 
 #include <stdio.h>
@@ -122,8 +122,7 @@ initiate_dcc_chat(struct source_client *source_p)
   }
 
   privmsg (source_p->name, "\001DCC CHAT chat %lu %d\001",
-	   local_ip(tcm_status.my_hostname),
-	   dcc_port);
+	   local_ip(tcm_status.my_hostname), dcc_port);
 
   if (config_entries.debug && outfile)
       (void)fprintf(outfile, "DEBUG: dcc socket = %d\n",
@@ -167,7 +166,7 @@ accept_dcc_connection(struct source_client *source_p,
   strlcpy(connections[i].nick, source_p->name, MAX_NICK);
   strlcpy(connections[i].user, source_p->username, MAX_USER);
   strlcpy(connections[i].host, source_p->host, MAX_HOST);
-  connections[i].last_message_time = time(NULL);
+  connections[i].last_message_time = current_time;
 
   (void)sscanf(host_ip, "%lu", &remoteaddr);
   /* Argh.  Didn't they teach byte order in school??? --cah */
@@ -282,7 +281,6 @@ finish_dcc_chat(int i)
          connections[i].user,
          connections[i].host);
 
-  connections[i].io_read_function = parse_client;
   connections[i].state = S_CLIENT;
   connections[i].io_read_function = parse_client;
   connections[i].io_write_function = NULL;

@@ -56,7 +56,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.19 2001/10/17 13:38:12 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.20 2001/10/23 22:21:19 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -985,10 +985,14 @@ void onservnotice(int connnum, int argc, char *argv[])
          }
        if (c >= 0)
          {
-           snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host), "%s", 
-                    user);
-           connect_flood[c].last_connect = current_time;
+           if (strchr(user, '@'))
+             snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host), "%s", 
+                      user);
+           else
+             snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host), "%s@%s",
+                      user);
            connect_flood[c].connect_count = 0;
+           connect_flood[c].last_connect = current_time;
          }
       break;
 
@@ -1037,10 +1041,10 @@ void onservnotice(int connnum, int argc, char *argv[])
       break;
 
     case SERVER:
-      if (!strcmp(argv[5], "split"))
-        sendtoalldcc(SEND_WARN_ONLY, "Server %s split from %s", argv[4], argv[7]);
+      if (!strcmp(argv[8], "split"))
+        sendtoalldcc(SEND_WARN_ONLY, "Server %s split from %s", argv[7], argv[10]);
       else
-        sendtoalldcc(SEND_WARN_ONLY, "Server %s being introduced by %s", argv[4], argv[8]);
+        sendtoalldcc(SEND_WARN_ONLY, "Server %s being introduced by %s", argv[7], argv[11]);
       break;
 
     case FAILEDOPER:
@@ -1110,7 +1114,6 @@ char makeconn(char *hostport,char *nick,char *userhost)
     {
       if (!isoper(user,host))
         {
-          printf("user: \"%s\" host: \"%s\"\n", user, host);
           notice(nick,"You are not an operator");
           return 0;
         }

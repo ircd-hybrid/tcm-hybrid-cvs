@@ -1,3 +1,17 @@
+*** 20011108_1 by bill
+- added ability to specify install directory with ./configure --prefix
+  (documented, aren't you proud hwy?)
+- turned OPERS_ONLY on by default
+- fixed bug in rdpt() causing incoming buffers from differing fds to be
+  switched with one-another
+- fixed bug in check_host_clones() and check_virtual_host_clones() that
+  would print unitialized variables
+- fixed .vlist so the user part of <[user@]ip> works properly.  you may now:
+   .vlist 255.2?5.*  or .vlist ~*@255.2?5.*
+  (documented this, too.  I am on a role!)
+- added the "has disconnected" notice back from wherever it went
+
+
 *** 20011107_1 by wcampbel
 Document some items more clearly.
 Disable HOW_TO_MAIL by default.

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.84 2002/06/04 08:36:29 db Exp $
+ * $Id: tcm_io.c,v 1.85 2002/06/04 13:24:31 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -27,7 +27,7 @@
 # include <sys/socketvar.h>
 #endif
 
-#ifdef AIX
+#ifdef HAVE_SYS_SELECT_H
 # include <sys/select.h>
 #endif
 
@@ -57,7 +57,6 @@ static void va_print_to_socket(int sock, const char *format, va_list va);
 static void va_print_to_server(const char *format, va_list va);
 static void signon_to_server(int unused);
 static void reconnect(void);
-static void server_ping_timeout(int conn_num);
 
 fd_set readfds;		/* file descriptor set for use with select */
 fd_set writefds;	/* file descriptor set for use with select */
@@ -328,22 +327,6 @@ server_link_closed(int conn_num)
   tcm_log(L_ERR, "server_link_closed()");
   tcm_status.am_opered = NO;
   eventAdd("reconnect", (EVH *)reconnect, NULL, 30);
-}
-
-/*
- * server_ping_timeout()
- *
- * inputs	- connection id
- * output	- none
- * side effects	-
- *
- */
-static void
-server_ping_timeout(int conn_num)
-{
-  tcm_log(L_ERR, "read_packet() ping time out");
-  send_to_all(FLAGS_ALL, "PING time out on server");
-  server_link_closed(conn_num);
 }
 
 /*

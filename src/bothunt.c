@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.149 2002/06/03 11:03:06 leeh Exp $
+ * $Id: bothunt.c,v 1.150 2002/06/04 13:24:30 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -974,7 +974,7 @@ connect_flood_notice(char *snotice)
 
   int first_empty_entry = -1;
   int found_entry = NO;
-  int i, ident=YES;
+  int i;
 
   snotice +=5;
 
@@ -1020,10 +1020,6 @@ connect_flood_notice(char *snotice)
 		}
 
 	      connect_flood[i].connect_count++;
-	      if ((user[0] == '~') || (!strcmp(user, "unknown"))) 
-		ident = 0;
-	      else
-		ident = 1;
 	      if (connect_flood[i].connect_count >= MAX_CONNECT_FAILS)
 		handle_action(act_cflood, nick_reported, user, host, 0, 0);
 	    }

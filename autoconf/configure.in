@@ -1,4 +1,4 @@
-dnl $Id: configure.in,v 1.19 2002/06/01 13:04:19 wcampbel Exp $
+dnl $Id: configure.in,v 1.20 2002/06/04 13:24:26 wcampbel Exp $
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(include/tcm.h)
 
@@ -46,6 +46,7 @@ AC_CHECK_FUNC(dlopen,, AC_CHECK_LIB(dl, dlopen))
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/socketvar.h sys/stream.h crypt.h sys/resource.h getopt.h)
+AC_CHECK_HEADERS(sys/select.h)
 
 dnl Check for regex.h - if found, assume regexec() and regcomp()
 AC_CHECK_HEADER(regex.h, AC_DEFINE(HAVE_REGEX_H), AC_MSG_WARN(regex.h could not be found - regex matching will not be implemented))

@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.4 2002/06/04 04:43:13 db Exp $
+ * $Id: dcc.c,v 1.5 2002/06/04 13:24:31 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -25,10 +25,6 @@
 
 #ifdef HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
-#endif
-
-#ifdef AIX
-# include <sys/select.h>
 #endif
 
 #include <netinet/in.h>

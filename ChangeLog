@@ -1,3 +1,15 @@
+leeh        2002/04/21 16:14:38 EDT	(20020421_0)
+
+  Modified files:
+    modules              serverif.c 
+  Log:
+  - ERROR doesnt have a source..
+  
+  Revision  Changes    Path
+  1.51      +1 -1      tcm-hybrid/modules/serverif.c
+
+
+
 wcampbel    2002/04/19 19:15:11 EDT	(20020420_0)
 
   Modified files:

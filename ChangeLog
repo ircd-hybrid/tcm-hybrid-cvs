@@ -1,3 +1,35 @@
+*** 20011016_2 by bill
+- got rid of tcm linking userlist flags
+  (note: once and for all, tcm link support is *gone*)
+  it needs to be rewritten, and taking it out was motivation for me to redo it
+- replaced old E: lines in userlist.cf with what were once known as F: lines
+- updated connection flooding to handle "Invalid username" notices as well as
+  X-line rejection notices
+- added capability to detect network splits/joins and inform SEND_WARN_ONLY users
+- added G-line support (for monitoring, I have yet to decide if tcm opers should have control over
+  voting on G-lines)
+- REHASH notice still doesn't seem to work.  I have absolutely no idea why.. anyone?
+- added logging of "Failed OPER attempt" notices, also inform SEND_WARN_ONLY users
+- added logging of "has just acquired the personality of a ..." notices, and again, inform
+  SEND_WARN_ONLY users
+- rewrote okhost() to be action specific; the rules are as follows:
+   cflood  -- ident -> ident@host          no ident -> ~*@host
+   vclone  -- ident -> ident@ip.block.0/24 no ident -> ~*@ip.block.0/24
+   flood   -- ident -> ident@*.domain      no ident -> ~*@host
+   link    -- ident -> ident@host          no ident -> ~*@host
+   bot     -- ident -> ident@*.domain      no ident -> ~*@host
+   ctcp    -- ident -> ident@*.domain      no ident -> ~*@host
+   spambot -- ident -> ident@*.domain      no ident -> ~*@host
+   clone   -- ident -> *@host              no ident -> ~*@host
+   sclone  -- ident -> *@host              no ident -> ~*@host
+   drone   -- ident -> *@host              no ident -> ~*@host
+   wingate -- ident -> *@host              no ident -> ~*@host
+   socks   -- ident -> *@host              no ident -> ~*@host
+    (note: I would like these to be, at some point, #define'able or even better, configurable
+           in the config file(s).  Dynamic configuration, like .action, would be the next step
+           to this, too.)
+
+
 *** 20011016_1 by bill
 - first step of major comit -- updated to correct action names
                             -- updated user flags (and added +e/+p to userlist)

@@ -1,7 +1,10 @@
 main.o: main.c ../include/setup.h ../include/config.h ../include/tcm.h \
- ../include/serverif.h ../include/userlist.h ../include/bothunt.h \
- ../include/commands.h ../include/modules.h ../include/stdcmds.h \
- ../include/wild.h ../include/serno.h ../include/patchlevel.h
+ ../include/event.h ../include/serverif.h ../include/userlist.h \
+ ../include/bothunt.h ../include/commands.h ../include/modules.h \
+ ../include/stdcmds.h ../include/wild.h ../include/serno.h \
+ ../include/patchlevel.h
+event.o: event.c ../include/tcm.h ../include/config.h \
+ ../include/event.h ../include/stdcmds.h
 modules.o: modules.c ../include/config.h ../include/tcm.h \
  ../include/commands.h ../include/modules.h ../include/serverif.h \
  ../include/stdcmds.h ../include/wild.h

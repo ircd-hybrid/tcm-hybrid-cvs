@@ -1,4 +1,4 @@
-dnl $Id: configure.in,v 1.15 2002/05/20 00:52:47 wcampbel Exp $
+dnl $Id: configure.in,v 1.16 2002/05/20 12:46:28 wcampbel Exp $
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(include/tcm.h)
 
@@ -20,6 +20,7 @@ AC_CANONICAL_SYSTEM
 AC_PROG_MAKE_SET
 AC_PATH_PROG(RM,rm)
 AC_PATH_PROG(CP,cp)
+AC_PATH_PROG(SED, sed)
 AC_PROG_INSTALL
 
 hold_ldflags=$LDFLAGS     

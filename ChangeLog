@@ -1,3 +1,11 @@
+*** 20011129_1 by bill
+
+- fixed bug in okhost()
+- fixed exemptions
+- fixed bug in .k<action> commands when <action> is warn
+  (providing a nick caused core)
+
+
 *** 20011128_1 by bill
 
 - fixed bug in connect flood detection

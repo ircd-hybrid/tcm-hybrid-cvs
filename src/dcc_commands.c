@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.51 2002/05/08 20:45:02 einride Exp $ */
+/* $Id: dcc_commands.c,v 1.52 2002/05/08 20:55:35 bill Exp $ */
 
 #include "setup.h"
 
@@ -350,7 +350,7 @@ void m_hmulti(int connnum, int argc, char *argv[])
     if ((t = atoi(argv[1])) < 3)
     {
       prnt(connections[connnum].socket,
-           "Using a threshold less than 3 is not recommended, changed to 3\n");
+           "Using a threshold less than 3 is forbidden, changed to 3\n");
       t = 3;
     }
   }
@@ -368,7 +368,7 @@ void m_umulti(int connnum, int argc, char *argv[])
     if ((t = atoi(argv[1])) < 3)
     {
       prnt(connections[connnum].socket,
-           "Using a threshold less than 3 is not recommended, changed to 3\n");
+           "Using a threshold less than 3 is forbidden, changed to 3\n");
       t = 3;
     }
   }

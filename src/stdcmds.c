@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.51 2002/05/06 13:10:53 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.52 2002/05/08 20:55:38 bill Exp $ */
 
 #include "setup.h"
 
@@ -724,22 +724,13 @@ list_users(int sock,char *userhost,int regex)
   regex_t reg;
   regmatch_t m[1];
 #endif
-  char *uhost, *uhostmatch;
+  char *uhost;
   int i, numfound = 0;
   if ((uhost = (char *)malloc(1024)) == NULL)
   {
     sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
     exit(0);
   }
-  if ((uhostmatch = (char *)malloc(1024)) == NULL)
-  {
-    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
-    exit(0);
-  }
-  if (strchr(userhost, '@') == NULL && regex != YES)
-    snprintf(uhostmatch, 1024, "*@%s", userhost);
-  else
-    snprintf(uhostmatch, 1024, "%s", userhost);
 
 #ifdef HAVE_REGEX_H
   if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
@@ -769,13 +760,13 @@ list_users(int sock,char *userhost,int regex)
 #ifdef HAVE_REGEX_H
       if ((regex == YES &&
           !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS)) 
-          || (regex == NO && !match(uhostmatch, uhost)))
+          || (regex == NO && !match(userhost, uhost)))
 #else
-      if (!match(uhostmatch, uhost))
+      if (!match(userhost, uhost))
 #endif 
       {
         if (!numfound++)
-          prnt(sock, "The following clients match %s:\n", uhostmatch);
+          prnt(sock, "The following clients match %s:\n", userhost);
 
         if (ipptr->info->ip_host[0] > '9' || ipptr->info->ip_host[0] < '0')
           prnt(sock, "  %s (%s@%s) {%s}\n", ipptr->info->nick,
@@ -789,11 +780,10 @@ list_users(int sock,char *userhost,int regex)
   }
   if (numfound > 0)
     prnt(sock, "%d match%sfor %s found\n", numfound,
-         (numfound > 1 ? "es " : " "), uhostmatch);
+         (numfound > 1 ? "es " : " "), userhost);
   else
-    prnt(sock, "No matches for %s found\n", uhostmatch);
+    prnt(sock, "No matches for %s found\n", userhost);
   free(uhost);
-  free(uhostmatch);
 }
 
 /*
@@ -815,7 +805,7 @@ list_virtual_users(int sock,char *userhost,int regex)
   regex_t reg;
   regmatch_t m[1];
 #endif
-  char *uhost, *uhostmatch;
+  char *uhost;
   int i,numfound = 0;
 
   if ((uhost = (char *)malloc(1024)) == NULL)
@@ -823,15 +813,6 @@ list_virtual_users(int sock,char *userhost,int regex)
     sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
     exit(0);
   }
-  if ((uhostmatch = (char *)malloc(1024)) == NULL)
-  {
-    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in list_users()\n");
-    exit(0);
-  }
-  if (strchr(userhost, '@') == NULL && regex != YES)
-    snprintf(uhostmatch, 1024, "*@%s", userhost);
-  else
-    snprintf(uhostmatch, 1024, "%s", userhost);
 
 #ifdef HAVE_REGEX_H
   if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
@@ -861,13 +842,13 @@ list_virtual_users(int sock,char *userhost,int regex)
 #ifdef HAVE_REGEX_H
       if ((regex == YES &&
           !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS))
-          || (regex == NO && !match(uhostmatch, uhost)))
+          || (regex == NO && !match(userhost, uhost)))
 #else
-      if (!match(uhostmatch, uhost))
+      if (!match(userhost, uhost))
 #endif 
       {
         if (!numfound++)
-          prnt(sock, "The following clients match %s:\n", uhostmatch);
+          prnt(sock, "The following clients match %s:\n", userhost);
 
         prnt(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
              ipptr->info->user, ipptr->info->host, ipptr->info->ip_host,
@@ -877,11 +858,10 @@ list_virtual_users(int sock,char *userhost,int regex)
   }
   if (numfound > 0)
     prnt(sock, "%d match%sfor %s found\n", numfound,
-         (numfound > 1 ? "es " : " "), uhostmatch);
+         (numfound > 1 ? "es " : " "), userhost);
   else
-    prnt(sock, "No matches for %s found\n", uhostmatch);
+    prnt(sock, "No matches for %s found\n", userhost);
   free(uhost);
-  free(uhostmatch);
 }
 
 void kill_list_users(int sock, char *userhost, char *reason, int regex)

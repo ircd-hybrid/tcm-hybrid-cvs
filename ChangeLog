@@ -1,3 +1,17 @@
+leeh        2002/05/25 14:44:09 EDT	(20020525_28)
+
+  Modified files:
+    include              modules.h 
+    src                  modules.c 
+  Log:
+  - initial attempt at the server command handler
+  
+  Revision  Changes    Path
+  1.25      +10 -11    tcm-hybrid/include/modules.h
+  1.42      +144 -10   tcm-hybrid/src/modules.c
+
+
+
 db          2002/05/25 13:52:06 EDT	(20020525_27)
 
   Modified files:

@@ -1,3 +1,7 @@
+*** 20011026_3 by bill
+- missing string.h which caused warnings on compile
+
+
 *** 20011026_2 by bill
 - fixed "is now an operator" notice
 

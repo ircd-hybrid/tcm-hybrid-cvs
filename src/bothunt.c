@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.164 2002/06/11 22:54:33 leeh Exp $
+ * $Id: bothunt.c,v 1.165 2002/06/15 18:36:13 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -270,7 +270,7 @@ on_stats_i(int argc, char *argv[])
 void
 on_server_notice(struct source_client *source_p, int argc, char *argv[])
 {
-  int i = -1, a, c = -1;
+  int i = -1;
   int faction = -1;
   struct user_entry userinfo;
   char *from_server;

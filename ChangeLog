@@ -1,3 +1,15 @@
+leeh        2002/05/28 12:52:09 EDT	(20020528_18)
+
+  Modified files:
+    src                  userlist.c 
+  Log:
+  - fixed a merge problem
+  
+  Revision  Changes    Path
+  1.101     +0 -13     tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/28 12:41:59 EDT	(20020528_17)
 
   Modified files:

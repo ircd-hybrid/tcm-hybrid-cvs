@@ -40,7 +40,7 @@ III. How to use it
   examples to get you going. 
 
   Unlike the original tcm, this tcm puts itself into the background.
-  "./tcm" is all you need
+  "bin/tcm" is all you need
 
   Once the tcm is running, it is controlled via DCC CHAT.  If you
   open a DCC CHAT connection to the tcm, it will announce you and

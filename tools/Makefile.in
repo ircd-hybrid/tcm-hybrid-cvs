@@ -4,7 +4,7 @@ TCMLIBS=@LIBS@
 INCLUDEDIR=-I../include
 
 .c.o:
-	${CC} ${CPPFLAGS} ${CFLAGS} -c $<
+	${CC} ${CPPFLAGS} ${INCLUDEDIR} ${CFLAGS} -c $<
 
 all: mkpasswd
 
@@ -20,3 +20,6 @@ distclean: clean
 	${RM} -f Makefile
 
 depend:
+
+lint:
+	lint -aacgprxhH ${CPPFLAGS} ${INCLUDEDIR} mkpasswd.c >>../lint.out

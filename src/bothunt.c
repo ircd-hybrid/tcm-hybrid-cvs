@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.199 2002/08/14 16:59:36 bill Exp $
+ * $Id: bothunt.c,v 1.200 2002/08/26 16:26:38 bill Exp $
  */
 
 #include <stdio.h>
@@ -793,7 +793,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     ++q;
 
-    send_to_all(NULL, FLAGS_SPY, "*** Active for %s", q);
+    send_to_all(NULL, FLAGS_VIEW_KLINES, "*** Active for %s", q);
     break;
 
   default:

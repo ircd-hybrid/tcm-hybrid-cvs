@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.142 2002/08/08 18:10:39 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.143 2002/08/26 16:26:38 bill Exp $ */
 
 #include "setup.h"
 
@@ -182,6 +182,13 @@ m_kline(struct connection *connection_p, int argc, char *argv[])
 {
   char buff[MAX_BUFF];
   int kline_time;
+
+  if (!(connection_p->type & FLAGS_KLINE))
+  {
+    send_to_connection(connection_p,
+                       "You need the K flag to use %s", argv[0]);
+    return;
+  }
 
   if (argc < 3)
     send_to_connection(connection_p,

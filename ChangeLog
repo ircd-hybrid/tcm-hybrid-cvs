@@ -1,3 +1,18 @@
+db          2002/05/26 15:27:11 EDT	(20020526_22)
+
+  Modified files:
+    include              config.h 
+    src                  userlist.c wingate.c 
+  Log:
+  - moved wingate class table back into userlist.c
+  
+  Revision  Changes    Path
+  1.58      +9 -0      tcm-hybrid/include/config.h
+  1.79      +16 -10    tcm-hybrid/src/userlist.c
+  1.42      +0 -25     tcm-hybrid/src/wingate.c
+
+
+
 leeh        2002/05/26 15:04:17 EDT	(20020526_21)
 
   Modified files:

@@ -1,3 +1,10 @@
+*** 20010722_7 by wcampbel
+Made tcm work with getopt for command line arguments.
+This WILL break any installations that use ./tcm conf.file
+They will have to use ./tcm -f conf.file or just use the standard tcm.cf
+name.
+
+
 *** 20010722_6 by wcampbel
 Keep all logs in the logs/ directory.
 

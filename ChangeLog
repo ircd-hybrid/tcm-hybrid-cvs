@@ -1,3 +1,28 @@
+bill        2002/12/30 02:31:38 EST	(20021230_0)
+
+  Modified files:
+    src                  actions.c bothunt.c clones.c dcc.c hash.c 
+                         logging.c main.c parse.c serv_commands.c 
+                         services.c userlist.c wingate.c 
+  Log:
+  - removed all magic values for strlcpy() calls.  now use sizeof()
+  
+  Revision  Changes    Path
+  1.44      +5 -5      tcm-hybrid/src/actions.c
+  1.209     +33 -24    tcm-hybrid/src/bothunt.c
+  1.26      +4 -2      tcm-hybrid/src/clones.c
+  1.21      +12 -6     tcm-hybrid/src/dcc.c
+  1.60      +24 -12    tcm-hybrid/src/hash.c
+  1.55      +4 -2      tcm-hybrid/src/logging.c
+  1.130     +10 -14    tcm-hybrid/src/main.c
+  1.86      +4 -2      tcm-hybrid/src/parse.c
+  1.7       +2 -1      tcm-hybrid/src/serv_commands.c
+  1.26      +4 -2      tcm-hybrid/src/services.c
+  1.147     +31 -16    tcm-hybrid/src/userlist.c
+  1.64      +24 -12    tcm-hybrid/src/wingate.c
+
+
+
 bill        2002/12/29 04:41:22 EST	(20021229_0)
 
   Modified files:

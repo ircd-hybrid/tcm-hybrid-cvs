@@ -1,7 +1,7 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
-/* $Id: serverif.h,v 1.11 2001/10/29 17:19:47 wcampbel Exp $ */
+/* $Id: serverif.h,v 1.12 2001/11/02 16:53:08 db Exp $ */
 
 /* Time out for no response from the server 
  * 5 minutes should be plenty to receive a PING from the server
@@ -64,6 +64,13 @@ void sendto_all_linkedbots(char *);
 
 void oper();
 void msg_mychannel(char *msg,...);
+
+void rdpt(void);
+void linkclosed(int connnum, int argc, char *argv[]);
+void _wallops(int connnum, int argc, char *argv[]);
+void _onjoin(int connnum, int argc, char *argv[]);
+void _signon (int connnum, int argc, char *argv[]);
+void _modinit();
 
 /* types for sendtoalldcc */
 

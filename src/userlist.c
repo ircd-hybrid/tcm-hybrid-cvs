@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.110 2002/06/02 22:24:16 wcampbel Exp $
+ * $Id: userlist.c,v 1.111 2002/06/05 12:29:05 leeh Exp $
  *
  */
 
@@ -353,6 +353,16 @@ get_umodes_from_prefs(int user)
       *p = '\0';
 
     type = atoi(type_string);
+
+    /* if theres no FLAGS_VALID, its an old userfile */
+    if((type & FLAGS_VALID) == 0)
+    {
+      send_to_all(FLAGS_ALL, "Preference file %s is invalid, removing",
+                  user_pref_filename);
+      unlink(user_pref_filename);
+      return 0;
+    }
+
     return type;
   }
   
@@ -382,7 +392,7 @@ save_umodes(void *unused)
 
     if((fp = fopen(user_pref, "w")) != NULL)
     {
-      fprintf(fp, "%d\n", userlist[i].type);
+      fprintf(fp, "%d\n", (userlist[i].type|FLAGS_VALID));
       (void)fclose(fp);
     }
     else

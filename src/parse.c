@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.58 2002/06/05 11:43:53 leeh Exp $
+ * $Id: parse.c,v 1.59 2002/06/05 12:29:05 leeh Exp $
  */
 
 #include <stdio.h>
@@ -274,12 +274,11 @@ process_server(struct source_client *source_p, char *function, char *param)
   char *q;
   char *argv[MAX_ARGV];
 
-  argv[0] = source_p->name;
-  argv[1] = function;
+  argv[argc++] = source_p->name;
+  argv[argc++] = function;
  
-  argc = 2;
-
   p = param;
+
   if (*p == ':')
     argv[argc++] = p;
   else

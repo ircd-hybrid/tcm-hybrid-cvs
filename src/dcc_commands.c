@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.120 2002/06/02 23:41:32 db Exp $ */
+/* $Id: dcc_commands.c,v 1.121 2002/06/05 12:29:05 leeh Exp $ */
 
 #include "setup.h"
 
@@ -52,7 +52,6 @@
 static void register_oper(int connnum, char *password, char *who_did_command);
 static void list_opers(int sock);
 static void list_exemptions(int sock);
-static void handle_save(int sock,char *nick);
 static int  is_legal_pass(int connect_id,char *password);
 static void print_help(int sock,char *text);
 
@@ -388,8 +387,10 @@ m_motd(int connnum, int argc, char *argv[])
 void
 m_save(int connnum, int argc, char *argv[])
 {
-  handle_save(connections[connnum].socket, 
-              connections[connnum].registered_nick);
+  send_to_all(FLAGS_ALL, "%s is saving %s and preferences",
+              connections[connnum].registered_nick, CONFIG_FILE);
+  save_prefs();
+  save_umodes(NULL);
 }
 
 void
@@ -851,24 +852,6 @@ list_exemptions(int sock)
 	snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " %s", actions[n].name);
     print_to_socket(sock,"%s", buf);
   }
-}
-
-
-/*
- * handle_save
- *
- * inputs	- socket
- *		- nick who did the command
- * output	- NONE
- * side effects	- save tcm prefs
- */
-
-static void 
-handle_save(int sock,char *nick)
-{
-  print_to_socket(sock, "Saving %s file", CONFIG_FILE);
-  send_to_all( FLAGS_ALL, "%s is saving %s", nick, CONFIG_FILE);
-  save_prefs();
 }
 
 struct dcc_command class_msgtab = {

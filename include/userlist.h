@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.65 2002/06/02 22:24:14 wcampbel Exp $ */
+/* $Id: userlist.h,v 1.66 2002/06/05 12:29:02 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -114,24 +114,26 @@ void exemption_summary();
 #endif
 
 /* privs first */
-#define FLAGS_OPER		0x00001	/* user has registered as an oper */
-#define FLAGS_KLINE		0x00002 /* user has .kline privs */
-#define FLAGS_INVS		0x00004	/* user is invisible to STATS p list */
-#define FLAGS_PARTYLINE		0x00008	/* user wants to be on partyline */
-#define FLAGS_DLINE		0x00010 /* user has .dline privs */
-#define FLAGS_SUSPENDED		0x00020 /* user is suspended */
+#define FLAGS_OPER		0x000001 /* user has registered as an oper */
+#define FLAGS_KLINE		0x000002 /* user has .kline privs */
+#define FLAGS_INVS		0x000004 /* user is invisible to STATS p list */
+#define FLAGS_PARTYLINE		0x000008 /* user wants to be on partyline */
+#define FLAGS_DLINE		0x000010 /* user has .dline privs */
+#define FLAGS_SUSPENDED		0x000020 /* user is suspended */
 
 /* send second */
-#define FLAGS_ALL		0x00100 /* notices destined for all users */
-#define FLAGS_SERVERS           0x00200 /* user sees server intro/quits */
-#define FLAGS_PRIVMSG		0x00400 /* user wants to see privmsgs */
-#define FLAGS_NOTICE		0x00800 /* user wants to see notices */
-#define FLAGS_WARN		0x01000	/* user sees clone reports */
-#define FLAGS_LOCOPS		0x02000 /* user sees LOCOPS */
-#define FLAGS_ADMIN		0x04000 /* user is an adminstrator */
-#define FLAGS_SPY		0x08000 /* links, motd, info requests */
-#define FLAGS_VIEW_KLINES	0x10000 /* user see's klines/unklines */
-#define FLAGS_WALLOPS		0x20000 /* user can see OPERWALL */
+#define FLAGS_ALL		0x000100 /* notices destined for all users */
+#define FLAGS_SERVERS           0x000200 /* user sees server intro/quits */
+#define FLAGS_PRIVMSG		0x000400 /* user wants to see privmsgs */
+#define FLAGS_NOTICE		0x000800 /* user wants to see notices */
+#define FLAGS_WARN		0x001000 /* user sees clone reports */
+#define FLAGS_LOCOPS		0x002000 /* user sees LOCOPS */
+#define FLAGS_ADMIN		0x004000 /* user is an adminstrator */
+#define FLAGS_SPY		0x008000 /* links, motd, info requests */
+#define FLAGS_VIEW_KLINES	0x010000 /* user see's klines/unklines */
+#define FLAGS_WALLOPS		0x020000 /* user can see OPERWALL */
+
+#define FLAGS_VALID		0x200000 /* valid userfile */
 
 
 int  is_an_oper(char *user, char *host);

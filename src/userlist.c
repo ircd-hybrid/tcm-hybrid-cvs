@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.44 2002/03/06 05:16:25 bill Exp $
+ * $Id: userlist.c,v 1.45 2002/03/20 05:08:27 bill Exp $
  *
  */
 
@@ -633,23 +633,35 @@ static void load_e_line(char *line)
   *p = '\0';
   uhost = p+1;
   while (occurance(vltn, ' ') || occurance(vltn, ','))
-    {
-      if (!(p = strchr(vltn, ' ')))
-        p = strchr(vltn, ',');
-      if (p == NULL)
-        break;
+  {
+    if (!(p = strchr(vltn, ' ')))
+      p = strchr(vltn, ',');
+    if (p == NULL)
+      break;
 
-      uhost = p+1;
-      *p = '\0';
-      type |= get_action_type(vltn);
-      vltn = uhost;
-    }
+    uhost = p+1;
+    *p = '\0';
+    type |= get_action_type(vltn);
+    vltn = uhost;
+  }
   type |= get_action_type(vltn);
 
-  p = strchr(uhost, '@');
-  *p = '\0';
-  snprintf(hostlist[host_list_index].user, sizeof(hostlist[host_list_index].user), "%s", uhost);
-  snprintf(hostlist[host_list_index].host, sizeof(hostlist[host_list_index].host), "%s", p+1);
+  if ((p = strchr(uhost, '@')) != NULL)
+  {
+    *p = '\0';
+    snprintf(hostlist[host_list_index].user,
+             sizeof(hostlist[host_list_index].user), "%s", uhost);
+    snprintf(hostlist[host_list_index].host,
+             sizeof(hostlist[host_list_index].host), "%s", p+1);
+  }
+  else
+  {
+    snprintf(hostlist[host_list_index].user,
+             sizeof(hostlist[host_list_index].user), "*");
+    snprintf(hostlist[host_list_index].host,
+             sizeof(hostlist[host_list_index].host), "%s", uhost);
+  }
+
   hostlist[host_list_index].type = type;
   ++host_list_index;
   hostlist[host_list_index].user[0] = '\0';
@@ -823,14 +835,31 @@ void ban_manipulate(int sock,char flag,char *userhost)
 
 int okhost(char *user,char *host, int type)
 {
-  int i;
+  int i, ok;
 
   for(i=0;hostlist[i].user[0];i++)
     {
-      if ((!wldwld(hostlist[i].user,user)) &&
-	  (!wldwld(hostlist[i].host,host)) &&
-          hostlist[i].type & type)
-      return(YES);
+      ok = 0;
+      if (strchr(user, '?') || strchr(user, '*'))
+      {
+        if (!wldwld(hostlist[i].user, user))
+          ok++;
+      }
+      else
+        if (!wldcmp(hostlist[i].user, user))
+          ok++;
+
+      if (strchr(host, '?') || strchr(host, '*'))
+      {
+        if (!wldwld(hostlist[i].host, host))
+          ok++;
+      }
+      else
+        if (!wldcmp(hostlist[i].host, host))
+          ok++;
+
+      if (ok == 2 && (hostlist[i].type & type))
+        return YES;
     }
   return(NO);
 }

@@ -1,3 +1,22 @@
+db          2002/05/17 22:53:22 EDT	(20020518_2)
+
+  Modified files:
+    modules              commands.c serverif.c 
+    src                  logging.c main.c 
+  Log:
+  - reworked select loop so it times out after 1 second. This should
+    be dropped a bit for proper event handling.
+  - reworked server timeout
+  - removed unnecessary includes of select.h
+  
+  Revision  Changes    Path
+  1.57      +0 -3      tcm-hybrid/modules/commands.c
+  1.62      +45 -31    tcm-hybrid/modules/serverif.c
+  1.21      +0 -3      tcm-hybrid/src/logging.c
+  1.35      +0 -3      tcm-hybrid/src/main.c
+
+
+
 wcampbel    2002/05/17 22:21:16 EDT	(20020518_1)
 
   Modified files:

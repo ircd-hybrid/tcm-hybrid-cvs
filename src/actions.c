@@ -1,11 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.18 2002/05/31 02:02:39 wcampbel Exp $
- */
-
-/* XXX
- * actions.c:234: warning: `set_action_time' defined but not used
- * actions.c:248: warning: `set_action_method' defined but not used
+ * $Id: actions.c,v 1.19 2002/05/31 02:06:34 wcampbel Exp $
  */
 
 #include "setup.h"
@@ -56,9 +51,7 @@ static void m_action(int connnum, int argc, char *argv[]);
 static void list_actions(int conn_num);
 static void list_one_action(int conn_num, int action);
 
-static void set_action_time(int action, int time);
 static void set_action_reason(int action, char *reason);
-static void set_action_method(int action, int method);
 static void set_action_strip(int action, int hoststrip);
 
 struct dcc_command actions_msgtab = {
@@ -235,24 +228,10 @@ update_action(int conn_num, int argc, char *argv[])
 }
 
 void
-set_action_time(int actionid, int time)
-{
-  if(actions[actionid].name[0] != '\0')
-    actions[actionid].klinetime = time;
-}
-
-void
 set_action_strip(int actionid, int hoststrip)
 {
   if(actions[actionid].name[0] != '\0')
     actions[actionid].hoststrip = hoststrip;
-}
-
-void
-set_action_method(int actionid, int method)
-{
-  if(actions[actionid].name[0] != '\0')
-    actions[actionid].method = method;
 }
 
 void

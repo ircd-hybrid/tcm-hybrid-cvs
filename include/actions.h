@@ -1,7 +1,7 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.19 2003/02/03 02:04:19 bill Exp $ */
+/* $Id: actions.h,v 1.20 2003/02/12 02:42:12 bill Exp $ */
 
 #define MAX_ACTIONS	16
 
@@ -23,7 +23,7 @@ int act_vclone;
 int act_flood;
 int act_link;
 int act_bot;
-int act_spambot;
+int act_spam;
 int act_clone;
 int act_rclone;
 int act_jupe;
@@ -88,7 +88,7 @@ int get_method_number(char *);
 #define HS_NFLOOD   HS_DEFAULT
 #define HS_JUPE     (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
 #define HS_LINK     (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_PREFIXED | HOSTSTRIP_NOIDENT_PREFIXED)
-#define HS_SPAMBOT  (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_AS_IS | HOSTSTRIP_NOIDENT_ALL)
+#define HS_SPAM     (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_AS_IS | HOSTSTRIP_NOIDENT_ALL)
 #define HS_CLONE    (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
 #define HS_RCLONE   HS_DEFAULT
 #define HS_SCLONE   (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_PREFIXED | HOSTSTRIP_NOIDENT_ALL)

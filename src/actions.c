@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.48 2003/02/02 21:27:01 lusky Exp $
+ * $Id: actions.c,v 1.49 2003/02/12 02:42:14 bill Exp $
  */
 
 
@@ -71,7 +71,7 @@ init_actions(void)
   init_one_action(&act_vclone, "vclone", HS_VCLONE, REASON_VCLONE);
   init_one_action(&act_flood, "flood", HS_FLOOD, REASON_FLOOD);
   init_one_action(&act_link, "link", HS_LINK, REASON_LINK);
-  init_one_action(&act_spambot, "spam", HS_SPAMBOT, REASON_SPAMBOT);
+  init_one_action(&act_spam, "spam", HS_SPAM, REASON_SPAM);
   init_one_action(&act_clone, "clone", HS_CLONE, REASON_CLONE);
   init_one_action(&act_rclone, "rclone", HS_RCLONE, REASON_RCLONE);
   init_one_action(&act_nflood, "nflood", HS_NFLOOD, REASON_NFLOOD);

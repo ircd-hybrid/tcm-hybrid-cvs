@@ -1,4 +1,4 @@
-# $Id: tcm.cf,v 1.32 2002/12/29 09:41:16 bill Exp $
+# $Id: tcm.cf,v 1.33 2003/02/12 02:42:10 bill Exp $
 # Username for the bot
 U:db
 
@@ -38,7 +38,7 @@ C:&frizzle.net
 #       - vclone      <what action to take when virtual host cloners are found>
 #	- flood       <what action to take when a user floods>
 #	- link        <what action to take when a link looker is found>
-#	- spambot     <what action to take when a spambot is found>
+#	- spam        <what action to take when a spambot is found>
 #	- clone       <what action to take when clones are found>
 #	- rclone      <what action to take when reconnecting clones are found>
 #	- sclone      <what action to take when multi-server clones are found>
@@ -68,7 +68,7 @@ A:cflood:dline dccwarn ircwarn:Connection flooding
 A:vclone:ircwarn dccwarn tkline 180:Cloning is prohibited
 A:flood:tkline 180:Flooding is prohibited
 A:link:dccwarn tkline 180:Link Lookers are prohibited
-A:spambot:tkline 1440:Spamming is prohibited
+A:spam:tkline 1440:Spamming is prohibited
 A:clone:tkline 1440:Cloning is prohibited
 A:rclone:ircwarn dccwarn tkline 240:Reconnect flood
 A:sclone:tkline 180:Clones on multiple servers

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.212 2003/02/03 06:35:45 bill Exp $
+ * $Id: bothunt.c,v 1.213 2003/02/12 02:42:14 bill Exp $
  */
 
 #include <stdio.h>
@@ -696,7 +696,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       jupe_joins_notice(nick, user, host, p);
     }
     else if (strstr(q, "possible spambot") != NULL)
-      handle_action(act_spambot, nick, user, host, NULL, NULL);
+      handle_action(act_spam, nick, user, host, NULL, NULL);
 
     break;
 

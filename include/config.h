@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.80 2003/01/19 01:18:38 wiz Exp $
+ * $Id: config.h,v 1.81 2003/02/12 02:42:12 bill Exp $
  */
 
 /*
@@ -127,7 +127,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 #define REASON_NFLOOD  "Nick flooding is prohibited"
 #define REASON_JUPE    "Repeated attempts to join juped channels"
 #define REASON_LINK    "Link looking is prohibited"
-#define REASON_SPAMBOT "Spamming is prohibited"
+#define REASON_SPAM    "Spamming is prohibited"
 #define REASON_CLONE   "Clones are prohibited"
 #define REASON_RCLONE  "Reconnect clones"
 #define REASON_SCLONE  "Clones on multiple servers"

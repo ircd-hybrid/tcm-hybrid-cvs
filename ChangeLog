@@ -1,3 +1,16 @@
+*** 20010603_2 by greg
+Two simple bugfixes.
+
+- (from Walter Campbell) oper before doing a /stats O; some servers may
+  make use of OLINES_OPER_ONLY, or similar.
+- (pointed out by KrON/ogre) fixed a nifty core where islegal_pass() fell
+  off the edge of the userlist array.
+
+(hum, maybe we should do something when spoofed opers msg the bot .chat?
+I can see this being a) an information leak if tcm is not opers_only, and
+b) a problem when a person uses .chat, but their oline is for their spoof)
+
+
 *** 20010603_1 by db
 Submitted by Walter Campbell <wcampbel@botbay.net>
 

@@ -1,3 +1,12 @@
+*** 20010728_1 by bill
+
+- first step towards fixing proxy checking
+   (currently, wingate detect works, proxy detection does not)
+
+- once and for all, replaced stupid byte-per-recv() socket reading with
+  an actual buffer
+
+
 *** 20010723_1 by wcampbel
 Replace all sprintf's with more secure snprintf's
 

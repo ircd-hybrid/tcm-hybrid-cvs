@@ -1,3 +1,15 @@
+db          2002/05/26 03:30:55 EDT	(20020526_16)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - just a few tidy ups
+  
+  Revision  Changes    Path
+  1.43      +2 -7      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/26 03:26:09 EDT	(20020526_15)
 
   Modified files:

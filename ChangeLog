@@ -1,3 +1,15 @@
+leeh        2002/05/26 21:54:50 EDT	(20020527_8)
+
+  Modified files:
+    src                  userlist.c 
+  Log:
+  - return hardcoded and own set preferences
+  
+  Revision  Changes    Path
+  1.81      +4 -5      tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/26 21:44:36 EDT	(20020527_7)
 
   Modified files:

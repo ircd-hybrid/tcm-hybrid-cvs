@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.100 2002/05/27 23:59:45 db Exp $ */
+/* $Id: dcc_commands.c,v 1.101 2002/05/28 00:35:09 db Exp $ */
 
 #include "setup.h"
 
@@ -32,7 +32,7 @@
 #include "config.h"
 #include "tcm.h"
 #include "event.h"
-#include "hash.h"
+#include "parse.h"
 #include "bothunt.h"
 #include "userlist.h"
 #include "logging.h"
@@ -42,7 +42,6 @@
 #include "tcm_io.h"
 #include "wild.h"
 #include "match.h"
-#include "parse.h"
 #include "actions.h"
 
 

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.123 2002/05/28 00:20:23 db Exp $
+ * $Id: bothunt.c,v 1.124 2002/05/28 00:35:08 db Exp $
  */
 
 #include <stdio.h>
@@ -19,7 +19,7 @@
 #include "tcm.h"
 #include "tcm_io.h"
 #include "stdcmds.h"
-#include "hash.h"
+#include "parse.h"
 #include "bothunt.h"
 #include "userlist.h"
 #include "logging.h"

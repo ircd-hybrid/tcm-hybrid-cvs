@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.1 2002/05/27 23:59:46 db Exp $
+ * $Id: hash.c,v 1.2 2002/05/28 00:35:09 db Exp $
  */
 
 #include <stdio.h>
@@ -19,7 +19,7 @@
 #include "tcm.h"
 #include "tcm_io.h"
 #include "stdcmds.h"
-#include "hash.h"
+#include "parse.h"
 #include "bothunt.h"
 #include "userlist.h"
 #include "logging.h"

@@ -1,16 +1,8 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.2 2002/05/27 23:59:42 db Exp $ */
+/* $Id: hash.h,v 1.3 2002/05/28 00:35:06 db Exp $ */
 
-struct plus_c_info
-{
-  char *nick;
-  char *user;
-  char *host;
-  char class[MAX_CLASS+1];
-  char ip[MAX_IP+1];
-};
 
 struct userentry {
   char nick[MAX_NICK];
@@ -48,6 +40,7 @@ void updatehash(struct hashrec**,char *,char *,char *);
 void adduserhost(struct plus_c_info *, int, int);
 void removeuserhost(char *, struct plus_c_info *);
 void updateuserhost(char *nick1, char *nick2, char *userhost);
+void check_clones(void *);
 void init_hash(void);
 
 #endif

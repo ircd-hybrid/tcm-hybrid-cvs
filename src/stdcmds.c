@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.79 2002/05/28 00:03:03 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.80 2002/05/28 00:35:10 db Exp $ */
 
 #include "setup.h"
 
@@ -32,7 +32,7 @@
 #include "config.h"
 #include "tcm.h"
 #include "tcm_io.h"
-#include "hash.h" /* XXX */
+#include "parse.h"
 #include "logging.h"
 #include "bothunt.h" /* XXX */
 #include "stdcmds.h"

@@ -15,17 +15,18 @@
 #include "config.h"
 #include "tcm.h"
 #include "tcm_io.h"
-#include "hash.h"
+#include "parse.h"
 #include "logging.h"
 #include "bothunt.h"
 #include "userlist.h"
 #include "actions.h"
 #include "stdcmds.h"
 #include "wild.h"
+#include "hash.h"
 
 /* actions.c
  *
- * $Id: actions.c,v 1.4 2002/05/27 23:59:45 db Exp $
+ * $Id: actions.c,v 1.5 2002/05/28 00:35:08 db Exp $
  */
 
 int act_cflood;

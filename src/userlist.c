@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.93 2002/05/27 23:59:47 db Exp $
+ * $Id: userlist.c,v 1.94 2002/05/28 00:35:10 db Exp $
  *
  */
 
@@ -27,7 +27,7 @@
 #include "tcm.h"
 #include "tcm_io.h"
 #include "userlist.h"
-#include "hash.h"
+#include "parse.h"
 #include "logging.h"
 #include "stdcmds.h"
 #include "wild.h"

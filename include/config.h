@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.28 2001/11/06 02:13:24 wcampbel Exp $
+ * $Id: config.h,v 1.29 2001/11/08 02:21:55 wcampbel Exp $
  */
 
 /*
@@ -79,11 +79,13 @@
 /* How to email, sendmail would work too */
 /* This is obviously a SUNos ism */
 /* note:  if you do not want to have this support enabled, do not define */
-
 /* #define HOW_TO_MAIL "/usr/ucb/mail -s" */
 
 /* For Linux this is suggested by zaph */
-#define HOW_TO_MAIL "/bin/mail -s"
+/* #define HOW_TO_MAIL "/bin/mail -s" */
+
+/* For FreeBSD and OpenBSD, this is suggested by zartik */
+/* #define HOW_TO_MAIL "/usr/bin/mail -s" */
 
 
 /*
@@ -97,6 +99,8 @@
 /*
  * length of time between scans of tcm's internal user table
  * for detection of clones
+ *
+ * This time is in seconds
  */
 #define CLONE_CHECK_TIME 60
 
@@ -225,7 +229,7 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 /* how many clones to look for globally */
 #define SERVICES_CLONE_THRESHOLD 4
 
-/* how often to check for global clones */
+/* how often to check for global clones in seconds */
 #define SERVICES_CHECK_TIME 60
 
 /* Maximum DCC chat connections */

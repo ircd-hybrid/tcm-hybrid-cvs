@@ -1,3 +1,18 @@
+db          2002/06/07 02:21:53 EDT	(20020607_0)
+
+  Modified files:
+    src                  handler.c 
+  Log:
+  - simplified some logic
+  - tptr is shorter than temp_ptr !
+  
+   antici...
+  
+  Revision  Changes    Path
+  1.7       +42 -57    tcm-hybrid/src/handler.c
+
+
+
 db          2002/06/06 18:40:33 EDT	(20020606_3)
 
   Modified files:

@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.27 2001/10/29 00:12:13 wcampbel Exp $
+ * $Id: config.h,v 1.28 2001/11/06 02:13:24 wcampbel Exp $
  */
 
 /*
@@ -15,7 +15,7 @@
 #define VIRTUAL
 
 /*
- * USE_CRYPT, define this is you want your oper passwords to be encrypted
+ * USE_CRYPT, define this if you want your oper passwords to be encrypted
  */
 #define USE_CRYPT
 

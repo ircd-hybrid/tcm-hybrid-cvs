@@ -3,8 +3,6 @@ Quick install guide for tcm-hybrid3.0
 IMPORTANT:  Since the configure script sets the path that it is run in as
             DPATH, you MUST configure tcm in the place that it will run.
 
-  Run the configure script
-
   Read the config.h file. Its pretty self explanatory... the defaults
 should be fine to start. If you want to play with AUTO_KLINE etc.
 this is all handled from the tcm.cf now. Read the .html docs which

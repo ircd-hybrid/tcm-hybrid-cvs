@@ -1,3 +1,24 @@
+leeh        2002/05/25 11:49:42 EDT	(20020525_13)
+
+  Modified files:
+    include              tcm.h 
+    src                  bothunt.c commands.c logging.c main.c 
+                         stdcmds.c token.c userlist.c 
+  Log:
+  - added xmalloc() to account for malloc() failure
+  
+  Revision  Changes    Path
+  1.35      +2 -0      tcm-hybrid/include/tcm.h
+  1.98      +2 -19     tcm-hybrid/src/bothunt.c
+  1.80      +0 -4      tcm-hybrid/src/commands.c
+  1.30      +1 -7      tcm-hybrid/src/logging.c
+  1.65      +20 -0     tcm-hybrid/src/main.c
+  1.69      +0 -4      tcm-hybrid/src/stdcmds.c
+  1.24      +1 -10     tcm-hybrid/src/token.c
+  1.70      +0 -4      tcm-hybrid/src/userlist.c
+
+
+
 wcampbel    2002/05/25 11:46:16 EDT	(20020525_12)
 
   Modified files:

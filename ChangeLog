@@ -1,3 +1,14 @@
+*** 20011017_2 by wcampbel
+Doc cleanups
+Minor cosmetic code cleanups
+configure now takes the current working directory and sets it to DPATH, this
+  is used when starting so that it chdir's into there BEFORE trying to use
+  the conf files.  This will allow the tcm to be started from any directory,
+  not just in the root of the source tree.  The side effect is that users
+  will have to build in place...they cannot build then move the tree elsewhere.
+  This will also be used for RESTART.
+
+
 *** 20011017_1 by bill
 
 - whoop, first in what is sure to be series of typo fixes (argv[9] needed where argv[6] was)

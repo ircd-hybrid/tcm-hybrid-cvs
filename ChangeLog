@@ -1,3 +1,16 @@
+db          2002/05/26 22:46:10 EDT	(20020527_10)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - renamed onnicktaken to on_nick_taken etc.
+  - fix an off by one error in on_nick_taken
+  
+  Revision  Changes    Path
+  1.31      +11 -18    tcm-hybrid/src/parse.c
+
+
+
 db          2002/05/26 22:24:48 EDT	(20020527_9)
 
   Modified files:

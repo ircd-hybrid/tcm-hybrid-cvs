@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.41 2002/05/26 07:13:11 db Exp $
+ * $Id: tcm_io.c,v 1.42 2002/05/26 07:26:07 db Exp $
  */
 
 #include <stdio.h>
@@ -61,8 +61,8 @@ static void finish_dcc_chat(int i);
 static void close_dcc_connection(int connnum);
 static void signon_to_server(int unused);
 
-fd_set readfds;            /* file descriptor set for use with select */
-fd_set writefds;            /* file descriptor set for use with select */
+static fd_set readfds;		/* file descriptor set for use with select */
+static fd_set writefds;		/* file descriptor set for use with select */
 
 struct connection connections[MAXDCCCONNS+1]; /*plus 1 for the server, silly*/
 int pingtime;
@@ -740,6 +740,7 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   connections[i].io_read_function = finish_dcc_chat;
   connections[i].io_write_function = NULL;
   connections[i].io_close_function = close_connection;
+  FD_SET(connections[i].socket, &readfds);
 
   return 1;
 }
@@ -855,7 +856,6 @@ close_connection(int connnum)
 	  break;
       maxconns = i+1;
     }
-    
 
   connections[connnum].user[0] = '\0';
   connections[connnum].host[0] = '\0';

@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.38 2002/05/26 07:13:11 db Exp $ */
+/* $Id: wingate.c,v 1.39 2002/05/26 07:26:07 db Exp $ */
 
 
 #include <netdb.h>
@@ -112,7 +112,7 @@ struct dcc_command proxy_msgtab = {
 
 #ifdef DETECT_WINGATE
 /*
- * wingate_start_test
+ * wingate_start_test()
  *
  * inputs	-
  * output	-
@@ -147,10 +147,8 @@ wingate_start_test(struct plus_c_info *info_p)
 #endif
 
 #ifdef DETECT_SOCKS
-
 /*
- * socks_bindsocket()
- *   Sets up a socket and connects to the given host
+ * socks_start_test()
  *
  * inputs	-
  * output	-
@@ -186,7 +184,7 @@ socks_start_test(struct plus_c_info *info_p, int socksversion)
 
 #ifdef DETECT_SQUID
 /*
- * squid_start_test
+ * squid_start_test()
  *
  * inputs	-
  * output	-

@@ -1,3 +1,19 @@
+leeh        2002/06/21 10:59:10 EDT	(20020621_12)
+
+  Modified files:
+    include              userlist.h 
+    src                  bothunt.c userlist.c 
+  Log:
+  - simplified the exemption stuff with add_exemption
+  - attempt at fixing the stats I code.
+  
+  Revision  Changes    Path
+  1.71      +2 -0      tcm-hybrid/include/userlist.h
+  1.170     +27 -10    tcm-hybrid/src/bothunt.c
+  1.122     +21 -21    tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/21 10:16:32 EDT	(20020621_11)
 
   Modified files:

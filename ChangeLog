@@ -1,3 +1,7 @@
+*** 20010723_1 by wcampbel
+Replace all sprintf's with more secure snprintf's
+
+
 *** 20010722_15 by wcampbel
 This is all I can do to fix SOCKS detection.  It now gets into socks_bindsocket
 but fails inside.

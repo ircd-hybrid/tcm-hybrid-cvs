@@ -1,3 +1,19 @@
+bill        2002/04/04 17:53:47 EST	(20020404_1)
+
+  Modified files:
+    modules              bothunt.c commands.c serverif.c 
+  Log:
+  - fixed off-by-one in onservnotice()
+  - fixed NO_D_LINE_SUPPORT bug found by Disciple
+  - fixed services notices bug found by plan9
+  
+  Revision  Changes    Path
+  1.51      +1 -1      tcm-hybrid/modules/bothunt.c
+  1.39      +2 -0      tcm-hybrid/modules/commands.c
+  1.47      +4 -1      tcm-hybrid/modules/serverif.c
+
+
+
 bill        2002/04/04 17:17:49 EST	(20020404_0)
 
   Modified files:

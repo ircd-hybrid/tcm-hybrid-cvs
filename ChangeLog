@@ -1,3 +1,18 @@
+leeh        2002/06/04 17:21:45 EDT	(20020604_5)
+
+  Modified files:
+    include              handler.h 
+    src                  handler.c services.c 
+  Log:
+  - ripped multi func handlers (part 1)
+  
+  Revision  Changes    Path
+  1.2       +1 -2      tcm-hybrid/include/handler.h
+  1.5       +12 -72    tcm-hybrid/src/handler.c
+  1.13      +3 -1      tcm-hybrid/src/services.c
+
+
+
 wcampbel    2002/06/04 09:24:33 EDT	(20020604_4)
 
   Modified files:

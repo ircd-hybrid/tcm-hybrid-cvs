@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.29 2001/08/30 02:27:42 bill Exp $";
+static char *version="$Id: serverif.c,v 1.30 2001/09/01 23:01:43 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -838,7 +838,7 @@ void rdpt(void)
 
 		  if (FD_ISSET(wingate[i].socket, &writefds) || wingate[i].state == WINGATE_READING)
 		    {
-		      sleep(1);
+//		      sleep(1);
 		      nread = read(wingate[i].socket,buffer,256);
 		      if(nread > 0)
 			{

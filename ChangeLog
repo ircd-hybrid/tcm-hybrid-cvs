@@ -1,3 +1,16 @@
+*** 20010602_1 by greg
+Well kids, my first CVS commit. Be afraid or something.
+
+Some cleanup before I do some in-depth stuff.
+- removed the capability to msg a tcm .clones, it's kind of
+  silly considering we dump it to the channel and stuff.
+- removed a few extraneous msg_mychannel()'s that were randomly
+  dumping "  [etc.]" to the TCM's channel, and personally scaring
+  the hell out of me when I randomly see my TCM speak.
+
+Build check done.
+
+
 *** 20010403_2 by db
 - corrected drone code to honour autopilot as well
 - corrected examples.

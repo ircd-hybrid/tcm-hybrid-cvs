@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.74 2002/05/26 02:55:10 db Exp $ */
+/* $Id: stdcmds.c,v 1.75 2002/05/26 17:44:01 leeh Exp $ */
 
 #include "setup.h"
 
@@ -188,29 +188,6 @@ newnick(char *nick)
 }
 
 /*
- * msg_mychannel
- *
- * inputs       - format varargs
- * output       - none
- * side effects -
- */
-
-void
-msg_mychannel(char *format, ...)
-{
-  va_list va;
-  char message[MAX_BUFF];
-
-  va_start(va,format);
-
-  vsprintf(message, format, va );
-
-  privmsg(config_entries.defchannel,message);
-
-  va_end(va);
-}
-
-/*
  * Generic report
  *
  * report
@@ -236,7 +213,7 @@ report(int type, int channel_send_flag, char *format,...)
 
   if( channel_send_flag & config_entries.channel_report )
     {
-      msg_mychannel("%s", msg);
+      privmsg(config_entries.defchannel, "%s", msg);
     }
 
   va_end(va);
@@ -512,8 +489,14 @@ handle_action(int actionid, int idented, char *nick, char *user,
       return;
     }
 
+  /* kludge, ugh, but these have their own notices */
+  if((strcasecmp(actions[actionid].name, "sclone") == 0) ||
+     (strcasecmp(actions[actionid].name, "drone") == 0))
+    return;
+
   if (actions[actionid].method & METHOD_DCC_WARN)
     {
+
       if (addcmt && addcmt[0])
 	send_to_all(SEND_WARN,
 		     "*** %s violation (%s) from %s (%s@%s): %s", 
@@ -530,16 +513,17 @@ handle_action(int actionid, int idented, char *nick, char *user,
 		     host, comment);
 
     }
+
   if (actions[actionid].method & METHOD_IRC_WARN)
     {
       if (addcmt && addcmt[0])
-	msg_mychannel("*** %s violation (%s) from %s (%s@%s): %s\n",
+	privmsg(config_entries.defchannel, "*** %s violation (%s) from %s (%s@%s): %s",
 		      actions[actionid].name, addcmt,
 		      (nick && nick[0]) ? nick : "<unknown>", 
 		      (user && user[0]) ? user : "<unknown>",
 		      host, comment);
       else
-	msg_mychannel("*** %s violation from %s (%s@%s): %s\n",
+	privmsg(config_entries.defchannel, "*** %s violation from %s (%s@%s): %s",
 		      actions[actionid].name, 
 		      (nick && nick[0]) ? nick : "<unknown>", 
 		      (user && user[0]) ? user : "<unknown>",
@@ -820,7 +804,7 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
   regex_t reg;
   regmatch_t m[1];
 #endif
-  char fulluh[MAX_HOST+MAX_DOMAIN+2];
+  char fulluh[MAX_USERHOST+1];
   int i, numfound=0;
 
 #ifdef HAVE_REGEX_H

@@ -1,9 +1,8 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.22 2002/05/26 02:55:05 db Exp $ */
+/* $Id: stdcmds.h,v 1.23 2002/05/26 17:43:58 leeh Exp $ */
 
-void msg_mychannel(char *msg,...);
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
 void join(char *chan,char *key);

@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.3 2002/05/26 03:02:50 leeh Exp $
+ * $Id: services.c,v 1.4 2002/05/26 17:44:01 leeh Exp $
  */
 
 #include <stdio.h>
@@ -45,6 +45,7 @@ struct serv_command services_msgtab = {
 struct services_entry
 {
   char cloning_host[MAX_HOST];
+  int clone_amount;
   int clones_displayed;
   int kline_suggested;
 };
@@ -89,8 +90,8 @@ services_handler(int argc, char *argv[])
     if((p = strchr(host, ' ')) != NULL)
       *p = '\0';
 
-    report(SEND_ALL, CHANNEL_REPORT_DRONE, 
-           "%s reports drone %s", SERVICES_NAME, nick);
+    send_to_all(SEND_ALL, "%s reports drone %s", SERVICES_NAME, nick);
+    privmsg(config_entries.defchannel, "%s reports drone %s", SERVICES_NAME, nick);
 
     handle_action(act_drone, 1, nick, user, host, 0, 0);
     log("%s reports drone %s [%s@%s]", SERVICES_NAME, nick, user, host);
@@ -106,16 +107,22 @@ services_handler(int argc, char *argv[])
   /* the services clones header, giving user@host and amount */
   if((strcmp(p+3, "users") == 0) && (strncmp(p, "on", 2) != 0))
   {
+    char *s;
+
     if((p = strchr(argv[3], ' ')) == NULL)
       return;
 
     *p = '\0';
     p += 3;
 
+    if((s = strchr(argv[3], ' ')) != NULL)
+      *s = '\0';
+
     strncpy(services.cloning_host, argv[3], MAX_HOST-1);
 
     services.clones_displayed = 0;
     services.kline_suggested = NO;
+    services.clone_amount = atoi(p);
     return;
   }
 
@@ -144,6 +151,12 @@ services_handler(int argc, char *argv[])
 
     user = userathost;
     *host++ = '\0';
+
+    /* XXX */
+    send_to_all(SEND_ALL, "%s reports %d cloning %s@%s nick %s",
+                SERVICES_NAME, services.clone_amount, user, host, nick);
+    privmsg(config_entries.defchannel, "%s reports %d cloning %s@%s nick %s",
+            SERVICES_NAME, services.clone_amount, user, host, nick);
 
     if(services.kline_suggested == NO)
     {

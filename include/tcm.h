@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.42 2002/05/26 16:10:24 leeh Exp $ */
+/* $Id: tcm.h,v 1.43 2002/05/26 17:43:58 leeh Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -35,13 +35,9 @@ extern time_t current_time;
 #define MAX_USER	11
 #define MAX_HOST	80	
 #define MAX_USERHOST	MAX_USER + MAX_HOST
-#define MAX_DOMAIN	80
 #define MAX_REASON	120	/* should be quite long enough */
 #define MAX_IP		20
 #define MAX_CLASS       50
-
-/* XXX not sure on this one yet -db */
-#define MAX_WHO		(MAX_NICK+MAX_USER+MAX_HOST+5)
 
 /* Macros for universal OS handling of signal vectors */
 #define sysvhold notice

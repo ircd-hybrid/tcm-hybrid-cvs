@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.21 2002/05/26 06:57:29 db Exp $
+ * $Id: tcm_io.h,v 1.22 2002/05/26 17:43:58 leeh Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -51,7 +51,7 @@ void	init_connections(void);
 void	close_connection(int connnum);
 
 void notice(const char *nick, const char *format, ...);
-void privmsg(const char *nick, const char *format, ...);
+void privmsg(const char *target, const char *format, ...);
 
 extern fd_set readfds;
 extern fd_set writefds;

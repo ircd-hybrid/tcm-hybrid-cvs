@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.40 2002/05/26 16:10:24 leeh Exp $ */
+/* $Id: userlist.h,v 1.41 2002/05/26 17:43:58 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -108,13 +108,13 @@ struct failrec *failures;
 
 struct userentry {
   char nick[MAX_NICK];
-  char user[MAX_NICK+1];
+  char user[MAX_USER];
   char host[MAX_HOST];
   char ip_host[MAX_IP];         /* host ip as string */
 #ifdef VIRTUAL
   char ip_class_c[MAX_IP];      /* /24 of host ip as string */
 #endif
-  char domain[MAX_DOMAIN];
+  char domain[MAX_HOST];
   char link_count;
   char isoper;
   char class[100];		/* -1 if unknown */

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.44 2002/05/26 15:26:00 db Exp $
+ * $Id: tcm_io.c,v 1.45 2002/05/26 17:44:01 leeh Exp $
  */
 
 #include <stdio.h>
@@ -529,19 +529,19 @@ notice(const char *nick, const char *format, ...)
 /*
  * privmsg
  *
- * inputs	- nick to privmsg
+ * inputs	- target to privmsg (nick/channel)
  * 		- format string to use
  *		- var args to send
  * output	- none
- * side effects	- nick is privmsg'd
+ * side effects	- target is privmsg'd
  */
 
 void
-privmsg(const char *nick,const char *format, ...)
+privmsg(const char *target, const char *format, ...)
 {
   char command[MAX_BUFF];
   va_list va;
-  snprintf(command, MAX_BUFF-1, "PRIVMSG %s :%s", nick, format);
+  snprintf(command, MAX_BUFF-1, "PRIVMSG %s :%s", target, format);
   command[MAX_BUFF-1] = '\0';
   va_start(va,format);
   va_print_to_server(command, va);

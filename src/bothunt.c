@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.110 2002/05/26 16:10:27 leeh Exp $
+ * $Id: bothunt.c,v 1.111 2002/05/26 17:44:01 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1493,8 +1493,8 @@ adduserhost(struct plus_c_info *userinfo, int fromtrace, int is_oper)
   /* Determine the domain name */
   domain = find_domain(userinfo->host);
 
-  strncpy(newuser->domain,domain,MAX_DOMAIN);
-  newuser->domain[MAX_DOMAIN-1] = '\0';
+  strncpy(newuser->domain, domain, MAX_HOST);
+  newuser->domain[MAX_HOST-1] = '\0';
 
   /* Add it to the hash tables */
   addtohash(usertable, userinfo->user, newuser);

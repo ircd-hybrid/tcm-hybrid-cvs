@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.116 2002/05/30 16:36:01 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.117 2002/05/31 01:54:18 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -43,6 +43,7 @@
 #include "match.h"
 #include "actions.h"
 #include "handler.h"
+#include "hash.h"
 
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>
@@ -59,18 +60,11 @@ static void m_class(int connnum, int argc, char *argv[]);
 static void m_classt(int connnum, int argc, char *argv[]);
 static void m_killlist(int connnum, int argc, char *argv[]);
 static void m_kline(int connnum, int argc, char **argv);
-static void m_kclone(int connnum, int argc, char *argv[]);
-static void m_kflood(int connnum, int argc, char *argv[]);
-static void m_klink(int connnum, int argc, char *argv[]);
-static void m_kdrone(int connnum, int argc, char *argv[]);
-static void m_kbot(int connnum, int argc, char *argv[]);
 static void m_kill(int connnum, int argc, char *argv[]);
 static void m_kaction(int connnum, int argc, char *argv[]);
-static void m_kspam(int connnum, int argc, char *argv[]);
 static void m_register(int connnum, int argc, char *argv[]);
 static void m_opers(int connnum, int argc, char *argv[]);
 static void m_testline(int connnum, int argc, char *argv[]);
-static void m_set(int connnum, int argc, char *argv[]);
 static void m_uptime(int connnum, int argc, char *argv[]);
 static void m_exemptions(int connnum, int argc, char *argv[]);
 static void m_connections(int connnum, int argc, char *argv[]);
@@ -87,7 +81,9 @@ static void m_info(int connnum, int argc, char *argv[]);
 static void m_locops(int connnum, int argc, char *argv[]);
 static void m_unkline(int connnum, int argc, char *argv[]);
 static void m_dline(int connnum, int argc, char *argv[]);
+#ifdef ENABLE_QUOTE
 static void m_quote(int connnum, int argc, char *argv[]);
+#endif
 static void m_mem(int connnum, int argc, char *argv[]);
 static void m_nflood(int connnum, int argc, char *argv[]);
 static void m_rehash(int connnum, int argc, char *argv[]);
@@ -248,7 +244,6 @@ m_kaction(int connnum, int argc, char *argv[])
 {
   char *userhost;
   char *p;
-  int split;
   int actionid;
 
   if(argc < 2)

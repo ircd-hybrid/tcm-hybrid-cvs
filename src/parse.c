@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.47 2002/05/30 01:49:49 leeh Exp $
+ * $Id: parse.c,v 1.48 2002/05/31 01:54:18 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -35,6 +35,7 @@
 #include "patchlevel.h"
 #include "modules.h"
 #include "handler.h"
+#include "dcc.h"
 
 static void do_init(void);
 static void process_server(int conn_num,

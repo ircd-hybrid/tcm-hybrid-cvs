@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.106 2002/05/30 15:27:30 leeh Exp $
+ * $Id: userlist.c,v 1.107 2002/05/31 01:54:19 wcampbel Exp $
  *
  */
 
@@ -388,7 +388,7 @@ save_umodes(void *unused)
     else
       send_to_all(FLAGS_ALL, "Couldn't open %s for writing", user_pref);
 
-    userlist[i].changed == 0;
+    userlist[i].changed = 0;
   }
 }
     

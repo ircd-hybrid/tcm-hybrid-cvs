@@ -1,7 +1,7 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.8 2002/05/30 16:35:59 leeh Exp $ */
+/* $Id: actions.h,v 1.9 2002/05/31 01:54:13 wcampbel Exp $ */
 
 #define MAX_ACTIONS	16
 
@@ -14,8 +14,8 @@ extern int act_vclone;
 extern int act_flood;
 extern int act_link;
 extern int act_bot;
-extern act_spambot;
-extern act_clone;
+extern int act_spambot;
+extern int act_clone;
 extern int act_rclone;
 
 void init_actions(void);

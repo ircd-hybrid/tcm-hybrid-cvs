@@ -1,6 +1,11 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.16 2002/05/30 20:54:07 db Exp $
+ * $Id: actions.c,v 1.17 2002/05/31 01:54:17 wcampbel Exp $
+ */
+
+/* XXX
+ * actions.c:234: warning: `set_action_time' defined but not used
+ * actions.c:248: warning: `set_action_method' defined but not used
  */
 
 #include "setup.h"
@@ -186,8 +191,6 @@ void
 update_action(int conn_num, int argc, char *argv[])
 {
   char reason[MAX_REASON];
-  char *p;
-  char *q;
   int actionid;
   int method;
   int i;
@@ -565,6 +568,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
   }
   else
   {
+/* XXX - We can't do this without p set prior! */
     *p++ = '\0';
     user = m_user;
     host = m_host;
@@ -644,7 +648,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
 	if(s == NULL)
           return NULL;
 
-	*s == '\0';
+	*s = '\0';
 	snprintf(p, MAX_HOST+1, "%s.*", host);
       }
       break;

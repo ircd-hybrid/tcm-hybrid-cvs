@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.6 2002/05/30 22:40:58 db Exp $
+ * $Id: vclones.c,v 1.7 2002/05/31 01:54:19 wcampbel Exp $
  */
 
 #include <assert.h>
@@ -25,6 +25,7 @@
 #include "handler.h"
 #include "userlist.h"
 #include "actions.h"
+#include "match.h"
 
 #ifdef VIRTUAL
 

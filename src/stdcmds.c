@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.83 2002/05/30 01:49:49 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.84 2002/05/31 01:54:18 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -38,6 +38,7 @@
 #include "stdcmds.h"
 #include "userlist.h"
 #include "wild.h"
+#include "hash.h"
 
 int doingtrace = NO;
 

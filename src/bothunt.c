@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.141 2002/05/30 20:54:07 db Exp $
+ * $Id: bothunt.c,v 1.142 2002/05/31 01:54:17 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -38,10 +38,6 @@
 #include <regex.h>
 #define REGCOMP_FLAGS REG_EXTENDED
 #define REGEXEC_FLAGS 0
-#endif
-
-#ifndef INADDR_NONE
-#define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
 static void check_nick_flood(char *snotice);
@@ -305,7 +301,7 @@ on_stats_i(int argc, char *argv[])
 void
 on_server_notice(int argc, char *argv[])
 {
-  int i = -1, a, b, c = -1;
+  int i = -1, a, c = -1;
   int faction = -1;
   struct user_entry userinfo;
   char *from_server;
@@ -1078,7 +1074,6 @@ link_look_notice(char *snotice)
   char *host;
   char user_host[MAX_HOST+MAX_NICK+2];
   char *seen_user_host;
-  char *p;
   int first_empty_entry = -1;
   int found_entry = NO;
   int i;
@@ -1182,7 +1177,6 @@ void cs_nick_flood(char *snotice)
   char *user_host;
   char *user;
   char *host;
-  char *p;
 
   if ((nick_reported = strchr(snotice,' ')) == NULL)
     return;
@@ -1504,10 +1498,6 @@ stats_notice(char *snotice)
   char *nick;
   char *fulluh;
   char *p;
-#ifdef STATS_P
-  int i;
-  int number_of_tcm_opers=0;
-#endif
   int stat;
 
   stat = *snotice;
@@ -1667,7 +1657,6 @@ int
 get_user_host(char **user_p, char **host_p, char *user_host)
 {
   char *user = user_host;
-  char *host;
   char *p;
 
   /*

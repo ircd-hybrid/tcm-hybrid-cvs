@@ -1,10 +1,10 @@
 /* dcc.h
  *
  * 
- * $Id: dcc.h,v 1.1 2002/05/29 18:47:46 db Exp $
+ * $Id: dcc.h,v 1.2 2002/05/31 01:54:13 wcampbel Exp $
  */
-#ifndef __TCM_IO_H
-#define __TCM_IO_H
+#ifndef __DCC_H
+#define __DCC_H
 
 extern	int initiated_dcc_socket;
 extern	time_t initiated_dcc_socket_time;

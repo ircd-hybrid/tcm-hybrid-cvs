@@ -1,7 +1,7 @@
 /* handler.c
  *
  * contains the code for the dcc and server command handlers
- * $Id: handler.c,v 1.2 2002/05/30 01:49:48 leeh Exp $
+ * $Id: handler.c,v 1.3 2002/05/31 01:54:18 wcampbel Exp $
  */
 
 #include <assert.h>
@@ -179,8 +179,8 @@ void
 del_serv_handler(struct serv_command *ptr)
 {
   struct serv_command *temp_ptr;
-  struct serv_command *last_cmd_ptr;
-  struct serv_command *last_func_ptr;
+  struct serv_command *last_cmd_ptr = NULL;
+  struct serv_command *last_func_ptr = NULL;
   int hashval;
 
   hashval = hash_command(ptr->cmd);
@@ -278,7 +278,7 @@ void
 del_numeric_handler(struct serv_numeric *ptr)
 {
   struct serv_numeric *temp_ptr;
-  struct serv_numeric *last_ptr;
+  struct serv_numeric *last_ptr = NULL;
 
   for(temp_ptr = serv_numeric_table; temp_ptr;
       temp_ptr = temp_ptr->next)
@@ -289,7 +289,7 @@ del_numeric_handler(struct serv_numeric *ptr)
     last_ptr = temp_ptr;
   }
 
-  if(last_ptr)
+  if(last_ptr != NULL)
     last_ptr->next = ptr->next;
   else
     serv_numeric_table = ptr->next;

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.14 2002/05/30 22:48:24 jmallett Exp $
+ * $Id: hash.c,v 1.15 2002/05/31 01:54:18 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -28,6 +28,7 @@
 #include "patchlevel.h"
 #include "hash.h"
 #include "actions.h"
+#include "match.h"
 
 #ifdef HAVE_REGEX_H
 #include <regex.h>
@@ -62,7 +63,7 @@ struct hash_rec *ip_table[HASHTABLESIZE];
 static void 
 free_hash_links(struct hash_rec *ptr)
 {
-  struct hash_rec *next_ptr;
+  struct hash_rec *next_ptr = NULL;  /* Quell warnings */
 
   if (ptr == NULL)
     return;
@@ -895,7 +896,7 @@ update_nick(char *nick1, char *nick2)
 void
 kill_add_report(char *server_notice)
 {
-  char buff[MAX_BUFF], *p, *q;
+  char *p, *q;
   char *nick, *by, *reason;
   struct hash_rec *ptr;
   int i=0;

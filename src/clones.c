@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.8 2002/05/30 22:40:58 db Exp $
+ * $Id: clones.c,v 1.9 2002/05/31 01:54:17 wcampbel Exp $
  */
 
 #include <assert.h>
@@ -25,6 +25,8 @@
 #include "handler.h"
 #include "userlist.h"
 #include "actions.h"
+#include "event.h"
+#include "match.h"
 
 static void m_bots(int, int, char *argv[]);
 static void m_umulti(int, int, char *argv[]);

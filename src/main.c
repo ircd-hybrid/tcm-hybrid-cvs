@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.102 2002/05/30 15:27:30 leeh Exp $ */
+/* $Id: main.c,v 1.103 2002/05/31 01:54:18 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -46,6 +46,7 @@
 #include "hash.h"
 #include "logging.h"
 #include "actions.h"
+#include "handler.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"

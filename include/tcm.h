@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.50 2002/05/30 15:59:31 leeh Exp $ */
+/* $Id: tcm.h,v 1.51 2002/05/31 01:54:14 wcampbel Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -75,5 +75,11 @@ extern void init_wingates(void);
 
 void *xmalloc(size_t);
 void xfree(void *);
+
+#ifndef INADDR_NONE
+/* Needed for Solaris, stolen from Hybrid 7 */
+#define INADDR_NONE ((unsigned int) 0xffffffff)
+#endif
+
 
 #endif

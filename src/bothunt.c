@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.68 2002/05/08 20:45:02 einride Exp $ */
+/* $Id: bothunt.c,v 1.69 2002/05/10 00:26:27 bill Exp $ */
 
 #include "setup.h"
 
@@ -79,7 +79,9 @@ static void addtohash(struct hashrec *table[],char *key,struct userentry *item);
 static char removefromhash(struct hashrec *table[], char *key, char *hostmatch,
                     char *usermatch, char *nickmatch);
 static void check_host_clones(char *);
+#ifdef VIRTUAL
 static void check_virtual_host_clones(char *);
+#endif
 static void check_reconnect_clones(char *);
 
 void _ontraceuser(int connnum, int argc, char *argv[]);
@@ -1628,9 +1630,11 @@ static void updatehash(struct hashrec *table[],
 
 static void removeuserhost(char *nick, struct plus_c_info *userinfo)
 {
+#ifdef VIRTUAL
   int  found_dots;
   char ip_class_c[MAX_IP];
   char *p;
+#endif
   char *domain;
 
   /* Determine the domain name */
@@ -1771,8 +1775,10 @@ static void adduserhost(char *nick,
   struct common_function *temp;
   char *par[5];
   char *domain;
+#ifdef VIRTUAL
   int  found_dots;
   char *p;
+#endif
 
   par[0] = nick;
   par[1] = userinfo->user;
@@ -1861,7 +1867,9 @@ static void adduserhost(char *nick,
   if (!fromtrace)
   {
     check_host_clones(userinfo->host);
+#ifdef VIRTUAL
     check_virtual_host_clones(newuser->ip_class_c);
+#endif
     check_reconnect_clones(userinfo->host);
   }
 }
@@ -2198,7 +2206,7 @@ static void check_host_clones(char *host)
  * side effects	- 
  *
  */
-
+#ifdef VIRTUAL
 static void check_virtual_host_clones(char *ip_class_c)
 {
   struct hashrec *find;
@@ -2336,6 +2344,7 @@ static void check_virtual_host_clones(char *ip_class_c)
 
     }
 }
+#endif
 
 static void connect_flood_notice(char *snotice)
 {
@@ -3032,8 +3041,10 @@ static void stats_notice(char *snotice)
   char *nick;
   char *fulluh;
   char *p;
+#ifdef STATS_P
   int i;
   int number_of_tcm_opers=0;
+#endif
   int stat;
 
   stat = *snotice;

@@ -1,7 +1,7 @@
 #ifndef __COMMANDS_H
 #define __COMMANDS_H
 
-/* $Id: commands.h,v 1.8 2002/05/09 23:41:58 bill Exp $ */
+/* $Id: commands.h,v 1.9 2002/05/10 00:26:24 bill Exp $ */
 
 void init_allow_nick();
 void dccproc(int connnum, int argc, char *argv[]);	
@@ -98,6 +98,8 @@ void m_klink(int connnum, int argc, char *argv[]);
 void m_kdrone(int connnum, int argc, char *argv[]);
 void m_kbot(int connnum, int argc, char *argv[]);
 void m_kill(int connnum, int argc, char *argv[]);
+void m_use_kaction(int connnum, int argc, char *argv[]);
+void m_kaction(int connnum, int argc, char *argv[]);
 void m_kspam(int connnum, int argc, char *argv[]);
 void m_hmulti(int connnum, int argc, char *argv[]);
 void m_umulti(int connnum, int argc, char *argv[]);

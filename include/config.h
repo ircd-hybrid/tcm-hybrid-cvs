@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.38 2002/05/05 17:04:44 einride Exp $
+ * $Id: config.h,v 1.39 2002/05/10 00:26:24 bill Exp $
  */
 
 /*
@@ -46,11 +46,6 @@
  * tcm, being able to D line, define this
  */
 #undef NO_D_LINE_SUPPORT
-
-/*
- * If you are careful with your exemptions to D lines...
- */
-#undef AUTO_DLINE
 
 /*
  * Force tcm to dump core even on systems defaulting to a core

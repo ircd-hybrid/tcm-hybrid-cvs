@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.28 2002/05/08 21:00:44 einride Exp $ */
+/* $Id: userlist.h,v 1.29 2002/05/10 00:26:24 bill Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -111,7 +111,9 @@ struct userentry {
   char user[MAX_NICK+1];
   char host[MAX_HOST];
   char ip_host[MAX_IP];         /* host ip as string */
+#ifdef VIRTUAL
   char ip_class_c[MAX_IP];      /* /24 of host ip as string */
+#endif
   char domain[MAX_DOMAIN];
   char link_count;
   char isoper;

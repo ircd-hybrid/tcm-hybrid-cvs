@@ -1,7 +1,7 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.16 2002/05/06 14:20:02 wcampbel Exp $ */
+/* $Id: stdcmds.h,v 1.17 2002/05/10 00:26:24 bill Exp $ */
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
@@ -16,6 +16,12 @@ void list_nicks(int sock,char *nick,int regex);
 void list_virtual_users(int sock,char *userhost,int regex);
 void list_users(int sock,char *userhost,int regex);
 void kill_list_users(int sock,char *userhost,char *reason,int regex);
+void report_multi_host(int sock,int nclones);
+void report_multi(int sock,int nclones);
+void report_multi_user(int sock,int nclones);
+#ifdef VIRTUAL
+void report_multi_virtuals(int sock,int nclones);
+#endif
 void report_mem(int sock);
 void report_clones(int sock);
 void report_nick_flooders(int sock);
@@ -29,7 +35,7 @@ void list_class(int sock,char *class_to_find,int total_only);
 xxx_ void suggest_action(int type_s, char *nick, char *user, char *host,
                     int different, int identd);
 */
-void handle_action(int action, int idented, char *nick, char *user, char *host, char *ip, char * addcmt);
+void handle_action(int actionid, int idented, char *nick, char *user, char *host, char *ip, char * addcmt);
 void initopers(void);
 void inithash(void);
 void prnt(int,char *,...);              /* - Hendrix (va'd by bill)*/

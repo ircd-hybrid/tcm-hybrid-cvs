@@ -52,7 +52,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.17 2001/06/03 20:18:03 greg Exp $";
+static char *version="$Id: serverif.c,v 1.18 2001/06/03 21:10:36 db Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -354,7 +354,7 @@ int socks_bindsocket(char *nick,char *user,char *host,char *ip)
   int flags;
   int optval;
   int i;
-  int found_slot = -1;
+  int found_slot = INVALID;
 #ifdef DEBUGMODE
   placed;
 #endif
@@ -2615,6 +2615,12 @@ void sendto_all_linkedbots(char *buffer)
 	{
 	  if(connections[i].type & TYPE_TCM)
 	    {
+              /* Don't send things to pending connections! */
+              if (connections[i].type & TYPE_PENDING)
+                {
+                  return;
+                }
+
 	      /*
 	       * Don't send something back to tcm it originated from
 	       */

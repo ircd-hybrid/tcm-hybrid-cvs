@@ -1,3 +1,15 @@
+bill        2002/12/18 21:26:08 EST	(20021219_0)
+
+  Modified files:
+    src                  actions.c 
+  Log:
+  - fix bug that would cause the user field in a kline mask to be truncated by ircd
+  
+  Revision  Changes    Path
+  1.43      +2 -2      tcm-hybrid/src/actions.c
+
+
+
 bill        2002/12/13 13:05:32 EST	(20021213_0)
 
   Modified files:

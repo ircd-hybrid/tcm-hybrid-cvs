@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.44 2002/04/17 22:09:27 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.45 2002/04/22 22:32:06 bill Exp $ */
 
 #include "setup.h"
 
@@ -350,6 +350,8 @@ suggest_host(char *host, int ident, int type)
     return q;
   if (type & get_action_type("sclone"))
     return q;
+  if (type & get_action_type("rclone"))
+    return q;
   if (type & get_action_type("drone"))
     return q;
   if (type & get_action_type("wingate"))
@@ -493,10 +495,10 @@ suggest_action(int type_s,
       if (strchr(host,'?') != (char *)NULL)
         return;
 
-      if (identd && !different)
+      if (identd)
         strcpy(suggested_user,user);
       else 
-        strcpy(suggested_user, "*");
+        strcpy(suggested_user, "~*");
 
       if (type & get_action_type("clone"))
         {
@@ -517,6 +519,10 @@ suggest_action(int type_s,
       else if (type & get_action_type("socks"))
         {
           strcpy(suggested_user, "*");
+        }
+      else if (type & get_action_type("rclone") && identd)
+        {
+          strcpy(suggested_user, user);
         }
 
       suggested_host=suggest_host(host, identd, type);

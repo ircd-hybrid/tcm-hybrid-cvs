@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.56 2002/04/17 22:09:23 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.57 2002/04/22 22:32:03 bill Exp $ */
 
 #include "setup.h"
 
@@ -111,6 +111,8 @@ struct msg_to_action msgs_to_mon[] = {
   {"Client connecting: ", CONNECT},
   {"Client exiting: ", EXITING},
   {"Unauthorized ", UNAUTHORIZED},
+  /* lee smells like cheese.  filthy brit. */
+  {"Unauthorised client connection", UNAUTHORIZED},
   {"Nick change:", NICKCHANGE},
   {"Nick flooding detected by:", CS_NICKFLOODING},
   {"Rejecting ", CS_CLONES},

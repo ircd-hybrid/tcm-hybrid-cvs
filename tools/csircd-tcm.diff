@@ -1,0 +1,33 @@
+diff -urN csircd-1.13/lib/commands.c csircd-1.13.tcm/lib/commands.c
+--- csircd-1.13/lib/commands.c	Sun Apr 21 18:17:29 2002
++++ csircd-1.13.tcm/lib/commands.c	Sun Apr 21 18:22:24 2002
+@@ -5349,12 +5349,12 @@
+ 					send_prefix_to_client(meptr, pptr,
+ 						IRCD_REPLY(RPL_TRACEOPERATOR, pptr->name),
+ 						acptr->c_class->classname,
+-						ircd_clientname(acptr, 0, cnamebuf), acptr->c_ipstring);
++						ircd_clientname(acptr, 0, cnamebuf));
+ 				else
+ 					send_prefix_to_client(meptr, pptr,
+ 						IRCD_REPLY(RPL_TRACEUSER, pptr->name),
+ 						acptr->c_class->classname,
+-						ircd_clientname(acptr, 0, cnamebuf), acptr->c_ipstring);
++						ircd_clientname(acptr, 0, cnamebuf));
+ 			}
+ 			else if (IsServer(acptr))
+ 			{
+diff -urN csircd-1.13/lib/numeric.c csircd-1.13.tcm/lib/numeric.c
+--- csircd-1.13/lib/numeric.c	Sun Apr 21 18:20:23 2002
++++ csircd-1.13.tcm/lib/numeric.c	Sun Apr 21 18:22:14 2002
+@@ -53,8 +53,8 @@
+ /* 201 */	{	RPL_TRACECONNECTING,	"Try. %s %s" },
+ /* 202 */	{	RPL_TRACEHANDSHAKE,		"H.S. %s %s" },
+ /* 203 */	{	RPL_TRACEUNKNOWN,		"???? %s %s" },
+-/* 204 */	{	RPL_TRACEOPERATOR,		"Oper %s %s (%s)" },
+-/* 205 */	{	RPL_TRACEUSER,			"User %s %s (%s)" },
++/* $Id: csircd-tcm.diff,v 1.1 2002/04/22 22:32:09 bill Exp $ */
++/* 204 */	{	RPL_TRACEOPERATOR,		"Oper %s %s" },
++/* 205 */	{	RPL_TRACEUSER,			"User %s %s" },
+ /* 206 */	{	RPL_TRACESERVER,		"Serv %s %dS %dC %s %s" },
+ /* 207 */	{	RPL_TRACESERVICE,		"Service %s %s" },
+ /* 208 */	{	RPL_TRACENEWTYPE,		"<newtype> 0 %s" },

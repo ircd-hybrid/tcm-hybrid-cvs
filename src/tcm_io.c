@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.35 2002/05/26 02:12:46 db Exp $
+ * $Id: tcm_io.c,v 1.36 2002/05/26 02:32:47 db Exp $
  */
 
 #include <stdio.h>
@@ -57,12 +57,13 @@ static int get_line(char *inbuf,int *len, struct connection *connections_p);
 static int connect_to_dcc_ip(const char *nick, const char *hostport);
 static void va_print_to_socket(int sock, const char *format, va_list va);
 static void va_print_to_server(const char *format, va_list va);
-static int finish_accept_dcc_chat(int i);
-static int finish_dcc_chat(int i);
-static int signon_to_server(int unused);
+static void finish_accept_dcc_chat(int i);
+static void finish_dcc_chat(int i);
+static void signon_to_server(int unused);
 
 fd_set readfds;            /* file descriptor set for use with select */
-fd_set writefds;
+fd_set writefds;            /* file descriptor set for use with select */
+
 struct connection connections[MAXDCCCONNS+1]; /*plus 1 for the server, silly*/
 
 /*
@@ -117,16 +118,18 @@ read_packet(void)
     }
 
     FD_ZERO (&readfds);
+    FD_ZERO (&writefds);
 
+#if 0
     _continuous(0, 0, NULL);
+#endif
 
     for (i = 0; i < MAXDCCCONNS; i++)
       {
 	if (connections[i].state != S_IDLE)
 	  {
 	    FD_SET(connections[i].socket, &readfds);
-	    if (connections[i].state != S_IDLE)
-	      FD_SET(connections[i].socket, &writefds);
+	    FD_SET(connections[i].socket, &writefds);
 	  }
       }
 
@@ -143,17 +146,26 @@ read_packet(void)
 
     if (select_result > 0)
     {
+#if 0
       _scontinuous(0, 0, NULL);
+#endif
 
       for (i=0; i < MAXDCCCONNS; i++)
       {
+	if (connections[i].state != S_IDLE &&
+	    FD_ISSET(connections[i].socket, &writefds))
+	  {
+	    if (connections[i].io_write_function != NULL)
+	      (connections[i].io_write_function)(i);
+	  }
+
 	if (connections[i].state != S_IDLE &&
 	    FD_ISSET(connections[i].socket, &readfds))
           {
 	    if (connections[i].state == S_CONNECTING)
 	      {
 		connections[i].state = S_ACTIVE;
-		(connections[i].io_function)(i);
+		(connections[i].io_read_function)(i);
 		continue;
 	      }
 
@@ -186,7 +198,7 @@ read_packet(void)
 #ifdef DEBUGMODE
 		    printf("<- %s\n", connections[i].buffer);
 #endif
-		    (connections[i].io_function)(i);
+		    (connections[i].io_read_function)(i);
 		    tscanned += nscanned;
                   }
               }
@@ -350,11 +362,6 @@ linkclosed(int connnum, int argc, char *argv[])
       quit = YES;
       return;
     }
-
-/* XXX huh?*/
-#if 0
-  signon_to_server(0);
-#endif
 }
 
 
@@ -463,7 +470,8 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
 		    connections[i].socket);
 
   connections[i].state = S_CONNECTING;
-  connections[i].io_function = finish_accept_dcc_chat;
+  connections[i].io_read_function = finish_accept_dcc_chat;
+  connections[i].io_write_function = NULL;
   connections[i].last_message_time = current_time;
 }
 
@@ -727,7 +735,8 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   if (connections[i].socket == INVALID)
     return (0);
   connections[i].state = S_CONNECTING;
-  connections[i].io_function = finish_dcc_chat;
+  connections[i].io_read_function = finish_dcc_chat;
+  connections[i].io_write_function = NULL;
   FD_SET(connections[i].socket, &readfds);
 }
 
@@ -739,7 +748,7 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
  * side effects -
  */
 
-static int
+static void
 finish_accept_dcc_chat(int i)
 {
   struct sockaddr_in incoming_addr;
@@ -774,7 +783,7 @@ finish_accept_dcc_chat(int i)
  * side effects -
  */
 
-static int
+static void
 finish_dcc_chat(int i)
 {
   print_motd(connections[i].socket);
@@ -788,7 +797,9 @@ finish_dcc_chat(int i)
 
   print_to_socket(connections[i].socket,
 		  "Connected.  Send '.help' for commands.");
-  connections[i].io_function = parse_client;
+  connections[i].io_read_function = parse_client;
+  connections[i].io_write_function = NULL;
+
 }
 
 /*
@@ -809,7 +820,8 @@ close_connection(int connnum)
 
   connections[connnum].socket = INVALID;
   connections[connnum].state = S_IDLE;
-  connections[connnum].io_function = NULL; /* blow up real good */
+  connections[connnum].io_read_function = NULL; /* blow up real good */
+  connections[connnum].io_write_function = NULL; /* blow up real good */
 
   if ((connnum + 1) == maxconns)
     {
@@ -867,8 +879,10 @@ connect_to_server(const char *hostport)
 	  remote_hostent->h_length);
 
   connections[0].state = S_CONNECTING;
-  connections[0].io_function = signon_to_server;
+  connections[0].io_read_function = signon_to_server;
+  connections[0].io_write_function = NULL;
   return(connect_to_given_ip_port(&socketname, port));
+
 }
 
 /*
@@ -879,10 +893,11 @@ connect_to_server(const char *hostport)
  * side effects - does signon to server
  */
 
-int
+static void
 signon_to_server (int unused)
 {
-  connections[0].io_function = parse_server;
+  connections[0].io_read_function = parse_server;
+  connections[0].io_write_function = NULL;
   connections[0].nbuf = 0;
   if (*mynick == '\0')
     strcpy (mynick,config_entries.dfltnick);

@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.17 2002/05/26 02:12:43 db Exp $
+ * $Id: tcm_io.h,v 1.18 2002/05/26 02:32:44 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -19,7 +19,8 @@ struct connection {
   int	nbuf;			/* number in buffer */
   int	socket;
   int   state;
-  int	(*io_function)(int connect_id);
+  void	(*io_read_function)(int connect_id);
+  void	(*io_write_function)(int connect_id);
   void	*arg;			/* argument to handler */
   int	type;			/* why was this a char? -bill */
   int	set_modes;		/* for set options */

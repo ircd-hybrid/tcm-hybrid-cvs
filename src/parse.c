@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.26 2002/05/26 02:12:46 db Exp $
+ * $Id: parse.c,v 1.27 2002/05/26 02:32:47 db Exp $
  */
 
 #include <stdio.h>
@@ -55,7 +55,7 @@ int  maxconns = 0;
  * side effects - process server message
  */
 
-int
+void
 parse_server(int unused)
 {
   char *buffer = connections[0].buffer;
@@ -119,7 +119,7 @@ parse_server(int unused)
  * side effects -
  */
 
-int
+void
 parse_client(int i)
 {
   struct dcc_command *ptr;
@@ -128,7 +128,7 @@ parse_client(int i)
 
   argc = parse_args(connections[i].buffer, argv);
   if (argc == 0)
-    return(0);
+    return;
 
   /* command */
   if(argv[0][0] == '.')
@@ -147,7 +147,7 @@ parse_client(int i)
       print_to_socket(connections[i].socket,
 		      "Unknown command [%s]", argv[0] + 1);
 
-    return(0);
+    return;
   }
   /* message to partyline */
   else
@@ -164,7 +164,7 @@ parse_client(int i)
       print_to_socket(connections[i].socket,
 		      "You are not +p, not sending to chat line");
   }
-  return(0);
+  return;
 }
 
 /*

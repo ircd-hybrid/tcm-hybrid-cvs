@@ -1,0 +1,4 @@
+Usage: .check <hostname> [scanner name]
+
+  Checks a given hostname for an open proxy.  Optionally, you may
+  specify the name of the scanner (as defined in the tcm's configuration)

@@ -1,3 +1,24 @@
+wcampbel    2002/04/23 10:31:12 EDT	(20020423_0)
+
+  Modified files:
+    help                 help.clones 
+    include              commands.h config.h 
+    modules              commands.c 
+  Log:
+  Brought back .ulist and .hlist, These are optional...
+    Reasoning:  I used to use these heavily, as did some of the other opers
+                I talked to.  I know .list does the same thing, but it's an
+                extra step to put in that @* or *@.  Many European keyboards
+                don't have @ easily accessable on the keyboard as well.
+  
+  Revision  Changes    Path
+  1.10      +4 -0      tcm-hybrid/help/help.clones
+  1.7       +6 -0      tcm-hybrid/include/commands.h
+  1.36      +6 -0      tcm-hybrid/include/config.h
+  1.43      +88 -0     tcm-hybrid/modules/commands.c
+
+
+
 bill        2002/04/22 18:32:10 EDT	(20020422_0)
 
   Modified files:

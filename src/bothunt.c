@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.64 2002/05/06 02:11:55 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.65 2002/05/06 12:50:53 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -341,15 +341,8 @@ void _ontraceclass(int connnum, int argc, char *argv[])
   if (doingtrace)
   {
     doingtrace = NO;
-    /* XXX - These should use the functions in stdcmd.c */
-    if (config_entries.defchannel_key[0])
-    {
-      toserv("JOIN %s %s\n",
-	   config_entries.defchannel, config_entries.defchannel_key);
-      set_key(config_entries.defchannel, config_entries.defchannel_key);
-    }
-    else
-      toserv("JOIN %n", config_entries.defchannel);
+    join(config_entries.defchannel, config_entries.defchannel_key);
+    set_key(config_entries.defchannel, config_entries.defchannel_key);
   }
 }
 

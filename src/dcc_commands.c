@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.47 2002/05/05 17:04:47 einride Exp $ */
+/* $Id: dcc_commands.c,v 1.48 2002/05/06 12:50:54 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -725,9 +725,10 @@ void m_cycle(int connnum, int argc, char *argv[])
   /* probably on a cycle, we'd want the tcm to set
    * the key as well...
    */
-  toserv("JOIN %s %s\nMODE %s +ntk %s\n", config_entries.defchannel,
-         config_entries.defchannel_key, config_entries.defchannel,
-         config_entries.defchannel_key);
+  join(config_entries.defchannel, config_entries.defchannel_key);
+  set_key(config_entries.defchannel, config_entries.defchannel_key);
+  /* XXX - no set_mode...probably I should combine it with set_key */
+  toserv("MODE %s +nt\n", config_entries.defchannel);
 }
 
 void m_die(int connnum, int argc, char *argv[])

@@ -1,3 +1,33 @@
+db          2002/05/20 01:31:06 EDT	(20020520_5)
+
+  Modified files:
+    include              config.h serverif.h 
+    modules              bothunt.c commands.c serverif.c 
+    src                  event.c logging.c main.c modules.c 
+                         stdcmds.c 
+  Log:
+  - ripped out last remnant of gracefuldie ewww
+  - style fixes
+  - using event code to run events now
+  - fixed function names so they start at first char of line
+  
+    Probably more, but this is enough for tonight. I still don't understand
+  the tunafish thing though.
+  
+  Revision  Changes    Path
+  1.44      +2 -0      tcm-hybrid/include/config.h
+  1.17      +0 -1      tcm-hybrid/include/serverif.h
+  1.74      +7 -7      tcm-hybrid/modules/bothunt.c
+  1.62      +11 -0     tcm-hybrid/modules/commands.c
+  1.68      +78 -78    tcm-hybrid/modules/serverif.c
+  1.2       +5 -4      tcm-hybrid/src/event.c
+  1.23      +1 -1      tcm-hybrid/src/logging.c
+  1.40      +38 -95    tcm-hybrid/src/main.c
+  1.24      +2 -2      tcm-hybrid/src/modules.c
+  1.58      +227 -182  tcm-hybrid/src/stdcmds.c
+
+
+
 db          2002/05/19 21:59:57 EDT	(20020520_4)
 
   Modified files:

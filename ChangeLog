@@ -1,3 +1,8 @@
+*** 20011008_1 by wcampbel
+Fix for .help.  ".help    admin" still doesn't work, but it's not a big
+concern for right now.
+
+
 *** 20011004_2 by wcampbel
 Cosmetic fix of LOCOPS/WALLOPS/OPERWALL handling.
 

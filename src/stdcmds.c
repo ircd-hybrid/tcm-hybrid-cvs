@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.78 2002/05/27 23:59:46 db Exp $ */
+/* $Id: stdcmds.c,v 1.79 2002/05/28 00:03:03 leeh Exp $ */
 
 #include "setup.h"
 
@@ -229,7 +229,7 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
     {
       if(kline_time)
         send_to_all(SEND_ALL,
-                     "%s %d %s : %s added by oper %s",
+                     "%s %d %s :%s added by oper %s",
                      command_name,
                      kline_time,
                      pattern,
@@ -237,7 +237,7 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
                      who_did_command);
       else
         send_to_all(SEND_ALL,
-                     "%s %s : %s added by oper %s",
+                     "%s %s :%s added by oper %s",
                      command_name,
                      pattern,
                      format_reason(reason),
@@ -246,7 +246,7 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
   else
     {
       send_to_all(SEND_ALL,
-                   "%s %s : %s added by oper %s",
+                   "%s %s :%s added by oper %s",
                    command_name,
                    pattern,
                    format_reason(reason),

@@ -1,3 +1,22 @@
+db          2002/05/24 11:01:34 EDT	(20020524_11)
+
+  Modified files:
+    include              tcm.h 
+    modules              wingate.c 
+    src                  bothunt.c event.c main.c tcm_io.c 
+  Log:
+  - rename CurrentTime -> current_time for naming convention consistency
+  
+  Revision  Changes    Path
+  1.31      +1 -1      tcm-hybrid/include/tcm.h
+  1.28      +6 -6      tcm-hybrid/modules/wingate.c
+  1.89      +23 -23    tcm-hybrid/src/bothunt.c
+  1.6       +5 -5      tcm-hybrid/src/event.c
+  1.55      +1 -1      tcm-hybrid/src/main.c
+  1.11      +5 -5      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/24 10:51:18 EDT	(20020524_10)
 
   Modified files:

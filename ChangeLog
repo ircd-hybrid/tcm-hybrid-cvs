@@ -1,3 +1,17 @@
+db          2002/06/08 17:54:56 EDT	(20020608_3)
+
+  Modified files:
+    src                  bothunt.c userlist.c 
+  Log:
+  - if a read error happens, don't leave an fp open
+  - simplified code more in bothunt.c
+  
+  Revision  Changes    Path
+  1.160     +6 -25     tcm-hybrid/src/bothunt.c
+  1.115     +5 -3      tcm-hybrid/src/userlist.c
+
+
+
 wcampbel    2002/06/08 17:53:37 EDT	(20020608_2)
 
   Modified files:

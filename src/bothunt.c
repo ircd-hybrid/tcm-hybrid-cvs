@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.143 2002/06/01 01:12:27 wcampbel Exp $
+ * $Id: bothunt.c,v 1.144 2002/06/01 02:18:11 db Exp $
  */
 
 #include <stdio.h>
@@ -147,7 +147,7 @@ on_trace_user(int argc, char *argv[])
 
   while(right_bracket_ptr != argv[6])
   {
-    if ( *right_bracket_ptr == ')' )
+    if (*right_bracket_ptr == ')')
     {
       *right_bracket_ptr = '\0';
       break;
@@ -441,7 +441,8 @@ on_server_notice(int argc, char *argv[])
       return;
     *p = '\0';
 
-    send_to_all(FLAGS_VIEW_KLINES, "GLINE for %s@%s triggered by %s: %s", user, host, nick, q);
+    send_to_all(FLAGS_VIEW_KLINES,
+		"GLINE for %s@%s triggered by %s: %s", user, host, nick, q);
     return;
   }
 

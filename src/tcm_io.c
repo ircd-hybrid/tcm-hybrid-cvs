@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.63 2002/05/28 16:41:56 db Exp $
+ * $Id: tcm_io.c,v 1.64 2002/05/28 17:32:04 db Exp $
  */
 
 #include <stdio.h>
@@ -346,7 +346,7 @@ reconnect(void)
 {
   eventDelete((EVH *)reconnect, NULL);
 
-  if (connect_to_server(serverhost) == INVALID)
+  if (connect_to_server(tcm_status.serverhost) == INVALID)
     {
       /* This one is fatal folks */
       tcm_log(L_ERR, "server_link_closed() invalid socket quitting");
@@ -449,7 +449,8 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
     return;
   }
 
-  privmsg (nick,"\001DCC CHAT chat %lu %d\001", local_ip(ourhostname),
+  privmsg (nick,"\001DCC CHAT chat %lu %d\001",
+	   local_ip(tcm_status.ourhostname),
 	   dcc_port);
 
   if (config_entries.debug && outfile)
@@ -957,19 +958,19 @@ signon_to_server (int unused)
   else
     connections[server_id].time_out = SERVER_TIME_OUT;
 
-  if (*mynick == '\0')
-    strcpy (mynick,config_entries.dfltnick);
+  if (tcm_status.mynick[0] == '\0')
+    strcpy (tcm_status.mynick, config_entries.dfltnick);
 
   if (config_entries.server_pass[0] != '\0')
     print_to_server("PASS %s", config_entries.server_pass);
 
   print_to_server("USER %s %s %s :%s",
 		  config_entries.username_config,
-		  ourhostname,
+		  tcm_status.ourhostname,
 		  config_entries.server_name,
 		  config_entries.ircname_config);
   
-  print_to_server("NICK %s", mynick);
+  print_to_server("NICK %s", tcm_status.mynick);
 }
 
 /*

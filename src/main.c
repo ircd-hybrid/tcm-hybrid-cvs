@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.93 2002/05/28 16:41:56 db Exp $ */
+/* $Id: main.c,v 1.94 2002/05/28 17:32:03 db Exp $ */
 
 #include "setup.h"
 
@@ -58,10 +58,6 @@
 
 struct s_testline testlines;
 time_t current_time;
-char mynick[MAX_NICK];
-char ourhostname[MAX_HOST];   /* This is our hostname with domainname */
-char serverhost[MAX_HOST];    /* Server tcm will use. */
-int amianoper;
 
 /* total memory xmalloc'd */
 unsigned long totalmem;
@@ -259,7 +255,9 @@ main(int argc, char *argv[])
   exemption_summary();
 #endif
 
-  snprintf(serverhost,sizeof(serverhost), "%s:%d", config_entries.server_name, 
+  snprintf(tcm_status.serverhost,
+	   MAX_HOST,
+	   "%s:%d", config_entries.server_name, 
            atoi(config_entries.server_port));
 
   init_connections();
@@ -334,7 +332,7 @@ main(int argc, char *argv[])
 	 }
     }
 
-  if(connect_to_server(serverhost) < 0)
+  if(connect_to_server(tcm_status.serverhost) < 0)
     {
       tcm_log(L_ERR, "Could not connect to server at startup\n");
       exit(1);
@@ -342,18 +340,21 @@ main(int argc, char *argv[])
 
   if(config_entries.virtual_host_config[0] != '\0')
     {
-      strncpy(ourhostname,config_entries.virtual_host_config,MAX_HOST-1);
+      strncpy(tcm_status.ourhostname,
+	      config_entries.virtual_host_config,
+	      MAX_HOST-1);
     }
   else
     {
-      gethostname(ourhostname,MAX_HOST-1);
+      gethostname(tcm_status.ourhostname,MAX_HOST-1);
     }
-  *mynick = '\0';
   pingtime = 0;
   memset((void *)&myclass, sizeof(myclass), 0);
-
-  amianoper = NO;
   startup_time = time(NULL);
+
+  /* XXX move into init_tcm_status() later */
+  tcm_status.mynick[0] = '\0';
+  tcm_status.amianoper = 0;
 
   /* enter the main IO loop */
   read_packet();

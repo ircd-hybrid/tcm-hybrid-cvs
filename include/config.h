@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.40 2002/05/13 22:36:34 bill Exp $
+ * $Id: config.h,v 1.41 2002/05/13 22:44:02 wcampbel Exp $
  */
 
 /*
@@ -186,7 +186,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
  * - The Hybrid team does not support the use of this option, and will
  *   take no responsibility for any damage it may cause.
  */
-#define ENABLE_QUOTE
+#undef ENABLE_QUOTE
 
 /* Define this to prevent tcm from forking() */
 #undef DEBUGMODE
@@ -239,7 +239,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 */
 
 /* #define SERVICES_NICK "services@services.int" */
-/* #define SERVICES_NAME "services.us" */
+/* #define SERVICES_NAME "services.int" */
 
 /* how many clones to look for globally */
 #define SERVICES_CLONE_THRESHOLD 4

@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.7 2002/05/31 01:54:19 wcampbel Exp $
+ * $Id: vclones.c,v 1.8 2002/05/31 04:54:51 db Exp $
  */
 
 #include <assert.h>
@@ -34,7 +34,7 @@ static void m_vbots(int, int, char *argv[]);
 static void m_vlist(int, int, char *argv[]);
 
 static void report_multi_virtuals(int, int);
-static void report_vbots(int, int);
+static void report_vbots(int, int, int);
 static void list_virtual_users(int, char *, int);
 
 struct dcc_command vmulti_msgtab = {
@@ -59,18 +59,18 @@ void
 m_vmulti(int connnum, int argc, char *argv[])
 {
   if (argc >= 2)
-    report_multi_virtuals(connections[connnum].socket, atoi(argv[1]));
+    report_vbots(connections[connnum].socket, atoi(argv[1]), NO);
   else
-    report_multi_virtuals(connections[connnum].socket, 3);
+    report_vbots(connections[connnum].socket, 3, NO);
 }
 
 void
 m_vbots(int connnum, int argc, char *argv[])
 {
   if (argc >= 2)
-    report_vbots(connections[connnum].socket, atoi(argv[1]));
+    report_vbots(connections[connnum].socket, atoi(argv[1]), YES);
   else
-    report_vbots(connections[connnum].socket, 3);
+    report_vbots(connections[connnum].socket, 3, YES);
 }
 
 void
@@ -82,7 +82,7 @@ m_vlist(int connnum, int argc, char *argv[])
                     "Usage: %s <wildcarded/regexp ip>",
                     argv[0]);
   else if (argc == 2)
-    list_virtual_users(connections[connnum].socket, argv[1], NO);
+    report_vbots(connections[connnum].socket, atoi(argv[1]), YES);
   else
     list_virtual_users(connections[connnum].socket, argv[2], YES);
 #else
@@ -95,24 +95,26 @@ m_vlist(int connnum, int argc, char *argv[])
 }
 
 /*
- * report_multi_virtuals()
+ * report_vbots()
  *
  * inputs       - socket to print out
  *              - number to consider as clone
+ *		- check_user YES means check user name as well as IP block
  * output       - NONE
  * side effects -
  */
-void
-report_multi_virtuals(int sock,int nclones)
+
+static void
+report_vbots(int sock, int nclones, int check_user)
 {
   struct hash_rec *ptr;
   struct hash_rec *top;
-  struct hash_rec *temp;
+  struct hash_rec *tptr;
   int num_found;
   int i;
   int foundany = 0;
 
-  if(!nclones)
+  if(nclones == 0)
     nclones = 5;
 
   nclones--;
@@ -123,35 +125,74 @@ report_multi_virtuals(int sock,int nclones)
         {
           num_found = 0;
 
-          for (temp = top; temp != ptr; temp = temp->next)
+          for (tptr = top; tptr != ptr; tptr = tptr->next)
             {
-              if (!strcmp(temp->info->ip_class_c, ptr->info->ip_class_c))
-                break;
+              if (check_user)
+		{
+		  if (!strcmp(tptr->info->user, ptr->info->user) &&
+		      !strcmp(tptr->info->ip_class_c, ptr->info->ip_class_c))
+		    break;
+		}
+	      else
+		{
+		  if (!strcmp(tptr->info->ip_class_c, ptr->info->ip_class_c))
+		  break;
+		}
             }
 
-          if (temp == ptr)
+          if (tptr == ptr)
             {
               num_found=1;
-              for(temp = temp->next; temp; temp = temp->next)
+              for(tptr = tptr->next; tptr; tptr = tptr->next)
                 {
-                  if (!strcmp(temp->info->ip_class_c, ptr->info->ip_class_c))
-                    num_found++; /* - zaph & Dianora :-) */
+		  if (check_user)
+		    {
+		      if (!strcmp(tptr->info->user, ptr->info->user) &&
+			  !strcmp(tptr->info->ip_class_c, ptr->info->ip_class_c))
+			num_found++; /* - zaph & Dianora :-) */
+		    }
+		  else
+		    {
+		      if (!strcmp(tptr->info->ip_class_c, ptr->info->ip_class_c))
+			num_found++; /* - zaph & Dianora :-) */
+		    }
                 }
 
               if (num_found > nclones)
                 {
                   if (!foundany)
                     {
-                      print_to_socket(sock,
-                           "Multiple clients from the following ip blocks:\n");
+		      if (check_user)
+			{
+			  print_to_socket(sock,
+			  "Multiple clients from the following userhosts:\n");
+			}
+		      else
+			{
+			  print_to_socket(sock,
+			  "Multiple clients from the following ip blocks:\n");
+			}
                       foundany = YES;
                     }
 
-                  print_to_socket(sock,
-                       " %s %2d connections -- %s.*\n",
-                       (num_found-nclones > 3) ? "==>" : "   ",
-                       num_found,
-                       ptr->info->ip_class_c);
+		  if (check_user)
+		    {
+		      print_to_socket(sock,
+				  " %s %2d connections -- %s@%s.* {%s}\n",
+				      (num_found-nclones > 2) ? "==>" :
+				      "   ", num_found, ptr->info->user,
+				      ptr->info->ip_class_c,
+				      ptr->info->class);
+		    }
+		    else
+		    {
+		      print_to_socket(sock,
+				      " %s %2d connections -- %s.*\n",
+				      (num_found-nclones > 3) ? "==>" : "   ",
+				      num_found,
+				      ptr->info->ip_class_c);
+		    }
+
                 }
             }
         }
@@ -159,63 +200,6 @@ report_multi_virtuals(int sock,int nclones)
 
   if (!foundany)
     print_to_socket(sock, "No multiple virtual logins found.\n");
-}
-
-
-void
-report_vbots(int sock, int nclones)
-{
-  struct hash_rec *ptr;
-  struct hash_rec *top;
-  struct hash_rec *temp;
-  int num_found;
-  int i;
-  int foundany = NO;
-
-  nclones-=2;  /* ::sigh:: I have no idea */
-  for (i=0; i<HASHTABLESIZE; ++i)
-    {
-      for (top = ptr = ip_table[i]; ptr; ptr = ptr->next)
-        {
-          /* Ensure we haven't already checked this user & domain */
-          for (temp = top, num_found = 0; temp != ptr; temp = temp->next)
-            {
-              if (!strcmp(temp->info->user, ptr->info->user) &&
-                  !strcmp(temp->info->ip_class_c, ptr->info->ip_class_c))
-                break;
-            }
-
-          if (temp == ptr)
-            {
-              for (temp = temp->next; temp; temp = temp->next)
-                {
-                  if (!strcmp(temp->info->user, ptr->info->user) &&
-                      !strcmp(temp->info->ip_class_c, ptr->info->ip_class_c))
-                    num_found++; /* - zaph & Dianora :-) */
-                }
-
-              if (num_found > nclones)
-                {
-                  if (!foundany)
-                    {
-                      foundany = YES;
-                      print_to_socket(sock,
-                           "Multiple clients from the following userhosts:\n");
-                    }
-
-                  num_found++;   /* - zaph and next line*/
-                  print_to_socket(sock,
-                       " %s %2d connections -- %s@%s.* {%s}\n",
-				  (num_found-nclones > 2) ? "==>" :
-				  "   ", num_found, ptr->info->user,
-				  ptr->info->ip_class_c,
-				  ptr->info->class);
-                }
-            }
-        }
-    }
-  if (!foundany)
-    print_to_socket(sock, "No multiple logins found.\n");
 }
 
 /*
@@ -229,7 +213,7 @@ report_vbots(int sock, int nclones)
  */
 
 void
-list_virtual_users(int sock,char *userhost,int regex)
+list_virtual_users(int sock, char *userhost, int regex)
 {
   struct hash_rec *ipptr;
 #ifdef HAVE_REGEX_H

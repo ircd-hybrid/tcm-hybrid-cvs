@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.15 2002/05/31 01:54:18 wcampbel Exp $
+ * $Id: hash.c,v 1.16 2002/05/31 06:12:16 db Exp $
  */
 
 #include <stdio.h>
@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <time.h>
+#include <assert.h>
 
 #include "setup.h"
 #include "config.h"
@@ -190,7 +191,9 @@ add_to_hash_table(struct hash_rec *table[],
 		       const char *key, struct hash_rec *hashptr)
 {
   int ind;
-  
+
+  assert(hashptr->info != NULL);
+
   ind = hash_func(key);
   if (table[ind] == NULL)
     {
@@ -201,6 +204,7 @@ add_to_hash_table(struct hash_rec *table[],
       ((struct hash_rec *)table[ind])->next = hashptr;
       hashptr->next = NULL;
     }
+  hashptr->info->link_count++;
 }
 
 
@@ -235,9 +239,12 @@ remove_from_hash_table(struct hash_rec *table[],
 	prev->next = find->next;
       else
 	table[ind] = find->next;
-      find->info->link_count--;
-      if (find->info->link_count == 0)
-	xfree(find->info);
+      if (find->info->link_count > 0)
+	{
+	  find->info->link_count--;
+	  if (find->info->link_count == 0)
+	    xfree(find->info);
+	}
       free(find);
       return (1);	/* Found the item, and deleted. */
     }
@@ -286,6 +293,7 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
 
   new_user->connecttime = (fromtrace ? 0 : time(NULL));
   new_user->reporttime = 0;
+  new_user->link_count = 0;
 
   new_user->isoper = is_oper;
   strlcpy(new_user->class, user_info->class, MAX_CLASS);
@@ -294,6 +302,7 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
   domain = find_domain(user_info->host);
 
   strlcpy(new_user->domain, domain, MAX_HOST);
+  new_hash->info = new_user;
 
   /* Add it to the hash tables */
   add_to_hash_table(user_table, user_info->user, new_hash);

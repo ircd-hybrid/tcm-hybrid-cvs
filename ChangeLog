@@ -1,3 +1,19 @@
+db          2002/05/27 13:32:22 EDT	(20020527_14)
+
+  Modified files:
+    include              tcm_io.h 
+    src                  tcm_io.c userlist.c wingate.c 
+  Log:
+  - generalised timeout to all connections.
+  
+  Revision  Changes    Path
+  1.26      +2 -1      tcm-hybrid/include/tcm_io.h
+  1.53      +34 -21    tcm-hybrid/src/tcm_io.c
+  1.84      +1 -1      tcm-hybrid/src/userlist.c
+  1.45      +9 -10     tcm-hybrid/src/wingate.c
+
+
+
 leeh        2002/05/27 07:42:01 EDT	(20020527_13)
 
   Modified files:

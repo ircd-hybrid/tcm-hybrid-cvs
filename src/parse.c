@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.43 2002/05/28 17:32:04 db Exp $
+ * $Id: parse.c,v 1.44 2002/05/28 17:57:10 db Exp $
  */
 
 #include <stdio.h>
@@ -304,7 +304,7 @@ process_server(int conn_num, char *source, char *function, char *param)
 
   if (strcmp(argv[1],"PRIVMSG") == 0)
   {
-    if(strcasecmp(argv[2], tcm_status.mynick) == 0)
+    if(strcasecmp(argv[2], tcm_status.my_nick) == 0)
     {
       if ((userhost = strchr(argv[0], '!')) != NULL)
         *userhost++ = '\0';
@@ -369,8 +369,8 @@ process_server(int conn_num, char *source, char *function, char *param)
   switch(numeric)
   {
     case RPL_STATSYLINE:
-      if (!strcasecmp(argv[4], myclass))
-        pingtime = atoi(argv[5]) * 2 + 15;
+      if (!strcasecmp(argv[4], tcm_status.my_class))
+        tcm_status.pingtime = atoi(argv[5]) * 2 + 15;
       break;
 
     case ERR_NICKNAMEINUSE:
@@ -383,7 +383,7 @@ process_server(int conn_num, char *source, char *function, char *param)
 	
     case ERR_CHANNELISFULL: case ERR_INVITEONLYCHAN:
     case ERR_BANNEDFROMCHAN: case ERR_BADCHANNELKEY:
-      tcm_status.mychannel[0] = '\0';
+      tcm_status.my_channel[0] = '\0';
       break;
 	
     case RPL_MYINFO:
@@ -404,16 +404,16 @@ process_server(int conn_num, char *source, char *function, char *param)
       else
          config_entries.hybrid = NO;
 
-      if (!amianoper)
+      if (!tcm_status.am_opered)
         do_init();
       else
-        send_umodes(tcm_status.mynick);
+        send_umodes(tcm_status.my_nick);
       break;
 
     case RPL_YOUREOPER:
-      amianoper = YES;
+      tcm_status.am_opered = YES;
       oper_time = time(NULL);
-      send_umodes(tcm_status.mynick);
+      send_umodes(tcm_status.my_nick);
       inithash();
       print_to_server("STATS Y");
       break;
@@ -580,9 +580,9 @@ on_join(char *nick, char *channel)
   if ((p = strchr(nick, '!')) == NULL)
     return;
   *p = '\0';
-  if (strcmp(tcm_status.mynick, nick) == 0)
+  if (strcmp(tcm_status.my_nick, nick) == 0)
   {
-    strlcpy(tcm_status.mychannel,channel,MAX_CHANNEL);
+    strlcpy(tcm_status.my_channel,channel,MAX_CHANNEL);
   }
 }
 
@@ -597,7 +597,7 @@ on_join(char *nick, char *channel)
 static void
 on_kick(char *nick)
 {
-  if (strcmp(tcm_status.mynick, nick) == 0)
+  if (strcmp(tcm_status.my_nick, nick) == 0)
     join();
 }
 
@@ -623,8 +623,8 @@ on_nick(char *old_nick,char *new_nick)
   if ((p = strchr(old_nick, '!')) != NULL)
     *p = '\0';
 
-  if (strcmp(old_nick, tcm_status.mynick) == 0)
-    strcpy(tcm_status.mynick, new_nick);
+  if (strcmp(old_nick, tcm_status.my_nick) == 0)
+    strcpy(tcm_status.my_nick, new_nick);
 }
 
 /*
@@ -644,16 +644,16 @@ on_nick_taken(void)
 		 config_entries.dfltnick,
                  (int) random() % 10);
 
-  if (tcm_status.mychannel[0] == '\0')
+  if (tcm_status.my_channel[0] == '\0')
   {
     newnick(randnick);
-    strcpy(tcm_status.mynick, randnick);
+    strcpy(tcm_status.my_nick, randnick);
   }
   else if (strncmp(randnick,config_entries.dfltnick,
                    strlen(config_entries.dfltnick)))
   {
     newnick(randnick);
-    strcpy(tcm_status.mynick, randnick);
+    strcpy(tcm_status.my_nick, randnick);
   }
 }
 

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.94 2002/05/28 17:32:03 db Exp $ */
+/* $Id: main.c,v 1.95 2002/05/28 17:57:10 db Exp $ */
 
 #include "setup.h"
 
@@ -340,21 +340,22 @@ main(int argc, char *argv[])
 
   if(config_entries.virtual_host_config[0] != '\0')
     {
-      strncpy(tcm_status.ourhostname,
+      strncpy(tcm_status.my_hostname,
 	      config_entries.virtual_host_config,
 	      MAX_HOST-1);
     }
   else
     {
-      gethostname(tcm_status.ourhostname,MAX_HOST-1);
+      gethostname(tcm_status.my_hostname,MAX_HOST-1);
     }
-  pingtime = 0;
-  memset((void *)&myclass, sizeof(myclass), 0);
+
   startup_time = time(NULL);
 
   /* XXX move into init_tcm_status() later */
-  tcm_status.mynick[0] = '\0';
-  tcm_status.amianoper = 0;
+  tcm_status.my_class[0] = '\0';
+  tcm_status.my_nick[0] = '\0';
+  tcm_status.am_opered = 0;
+  tcm_status.pingtime = 0;
 
   /* enter the main IO loop */
   read_packet();

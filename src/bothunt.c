@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.130 2002/05/28 16:41:55 db Exp $
+ * $Id: bothunt.c,v 1.131 2002/05/28 17:57:09 db Exp $
  */
 
 #include <stdio.h>
@@ -55,7 +55,6 @@ static void stats_notice(char *snotice);
 static int  get_user_host(char **user_p, char **host_p, char *user_host);
 
 struct s_testline testlines;
-char   myclass[MAX_CLASS]; /* XXX */
 
 struct nick_change_entry
 {
@@ -168,9 +167,9 @@ on_trace_user(int argc, char *argv[])
   if (*ip_ptr == ')')
     *ip_ptr = '\0';
 
-  if (!strncmp(argv[5], mynick, strlen(mynick)))
+  if (!strncmp(argv[5], tcm_status.my_nick, strlen(tcm_status.my_nick)))
   {
-    snprintf(myclass, MAX_CLASS, "%s", argv[4]);
+    snprintf(tcm_status.my_class, MAX_CLASS, "%s", argv[4]);
   }
   class_ptr = argv[4];
 
@@ -1681,7 +1680,7 @@ stats_notice(char *snotice)
 void
 reload_bothunt(void)
 {
-  if (!amianoper)
+  if (!tcm_status.am_opered)
     oper();
 }
 

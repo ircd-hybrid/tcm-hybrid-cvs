@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.29 2001/10/29 03:56:30 db Exp $ */
+/* $Id: bothunt.c,v 1.30 2001/10/29 15:02:24 bill Exp $ */
 
 #include "setup.h"
 
@@ -2030,7 +2030,7 @@ void check_virtual_host_clones(char *ip_class_c)
 			    tmrec->tm_min,
 			    tmrec->tm_sec);
 	    }
-	  else
+	  else if (different == 0)  /* apparantely we do not want to kline *@some.net.block.0/24 if the idents differ */
 	    {
 	      (void)snprintf(notice0,sizeof(notice0) - 1,
                             "  %s is %s@%s [%s] (%2.2d:%2.2d:%2.2d)\n",

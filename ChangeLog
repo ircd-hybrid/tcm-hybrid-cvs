@@ -1,3 +1,18 @@
+db          2001/12/11 02:00:57 EST	(20011211_0)
+
+  Modified files:
+    modules              commands.c 
+    src                  userlist.c 
+  Log:
+  - reformatted commands.c
+  - rewrote config file handling in userlist.c.
+  
+  Revision  Changes    Path
+  1.33      +4 -4      tcm-hybrid/modules/commands.c
+  1.38      +222 -279  tcm-hybrid/src/userlist.c
+
+
+
 bill        2001/12/07 15:06:16 EST	(20011207_0)
 
   Modified files:

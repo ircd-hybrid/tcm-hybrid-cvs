@@ -1,3 +1,10 @@
+*** 20011026_1 by db
+- got rid of unnecessary mallocs and frees
+- make function names stand out on own line
+- just a bunch of cleanups
+
+
+
 *** 20011024_3 by wcampbel
 Document .help umode
 

@@ -1,3 +1,4 @@
+# $Id: userlist.cf,v 1.14 2002/04/29 02:18:26 bill Exp $
 # userlist.cf file
 #
 # each line is colon separated
@@ -22,7 +23,8 @@
 #   +/-I will, if set, override the dyanmic i flag
 #   +/-G will allow user to .gline
 #   +/-D will give this user access to .dline
-#   +/-W will allow this user to see WALLOPS and OPERWALL
+#   +/-W will allow this user to see WALLOPS and OPERWALL (this is only used
+#         if ENABLE_W_FLAG is defined)
 #   +/-k will show this user K-lines
 #   +/-s will allow this user to see STAT requests made by users
 #   +/-w will show this user misc. warnings, such as clones detected and
@@ -68,3 +70,6 @@ E:*:bill@*.parodius.com
 #
 # bill@*.ircd-hybrid.org is exempt from all cloning violations
 E:*clone*:bill@*.ircd-hybrid.org
+#
+# bot@*.uber-fast.com can clone and flood
+E:clone,flood:bot@*.uber-fast.com

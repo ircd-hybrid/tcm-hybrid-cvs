@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.23 2002/04/02 23:24:22 bill Exp $ */
+/* $Id: userlist.h,v 1.24 2002/04/29 02:18:28 bill Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -147,6 +147,10 @@ extern int ban_list_index;
 
 extern struct exception_entry hostlist[];	/* defined in userlist.c */
 extern int host_list_index;
+
+#ifdef DEBUGMODE
+void exemption_summary();
+#endif
 
 extern struct tcm_file_entry tcmlist[];
 extern int tcm_list_index;

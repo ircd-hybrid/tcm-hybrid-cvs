@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.47 2002/04/17 22:09:27 wcampbel Exp $
+ * $Id: userlist.c,v 1.48 2002/04/29 02:18:33 bill Exp $
  *
  */
 
@@ -624,7 +624,7 @@ static void load_a_user(char *line)
 
 static void load_e_line(char *line)
 {
-  char *vltn, *p, *uhost;
+  char *vltn, *p, *q, *uhost;
   int type=0;
 
   if ((p = strchr(line, ':')) == NULL)
@@ -640,10 +640,9 @@ static void load_e_line(char *line)
     if (p == NULL)
       break;
 
-    uhost = p+1;
-    *p = '\0';
+    *p++ = '\0';
     type |= get_action_type(vltn);
-    vltn = uhost;
+    vltn = p;
   }
   type |= get_action_type(vltn);
 
@@ -931,3 +930,32 @@ void reload_user_list(int sig)
   sendtoalldcc(SEND_ALL_USERS, "*** Caught SIGHUP ***\n");
 }
 
+#ifdef DEBUGMODE
+/*
+ * exemption_summary()
+ *
+ * inputs - none
+ * outputs - none
+ * side effects - prints out summary of exemptions, indexed by action names
+ */
+
+void exemption_summary()
+{
+  int i, j;
+
+  for (i=0;i<MAX_ACTIONS;++i)
+  {
+    if (actions[i].name[0] == '\0')
+     break;
+    printf("%s:", actions[i].name);
+    for (j=0;j<MAXHOSTS;++j)
+    {
+      if (hostlist[j].user[0] == '\0')
+        break;
+      if (hostlist[j].type & actions[i].type)
+        printf(" %s@%s", hostlist[j].user, hostlist[j].host);
+    }
+    printf("\n");
+  }
+}
+#endif

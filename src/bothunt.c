@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.59 2002/04/27 06:18:38 bill Exp $ */
+/* $Id: bothunt.c,v 1.60 2002/04/29 02:18:30 bill Exp $ */
 
 #include "setup.h"
 
@@ -986,6 +986,7 @@ void onservnotice(int connnum, int argc, char *argv[])
     target = p + 8;
     if (strcasecmp(config_entries.rserver_name,from_server) == 0)
     {
+      sendtoalldcc(SEND_WARN_ONLY, "*** Flooder %s (%s@%s) target: %s", nick, user, host, target);
       if (*user == '~')
 	suggest_action(get_action_type("flood"), nick, user, host, NO, NO);
       else
@@ -1016,7 +1017,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 
     if (strstr(p,"possible spambot") == NULL)
       return;
-
+    sendtoalldcc(SEND_WARN_ONLY, "*** Spambot %s (%s@%s)", nick, user, host);
     suggest_action(get_action_type("spambot"), nick, user, host, NO, YES);
     break;
 
@@ -1104,6 +1105,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 		b = NO;
 	      else
 		b = YES;
+              sendtoalldcc(SEND_WARN_ONLY, "*** X: flooder %s (%s@%s)", nick, user, host);
 	      suggest_action(get_action_type("cflood"), nick, user, host, NO,
                              (user[0] == '~' ? NO : YES));
 	      connect_flood[a].user_host[0] = '\0';
@@ -1162,6 +1164,7 @@ void onservnotice(int connnum, int argc, char *argv[])
           {
             if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
             {
+              sendtoalldcc(SEND_WARN_ONLY, "*** Q: flooder %s (%s@%s)", nick, user, host);
               suggest_action(get_action_type("cflood"), nick, user, host, NO,
                              (user[0] == '~' ? NO : YES));
               connect_flood[a].user_host[0] = '\0';
@@ -1222,6 +1225,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 	  {
 	    if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
 	    {
+              sendtoalldcc(SEND_WARN_ONLY, "*** Bad UH flooder %s (%s@%s)", nick, user, host);
 	      suggest_action(get_action_type("cflood"), nick, user, host, NO,
                              (user[0] == '~' ? NO : YES));
 	      connect_flood[a].user_host[0] = '\0';
@@ -1483,6 +1487,7 @@ void _onctcp(int connnum, int argc, char *argv[])
     strcat(dccbuff, port);
     if (!makeconn(dccbuff, nick, hold))
     {
+      notice(nick, "\001DCC REJECT CHAT chat\001");
       notice(nick,"DCC CHAT connection failed");
       return;
     }
@@ -2405,6 +2410,8 @@ static void connect_flood_notice(char *snotice)
 		  if (connect_flood[i].connect_count >= MAX_CONNECT_FAILS)
 		    {
                       if ((user[0] == '~') || (!strcmp(user, "unknown"))) ident = NO;
+                      sendtoalldcc(SEND_WARN_ONLY, "*** Connect flooder %s (%s@%s)",
+                                   nick_reported, user, host);
 		      if (!strncasecmp((char *)get_action_method("cflood"), "dline", 5))
 			suggest_action(get_action_type("cflood"), nick_reported, user, ip,
                                        NO, ident);

@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.29 2002/04/08 14:02:28 wcampbel Exp $ */
+/* $Id: main.c,v 1.30 2002/04/29 02:18:33 bill Exp $ */
 
 #include "setup.h"
 
@@ -625,6 +625,9 @@ int main(int argc, char *argv[])
   else
     load_config_file(CONFIG_FILE);
   load_userlist();
+#ifdef DEBUGMODE
+  exemption_summary();
+#endif
 
   snprintf(serverhost,sizeof(serverhost), "%s:%d", config_entries.server_name, 
            atoi(config_entries.server_port));

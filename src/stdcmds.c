@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.48 2002/05/04 20:12:07 einride Exp $ */
+/* $Id: stdcmds.c,v 1.49 2002/05/05 17:04:51 einride Exp $ */
 
 #include "setup.h"
 
@@ -364,7 +364,7 @@ struct hashrec * find_host(char * host) {
  * Note that if an ip is passed, it *must* be a valid ip, no checks for that
  */
 
-void handle_action(int action, int idented, char *nick, char *user, char *host, char *ip) {
+void handle_action(int action, int idented, char *nick, char *user, char *host, char *ip, char * addcmt) {
   char newhost[MAX_HOST];
   char newuser[MAX_USER];
   char comment[512];
@@ -386,12 +386,26 @@ void handle_action(int action, int idented, char *nick, char *user, char *host, 
   if ((action < 0) || (action >= MAX_ACTIONS) || !user || !host || !host[0]
       || strchr(host, '*') || strchr(host, '?') || strchr(user, '*') || strchr(user, '?')) 
   {
+    if ((action < 0) || (action >= MAX_ACTIONS))
+      log("handle_action: action is %i\n", action);
+    else if (!user)
+      log("handle_action(%s): user is NULL\n", actions[action].name);
+    else if (!host)
+      log("handle_action(%s): host is NULL\n", actions[action].name);
+    else if (!host[0])
+      log("handle_action(%s): host is empty\n", actions[action].name);
+    else if (strchr(host, '*') || strchr(host, '?'))
+      log("handle_action(%s): host contains wildchars (%s)\n", actions[action].name, host);
+    else if (strchr(user, '*') || strchr(user, '?'))
+      log("handle_action(%s): user contains wildchars (%s)\n", actions[action].name, user);
     return;
   }
 
   // Valid action?
-  if (!actions[action].method)
+  if (!actions[action].method) {
+    log("handle_action(%s): method field is 0\n", actions[action].name);
     return;
+  }
 
   // Use hoststrip to create a k-line mask.
   // First the host
@@ -405,7 +419,8 @@ void handle_action(int action, int idented, char *nick, char *user, char *host, 
 	// Host without dots? 
 	strncpy(newhost, host, sizeof(newhost));
 	newhost[sizeof(newhost)-1] = 0;
-	break;
+	log("handle_action(%s): '%s' appears to be a weird host\n", actions[action].name, host);
+	return;
       }
       newhost[0] = '*';
       newhost[1] = 0;
@@ -480,20 +495,18 @@ void handle_action(int action, int idented, char *nick, char *user, char *host, 
       snprintf(comment, sizeof(comment), "Permanent k-line of %s@%s", newuser, newhost);
     } else if (actions[action].method & METHOD_DLINE) {
       if ((inet_addr(host) == INADDR_NONE) && (!ip)) {
-	/* We don't have any IP, so look it up */
-	struct in_addr in;
-	struct hostent * he = gethostbyname(host);
-	if (!he) {
+	/* We don't have any IP, so look it up from our tables */
+	userptr = find_host(host);
+	if (!userptr || !userptr->info || !userptr->info->ip_host[0]) {
 	  /* We couldn't find one either, revert to a k-line */
+	  log("handle_action(%s): Reverting to k-line, couldn't find IP for %s\n",
+	      actions[action].name, host);
 	  actions[action].method |= METHOD_KLINE;
-	  handle_action(action, idented, nick, user, host, ip);
+	  handle_action(action, idented, nick, user, host, 0, addcmt);
 	  actions[action].method &= ~METHOD_KLINE;
 	  return;
 	}
-	in.s_addr = * (unsigned long *) he->h_addr_list[0];
-	ip = strdup(inet_ntoa(in));
-	handle_action(action, idented, nick, user, ip, 0);
-	free(ip);
+	handle_action(action, idented, nick, user, host, userptr->info->ip_host, addcmt);
 	return;
       }
       if (inet_addr(host) == INADDR_NONE) {
@@ -516,19 +529,34 @@ void handle_action(int action, int idented, char *nick, char *user, char *host, 
     strcpy(comment, "Exempted host - no actions taken");
   }
   if (actions[action].method & METHOD_DCC_WARN) {
-    sendtoalldcc(SEND_WARN_ONLY, "*** %s violation from %s (%s@%s): %s", 
-		 actions[action].name, 
-		 (nick && nick[0]) ? nick : "<unknown>", 
-		 (user && user[0]) ? user : "<unknown>",
-		 host, comment);
+    if (addcmt && addcmt[0])
+      sendtoalldcc(SEND_WARN_ONLY, "*** %s violation (%s) from %s (%s@%s): %s", 
+		   actions[action].name, addcmt,
+		   (nick && nick[0]) ? nick : "<unknown>", 
+		   (user && user[0]) ? user : "<unknown>",
+		   host, comment);
+    else
+      sendtoalldcc(SEND_WARN_ONLY, "*** %s violation from %s (%s@%s): %s", 
+		   actions[action].name, 
+		   (nick && nick[0]) ? nick : "<unknown>", 
+		   (user && user[0]) ? user : "<unknown>",
+		   host, comment);
+
   }
   if (actions[action].method & METHOD_IRC_WARN) {
-    msg_mychannel("*** %s violation from %s (%s@%s): %s\n",
-		  actions[action].name, 
-		  (nick && nick[0]) ? nick : "<unknown>", 
-		  (user && user[0]) ? user : "<unknown>",
-		  host, comment);
-	   
+    if (addcmt && addcmt[0])
+      msg_mychannel("*** %s violation (%s) from %s (%s@%s): %s\n",
+		    actions[action].name, addcmt,
+		    (nick && nick[0]) ? nick : "<unknown>", 
+		    (user && user[0]) ? user : "<unknown>",
+		    host, comment);
+    else
+      msg_mychannel("*** %s violation from %s (%s@%s): %s\n",
+		    actions[action].name, 
+		    (nick && nick[0]) ? nick : "<unknown>", 
+		    (user && user[0]) ? user : "<unknown>",
+		    host, comment);
+    
   }
 }
 		  

@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.37 2002/05/04 20:12:01 einride Exp $
+ * $Id: config.h,v 1.38 2002/05/05 17:04:44 einride Exp $
  */
 
 /*
@@ -17,7 +17,7 @@
 /*
  * USE_CRYPT, define this if you want your oper passwords to be encrypted
  */
-#undef USE_CRYPT
+#define USE_CRYPT
 
 /*
  * if you like the tcm to report its users on stats p, define this
@@ -125,30 +125,23 @@
  */
 
 /* Now, all the KLINE reasons are defines i.e. the kline
-for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
+for .kflood would be the #define for REASON_FLOOD etc. */
 
-/* .kclone reason */
-#define REASON_KCLONE "Clones are prohibited"
+#define REASON_CFLOOD  "Connection flooding"
+#define REASON_VCLONE  "V-hosted clones"
+#define REASON_FLOOD   "Flooding is prohibited"
+#define REASON_LINK    "Link looking is prohibited"
+#define REASON_BOT     "Bots are prohibited"
+#define REASON_SPAMBOT "Spamming is prohibited"
+#define REASON_CLONE   "Clones are prohibited"
+#define REASON_RCLONE  "Reconnect clones"
+#define REASON_SCLONE  "Clones on multiple servers"
+#define REASON_DRONE   "Drones"
+#define REASON_SOCKS   "Open SOCKS Proxy"
+#define REASON_WINGATE "Open WinGate Proxy"
 
-#define REASON_AUTO_MULTI_SERVER_CLONES "Clones on multiple servers"
-
-/* .kflood reason */
-#define REASON_KFLOOD "Flooding is prohibited"
-
-/* .kperm reason */
-#define REASON_KPERM "PERMANENT"
-
-/* .klink reason */
-#define REASON_LINK   "Link lookers are prohibited"
-
-/* .kspam reason */
-#define REASON_KSPAM "Spamming is prohibited"
-
-/* .kbot reason */
-#define REASON_KBOT "Bots are prohibited"
-
-/* .kdrone reason */
-#define REASON_KDRONE "Drone bots"
+/* .kperm */
+#define REASON_KPERM   "Permanent K-Line"
 
 /*
  * E: lines in userlist.cf will overrule auto kills/klines
@@ -201,7 +194,7 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 #define ENABLE_QUOTE
 
 /* Define this to prevent tcm from forking() */
-#define DEBUGMODE
+#undef DEBUGMODE
 
 /* Define this for dmalloc malloc debugging package */
 #undef DMALLOC

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.50 2002/05/04 20:12:08 einride Exp $
+ * $Id: userlist.c,v 1.51 2002/05/05 17:04:51 einride Exp $
  *
  */
 
@@ -396,11 +396,14 @@ save_prefs(void)
     case 'A': case 'a':
       a = find_action(argv[1]);
       if (a>=0) {
-	fprintf(fp_out, "A:%s:%s %d:%s\n",
-		actions[a].name,
-		get_method_names(actions[a].method),
-		actions[a].klinetime,
-		actions[a].reason);
+	if (!(actions[a].method & 0x80000000)) {
+	  fprintf(fp_out, "A:%s:%s %d:%s\n",
+		  actions[a].name,
+		  get_method_names(actions[a].method),
+		  actions[a].klinetime,
+		  actions[a].reason);
+	  actions[a].method |= 0x80000000;
+	}
 	break;
 
       }
@@ -413,7 +416,16 @@ save_prefs(void)
       break;
     }
   }
-
+  for (a=0;actions[a].name[0];a++) {
+    if (actions[a].method & 0x80000000)
+      actions[a].method &= 0x7FFFFFFF;
+    else
+      fprintf(fp_out, "A:%s:%s %d:%s\n",
+	      actions[a].name,
+	      get_method_names(actions[a].method),
+	      actions[a].klinetime,
+	      actions[a].reason);
+  }
   fclose(fp_in);
   fclose(fp_out);
 

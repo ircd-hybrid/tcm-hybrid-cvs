@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.23 2002/05/03 22:49:47 einride Exp $ */
+/* $Id: wingate.c,v 1.24 2002/05/05 17:04:48 einride Exp $ */
 
 
 #include <netdb.h>
@@ -23,8 +23,6 @@
 #undef REPORT_WINGATES_TO_CHANNEL
 #undef REPORT_SOCKS_TO_CHANNEL
 
-#define REASON_WINGATE "Open wingate"
-#define REASON_SOCKS   "Open SOCKS"
 
 /* Maximum pending connects for wingates */
 #define MAXWINGATES 200
@@ -329,6 +327,7 @@ void _scontinuous(int connnum, int argc, char *argv[])
 		tmp[3] = 0; /* EOF */
 		if (write(socks[i].socket, tmp, 4)!=4) {
 		  close(socks[i].socket);
+		  socks_bindsocket(socks[i].nick, socks[i].user, socks[i].host, 4);
 		  socks[i].state = 0;
 		  socks[i].socket = INVALID;
 		  break;
@@ -354,6 +353,7 @@ void _scontinuous(int connnum, int argc, char *argv[])
 		  }
 
 		close(socks[i].socket);
+		socks_bindsocket(socks[i].nick, socks[i].user, socks[i].host, 4);
 		socks[i].state = 0;
 		socks[i].socket = INVALID;
 		break;
@@ -477,7 +477,6 @@ void _user_signon(int connnum, int argc, char *argv[])
 #endif
 #ifdef DETECT_SOCKS
       socks_bindsocket(argv[0], argv[1], argv[2], 5);
-      socks_bindsocket(argv[0], argv[1], argv[2], 4);
 #endif
     }
 }
@@ -548,7 +547,7 @@ static void report_open_wingate(int i)
     fprintf(outfile, "Found wingate open\n");
   
   
-  handle_action(act_wingate, 0, wingate[i].nick, wingate[i].user, wingate[i].host, inet_ntoa(wingate[i].socketname.sin_addr));
+  handle_action(act_wingate, 0, wingate[i].nick, wingate[i].user, wingate[i].host, inet_ntoa(wingate[i].socketname.sin_addr), 0);
   log("Open Wingate %s!%s@%s\n",
       wingate[i].nick, wingate[i].user, wingate[i].host);
 }
@@ -561,7 +560,7 @@ static void report_open_socks(int i)
   if (config_entries.debug && outfile)
     fprintf(outfile, "DEBUG: Found open socks proxy at %s\n", socks[i].host);
 
-  handle_action(act_socks, 0, socks[i].nick, socks[i].user, socks[i].host, inet_ntoa(socks[i].socketname.sin_addr));
+  handle_action(act_socks, 0, socks[i].nick, socks[i].user, socks[i].host, inet_ntoa(socks[i].socketname.sin_addr), 0);
   log("Open socks proxy %s\n",socks[i].host);
 }
 #endif
@@ -577,13 +576,16 @@ void _modinit()
   wingate_class_list_index = 0;
 #ifdef DETECT_WINGATE
   act_wingate = add_action("wingate");
-  set_action_reason(act_wingate, "Open WinGate proxy");
+  set_action_strip(act_wingate, HS_WINGATE);
+  set_action_reason(act_wingate, REASON_WINGATE);
   for (i=0;i<MAXWINGATES;++i)
     wingate[i].socket = INVALID;
 #endif
 #ifdef DETECT_SOCKS
   act_socks = add_action("socks");
-  set_action_reason(act_socks, "Open SOCKS proxy");
+  set_action_strip(act_socks, HS_SOCKS);
+  set_action_reason(act_socks, REASON_SOCKS);  
+
   for (i=0;i<MAXWINGATES;++i)
     {
       socks[i].socket = INVALID;

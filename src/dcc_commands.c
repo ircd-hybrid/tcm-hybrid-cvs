@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.46 2002/05/05 14:36:44 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.47 2002/05/05 17:04:47 einride Exp $ */
 
 #include "setup.h"
 
@@ -405,7 +405,7 @@ void m_kaction(int connnum, int argc, char *argv[]) {
   if ((host = strchr(who, '@')))
     *host++=0;
 
-  handle_action(action, 0, host ? "" : who, host ? who : 0, host ? host : 0, 0);
+  handle_action(action, 0, host ? "" : who, host ? who : 0, host ? host : 0, 0, "Manually set");
 }
 
 extern int act_spambot;

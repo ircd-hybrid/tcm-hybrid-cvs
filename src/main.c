@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.32 2002/05/04 20:12:07 einride Exp $ */
+/* $Id: main.c,v 1.33 2002/05/05 17:04:51 einride Exp $ */
 
 #include "setup.h"
 
@@ -470,7 +470,7 @@ int add_action(char *name)
     snprintf(actions[i].name, sizeof(actions[i].name), "%s", name);
     actions[i].method = METHOD_IRC_WARN | METHOD_DCC_WARN;
     actions[i].klinetime = 60;
-    actions[i].hoststrip = HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL;
+    actions[i].hoststrip = HS_DEFAULT;
   }
   return i;
 }

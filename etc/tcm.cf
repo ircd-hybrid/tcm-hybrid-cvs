@@ -1,4 +1,4 @@
-# $Id: tcm.cf,v 1.21 2002/05/04 20:11:58 einride Exp $
+# $Id: tcm.cf,v 1.22 2002/05/05 17:04:42 einride Exp $
 # Username for the bot
 U:db
 
@@ -35,11 +35,11 @@ C:&frizzle.net
 #	- bot         <what action to take when a bot is found>
 #	- spambot     <what action to take when a spambot is found>
 #	- clone       <what action to take when clones are found>
+#	- rclone      <what action to take when reconnecting clones are found>
 #	- sclone      <what action to take when multi-server clones are found>
 #	- drone       <what action to take when services reports drones>
 #	- wingate     <what action to take when an open wingate is found>
 #	- socks       <what action to take when an open soxy proxy is found>
-#	- rclone      <what action to take when reconnecting clones are found>
 #
 #   Possible values for action:
 #	- kline	        <kline the user using the proper message>
@@ -53,6 +53,9 @@ C:&frizzle.net
 #
 #   The default values for all cases are ircwarn dccwarn
 #
+# For undefined actions, the reasons from config.h are used, and the handling
+# will be set to "ircwarn dccwarn"
+
 A:cflood:dline dccwarn ircwarn:Connection flooding
 A:vclone:ircwarn dccwarn tkline 180:Cloning is prohibited
 A:flood:tkline 180:Flooding is prohibited
@@ -60,11 +63,11 @@ A:link:dccwarn tkline 180:Link Lookers are prohibited
 A:bot:kline:Bots are prohibited
 A:spambot:tkline 1440:Spamming is prohibited
 A:clone:tkline 1440:Cloning is prohibited
+A:rclone:ircwarn dccwarn tkline 240:Reconnect flood
 A:sclone:tkline 180:Clones on multiple servers
 A:drone:ccwarn kline:Drone bots
 A:wingate:dline:Open Wingate
 A:socks:dline:Open SOCKS server
-A:rclone:ircwarn dccwarn tkline 240:Reconnect flood
 
 # optional message to send to users who request STATS p
 M:For basic information, see http://www.ircd-hybrid.org/tcm/

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.26 2002/05/04 20:12:01 einride Exp $ */
+/* $Id: userlist.h,v 1.27 2002/05/05 17:04:44 einride Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -45,6 +45,24 @@
 #define METHOD_TKLINE                0x0004
 #define METHOD_KLINE                 0x0008
 #define METHOD_DLINE                 0x0010
+
+
+// Default HOSTSTRIPs
+#define HS_DEFAULT  (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_PREFIXED | HOSTSTRIP_NOIDENT_ALL)
+
+#define HS_CFLOOD   HS_DEFAULT
+#define HS_VCLONE   (HOSTSTRIP_HOST_BLOCK | HOSTSTRIP_IDENT_PREFIXED | HOSTSTRIP_NOIDENT_ALL)
+#define HS_FLOOD    HS_DEFAULT
+#define HS_LINK     HS_DEFAULT
+#define HS_BOT      HS_DEFAULT
+#define HS_SPAMBOT  HS_DEFAULT
+#define HS_CLONE    HS_DEFAULT
+#define HS_RCLONE   HS_DEFAULT
+#define HS_SCLONE   HS_DEFAULT
+#define HS_DRONE    HS_DEFAULT
+#define HS_WINGATE  (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
+#define HS_SOCKS    (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
+
 
 struct f_entry {
   int type;

@@ -1,4 +1,4 @@
-/* $Id: setup.h.in,v 1.8 2002/06/04 13:24:28 wcampbel Exp $ */
+/* $Id: setup.h.in,v 1.9 2002/06/09 01:49:30 wcampbel Exp $ */
 /* include/setup.h.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define if you need to in order for stat and other things to work.  */
@@ -39,9 +39,6 @@
 
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL
-
-/* Define if you have the resolv library (-lresolv).  */
-#undef HAVE_LIBRESOLV
 
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET

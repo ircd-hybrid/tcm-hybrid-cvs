@@ -1,4 +1,4 @@
-dnl $Id: configure.in,v 1.20 2002/06/04 13:24:26 wcampbel Exp $
+dnl $Id: configure.in,v 1.21 2002/06/09 01:49:28 wcampbel Exp $
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(include/tcm.h)
 
@@ -37,9 +37,8 @@ fi
 dnl Checks for libraries.
 dnl Replace `main' with a function in -lnsl:
 AC_CHECK_LIB(nsl, gethostbyname)
-AC_CHECK_FUNC(res_mkquery,, AC_CHECK_LIB(resolv, res_mkquery))
 AC_CHECK_LIB(socket, socket)
-AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(descrypt, crypt,,AC_CHECK_LIB(crypt, crypt,,)))
+AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(crypt, crypt,,))
 
 AC_CHECK_FUNC(dlopen,, AC_CHECK_LIB(dl, dlopen))
 

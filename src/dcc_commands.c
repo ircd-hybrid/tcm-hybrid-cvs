@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.122 2002/06/07 10:46:06 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.123 2002/06/07 10:58:06 leeh Exp $ */
 
 #include "setup.h"
 
@@ -1080,18 +1080,16 @@ is_legal_pass(int connect_id, char *password)
               if(strcmp((char*)crypt(password,userlist[i].password),
                          userlist[i].password) == 0)
 	      {
-                strncpy(connections[connect_id].registered_nick,
-                        userlist[i].usernick,
-                        MAX_NICK);
+                strlcpy(connections[connect_id].registered_nick,
+                        userlist[i].usernick, MAX_NICK);
 
 		return 1;
 	      }
 #else
               if(strcmp(userlist[i].password,password) == 0)
 	      {
-                strncpy(connections[connect_id].registered_nick,
-                        userlist[i].usernick,
-                        MAX_NICK);
+                strlcpy(connections[connect_id].registered_nick,
+                        userlist[i].usernick, MAX_NICK);
 
 		return 1;
 	      }

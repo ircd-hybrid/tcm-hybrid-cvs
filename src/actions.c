@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.26 2002/06/05 14:43:37 leeh Exp $
+ * $Id: actions.c,v 1.27 2002/06/07 10:58:06 leeh Exp $
  */
 
 #include "setup.h"
@@ -607,7 +607,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
 
       case HOSTSTRIP_IDENT_AS_IS:
       default:
-	strncpy(p, user, MAX_USER);
+	strlcpy(p, user, MAX_USER);
 	p += strlen(p);
 	break;
     }
@@ -648,7 +648,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
 
     case HOSTSTRIP_HOST_AS_IS:
     default:
-      strncpy(p, host, MAX_HOST);
+      strlcpy(p, host, MAX_HOST);
       break;
   }
 

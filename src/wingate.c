@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.55 2002/06/05 14:43:38 leeh Exp $ */
+/* $Id: wingate.c,v 1.56 2002/06/07 10:58:07 leeh Exp $ */
 
 
 #include <netdb.h>
@@ -134,10 +134,10 @@ wingate_start_test(struct user_entry *info_p)
 
   n_open_wingate_fds++;
 
-  strncpy(connections[found_slot].user, info_p->user, MAX_USER-1);
-  strncpy(connections[found_slot].host, info_p->host, MAX_HOST-1);
-  strncpy(connections[found_slot].nick, info_p->nick, MAX_NICK-1);
-  strncpy(connections[found_slot].ip, info_p->ip_host, MAX_IP-1);
+  strlcpy(connections[found_slot].user, info_p->user, MAX_USER);
+  strlcpy(connections[found_slot].host, info_p->host, MAX_HOST);
+  strlcpy(connections[found_slot].nick, info_p->nick, MAX_NICK);
+  strlcpy(connections[found_slot].ip, info_p->ip_host, MAX_IP);
   connections[found_slot].io_read_function = read_wingate;
   connections[found_slot].io_write_function = NULL;
   connections[found_slot].io_close_function = NULL;
@@ -186,10 +186,10 @@ return;
   else
     return;
 
-  strncpy(connections[found_slot].user, info_p->user, MAX_USER-1);
-  strncpy(connections[found_slot].host, info_p->host, MAX_HOST-1);
-  strncpy(connections[found_slot].nick, info_p->nick, MAX_NICK-1);
-  strncpy(connections[found_slot].ip, info_p->ip_host, MAX_IP-1);
+  strlcpy(connections[found_slot].user, info_p->user, MAX_USER);
+  strlcpy(connections[found_slot].host, info_p->host, MAX_HOST);
+  strlcpy(connections[found_slot].nick, info_p->nick, MAX_NICK);
+  strlcpy(connections[found_slot].ip, info_p->ip_host, MAX_IP);
   connections[found_slot].io_read_function = NULL;
   connections[found_slot].io_write_function = NULL;
   connections[found_slot].io_close_function = NULL;
@@ -220,10 +220,10 @@ squid_start_test(struct user_entry *info_p, int port)
   n_open_squid_fds++;
 
   connections[found_slot].curr_state = SQUID_CONNECTING;
-  strncpy(connections[found_slot].user, info_p->user, MAX_USER-1);
-  strncpy(connections[found_slot].host, info_p->host, MAX_HOST-1);
-  strncpy(connections[found_slot].nick, info_p->nick, MAX_NICK-1);
-  strncpy(connections[found_slot].ip, info_p->ip_host, MAX_IP-1);
+  strlcpy(connections[found_slot].user, info_p->user, MAX_USER);
+  strlcpy(connections[found_slot].host, info_p->host, MAX_HOST);
+  strlcpy(connections[found_slot].nick, info_p->nick, MAX_NICK);
+  strlcpy(connections[found_slot].ip, info_p->ip_host, MAX_IP);
   connections[found_slot].io_read_function = read_squid;
   connections[found_slot].io_write_function = NULL; 
   connections[found_slot].io_close_function = NULL;

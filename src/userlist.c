@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.112 2002/06/07 10:46:07 leeh Exp $
+ * $Id: userlist.c,v 1.113 2002/06/07 10:58:06 leeh Exp $
  *
  */
 
@@ -443,7 +443,7 @@ load_config_file(char *file_name)
   config_entries.channel_report = 
     CHANNEL_REPORT_ROUTINE | CHANNEL_REPORT_CLONES;
 
-  strncpy(config_entries.userlist_config,USERLIST_FILE,MAX_CONFIG-1);
+  strlcpy(config_entries.userlist_config, USERLIST_FILE, MAX_CONFIG);
 
   if((fp = fopen(file_name,"r")) == NULL)
   {
@@ -481,21 +481,21 @@ load_config_file(char *file_name)
       break;
 
     case 'e':case 'E':
-      strncpy(config_entries.email_config,argv[1],MAX_CONFIG-1);
+      strlcpy(config_entries.email_config, argv[1], MAX_CONFIG);
       break;
 
     case 'f':case 'F':
       if (config_entries.debug && outfile)
 	(void)fprintf(outfile, "tcm.pid file name = [%s]\n", argv[1]);
-      strncpy(config_entries.tcm_pid_file,argv[1],MAX_CONFIG-1);
+      strlcpy(config_entries.tcm_pid_file, argv[1], MAX_CONFIG);
       break;
 
     case 'l':case 'L':
-      strncpy(config_entries.userlist_config,argv[1],MAX_CONFIG-1);
+      strlcpy(config_entries.userlist_config, argv[1], MAX_CONFIG);
       break;
 
     case 'm':case 'M':
-      strncpy(config_entries.statspmsg, argv[1],sizeof(config_entries.statspmsg));          
+      strlcpy(config_entries.statspmsg, argv[1], sizeof(config_entries.statspmsg));
       for ( a = 2 ; a < argc ; ++a )
       {
 	strcat(config_entries.statspmsg, ":");
@@ -506,45 +506,47 @@ load_config_file(char *file_name)
       break;
 
     case 'o':case 'O':
-      strncpy(config_entries.oper_nick_config,argv[1],MAX_NICK);
-      strncpy(config_entries.oper_pass_config,argv[2],MAX_CONFIG-1);
+      strlcpy(config_entries.oper_nick_config, argv[1], MAX_NICK);
+      strlcpy(config_entries.oper_pass_config, argv[2], MAX_CONFIG);
       break;
 
     case 'u':case 'U':
       if (config_entries.debug && outfile)
 	fprintf(outfile, "user name = [%s]\n", argv[1]);
-      strncpy(config_entries.username_config,argv[1],MAX_CONFIG-1);
+
+      strlcpy(config_entries.username_config, argv[1], MAX_CONFIG);
       break;
 
     case 'v':case 'V':
       if (config_entries.debug && outfile)
 	fprintf(outfile, "virtual host name = [%s]\n", argv[1]);
-      strncpy(config_entries.virtual_host_config,argv[1],MAX_CONFIG-1);
+
+      strlcpy(config_entries.virtual_host_config, argv[1], MAX_CONFIG);
       break;
 
     case 's':case 'S':
       if (config_entries.debug && outfile)
 	fprintf(outfile, "server = [%s]\n", argv[1]);
-      strlcpy(config_entries.server_name,argv[1],MAX_CONFIG-1);
+      strlcpy(config_entries.server_name,argv[1],MAX_CONFIG);
       strlcpy(tcm_status.my_server, argv[1], MAX_HOST);
 
       if (argc > 2)
-	strncpy(config_entries.server_port,argv[2],MAX_CONFIG-1);
+	strlcpy(config_entries.server_port, argv[2], MAX_CONFIG);
 
       if (argc > 3)
-	strncpy(config_entries.server_pass,argv[3],MAX_CONFIG-1);
+	strlcpy(config_entries.server_pass, argv[3], MAX_CONFIG);
       break;
 
     case 'n':case 'N':
       if (config_entries.debug && outfile)
 	fprintf(outfile, "nick for tcm = [%s]\n", argv[1]);
-      strncpy(config_entries.dfltnick,argv[1],MAX_NICK-1);
+      strlcpy(config_entries.dfltnick, argv[1], MAX_NICK);
       break;
 
     case 'i':case 'I':
       if (config_entries.debug && outfile)
 	fprintf(outfile, "IRCNAME = [%s]\n", argv[1]);
-      strncpy(config_entries.ircname_config,argv[1],MAX_CONFIG-1);
+      strlcpy(config_entries.ircname_config, argv[1], MAX_CONFIG);
       break;
 
     case 'c':case 'C':
@@ -552,23 +554,20 @@ load_config_file(char *file_name)
 	fprintf(outfile, "Channel = [%s]\n", argv[1]);
 
       if (argc > 2)
-	strncpy(config_entries.defchannel_key,argv[2],MAX_CONFIG-1);
+	strlcpy(config_entries.defchannel_key, argv[2], MAX_CONFIG);
       else
 	config_entries.defchannel_key[0] = '\0';
 
-      strncpy(config_entries.defchannel,argv[1],MAX_CHANNEL-1);
+      strlcpy(config_entries.defchannel, argv[1], MAX_CHANNEL);
       break;
 
     case 'w': case 'W':
       strlcpy(wingate_class_list[wingate_class_list_index], argv[1],
-	      MAX_CLASS-1);	/* XXX MAX_CLASS or MAX_CLASS-1 ? */
+	      MAX_CLASS);
       wingate_class_list_index++;
       break;
 
     default:
-#if 0
-      _config(0, argc, argv);
-#endif
       break;
     }
   }
@@ -821,22 +820,22 @@ load_a_user(char *line)
     userlist[user_list_index].usernick[0] = 0;
     userlist[user_list_index].password[0] = 0;
 
-    strncpy(userlist[user_list_index].user, user, 
+    strlcpy(userlist[user_list_index].user, user, 
 	    sizeof(userlist[user_list_index].user));
 
-    strncpy(userlist[user_list_index].host, host, 
+    strlcpy(userlist[user_list_index].host, host, 
 	    sizeof(userlist[user_list_index].host));
 
     usernick = strtok(NULL,":");
     
     if(usernick != NULL)
-      strncpy(userlist[user_list_index].usernick, usernick, 
+      strlcpy(userlist[user_list_index].usernick, usernick, 
 	      sizeof(userlist[user_list_index].usernick));
 
     password = strtok(NULL,":");
 
     if(password != NULL)
-      strncpy(userlist[user_list_index].password, password, 
+      strlcpy(userlist[user_list_index].password, password, 
 	      sizeof(userlist[user_list_index].password));
 
     type = strtok(NULL,":");
@@ -900,13 +899,13 @@ add_an_oper(int argc, char *argv[])
    */
   if(is_an_oper(user,host) == 0)
   {
-    strncpy(userlist[user_list_index].user, user,
+    strlcpy(userlist[user_list_index].user, user,
             sizeof(userlist[user_list_index].user));
 
-    strncpy(userlist[user_list_index].host, host,
+    strlcpy(userlist[user_list_index].host, host,
             sizeof(userlist[user_list_index].host));
 
-    strncpy(userlist[user_list_index].usernick, nick,
+    strlcpy(userlist[user_list_index].usernick, nick,
             sizeof(userlist[user_list_index].usernick));
 
     userlist[user_list_index].password[0] = '\0';
@@ -914,8 +913,10 @@ add_an_oper(int argc, char *argv[])
     user_list_index++;
   }
 
-  strcpy(hostlist[host_list_index].user, user);
-  strcpy(hostlist[host_list_index].host, host);
+  strlcpy(hostlist[host_list_index].user, user, 
+          sizeof(hostlist[host_list_index].user));
+  strlcpy(hostlist[host_list_index].host, host,
+          sizeof(hostlist[host_list_index].host));
   hostlist[host_list_index].type = 0xFFFFFFFF;
   ++host_list_index;
 }

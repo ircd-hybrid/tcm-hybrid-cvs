@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.17 2002/06/07 10:46:07 leeh Exp $
+ * $Id: services.c,v 1.18 2002/06/07 10:58:06 leeh Exp $
  */
 
 #include <stdio.h>
@@ -125,7 +125,7 @@ services_handler(struct source_client *source_p, int argc, char *argv[])
     if((s = strchr(argv[3], ' ')) != NULL)
       *s = '\0';
 
-    strncpy(services.cloning_host, argv[3], MAX_HOST-1);
+    strlcpy(services.cloning_host, argv[3], MAX_HOST);
 
     services.clones_displayed = 0;
     services.kline_suggested = NO;
@@ -151,7 +151,7 @@ services_handler(struct source_client *source_p, int argc, char *argv[])
 
     services.clones_displayed++;
 
-    strncpy(userathost, services.cloning_host, MAX_HOST);
+    strlcpy(userathost, services.cloning_host, MAX_HOST);
 
     if((host = strchr(userathost, '@')) == NULL)
       return;

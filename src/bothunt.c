@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.153 2002/06/07 10:46:06 leeh Exp $
+ * $Id: bothunt.c,v 1.154 2002/06/07 10:58:06 leeh Exp $
  */
 
 #include <stdio.h>
@@ -218,10 +218,10 @@ on_stats_e(int argc, char *argv[])
   if ((user = strtok(NULL," ")) == NULL)	/* NOW user */
     return;
 
-  strncpy(hostlist[host_list_index].user, user,
+  strlcpy(hostlist[host_list_index].user, user,
 	  sizeof(hostlist[host_list_index].user));
 
-  strncpy(hostlist[host_list_index].host, host,
+  strlcpy(hostlist[host_list_index].host, host,
 	  sizeof(hostlist[host_list_index].host));
 
   host_list_index++;
@@ -283,10 +283,10 @@ on_stats_i(int argc, char *argv[])
 
   if (ok)
   {
-    strncpy(hostlist[host_list_index].user, 
+    strlcpy(hostlist[host_list_index].user, 
 	    user, sizeof(hostlist[host_list_index].user));
 
-    strncpy(hostlist[host_list_index].host,
+    strlcpy(hostlist[host_list_index].host,
 	    host, sizeof(hostlist[host_list_index].host));
     hostlist[host_list_index].type = 0xFFFFFFFF;
 
@@ -1044,7 +1044,7 @@ connect_flood_notice(char *snotice)
     {
       if (first_empty_entry >= 0)
 	{
-	  strncpy(connect_flood[first_empty_entry].user_host, user_host,
+	  strlcpy(connect_flood[first_empty_entry].user_host, user_host,
 		  sizeof(connect_flood[first_empty_entry]));
 	  connect_flood[first_empty_entry].last_connect = current_time;
 	  connect_flood[first_empty_entry].connect_count = 0;
@@ -1150,7 +1150,7 @@ link_look_notice(char *snotice)
       if (first_empty_entry >= 0)
 	{
 	  /* XXX */
-	  strncpy(link_look[first_empty_entry].user_host,user_host,
+	  strlcpy(link_look[first_empty_entry].user_host,user_host,
 		  MAX_USER+MAX_HOST);
 	  link_look[first_empty_entry].last_link_look = current_time;
           link_look[first_empty_entry].link_look_count = 1;
@@ -1405,8 +1405,7 @@ add_to_nick_change_table(char *user_host,char *last_nick)
 	  if ((strcasecmp(nick_changes[i].user_host,user_host)) == 0)
 	  {
 	    nick_changes[i].last_nick_change = current_time;
-	    (void)strncpy(nick_changes[i].last_nick,
-			  last_nick,MAX_NICK);
+	    (void)strlcpy(nick_changes[i].last_nick, last_nick, MAX_NICK);
 	    nick_changes[i].nick_change_count++;
 	  }
 

@@ -37,7 +37,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.26 2001/10/28 21:58:58 wcampbel Exp $";
+static char *version="$Id: userlist.c,v 1.27 2001/10/28 22:17:46 wcampbel Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct exception_entry hostlist[MAXHOSTS];
@@ -659,9 +659,6 @@ static void load_a_user(char *line,int link_tcm)
 	    q++;
 	  }
 
-	if(link_tcm)
-	  type_int |= TYPE_TCM;
-
 	userlist[user_list_index].type = type_int;
       }
 
@@ -801,10 +798,9 @@ int isoper(char *user,char *host)
 
   for(i=0;userlist[i].user[0];i++)
     {
-      if((userlist[i].type & TYPE_TCM) == 0)
-	if ((!wldcmp(userlist[i].user,user)) &&
-	    (!wldcmp(userlist[i].host,host)))
-	  return(TYPE_OPER);
+      if ((!wldcmp(userlist[i].user,user)) &&
+          (!wldcmp(userlist[i].host,host)))
+        return(TYPE_OPER);
     }
   return(0);
 }
@@ -921,9 +917,6 @@ int flags_by_userhost(char *user, char *host)
 
   for(i = 0; userlist[i].user; i++)
     {
-      if (userlist[i].type & TYPE_TCM)
-	continue;
-
       if ((!wldcmp(userlist[i].user,user)) &&
 	  (!wldcmp(userlist[i].host,host)))
 	return( userlist[i].type);
@@ -949,9 +942,6 @@ int islegal_pass(int connect_id,char *password)
 
   for(i=0;userlist[i].user && userlist[i].user[0];i++)
     {
-      if(userlist[i].type & TYPE_TCM)
-	continue;
-
       if ((!wldcmp(userlist[i].user,connections[connect_id].user)) &&
 	  (!wldcmp(userlist[i].host,connections[connect_id].host)))
 	{
@@ -1047,7 +1037,6 @@ char *type_show(unsigned long type)
   if(type&TYPE_REGISTERED)*p++ = 'K';
   if(type&TYPE_GLINE)*p++ = 'G';
   if(type&TYPE_SUSPENDED)*p++ = 'S';
-  if(type&TYPE_TCM)*p++ = 'T';
   if(type&TYPE_CAN_REMOTE)*p++ = 'R';
   if(type&TYPE_ADMIN)*p++ = 'M';
   if(type&TYPE_INVM)*p++ = 'I';

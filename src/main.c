@@ -60,7 +60,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.14 2001/10/28 21:58:58 wcampbel Exp $";
+static char *version="$Id: main.c,v 1.15 2001/10/28 22:17:46 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -284,9 +284,6 @@ void sendtoalldcc(int type,...)
   for(i = 1; i < maxconns; i++)
     {
       if( !echo && (i == incoming_connnum) )
-	continue;
-      else if( ((connections[i].type & TYPE_TCM)
-		&& (i == incoming_connnum )) )
 	continue;
 
       if (connections[i].socket != INVALID)

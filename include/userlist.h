@@ -156,7 +156,6 @@ extern int tcm_list_index;
 #define TYPE_GLINE		0x00004	/* user has .gline privs */ 
 #define TYPE_CAN_REMOTE		0x00008	/* user has remote .kline privs etc. */
 #define TYPE_PARTYLINE		0x00010	/* user wants to be on partyline */
-#define TYPE_TCM		0x00020
 #define TYPE_STAT		0x00040	/* user sees STAT requests */
 #define TYPE_WARN		0x00080	/* user sees clone reports */
 #define TYPE_INVS		0x00100	/* user is invisible to STATS p list */

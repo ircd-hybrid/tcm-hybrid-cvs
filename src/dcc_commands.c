@@ -46,7 +46,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.21 2001/10/28 21:58:58 wcampbel Exp $";
+static char *version="$Id: dcc_commands.c,v 1.22 2001/10/28 22:17:46 wcampbel Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -1294,9 +1294,6 @@ set_umode(int connnum, char *flags, char *registered_nick)
 
 	  for(z=0;userlist[z].user[0];z++)
 	    {
-	      if(userlist[z].type & TYPE_TCM)
-		continue;
-
 	      if(found)
 		break;
 
@@ -1396,7 +1393,7 @@ save_umodes(char *registered_nick, unsigned long type)
     }
 
   fprintf(fp,"%lu\n",
-	  type & ~(TYPE_TCM|TYPE_ADMIN|TYPE_PENDING));
+	  type & ~(TYPE_ADMIN|TYPE_PENDING));
   (void)fclose(fp);
 }
 
@@ -1430,7 +1427,7 @@ load_umodes(int connect_id)
 	}
       type = connections[connect_id].type;
       fprintf(fp,"%lu\n",
-	      type & ~(TYPE_TCM|TYPE_ADMIN|TYPE_PENDING));
+	      type & ~(TYPE_ADMIN|TYPE_PENDING));
       (void)fclose(fp);
       return;
     }
@@ -1442,7 +1439,7 @@ load_umodes(int connect_id)
      *p = '\0';
   
   sscanf(type_string,"%lu",&type);
-  type &= ~(TYPE_TCM|TYPE_ADMIN|TYPE_PENDING);
+  type &= ~(TYPE_ADMIN|TYPE_PENDING);
 
   connections[connect_id].type &= TYPE_ADMIN;
   connections[connect_id].type |= type;
@@ -1494,7 +1491,7 @@ find_user_umodes(char *registered_nick)
 
   sscanf(type_string,"%lu",&type);
 
-  type &= ~(TYPE_TCM|TYPE_ADMIN|TYPE_PENDING);
+  type &= ~(TYPE_ADMIN|TYPE_PENDING);
 
   return type;
 }
@@ -1521,9 +1518,6 @@ show_user_umodes(int sock, char *registered_nick)
 
   for(i=0; userlist[i].user[0]; i++)
     {
-      if(userlist[i].type & TYPE_TCM)
-	continue;
-
       if (!strcasecmp(registered_nick, userlist[i].usernick))
 	{
 	  type = userlist[i].type;
@@ -1558,7 +1552,7 @@ show_user_umodes(int sock, char *registered_nick)
 
   sscanf(type_string,"%lu",&pref_type);
 
-  pref_type &= ~(TYPE_TCM|TYPE_ADMIN|TYPE_PENDING);
+  pref_type &= ~(TYPE_ADMIN|TYPE_PENDING);
 
   prnt(sock,"%s user flags are %s\n", 
        registered_nick,
@@ -1591,7 +1585,7 @@ register_oper(int connnum, char *password, char *who_did_command)
 	      sendtoalldcc(SEND_OPERS_ONLY,"%s is suspended\n",
 			   who_did_command);
 	      if (connections[connnum].type &
-		  (TYPE_PENDING|~TYPE_TCM))
+		  (TYPE_PENDING))
 		connections[connnum].type &= ~TYPE_PENDING;
 	    }
 	  else
@@ -1602,7 +1596,7 @@ register_oper(int connnum, char *password, char *who_did_command)
 			   "%s has registered\n",
 			   who_did_command);
 	      if (connections[connnum].type &
-		  (TYPE_PENDING|~TYPE_TCM))
+		  (TYPE_PENDING))
 		connections[connnum].type &= ~TYPE_PENDING;
 	    }
 	}
@@ -1638,24 +1632,12 @@ list_opers(int sock)
       if(!userlist[i].user[0])
 	break;
 
-      if(userlist[i].type & TYPE_TCM)
-	{
-	  prnt(sock,
-	       "%s [%s@%s] %s\n",
-	       userlist[i].user,
-	       userlist[i].host,
-	       userlist[i].usernick,
-	       type_show(userlist[i].type));
-	}
-      else
-	{
-	  prnt(sock,
-	       "(%s) %s@%s %s\n",
-	       (userlist[i].usernick) ? userlist[i].usernick:"unknown",
-	       userlist[i].user,
-	       userlist[i].host,
-	       type_show(userlist[i].type));
-	}
+      prnt(sock,
+           "(%s) %s@%s %s\n",
+           (userlist[i].usernick) ? userlist[i].usernick:"unknown",
+           userlist[i].user,
+           userlist[i].host,
+           type_show(userlist[i].type));
     }
 }
 
@@ -1750,8 +1732,6 @@ handle_disconnect(int sock,char *nickname,char *who_did_command)
 	    type = "user";
 	    if(connections[i].type & TYPE_OPER)
 	      type = "oper";
-	    if(connections[i].type & TYPE_TCM)
-	      type = "tcm";
 
 	    prnt(sock,
 		 "Disconnecting %s %s\n",

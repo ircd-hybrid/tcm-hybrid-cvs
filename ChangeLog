@@ -1,3 +1,17 @@
+wcampbel    2002/05/07 13:02:46 EDT	(20020507_0)
+
+  Modified files:
+    modules              bothunt.c 
+  Log:
+  Fix the bug dilli spotted when parsing Quarantined nicks...
+  This same issue exists elsewhere, so I will attempt to audit all cases
+  or our handling of [ and ] (and friends)
+  
+  Revision  Changes    Path
+  1.66      +6 -2      tcm-hybrid/modules/bothunt.c
+
+
+
 wcampbel    2002/05/06 10:20:04 EDT	(20020506_5)
 
   Modified files:

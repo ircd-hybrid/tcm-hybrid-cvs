@@ -45,30 +45,23 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.18 2001/10/27 02:45:27 wcampbel Exp $";
+static char *version="$Id: dcc_commands.c,v 1.19 2001/10/27 15:12:43 db Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
 static void set_actions(int sock, char *key, char *act, int time, char *reason);
-/* XXX - static void send_to_nick(char *to_nick,char *buffer); */
-/* XXX - static void setup_allow(char *nick); */
 static void save_umodes(char *registered_nick, unsigned long type);
 static void load_umodes(int connect_id);
 static unsigned long find_user_umodes(char *nick);
-/* XXX - static int  test_ignore(char *line); */
 static void set_umode(int connnum, char *flags, char *registered_nick);
 static void show_user_umodes(int sock, char *registered_nick);
 static void not_authorized(int sock);
 static void register_oper(int connnum, char *password, char *who_did_command);
 static void list_opers(int sock);
-/* XXX - static void list_tcmlist(int sock); */
 static void list_connections(int sock);
 static void list_exemptions(int sock);
 static void handle_disconnect(int sock,char *param2,char *who_did_command);
 static void handle_save(int sock,char *nick);
-/* XXX - static void handle_gline(int sock,char *pattern,char *reason,
-**                                char *who_did_command);
-*/
 
 extern struct connection connections[];
 extern struct s_testline testlines;
@@ -1040,164 +1033,6 @@ dccproc(int connnum, int argc, char *argv[])
     }
 }
 
-#if 0
-
-/* XXX - Not used, keep it here for now if'ed out...check it in a little bit
-**       and remove it for good if it will never be used again - Hwy
-*/
-
-/*
- * setup_allow()
- *
- * input	- nick to allow
- * output	- NONE
- * side effects	- nick is added to botnick allow list
- */
-
-static void 
-setup_allow(char *nick)
-{
-  char botnick[MAX_NICK+4];	/* Allow room for '<' and '>' */
-  int i=0;
-  int remove_allow = NO;
-  int first_free = -1;
-#ifdef DEBUGMODE
-  placed;
-#endif
-
-  while(*nick == ' ')
-    nick++;
-
-  if(*nick == '-')
-    {
-      remove_allow = YES;
-      nick++;
-    }
-
-  botnick[i++] = '<';
-  while(*nick)
-    {
-      if(*nick == ' ')
-	break;
-      if(i >= MAX_NICK+1)
-	break;
-      botnick[i++] = *nick++;
-    }
-
-  botnick[i++] = '>';
-  botnick[i] = '\0';
-
-  first_free = -1;
-
-  for( i = 0; i < MAX_ALLOW_SIZE ; i++ )
-    {
-      if( allow_nick[i][0] == '\0' )
-	allow_nick[i][0] = '-';
-
-      if( (allow_nick[i][0] == '-') && (first_free < 0))
-	{
-	  first_free = i;
-	}
-
-      if( !(strcasecmp(allow_nick[i],botnick)) )
-	{
-	  if(remove_allow)	/* make it so it no longer matches */
-	    allow_nick[i][0] = '-';
-	  return;
-	}
-    }
-  /* Not found insert if room */
-  if(first_free >= 0)
-    {
-      strcpy(allow_nick[first_free],botnick);
-    }
-  /* whoops. if first_free < 0 then.. I'll just ignore with nothing said */
-}
-#endif
-
-#if 0
-
-/* XXX - Not used, keep it here for now if'ed out...check it in a little bit
-**       and remove it for good if it will never be used again - Hwy
-*/
-
-/*
- * send_to_nick
- *
- * inputs	- nick to send to
- *		  buffer to send to nick
- * output	- NONE
- * side effects	- NONE
- */
-
-static void 
-send_to_nick(char *to_nick,char *buffer)
-{
-  int i;
-  char dccbuff[DCCBUFF_SIZE];
-#ifdef DEBUGMODE
-  placed;
-#endif
-
-  strncpy(dccbuff,buffer,DCCBUFF_SIZE-2);
-  strcat(dccbuff,"\n");
-
-  for( i = 1; i < maxconns; i++ )
-    {
-      if( !(strcasecmp(to_nick,connections[i].nick)) )
-	{
-	  send(connections[i].socket, dccbuff, strlen(dccbuff), 0);
-	}
-    }
-}
-#endif
-
-#if 0
-
-/* XXX - Not used, keep it here for now if'ed out...check it in a little bit
-**       and remove it for good if it will never be used again - Hwy
-*/
-
-/*
- * test_ignore()
- *
- * inputs	- input from link
- * output	- YES if not to ignore NO if to ignore
- * side effects	- NONE
- */
-
-static int 
-test_ignore(char *line)
-{
-  char botnick[MAX_NICK+4];	/* Allow room for '<' and '>' */
-  int i;
-#ifdef DEBUGMODE
-  placed;
-#endif
-
-  if(line[0] != '<')
-    return(NO);
-
-  for(i=0;i<MAX_NICK+3;)
-    {
-      if(*line == '@')return(NO);	/* Not even just a botnick */
-      botnick[i++] = *line++; 
-      if(*line == '>')
-	break;
-    }
-  botnick[i++] = '>';
-  botnick[i] = '\0';
-
-
-  for(i=0;i<MAX_ALLOW_SIZE;i++)
-    {
-      if( !(strcasecmp(allow_nick[i],botnick) ) )
-	return(NO);
-    }
-  return(YES);
-}
-#endif
-
 /*
  * set_actions
  *
@@ -1820,35 +1655,6 @@ list_opers(int sock)
     }
 }
 
-#if 0
-
-/* XXX - Not used, keep it here for now if'ed out...check it in a little bit
-**       and remove it for good if it will never be used again - Hwy
-*/
-
-/*
- * list_tcmlist
- *
- * inputs	- socket
- * output	- NONE
- * side effects	- list tcm list on socket
- */
-
-static void 
-list_tcmlist(int sock)
-{
-  int i;
-  
-  for(i=0; i < MAXTCMS; i++)
-    {
-      if(!tcmlist[i].host[0])
-	break;
-      prnt(sock,"%s@%s\n", tcmlist[i].theirnick, tcmlist[i].host);
-    }
-}
-
-#endif
-
 /*
  * list_exemptions
  *
@@ -1972,64 +1778,6 @@ handle_save(int sock,char *nick)
   sendtoalldcc(SEND_OPERS_ONLY, "%s is saving %s\n", nick, CONFIG_FILE);
   save_prefs();
 }
-
-#if 0
-
-/* XXX - Not used, keep it here for now if'ed out...check it in a little bit
-**       and remove it for good if it will never be used again - Hwy
-*/
-
-/*
- * handle_gline
- *
- * inputs	- socket
- *		- pattern to gline
- *		- reason to gline
- * output	- NONE
- * side effects	- 
- */
-
-static void 
-handle_gline(int sock,char *pattern,char *reason,
-			 char *who_did_command)
-{
-  if(pattern)
-    {
-      if( reason )
-	{
-	  /* Removed *@ prefix from kline parameter -tlj */
-	  sendtoalldcc(SEND_OPERS_ONLY,
-		       "gline %s : %s added by oper %s",
-		       pattern,reason,
-		       who_did_command,
-		       who_did_command);
-			
-	  log_kline("GLINE",
-		    pattern,
-		    0,
-		    who_did_command,
-		    reason);
-			
-	  toserv("KLINE %s :%s [%s]\n",
-		 pattern,
-		 format_reason(reason),
-		 who_did_command);
-
-	}
-      else
-	{
-	  prnt(sock,
-	       "missing reason \"kline [nick]|[user@host] reason\"\n");
-	}
-    }
-  else
-    {
-      prnt(sock,
-	   "missing nick/user@host \".kline [nick]|[user@host] reason\"\n");
-    }
-}
-
-#endif
 
 /*
  * not_authorized

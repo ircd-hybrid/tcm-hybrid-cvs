@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.23 2001/10/27 02:45:27 wcampbel Exp $";
+static char *version="$Id: bothunt.c,v 1.24 2001/10/27 15:12:43 db Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -161,37 +161,44 @@ struct banned_info glines[MAXBANS];
 static int find_banned_host(char *user, char *host)
 {
   int wld[2] = { NO, NO };
-  int a, match = YES;
+  int i;
+  int match = YES;
 
-  if (strchr(user, '?')) wld[0] = YES;
-  else if (strchr(user, '*')) wld[0] = YES;
-  if (strchr(host, '?')) wld[1] = YES;
-  else if (strchr(host, '*')) wld[1] = YES;
-  for (a=0;a<MAXBANS;++a)
+  if (strchr(user, '?') != NULL)
+    wld[0] = YES;
+  else if (strchr(user, '*') != NULL)
+    wld[0] = YES;
+
+  if (strchr(host, '?') != NULL)
+    wld[1] = YES;
+  else if (strchr(host, '*') != NULL)
+    wld[1] = YES;
+
+  for (i=0; i < MAXBANS; i++)
+  {
+    if (wld[0])
     {
-      if (wld[0])
-        {
-          if (wldwld(user, glines[a].user))
-            match = NO;
-        }
-      else
-        {
-          if (wldcmp(user, glines[a].user))
-            match = NO;
-        }
-      if (match == YES && wld[1])
-        {
-          if (wldwld(host, glines[a].host))
-            match = NO;
-        }
-      else if (match == YES)
-        {
-          if (wldcmp(host, glines[a].host))
-            match = NO;
-        }
-      if (match == YES)
-        return a;
+      if (wldwld(user, glines[i].user))
+	match = NO;
     }
+    else
+    {
+      if (wldcmp(user, glines[i].user))
+	match = NO;
+    }
+    if (match == YES && wld[1])
+    {
+      if (wldwld(host, glines[i].host))
+	match = NO;
+    }
+    else if (match == YES)
+    {
+      if (wldcmp(host, glines[i].host))
+	match = NO;
+    }
+    if (match == YES)
+      return i;
+  }
 
   /* There was no match above, so we KNOW match == NO - Hwy */
   return -1;
@@ -199,54 +206,65 @@ static int find_banned_host(char *user, char *host)
 
 static void remove_gline(char *user, char *host)
 {
-  int a;
-  if ((a = find_banned_host(user, host)) == -1)
+  int i;
+  if ((i = find_banned_host(user, host)) == -1)
     return;
 
-  if (glines[a].user)
-    free(glines[a].user);
-  if (glines[a].host)
-    free(glines[a].host);
-  if (glines[a].reason)
-    free(glines[a].reason);
-  glines[a].pending = NO;
-  glines[a].when = (time_t *)NULL;
+  if (glines[i].user)
+    free(glines[i].user);
+
+  if (glines[i].host)
+    free(glines[i].host);
+
+  if (glines[i].reason)
+    free(glines[i].reason);
+
+  glines[i].pending = NO;
+
+  glines[i].when = (time_t *)NULL;
 }
 
 static int gline_request(char *user, char *host, char *reason, time_t *when)
 {
-  int a;
+  int i;
   time_t current_time;
   if (find_banned_host(user, host) != -1) return 0;
 
-  for (a=0;a<MAXBANS;++a)
-    if (glines[a].user == NULL) break;
-  if (glines[a].user != NULL) return 0;
+  /* XXX huh? */
+  for (i=0; i < MAXBANS; i++)
+    if (glines[i].user == NULL)
+      break;
 
-  if (!(glines[a].user = (char *) malloc(MAX_USER)))
+  if (glines[i].user == NULL)
+    return 0;
+
+  if ((glines[i].user = (char *) malloc(MAX_USER)) == NULL)
     {
       sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host");
       gracefuldie(0, __FILE__, __LINE__);
     }
-  if (!(glines[a].host = (char *) malloc(MAX_HOST)))
+
+  if ((glines[i].host = (char *) malloc(MAX_HOST)) == NULL)
     {
       sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host");
       gracefuldie(0, __FILE__, __LINE__);
     }
-  if (!(glines[a].reason = (char *) malloc(1024)))
+
+  if ((glines[i].reason = (char *) malloc(1024)) == NULL)
     {
       sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in add_banned_host");
       gracefuldie(0, __FILE__, __LINE__);
     }
-  strncpy(glines[a].user, user, MAX_USER);
-  strncpy(glines[a].host, host, MAX_HOST);
-  strncpy(glines[a].reason, reason, 1024);
-  glines[a].pending = YES;
+
+  strncpy(glines[i].user, user, MAX_USER);
+  strncpy(glines[i].host, host, MAX_HOST);
+  strncpy(glines[i].reason, reason, 1024);
+  glines[i].pending = YES;
   current_time = time(NULL);
   if (when)
-    glines[a].when = when;
+    glines[i].when = when;
   else
-    glines[a].when = &current_time;
+    glines[i].when = &current_time;
 
   return 1;
 }
@@ -289,19 +307,22 @@ void _ontraceuser(int connnum, int argc, char *argv[])
   right_bracket_ptr = argv[6]+strlen(argv[6]);
 
   while(right_bracket_ptr != argv[6])
+  {
+    if ( *right_bracket_ptr == ')' )
     {
-      if ( *right_bracket_ptr == ')' )
-	{
-	  *right_bracket_ptr = '\0';
-	  break;
-	}
-      right_bracket_ptr--;
+      *right_bracket_ptr = '\0';
+      break;
     }
+    right_bracket_ptr--;
+  }
 
   ip_ptr = argv[6]+1;
 
-  while((*ip_ptr != ')') && *ip_ptr) ++ip_ptr;
-  if (*ip_ptr == ')') *ip_ptr = '\0';
+  while((*ip_ptr != ')') && *ip_ptr)
+    ++ip_ptr;
+
+  if (*ip_ptr == ')')
+    *ip_ptr = '\0';
 
   class_ptr = argv[4];
   chopuh(YES,argv[5],&userinfo);
@@ -314,10 +335,11 @@ void _ontraceuser(int connnum, int argc, char *argv[])
 void _ontraceclass(int connnum, int argc, char *argv[])
 {
   if (doingtrace)
-    {
-      doingtrace = NO;
-      toserv("JOIN %s %s\n", config_entries.defchannel, config_entries.defchannel_key);
-    }
+  {
+    doingtrace = NO;
+    toserv("JOIN %s %s\n",
+	   config_entries.defchannel, config_entries.defchannel_key);
+  }
 }
 
 /* 
@@ -348,14 +370,18 @@ void on_stats_o(int connnum, int argc, char *argv[])
   char *nick;
   int non_lame_user_o;	/* If its not a wildcarded user O line... */
   int non_lame_host_o;	/* If its not a wildcarded host O line... */
+  int i;
   char *p;		/* pointer used to scan for valid O line */
+  int len;
 
-  for (non_lame_user_o=0;non_lame_user_o<argc;++non_lame_user_o)
-    {
-      strncat(body, argv[non_lame_user_o], sizeof(body)-strlen(body));
-      strncat(body, " ", sizeof(body)-strlen(body));
-    }
-  if (body[strlen(body)-1] == ' ') body[strlen(body)-1] = '\0';
+  p = body;
+  for (i = 0; i < argc; i++)
+  {
+    len = sprintf(p, "%s ", argv[i]);
+    p += len;
+  }
+  /* blow away last ' ' */
+  *--p = '\0';
 
 /* No point if I am maxed out going any further */
   if ( user_list_index == (MAXUSERS - 1))
@@ -366,16 +392,16 @@ void on_stats_o(int connnum, int argc, char *argv[])
   non_lame_user_o = NO;
 
   while(*p)
-    {
-      if (*p == '@')	/* Found the first part of "...@" ? */
-	break;
+  {
+    if (*p == '@')	/* Found the first part of "...@" ? */
+      break;
 
-      if (*p != '*')	/* A non wild card found in the username? */
-	non_lame_user_o = YES;	/* GOOD a non lame user O line */
-      /* can't just break. I am using this loop to find the '@' too */
+    if (*p != '*')	/* A non wild card found in the username? */
+      non_lame_user_o = YES;	/* GOOD a non lame user O line */
+    /* can't just break. I am using this loop to find the '@' too */
 
-      p++;
-    }
+    p++;
+  }
   
   if (!non_lame_user_o)	/* LAME O line ignore it */
     return;
@@ -384,27 +410,27 @@ void on_stats_o(int connnum, int argc, char *argv[])
   non_lame_host_o = NO;
 
   while(*p)
-    {
-      if (*p != '*')	/* A non wild card found in the hostname? */
-	non_lame_host_o = YES;	/* GOOD a non lame host O line */
-      p++;
-    }
+  {
+    if (*p != '*')	/* A non wild card found in the hostname? */
+      non_lame_host_o = YES;	/* GOOD a non lame host O line */
+    p++;
+  }
 
   if (!non_lame_host_o)
     return;
   user = user_at_host;
 
-  if ((p = strchr(user_at_host,'@')) )
-    {
-      *p = '\0';
-       p++;
-       host = p;
-    }
+  if ((p = strchr(user_at_host,'@')) != NULL)
+  {
+    *p = '\0';
+    p++;
+    host = p;
+  }
   else
-    {
-      user = "*";
-      host = user_at_host;
-    }
+  {
+    user = "*";
+    host = user_at_host;
+  }
 
   /*
    * If this user is already loaded due to userlist.load
@@ -412,20 +438,20 @@ void on_stats_o(int connnum, int argc, char *argv[])
    */
 
   if (!isoper(user,host) )
-    {
-      strncpy(userlist[user_list_index].user, user, 
-	      sizeof(userlist[user_list_index].user));
+  {
+    strncpy(userlist[user_list_index].user, user, 
+	    sizeof(userlist[user_list_index].user));
 
-      strncpy(userlist[user_list_index].host, host, 
-	      sizeof(userlist[user_list_index].host));
+    strncpy(userlist[user_list_index].host, host, 
+	    sizeof(userlist[user_list_index].host));
 
-      strncpy(userlist[user_list_index].usernick, nick, 
-	      sizeof(userlist[user_list_index].usernick));
+    strncpy(userlist[user_list_index].usernick, nick, 
+	    sizeof(userlist[user_list_index].usernick));
 
-      userlist[user_list_index].password[0] = '\0';
-      userlist[user_list_index].type = TYPE_OPER;
-      user_list_index++;
-    }
+    userlist[user_list_index].password[0] = '\0';
+    userlist[user_list_index].type = TYPE_OPER;
+    user_list_index++;
+  }
 }
 
 /* 
@@ -443,13 +469,17 @@ void on_stats_e(int connnum, int argc, char *argv[])
   char *host;
   char body[MAX_BUFF];
   int i;
+  char *p;
+  int len;
 
-  for (i=0;i<argc;++i)
-    {
-      strncat(body, argv[i], sizeof(body)-strlen(body));
-      strncat(body, " ", sizeof(body)-strlen(body));
-    }
-  if (body[strlen(body)-1] == ' ') body[strlen(body)-1] = '\0';
+  p = body;
+  for (i = 0; i < argc; i++)
+  {
+    len = sprintf(p, "%s ", argv[i]);
+    p += len;
+  }
+  /* blow away last ' ' */
+  *--p = '\0';
 
 /* No point if I am maxed out going any further */
   if (host_list_index == (MAXHOSTS - 1))
@@ -494,13 +524,18 @@ void on_stats_i(int connnum, int argc, char *argv[])
   char *p;
   char body[MAX_BUFF];
   int  alpha, ok=NO;
+  int i;
+  int len;
 
-  for (alpha = 0; alpha < argc; ++alpha)
-    {
-      strncat(body, argv[alpha], sizeof(body)-strlen(body));
-      strncat(body, " ", sizeof(body)-strlen(body));
-    }
-  if (body[strlen(body)-1] == ' ' ) body[strlen(body)-1] = '\0';
+  p = body;
+  for (i = 0; i < argc; i++)
+  {
+    len = sprintf(p, "%s ", argv[i]);
+    p += len;
+  }
+  /* blow away last ' ' */
+  *--p = '\0';
+
   alpha = NO;
 
 /* No point if I am maxed out going any further */
@@ -518,29 +553,34 @@ void on_stats_i(int connnum, int argc, char *argv[])
   /* if client is exempt, mark it as such in the exemption list */
 
   for(;*p;p++)
+  {
+    switch(*p)
     {
-      switch(*p)
-	{
-        case '<':case '-':case '$':case '=':
-	case '%':case '^':case '&':case '>':
-	case '_':
-          ok=YES;
-	  break;
+    case '<':case '-':case '$':case '=':
+    case '%':case '^':case '&':case '>':
+    case '_':
+      ok=YES;
+      break;
+      
+    default:
+      alpha = YES;
+      break;
+    }
+    if (alpha)
+      break;
+  }
 
-	default:
-	  alpha = YES;
-	  break;
-	}
-      if (alpha)
-	break;
-    }
   user = p;
+
   if (ok)
-    {
-      strncpy(hostlist[host_list_index].user, user,sizeof(hostlist[host_list_index].user));
-      strncpy(hostlist[host_list_index].host, host, sizeof(hostlist[host_list_index].host));
-      host_list_index++;
-    }
+  {
+    strncpy(hostlist[host_list_index].user, 
+	    user, sizeof(hostlist[host_list_index].user));
+
+    strncpy(hostlist[host_list_index].host,
+	    host, sizeof(hostlist[host_list_index].host));
+    host_list_index++;
+  }
 }
 
 /* 
@@ -559,13 +599,16 @@ void on_stats_k(int connnum, int argc, char *argv[])
   char *p;
   char body[MAX_BUFF];
   int i;
+  int len;
 
-  for (i = 0; i < argc; ++i)
-    {
-      strncat(body, argv[i], sizeof(body)-strlen(body));
-      strncat(body, " ", sizeof(body)-strlen(body));
-    }
-  if (body[strlen(body)-1] == ' ') body[strlen(body)-1] = '\0';
+  p = body;
+  for (i = 0; i < argc; i++)
+  {
+    len = sprintf(p, "%s ", argv[i]);
+    p += len;
+  }
+  /* blow away last ' ' */
+  *--p = '\0';
 
   if ((p = strchr(body,' ')) == NULL)
     return;
@@ -597,6 +640,7 @@ void on_stats_k(int connnum, int argc, char *argv[])
 void onservnotice(int connnum, int argc, char *argv[])
 {
   int i = -1, a, b, c;
+  int len;
   struct plus_c_info userinfo;
   time_t current_time;
   char *from_server;
@@ -612,15 +656,14 @@ void onservnotice(int connnum, int argc, char *argv[])
   placed;
 #endif
 
-  memset((void *)&message, 0, sizeof(message));
-
-  for (i=3;i<argc;++i)
-    {
-      strcat((char *)&message, argv[i]);
-      strcat((char *)&message, " ");
-    }
-
-  if (message[strlen(message)-1] == ' ') message[strlen(message)-1] = '\0';
+  p = message;
+  for (i = 3; i < argc; i++)
+  {
+    len = sprintf(p, "%s ", argv[i]);
+    p += len;
+  }
+  /* blow away last ' ' */
+  *--p = '\0';
 
   if (message[0] == ':')
     p = message+1;
@@ -631,10 +674,10 @@ void onservnotice(int connnum, int argc, char *argv[])
   i = -1;
 
   while (msgs_to_mon[++i])
-    {
-      if (!strncmp(p,msgs_to_mon[i],strlen(msgs_to_mon[i])))
-        break;
-    }
+  {
+    if (!strncmp(p,msgs_to_mon[i],strlen(msgs_to_mon[i])))
+      break;
+  }
 
   current_time = time(NULL);
   if (msgs_to_mon[i]) q = p+strlen(msgs_to_mon[i]);
@@ -664,8 +707,11 @@ void onservnotice(int connnum, int argc, char *argv[])
           strcat(message, argv[a]);
           strcat(message, " ");
         }
-      if (message[strlen(message)-1] == ' ') message[strlen(message)-1] = '\0';
-      if (message[strlen(message)-1] == ']') message[strlen(message)-1] = '\0';
+      if (message[strlen(message)-1] == ' ')
+	message[strlen(message)-1] = '\0';
+
+      if (message[strlen(message)-1] == ']') 
+	message[strlen(message)-1] = '\0';
 
       prnt(connections[testlines.index].socket, "%s has been K-lined: %s\n", testlines.umask,
            message);
@@ -710,15 +756,23 @@ void onservnotice(int connnum, int argc, char *argv[])
       *q = '\0';
       user = argv[10]+1;
       host = q+1;
-      if ((q=strrchr(host, ']'))) *q = '\0';
+
+      if ((q=strrchr(host, ']')) != NULL)
+	*q = '\0';
+
       snprintf(message, sizeof(message), "%s", argv[11]+1);
+
       for (a=12;a<argc;++a)
         {
           strcat((char *)&message, argv[a]);
           strcat((char *)&message, " ");
         }
-      if (message[strlen(message)-1] == ' ') message[strlen(message)-1] = '\0';
-      if (message[strlen(message)-1] == ']') message[strlen(message)-1] = '\0';
+      if (message[strlen(message)-1] == ' ')
+	message[strlen(message)-1] = '\0';
+
+      if (message[strlen(message)-1] == ']')
+	message[strlen(message)-1] = '\0';
+
       if (gline_request(user, host, message, (time_t *)current_time))
         {
           sendtoalldcc(SEND_KLINE_NOTICES_ONLY, "G-line for %s@%s requested by %s: %s", user, 
@@ -846,18 +900,18 @@ void onservnotice(int connnum, int argc, char *argv[])
       nick = q;
 
       user = p;
-      if (!(p = strchr(user,'[')))
+      if ((p = strchr(user,'[')) == NULL)
 	break;
       p++;
       user = p;
 
-      if (!(p = strchr(user,'@')))
+      if ((p = strchr(user,'@')) == NULL)
 	break;
       *p = '\0';
       p++;
 
       host = p;
-      if (!(p = strchr(host,']')))
+      if ((p = strchr(host,']')) == NULL)
 	break;
       *p = '\0';
       p++;
@@ -867,41 +921,42 @@ void onservnotice(int connnum, int argc, char *argv[])
       p++;
 
       /* p =should= be pointing at "on" */
-      if (!(p = strchr(p,' ')))
+      if ((p = strchr(p,' ')) == NULL)
 	break;
       p++;
 
       from_server = p;
-      if (!(p = strchr(from_server,' ')))
+      if ((p = strchr(from_server,' ')) == NULL)
 	break;
       *p = '\0';
       p++;
 
-      p = strstr(p, "target");
+      if ((p = strstr(p, "target")) == NULL)
+	break;
 
       target = p + 8;
 
-      if (!strcasecmp(target,nick))
-	{
-	  sendtoalldcc(SEND_WARN_ONLY,
-		       "User CTCP Flooding themselves, strange %s!%s@%s\n",
-		       nick, user, host);
-	  break;
-	}
+      if (strcasecmp(target,nick) == 0)
+      {
+	sendtoalldcc(SEND_WARN_ONLY,
+		     "User CTCP Flooding themselves, strange %s!%s@%s\n",
+		     nick, user, host);
+	break;
+      }
 
-      if (!strcasecmp(config_entries.rserver_name,from_server))
-	{
-	  if (*user == '~')
-	    suggest_action(get_action_type("ctcp"), nick, user, host, NO, NO);
-          else
-	    suggest_action(get_action_type("ctcp"), nick, user, host, NO, YES);
-	}
+      if (strcasecmp(config_entries.rserver_name,from_server) == 0)
+      {
+	if (*user == '~')
+	  suggest_action(get_action_type("ctcp"), nick, user, host, NO, NO);
+	else
+	  suggest_action(get_action_type("ctcp"), nick, user, host, NO, YES);
+      }
 
       break;
 
     case SPAMBOT:
       ++q;
-      if (!(p = strchr(q,' ')))
+      if ((p = strchr(q,' ')) == NULL)
 	break;
 
       *p = '\0';
@@ -909,23 +964,23 @@ void onservnotice(int connnum, int argc, char *argv[])
       nick = q;
 
       user = p;
-      if (!(p = strchr(user,'(')))
+      if ((p = strchr(user,'(')) == NULL)
 	break;
       p++;
       user = p;
 
-      if (!(p = strchr(user,'@')))
+      if ((p = strchr(user,'@')) == NULL)
 	break;
       *p = '\0';
       p++;
 
       host = p;
-      if (!(p = strchr(host,')')))
+      if ((p = strchr(host,')')) == NULL)
 	break;
       *p = '\0';
       p++;
 
-      if (!strstr(p,"possible spambot"))
+      if (strstr(p,"possible spambot") == NULL)
 	break;
 
       suggest_action(get_action_type("spambot"), nick, user, host, NO, YES);
@@ -943,137 +998,164 @@ void onservnotice(int connnum, int argc, char *argv[])
       gracefuldie(0, __FILE__, __LINE__);
 
     case DRONE:
-      if (!strcasecmp(argv[9], config_entries.rserver_name) || !strcasecmp(argv[9], 
-          config_entries.server_name))
-        {
-          sendtoalldcc(SEND_WARN_ONLY, "Drone flooder detected %s!%s@%s target: %s", argv[6], 
-                       user, host, argv[11]);
-          suggest_action(get_action_type("drone"), nick, user, host, NO, 
-                         (user[0] == '~' ? YES : NO ));
-        }
+      if (!strcasecmp(argv[9], config_entries.rserver_name) ||
+	  !strcasecmp(argv[9], 
+		      config_entries.server_name))
+      {
+	sendtoalldcc(SEND_WARN_ONLY,
+		     "Drone flooder detected %s!%s@%s target: %s", argv[6], 
+		     user, host, argv[11]);
+	suggest_action(get_action_type("drone"), nick, user, host, NO, 
+		       (user[0] == '~' ? YES : NO ));
+      }
       break;
 
     case XLINEREJ:
        nick = argv[argc-1];
-       p = strchr(nick, '[');
+       if ((p = strchr(nick, '[')) == NULL)
+	 break;
        *p = '\0';
        user = p+1;
-       if (user[strlen(user)-1] == ']') user[strlen(user)-1] = '\0';
-       c=-1;
-       for (a=0;a<MAX_CONNECT_FAILS;++a)
-         {
-           if (connect_flood[a].user_host[0])
-             {
-               if (!strcasecmp(connect_flood[a].user_host, user))
-                 {
-                   if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
-                     connect_flood[a].connect_count = 0;
 
-                   ++connect_flood[a].connect_count;
-                   p = strchr(user, '@');
-                   *p = '\0';
-                   host = p+1;
-                   if (!okhost(user, host, get_action_type("cflood")))
-                     {
-                       if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
-                         {
-                           if (user[0] == '~')
-                             b = NO;
-                           else
-                             b = YES;
-                           suggest_action(get_action_type("cflood"), nick, user, host, NO, b);
-                           connect_flood[a].user_host[0] = '\0';
-                         }
-                     }
-                   else
-                     connect_flood[a].last_connect = current_time;
-                 }
-               else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
-                 connect_flood[a].user_host[0] = '\0';
-             }
-           else c = a;
-         }
+       if (user[strlen(user)-1] == ']')
+	 user[strlen(user)-1] = '\0';
+       c=-1;
+
+       for (a=0;a<MAX_CONNECT_FAILS;++a)
+       {
+	 if (connect_flood[a].user_host[0])
+	 {
+	   if (!strcasecmp(connect_flood[a].user_host, user))
+	   {
+	     if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
+	       connect_flood[a].connect_count = 0;
+
+	     ++connect_flood[a].connect_count;
+	     if ((p = strchr(user, '@')) == NULL)
+	       break;
+	     *p = '\0';
+	     host = p+1;
+
+	     if (!okhost(user, host, get_action_type("cflood")))
+	     {
+	       if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
+	       {
+		 if (user[0] == '~')
+		   b = NO;
+		 else
+		   b = YES;
+		 suggest_action(get_action_type("cflood"),
+				nick, user, host, NO, b);
+		 connect_flood[a].user_host[0] = '\0';
+	       }
+	     }
+	     else
+	       connect_flood[a].last_connect = current_time;
+	   }
+	   else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
+	     connect_flood[a].user_host[0] = '\0';
+	 }
+	 else c = a;
+       }
        if (c >= 0)
-         {
-           if (strchr(user, '@'))
-             snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host), "%s", 
-                      user);
-           else
-             snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host), "%s@%s",
-                      user, host);
-           connect_flood[c].connect_count = 0;
-           connect_flood[c].last_connect = current_time;
-         }
+       {
+	 if (strchr(user, '@'))
+	   snprintf(connect_flood[c].user_host,
+		    sizeof(connect_flood[c].user_host), "%s", 
+		    user);
+	 else
+	   snprintf(connect_flood[c].user_host,
+		    sizeof(connect_flood[c].user_host), "%s@%s",
+		    user, host);
+	 connect_flood[c].connect_count = 0;
+	 connect_flood[c].last_connect = current_time;
+       }
       break;
 
     case INVALIDUH:
-      p = strchr(argv[9], '@');
+      if ((p = strchr(argv[9], '@')) == NULL)
+	break;
       *p = '\0';
       user = argv[9]+1;
       host = p+1;
-      if ((host[strlen(host)-1] == ')')) host[strlen(host)-1] = '\0';
-      snprintf(message, sizeof(message), "%s@%s", user, host);
-      c = -1;
-      for (a=0;a<MAX_CONNECT_FAILS;++a)
-        {
-          if (connect_flood[a].user_host[0])
-            {
-              if (!strcasecmp(message, connect_flood[a].user_host))
-                {
-                  if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
-                    connect_flood[a].connect_count = 0;
 
-                  ++connect_flood[a].connect_count;
-                  if (!okhost(user, host, get_action_type("cflood")))
-                    {
-                      if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
-                        {
-                          if (user[0] == '~')
-                            b = NO;
-                          else
-                            b = YES;
-                          suggest_action(get_action_type("cflood"), argv[8], user, host, NO, b);
-                          connect_flood[a].user_host[0] = '\0';
-                        }
-                    }
-                  else
-                    connect_flood[a].last_connect = current_time;
-                }
-              else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
-                connect_flood[a].user_host[0] = '\0';
-            } else c = a;
-        }
-      if (c >= 0)
+      if ((host[strlen(host)-1] == ')'))
+	host[strlen(host)-1] = '\0';
+
+      snprintf(message, sizeof(message), "%s@%s", user, host);
+
+      c = -1;
+
+      for (a=0;a<MAX_CONNECT_FAILS;++a)
+      {
+	if (connect_flood[a].user_host[0])
         {
-          snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host), "%s@%s",
-                   user, host);
-          connect_flood[c].last_connect = current_time;
-          connect_flood[c].connect_count = 0;
-        }
+	  if (!strcasecmp(message, connect_flood[a].user_host))
+          {
+	    if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
+	      connect_flood[a].connect_count = 0;
+
+	    ++connect_flood[a].connect_count;
+	    if (!okhost(user, host, get_action_type("cflood")))
+	    {
+	      if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
+	      {
+		if (user[0] == '~')
+		  b = NO;
+		else
+		  b = YES;
+		suggest_action(get_action_type("cflood"),
+			       argv[8], user, host, NO, b);
+		connect_flood[a].user_host[0] = '\0';
+	      }
+	    }
+	    else
+	      connect_flood[a].last_connect = current_time;
+	  }
+	  else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
+	    connect_flood[a].user_host[0] = '\0';
+	}
+	else
+	  c = a;
+      }
+      if (c >= 0)
+      {
+	snprintf(connect_flood[c].user_host,
+		 sizeof(connect_flood[c].user_host), "%s@%s",
+		 user, host);
+	connect_flood[c].last_connect = current_time;
+	connect_flood[c].connect_count = 0;
+      }
       break;
 
     case SERVER:
-      if (!strcmp(argv[8], "split"))
-        sendtoalldcc(SEND_WARN_ONLY, "Server %s split from %s", argv[7], argv[10]);
+      if (strcmp(argv[8], "split") == 0)
+        sendtoalldcc(SEND_WARN_ONLY,
+		     "Server %s split from %s", argv[7], argv[10]);
       else
-        sendtoalldcc(SEND_WARN_ONLY, "Server %s being introduced by %s", argv[7], argv[11]);
+        sendtoalldcc(SEND_WARN_ONLY,
+		     "Server %s being introduced by %s", argv[7], argv[11]);
       break;
 
     case FAILEDOPER:
       snprintf(message, sizeof(message), "%s", argv[7]);
       for (a=8;a<argc-3;++a)
-        {
-          strcat((char *)&message, argv[a]);
-          strcat((char *)&message, " ");
-        }
-      if (message[strlen(message)-1] == ' ') message[strlen(message)-1] = '\0';
-      sendtoalldcc(SEND_WARN_ONLY, "*** Failed oper attempt by %s!%s: %s", argv[10], argv[11],
+      {
+	strcat((char *)&message, argv[a]);
+	strcat((char *)&message, " ");
+      }
+      if (message[strlen(message)-1] == ' ')
+	message[strlen(message)-1] = '\0';
+      sendtoalldcc(SEND_WARN_ONLY,
+		   "*** Failed oper attempt by %s!%s: %s", argv[10], argv[11],
                    message);
       break;
 
     default:
-      if ((p = strstr(message, "*** Notice -- "))) p += 15;
-      else p = message;
+      if ((p = strstr(message, "*** Notice -- ")))
+	p += 15;
+      else
+	p = message;
       sendtoalldcc(SEND_OPERS_NOTICES_ONLY, "Notice: %s", p);
       break;
     }
@@ -1096,60 +1178,63 @@ char makeconn(char *hostport,char *nick,char *userhost)
 #endif
 
   for (i=1; i<MAXDCCCONNS+1; ++i)
+  {
     if (connections[i].socket == INVALID)
-      {
-        if (maxconns < i+1)
-          maxconns = i+1;
-        break;
-      }
+    {
+      if (maxconns < i+1)
+	maxconns = i+1;
+      break;
+    }
+  }
 
   if (i > MAXDCCCONNS)
     return 0;
 
-  if ( (p = strchr(userhost,'@')) )
-    {
-      user = userhost;
-      *p = '\0';
-      p++;
-      host = p;
-    }
+  if ((p = strchr(userhost,'@')) != NULL)
+  {
+    user = userhost;
+    *p = '\0';
+    p++;
+    host = p;
+  }
   else
-    {
-      host = userhost;
-      user = "*";
-    }
+  {
+    host = userhost;
+    user = "*";
+  }
 
-  if ( (p = strchr(host,' ')) )
+  if ((p = strchr(host,' ')) != NULL)
     *p = '\0';
 
   if (config_entries.opers_only)
+  {
+    if (!isoper(user,host))
     {
-      if (!isoper(user,host))
-        {
-          notice(nick,"You are not an operator");
-          return 0;
-        }
+      notice(nick,"You are not an operator");
+      return 0;
     }
+  }
   connections[i].socket = bindsocket(hostport);
 
   if (connections[i].socket == INVALID)
     return 0;
+
   fcntl(connections[i].socket, F_SETFL, O_NONBLOCK);
   FD_SET(connections[i].socket, &readfds);
   connections[i].set_modes = 0;
 
   connections[i].buffer = (char *)malloc(BUFFERSIZE);
-  bzero(connections[i].buffer, BUFFERSIZE);
+
   if (!connections[i].buffer)
-    {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in makeconn\n");
-      gracefuldie(0, __FILE__, __LINE__);
-    }
+  {
+    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in makeconn\n");
+    gracefuldie(0, __FILE__, __LINE__);
+  }
+  memset(connections[i].buffer, 0, BUFFERSIZE);
 
   connections[i].buffend = connections[i].buffer;
   strncpy(connections[i].nick,nick,MAX_NICK-1);
   connections[i].nick[MAX_NICK-1] = '\0';
-
 
   strncpy(connections[i].user,user,MAX_USER-1);
   connections[i].user[MAX_USER-1] = '\0';
@@ -1158,20 +1243,20 @@ char makeconn(char *hostport,char *nick,char *userhost)
   connections[i].type = 0;
   connections[i].type |= isoper(user,host);
 
-  if ( !(connections[i].type & TYPE_OPER) &&
+  if (!(connections[i].type & TYPE_OPER) &&
       isbanned(user,host)) /* allow opers on */
-    {
-      prnt(connections[i].socket,
-           "Sorry, you are banned.\n");
-      (void)close(connections[i].socket);
-      connections[i].socket = INVALID;
-      connections[i].nick[0] = '\0';
-      connections[i].registered_nick[0] = '\0';
-      connections[i].user[0] = '\0';
-      connections[i].type = 0;
-      (void)free(connections[i].buffer);
-      return 0;
-    }
+  {
+    prnt(connections[i].socket,
+	 "Sorry, you are banned.\n");
+    (void)close(connections[i].socket);
+    connections[i].socket = INVALID;
+    connections[i].nick[0] = '\0';
+    connections[i].registered_nick[0] = '\0';
+    connections[i].user[0] = '\0';
+    connections[i].type = 0;
+    (void)free(connections[i].buffer);
+    return 0;
+  }
 
   connections[i].last_message_time = time(NULL);
 
@@ -1213,7 +1298,9 @@ void _onctcp(int connnum, int argc, char *argv[])
   char *hold, *nick;
   char *msg=argv[3]+2;
   char dccbuff[DCCBUFF_SIZE];
+  char *p;
   int i;
+  int len;
 
   nick = argv[0] + 1;
   if ((hold = strchr(argv[0], '!'))) *hold = '\0';
@@ -1221,38 +1308,41 @@ void _onctcp(int connnum, int argc, char *argv[])
   ++hold;
   if (dccbuff[0] != '\0') memset(&dccbuff, 0, sizeof(dccbuff));
 
-  if (!strncasecmp(msg,"PING",4))
+  if (strncasecmp(msg,"PING",4) == 0)
+  {
+    p = dccbuff;
+    for (i = 4; i < argc; i++)
+      {
+	len = sprintf(p, "%s ", argv[i]);
+	p += len;
+      }
+    /* blow away last ' ' */
+    *--p = '\0';
+    if (*p == '\001')
+      *--p = '\0';
+    notice(nick, "\001PING %s\001\n", dccbuff);
+    return;
+  }
+  else if (strncasecmp(msg,"VERSION",7) == 0)
+  {
+    notice(nick,"\001VERSION %s(%s)\001",VERSION,SERIALNUM);
+  }
+  else if (!strcasecmp(argv[3],":\001DCC") && !strcasecmp(argv[4], "CHAT"))
+  {
+    snprintf(dccbuff, sizeof(dccbuff), "#%s", argv[6]);
+    if (atoi(argv[7]) < 1024)
     {
-      for (i=4;i<argc;++i)
-        {
-          strncat(dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
-          strncat(dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
-        }
-      if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
-      if (dccbuff[strlen(dccbuff)-1] == '\001') dccbuff[strlen(dccbuff)-1] = '\0';
-      notice(nick, "\001PING %s\001\n", dccbuff);
+      notice(nick, "Invalid port specified for DCC CHAT. Not funny.");
       return;
     }
-  else if (!strncasecmp(msg,"VERSION",7))
+    strcat(dccbuff, ":");
+    strcat(dccbuff, argv[7]);
+    if (!makeconn(dccbuff, nick, hold))
     {
-      notice(nick,"\001VERSION %s(%s)\001",VERSION,SERIALNUM);
+      notice(nick,"DCC CHAT connection failed");
+      return;
     }
-  else if (!strcasecmp(argv[3],":\001DCC") && !strcasecmp(argv[4], "CHAT"))
-    {
-      snprintf(dccbuff, sizeof(dccbuff), "#%s", argv[6]);
-      if (atoi(argv[7]) < 1024)
-        {
-          notice(nick, "Invalid port specified for DCC CHAT. Not funny.");
-          return;
-        }
-      strcat(dccbuff, ":");
-      strcat(dccbuff, argv[7]);
-      if (!makeconn(dccbuff, nick, hold))
-        {
-	  notice(nick,"DCC CHAT connection failed");
-	  return;
-	}
-    }
+  }
 }
 
 int hash_func(char *string)
@@ -1280,11 +1370,11 @@ void addtohash(struct hashrec *table[],char *key,struct userentry *item)
   ind = hash_func(key);
   newhashrec = (struct hashrec *)malloc(sizeof(struct hashrec));
   if ( !newhashrec )
-    {
-      prnt(connections[0].socket,"Ran out of memory in addtohash\n");
-      sendtoalldcc(SEND_ALL_USERS,"Ran out of memory in addtohash\n");
-      gracefuldie(0, __FILE__, __LINE__);
-    }
+  {
+    prnt(connections[0].socket,"Ran out of memory in addtohash\n");
+    sendtoalldcc(SEND_ALL_USERS,"Ran out of memory in addtohash\n");
+    gracefuldie(0, __FILE__, __LINE__);
+  }
 
   newhashrec->info = item;
   newhashrec->collision = table[ind];
@@ -1314,32 +1404,32 @@ char removefromhash(struct hashrec *table[],
   prev = NULL;
 
   while (find)
+  {
+    if ((!hostmatch || !strcmp(find->info->host,hostmatch)) &&
+	(!usermatch || !strcmp(find->info->user,usermatch)) &&
+	(!nickmatch || !strcmp(find->info->nick,nickmatch)))
     {
-      if ((!hostmatch || !strcmp(find->info->host,hostmatch)) &&
-	  (!usermatch || !strcmp(find->info->user,usermatch)) &&
-	  (!nickmatch || !strcmp(find->info->nick,nickmatch)))
-	{
-	  if (prev)
-	    prev->collision = find->collision;
-	  else
-	    table[ind] = find->collision;
+      if (prev)
+	prev->collision = find->collision;
+      else
+	table[ind] = find->collision;
 
-	  if (find->info->link_count > 0)
-	    {
-	      find->info->link_count--;
-	      if (find->info->link_count == 0)
-		{
-		  (void)free(find->info);
-		}
-	    }
+      if (find->info->link_count > 0)
+      {
+	find->info->link_count--;
+	if (find->info->link_count == 0)
+	  {
+	    (void)free(find->info);
+	  }
+      }
 
-	  (void)free(find);
-	  return 1;		/* Found the item */
-	}
-      prev = find;
-      find = find->collision;
+      (void)free(find);
+      return 1;		/* Found the item */
     }
-  return 0;
+    prev = find;
+    find = find->collision;
+  }
+  return (0);
 }
 
 /*
@@ -1358,7 +1448,7 @@ static void updateuserhost(char *nick1,char *nick2,char *userhost)
 {
   char *host;
 
-  if ( !(host = strchr(userhost,'@')) )
+  if ((host = strchr(userhost,'@')) == NULL)
     return;
 
   *host = '\0';
@@ -1382,13 +1472,13 @@ static void updatehash(struct hashrec *table[],
 {
   struct hashrec *find;
 
-  for( find = table[hash_func(key)]; find; find = find->collision )
+  for (find = table[hash_func(key)]; find; find = find->collision)
+  {
+    if (strcmp(find->info->nick,nick1) == 0)
     {
-      if ( !strcmp(find->info->nick,nick1) )
-	{
-	  strncpy(find->info->nick,nick2,MAX_NICK);
-	}
+      strncpy(find->info->nick,nick2,MAX_NICK);
     }
+  }
 }
 
 /*
@@ -1422,15 +1512,15 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
 			userinfo->host,
 			userinfo->host,
 			userinfo->user,NULL))
+    {
+      if (config_entries.debug && outfile)
       {
-	if (config_entries.debug && outfile)
-	  {
-	    fprintf(outfile,"*** Error removing %s!%s@%s from host table!\n",
-		    nick,
-		    userinfo->user,
-		    userinfo->host);
-	  }
+	fprintf(outfile,"*** Error removing %s!%s@%s from host table!\n",
+		nick,
+		userinfo->user,
+		userinfo->host);
       }
+    }
 
   if (!removefromhash(domaintable,
 		      domain,
@@ -1442,15 +1532,15 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
 			userinfo->host,
 			userinfo->user,
 			NULL))
+    {
+      if (config_entries.debug && outfile)
       {
-	if (config_entries.debug && outfile)
-	  {
-	    fprintf(outfile,"*** Error removing %s!%s@%s from domain table!\n",
-		    nick,
-		    userinfo->user,
-		    userinfo->host);
-	  }
+	fprintf(outfile,"*** Error removing %s!%s@%s from domain table!\n",
+		nick,
+		userinfo->user,
+		userinfo->host);
       }
+    }
 
   if (!removefromhash(usertable,
 		      userinfo->user,
@@ -1462,16 +1552,15 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
 			userinfo->host,
 			userinfo->user,
 			NULL))
+    {
+      if (config_entries.debug && outfile)
       {
-	if (config_entries.debug && outfile)
-	  {
-	    fprintf(outfile,"*** Error removing %s!%s@%s from user table!\n",
-		    nick,
-		    userinfo->user,
-		    userinfo->host);
-	  }
-
+	fprintf(outfile,"*** Error removing %s!%s@%s from user table!\n",
+		nick,
+		userinfo->user,
+		userinfo->host);
       }
+    }
 
 #ifdef VIRTUAL
   /* well, no such thing as a class c , but it will do */
@@ -1483,26 +1572,26 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
   p = ip_class_c;
   found_dots = 0;
   while(*p)
-    {
-      if (*p == '.')
-	found_dots++;
+  {
+    if (*p == '.')
+      found_dots++;
 
-      if (found_dots == 3)
-	{
-	  *p = '\0';
-	  break;
-	}
-      p++;
+    if (found_dots == 3)
+    {
+      *p = '\0';
+      break;
     }
+    p++;
+  }
 
   if (config_entries.debug && outfile)
-    {
-      fprintf(outfile,
-	      "about to removefromhash ip_class_c = [%s]\n", ip_class_c);
-      fprintf(outfile,
-	      "userinfo->host [%s] userinfo->user [%s] nick [%s]\n",
-	      userinfo->host,userinfo->user,nick);
-    }
+  {
+    fprintf(outfile,
+	    "about to removefromhash ip_class_c = [%s]\n", ip_class_c);
+    fprintf(outfile,
+	    "userinfo->host [%s] userinfo->user [%s] nick [%s]\n",
+	    userinfo->host,userinfo->user,nick);
+  }
 
   if (!removefromhash(iptable,
 		      ip_class_c,
@@ -1514,17 +1603,17 @@ static void removeuserhost(char *nick, struct plus_c_info *userinfo)
 			userinfo->host,
 			userinfo->user,
 			NULL))
+    {
+      if (config_entries.debug && outfile)
       {
-	if (config_entries.debug && outfile)
-	  {
-	    fprintf(outfile,
-		    "*** Error removing %s!%s@%s [%s] from iptable table!\n",
-		    nick,
-		    userinfo->user,
-		    userinfo->host,
-		    ip_class_c);
-	  }
+	fprintf(outfile,
+		"*** Error removing %s!%s@%s [%s] from iptable table!\n",
+		nick,
+		userinfo->user,
+		userinfo->host,
+		ip_class_c);
       }
+    }
 #endif
 #ifdef DEBUGMODE
   placed;
@@ -1564,13 +1653,13 @@ static void adduserhost(char *nick,
     temp->function(doingtrace, 5, par);
 
   newuser = (struct userentry *)malloc(sizeof(struct userentry));
-  if ( !newuser )
-    {
-      fprintf(outfile, "Ran out of memory in adduserhost\n");
-      prnt(connections[0].socket,"QUIT :Ran out of memory in adduserhost\n");
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in adduserhost\n");
-      gracefuldie(0, __FILE__, __LINE__);
-    }
+  if (newuser == NULL)
+  {
+    fprintf(outfile, "Ran out of memory in adduserhost\n");
+    prnt(connections[0].socket,"QUIT :Ran out of memory in adduserhost\n");
+    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in adduserhost\n");
+    gracefuldie(0, __FILE__, __LINE__);
+  }
 
   strncpy(newuser->nick,nick,MAX_NICK);
   newuser->nick[MAX_NICK-1] = '\0';
@@ -1594,17 +1683,17 @@ static void adduserhost(char *nick,
 
   found_dots = 0;
   while(*p)
+  {
+    if (*p == '.')
+      found_dots++;
+    
+    if (found_dots == 3)
     {
-      if (*p == '.')
-	found_dots++;
-
-      if (found_dots == 3)
-	{
-	  *p = '\0';
-	  break;
-	}
-      p++;
+      *p = '\0';
+      break;
     }
+    p++;
+  }
 #endif
 
   newuser->connecttime = (fromtrace ? 0 : time(NULL));
@@ -1640,10 +1729,10 @@ static void adduserhost(char *nick,
 
   /* Clonebot check */
   if (!fromtrace)
-    {
-      check_host_clones(userinfo->host);
-      check_virtual_host_clones(newuser->ip_class_c);
-    }
+  {
+    check_host_clones(userinfo->host);
+    check_virtual_host_clones(newuser->ip_class_c);
+  }
 }
 
 /*
@@ -1668,88 +1757,88 @@ static char* find_domain(char* host)
   ip_domain = host;
 
   if (isdigit(*ip_domain))
+  {
+    while (*ip_domain)
     {
-      while (*ip_domain)
+      iphold[i++] = *ip_domain;
+      if (*ip_domain == '.')
+	found_dots++;
+      else if (!isdigit(*ip_domain))
 	{
-	  iphold[i++] = *ip_domain;
-	  if ( *ip_domain == '.' )
-	    found_dots++;
-	  else if (!isdigit(*ip_domain))
-	   {
-	     is_legal_ip = NO;
-	     break;
-	   }
-
-          if (found_dots == 3 )
-            break;
-
-	  ip_domain++;
-
-          if ( i > (MAX_IP-2))
-            {
-              is_legal_ip = NO;
-              break;
-            }
+	  is_legal_ip = NO;
+	  break;
 	}
-      iphold[i++] = '*';
-      iphold[i] = '\0';
-      ip_domain = iphold;
+
+      if (found_dots == 3 )
+	break;
+
+      ip_domain++;
+
+      if ( i > (MAX_IP-2))
+      {
+	is_legal_ip = NO;
+	break;
+      }
+    }
+    iphold[i++] = '*';
+    iphold[i] = '\0';
+    ip_domain = iphold;
+  }
+
+  if ((found_dots != 3) || !is_legal_ip)
+  {
+    found_domain = host + (strlen(host) - 1);
+
+    /* find tld "com" "net" "org" or two letter domain i.e. "ca" */
+    while (found_domain != host)
+    {
+      if (*found_domain == '.')
+      {
+	if (found_domain[3] == '\0')
+	{
+	  two_letter_tld = YES;
+	}
+	found_domain--;
+	break;
+      }
+      found_domain--;
     }
 
-  if ( (found_dots != 3) || !is_legal_ip)
+    while (found_domain != host)
     {
-      found_domain = host + (strlen(host) - 1);
-
-      /* find tld "com" "net" "org" or two letter domain i.e. "ca" */
-      while (found_domain != host)
+      if (*found_domain == '.')
+      {
+	if (!two_letter_tld)
 	{
-          if (*found_domain == '.')
-	    {
-	      if (found_domain[3] == '\0')
-		{
-		  two_letter_tld = YES;
-		}
-	      found_domain--;
-	      break;
-	    }
+	  found_domain++;
+	}
+	else
+	{
 	  found_domain--;
 	}
-
-      while (found_domain != host)
-	{
-          if (*found_domain == '.')
-	    {
-	      if (!two_letter_tld)
-		{
-		  found_domain++;
-		}
-	      else
-		{
-		  found_domain--;
-		}
-	      break;
-	    }
-	  found_domain--;
-	}
-
-      if (two_letter_tld)
-	{
-	  while (found_domain != host)
-	    {
-	      if (*found_domain == '.')
-		{
-		  found_domain++;
-		  break;
-		}
-	      found_domain--;
-	    }
-	}
-      return(found_domain);
+	break;
+      }
+      found_domain--;
     }
+
+    if (two_letter_tld)
+    {
+      while (found_domain != host)
+      {
+	if (*found_domain == '.')
+	{
+	  found_domain++;
+	  break;
+	}
+	found_domain--;
+      }
+    }
+    return(found_domain);
+  }
   else
-    {
-      return(ip_domain);
-    }
+  {
+    return(ip_domain);
+  }
 }
 
 /*
@@ -1778,127 +1867,128 @@ void check_host_clones(char *host)
   lastreport = 0;
   ind = hash_func(host);
 
-  for( find = hosttable[ind]; find; find = find->collision )
+  for (find = hosttable[ind]; find; find = find->collision)
+  {
+    if ((strcmp(find->info->host,host) == 0)&&
+	(now - find->info->connecttime < CLONECONNECTFREQ + 1))
     {
-      if (!strcmp(find->info->host,host) &&
-	  (now - find->info->connecttime < CLONECONNECTFREQ + 1))
-	{
-	  if (find->info->reporttime > 0)
-	    {
-	      ++reportedclones;
-	      if (lastreport < find->info->reporttime)
-		lastreport = find->info->reporttime;
-	    }
-	  else
-	    {
-	      ++clonecount;
-	      if (find->info->connecttime < oldest)
-		oldest = find->info->connecttime;
-	    }
-	}
+      if (find->info->reporttime > 0)
+      {
+	++reportedclones;
+	if (lastreport < find->info->reporttime)
+	  lastreport = find->info->reporttime;
+      }
+      else
+      {
+	++clonecount;
+	if (find->info->connecttime < oldest)
+	  oldest = find->info->connecttime;
+      }
     }
+  }
 
   if ((reportedclones == 0 && clonecount < CLONECONNECTCOUNT) ||
       now - lastreport < 10)
     return;
 
   if (reportedclones)
-    {
-      report(SEND_ALL_USERS,
-	     CHANNEL_REPORT_CLONES,
-	     "%d more possible clones (%d total) from %s:\n",
-	     clonecount, clonecount+reportedclones, host);
+  {
+    report(SEND_ALL_USERS,
+	   CHANNEL_REPORT_CLONES,
+	   "%d more possible clones (%d total) from %s:\n",
+	   clonecount, clonecount+reportedclones, host);
 
-      log("%d more possible clones (%d total) from %s:\n",
-	  clonecount, clonecount+reportedclones, host);
-    }
+    log("%d more possible clones (%d total) from %s:\n",
+	clonecount, clonecount+reportedclones, host);
+  }
   else
-    {
-      report(SEND_ALL_USERS,
-	     CHANNEL_REPORT_CLONES,
-	     "Possible clones from %s detected: %d connects in %d seconds\n",
-	     host, clonecount, now - oldest);
+  {
+    report(SEND_ALL_USERS,
+	   CHANNEL_REPORT_CLONES,
+	   "Possible clones from %s detected: %d connects in %d seconds\n",
+	   host, clonecount, now - oldest);
 
-      log("Possible clones from %s detected: %d connects in %d seconds\n",
-	  host, clonecount, now - oldest);
-    }
+    log("Possible clones from %s detected: %d connects in %d seconds\n",
+	host, clonecount, now - oldest);
+  }
 
   for( find = hosttable[ind],clonecount = 0; find; find = find->collision)
+  {
+    if ((strcmp(find->info->host,host) == 0) &&
+	(now - find->info->connecttime < CLONECONNECTFREQ + 1) &&
+	find->info->reporttime == 0)
     {
-      if (!strcmp(find->info->host,host) &&
-	  (now - find->info->connecttime < CLONECONNECTFREQ + 1) &&
-	  find->info->reporttime == 0)
+      ++clonecount;
+      tmrec = localtime(&find->info->connecttime);
+
+      if (clonecount == 1)
+      {
+	(void)snprintf(notice1,sizeof(notice1) - 1,
+		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
+		       find->info->nick, 
+		       find->info->user,
+		       find->info->host,
+		       tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
+      }
+      else
+      {
+	(void)snprintf(notice0,sizeof(notice0) - 1,
+		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
+		       find->info->nick,
+		       find->info->user,
+		       find->info->host,
+		       tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
+      }
+
+      current_identd = YES;
+      different = NO;
+
+      if (clonecount == 1)
+	last_user = find->info->user;
+      else if (clonecount == 2)
+      {
+	char *current_user;
+	
+	if ( *last_user == '~' )
 	{
-	  ++clonecount;
-	  tmrec = localtime(&find->info->connecttime);
-
-	  if (clonecount == 1)
-	    {
-	      (void)snprintf(notice1,sizeof(notice1) - 1,
-                            "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
-			    find->info->nick, 
-			    find->info->user,
-			    find->info->host,
-			    tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
-	    }
-	  else
-	    {
-	      (void)snprintf(notice0,sizeof(notice0) - 1,
-                            "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
-			    find->info->nick,
-			    find->info->user,
-			    find->info->host,
-			    tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
-	    }
-
-	  current_identd = YES;
-	  different = NO;
-
-	  if (clonecount == 1)
-	    last_user = find->info->user;
-	  else if (clonecount == 2)
-	    {
-	      char *current_user;
-
-	      if ( *last_user == '~' )
-		{
-		  last_user++;
-		}
-
-	      current_user = find->info->user;
-	      if ( *current_user != '~' )
-                current_identd = YES;
-              else
-                ++current_user;
-
-	      if (strcmp(last_user,current_user) && current_identd)
-		different = YES;
-
-	      suggest_action(get_action_type("clone"), find->info->nick, find->info->user,
-			     find->info->host, different, current_identd);
-	    }
-
-	  find->info->reporttime = now;
-	  if (clonecount == 2)
-	    {
-	      report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, notice1);
-	      log("%s", notice1);
-
-	      report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, notice0);
-	      log("%s", notice0);
-	    }
-	  else if (clonecount < 5)
-	    {
-	      report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, notice0);
-	      log("%s", notice0);
-	    }
-	  else if (clonecount == 5)
-	    {
-	      sendtoalldcc(SEND_ALL_USERS, notice0);
-	      log("  [etc.]\n");
-	    }
+	  last_user++;
 	}
+
+	current_user = find->info->user;
+	if ( *current_user != '~' )
+	  current_identd = YES;
+	else
+	  ++current_user;
+
+	if (strcmp(last_user,current_user) && current_identd)
+	  different = YES;
+
+	suggest_action(get_action_type("clone"),
+		       find->info->nick, find->info->user,
+		       find->info->host, different, current_identd);
+      }
+
+      find->info->reporttime = now;
+      if (clonecount == 2)
+      {
+	report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, notice1);
+	log("%s", notice1);
+
+	report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, notice0);
+	log("%s", notice0);
+      }
+      else if (clonecount < 5)
+      {
+	report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, notice0);
+	log("%s", notice0);
+      }
+      else if (clonecount == 5)
+      {
+	sendtoalldcc(SEND_ALL_USERS, notice0);
+	log("  [etc.]\n");
+      }
     }
+  }
 }
 
 /*
@@ -1926,7 +2016,7 @@ void check_virtual_host_clones(char *ip_class_c)
 
   ind = hash_func(ip_class_c);
 
-  for( find = iptable[ind]; find; find = find->collision )
+  for (find = iptable[ind]; find; find = find->collision)
     {
       if (!strcmp(find->info->ip_class_c,ip_class_c) &&
 	  (now - find->info->connecttime < CLONECONNECTFREQ + 1))
@@ -2540,10 +2630,10 @@ static void check_nick_flood(char *server_notice)
       if ((p = strtok(NULL," ")) == NULL)
 	return;
 
-      if (strcmp(p,"as"))
+      if (strcmp(p,"as") != 0)
 	return;
 
-      if ( !(nick2 = strtok(NULL," ")) )
+      if ((nick2 = strtok(NULL," ")) == NULL)
 	return;
 
       add_to_nick_change_table(user_host,nick2);
@@ -2552,22 +2642,22 @@ static void check_nick_flood(char *server_notice)
       return;
     }
 
-  if ( !(nick1 = strtok(NULL," ")) )
+  if ((nick1 = strtok(NULL," ")) == NULL)
     return;
 
-  if ( !(p = strtok(NULL," ")) )	/* Throw away the "to" */
+  if ((p = strtok(NULL," ")) == NULL)	/* Throw away the "to" */
     return;
 
-  if ( !(nick2 = strtok(NULL," ")) )	/* This _should_ be nick2 */
+  if ((nick2 = strtok(NULL," ")) == NULL)	/* This _should_ be nick2 */
     return;
 
-  if ( !(user_host = strtok(NULL," ")) )	/* u@h  */
+  if ((user_host = strtok(NULL," ")) == NULL)	/* u@h  */
     return;
 
   if (*user_host == '[')
     user_host++;
 
-  if ( (p = strrchr(user_host,']')) )
+  if ((p = strrchr(user_host,']')) != NULL)
     *p = '\0';
 
 /* N.B.
@@ -2652,98 +2742,100 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
   current_time = time(NULL);
 
   for(i = 0; i < NICK_CHANGE_TABLE_SIZE; i++)
+  {
+    if (nick_changes[i].user_host[0])
     {
-      if ( nick_changes[i].user_host[0] )
-	{
-	  time_t time_difference;
-	  int time_ticks;
+      time_t time_difference;
+      int time_ticks;
 
-	  time_difference = current_time - nick_changes[i].last_nick_change;
+      time_difference = current_time - nick_changes[i].last_nick_change;
 
-	  /* is it stale ? */
-	  if ( time_difference >= NICK_CHANGE_T2_TIME )
-	    {
-	      nick_changes[i].user_host[0] = '\0';
-	      nick_changes[i].noticed = NO;
-	    }
-	  else
-	    {
-	      /* how many 10 second intervals do I have? */
-	      time_ticks = time_difference / NICK_CHANGE_T1_TIME;
-
-	      /* is it stale? */
-	      if (time_ticks >= nick_changes[i].nick_change_count)
-		{
-		  nick_changes[i].user_host[0] = '\0';
-		  nick_changes[i].noticed = NO;
-		}
-	      else
-		{
-		  /* just decrement 10 second units of nick changes */
-		  nick_changes[i].nick_change_count -= time_ticks;
-
-		  if ( !(strcasecmp(nick_changes[i].user_host,user_host)) )
-		    {
-		      nick_changes[i].last_nick_change = current_time;
-		      (void)strncpy(nick_changes[i].last_nick,
-				    last_nick,MAX_NICK);
-		      nick_changes[i].nick_change_count++;
-		    }
-
-		  /* now, check for a nick flooder */
-	  
-		  if ((nick_changes[i].nick_change_count >=
-		      NICK_CHANGE_MAX_COUNT)
-		     && !nick_changes[i].noticed)
-		    {
-		      tmrec = localtime(&nick_changes[i].last_nick_change);
-
-		      sendtoalldcc(SEND_WARN_ONLY,
-	    "nick flood %s (%s) %d in %d seconds (%2.2d:%2.2d:%2.2d)\n",
-				    nick_changes[i].user_host,
-				    nick_changes[i].last_nick,
-				    nick_changes[i].nick_change_count,
-				    nick_changes[i].last_nick_change-
-				    nick_changes[i].first_nick_change,
-				    tmrec->tm_hour,
-				    tmrec->tm_min,
-				    tmrec->tm_sec);
-
-
-		      if ( !(user = strtok(user_host,"@")) )
-			return;
-		      if ( !(host = strtok(NULL,"")) )
-			return;
-		      
-		      if (*user_host == '~')
-			suggest_action(get_action_type("flood"), last_nick, user, host, NO, NO);
-		      else
-			suggest_action(get_action_type("flood"), last_nick, user, host, NO, YES);
-		      log(
-			  "nick flood %s (%s) %d in %d seconds (%02d/%02d/%d %2.2d:%2.2d:%2.2d)\n",
-			  nick_changes[i].user_host,
-			  nick_changes[i].last_nick,
-			  nick_changes[i].nick_change_count,
-			  nick_changes[i].last_nick_change-
-			  nick_changes[i].first_nick_change,
-			  tmrec->tm_mon+1,
-			  tmrec->tm_mday,
-			  tmrec->tm_year+1900,
-			  tmrec->tm_hour,
-			  tmrec->tm_min,
-			  tmrec->tm_sec);
-
-		      nick_changes[i].noticed = YES;
-		    }
-		}
-	    }
-	}
+      /* is it stale ? */
+      if (time_difference >= NICK_CHANGE_T2_TIME)
+      {
+	nick_changes[i].user_host[0] = '\0';
+	nick_changes[i].noticed = NO;
+      }
       else
+      {
+	/* how many 10 second intervals do I have? */
+	time_ticks = time_difference / NICK_CHANGE_T1_TIME;
+
+	/* is it stale? */
+	if (time_ticks >= nick_changes[i].nick_change_count)
 	{
-	  if ( found_empty_entry < 0 )
-	    found_empty_entry = i;
+	  nick_changes[i].user_host[0] = '\0';
+	  nick_changes[i].noticed = NO;
 	}
+	else
+	{
+	  /* just decrement 10 second units of nick changes */
+	  nick_changes[i].nick_change_count -= time_ticks;
+
+	  if ((strcasecmp(nick_changes[i].user_host,user_host)) == 0)
+	  {
+	    nick_changes[i].last_nick_change = current_time;
+	    (void)strncpy(nick_changes[i].last_nick,
+			  last_nick,MAX_NICK);
+	    nick_changes[i].nick_change_count++;
+	  }
+
+	  /* now, check for a nick flooder */
+	  
+	  if ((nick_changes[i].nick_change_count >=
+	       NICK_CHANGE_MAX_COUNT)
+	      && !nick_changes[i].noticed)
+	  {
+	    tmrec = localtime(&nick_changes[i].last_nick_change);
+
+	    sendtoalldcc(SEND_WARN_ONLY,
+		 "nick flood %s (%s) %d in %d seconds (%2.2d:%2.2d:%2.2d)\n",
+			 nick_changes[i].user_host,
+			 nick_changes[i].last_nick,
+			 nick_changes[i].nick_change_count,
+			 nick_changes[i].last_nick_change-
+			 nick_changes[i].first_nick_change,
+			 tmrec->tm_hour,
+			 tmrec->tm_min,
+			 tmrec->tm_sec);
+
+	    
+	    if ((user = strtok(user_host,"@")) == NULL)
+	      return;
+	    if ((host = strtok(NULL,"")) == NULL)
+	      return;
+		      
+	    if (*user_host == '~')
+	      suggest_action(get_action_type("flood"),
+			     last_nick, user, host, NO, NO);
+	    else
+	      suggest_action(get_action_type("flood"),
+			     last_nick, user, host, NO, YES);
+	    log(
+		"nick flood %s (%s) %d in %d seconds (%02d/%02d/%d %2.2d:%2.2d:%2.2d)\n",
+		nick_changes[i].user_host,
+		nick_changes[i].last_nick,
+		nick_changes[i].nick_change_count,
+		nick_changes[i].last_nick_change-
+		nick_changes[i].first_nick_change,
+		tmrec->tm_mon+1,
+		tmrec->tm_mday,
+		tmrec->tm_year+1900,
+		tmrec->tm_hour,
+		tmrec->tm_min,
+		tmrec->tm_sec);
+
+	    nick_changes[i].noticed = YES;
+	  }
+	}
+      }
     }
+    else
+    {
+      if (found_empty_entry < 0)
+	found_empty_entry = i;
+    }
+  }
 
 /* If the table is full, don't worry about this nick change for now
  * if this nick change is part of a flood, it will show up
@@ -2751,12 +2843,12 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
  */
 
   if (found_empty_entry > 0)
-    {
-      nick_changes[found_empty_entry].first_nick_change = current_time;
-      nick_changes[found_empty_entry].last_nick_change = current_time;
-      nick_changes[found_empty_entry].nick_change_count = 1;
-      nick_changes[found_empty_entry].noticed = NO;
-    }
+  {
+    nick_changes[found_empty_entry].first_nick_change = current_time;
+    nick_changes[found_empty_entry].last_nick_change = current_time;
+    nick_changes[found_empty_entry].nick_change_count = 1;
+    nick_changes[found_empty_entry].noticed = NO;
+  }
 }
 
 /*
@@ -2774,35 +2866,35 @@ static void bot_reject(char *text)
   char *p;
 
   if (text)
+  {
+    if (strncmp("bot:",text,4) == 0)
+      generic = YES;
+
+    if ((text = strchr(text,' ')) == NULL)
+      return;
+
+    if ((p = strstr(text+1,"(Single")) != NULL)
     {
-      if (strncmp("bot:",text,4) == 0)
-	generic = YES;
-
-      if ( !(text = strchr(text,' ')) )
-	return;
-
-      p = strstr(text+1,"(Single");
-      if (p)
+      while(p != text)
+      {
+	if (*p == ']')
 	{
-	  while(p != text)
-	    {
-	      if (*p == ']')
-		{
-		  p++;
-		  *p = '\0';
-		  break;
-		}
-	      p--;
-	    }
+	  p++;
+	  *p = '\0';
+	  break;
 	}
-      if (!generic)
-	{
-	  if ( !(text = strchr(text+1,' ')) )
-	    return;
-	}
-
-      logfailure(text+1,1);
+	p--;
+      }
     }
+
+    if (!generic)
+    {
+      if ((text = strchr(text+1,' ')) == NULL)
+	return;
+    }
+
+    logfailure(text+1,1);
+  }
 }
 
 /*
@@ -2827,12 +2919,12 @@ static void stats_notice(char *server_notice)
 
   stat = *server_notice;
 
-  if ( !(nick = strstr(server_notice,"by")) )
+  if ((nick = strstr(server_notice,"by")) == NULL)
     return;
 
   nick += 3;
 
-  if ( (p = strchr(nick, ' ')) )
+  if ((p = strchr(nick, ' ')) != NULL)
     *p = '\0';
   p++;
 
@@ -2845,53 +2937,49 @@ static void stats_notice(char *server_notice)
 
 #ifdef STATS_P
   if (stat == 'p')
+  {
+#ifdef DEBUGMODE
+    placed;
+#endif
+
+    for (i=1;i<maxconns;++i)
     {
 #ifdef DEBUGMODE
       placed;
 #endif
 
-      for (i=1;i<maxconns;++i)
-	{
-#ifdef DEBUGMODE
-          placed;
-#endif
+      /* ignore bad sockets */
+      if (connections[i].socket == INVALID)
+	continue;
 
-	  /* ignore bad sockets */
-	  if (connections[i].socket == INVALID)
-	    continue;
+      /* ignore invisible users/opers */
+      if (connections[i].type & (TYPE_INVS|TYPE_INVM))
+	continue;
 
-	  /* ignore tcm connections */
-	  if (connections[i].type & TYPE_TCM)
-	    continue;
-
-	  /* ignore invisible users/opers */
-	  if (connections[i].type & (TYPE_INVS|TYPE_INVM))
-	    continue;
-
-	  /* display opers */
-	  if (connections[i].type & TYPE_OPER)
-	    {
+      /* display opers */
+      if (connections[i].type & TYPE_OPER)
+      {
 #ifdef HIDE_OPER_HOST
-              notice(nick,
-                     "%s - idle %lu\n",
-                     connections[i].nick,
-                     time(NULL) - connections[i].last_message_time );
+	notice(nick,
+	       "%s - idle %lu\n",
+	       connections[i].nick,
+	       time(NULL) - connections[i].last_message_time );
 #else 
-	      notice(nick,
-		     "%s (%s@%s) idle %lu\n",
-		     connections[i].nick,
-		     connections[i].user,
-		     connections[i].host,
-		     time(NULL) - connections[i].last_message_time );
+	notice(nick,
+	       "%s (%s@%s) idle %lu\n",
+	       connections[i].nick,
+	       connections[i].user,
+	       connections[i].host,
+	       time(NULL) - connections[i].last_message_time );
 #endif
-	    number_of_tcm_opers++;
-	    }
-	}
-      notice(nick,"Number of tcm opers %d\n", number_of_tcm_opers);
-
-      if (config_entries.statspmsg[0])
-	notice(nick, config_entries.statspmsg);
+	number_of_tcm_opers++;
+      }
     }
+    notice(nick,"Number of tcm opers %d\n", number_of_tcm_opers);
+
+    if (config_entries.statspmsg[0])
+      notice(nick, config_entries.statspmsg);
+  }
 #endif
 
   sendtoalldcc(SEND_OPERS_STATS_ONLY, "[STATS %c requested by %s (%s)]\n",
@@ -2942,8 +3030,8 @@ void _modinit()
   add_action("clone", "kline", "Cloning is prohibited", YES);
   set_action_type("clone", R_CLONE);
   if (connections[0].socket)
-    {
-      doingtrace = YES;
-      toserv("TRACE\n");
-    }
+  {
+    doingtrace = YES;
+    toserv("TRACE\n");
+  }
 }

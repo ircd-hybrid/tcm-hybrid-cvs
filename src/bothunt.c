@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.160 2002/06/08 21:54:53 db Exp $
+ * $Id: bothunt.c,v 1.161 2002/06/09 02:30:14 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -255,7 +255,7 @@ on_stats_i(int argc, char *argv[])
 
   strlcpy(hostlist[host_list_index].user, user, MAX_NICK);
   strlcpy(hostlist[host_list_index].host, host, MAX_HOST);
-  hostlist[host_list_index].type = ~0;
+  hostlist[host_list_index].type = (unsigned int) ~0;
 
   host_list_index++;
 }

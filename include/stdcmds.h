@@ -1,8 +1,9 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.21 2002/05/25 23:27:50 db Exp $ */
+/* $Id: stdcmds.h,v 1.22 2002/05/26 02:55:05 db Exp $ */
 
+void msg_mychannel(char *msg,...);
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
 void join(char *chan,char *key);
@@ -39,6 +40,8 @@ xxx_ void suggest_action(int type_s, char *nick, char *user, char *host,
 void handle_action(int actionid, int idented, char *nick, char *user, char *host, char *ip, char * addcmt);
 void initopers(void);
 void inithash(void);
+void oper();
+void report(int type, int channel_report_flag, char *format, ... );
 
 struct s_testline
 {

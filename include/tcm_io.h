@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.18 2002/05/26 02:32:44 db Exp $
+ * $Id: tcm_io.h,v 1.19 2002/05/26 02:55:05 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -75,4 +75,5 @@ int connect_to_given_ip_port(struct sockaddr_in *, int );
 
 #define EOL(c) ((c=='\r')||(c=='\n'))
 
+int pingtime; /* XXX hide later */
 #endif

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.27 2002/05/26 02:32:47 db Exp $
+ * $Id: parse.c,v 1.28 2002/05/26 02:55:10 db Exp $
  */
 
 #include <stdio.h>
@@ -24,7 +24,6 @@
 #include "event.h"
 #include "bothunt.h"
 #include "userlist.h"
-#include "serverif.h"
 #include "parse.h"
 #include "numeric.h"
 #include "logging.h"
@@ -37,6 +36,7 @@
 #include "modules.h"
 
 
+static void do_init(void);
 static void proc(char *source,char *function, char *body);
 static void privmsgproc(char *nick,char *userhost, int argc, char *argv[]);
 static void send_umodes(char *nick);
@@ -518,7 +518,7 @@ privmsgproc(char *nick, char *userhost, int argc, char *argv[])
  * side effects - attempt to oper up, get version of server.
  */
 
-void
+static void
 do_init(void)
 {
   oper();

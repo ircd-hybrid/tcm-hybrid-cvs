@@ -1,5 +1,5 @@
 /*
- * $Id: modules.c,v 1.44 2002/05/25 22:25:09 leeh Exp $B
+ * $Id: modules.c,v 1.45 2002/05/26 02:55:10 db Exp $B
  *
  */
 
@@ -18,7 +18,6 @@
 #include "commands.h"
 #include "bothunt.h"
 #include "modules.h"
-#include "serverif.h"
 #include "stdcmds.h"
 #include "wild.h"
 #include "parse.h"

@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.54 2002/05/26 00:45:28 leeh Exp $
+ * $Id: config.h,v 1.55 2002/05/26 02:55:05 db Exp $
  */
 
 /*
@@ -320,4 +320,12 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 
 /* only needed if HAVE_REGEX_H is defined */
 #define REGEX_SIZE 1024
+
+/*
+ * default ping timeout time from server
+ * note: this value is only used if tcm cannot
+ *       determine the ping-frequency value in
+ *       the Y: lines.
+ */
+#define SERVER_TIME_OUT 300
 #endif

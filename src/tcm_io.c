@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.36 2002/05/26 02:32:47 db Exp $
+ * $Id: tcm_io.c,v 1.37 2002/05/26 02:55:10 db Exp $
  */
 
 #include <stdio.h>
@@ -41,7 +41,6 @@
 #include "event.h"
 #include "bothunt.h"
 #include "userlist.h"
-#include "serverif.h"
 #include "commands.h"
 #include "modules.h"
 #include "tcm_io.h"
@@ -65,6 +64,7 @@ fd_set readfds;            /* file descriptor set for use with select */
 fd_set writefds;            /* file descriptor set for use with select */
 
 struct connection connections[MAXDCCCONNS+1]; /*plus 1 for the server, silly*/
+int pingtime;
 
 /*
  * read_packet()

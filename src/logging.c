@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.32 2002/05/25 17:45:14 jmallett Exp $
+ * $Id: logging.c,v 1.33 2002/05/26 02:55:10 db Exp $
  *
  * - db
  */
@@ -36,7 +36,6 @@
 #include "tcm.h"
 #include "userlist.h"
 #include "tcm_io.h"
-#include "serverif.h"
 #include "bothunt.h"
 #include "logging.h"
 #include "stdcmds.h"

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.89 2002/05/26 01:28:20 db Exp $ */
+/* $Id: dcc_commands.c,v 1.90 2002/05/26 02:55:09 db Exp $ */
 
 #include "setup.h"
 
@@ -34,7 +34,6 @@
 #include "event.h"
 #include "bothunt.h"
 #include "userlist.h"
-#include "serverif.h"
 #include "logging.h"
 #include "commands.h"
 #include "stdcmds.h"

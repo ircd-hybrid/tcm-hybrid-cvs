@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.78 2002/05/26 02:12:46 db Exp $ */
+/* $Id: main.c,v 1.79 2002/05/26 02:55:10 db Exp $ */
 
 #include "setup.h"
 
@@ -35,7 +35,6 @@
 #include "tcm.h"
 #include "tcm_io.h"
 #include "event.h"
-#include "serverif.h"
 #include "userlist.h"
 #include "bothunt.h"
 #include "commands.h"

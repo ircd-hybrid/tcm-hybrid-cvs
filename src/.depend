@@ -1,12 +1,12 @@
 bothunt.o: bothunt.c ../include/setup.h ../include/config.h \
- ../include/tcm.h ../include/stdcmds.h ../include/serverif.h \
+ ../include/tcm.h ../include/stdcmds.h \
  ../include/bothunt.h ../include/userlist.h ../include/logging.h \
  ../include/wild.h ../include/serno.h ../include/patchlevel.h \
  ../include/commands.h ../include/modules.h ../include/tcm_io.h \
  ../include/parse.h ../include/wingate.h
 commands.o: commands.c ../include/setup.h ../include/config.h \
  ../include/tcm.h ../include/event.h ../include/bothunt.h \
- ../include/userlist.h ../include/serverif.h ../include/logging.h \
+ ../include/userlist.h ../include/logging.h \
  ../include/commands.h ../include/stdcmds.h ../include/modules.h \
  ../include/tcm_io.h ../include/wild.h ../include/match.h \
  ../include/parse.h
@@ -14,42 +14,42 @@ event.o: event.c ../include/tcm.h ../include/config.h \
  ../include/event.h ../include/stdcmds.h ../include/tcm_io.h
 logging.o: logging.c ../include/setup.h ../include/config.h \
  ../include/tcm.h ../include/userlist.h ../include/tcm_io.h \
- ../include/serverif.h ../include/bothunt.h ../include/logging.h \
+ ../include/bothunt.h ../include/logging.h \
  ../include/stdcmds.h
 main.o: main.c ../include/setup.h ../include/config.h ../include/tcm.h \
- ../include/tcm_io.h ../include/event.h ../include/serverif.h \
+ ../include/tcm_io.h ../include/event.h \
  ../include/userlist.h ../include/bothunt.h ../include/commands.h \
  ../include/modules.h ../include/stdcmds.h ../include/wild.h \
  ../include/serno.h ../include/patchlevel.h ../include/parse.h
 match.o: match.c ../include/match.h
 modules.o: modules.c ../include/config.h ../include/tcm.h \
  ../include/tcm_io.h ../include/commands.h ../include/bothunt.h \
- ../include/modules.h ../include/serverif.h ../include/stdcmds.h \
+ ../include/modules.h ../include/stdcmds.h \
  ../include/wild.h ../include/parse.h
 parse.o: parse.c ../include/config.h ../include/tcm.h \
  ../include/event.h ../include/bothunt.h ../include/userlist.h \
- ../include/serverif.h ../include/parse.h ../include/numeric.h \
+ ../include/parse.h ../include/numeric.h \
  ../include/logging.h ../include/stdcmds.h ../include/commands.h \
  ../include/wild.h ../include/tcm_io.h ../include/serno.h \
  ../include/patchlevel.h ../include/modules.h
 services.o: services.c ../include/config.h ../include/tcm.h \
  ../include/event.h ../include/bothunt.h ../include/userlist.h \
- ../include/serverif.h ../include/parse.h ../include/numeric.h \
+ ../include/parse.h ../include/numeric.h \
  ../include/logging.h ../include/stdcmds.h ../include/commands.h \
  ../include/wild.h ../include/tcm_io.h ../include/serno.h \
  ../include/patchlevel.h ../include/modules.h
 stdcmds.o: stdcmds.c ../include/setup.h ../include/config.h \
  ../include/tcm.h ../include/tcm_io.h ../include/logging.h \
- ../include/serverif.h ../include/stdcmds.h ../include/userlist.h \
+ ../include/stdcmds.h ../include/userlist.h \
  ../include/wild.h ../include/match.h
 tcm_io.o: tcm_io.c ../include/config.h ../include/tcm.h \
  ../include/parse.h ../include/event.h ../include/bothunt.h \
- ../include/userlist.h ../include/serverif.h ../include/commands.h \
+ ../include/userlist.h ../include/commands.h \
  ../include/modules.h ../include/tcm_io.h ../include/numeric.h \
  ../include/logging.h ../include/stdcmds.h ../include/wild.h \
  ../include/wingate.h ../include/serno.h ../include/patchlevel.h
 userlist.o: userlist.c ../include/config.h ../include/tcm.h \
- ../include/tcm_io.h ../include/serverif.h ../include/userlist.h \
+ ../include/tcm_io.h ../include/userlist.h \
  ../include/logging.h ../include/stdcmds.h ../include/wild.h \
  ../include/commands.h ../include/modules.h ../include/match.h \
  ../include/wingate.h ../include/bothunt.h

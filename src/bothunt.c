@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.180 2002/06/23 19:15:06 leeh Exp $
+ * $Id: bothunt.c,v 1.181 2002/06/23 19:24:13 db Exp $
  */
 
 #include <stdio.h>
@@ -473,17 +473,12 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   {
   /* Client connecting: bill (bill@ummm.E) [255.255.255.255] {1} */
   case CONNECT:
-    if ((q = strchr(p, '(')) == NULL)
+    if ((q = strchr(p, ' ')) == NULL)
       return;
-    *(q-1) = '\0';
-    strlcpy(userinfo.nick, p+19, MAX_NICK);;
-    if ((p = strchr(q, '[')) == NULL)
-      return;
-    ++p;
-
+    *q++ = '\0';
+    strlcpy(userinfo.nick, p+19, MAX_NICK);
     if (get_user_host(&user, &host, q) != 1)
       return;
-
     strlcpy(userinfo.username, user, MAX_USER);
     strlcpy(userinfo.host, host, MAX_HOST);
 
@@ -504,13 +499,23 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     add_user_host(&userinfo, NO);
     break;
 
-  /* Client exiting: bill (bill@ummm.E) [e?] [255.255.255.255]*/
+  /* Client exiting: bill (bill@ummm.E) [255.255.255.255]*/
   case EXITING:
-    chopuh(IS_NOT_FROM_TRACE, q, &userinfo);
-    if((q = strchr(p, ' ')) != NULL)
-      *q = '\0';
+    if ((q = strchr(p, ' ')) == NULL)
+      return;
+    *q++ = '\0';
+    strlcpy(userinfo.nick, p+16, MAX_NICK);
+    if (get_user_host(&user, &host, q) != 1)
+      return;
+    strlcpy(userinfo.username, user, MAX_USER);
+    strlcpy(userinfo.host, host, MAX_HOST);
 
-    strlcpy(userinfo.nick, p, MAX_NICK);
+    if ((q = strchr(p, ']')) == NULL)
+      return;
+    *q++ = '\0';
+
+    strlcpy(userinfo.ip_host, p, MAX_IP);
+    chopuh(IS_NOT_FROM_TRACE, q, &userinfo);
     remove_user_host(q,&userinfo);
     break;
 

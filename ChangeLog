@@ -1,3 +1,73 @@
+bill        2004/06/03 16:15:27 EDT	(20040603_2)
+
+  Modified files:
+    help                 help.actions 
+    include              hash.h 
+    src                  bothunt.c client_list.c dcc_commands.c 
+                         hash.c 
+  Added files:
+    help                 help.action help.bots help.close 
+                         help.cycle help.die help.dline 
+                         help.domains help.events help.failures 
+                         help.help help.hlist help.hmulti 
+                         help.info help.jupe help.listdump 
+                         help.locops help.mem help.motd 
+                         help.nflood help.op help.quote 
+                         help.rehash help.restart help.save 
+                         help.seedrand help.sysnotice help.trace 
+                         help.ulist help.umulti help.undline 
+                         help.unjupe help.unxline help.vbots 
+                         help.vlist help.vmulti help.xline 
+  Log:
+  - added more documentation files
+  - added .smartlist, an extremely versatile client listing tool
+  
+  Revision  Changes    Path
+  1.1       +16 -0     tcm-hybrid/help/help.action (new)
+  1.2       +15 -2     tcm-hybrid/help/help.actions
+  1.1       +3 -0      tcm-hybrid/help/help.bots (new)
+  1.1       +3 -0      tcm-hybrid/help/help.close (new)
+  1.1       +3 -0      tcm-hybrid/help/help.cycle (new)
+  1.1       +3 -0      tcm-hybrid/help/help.die (new)
+  1.1       +3 -0      tcm-hybrid/help/help.dline (new)
+  1.1       +3 -0      tcm-hybrid/help/help.domains (new)
+  1.1       +3 -0      tcm-hybrid/help/help.events (new)
+  1.1       +3 -0      tcm-hybrid/help/help.failures (new)
+  1.1       +3 -0      tcm-hybrid/help/help.help (new)
+  1.1       +7 -0      tcm-hybrid/help/help.hlist (new)
+  1.1       +3 -0      tcm-hybrid/help/help.hmulti (new)
+  1.1       +3 -0      tcm-hybrid/help/help.info (new)
+  1.1       +3 -0      tcm-hybrid/help/help.jupe (new)
+  1.1       +3 -0      tcm-hybrid/help/help.listdump (new)
+  1.1       +3 -0      tcm-hybrid/help/help.locops (new)
+  1.1       +3 -0      tcm-hybrid/help/help.mem (new)
+  1.1       +3 -0      tcm-hybrid/help/help.motd (new)
+  1.1       +3 -0      tcm-hybrid/help/help.nflood (new)
+  1.1       +3 -0      tcm-hybrid/help/help.op (new)
+  1.1       +3 -0      tcm-hybrid/help/help.quote (new)
+  1.1       +3 -0      tcm-hybrid/help/help.rehash (new)
+  1.1       +3 -0      tcm-hybrid/help/help.restart (new)
+  1.1       +3 -0      tcm-hybrid/help/help.save (new)
+  1.1       +5 -0      tcm-hybrid/help/help.seedrand (new)
+  1.1       +3 -0      tcm-hybrid/help/help.sysnotice (new)
+  1.1       +3 -0      tcm-hybrid/help/help.trace (new)
+  1.1       +7 -0      tcm-hybrid/help/help.ulist (new)
+  1.1       +3 -0      tcm-hybrid/help/help.umulti (new)
+  1.1       +3 -0      tcm-hybrid/help/help.undline (new)
+  1.1       +3 -0      tcm-hybrid/help/help.unjupe (new)
+  1.1       +3 -0      tcm-hybrid/help/help.unxline (new)
+  1.1       +3 -0      tcm-hybrid/help/help.vbots (new)
+  1.1       +7 -0      tcm-hybrid/help/help.vlist (new)
+  1.1       +3 -0      tcm-hybrid/help/help.vmulti (new)
+  1.1       +3 -0      tcm-hybrid/help/help.xline (new)
+  1.31      +1 -0      tcm-hybrid/include/hash.h
+  1.228     +1 -1      tcm-hybrid/src/bothunt.c
+  1.10      +3 -0      tcm-hybrid/src/client_list.c
+  1.158     +147 -0    tcm-hybrid/src/dcc_commands.c
+  1.74      +257 -1    tcm-hybrid/src/hash.c
+
+
+
 bill        2004/06/02 22:52:50 EDT	(20040603_1)
 
   Modified files:

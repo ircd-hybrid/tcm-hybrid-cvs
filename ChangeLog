@@ -1,3 +1,19 @@
+db          2002/06/02 19:30:12 EDT	(20020603_1)
+
+  Modified files:
+    include              parse.h 
+    src                  main.c parse.c tcm_io.c 
+  Log:
+  - pingtime -> tcm_status.ping_time
+  
+  Revision  Changes    Path
+  1.16      +3 -3      tcm-hybrid/include/parse.h
+  1.107     +4 -5      tcm-hybrid/src/main.c
+  1.51      +1 -1      tcm-hybrid/src/parse.c
+  1.78      +4 -4      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/06/02 19:13:22 EDT	(20020603_0)
 
   Modified files:

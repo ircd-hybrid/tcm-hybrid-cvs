@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.17 2001/07/29 00:37:12 bill Exp $";
+static char *version="$Id: commands.c,v 1.18 2001/08/27 02:09:30 bill Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -574,7 +574,7 @@ void dccproc(int connnum)
 	  else
 	    {
 	      prnt(connections[connnum].socket,
-		   "Usage: .class class_name\n");
+		   "Usage: .class <class name>\n");
 	    }
 	}
       else
@@ -599,7 +599,7 @@ void dccproc(int connnum)
 	  else
 	    {
 	      prnt(connections[connnum].socket,
-		   "Usage: .class class_name\n");
+		   "Usage: .classt <class name>\n");
 	    }
 	}
       else
@@ -887,7 +887,7 @@ void dccproc(int connnum)
 		   "missing nick/user@host \".kspam [nick]|[user@host]\"\n");
 	      return;
 	    }
-	  do_a_kline("kflood",kline_time,param2,
+	  do_a_kline("kspam",kline_time,param2,
 		     REASON_KSPAM,who_did_command);
 	}
       else
@@ -3208,21 +3208,23 @@ static void list_connections(int sock)
 	  if(connections[i].registered_nick[0])
 	    {
 	      prnt(sock,
-		   "%s/%s %s (%s@%s) is connected\n",
+		   "%s/%s %s (%s@%s) is connected - idle: %ld\n",
 		   connections[i].nick,
 		   connections[i].registered_nick,
 		   type_show(connections[i].type),
 		   connections[i].user,
-		   connections[i].host );
+		   connections[i].host,
+		   time((time_t *)NULL)-connections[i].last_message_time );
 	    }
 	  else
 	    {
 	      prnt(sock,
-		   "%s %s (%s@%s) is connected\n",
+		   "%s %s (%s@%s) is connected - idle: %ld\n",
 		   connections[i].nick,
 		   type_show(connections[i].type),
 		   connections[i].user,
-		   connections[i].host );
+		   connections[i].host,
+		   time((time_t *)NULL)-connections[i].last_message_time  );
 	    }
 	}
     }

@@ -1,3 +1,30 @@
+bill        2002/12/10 11:35:46 EST	(20021210_0)
+
+  Modified files:
+    etc                  tcm.cf 
+    include              actions.h config.h 
+    src                  actions.c bothunt.c logging.c parse.c 
+  Log:
+  Submitted by:   Lee H
+  Approved by:    me
+  bill,
+  
+  attached diff does following:
+  - fixes support for ircd-ratbox
+  - adds seperate config entities for juped chans/nick floods
+     (jupe and nflood respectively)
+  
+  Revision  Changes    Path
+  1.31      +4 -0      tcm-hybrid/etc/tcm.cf
+  1.16      +4 -0      tcm-hybrid/include/actions.h
+  1.79      +2 -0      tcm-hybrid/include/config.h
+  1.41      +4 -0      tcm-hybrid/src/actions.c
+  1.205     +2 -2      tcm-hybrid/src/bothunt.c
+  1.54      +1 -1      tcm-hybrid/src/logging.c
+  1.84      +5 -0      tcm-hybrid/src/parse.c
+
+
+
 bill        2002/11/26 23:31:17 EST	(20021127_2)
 
   Modified files:

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.53 2002/05/27 17:32:20 db Exp $
+ * $Id: tcm_io.c,v 1.54 2002/05/27 17:42:07 db Exp $
  */
 
 #include <stdio.h>
@@ -85,9 +85,6 @@ read_packet(void)
   int  nread=0;
   int  i;
   struct timeval read_time_out;
-
-  current_time = time(NULL);
-  connections[server_id].last_message_time = current_time;
 
   eventAdd("check_clones", check_clones, NULL, CLONE_CHECK_TIME);
 
@@ -830,10 +827,11 @@ close_connection(int connnum)
 
   connections[connnum].socket = INVALID;
   connections[connnum].state = S_IDLE;
-  connections[connnum].io_read_function = NULL; /* blow up real good */
+  connections[connnum].io_read_function = NULL;	 /* blow up real good */
   connections[connnum].io_write_function = NULL; /* blow up real good */
   connections[connnum].io_close_function = NULL; /* blow up real good */
   connections[connnum].user_state = 0;
+  connections[connnum].time_out = 0;
 
   if ((connnum + 1) == maxconns)
     {
@@ -909,6 +907,8 @@ connect_to_server(const char *hostport)
     connections[i].time_out = SERVER_TIME_OUT;
   }
 
+  current_time = time(NULL);
+  connections[server_id].last_message_time = current_time;
   return(connections[i].socket);
 }
 

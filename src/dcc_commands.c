@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.33 2001/12/11 07:00:52 db Exp $ */
+/* $Id: dcc_commands.c,v 1.34 2001/12/13 03:57:17 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -2184,7 +2184,7 @@ kill_list_users(int sock,char *userhost, char *reason)
 {
   struct hashrec *userptr;
   /* Looks fishy but it really isn't */
-  char fulluh[MAX_HOST+MAX_DOMAIN];
+  char fulluh[MAX_HOST+MAX_DOMAIN+2];
   int i;
   int numfound = 0;
 

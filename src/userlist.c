@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.134 2002/06/24 00:40:22 db Exp $
+ * $Id: userlist.c,v 1.135 2002/06/24 02:30:39 db Exp $
  *
  */
 
@@ -1100,10 +1100,6 @@ type_show(unsigned long type)
 void
 reload_userlist(void)
 {
-#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
-  _reload_wingate(0, 0, NULL);
-#endif
-
   clear_userlist();
   load_userlist();
 

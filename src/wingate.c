@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.62 2002/06/24 01:23:27 db Exp $ */
+/* $Id: wingate.c,v 1.63 2002/06/24 02:30:39 db Exp $ */
 
 
 #include <netdb.h>
@@ -33,6 +33,9 @@
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
 
 
+#define SOCKS4			4
+#define SOCKS5			5
+
 #define SOCKS5_CONNECTING	4
 #define SOCKS4_CONNECTING	5
 #define SOCKS5_SENTVERSION	6
@@ -52,12 +55,7 @@ static int n_open_wingate_fds=0;
 int act_socks;
 static void report_open_socks(struct connection *connection_p);
 static void socks_start_test(struct user_entry *info_p, int socksversion);
-
-/* XXX */
-#if notyet
 static void read_socks(struct connection *connection_p);
-#endif
-
 static int n_open_socks_fds=0;
 #endif
 
@@ -133,7 +131,7 @@ wingate_start_test(struct user_entry *info_p)
 
   n_open_wingate_fds++;
 
-  strlcpy(found_p->pusername, info_p->username, MAX_USER);
+  strlcpy(found_p->username, info_p->username, MAX_USER);
   strlcpy(found_p->host, info_p->host, MAX_HOST);
   strlcpy(found_p->nick, info_p->nick, MAX_NICK);
   strlcpy(found_p->ip, info_p->ip_host, MAX_IP);
@@ -147,6 +145,8 @@ wingate_start_test(struct user_entry *info_p)
     }
   else
     {
+      if (n_open_wingate_fds > 0)
+	n_open_wingate_fds--;
       close_connection(found_p);
     }
 }
@@ -166,9 +166,6 @@ socks_start_test(struct user_entry *info_p, int socksversion)
   struct connection *found_p;
   struct sockaddr_in socketname;
 
-  /* XXX disable until done */
-return;
-
   if (n_open_socks_fds >= MAXSOCKS)
     return;
 
@@ -177,9 +174,9 @@ return;
 
   n_open_socks_fds++;
 
-  if (socksversion == 4)
+  if (socksversion == SOCKS4)
     found_p->curr_state = SOCKS4_CONNECTING;
-  else if(socksversion == 5)
+  else if(socksversion == SOCKS5)
     found_p->curr_state = SOCKS5_CONNECTING;
   else
     return;
@@ -206,13 +203,13 @@ return;
 static void
 squid_start_test(struct user_entry *info_p, int port)
 {
-  struct connect *found_p;
+  struct connection *found_p;
   struct sockaddr_in socketname;
 
   if (n_open_squid_fds >= MAXSQUID)
     return;
 
-  if ((found_p = find_free_connection_slot()) == NULL)
+  if ((found_p = find_free_connection()) == NULL)
     return;
 
   n_open_squid_fds++;
@@ -231,6 +228,8 @@ squid_start_test(struct user_entry *info_p, int port)
     }
   else
     {
+      if (n_open_squid_fds > 0)
+	n_open_squid_fds--;
       close_connection(found_p);
     }
 }
@@ -247,6 +246,8 @@ read_wingate(struct connection *connection_p)
 
   if (fstat(connection_p->socket, &buf) < 0)
     {
+      if (n_open_wingate_fds > 0)
+	n_open_wingate_fds--;
       close_connection(connection_p);
       return;
     }
@@ -309,8 +310,6 @@ read_squid(struct connection *connection_p)
 }
 #endif
 
-/* ZZZ XXX */
-#if notyet
 #ifdef DETECT_SOCKS
 
 static void
@@ -327,6 +326,8 @@ read_socks(struct connection *connection_p)
       tmp[3] = 0; /* EOF */
       if (write(connection_p->socket, tmp, 4) != 4)
 	{
+	  if (n_open_socks_fds > 0)
+	    n_open_socks_fds--;
 	  close_connection(connection_p);
 	  break;
 	} 
@@ -347,6 +348,8 @@ read_socks(struct connection *connection_p)
 		      connection_p->host);
 	    }
 	}
+      if (n_open_socks_fds > 0)
+	n_open_socks_fds--;
       close_connection(connection_p);
       break;
 
@@ -354,31 +357,30 @@ read_socks(struct connection *connection_p)
       tmp[0] = 4; /* socks v4 */
       tmp[1] = 1; /* connect */
 
-      *((unsigned short *) (tmp+2)) =
-	htons(SOCKS_CHECKPORT); /* Connect to port */
-
-      *((unsigned int *) (tmp+4)) = 
-	inet_addr(SOCKS_CHECKIP); /* Connect to ip */
+      /* Connect to port */
+      *((unsigned short *) (tmp+2)) = htons(SOCKS_CHECKPORT);
+      /* Connect to ip */
+      *((unsigned int *) (tmp+4)) = inet_addr(SOCKS_CHECKIP);
 
       strcpy(tmp+8, "tcm"); /* Dummy username */
-      if (write(socks[i].socket, tmp, 12)!=12)
+      if (write(connection_p->socket, tmp, 12) != 12)
 	{
-	  close(socks[i].socket);
+	  if (n_open_socks_fds > 0)
+	    n_open_socks_fds--;
+	  close_connection(connection_p);
 	  break;
 	} 
       if(config_entries.debug && outfile)
 	{
 	  fprintf(outfile,
 		  "DEBUG: Sent Socks 4 CONNECT to %s\n",
-		  socks[i].host);
+		  connection_p->host);
 	}
-      connections[i].state=SOCKS4_SENTCONNECT;
+      connection_p->state=SOCKS4_SENTCONNECT;
       break;
 
     case SOCKS4_SENTCONNECT:
       memset(tmp, 0xCC, sizeof(tmp));
-      close(connection_p);
-      break;
 
       if (tmp[1] != 90)
 	{
@@ -388,18 +390,21 @@ read_socks(struct connection *connection_p)
 		      "DEBUG: Socks 4 server at %s denies connect (0x%02hhx)\n",
 		      connection_p->host, tmp[1]);
 	    }
+	  if (n_open_socks_fds > 0)
+	    n_open_socks_fds--;
 	  close_connection(connection_p);
 	  break;
 	}
       report_open_socks(connection_p);
-      close(connection_p);
+      if (n_open_socks_fds > 0)
+	n_open_socks_fds--;
+      close_connection(connection_p);
       break;
     default:
       break;
     }
 }
 #endif	/* #ifdef SOCKS */
-#endif	/* #if notyet */
 
 void
 user_signon(struct user_entry *info_p)
@@ -410,8 +415,8 @@ user_signon(struct user_entry *info_p)
       wingate_start_test(info_p);
 #endif
 #ifdef DETECT_SOCKS
-      socks_start_test(info_p, 4);
-      socks_start_test(info_p, 5);
+      socks_start_test(info_p, SOCKS4);
+      socks_start_test(info_p, SOCKS5);
 #endif
 #ifdef DETECT_SQUID
       squid_start_test(info_p, 80);
@@ -420,16 +425,6 @@ user_signon(struct user_entry *info_p)
       squid_start_test(info_p, 3128);
 #endif
     }
-}
-
-
-/* XXX */
-void
-_reload_wingate(int connnum, int argc, char *argv[])
-{
-#if 0
-  int cnt;
-#endif
 }
 
 #ifdef DETECT_WINGATE

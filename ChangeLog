@@ -1,3 +1,21 @@
+db          2002/05/28 01:46:43 EDT	(20020528_10)
+
+  Modified files:
+    include              actions.h tcm.h 
+    src                  bothunt.c main.c tcm_io.c 
+  Log:
+  - use an event to reconnect tcm to server after timeout or other error
+  - move more prototypes into right headers
+  
+  Revision  Changes    Path
+  1.3       +7 -0      tcm-hybrid/include/actions.h
+  1.44      +0 -8      tcm-hybrid/include/tcm.h
+  1.126     +1 -0      tcm-hybrid/src/bothunt.c
+  1.89      +4 -3      tcm-hybrid/src/main.c
+  1.60      +21 -13    tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/28 00:32:27 EDT	(20020528_9)
 
   Modified files:

@@ -1,3 +1,17 @@
+leeh        2002/06/21 14:39:01 EDT	(20020621_19)
+
+  Modified files:
+    include              config.h 
+    src                  tools.c 
+  Log:
+  - removed MAXHOSTS, initialise m->data to NULL.
+  
+  Revision  Changes    Path
+  1.70      +0 -4      tcm-hybrid/include/config.h
+  1.2       +1 -0      tcm-hybrid/src/tools.c
+
+
+
 leeh        2002/06/21 14:36:38 EDT	(20020621_18)
 
   Modified files:

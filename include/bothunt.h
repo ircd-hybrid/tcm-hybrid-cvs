@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.51 2002/06/21 14:07:34 leeh Exp $ */
+/* $Id: bothunt.h,v 1.52 2002/06/21 15:34:12 leeh Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -124,7 +124,6 @@ void init_link_look_table(void);
 void init_bothunt(void);
 void clear_bothunt(void);
 void on_trace_user(int argc, char *argv[]);
-void on_stats_e(int argc, char *argv[]);
 void on_stats_i(int argc, char *argv[]);
 void on_server_notice(struct source_client *, int argc, char *argv[]);
 int  get_user_host(char **user_p, char **host_p, char *user_host);

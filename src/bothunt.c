@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.171 2002/06/21 15:20:51 leeh Exp $
+ * $Id: bothunt.c,v 1.172 2002/06/21 15:34:14 leeh Exp $
  */
 
 #include <stdio.h>
@@ -180,40 +180,6 @@ on_trace_user(int argc, char *argv[])
   strlcpy(userinfo.nick, argv[5], MAX_NICK);
   strlcpy(userinfo.ip_host, argv[6]+1, MAX_IP);
   add_user_host(&userinfo, YES, is_oper);
-}
-
-/* 
- * on_stats_e()
- *
- * inputs	- body of server message
- * output	- none
- * side effects	- exception list of tcm is built up from stats E of server
- * 
- */
-void
-on_stats_e(int argc, char *argv[])
-{
-  char *user;
-  char *host;
-  char body[MAX_BUFF];
-
-  expand_args(body, MAX_BUFF, argc, argv);
-
-  if ((strtok(body," ") == NULL) )		/* discard this field */
-    return;
-
-  /* should be 'E' */
-    
-  if ((host = strtok(NULL," ")) == NULL)
-    return;
-
-  if ((strtok(NULL," ") == NULL))
-    return;
-
-  if ((user = strtok(NULL," ")) == NULL)	/* NOW user */
-    return;
-
-  add_exemption(user, host, 0);
 }
 
 /* 

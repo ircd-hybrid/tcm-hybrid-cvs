@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.74 2002/06/21 12:56:22 leeh Exp $
+ * $Id: parse.c,v 1.75 2002/06/21 15:34:14 leeh Exp $
  */
 
 #include <stdio.h>
@@ -435,11 +435,6 @@ process_server(struct source_client *source_p, char *function, char *param)
       server_link_closed(0);
       break;
 	
-    case RPL_STATSELINE:
-    case RPL_STATSFLINE:
-      on_stats_e(argc, argv);
-      break;
-
     default:
       break;
   }

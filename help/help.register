@@ -1,0 +1,4 @@
+Usage: .register <password>
+
+ Attempts to register with the given password
+

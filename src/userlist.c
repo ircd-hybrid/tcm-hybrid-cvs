@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.155 2004/06/02 20:05:56 bill Exp $
+ * $Id: userlist.c,v 1.156 2004/06/03 02:51:37 bill Exp $
  */
 
 #include <errno.h>
@@ -440,7 +440,7 @@ on_stats_o(int argc, char *argv[])
 
 void
 add_oper(char *username, char *host, char *usernick, 
-         char *password, char flags)
+         char *password, int flags)
 {
   dlink_node *ptr;
   struct oper_entry *user;
@@ -457,7 +457,8 @@ add_oper(char *username, char *host, char *usernick,
   strlcpy(user->usernick, usernick, sizeof(user->usernick));
   strlcpy(user->password, password, sizeof(user->password));
 
-  //set_initial_umodes(user);
+  user->type = flags;
+  set_initial_umodes(user);
 
   dlink_add_tail(user, ptr, &user_list);
 }

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.95 2004/06/02 02:00:41 bill Exp $ */
+/* $Id: userlist.h,v 1.96 2004/06/03 02:51:35 bill Exp $ */
 
 #include "setup.h"
 #include "tools.h"
@@ -91,7 +91,7 @@ struct exempt_entry
 
 struct oper_entry *find_user_in_userlist(const char *);
 
-void add_oper(char *, char *, char *, char *, char);
+void add_oper(char *, char *, char *, char *, int);
 void show_stats_p(const char *nick);
 void set_umode(struct oper_entry *, int, const char *);
 void on_stats_o(int, char *argv[]);

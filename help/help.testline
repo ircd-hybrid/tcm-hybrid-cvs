@@ -1,0 +1,3 @@
+Usage: .testline <pattern>
+
+ Calls the TESTLINE function to determine if the given pattern has access to the server

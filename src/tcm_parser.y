@@ -3,7 +3,7 @@
  *
  * config file parser
  *
- * $Id: tcm_parser.y,v 1.1 2004/06/02 02:00:44 bill Exp $
+ * $Id: tcm_parser.y,v 1.2 2004/06/03 02:51:37 bill Exp $
  */
 
 %{
@@ -19,13 +19,13 @@
 #include "conf.h"
 #include "bothunt.h"
 
-int current_action;
+int current_action, flags;
 
 char oper_nick[MAX_NICK];
 char oper_pass[MAX_CONFIG];
 char oper_user[MAX_USER];
 char oper_host[MAX_HOST];
-char *user, *host, flags;
+char *user, *host;
 
 %}
 
@@ -292,14 +292,14 @@ general_vhost: VHOST '=' QSTRING ';'
 
 operator_entry: OPERATOR
 {
-  oper_nick[0] = oper_pass[0] = flags = '\0';
+  oper_nick[0] = oper_pass[0] = flags = 0;
 } '{' operator_items '}' ';'
 {
   if (oper_nick[0] == '\0')
     break;
 
   add_oper(oper_user, oper_host, oper_nick, oper_pass, flags);
-  oper_user[0] = oper_host[0] = oper_nick[0] = oper_pass[0] = flags = '\0';
+  oper_user[0] = oper_host[0] = oper_nick[0] = oper_pass[0] = flags = 0;
 };
 
 operator_items: operator_items operator_item | operator_item;
@@ -310,7 +310,7 @@ operator_name: NAME '=' QSTRING ';'
   if (oper_nick[0] != '\0')
   {
     add_oper(oper_user, oper_host, oper_nick, oper_pass, flags);
-    oper_user[0] = oper_host[0] = oper_nick[0] = oper_pass[0] = flags = '\0';
+    oper_user[0] = oper_host[0] = oper_nick[0] = oper_pass[0] = flags = 0;
   }
 
   strlcpy(oper_nick, yylval.string, sizeof(oper_nick));
@@ -335,7 +335,7 @@ operator_flags: FLAGS
   if (oper_nick[0] == '\0')
     break;
 
-  flags = '\0';
+  flags = 0;
 } '=' operator_flags_types ';';
 
 operator_flags_types: operator_flags_types ',' operator_flags_type_item | operator_flags_type_item;

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.156 2004/06/02 20:05:55 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.157 2004/06/03 02:51:37 bill Exp $ */
 
 #include "setup.h"
 
@@ -595,8 +595,7 @@ m_motd(struct connection *connection_p, int argc, char *argv[])
 void
 m_save(struct connection *connection_p, int argc, char *argv[])
 {
-  send_to_all(NULL, FLAGS_ALL, "%s is saving %s and preferences",
-              connection_p->registered_nick, CONFIG_FILE);
+  send_to_all(NULL, FLAGS_ALL, "%s is saving user preferences");
   save_umodes(connection_p->registered_nick);
 }
 

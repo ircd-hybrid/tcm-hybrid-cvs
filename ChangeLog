@@ -1,3 +1,12 @@
+*** 20011011_4 by bill
+- Thanks to Taske (irc.daxnet.no admin) for pointing out multiple typos
+  and formatting mistakes
+- Fixed .vbots to correct threshold
+- Ultimate robustness (yes, it is a word now) in .action
+- Removed .hlist and .ulist from help files (the commands were removed some
+  time ago, use .list *@host or .list user@*)
+
+
 *** 20011011_3 by bill
 - I never remember to remove my fripping debug statements
 

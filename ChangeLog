@@ -1,3 +1,15 @@
+einride     2002/03/06 06:06:42 EST	(20020306_4)
+
+  Modified files:
+    modules              serverif.c 
+  Log:
+  Added check for MAX_ARGV exceeds in input splitting to argv[]
+  
+  Revision  Changes    Path
+  1.42      +2 -2      tcm-hybrid/modules/serverif.c
+
+
+
 einride     2002/03/06 05:58:59 EST	(20020306_3)
 
   Modified files:

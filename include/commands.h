@@ -2,7 +2,7 @@
 #define __COMMANDS_H
 
 void init_allow_nick();
-void dccproc(int);	
+void dccproc(int connnum, int argc, char *argv[]);	
 
 /* hybrid-7 stuff again.  this time it's ver-batum because ultimately,
  * waaay down the line, the modules we're loading here will work in

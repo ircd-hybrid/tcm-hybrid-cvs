@@ -37,7 +37,6 @@
 #include "serverif.h"
 #include "logging.h"
 #include "commands.h"
-#include "abuse.h"
 #include "stdcmds.h"
 #include "modules.h"
 
@@ -45,7 +44,8 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.2 2001/09/19 16:27:03 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.3 2001/09/20 19:52:30 bill Exp $";
+char *_version="20012009";
 
 static int is_kline_time(char *p);
 static int not_legal_remote(int);
@@ -78,7 +78,7 @@ extern char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 ** dccproc()
 **   Handles processing of dcc chat commands
 */
-void dccproc(int connnum)
+void dccproc(int connnum, int argc, char *argv[])
 {
 
 /* *sigh* maximum allow for MAXIMUM sprintf limit */
@@ -88,21 +88,29 @@ void dccproc(int connnum)
 
 #define FLUFF_SIZE (4*MAX_NICK)+10
 
-  char *buffer = connections[connnum].buffer;
+  char buff[MAX_BUFF];
   char dccbuff[MAX_BUFF];
   char who_did_command[2*MAX_NICK];
   char fulluh[MAX_HOST+MAX_DOMAIN];
-  /* int i; - SAYS unused */
+  int i;
   int opers_only = SEND_ALL_USERS; 	/* Is it an oper only message ? */
   int ignore_bot = NO;
   char *param1;
   char *param2;
   char *param3;
   char *param2_orig;
+  char *buffer = buff;
   int kline_time = 0;
 #ifdef DEBUGMODE
   placed;
 #endif
+
+  for (i=0;i<argc;++i)
+    {
+      strncat(buff, argv[i], sizeof(buff)-strlen(buff));
+      strncat(buff, " ", sizeof(buff)-strlen(buff));
+    }
+  if (buff[strlen(buff)-1] == ' ') buff[strlen(buff)-1] = '\0';
 
 /* Make terribly sure that incoming buffer isn't larger than outgoing */
   if(strlen(buffer) > (MAX_BUFF - FLUFF_SIZE))
@@ -123,117 +131,8 @@ void dccproc(int connnum)
      or, its from a remote tcm to be passed onto another tcm
   */
 
-  if(*buffer == ':')
-    {
-      char *to;
-      char *from;
-      char *to_nick;
-      char *to_tcm;
-      char *from_nick;
-      char *from_tcm;
-
-      buffer++;	/* skip the ':' */
-
-      if(connections[connnum].type & TYPE_TCM)
-	{
-	  if( !(to = strtok(buffer," ")) )
-	    return;
-
-	  if( !(from = strtok((char *)NULL," ")) ) 
-	    return;
-
-	  to_nick = to;
-
-	  if( !(to_tcm = strchr(to,'@')) )
-	    {
-	      to_tcm = to;
-	    }
-	  else
-	    {
-	      *to_tcm = '\0';
-	      to_tcm++;
-	    }
-
-	  from_nick = from;
-	  strncpy(who_did_command,from,2*MAX_NICK);
-
-	  if( !(from_tcm = strchr(from,'@')) )
-	    return;
-
-	  *from_tcm = '\0';
-	  from_tcm++;
-
-	  if( !(buffer = strtok((char *)NULL,"")) )
-	    return;
-
-	  while(*buffer == ' ')
-	    buffer++;
-
-	  if( !strcasecmp(to_tcm,config_entries.dfltnick) )	
-	    {
-	      /* Directed to someone on this tcm */
-	      if( !strcasecmp(to_nick,config_entries.dfltnick) )
-		{
-		  /* Directed to the tcm itself */
-		  /* Set up to let prnt return to this address */
-		  strncpy(route_entry.to_nick,from_nick,MAX_NICK);
-		  strncpy(route_entry.to_tcm,from_tcm,MAX_NICK);
-		  strncpy(route_entry.from_nick,
-			  config_entries.dfltnick,MAX_NICK);
-		  strncpy(route_entry.from_tcm,
-			  config_entries.dfltnick,MAX_NICK);
-		}
-	      else
-		{
-		  /* Directed to this nick on the tcm */
-		  send_to_nick(to_nick,buffer);
-		  return;
-		}
-	    }
-	  else
-	    {
-	      /* Directed to someone on another tcm */
-	      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,":%s@%s %s@%s %s\n",
-			to_nick,
-			to_tcm,
-			from_nick,
-			from_tcm,
-			buffer);
-
-	      sendto_all_linkedbots(dccbuff);
-	      return;
-	    }
-	}
-      else	/* Its user */
-	{
-	  /* :server .command */
-
-	  if( !(to_nick = strtok(buffer," ")) )
-	    return;
-
-	  if( !(buffer = strtok((char *)NULL,"")) )
-	    return;
-
-	  while(*buffer == ' ')
-	    buffer++;
-
-	  (void)snprintf(dccbuff,sizeof(dccbuff) - 1,":%s@%s %s@%s %s\n",
-			to_nick,
-			to_nick,
-			connections[connnum].nick,
-			config_entries.dfltnick,
-			buffer);
-
-	  sendto_all_linkedbots(dccbuff);
-	  return;
-	}
-    }
-  else
-    {
-      (void)snprintf(who_did_command,sizeof(who_did_command) - 1, "%s@%s",
-		    connections[connnum].nick,config_entries.dfltnick);
-
-    }
+  (void)snprintf(who_did_command,sizeof(who_did_command) - 1, "%s@%s",
+	         connections[connnum].nick,config_entries.dfltnick);
 
   if(*buffer != '.')
     {	
@@ -285,56 +184,10 @@ void dccproc(int connnum)
       return;
     }
 
-  if((connections[connnum].type & TYPE_TCM) &&
-     ( !(route_entry.to_nick[0]) ))
-    {
-      if(buffer[1] != 'T')	/* You didn't see this and
-				 *  I won't admit to it
-				 */
-	{
-	  if(connections[connnum].type & TYPE_REGISTERED)
-	    {
-	      strcat(buffer,"\n");
-	      sendto_all_linkedbots(buffer);
-	      toserv(buffer+1);
-	    }
-	  return;
-	}
-    }
-
   buffer++;	/* skip the '.' */
 
   if( !(param1 = strtok(buffer," ")) )
     return;
-
-  if( (param2 = strtok((char *)NULL," ")) )
-    {
-      if(*param2 == '@')
-	{
-	  param3 = strtok((char *)NULL,"");
-
-	  /* Directed to someone on another tcm */
-	  if(param3)
-	    {
-	      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,":%s@%s %s .%s %s\n",
-			    param2+1,
-			    param2+1,
-			    who_did_command,
-			    param1,
-			    param3);
-	    }
-	  else
-	    {
-	      (void)snprintf(dccbuff,sizeof(dccbuff) - 1,":%s@%s %s .%s\n",
-			    param2+1,
-			    param2+1,
-			    who_did_command,
-			    param1);
-	    }
-	  sendto_all_linkedbots(dccbuff);
-	  return;
-	}
-    }
 
   if(config_entries.hybrid)
     {
@@ -1106,159 +959,6 @@ void dccproc(int connnum)
       break;
 #endif
       
-    case K_TCMCONN:
-      {
-	if(connections[connnum].type & TYPE_OPER)
-	  {
-	    int j;
-	    int new_connnum;
-
-	    if( !param2 )
-	      {
-		prnt(connections[connnum].socket,
-		     "You must specify a tcm nick to connect\n");
-		return;
-	      }
-
-	    for(j=0; j < MAXTCMS;j++)
-	      {
-		int sock;
-		
-		if(!tcmlist[j].host[0]) break;
-
-		if( !(strcasecmp(tcmlist[j].theirnick, param2)) )
-		  continue;
-
-		if(tcmlist[j].port == 0)
-		  (void)snprintf(dccbuff,sizeof(dccbuff) - 1,"%s:%d",
-				tcmlist[j].host,
-				TCM_PORT);
-		else
-		  (void)snprintf(dccbuff,sizeof(dccbuff) - 1,"%s:%d",
-				tcmlist[j].host,
-				tcmlist[j].port);
-
-		if((sock = bindsocket(dccbuff)) > 0)
-		  {
-		    new_connnum = add_connection(sock,j);
-		    if(new_connnum == INVALID)
-		      {
-			sendtoalldcc(SEND_ALL_USERS,
-				     "Failed tcm connection to %s\n",
-				     param2);
-			(void)close(sock);
-		      }
-		    else
-		      {
-			int k;
-
-			/* Extra paranoia doesn't hurt at all */
-			if(tcmlist[j].theirnick[0] && tcmlist[j].password[0])
-			  {
-			    prnt(sock,"%s %s %s\n",
-				 tcmlist[j].theirnick,
-				 config_entries.dfltnick,
-				 tcmlist[j].password);
-			    (void)snprintf(dccbuff,sizeof(dccbuff) - 1,
-                                          ".TCMINTRO %s %s ",
-					  config_entries.dfltnick,
-					  tcmlist[j].theirnick);
-
-			    for (k=1;k<maxconns;++k)
-			      if (connections[j].socket != INVALID)
-				{
-				  if(connections[k].type & TYPE_TCM)
-				    {
-				      (void)strcat(dccbuff," ");
-				      (void)strcat(dccbuff,
-						   connections[j].nick);
-				    }
-				}
-			    strcat(dccbuff,"\n");
-			    sendto_all_linkedbots(dccbuff);
-			    sendtoalldcc(SEND_ALL_USERS,
-					 "tcm connecting to %s\n", param2);
-			  }
-		      }
-		  }
-		else
-		  {
-		    sendtoalldcc(SEND_ALL_USERS,
-				 "tcm failed to connect to %s\n",
-				 param2);
-		    (void)close(sock);
-		  }
-	      }
-	  }
-	else
-	  {
-	    not_authorized(connections[connnum].socket);
-	  }
-      }
-    break;
-
-    case K_TCMINTRO:
-      {
-	/* param2 param3 are possibly already set up for tcm nicks... */
-	/* I pick up any more after param3 using tcmnick */
-
-	char *tcmnick;
-	char *newtcm;
-
-	if(param2)
-	  {
-	    if(config_entries.debug)
-	      {
-		fprintf(outfile, "DEBUG: tcmnick [%s] ", param2);
-	      }
-	  }
-	else
-	  return;
-
-	newtcm = strtok(param3," ");;
-	if(newtcm)
-	  {
-	    if(config_entries.debug)
-	      {
-		fprintf(outfile, "linking [%s]\n", newtcm);
-	      }
-	  }
-	else
-	  return;
-
-	tcmnick = strtok((char *)NULL," ");
-	while(tcmnick)
-	  {
-	    if(config_entries.debug)
-	      {
-		fprintf(outfile, "DEBUG: introducing [%s]\n", tcmnick);
-	      }
-
-	    if( already_have_tcm(tcmnick) )
-	      {
-		
-		if(config_entries.debug)
-		  {
-		    fprintf(outfile, "DEBUG: already have [%s]\n",  tcmnick);
-		  }
-		sendtoalldcc(SEND_ALL_USERS,
-   "!%s! Routing loop tcm [%s] linking in [%s] finding already present [%s]\n",
-			   config_entries.dfltnick,param2,newtcm,tcmnick);
-
-		(void)snprintf(dccbuff,sizeof(dccbuff) - 1,
-                            ":%s@%s -@%s .disconnect %s\n",
-			    param2,
-			    param2,
-			    config_entries.dfltnick,
-			    newtcm);
-
-		sendto_all_linkedbots(dccbuff);
-	      }
-	    tcmnick = strtok((char *)NULL," ");
-	  }
-      }
-      break;
-
     case K_ALLOW:
       if (connections[connnum].type & TYPE_REGISTERED)
 	handle_allow(connections[connnum].socket,param2,who_did_command);
@@ -1444,33 +1144,6 @@ void dccproc(int connnum)
 	prnt(connections[connnum].socket,"Not hybrid server\n" );
 
       break;
-
-    case K_KFIND:
-      if(!(connections[connnum].type & TYPE_OPER))
-	{
-	  not_authorized(connections[connnum].socket);
-	}
-      else
-	{
-	  if(param2_orig)
-	    kfind(connections[connnum].socket,param2_orig);
-	  else
-	    prnt(connections[connnum].socket, "Usage: .kfind <hostmask>\n");
-	}
-      break;
-
-    case K_VMULTI:
-      if(!(connections[connnum].type & TYPE_OPER))
-	{
-	  not_authorized(connections[connnum].socket);
-	}
-      else
-	{
-	  if (param2_orig) report_vmulti(connections[connnum].socket, atoi(param2_orig));
-	  else report_vmulti(connections[connnum].socket, 3);
-	}
-      break;
-
 
     case K_AUTOPILOT:
       if(!(connections[connnum].type & TYPE_OPER))
@@ -2624,10 +2297,6 @@ static void handle_gline(int sock,char *pattern,char *reason,
 		 format_reason(reason),
 		 who_did_command);
 
-	  snprintf(dccbuff,sizeof(dccbuff) - 1,".KLINE %s :%s by %s\n",
-		  pattern,format_reason(reason),who_did_command);
-
-	  sendto_all_linkedbots(dccbuff);
 	}
       else
 	{
@@ -2653,4 +2322,9 @@ static void handle_gline(int sock,char *pattern,char *reason,
 static void not_authorized(int sock)
 {
   prnt(sock,"Only authorized opers may use this command\n");
+}
+
+void _modinit()
+{
+  add_common_function(F_DCC, dccproc);
 }

@@ -12,6 +12,7 @@ DEFINES =
 
 # -O for optimization.  Can't debug.  Use -g for debuggable code.
 CFLAGS = -g -O2
+LDFLAGS = -Wl,-export-dynamic
 
 # Debuggers CFLAGS
 # CFLAGS = -g -O -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations
@@ -40,7 +41,7 @@ distclean: clean
 	${CC} ${CPPFLAGS} ${CFLAGS} ${DEFINES} -c $<
 
 build: ${OBJECTS}
-	${CC} ${CFLAGS} -o ../bin/tcm ${OBJECTS} ${TCMLIBS}
+	${CC} ${CFLAGS} ${LDFLAGS} -o ../bin/tcm ${OBJECTS} ${TCMLIBS}
 
 lint:
 	lint -aacgprxhH $(CPPFLAGS) $(SOURCES) >../lint.out

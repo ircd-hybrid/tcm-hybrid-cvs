@@ -23,7 +23,6 @@
 #include "logging.h"
 #include "stdcmds.h"
 #include "wild.h"
-#include "abuse.h"
 #include "modules.h"
 
 #ifdef DMALLOC
@@ -34,7 +33,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.14 2001/09/19 03:30:21 bill Exp $";
+static char *version="$Id: userlist.c,v 1.15 2001/09/20 19:52:30 bill Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct tcm_file_entry tcmlist[MAXTCMS];
@@ -1210,11 +1209,6 @@ void clear_userlist()
       banlist[cnt].user[0] = '\0';
       banlist[cnt].host[0] = '\0';
     }
-
-  for (temp=reload;temp;temp=temp->next)
-    {
-      temp->function(0, 0, NULL);
-    }
 }
 
 /*
@@ -1615,6 +1609,7 @@ void reload_user_list(int sig)
 
   for (temp=reload;temp;temp=temp->next)
     temp->function(sig, 0, NULL);
+  printf("erm.\n");
   clear_userlist();
   load_userlist();
   load_prefs();

@@ -1,12 +1,24 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
+/* maximum IP length in adduserhost() removeuserhost() */
+#define MAX_IP 20
 #define MAX_CONFIG	80
+#define HASHTABLESIZE 3001
+#define MAXFROMHOST    50
+#define CLONEDETECTINC 15
+#define NICK_CHANGE_TABLE_SIZE 100
 
 struct f_entry {
   int type;
   char uhost[MAX_NICK+2+MAX_HOST];
   struct f_entry *next;
+};
+
+struct sortarray
+{
+  struct userentry *domainrec;
+  int count;
 };
 
 struct a_entry {
@@ -15,8 +27,47 @@ struct a_entry {
   char reason[MAX_CONFIG];
   int type, report;
 };
-
 struct a_entry actions[MAX_ACTIONS];
+
+struct nick_change_entry
+{
+  char user_host[MAX_USER+MAX_HOST];
+  char last_nick[MAX_NICK];
+  int  nick_change_count;
+  time_t first_nick_change;
+  time_t last_nick_change;
+  int noticed;
+};
+struct nick_change_entry nick_changes[NICK_CHANGE_TABLE_SIZE];
+
+struct failrec
+{
+  char user[MAX_NICK+1];
+  char host[MAX_HOST];
+  int botcount;
+  int failcount;
+  struct failrec *next;
+};
+struct failrec *failures;
+
+struct userentry {
+  char nick[MAX_NICK];
+  char user[MAX_NICK+1];
+  char host[MAX_HOST];
+  char ip_host[MAX_IP];         /* host ip as string */
+  char ip_class_c[MAX_IP];      /* /24 of host ip as string */
+  char domain[MAX_DOMAIN];
+  char link_count;
+  char isoper;
+  char class[100];		/* -1 if unknown */
+  time_t connecttime;
+  time_t reporttime;
+};
+
+struct hashrec {
+  struct userentry *info;
+  struct hashrec *collision;
+};
 
 struct config_list {
   int  hybrid;
@@ -152,6 +203,10 @@ int islinkedbot(int connnum, char *botname, char *password);
 void init_userlist(void);
 void reload_user_list(int sig);
 
+struct hashrec *usertable[HASHTABLESIZE];
+struct hashrec *hosttable[HASHTABLESIZE];
+struct hashrec *domaintable[HASHTABLESIZE];
+struct hashrec *iptable[HASHTABLESIZE];
 struct config_list config_entries;
 
 /* channel_report flags */

@@ -55,14 +55,13 @@
 #define K_LOAD		53
 #define K_LOCOPS        54
 #define K_INFO          55
-#define K_KFIND         56
-#define K_VMULTI	57
-#define K_ULIST         58
-#define K_HLIST         59
-#define K_KDRONE	60
-#define K_UPTIME        61
-#define K_AUTOPILOT     62
-#define K_QUOTE         63
+#define K_VMULTI	56
+#define K_ULIST         57
+#define K_HLIST         58
+#define K_KDRONE	59
+#define K_UPTIME        60
+#define K_AUTOPILOT     61
+#define K_QUOTE         62
 
 char *splitc (char *rest, char divider);
 char *split (char *first);

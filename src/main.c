@@ -48,7 +48,6 @@
 #include "bothunt.h"
 #include "modules.h"
 /*#include "token.h"
-#include "abuse.h"
 #include "logging.h"
 #include "stdcmds.h"
 #include "commands.h"
@@ -60,19 +59,21 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.1 2001/09/19 16:28:43 bill Exp $";
+static char *version="$Id: main.c,v 1.2 2001/09/20 19:52:30 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
 extern struct a_entry actions[100];
 extern int load_all_modules(int log);
 
-static unsigned long local_ip(void);
+unsigned long local_ip(void);
 struct connection connections[MAXDCCCONNS+1]; /* plus 1 for the server, silly */
 
 char ourhostname[MAX_HOST];   /* This is our hostname with domainname */
 char serverhost[MAX_HOST];    /* Server tcm will use. */
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
+
+fd_set writefds;
 
 /* kludge for ensuring no direct loops */
 int  incoming_connnum;	      /* current connection number incoming */
@@ -109,7 +110,11 @@ void init_hash_tables(void)
   if (reload) memset(reload,0,sizeof(struct common_function));
   if (wallops) memset(wallops,0,sizeof(struct common_function));
   if (onjoin) memset(onjoin,0,sizeof(struct common_function));
+  if (onctcp) memset(onctcp,0,sizeof(struct common_function));
+  if (ontraceuser) memset(ontraceuser,0,sizeof(struct common_function));
+  if (ontraceclass) memset(ontraceclass,0,sizeof(struct common_function));
   if (server_notice) memset(server_notice,0,sizeof(struct common_function));
+  if (statsi) memset(statsi,0,sizeof(struct common_function));
 }
 
 /*
@@ -409,7 +414,7 @@ void closeconn(int connnum)
  * side effects	- NONE
  */
 
-static unsigned long local_ip(void)
+unsigned long local_ip(void)
 {
   struct hostent *local_host;
   unsigned long l_ip;
@@ -721,23 +726,20 @@ int main(int argc, char *argv[])
 
   temp_b[0] = config_entries.server_name;
   temp_b[1] = config_entries.rserver_name;
+  amianoper = NO;
+  startup_time = time(NULL);
+  for (temp=signon;temp;temp=temp->next)
+    temp->function(0, 0, NULL);
+  init_allow_nick();
+  modules_init();
+  load_all_modules(YES);
   for (temp=signon;temp;temp=temp->next)
     temp->function(0, 2, temp_b);
 
-  amianoper = NO;
-  startup_time = time(NULL);
-  init_allow_nick();
-  load_all_modules(YES);
-
   while(!quit)
     {
-      for (temp=continuous;temp;temp=temp->next)
-        {
-#ifdef DEBUGMODE
-          printf("hello\n");
-#endif
-          temp->function(0, 0, NULL);
-        }
+      for (temp=upper_continuous;temp;temp=temp->next)
+        temp->function(0, 0, NULL);
     }
 
   for (temp=signoff;temp;temp=temp->next)

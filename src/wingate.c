@@ -42,6 +42,8 @@ struct wingates {
 };
 #endif
 
+char *_version="20012009";
+
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS)
 char wingate_class_list[MAXWINGATES][100];
 int  wingate_class_list_index;
@@ -65,7 +67,7 @@ int wingate_class_list_index;
 
 extern time_t cur_time;
 
-static void proc_config(int connnum, int argc, char *argv[])
+void proc_config(int connnum, int argc, char *argv[])
 {
 
 }
@@ -231,7 +233,7 @@ int socks_bindsocket(char *nick,char *user,char *host,char *ip)
 }
 #endif
 
-static void _scontinuous(int connnum, int argc, char *argv[])
+void _scontinuous(int connnum, int argc, char *argv[])
 {
   char sillybuf[1];
   int i;
@@ -312,7 +314,7 @@ static void _scontinuous(int connnum, int argc, char *argv[])
 
 }
 
-static void _continuous(int connnum, int argc, char *argv[])
+void _continuous(int connnum, int argc, char *argv[])
 {
   int i;
 
@@ -350,7 +352,7 @@ static void _continuous(int connnum, int argc, char *argv[])
 
 }
 
-static void _user_signon(int connnum, int argc, char *argv[])
+void _user_signon(int connnum, int argc, char *argv[])
 {
   if (connnum) return; /* in this case, connnum means if it's from TRACE or not */
   if (wingate_class(argv[4]))
@@ -363,7 +365,8 @@ static void _user_signon(int connnum, int argc, char *argv[])
 #endif
     }
 }
-static void _reload(int connnum, int argc, char *argv[])
+
+void _reload_wingate(int connnum, int argc, char *argv[])
 {
   int cnt;
 
@@ -398,7 +401,7 @@ static void _reload(int connnum, int argc, char *argv[])
 #endif
 }
 
-static void _prefsave(int connnum, int argc, char *argv[])
+void _prefsave(int connnum, int argc, char *argv[])
 {
   int i;
 #ifdef DETECT_WINGATE
@@ -472,12 +475,12 @@ static void report_open_socks(int i)
 }
 #endif
 
-static void _modinit()
+void _modinit()
 {
   int i;
   add_common_function(F_CONFIG, proc_config);
   add_common_function(F_PREFSAVE, _prefsave);
-  add_common_function(F_RELOAD, _reload);
+  add_common_function(F_RELOAD, _reload_wingate);
   add_common_function(F_USER_SIGNON, _user_signon);
   add_common_function(F_CONTINUOUS, _continuous);
   add_common_function(F_SCONTINUOUS, _scontinuous);

@@ -6,6 +6,8 @@
  */
 #define SERVER_TIME_OUT 300
 
+time_t cur_time;
+
 /*
  * This structure defines who is connected to this tcm.
  */
@@ -90,11 +92,3 @@ void msg_mychannel(char *msg,...);
 #define PING_OUT_TIME 300
 
 #endif
-
-
-
-
-
-
-
-

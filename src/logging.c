@@ -40,13 +40,12 @@
 #include "bothunt.h"
 #include "logging.h"
 
-static char *version="$Id: logging.c,v 1.10 2001/09/19 03:30:21 bill Exp $";
+static char *version="$Id: logging.c,v 1.11 2001/09/20 19:52:30 bill Exp $";
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file
 			    */
 
-extern struct failrec *failures;
 extern struct connection connections[];
 
 static FILE *initlog(void);
@@ -453,6 +452,65 @@ void log_kline(char *command_name,
 }
 
 /*
+ * logfailure()
+ *
+ * inputs       - pointer to nick!user@host
+ *              - if a bot reject or not
+ * output       - NONE
+ * side effects -
+ */
+
+void logfailure(char *nickuh,int botreject)
+{
+  struct plus_c_info userinfo;
+  struct failrec *tmp, *hold = NULL;
+
+  chopuh(YES,nickuh,&userinfo); /* use trace form of chopuh() */
+
+  tmp = failures;
+  while (tmp)
+    {
+      if(!strcasecmp(tmp->user,userinfo.user)&&!strcasecmp(tmp->host,
+                                                           userinfo.host))
+        {
+          /* For performance, move the most recent to the head of the queue */
+          if (hold)
+            {
+              hold->next = tmp->next;
+              tmp->next = failures;
+              failures = tmp;
+            }
+          break;
+        }
+      hold = tmp;
+      tmp = tmp->next;
+    }
+
+  if (!tmp)
+    {
+      tmp = (struct failrec *)malloc(sizeof(struct failrec));
+      if(tmp == (struct failrec *)NULL)
+        {
+          prnt(connections[0].socket,"Ran out of memory in logfailure\n");
+          sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in logfailure");
+          gracefuldie(0, __FILE__, __LINE__);
+        }
+
+      strncpy(tmp->user,userinfo.user,11);
+      tmp->user[10] = '\0';
+      strncpy(tmp->host,userinfo.host,MAX_HOST);
+      tmp->host[79] = '\0';
+      tmp->failcount = tmp->botcount = 0;
+      tmp->next = failures;
+      failures = tmp;
+    }
+  if (botreject)
+    ++tmp->botcount;
+  ++tmp->failcount;
+}
+
+
+/*
  * kline_add_report
  *
  * inputs	- rest of notice from server
@@ -712,6 +770,3 @@ static char *durtn(double a)
 
  return(result);
 }
-
-
-

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.125 2002/06/28 06:23:14 db Exp $ */
+/* $Id: main.c,v 1.126 2002/08/08 18:10:40 bill Exp $ */
 
 #include "setup.h"
 
@@ -60,7 +60,6 @@
 #include <sys/resource.h>
 #endif
 
-struct s_testline testlines;
 time_t current_time;
 
 /* total memory xmalloc'd */

@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.142 2002/06/28 00:53:50 db Exp $
+ * $Id: userlist.c,v 1.143 2002/08/08 18:10:40 bill Exp $
  */
 
 #include <errno.h>
@@ -1243,7 +1243,7 @@ wingate_class(char *class)
 {
   int i;
 
-  for(i=0; wingate_class_list[i] != '\0' ;i++)
+  for(i=0; (wingate_class_list[i] != '\0') && (i < MAXWINGATE) ;i++)
     {
       if(strcasecmp(wingate_class_list[i], class) == 0)
         {

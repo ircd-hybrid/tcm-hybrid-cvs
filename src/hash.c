@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.47 2002/07/31 17:13:23 wcampbel Exp $
+ * $Id: hash.c,v 1.48 2002/08/08 18:10:39 bill Exp $
  */
 
 #include <stdio.h>
@@ -284,6 +284,7 @@ add_user_host(struct user_entry *user_info, int fromtrace)
   strlcpy(new_user->username, user_info->username, MAX_NICK);
   strlcpy(new_user->host, user_info->host, MAX_HOST);
   strlcpy(new_user->class, user_info->class, MAX_CLASS);
+  strlcpy(new_user->gecos, user_info->gecos, MAX_GECOS);
 
 #ifdef VIRTUAL
   if(user_info->ip_host[0] != '\0')
@@ -297,6 +298,14 @@ add_user_host(struct user_entry *user_info, int fromtrace)
   new_user->connecttime = (fromtrace ? 0 : time(NULL));
   new_user->reporttime = 0;
   new_user->link_count = 0;
+
+  /* Currently, hybrid-7 does not put gecos as part of the TRACE reply.
+   * Until there is a better solution, we limit gecos matchable clients
+   * to those that connect after the tcm has succesfully oper'd on its
+   * server.
+   */
+  if (fromtrace == YES)
+    memset(new_user->gecos, 0, MAX_GECOS);
 
   /* Determine the domain name */
   domain = find_domain(user_info->host);
@@ -342,6 +351,9 @@ remove_user_host(struct user_entry *user_info)
 
   domain = find_domain(user_info->host);
 
+  send_to_all(NULL, FLAGS_ALL, "Removing %s (%s@%s) [%s] (domain:%s)", user_info->nick,
+              user_info->username, user_info->host, user_info->ip_host, domain);
+
   if(!remove_from_hash_table(host_table, user_info->host,
 			      user_info->host, user_info->username, 
 			      user_info->nick)) 
@@ -349,6 +361,8 @@ remove_user_host(struct user_entry *user_info)
       if(!remove_from_hash_table(host_table, user_info->host,
 				  user_info->host, user_info->username, NULL))
 	{
+          send_to_all(NULL, FLAGS_ALL, "*** Error removing %s!%s@%s from host table!",
+                      user_info->nick, user_info->username, user_info->host);
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from host table!\n",
@@ -363,6 +377,8 @@ remove_user_host(struct user_entry *user_info)
       if(!remove_from_hash_table(domain_table, domain,
 				  user_info->host, user_info->username, NULL))
 	{
+          send_to_all(NULL, FLAGS_ALL, "*** Error removing %s!%s@%s from domain table!",
+                      user_info->nick, user_info->username, user_info->host);
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from domain table!\n",
@@ -377,6 +393,8 @@ remove_user_host(struct user_entry *user_info)
       if(!remove_from_hash_table(user_table, user_info->username,
 				  user_info->host, user_info->username, NULL))
 	{
+          send_to_all(NULL, FLAGS_ALL, "*** Error removing %s!%s@%s from user table!",
+                      user_info->nick, user_info->username, user_info->host);
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from user table!\n",
@@ -386,6 +404,7 @@ remove_user_host(struct user_entry *user_info)
     }
 
 #ifdef VIRTUAL
+  send_to_all(NULL, FLAGS_ALL, "Beginning removal from iptable...");
   if(user_info->ip_host[0])
     strlcpy(ip_class_c, user_info->ip_host, MAX_IP);
   else
@@ -398,6 +417,8 @@ remove_user_host(struct user_entry *user_info)
       if(!remove_from_hash_table(ip_table, ip_class_c,
 				  user_info->host, user_info->username, NULL))
 	{
+          send_to_all(NULL, FLAGS_ALL, "*** Error removing %s!%s@%s [%s] from iptable!",
+                      user_info->nick, user_info->username, user_info->host, ip_class_c);
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,
@@ -1223,7 +1244,81 @@ kill_or_list_users(struct connection *connection_p, char *userhost, int regex,
     send_to_connection(connection_p, "No matches for %s found", userhost);
 }
 
+/*
+ * list_gecos()
+ * inputs	- struct connection pointer
+ * 		- uhost to match on
+ * 		- regex or no?
+ * outputs	- none
+ * side effects - 
+ */
 
+void
+list_gecos(struct connection *connection_p, char *u_gecos, int regex)
+{
+  struct hash_rec *ptr;
+#ifdef HAVE_REGEX_H
+  regex_t reg;
+  regmatch_t m[1];
+#endif
+  char gecos[MAX_GECOS];
+  int i, numfound = 0;
+
+#ifdef HAVE_REGEX_H
+  if(regex == YES && (i = regcomp((regex_t *)&reg, u_gecos, 1)))
+  {
+    char errbuf[REGEX_SIZE];
+    regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE);
+    send_to_connection(connection_p, "Error compiling regular expression: %s",
+                       errbuf); 
+    return;
+  }
+#endif
+  if (!strcmp(u_gecos,"*") || !strcmp(u_gecos,"*@*"))
+  {
+    send_to_connection(connection_p, "Listing all users is not recommended.  To do it anyway, use '.gecos ?**'.");
+    return;
+  }
+
+  for (i=0; i < HASHTABLESIZE; ++i)
+  {
+    for (ptr = domain_table[i]; ptr; ptr = ptr->next)
+    {
+      snprintf(gecos, MAX_GECOS, "%s", ptr->info->gecos);
+#ifdef HAVE_REGEX_H
+      if(((regex == YES &&
+          !regexec((regex_t *)&reg, gecos, 1, m, REGEXEC_FLAGS))
+          || (regex == NO && !match(u_gecos, gecos))) && (gecos[0] != '\0'))
+#else
+      if (match(u_gecos, gecos) == 0 && (gecos[0] != '\0'))
+#endif
+      {
+        if (numfound == 0)
+          send_to_connection(connection_p,
+                             "The following clients match %s:", u_gecos);
+
+        numfound++;
+        if(ptr->info->ip_host[0] > '9' || ptr->info->ip_host[0] < '0')
+          send_to_connection(connection_p,
+                             "  %s (%s@%s) {%s} [%s]", ptr->info->nick,
+                             ptr->info->username, ptr->info->host,
+                             ptr->info->class, ptr->info->gecos);
+        else
+          send_to_connection(connection_p,
+                             "  %s (%s@%s) [%s] {%s} [%s]", ptr->info->nick,
+                             ptr->info->username, ptr->info->host,
+                             ptr->info->ip_host, ptr->info->class,
+                             ptr->info->gecos);
+      }
+    }
+  }
+  if(numfound > 0)
+    send_to_connection(connection_p,
+                       "%d matches for %s found", numfound, u_gecos);
+  else
+    send_to_connection(connection_p, "No matches for %s found", u_gecos);
+}
+   
 /*
  * report_mem()
  * inputs       - pointer to connection

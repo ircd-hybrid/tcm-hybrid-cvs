@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.189 2002/06/28 00:53:48 db Exp $
+ * $Id: bothunt.c,v 1.190 2002/08/08 18:10:38 bill Exp $
  */
 
 #include <stdio.h>
@@ -56,8 +56,6 @@ static void chopuh(int istrace,char *nickuserhost,struct user_entry *userinfo);
 struct serv_command servnotice_msgtab = {
   "NOTICE", NULL, on_server_notice
 };
-
-struct s_testline testlines;
 
 /* Nick change flood detect */
 struct nick_change_entry
@@ -297,13 +295,12 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     ++q;
     *p = '\0';
-#if 0
     /* XXX transition WRONG WRONG WRONG */
-    send_to_connection(connections[testlines.index].socket,
-		    "%s has access to class %s", testlines.umask, q);
-#endif
-    testlines.index = -1;
-    memset(&testlines.umask, 0, sizeof(testlines.umask));
+    /* who did this, and would you please explain it to me? -bill */
+    send_to_connection(config_entries.testline_cnctn,
+		    "%s has access to class %s", config_entries.testline_umask, q);
+    config_entries.testline_cnctn = NULL;
+    memset(&config_entries.testline_umask, 0, sizeof(config_entries.testline_umask));
     return;
   }
   else if (strstr(p, "K-line name "))
@@ -314,12 +311,11 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((p = strchr(q, ']')) == NULL)
       return;
     *p = '\0';
-#if 0
-    send_to_connection(connections[testlines.index].socket, 
-	 "%s has been K-lined: %s", testlines.umask, q);
-#endif
-    testlines.index = -1;
-    memset(&testlines.umask, 0, sizeof(testlines.umask));
+    /* see above */
+    send_to_connection(config_entries.testline_cnctn, 
+	 "%s has been K-lined: %s", config_entries.testline_umask, q);
+    config_entries.testline_cnctn = NULL;
+    memset(&config_entries.testline_umask, 0, sizeof(config_entries.testline_umask));
     return;
   }
 
@@ -480,11 +476,15 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   switch (faction)
   {
   /* Client connecting: bill (bill@ummm.E) [255.255.255.255] {1} */
+  /* Client connecting: bill (bill@ummm.E) [255.255.255.255] {opers} [Bill Jonus] */
   case CONNECT:
+    p+=19;
     if ((q = strchr(p, ' ')) == NULL)
       return;
     *q++ = '\0';
-    strlcpy(userinfo.nick, p+19, MAX_NICK);
+
+    strlcpy(userinfo.nick, p, MAX_NICK);
+
     if ((p = get_user_host(&user, &host, q)) == NULL)
       return;
     strlcpy(userinfo.username, user, MAX_USER);
@@ -494,6 +494,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     q++;
     p = q;
+
     if ((q = strchr(p, ']')) == NULL)
       return;
     *q++ = '\0';
@@ -506,31 +507,44 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((q = strchr(p, '}')) == NULL)
       return;
     *q = '\0';
-
     strlcpy(userinfo.class, p, MAX_CLASS);
+
+    if (config_entries.hybrid == YES && config_entries.hybrid_version >= 7)
+    {
+      q += 3;
+      if ((p = strrchr(q, ']')) == NULL)
+        return;
+      *p = '\0';
+      strlcpy(userinfo.gecos, q, MAX_GECOS);
+    }
+
     add_user_host(&userinfo, NO);
     break;
 
-  /* Client exiting: bill (bill@ummm.E) [255.255.255.255]*/
+  /* Client exiting: bill (bill@ummm.E) [255.255.255.255] */
   case EXITING:
+    p+=16;
     if ((q = strchr(p, ' ')) == NULL)
       return;
     *q++ = '\0';
-    strlcpy(userinfo.nick, p+16, MAX_NICK);
+
+    strlcpy(userinfo.nick, p, MAX_NICK);
     if ((p = get_user_host(&user, &host, q)) == NULL)
       return;
     strlcpy(userinfo.username, user, MAX_USER);
     strlcpy(userinfo.host, host, MAX_HOST);
+
     if ((q = strchr(p, ']')) == NULL)
       return;
-    q++;
-    p = q;
+    p = q+3;
     if ((q = strchr(p, ']')) == NULL)
       return;
     *q++ = '\0';
 
     strlcpy(userinfo.ip_host, p, MAX_IP);
-    chopuh(IS_NOT_FROM_TRACE, q, &userinfo);
+#ifdef VIRTUAL
+    strlcpy(userinfo.ip_class_c, p, MAX_IP);
+#endif
     remove_user_host(&userinfo);
     break;
 
@@ -777,13 +791,10 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* No aconf found */
   case NOACONFFOUND:
-#if 0
-    send_to_connection(connections[testlines.index].socket,
-		    "%s does not have access",
-		    testlines.umask);
-#endif
-    testlines.index = -1;
-    memset((char *)&testlines.umask, 0, sizeof(testlines.umask));
+    send_to_connection(config_entries.testline_cnctn,
+		    "%s does not have access", config_entries.testline_umask);
+    config_entries.testline_cnctn = NULL;
+    memset(&config_entries.testline_umask, 0, sizeof(config_entries.testline_umask));
     break;
 
   default:

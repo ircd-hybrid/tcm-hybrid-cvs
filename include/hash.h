@@ -1,7 +1,7 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.24 2002/06/24 00:40:15 db Exp $ */
+/* $Id: hash.h,v 1.25 2002/08/08 18:10:35 bill Exp $ */
 
 #define HASHTABLESIZE 3001
 
@@ -14,6 +14,7 @@ struct user_entry {
   char nick[MAX_NICK];
   char username[MAX_USER];
   char host[MAX_HOST];
+  char gecos[MAX_GECOS];
   char ip_host[MAX_IP];         /* host ip as string */
 #ifdef VIRTUAL
   char ip_class_c[MAX_IP];      /* /24 of host ip as string */
@@ -55,6 +56,7 @@ void list_nicks(struct connection *connection_p, char *nick, int regex);
 void kill_or_list_users(struct connection *connection_p,
 			char *userhost, int regex, int kill, 
 			const char *reason);
+void list_gecos(struct connection *connection_p, char *u_gecos, int regex);
 void report_mem(struct connection *connection_p);
 void report_failures(struct connection *connection_p, int num);
 

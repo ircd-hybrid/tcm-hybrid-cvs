@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.141 2002/06/28 00:53:48 db Exp $ */
+/* $Id: dcc_commands.c,v 1.142 2002/08/08 18:10:39 bill Exp $ */
 
 #include "setup.h"
 
@@ -97,6 +97,7 @@ static void m_failures(struct connection *connection_p, int argc,
 static void m_domains(struct connection *connection_p, int argc, char *argv[]);
 static void m_nfind(struct connection *connection_p, int argc, char *argv[]);
 static void m_list(struct connection *connection_p, int argc, char *argv[]);
+static void m_gecos(struct connection *connection_p, int argc, char *argv[]);
 static void m_ulist(struct connection *connection_p, int argc, char *argv[]);
 static void m_hlist(struct connection *connection_p, int argc, char *argv[]);
 
@@ -330,15 +331,15 @@ m_testline(struct connection *connection_p, int argc, char *argv[])
     send_to_connection(connection_p, "Usage: %s <mask>", argv[0]);
     return;
   }
-  if (strcasecmp(argv[1], testlines.umask) == 0)
+  if (config_entries.testline_cnctn != NULL)
   {
-    send_to_connection(connection_p, "Already pending %s", argv[1]);
+    send_to_connection(connection_p, "Error: Pending testline on %s", config_entries.testline_umask);
     return;
   }
-  snprintf(testlines.umask, sizeof(testlines.umask), "%s", argv[1]);
-#if 0
-  testlines.index = connnum;
-#endif
+
+  snprintf(config_entries.testline_umask, sizeof(config_entries.testline_umask), "%s", argv[1]);
+  config_entries.testline_cnctn = connection_p;
+
   send_to_server("TESTLINE %s", argv[1]);
 }
 
@@ -691,6 +692,27 @@ m_list(struct connection *connection_p, int argc, char *argv[])
 }
 
 void
+m_gecos(struct connection *connection_p, int argc, char *argv[])
+{
+#ifdef HAVE_REGEX_H
+  if((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+    send_to_connection(connection_p,
+        "Usage: %s [-r] <wildcarded/regex gecos>", argv[0]);
+  else if(argc == 2)
+    list_gecos(connection_p, argv[1], NO);
+  else
+    list_gecos(connection_p, argv[2], YES);
+#else
+  if(argc < 2)
+    send_to_connections(connection_p,
+                        "Usage: %s <wildcarded gecos>",
+         argv[0]);
+  else
+    list_gecos(connection_p, argv[1], NO);
+#endif
+}
+
+void
 m_ulist(struct connection *connection_p, int argc, char *argv[])
 {
   char buf[MAX_BUFF];
@@ -935,6 +957,9 @@ struct dcc_command nfind_msgtab = {
 struct dcc_command list_msgtab = {
  "list", NULL, {m_unregistered, m_list, m_list}
 };
+struct dcc_command gecos_msgtab = {
+ "gecos", NULL, {m_unregistered, m_gecos, m_gecos}
+};
 struct dcc_command ulist_msgtab = {
  "ulist", NULL, {m_unregistered, m_ulist, m_ulist}
 };
@@ -992,6 +1017,7 @@ init_commands(void)
   add_dcc_handler(&events_msgtab);
   add_dcc_handler(&nfind_msgtab);
   add_dcc_handler(&list_msgtab);
+  add_dcc_handler(&gecos_msgtab);
   add_dcc_handler(&ulist_msgtab);
   add_dcc_handler(&hlist_msgtab);
   add_dcc_handler(&uptime_msgtab);

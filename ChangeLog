@@ -1,3 +1,15 @@
+wiz         2003/02/02 15:37:55 EST	(20030202_0)
+
+  Modified files:
+    src                  actions.c 
+  Log:
+  - IPv6 vclone flooders will now use the action(s) defined for vclone
+  
+  Revision  Changes    Path
+  1.46      +21 -27    tcm-hybrid/src/actions.c
+
+
+
 bill        2003/01/31 19:55:39 EST	(20030201_0)
 
   Modified files:

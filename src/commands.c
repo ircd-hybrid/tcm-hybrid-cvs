@@ -40,7 +40,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.3 2000/11/10 18:53:35 bill Exp $";
+static char *version="$Id: commands.c,v 1.4 2000/12/01 05:16:15 bill Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -296,7 +296,6 @@ void dccproc(int connnum)
 
   buffer++;	/* skip the '.' */
 
-
   if( !(param1 = strtok(buffer," ")) )
     return;
 
@@ -342,7 +341,7 @@ void dccproc(int connnum)
 	      param2 = strtok((char *)NULL," "); /* new u@h or nick */
 	    }
 	}
-    }
+    } else param2_orig = param2;
 
   param3 = strtok((char *)NULL,"");
 
@@ -352,6 +351,7 @@ void dccproc(int connnum)
 	fprintf(outfile, "param3 = [%s]\n", param3);
     }
 
+  printf("param1: \"%s\" param2: \"%s\" param3: \"%s\"\n", param1, param2, param3);
   switch(get_token(param1))
     {
     case K_UPTIME:
@@ -1260,6 +1260,7 @@ void dccproc(int connnum)
 
 	if (param2_orig)
 	  {
+        	printf("param2_orig: \"%s\" param3: \"%s\"\n", param2_orig, param3 ? param3 : "");
 	    if(param3)
 	      {
 		if(! (connections[connnum].type & TYPE_ADMIN) )

@@ -52,7 +52,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.5 2000/11/10 18:53:36 bill Exp $";
+static char *version="$Id: serverif.c,v 1.6 2000/12/01 05:16:16 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -1849,6 +1849,7 @@ static void proc(char *source,char *fctn,char *param)
     if ( (body = strchr(param,' ')) )
       {
 	*(body++) = '\0';
+	while (*body == ' ') ++body;	/* ircd-comstud wants to make it hard for us. -pro */
 	if (*body == ':')
 	  ++body;
       }
@@ -2701,13 +2702,13 @@ void oper(char *mynick)
 static void send_umodes(char *mynick)
 {
   toserv("MODE %s :+bcdfknrswxyz\n", mynick );
-  toserv("FLAGS +CLICONNECTS +CLIDISCONNECTS +NICKCHANGES\n");
+  toserv("FLAGS +SKILLS CLICONNECTS +CLIDISCONNECTS +NICKCHANGES +LWALLOPS +CONNECTS +SQUITS +OWALLOPS\n");
 
   if(config_entries.hybrid && (config_entries.hybrid_version >= 6))
     {
       toserv("STATS I\n");
     }
-  else
+  else if (config_entries.hybrid)
     {
       toserv("STATS E\n");
       toserv("STATS F\n");

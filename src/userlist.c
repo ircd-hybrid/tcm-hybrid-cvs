@@ -28,7 +28,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: userlist.c,v 1.2 2000/11/10 18:53:36 bill Exp $";
+static char *version="$Id: userlist.c,v 1.3 2000/12/01 05:16:16 bill Exp $";
 
 #ifdef NEXT
 char *strdup(char *);
@@ -1679,6 +1679,7 @@ char *type_show(unsigned long type)
   static char type_string[SMALL_BUFF];
   char *p;
 
+  bzero(&type_string, sizeof(type_string));
   p = type_string;
   if(type&TYPE_OPER)*p++ = 'O';
   if(type&TYPE_REGISTERED)*p++ = 'K';

@@ -2,12 +2,12 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.19 2002/05/26 02:55:05 db Exp $
+ * $Id: tcm_io.h,v 1.20 2002/05/26 05:48:01 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
 
-/* dummy definitions */
+/* Dummy definition for now XXX */
 struct sockaddr_in;
 
 /*
@@ -21,7 +21,7 @@ struct connection {
   int   state;
   void	(*io_read_function)(int connect_id);
   void	(*io_write_function)(int connect_id);
-  void	*arg;			/* argument to handler */
+  int	user_state;
   int	type;			/* why was this a char? -bill */
   int	set_modes;		/* for set options */
   char	user[MAX_USER];
@@ -29,6 +29,10 @@ struct connection {
   char	nick[MAX_NICK+2];	/* allow + 2 for incoming tcm names */
   char	registered_nick[MAX_NICK+2]; /* allow + 2  */
   time_t last_message_time;
+  /* XXX later */
+#if 0
+  struct sockaddr_in socketname;
+#endif
 };
 
 #define	S_IDLE			0
@@ -36,6 +40,7 @@ struct connection {
 #define	S_ACTIVE		2
 
 extern struct connection connections[];
+int find_free_connection_slot(const char *nick);
 
 extern	int initiated_dcc_socket;
 extern	time_t initiated_dcc_socket_time;

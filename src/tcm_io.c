@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.38 2002/05/26 03:02:50 leeh Exp $
+ * $Id: tcm_io.c,v 1.39 2002/05/26 05:48:05 db Exp $
  */
 
 #include <stdio.h>
@@ -118,10 +118,6 @@ read_packet(void)
 
     FD_ZERO (&readfds);
     FD_ZERO (&writefds);
-
-#if 0
-    _continuous(0, 0, NULL);
-#endif
 
     for (i = 0; i < MAXDCCCONNS; i++)
       {
@@ -391,7 +387,8 @@ find_free_connection_slot(const char *nick)
 
   if(i > MAXDCCCONNS)
   {
-    notice(nick,"Max users on tcm, dcc chat rejected\n");
+    if (nick != NULL)
+      notice(nick,"Max users on tcm, dcc chat rejected\n");
     return(-1);
   }
 
@@ -979,6 +976,8 @@ connect_to_given_ip_port(struct sockaddr_in *socketname, int port)
   struct sockaddr_in localaddr;
   struct hostent *local_host;
   int optval;
+  int flags;
+  int result;
 
   /* open an inet socket */
   if ((sock = socket (AF_INET, SOCK_STREAM, 0)) < 0)
@@ -1033,7 +1032,12 @@ connect_to_given_ip_port(struct sockaddr_in *socketname, int port)
   socketname->sin_family = AF_INET;
   socketname->sin_port = htons (port);
 
-  fcntl(sock, F_SETFL, O_NONBLOCK);
+  /* set non blocking, the POSIX way */
+
+  flags = fcntl(sock,F_GETFL,0);
+  flags |= O_NONBLOCK;
+  result = fcntl(sock,F_SETFL,flags);
+
   connect (sock, (struct sockaddr *) socketname, sizeof *socketname);
   return (sock);
 }

@@ -1,17 +1,19 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.30 2002/05/26 02:55:05 db Exp $ */
+/* $Id: bothunt.h,v 1.31 2002/05/26 05:48:01 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
 
+/* XXX */
 struct plus_c_info
 {
+  char *nick;
   char *user;
   char *host;
   char class[100];
-  char ip[16];
+  char ip[MAX_IP];
 };
 
 struct banned_info

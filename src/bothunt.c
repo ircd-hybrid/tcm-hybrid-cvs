@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.106 2002/05/26 02:55:09 db Exp $
+ * $Id: bothunt.c,v 1.107 2002/05/26 05:48:04 db Exp $
  */
 
 #include <stdio.h>
@@ -30,16 +30,16 @@
 #include "parse.h"
 #include "wingate.h"
 
-static char* find_domain( char* domain );
-static void  check_nick_flood( char *snotice );
-static void  cs_nick_flood( char *snotice );
-static void  cs_clones( char *snotice );
-static void  link_look_notice( char *snotice );
-static void  connect_flood_notice( char *snotice );
-static void  add_to_nick_change_table( char *user_host, char *last_nick );
-static void  adduserhost( char *, struct plus_c_info *, int, int);
-static void  removeuserhost( char *, struct plus_c_info *);
-static void  updateuserhost( char *nick1, char *nick2, char *userhost);
+static char* find_domain(char* domain );
+static void  check_nick_flood(char *snotice );
+static void  cs_nick_flood(char *snotice );
+static void  cs_clones(char *snotice );
+static void  link_look_notice(char *snotice );
+static void  connect_flood_notice(char *snotice );
+static void  add_to_nick_change_table(char *user_host, char *last_nick );
+static void  adduserhost(struct plus_c_info *, int, int);
+static void  removeuserhost(char *, struct plus_c_info *);
+static void  updateuserhost(char *nick1, char *nick2, char *userhost);
 static void  updatehash(struct hashrec**,char *,char *,char *); 
 static void  stats_notice(char *snotice);
 static int hash_func(char *string);
@@ -241,11 +241,14 @@ _ontraceuser(int connnum, int argc, char *argv[])
     snprintf(myclass, sizeof(myclass), "%s", argv[4]);
   }
   class_ptr = argv[4];
+
   chopuh(YES,argv[5],&userinfo);
   snprintf(userinfo.ip, sizeof(userinfo.ip), "%s", argv[6]+1);
   snprintf(userinfo.class, sizeof(userinfo.class) - 1, "%s", class_ptr);
 
-  adduserhost(argv[5],&userinfo,YES,is_oper);
+  /* XXX */
+  userinfo.nick = argv[5]; /* XXX */
+  adduserhost(&userinfo,YES,is_oper);
 }
 
 void
@@ -690,7 +693,7 @@ onservnotice(int connnum, int argc, char *argv[])
 
     if ((q = strrchr(p, ' ')) == NULL)
       return;
-    nick = q+1;
+    userinfo.nick = q+1;
 
     if ((q = strchr(userinfo.user, '@')) == NULL)
       return;
@@ -714,7 +717,7 @@ onservnotice(int connnum, int argc, char *argv[])
     *p = '\0';
     strcpy((char *)&userinfo.class, q);
 
-    adduserhost(nick, &userinfo, NO, NO);
+    adduserhost(&userinfo, NO, NO);
     break;
 
   /* Client exiting: bill (bill@ummm.E) [e?] [255.255.255.255]*/
@@ -1506,8 +1509,7 @@ removeuserhost(char *nick, struct plus_c_info *userinfo)
 /*
  * adduserhost()
  * 
- * inputs	- nick
- * 		- user@host
+ * inputs	- pointer to struct plus_c_info
  * 		- from a trace YES or NO
  * 		- is this user an oper YES or NO
  * output	- NONE
@@ -1517,34 +1519,25 @@ removeuserhost(char *nick, struct plus_c_info *userinfo)
  */
 
 static void
-adduserhost(char *nick, struct plus_c_info *userinfo,int fromtrace,int is_oper)
+adduserhost(struct plus_c_info *userinfo, int fromtrace, int is_oper)
 {
   struct userentry *newuser;
-  char *par[5];
   char *domain;
 #ifdef VIRTUAL
   int  found_dots;
   char *p;
 #endif
 
-  par[0] = nick;
-  par[1] = userinfo->user;
-  par[2] = userinfo->host;
-  par[3] = userinfo->ip;
-  par[4] = userinfo->class;
-
-  _user_signon(doingtrace, 5, par);
+  if (!doingtrace)
+    user_signon(userinfo);
 
   newuser = (struct userentry *)xmalloc(sizeof(struct userentry));
 
-  strncpy(newuser->nick,nick,MAX_NICK);
-  newuser->nick[MAX_NICK-1] = '\0';
-  strncpy(newuser->user,userinfo->user,11);
-  newuser->user[MAX_NICK] = '\0';
-  strncpy(newuser->host,userinfo->host,MAX_HOST);
-  newuser->host[MAX_HOST-1] = '\0';
+  strlcpy(newuser->nick, userinfo->nick, MAX_NICK);
+  strlcpy(newuser->user,userinfo->user,MAX_NICK);
+  strlcpy(newuser->host,userinfo->host,MAX_HOST);
   if (userinfo->ip[0])
-    strncpy(newuser->ip_host,userinfo->ip,MAX_IP);
+    strlcpy(newuser->ip_host,userinfo->ip,MAX_IP);
   else
     strcpy(newuser->ip_host,"0.0.0.0");
 

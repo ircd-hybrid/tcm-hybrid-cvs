@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.38 2002/05/25 23:27:50 db Exp $ */
+/* $Id: userlist.h,v 1.39 2002/05/26 05:48:01 db Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -189,12 +189,12 @@ struct exception_entry
 void load_userlist(void);
 void load_config_file(char *);
 void clear_userlist(void);
-int  wingate_class(char *class);
 void ban_manipulate(int sock,char flag,char *userlist);
 void save_prefs(void);
 int  okhost(char *,char *,int);
 int  str2type(char *);
 char *type_show(unsigned long type);
+int  wingate_class(char *class);
 
 /* local_ip is clearly not going to be an unsigned long FIX THIS -db */
 unsigned long local_ip(char *ourhostname);

@@ -2,15 +2,13 @@
  *
  * the include files for the wingate/proxy check
  * 
- * $Id: wingate.h,v 1.1 2002/05/25 17:10:29 wcampbel Exp $
+ * $Id: wingate.h,v 1.2 2002/05/26 05:48:01 db Exp $
  */
 #ifndef __WINGATE_H
 #define __WINGATE_H
 
-void _scontinuous(int connnum, int argc, char *argv[]);
-void _continuous(int connnum, int argc, char *argv[]);
-void _user_signon(int connnum, int argc, char *argv[]);
-void _reload_wingate(int connnum, int argc, char *argv[]);
-void _config(int connnum, int argc, char * argv[]);
+void user_signon(struct plus_c_info *info_p);
+void reload_wingate(int connnum, int argc, char *argv[]);
+void config(int connnum, int argc, char * argv[]);
 
 #endif

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.74 2002/05/26 02:55:11 db Exp $
+ * $Id: userlist.c,v 1.75 2002/05/26 05:48:05 db Exp $
  *
  */
 
@@ -992,4 +992,30 @@ local_ip(char *ourhostname)
     }
   /* NOT REACHED */
   return 0L;
+}
+
+/*
+ * wingate_class
+ *
+ * inputs       - class
+ * output       - if this class is a wingate class to check
+ * side effects - none
+ */
+
+int
+wingate_class(char *class)
+{
+  int i;
+  return YES;
+  /* XXX */
+#if notyet
+  for(i=0; wingate_class_list[i] != '\0' ;i++)
+    {
+      if(strcasecmp(wingate_class_list[i], class) == 0)
+        {
+          return YES;
+        }
+    }
+  return(NO);
+#endif
 }

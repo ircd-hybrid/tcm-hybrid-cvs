@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.55 2002/05/26 02:55:05 db Exp $
+ * $Id: config.h,v 1.56 2002/05/26 05:48:01 db Exp $
  */
 
 /*
@@ -251,8 +251,11 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 
 /* END OF SERVICES DEFINES */
 
-/* Maximum DCC chat connections */
-#define MAXDCCCONNS 50
+/* Maximum connections;
+ * this is now shared with squid, socks, wingate checks
+ * XXX could make this FD_SETSIZE, but that might be a tad too large
+ */
+#define MAXDCCCONNS 1024
 
 /* Define the low and high range of ports the tcm will try to use
  * when an oper issues PRIVMSG tcm .chat

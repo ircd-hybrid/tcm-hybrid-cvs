@@ -23,9 +23,7 @@
  *  developed and/or copyrighted by other sources.  Please see the
  *  CREDITS file for full details.
  *
- *  Original never had a GPL, so GPL removed WITH PLEASURE. -db
- *
- *  $Id: event.c,v 1.6 2002/05/24 15:01:31 db Exp $
+ *  $Id: event.c,v 1.7 2002/05/25 16:14:36 jmallett Exp $
  */
 
 /*

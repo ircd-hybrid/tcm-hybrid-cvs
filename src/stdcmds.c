@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.69 2002/05/25 15:49:39 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.70 2002/05/25 16:14:36 jmallett Exp $ */
 
 #include "setup.h"
 
@@ -1196,7 +1196,9 @@ void report_mem(int sock)
        total_userentry, count_userentry);
 
   print_to_socket(sock,"Total memory in use %lu\n",
-       total_hosttable + total_domaintable + total_iptable + total_userentry );
+       total_hosttable + total_domaintable + total_iptable + total_userentry);
+
+  print_to_socket(sock,"Total memory allocated over time: %lu\n", totalmem);
 }
 
 /*

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.81 2002/05/25 15:57:56 db Exp $ */
+/* $Id: dcc_commands.c,v 1.82 2002/05/25 16:14:35 jmallett Exp $ */
 
 #include "setup.h"
 
@@ -802,6 +802,7 @@ m_rehash(int connnum, int argc, char *argv[])
     }
 
   initopers();
+  logclear();
 }
 
 void

@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.30 2002/05/25 15:49:39 leeh Exp $
+ * $Id: logging.c,v 1.31 2002/05/25 16:14:36 jmallett Exp $
  *
  * - db
  */
@@ -436,6 +436,29 @@ log_kline(char *command_name,
 }
 
 /*
+ * logclear()
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	-
+ */
+
+void
+logclear(void)
+{
+  struct failrec *tmp, *hold;
+
+  tmp = hold = NULL;
+
+  while ((tmp = failures) != NULL)
+    {
+        hold = tmp->next;
+        failures = hold;
+        free(tmp);
+    }
+}
+        
+
+/*
  * logfailure()
  *
  * inputs       - pointer to nick!user@host
@@ -453,13 +476,13 @@ logfailure(char *nickuh,int botreject)
   chopuh(YES,nickuh,&userinfo); /* use trace form of chopuh() */
 
   tmp = failures;
-  while (tmp)
+  while (tmp != NULL)
     {
       if(!strcasecmp(tmp->user,userinfo.user)&&!strcasecmp(tmp->host,
                                                            userinfo.host))
         {
           /* For performance, move the most recent to the head of the queue */
-          if (hold)
+          if (hold != NULL)
             {
               hold->next = tmp->next;
               tmp->next = failures;
@@ -471,7 +494,7 @@ logfailure(char *nickuh,int botreject)
       tmp = tmp->next;
     }
 
-  if (!tmp)
+  if (tmp == NULL)
     {
       tmp = (struct failrec *)xmalloc(sizeof(struct failrec));
 

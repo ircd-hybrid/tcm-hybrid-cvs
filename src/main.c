@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.65 2002/05/25 15:49:39 leeh Exp $ */
+/* $Id: main.c,v 1.66 2002/05/25 16:14:36 jmallett Exp $ */
 
 #include "setup.h"
 
@@ -76,6 +76,9 @@ char serverhost[MAX_HOST];    /* Server tcm will use. */
 int  incoming_connnum;	      /* current connection number incoming */
 /* KLUDGE  *grumble* */
 /* allow for ':' ' ' etc. */
+
+/* total memory xmalloc'd */
+unsigned long totalmem;
 
 #ifdef DEBUGMODE
 void write_debug();
@@ -560,13 +563,17 @@ size_t strlcpy(char *dst, const char *src, size_t siz)
 void *
 xmalloc(size_t size)
 {
-  void *ret = malloc(size);
+  void *ret;
 
-  if(!ret)
+  ret = malloc(size);
+
+  if (ret == NULL)
   {
     send_to_all(SEND_ALL, "Ran out of memory while attempting to allocate");
     exit(-1);
   }
+
+  totalmem += size;
 
   return ret;
 }

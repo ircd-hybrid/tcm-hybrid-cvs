@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.35 2002/05/25 15:49:36 leeh Exp $ */
+/* $Id: tcm.h,v 1.36 2002/05/25 16:14:33 jmallett Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -67,6 +67,8 @@ int amianoper;
 int quit;			/* Quit when = YES */
 
 int maxconns;
+
+extern unsigned long totalmem;
 
 int add_action(char *name);
 void set_action_time(int action, int klinetime);

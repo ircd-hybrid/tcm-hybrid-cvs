@@ -1,3 +1,38 @@
+einride     2002/05/04 16:12:10 EDT	(20020504_0)
+
+  Modified files:
+    etc                  tcm.cf userlist.cf 
+    include              config.h tcm.h userlist.h 
+    modules              bothunt.c commands.c 
+    src                  main.c stdcmds.c userlist.c 
+  Log:
+  Fixed some mixups and bugs
+  
+  Removed .k<actionname> and made .kaction as a generic dcc command for
+  simulating violations.
+  
+  handle_action retrieves ips on demand, and reverts from d-line to k-line
+  if an ip couldn't be found.
+  
+  STATS I wont show spoofed I-lines, so all oper hosts from stats O get added
+  as exempts instead.
+  
+  vclone is back to the logic it had before when it comes to masking hosts.
+  
+  Revision  Changes    Path
+  1.21      +0 -0      tcm-hybrid/etc/tcm.cf
+  1.16      +0 -0      tcm-hybrid/etc/userlist.cf
+  1.37      +2 -2      tcm-hybrid/include/config.h
+  1.24      +1 -1      tcm-hybrid/include/tcm.h
+  1.26      +1 -1      tcm-hybrid/include/userlist.h
+  1.62      +14 -4     tcm-hybrid/modules/bothunt.c
+  1.45      +63 -8     tcm-hybrid/modules/commands.c
+  1.32      +5 -5      tcm-hybrid/src/main.c
+  1.48      +119 -25   tcm-hybrid/src/stdcmds.c
+  1.50      +5 -5      tcm-hybrid/src/userlist.c
+
+
+
 einride     2002/05/03 18:49:52 EDT	(20020503_0)
 
   Modified files:

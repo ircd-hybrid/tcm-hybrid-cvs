@@ -1,3 +1,8 @@
+*** 20011110_1 by wcampbel
+Some more cleanups...
+I XXX'ed out some functions, check to see if they are not used
+
+
 *** 20011109_2 by wcampbel
 Fix make lint
 Minor cleanups

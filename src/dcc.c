@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.7 2002/06/05 00:10:56 leeh Exp $
+ * $Id: dcc.c,v 1.8 2002/06/05 00:21:42 db Exp $
  */
 
 #include <stdio.h>
@@ -151,24 +151,17 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
 
 int
 accept_dcc_connection(struct source_client *source_p,
-		      const char *host_ip, const char *port)
+		      const char *host_ip, const int port)
 {
   unsigned long remoteaddr;
   struct sockaddr_in socketname;
   int  i;               /* index variable */
-  int  i_port;
 
   if ((i = find_free_connection_slot()) < 0)
     {
       notice(source_p->name, "Max users on tcm, dcc chat rejected");
       return(-1);
     }
-
-  if(is_an_oper(source_p->username, source_p->host) == 0)
-  {
-    notice(source_p->name, "You are not an operator");
-    return (-1);
-  }
 
   connections[i].set_modes = 0;
   strlcpy(connections[i].nick, source_p->name, MAX_NICK);
@@ -180,13 +173,7 @@ accept_dcc_connection(struct source_client *source_p,
   /* Argh.  Didn't they teach byte order in school??? --cah */
 
   socketname.sin_addr.s_addr = htonl(remoteaddr);
-  i_port = atoi(port);
-  if (i_port < 1024)
-    {
-      notice(source_p->name, "Invalid port specified for DCC CHAT.  Not funny.");
-      return (INVALID);
-    }
-  connections[i].socket = connect_to_given_ip_port(&socketname, i_port);
+  connections[i].socket = connect_to_given_ip_port(&socketname, port);
   if (connections[i].socket == INVALID)
     {
       close_connection(i);

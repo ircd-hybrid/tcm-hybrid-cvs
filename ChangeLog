@@ -1,3 +1,18 @@
+db          2002/06/04 21:01:02 EDT	(20020605_3)
+
+  Modified files:
+    include              dcc.h 
+    src                  dcc.c parse.c 
+  Log:
+  - change initiate_dcc_chat interface to use struct source_client *
+  
+  Revision  Changes    Path
+  1.7       +3 -3      tcm-hybrid/include/dcc.h
+  1.9       +10 -10    tcm-hybrid/src/dcc.c
+  1.56      +1 -1      tcm-hybrid/src/parse.c
+
+
+
 db          2002/06/04 20:21:44 EDT	(20020605_2)
 
   Modified files:

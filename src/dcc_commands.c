@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.29 2001/11/23 21:40:48 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.30 2001/11/24 00:44:52 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -2204,8 +2204,7 @@ list_users(int sock,char *userhost)
 
   if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
     prnt(sock,
-         "Listing all users is not recommended.  To do it anyway, use 'list ?*@*
-'.\n");
+         "Listing all users is not recommended.  To do it anyway, use 'list ?*@*'.\n");
   else
     {
       for (i=0;i<HASHTABLESIZE;++i)

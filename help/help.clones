@@ -5,28 +5,36 @@ Note:  Opers as defined in this file are people with TCM O: lines (or
     configured now. typing .actions will show all actions. 
     To set individual action 
     e.g. .action clones kline 60 :Please do not clone here
- - .bots,.multi [n] (OPERS ONLY)
+ - .bots,.multi [-l list] [n] (OPERS ONLY)
     Report any userhost with multiple connections on this server.
- - .vbots [n] (OPERS ONLY)
+    The -l option stores the results in the given list name
+ - .vbots [-l list] [n] (OPERS ONLY)
     Report any ip blocks with multiple connections on this server
+    The -l option stores the results in the given list name 
     optional n gives trigger level
  - .clones (OPERS ONLY)
     This command lists any clonebots currently detected.
- - .list <wildcarded userhost>  (OPERS ONLY)
+ - .list [-l list] <[wildcard userhost]|[-r regex]>  (OPERS ONLY)
     List all connected users who match the given userhost (which
     may contain wildcards). 
- - .ulist <wildcarded username>  (OPERS ONLY)
+    The -l option stores the results in the given list name
+ - .ulist [-l list] <[wildcard user]|[-r regex]>  (OPERS ONLY)
     List all connected users who match the given username
- - .hlist <wildcarded hostname>  (OPERS ONLY)
+    The -l option stores the results in the given list name
+ - .hlist [-l list] <[wildcard host]|[-r regex]>  (OPERS ONLY)
     List all connected users who match the given hostname
- - .umulti [n] (OPERS ONLY)
+    The -l option stores the results in the given list name
+ - .umulti [-l list] [n] (OPERS ONLY)
     List users with multiple hosts with same user names.
- - .hmulti [n] (OPERS ONLY)
+    The -l option stores the results in the given list name
+ - .hmulti [-l list] [n] (OPERS ONLY)
     List hosts with multiple users.
- - .nfind <wildcarded nick> (OPERS ONLY)
+    The -l option stores the results in the given list name
+ - .nfind [-l list] <[wildcard nick]|[-r regex]> (OPERS ONLY)
     List all nicks which match the given wildcarded nick
- - .gecos [-r] <wildcarded/regex gecos> (OPERS ONLY)
+ - .gecos [-l list] <[wildcard gecos]|[-r regex]> (OPERS ONLY)
     List all connected users who match the given gecos
+    The -l option stores the results in the given list name
  - .failures
     This command lists userhosts that have exceeded the threshold
     of connect failures due to being K-lined, detected as a bot,
@@ -35,8 +43,10 @@ Note:  Opers as defined in this file are people with TCM O: lines (or
     domains with more than [min connections] users.
  - .nflood (OPERS ONLY)
     List nick flooders.
- - .vlist <[user@]ip mask> (OPERS ONLY)
+ - .vlist [-l list] <[wildcard ip]|[-r regex]> (OPERS ONLY)
     List all users matching the IP mask.
- - .vmulti (OPERS ONLY)
+    The -l option stores the results in the given list name
+ - .vmulti [-l list] [n] (OPERS ONLY)
     List all virtual hosted multiple connections.
+    The -l option stores the results in the given list name
 

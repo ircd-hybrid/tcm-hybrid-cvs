@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.65 2003/03/29 10:06:05 bill Exp $
+ * $Id: hash.c,v 1.66 2003/03/30 00:27:27 bill Exp $
  */
 
 #include <stdio.h>
@@ -1109,41 +1109,78 @@ report_domains(struct connection *connection_p, int num)
  */
 
 void 
-list_class(struct connection *connection_p, char *class_to_find,int total_only)
+list_class(struct connection *connection_p, char *class_to_find, int total_only, char *list_name)
 {
   struct hash_rec *ptr;
-  int i;
+  int i, idx=-1;
   int num_found=0;
   int num_unknown=0;
 
-  for (i=0; i < HASHTABLESIZE; ++i)
+  if (!BadPtr(list_name))
+  {
+    if ((idx = find_list(list_name)) == -1 &&
+        create_list(connection_p, list_name) == NULL)
     {
-      for (ptr = domain_table[i]; ptr; ptr = ptr->next)
-        {
-          if(strcmp(ptr->info->class, "unknown") == 0)
-            num_unknown++;
-
-          if(strcasecmp(class_to_find, ptr->info->class) == 0)
-            {
-              if(!total_only)
-                {
-                  if(num_found == 0)
-                    {
-                      /* Simply the header to the list of clients */
-                      send_to_connection(connection_p,
-                           "The following clients are in class %s",
-                           class_to_find);
-                    }
-
-                    send_to_connection(connection_p,
-				       "  %s (%s@%s)", ptr->info->nick,
-				       ptr->info->username, ptr->info->host);
-                }
-
-              num_found++;
-            }
-        }
+      send_to_connection(connection_p, "Error creating list!");
+      return;
     }
+
+    idx = find_list(list_name);
+  }
+
+  for (i=0; i < HASHTABLESIZE; ++i)
+  {
+    for (ptr = domain_table[i]; ptr; ptr = ptr->next)
+    {
+      if (strcmp(ptr->info->class, "unknown") == 0)
+        num_unknown++;
+
+      if (strcasecmp(class_to_find, ptr->info->class) == 0)
+      {
+        if (!total_only)
+        {
+          if (num_found++ == 0)
+          {
+            if (idx == -1)
+              send_to_connection(connection_p,
+                                "The following clients are in class %s",
+                                class_to_find);
+            else
+              send_to_connection(connection_p,
+                                 "Adding matches to list %s",
+                                 list_name);
+          }
+
+          if (idx == -1)
+          {
+#ifndef AGGRESSIVE_GECOS
+            if (ptr->info->gecos[0] == '\0')
+              send_to_connection(connection_p,
+                                 "  %s (%s@%s) [%s] {%s}",
+		                 ptr->info->nick, ptr->info->username, ptr->info->host,
+                                 ptr->info->ip_host, ptr->info->class);
+            else
+#endif
+              send_to_connection(connection_p,
+                                 "  %s (%s@%s) [%s] {%s} [%s]",
+                                 ptr->info->nick, ptr->info->username, ptr->info->host,
+                                 ptr->info->ip_host, ptr->info->class, ptr->info->gecos);
+          }
+          else
+          {
+            if (!add_client_to_list(ptr->info, idx))
+            {
+              send_to_connection(connection_p,
+                                 "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                                 ptr->info->nick, ptr->info->username, ptr->info->host,
+                                 ptr->info->ip_host, ptr->info->class);
+              continue;
+            }
+          }
+        }
+      }
+    }
+  }
 
   if(num_found != 0)
     send_to_connection(connection_p,
@@ -1163,17 +1200,15 @@ list_class(struct connection *connection_p, char *class_to_find,int total_only)
  */
 
 void 
-list_nicks(struct connection *connection_p, char *nick, int regex)
+list_nicks(struct connection *connection_p, char *nick, int regex, char *list_name)
 {
   struct hash_rec *ptr;
+  int i=0, numfound=0, idx=-1;
+
 #ifdef HAVE_REGEX_H
   regex_t reg;
   regmatch_t m[1];
-#endif
-  int i=0;
-  int numfound=0;
 
-#ifdef HAVE_REGEX_H
   if(regex == YES && (i=regcomp((regex_t *)&reg, nick, 1)))
   {
     char errbuf[1024];
@@ -1184,36 +1219,76 @@ list_nicks(struct connection *connection_p, char *nick, int regex)
   }
 #endif
 
-  for (i=0; i<HASHTABLESIZE; ++i)
+  if (!BadPtr(list_name))
+  {
+    if ((idx = find_list(list_name)) == -1 &&
+        create_list(connection_p, list_name) == NULL)
     {
-      for (ptr = domain_table[i]; ptr; ptr = ptr->next)
-        {
-#ifdef HAVE_REGEX_H
-          if((regex == YES &&
-               !regexec((regex_t *)&reg, ptr->info->nick,1,m,REGEXEC_FLAGS))
-              || (regex == NO && !match(nick, ptr->info->nick)))
-#else
-          if(!match(nick, ptr->info->nick))
-#endif
-            {
-              if(!numfound)
-                {
-                  send_to_connection(connection_p,
-				     "The following clients match %.150s:",
-				     nick);
-                }
-              numfound++;
-
-              send_to_connection(connection_p,
-				 "  %s (%s@%s) [%s] {%s}",
-				 ptr->info->nick, ptr->info->username,
-				 ptr->info->host, ptr->info->ip_host,
-                                 ptr->info->class);
-            }
-        }
+      send_to_connection(connection_p,
+                         "Error creating list!");
+      return;
     }
 
-  if(numfound)
+    idx = find_list(list_name);
+  }
+
+  for (i=0; i<HASHTABLESIZE; ++i)
+  {
+    for (ptr = domain_table[i]; ptr; ptr = ptr->next)
+    {
+#ifdef HAVE_REGEX_H
+      if((regex == YES &&
+         !regexec((regex_t *)&reg, ptr->info->nick,1,m,REGEXEC_FLAGS)) ||
+         (regex == NO && !match(nick, ptr->info->nick)))
+#else
+      if(!match(nick, ptr->info->nick))
+#endif
+      {
+        if(numfound++ == 0)
+        {
+          if (idx == -1)
+            send_to_connection(connection_p,
+                               "The following clients match %.150s:",
+                               nick);
+          else
+            send_to_connection(connection_p,
+                               "Adding matches to list %s",
+                               list_name);
+        }
+
+        if (idx == -1)
+        {
+#ifndef AGGRESSIVE_GECOS
+          if (ptr->info->gecos[0] == '\0')
+            send_to_connection(connection_p,
+                               "  %s (%s@%s) [%s] {%s}",
+                               ptr->info->nick, ptr->info->username,
+                               ptr->info->host, ptr->info->ip_host,
+                               ptr->info->class);
+          else
+#endif
+            send_to_connection(connection_p,
+                               "  %s (%s@%s) [%s] {%s} [%s]",
+                               ptr->info->nick, ptr->info->username,
+                               ptr->info->host, ptr->info->ip_host,
+                               ptr->info->class);
+        }
+        else
+        {
+          if (!add_client_to_list(ptr->info, idx))
+          {
+            send_to_connection(connection_p,
+                               "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                               ptr->info->nick, ptr->info->username, ptr->info->host,
+                               ptr->info->ip_host, ptr->info->class);
+            continue;
+          }
+        }
+      }
+    }
+  }
+
+  if (numfound)
     send_to_connection(connection_p,
 		       "%d matches for %s found",numfound,nick);
   else
@@ -1376,17 +1451,16 @@ kill_or_list_users(struct connection *connection_p, char *userhost, int regex,
  */
 
 void
-list_gecos(struct connection *connection_p, char *u_gecos, int regex)
+list_gecos(struct connection *connection_p, char *u_gecos, int regex, char *list_name)
 {
   struct hash_rec *ptr;
+  char gecos[MAX_GECOS];
+  int i, numfound = 0, idx = -1;
+
 #ifdef HAVE_REGEX_H
   regex_t reg;
   regmatch_t m[1];
-#endif
-  char gecos[MAX_GECOS];
-  int i, numfound = 0;
 
-#ifdef HAVE_REGEX_H
   if(regex == YES && (i = regcomp((regex_t *)&reg, u_gecos, 1)))
   {
     char errbuf[REGEX_SIZE];
@@ -1403,6 +1477,19 @@ list_gecos(struct connection *connection_p, char *u_gecos, int regex)
     return;
   }
 
+  if (!BadPtr(list_name))
+  {
+    if ((idx = find_list(list_name)) == -1 &&
+        create_list(connection_p, list_name) == NULL)
+    {
+      send_to_connection(connection_p,
+                         "Error creating list!");
+      return;
+    }
+
+    idx = find_list(list_name);
+  }
+
   for (i=0; i < HASHTABLESIZE; ++i)
   {
     for (ptr = domain_table[i]; ptr; ptr = ptr->next)
@@ -1416,22 +1503,45 @@ list_gecos(struct connection *connection_p, char *u_gecos, int regex)
       if (match(u_gecos, gecos) == 0 && (gecos[0] != '\0'))
 #endif
       {
-        if (numfound == 0)
-          send_to_connection(connection_p,
-                             "The following clients match %s:", u_gecos);
+        if (numfound++ == 0)
+        {
+          if (idx == -1)
+            send_to_connection(connection_p,
+                               "The following clients match %s:",
+                               u_gecos);
+          else
+            send_to_connection(connection_p,
+                               "Adding matches to list %s",
+                               list_name);
+        }
 
-        numfound++;
-        if(ptr->info->ip_host[0] > '9' || ptr->info->ip_host[0] < '0')
-          send_to_connection(connection_p,
-                             "  %s (%s@%s) {%s} [%s]", ptr->info->nick,
-                             ptr->info->username, ptr->info->host,
-                             ptr->info->class, ptr->info->gecos);
+        if (idx == -1)
+        {
+#ifndef AGGRESSIVE_GECOS
+          if (ptr->info->gecos[0] == '\0')
+            send_to_connection(connection_p,
+                               "  %s (%s@%s) {%s} [%s]", ptr->info->nick,
+                               ptr->info->username, ptr->info->host,
+                               ptr->info->class);
+          else
+#endif
+            send_to_connection(connection_p,
+                               "  %s (%s@%s) [%s] {%s} [%s]", ptr->info->nick,
+                               ptr->info->username, ptr->info->host,
+                               ptr->info->ip_host, ptr->info->class,
+                               ptr->info->gecos);
+        }
         else
-          send_to_connection(connection_p,
-                             "  %s (%s@%s) [%s] {%s} [%s]", ptr->info->nick,
-                             ptr->info->username, ptr->info->host,
-                             ptr->info->ip_host, ptr->info->class,
-                             ptr->info->gecos);
+        {
+          if (!add_client_to_list(ptr->info, idx))
+          {
+            send_to_connection(connection_p,
+                               "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                               ptr->info->nick, ptr->info->username, ptr->info->host,
+                               ptr->info->ip_host, ptr->info->class);
+            continue;
+          }
+        }
       }
     }
   }

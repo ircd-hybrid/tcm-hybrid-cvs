@@ -1,7 +1,7 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.29 2003/03/29 10:06:03 bill Exp $ */
+/* $Id: hash.h,v 1.30 2003/03/30 00:27:25 bill Exp $ */
 
 #define HASHTABLESIZE 3001
 
@@ -55,13 +55,14 @@ struct user_entry *find_nick_or_host(const char *find, int type);
 #define FIND_NICK 1
 #define FIND_HOST 0
 
-void list_nicks(struct connection *, char *, int);
+void list_nicks(struct connection *, char *, int, char *);
+void list_gecos(struct connection *, char *, int, char *);
+void list_class(struct connection *, char *, int, char *);
 void kill_or_list_users(struct connection *, char *, int, int, char *, const char *);
 #define KILL	0	/* kill clients from resulting list */
 #define DUMP	1	/* print out clients from resulting list */
 #define MAKE	2	/* put resulting clients into a list */
 
-void list_gecos(struct connection *, char *, int);
 void report_mem(struct connection *);
 void report_failures(struct connection *, int);
 
@@ -70,7 +71,5 @@ void check_reconnect_clones(char *, char *);
 
 void report_domains(struct connection *connection_p, int num);
 void kill_add_report(char *);
-void list_class(struct connection *connection_p,
-		char *class_to_find,int total_only);
 #endif
 

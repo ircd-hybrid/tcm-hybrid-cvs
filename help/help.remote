@@ -1,20 +1,19 @@
  - .register password
     registers a remote oper
- - .killlist user@host, .kl user@host
-    The tcm will kill each user@host found with the reason
-    "no multiple connections read the motd" (OPERS only)
+ - .killlist <[userhost]|[-l list]> [reason] (OPERS only)
+    The tcm will kill each user@host found
 
 If you have a hybrid server, you can set a temporary kline by
 setting a time in seconds, in the [time] field.
 
- - .kaction <action> [nick|user@host]
-
- - .kline [time] [nick|user@host] reason
+ - .k<action> [time] <[nick]|[userhost]|[-l list]> [reason]
+ - .kline [time] <[nick]|[userhost]|[-l list]> [reason]
     Generic K-line command.
  - .kill nick reason
    Issue a KILL for a specific user.
- - .dline IP reason
+ - .dline <[ip]|[-l list]> [reason]
    Set a D-line for the IP or IP/CIDR mask.
+ - .undline <ip>
  - .unkline user@host (must match exactly)
    The tcm will attempt to remove that kline
  - .jupe <channel/nick> [reason]

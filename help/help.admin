@@ -18,8 +18,9 @@
     This command reloads the userlist etc.
  - .trace
     Retraces the server, this will clear out any "stale" nicks.
- - .class n
+ - .class [-l list] n
     Shows you the client in class n, you may need to use .trace to update.
+    The -l option stores the results in the given list name
  - .classt n
     Shows you total number of clients in class n.
  - .actions (see .help clones)

@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.26 2002/12/30 07:31:36 bill Exp $
+ * $Id: clones.c,v 1.27 2003/03/30 00:27:27 bill Exp $
  */
 
 #include <assert.h>
@@ -27,6 +27,7 @@
 #include "actions.h"
 #include "event.h"
 #include "match.h"
+#include "client_list.h"
 
 static void m_bots(struct connection *, int, char *argv[]);
 static void m_umulti(struct connection *, int, char *argv[]);
@@ -36,7 +37,7 @@ static void m_clones(struct connection *, int, char *argv[]);
 static void check_clones(void *);
 static void report_clones(struct connection *);
 static void report_multi_user_host_domain(struct hash_rec *table[], 
-					  struct connection *, int);
+					  struct connection *, int, char *);
 static int is_an_ip(const char *host);
 
 struct dcc_command bots_msgtab = {
@@ -69,51 +70,50 @@ void
 m_bots(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc >= 2)
-    report_multi_user_host_domain(domain_table, connection_p,
-				  atoi(argv[1]));
+  {
+    if (strcasecmp(argv[1], "-l") == 0)
+      report_multi_user_host_domain(domain_table, connection_p,
+                                    (argc >= 4) ? atoi(argv[3]) : 3, argv[2]);
+    else
+      report_multi_user_host_domain(domain_table, connection_p,
+                                    atoi(argv[1]), NULL);
+  }
   else
     report_multi_user_host_domain(domain_table, connection_p,
-				  3);
+				  3, NULL);
 }
 
 void
 m_umulti(struct connection *connection_p, int argc, char *argv[])
 {
-  int t;
-
   if (argc >= 2)
   {
-    if ((t = atoi(argv[1])) < 3)
-    {
-      send_to_connection(connection_p,
-		 "Using a threshold less than 3 is forbidden, changed to 3");
-      t = 3;
-    }
+    if (strcasecmp(argv[1], "-l") == 0)
+      report_multi_user_host_domain(user_table, connection_p,
+                                    (argc >= 4) ? atoi(argv[3]) : 3, argv[2]);
+    else
+      report_multi_user_host_domain(user_table, connection_p,
+                                    atoi(argv[1]), NULL);
   }
   else
-    t = 3;
-
-  report_multi_user_host_domain(user_table, connection_p, t);
+    report_multi_user_host_domain(user_table, connection_p,
+                                  3, NULL);
 }
 
 void
 m_hmulti(struct connection *connection_p, int argc, char *argv[])
 {
-  int t;
-
   if (argc >= 2)
   {
-    if ((t = atoi(argv[1])) < 3)
-    {
-      send_to_connection(connection_p,
-		 "Using a threshold less than 3 is forbidden, changed to 3");
-      t = 3;
-    }
+    if (strcasecmp(argv[1], "-l") == 0)
+      report_multi_user_host_domain(host_table, connection_p,
+                                    (argc >= 4) ? atoi(argv[3]) : 3, argv[2]);
+    else
+      report_multi_user_host_domain(host_table, connection_p,
+                                    atoi(argv[1]), NULL);
   }
   else
-    t = 3;
-
-  report_multi_user_host_domain(host_table, connection_p, t);
+    report_multi_user_host_domain(host_table, connection_p, 3, NULL);
 }
 
 void
@@ -345,18 +345,20 @@ report_clones(struct connection *connection_p)
  *
  * inputs       - table either user_table or host_table or domain_table
  *		- pointer to connection
+ *		- threshold
+ *		- list name
  * output       - NONE
  * side effects -
  */
 void
 report_multi_user_host_domain(struct hash_rec *table[], 
-			      struct connection *connection_p, int nclones)
+			      struct connection *connection_p, int nclones, char *list_name)
 {
   struct hash_rec *ptr;
   struct hash_rec *top;
   struct hash_rec *tptr;
   int num_found;
-  int i;
+  int i, idx=-1;
   int foundany = NO;
   int check_type;
   int is_ip = 0;
@@ -369,6 +371,18 @@ report_multi_user_host_domain(struct hash_rec *table[],
     check_type = HOST_CHECK;
   else
     check_type = DOMAIN_CHECK;
+
+  if (!BadPtr(list_name))
+  {
+    if ((idx = find_list(list_name)) == -1 &&
+        create_list(connection_p, list_name) == NULL)
+    {
+      send_to_connection(connection_p, "Error creating list!");
+      return;
+    }
+
+    idx = find_list(list_name);
+  }
 
   for (i=0; i < HASHTABLESIZE; ++i)
     {
@@ -405,24 +419,76 @@ report_multi_user_host_domain(struct hash_rec *table[],
 		  if (check_type == USER_CHECK)
 		    {
 		      if (!match(tptr->info->username, ptr->info->username))
+                      {
 			num_found++; /* - zaph & Dianora :-) */
+                        if (idx >= 0)
+                        {
+                          if (!add_client_to_list(tptr->info, idx))
+                          {
+                            send_to_connection(connection_p,
+                                               "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                                               tptr->info->nick, tptr->info->username, tptr->info->host,
+                                               tptr->info->ip_host, tptr->info->class);
+                            continue;
+                          }
+                        }
+                      }
 		    }
 		  else if(check_type == HOST_CHECK)
 		    {
 		      if (!strcmp(tptr->info->host, ptr->info->host))
+                      {
 			num_found++; /* - zaph & Dianora :-) */
+                        if (idx >= 0)
+                        {
+                          if (!add_client_to_list(tptr->info, idx))
+                          {
+                            send_to_connection(connection_p,
+                                               "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                                               tptr->info->nick, tptr->info->username, tptr->info->host,
+                                               tptr->info->ip_host, tptr->info->class);
+                            continue;
+                          }
+                        }
+                      }
 		    }
 		  else if(check_type == DOMAIN_CHECK)
 		    {
 		      if (!strcmp(tptr->info->username, ptr->info->username) &&
 			  !strcmp(tptr->info->domain, ptr->info->domain))
+                      {
 			num_found++; /* - zaph & Dianora :-) */
+                        if (idx >= 0)
+                        {
+                          if (!add_client_to_list(tptr->info, idx))
+                          {
+                            send_to_connection(connection_p,
+                                               "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                                               tptr->info->nick, tptr->info->username, tptr->info->host,
+                                               tptr->info->ip_host, tptr->info->class);
+                            continue;
+                          }
+                        }
+                      }
 		    }
 		}
 	    }
 
 	  if (num_found > nclones)
 	    {
+              if (idx >= 0)
+              {
+                if (!add_client_to_list(ptr->info, idx))
+                {
+                  send_to_connection(connection_p,
+                                     "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                                     ptr->info->nick, ptr->info->username, ptr->info->host,
+                                     ptr->info->ip_host, ptr->info->class);
+                }
+                foundany = YES;
+                continue;
+              }
+
 	      if (!foundany)
 		{
 		  if (check_type == USER_CHECK)

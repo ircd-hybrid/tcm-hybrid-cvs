@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.219 2003/03/29 02:05:17 bill Exp $
+ * $Id: bothunt.c,v 1.220 2003/03/30 00:27:27 bill Exp $
  */
 
 #include <stdio.h>
@@ -637,6 +637,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     strlcpy(userinfo.ip_class_c, q, sizeof(userinfo.ip_class_c));
 #endif
 
+    del_client_from_all_lists(&userinfo);
     remove_user_host(&userinfo);
     break;
 
@@ -931,6 +932,10 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     {
       switch (*p)
       {
+        case 'D':
+          tcm_status.oper_privs |= PRIV_DLINE;
+          break;
+
         case 'G':
           tcm_status.oper_privs |= PRIV_GLINE;
           break;

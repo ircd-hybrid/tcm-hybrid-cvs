@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.17 2003/01/19 01:18:40 wiz Exp $
+ * $Id: vclones.c,v 1.18 2003/03/30 00:27:27 bill Exp $
  */
 
 #include <assert.h>
@@ -26,6 +26,7 @@
 #include "userlist.h"
 #include "actions.h"
 #include "match.h"
+#include "client_list.h"
 
 #ifdef HAVE_REGEX_H
 #include <regex.h>
@@ -37,8 +38,8 @@ static void m_vmulti(struct connection *, int, char *argv[]);
 static void m_vbots(struct connection *, int, char *argv[]);
 static void m_vlist(struct connection *, int, char *argv[]);
 
-static void report_vbots(struct connection *, int, int);
-static void list_virtual_users(struct connection *, char *, int);
+static void report_vbots(struct connection *, int, int, char *);
+static void list_virtual_users(struct connection *, char *, int, char *);
 
 struct dcc_command vmulti_msgtab = {
   "vmulti", NULL, {m_unregistered, m_vmulti, m_vmulti}
@@ -62,39 +63,79 @@ void
 m_vmulti(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc >= 2)
-    report_vbots(connection_p, atoi(argv[1]), NO);
+  {
+    if (strcasecmp(argv[1], "-l") == 0)
+      report_vbots(connection_p, (argc >= 4) ? atoi(argv[3]) : 3, NO, argv[2]);
+    else
+      report_vbots(connection_p, atoi(argv[1]), NO, NULL);
+  }
   else
-    report_vbots(connection_p, 3, NO);
+    report_vbots(connection_p, 3, NO, NULL);
 }
 
 void
 m_vbots(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc >= 2)
-    report_vbots(connection_p, atoi(argv[1]), YES);
+  {
+    if (strcasecmp(argv[1], "-l") == 0)
+      report_vbots(connection_p, (argc >= 4) ? atoi(argv[3]) : 3, YES, argv[2]);
+    else
+      report_vbots(connection_p, atoi(argv[1]), YES, NULL);
+  }
   else
-    report_vbots(connection_p, 3, YES);
+    report_vbots(connection_p, 3, YES, NULL);
 }
 
 void
 m_vlist(struct connection *connection_p, int argc, char *argv[])
 {
 #ifdef HAVE_REGEX_H
-  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+  if(!(argc >= 2) || !(argc <= 5) ||
+     /* .vlist -l list -r [0-9]  */
+     (strcasecmp(argv[1], "-l") == 0 && argc >= 4 && strcasecmp(argv[3], "-r") == 0 && argc < 5) ||
+     /* .vlist -l list ?*@*      */
+     (strcasecmp(argv[1], "-l") == 0 && argc >= 4 && strcasecmp(argv[3], "-r") != 0 && argc < 4) ||
+     /* .vlist -r [0-9]          */
+     (strcasecmp(argv[1], "-l") != 0 && argc >= 2 && strcasecmp(argv[1], "-r") == 0 && argc < 3) ||
+     /* .vlist ?*@*              */
+     (strcasecmp(argv[1], "-l") != 0 && argc >= 2 && strcasecmp(argv[1], "-r") != 0 && argc < 2) )
+  {
     send_to_connection(connection_p,
-		       "Usage: %s <wildcarded/regexp ip>",
+		       "Usage: %s [-l list] <[wildcard ip]|[-r regexp]>",
 		       argv[0]);
+    return;
+  }
+
+  if (strcasecmp(argv[1], "-l") == 0)
+  {
+    if (strcasecmp(argv[3], "-r") == 0)
+      list_virtual_users(connection_p, argv[4], YES, argv[2]);
+    else
+      list_virtual_users(connection_p, argv[3], NO, argv[2]);
+  }
   else if (argc == 2)
-    list_virtual_users(connection_p, argv[1], NO);
+    list_virtual_users(connection_p, argv[1], NO, NULL);
   else
-    list_virtual_users(connection_p, argv[2], YES);
+    list_virtual_users(connection_p, argv[2], YES, NULL);
 #else
-  if (argc < 2)
+  if(!(argc >= 2) || !(argc <= 4) ||
+     /* .vlist -l list ?*@*      */
+     (strcasecmp(argv[1], "-l") == 0 && argc < 4) ||
+     /* .vlist ?*@*              */
+     (strcasecmp(argv[1], "-l") != 0 && argc < 2) )
+  {
     send_to_connection(connection_p,
-		       "Usage %s <wildcarded ip>", argv[0]);
+		       "Usage %s [-l list] <wildcard ip>", argv[0]);
+    return;
+  }
+
+  if (strcasecmp(argv[1], "-l") == 0)
+    list_virtual_users(connection_p, argv[3], NO, argv[2]);
   else
-    list_virtual_users(connection_p, argv[1], NO);
-#endif
+    list_virtual_users(connection_p, argv[1], NO, NULL);
+#endif /* HAVE_REGEX_H */
+
 }
 
 /*
@@ -103,24 +144,37 @@ m_vlist(struct connection *connection_p, int argc, char *argv[])
  * inputs       - pointer to struct connection
  *              - number to consider as clone
  *		- check_user YES means check user name as well as IP block
+ *              - desired list name
  * output       - NONE
  * side effects -
  */
 
 static void
-report_vbots(struct connection *connection_p, int nclones, int check_user)
+report_vbots(struct connection *connection_p, int nclones, int check_user, char *list_name)
 {
   struct hash_rec *ptr;
   struct hash_rec *top;
   struct hash_rec *tptr;
   int num_found;
-  int i;
+  int i, idx=-1;
   int foundany = 0;
 
   if(nclones == 0)
     nclones = 5;
 
   nclones--;
+
+  if (!BadPtr(list_name))
+  {
+    if ((idx = find_list(list_name)) == -1 &&
+        create_list(connection_p, list_name) == NULL)
+    {
+      send_to_connection(connection_p, "Error creating list!");
+      return;
+    }
+
+    idx = find_list(list_name);
+  }
 
   for (i=0; i<HASHTABLESIZE; ++i)
     {
@@ -152,17 +206,54 @@ report_vbots(struct connection *connection_p, int nclones, int check_user)
 		    {
 		      if (!strcmp(tptr->info->username, ptr->info->username) &&
 			  !strcmp(tptr->info->ip_class_c, ptr->info->ip_class_c))
+                      {
 			num_found++; /* - zaph & Dianora :-) */
+                        if (idx >= 0)
+                        {
+                          if (!add_client_to_list(tptr->info, idx))
+                          {
+                            send_to_connection(connection_p,
+                                               "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                                               tptr->info->nick, tptr->info->username, tptr->info->host,
+                                               tptr->info->ip_host, tptr->info->class);
+                          }
+                        }
+                      }
 		    }
 		  else
 		    {
 		      if (!strcmp(tptr->info->ip_class_c, ptr->info->ip_class_c))
+                      {
 			num_found++; /* - zaph & Dianora :-) */
+                        if (idx >= 0)
+                        { 
+                          if (!add_client_to_list(tptr->info, idx))
+                          {
+                            send_to_connection(connection_p, 
+                                               "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                                               tptr->info->nick, tptr->info->username, tptr->info->host,
+                                               tptr->info->ip_host, tptr->info->class);
+                          }
+                        }
+                      }
 		    }
                 }
 
               if (num_found > nclones)
                 {
+                  if (idx >= 0)
+                  {
+                    if (!add_client_to_list(ptr->info, idx))
+                    {
+                      send_to_connection(connection_p,
+                                         "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                                         ptr->info->nick, ptr->info->username, ptr->info->host,
+                                         ptr->info->ip_host, ptr->info->class);
+                    }
+                    foundany = YES;
+                    continue;
+                  }
+
                   if (!foundany)
                     {
 		      if (check_user)
@@ -218,18 +309,15 @@ report_vbots(struct connection *connection_p, int nclones, int check_user)
  */
 
 void
-list_virtual_users(struct connection *connection_p, char *userhost, int regex)
+list_virtual_users(struct connection *connection_p, char *userhost, int regex, char *list_name)
 {
   struct hash_rec *ipptr;
+  char uhost[MAX_USERHOST];
+  int i, idx=-1, num_found=0;
 #ifdef HAVE_REGEX_H
   regex_t reg;
   regmatch_t m[1];
-#endif
-  char uhost[MAX_USERHOST];
-  int i;
-  int num_found = 0;
 
-#ifdef HAVE_REGEX_H
   if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
   {
     char errbuf[REGEX_SIZE];
@@ -239,12 +327,26 @@ list_virtual_users(struct connection *connection_p, char *userhost, int regex)
     return;
   }
 #endif
+
   if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
     {
       send_to_connection(connection_p,
- "Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.");
+                         "Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.");
       return;
     }
+
+  if (!BadPtr(list_name))
+  {
+    if ((idx = find_list(list_name)) == -1 &&
+        create_list(connection_p, list_name) == NULL)
+    {
+      send_to_connection(connection_p,
+                         "Error creating list!");
+      return;
+    }
+
+    idx = find_list(list_name);
+  }
 
   for (i=0; i < HASHTABLESIZE; ++i)
   {
@@ -260,21 +362,49 @@ list_virtual_users(struct connection *connection_p, char *userhost, int regex)
       if (!match(userhost, uhost))
 #endif
       {
-        if (num_found == 0)
-          send_to_connection(connection_p,
-			     "The following clients match %s:", userhost);
+        if (num_found++ == 0)
+        {
+          if (idx == -1)
+            send_to_connection(connection_p,
+		  	       "The following clients match %s:", userhost);
+          else
+            send_to_connection(connection_p,
+                               "Adding matches to list %s", list_name);
+        }
 
-	num_found++;
-        send_to_connection(connection_p,
-			   "  %s (%s@%s) [%s] {%s}", ipptr->info->nick,
-			   ipptr->info->username, ipptr->info->host, ipptr->info->ip_host,
-			   ipptr->info->class);
+        if (idx == -1)
+        {
+#ifndef AGGRESSIVE_GECOS
+          if (ipptr->info->gecos[0] == '\0')
+            send_to_connection(connection_p,
+		    	       "  %s (%s@%s) [%s] {%s}", ipptr->info->nick,
+			       ipptr->info->username, ipptr->info->host, ipptr->info->ip_host,
+			       ipptr->info->class);
+          else
+#endif
+            send_to_connection(connection_p,
+                               "  %s (%s@%s) [%s] {%s} [%s]",
+                               ipptr->info->nick, ipptr->info->username, ipptr->info->host,
+                               ipptr->info->ip_host, ipptr->info->class, ipptr->info->gecos);
+        }
+        else
+        {
+          if (!add_client_to_list(ipptr->info, idx))
+          {
+            send_to_connection(connection_p,
+                               "Failed to add %s (%s@%s) [%s] {%s} to the list",
+                               ipptr->info->nick, ipptr->info->username, ipptr->info->host,
+                               ipptr->info->ip_host, ipptr->info->class);
+            continue;
+          }
+        }
       }
     }
   }
+
   if (num_found > 0)
     send_to_connection(connection_p,
-		       "%d matches for %s found", num_found, userhost);
+		       "%d match%s for %s found", num_found, (num_found == 1) ? "" : "es", userhost);
   else
     send_to_connection(connection_p, "No matches for %s found", userhost);
 }

@@ -1,7 +1,7 @@
 /*
  * client_list.c: contains routines for managing lists of clients
  *
- * $Id: client_list.c,v 1.1 2003/03/29 10:06:05 bill Exp $
+ * $Id: client_list.c,v 1.2 2003/03/30 00:27:27 bill Exp $
  */
 
 #include "tcm.h"
@@ -18,12 +18,12 @@ static void init_list(int index);
 static int
 find_empty()
 {
-  int a = 0;
+  int idx = 0;
 
-  for (a=0; a<MAX_LISTS; ++a)
+  for (idx=0; idx<MAX_LISTS; ++idx)
   {
-    if (client_lists[a].name[0] == '\0')
-      return a;
+    if (client_lists[idx].name[0] == '\0')
+      return idx;
   }
 
   return -1;
@@ -56,6 +56,7 @@ init_client_lists()
 void
 print_list(struct connection *connection_p, char *name)
 {
+  time_t now = time(NULL);
   dlink_node *ptr;
   struct user_entry *user;
   int index;
@@ -67,7 +68,12 @@ print_list(struct connection *connection_p, char *name)
   }
 
   if (client_lists[index].dlink.head == NULL)
+  {
+    send_to_connection(connection_p, "List is empty.");
     return;
+  }
+
+  send_to_connection(connection_p, "Clients in list \'%s\':", name);
 
   DLINK_FOREACH(ptr, client_lists[index].dlink.head)
   {
@@ -82,25 +88,31 @@ print_list(struct connection *connection_p, char *name)
 #endif
       send_to_connection(connection_p, " %s (%s@%s) [%s] {%s} [%s]",
                          user->nick, user->username, user->host,
-                         user->ip_host, user->class);
+                         user->ip_host, user->class, user->gecos);
   }
+
+  send_to_connection(connection_p, "%s) %d entr%s -- created by %s lifetime: %ld",
+                     client_lists[index].name, dlink_length(&client_lists[index].dlink),
+                     (dlink_length(&client_lists[index].dlink) == 1) ? "y" : "ies",
+                     client_lists[index].creator, (now - client_lists[index].creation_time));
 }
 
 void
 print_lists(struct connection *connection_p, char *mask)
 {
-  int a;
+  int idx;
   time_t now = time(NULL);
 
   if (BadPtr(mask))
     return;
 
-  for (a=0; a<MAX_LISTS; ++a)
+  for (idx=0; idx<MAX_LISTS; ++idx)
   {
-    if (!match(mask, client_lists[a].name))
-      send_to_connection(connection_p, "%s) %d entries -- created by %s lifetime: %ld",
-                         client_lists[a].name, dlink_length(&client_lists[a].dlink),
-                         client_lists[a].creator, (now - client_lists[a].creation_time));
+    if (!match(mask, client_lists[idx].name))
+      send_to_connection(connection_p, "%s) %d entr%s -- created by %s lifetime: %ld",
+                         client_lists[idx].name, dlink_length(&client_lists[idx].dlink),
+                         (dlink_length(&client_lists[idx].dlink) == 1) ? "y" : "ies",
+                         client_lists[idx].creator, (now - client_lists[idx].creation_time));
   }
 }
 
@@ -143,6 +155,9 @@ add_client_to_list(struct user_entry *user, int idx)
   if ((ptr = dlink_create()) == NULL)
     return 0;
 
+  if (dlink_find(user, &client_lists[idx].dlink) != NULL)
+    return 1;
+
   dlink_add(user, ptr, &client_lists[idx].dlink);
   return 1;
 }
@@ -150,48 +165,68 @@ add_client_to_list(struct user_entry *user, int idx)
 int
 del_client_from_list(struct user_entry *user, int idx)
 {
+  struct user_entry *node;
   dlink_node *ptr;
 
   if (idx < 0 || idx > MAX_LISTS)
     return 0;
 
-  if ((ptr = dlink_find(user, &client_lists[idx].dlink)) == NULL)
-    return 0;
+  DLINK_FOREACH(ptr, client_lists[idx].dlink.head)
+  {
+    node = ptr->data;
 
-  dlink_delete(ptr, &client_lists[idx].dlink);
-  return 1;
+    if (!strcasecmp(user->nick, node->nick) &&
+        !strcasecmp(user->username, node->username) &&
+        !strcasecmp(user->host, node->host))
+    {
+      dlink_delete(ptr, &client_lists[idx].dlink);
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 void
 del_client_from_all_lists(struct user_entry *user)
 {
-  int a;
+  int idx;
+  struct user_entry *node;
   dlink_node *ptr;
 
-  for (a=0; a<MAX_LISTS; ++a)
+  for (idx=0; idx<MAX_LISTS; ++idx)
   {
-    if (client_lists[a].name[0] == '\0')
+    if (client_lists[idx].name[0] == '\0')
       continue;
 
-    if ((ptr = dlink_find(user, &client_lists[a].dlink)) == NULL)
-      continue;
+    DLINK_FOREACH(ptr, client_lists[idx].dlink.head)
+    {
+      node = ptr->data;
 
-    dlink_delete(ptr, &client_lists[a].dlink);
+      if (!strcasecmp(user->nick, node->nick) &&
+          !strcasecmp(user->username, node->username) &&
+          !strcasecmp(user->host, node->host))
+      {
+        dlink_delete(ptr, &client_lists[idx].dlink);
+        break;
+      }
+    }
+
   }
 }
 
 int
 find_list(char *name)
 {
-  int a;
+  int idx;
 
   if (BadPtr(name))
     return -1;
 
-  for (a=0; a<MAX_LISTS; ++a)
+  for (idx=0; idx<MAX_LISTS; ++idx)
   {
-    if (strcasecmp(name, client_lists[a].name) == 0)
-      return a;
+    if (strcasecmp(name, client_lists[idx].name) == 0)
+      return idx;
   }
 
   return -1;

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.178 2002/06/23 17:18:03 db Exp $
+ * $Id: bothunt.c,v 1.179 2002/06/23 18:34:26 leeh Exp $
  */
 
 #include <stdio.h>
@@ -159,17 +159,11 @@ void
 on_trace_user(int argc, char *argv[])
 {
   struct user_entry userinfo;
-  int  is_oper;
   char *ip_ptr;
   char *right_bracket_ptr;
 
   if (tcm_status.doing_trace == NO)
     return;
-
-  if (argv[3][0] == 'O')
-    is_oper = YES;
-  else
-    is_oper = NO;
 
   /* /trace format the same now everywhere? */
   
@@ -202,7 +196,7 @@ on_trace_user(int argc, char *argv[])
   strlcpy(userinfo.class, argv[4], MAX_CLASS);
   strlcpy(userinfo.nick, argv[5], MAX_NICK);
   strlcpy(userinfo.ip_host, argv[6]+1, MAX_IP);
-  add_user_host(&userinfo, YES, is_oper);
+  add_user_host(&userinfo, YES);
 }
 
 /* 
@@ -507,7 +501,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     *q = '\0';
 
     strlcpy(userinfo.class, p, MAX_CLASS);
-    add_user_host(&userinfo, NO, NO);
+    add_user_host(&userinfo, NO);
     break;
 
   /* Client exiting: bill (bill@ummm.E) [e?] [255.255.255.255]*/

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.39 2002/06/23 18:09:53 leeh Exp $
+ * $Id: hash.c,v 1.40 2002/06/23 18:34:26 leeh Exp $
  */
 
 #include <stdio.h>
@@ -184,8 +184,9 @@ add_to_hash_table(struct hash_rec *table[],
 
   assert(new_user != NULL);
 
-  if((new_hash = (struct hash_rec *)xmalloc(sizeof(struct hash_rec))) == NULL)
-    exit(-1);
+  new_hash = (struct hash_rec *)xmalloc(sizeof(struct hash_rec));
+  memset(new_hash, 0, sizeof(new_hash));
+
   new_hash->info = new_user;
   new_hash->next = NULL;
 
@@ -265,7 +266,7 @@ remove_from_hash_table(struct hash_rec *table[],
  */
 
 void
-add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
+add_user_host(struct user_entry *user_info, int fromtrace)
 {
   struct user_entry *new_user;
   char *domain;
@@ -275,14 +276,14 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
     user_signon(user_info);
 #endif
 
-  if((new_user = (struct user_entry *)xmalloc(sizeof(struct user_entry))) 
-      == NULL)
-    exit(-1);
-  new_user->link_count = 0;
+  new_user = (struct user_entry *)xmalloc(sizeof(struct user_entry));
+  memset(new_user, 0, sizeof(struct user_entry));
 
   strlcpy(new_user->nick, user_info->nick, MAX_NICK);
   strlcpy(new_user->username, user_info->username, MAX_NICK);
   strlcpy(new_user->host, user_info->host, MAX_HOST);
+  strlcpy(new_user->class, user_info->class, MAX_CLASS);
+
 #ifdef VIRTUAL
   if(user_info->ip_host[0] != '\0')
     strlcpy(new_user->ip_host, user_info->ip_host, MAX_IP);
@@ -295,9 +296,6 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
   new_user->connecttime = (fromtrace ? 0 : time(NULL));
   new_user->reporttime = 0;
   new_user->link_count = 0;
-
-  new_user->isoper = is_oper;
-  strlcpy(new_user->class, user_info->class, MAX_CLASS);
 
   /* Determine the domain name */
   domain = find_domain(user_info->host);

@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.39 2002/09/12 22:49:47 bill Exp $
+ * $Id: actions.c,v 1.40 2002/09/13 03:03:31 bill Exp $
  */
 
 #include "setup.h"
@@ -40,7 +40,6 @@ int act_cflood;
 int act_vclone;
 int act_flood;
 int act_link;
-int act_bot;
 int act_spambot;
 int act_clone;
 int act_rclone;
@@ -83,7 +82,6 @@ init_actions(void)
   init_one_action(&act_vclone, "vclone", HS_VCLONE, REASON_VCLONE);
   init_one_action(&act_flood, "flood", HS_FLOOD, REASON_FLOOD);
   init_one_action(&act_link, "link", HS_LINK, REASON_LINK);
-  init_one_action(&act_bot, "bot", HS_BOT, REASON_BOT);
   init_one_action(&act_spambot, "spam", HS_SPAMBOT, REASON_SPAMBOT);
   init_one_action(&act_clone, "clone", HS_CLONE, REASON_CLONE);
   init_one_action(&act_rclone, "rclone", HS_RCLONE, REASON_RCLONE);
@@ -327,6 +325,7 @@ handle_action(int actionid, char *g_nick, char *g_username,
   char *p;
   struct user_entry *userptr;
 
+  nick = username = host = ip = NULL;
 
   /*
    * it is nessecary to make copies of this data because of the parsing that follows.
@@ -334,15 +333,32 @@ handle_action(int actionid, char *g_nick, char *g_username,
    * simply modified the original memory, it may cause problems removing the user
    * from the hash tables when the client disconnects.  -bill
    */
-  strlcpy(l_nick, g_nick, MAX_NICK); nick = l_nick;
-  strlcpy(l_username, g_username, MAX_USER); username = l_username;
-  strlcpy(l_host, g_host, MAX_HOST); host = l_host;
-  strlcpy(l_ip, g_ip, MAX_HOST); ip = l_ip;
+  if (g_nick != NULL)
+  {
+    strlcpy(l_nick, g_nick, MAX_NICK);
+    nick = l_nick;
+  }
+  if (g_username != NULL)
+  {
+    strlcpy(l_username, g_username, MAX_USER);
+    username = l_username;
+  }
+  if (g_host != NULL)
+  {
+    strlcpy(l_host, g_host, MAX_HOST);
+    host = l_host;
+  }
+  if (g_ip != NULL)
+  {
+    strlcpy(l_ip, g_ip, MAX_HOST);
+    ip = l_ip;
+  }
 
   if ((g_ip == NULL || g_host == NULL || g_username == NULL) && (g_nick != NULL))
   {
     if ((userptr = find_nick_or_host(nick, FIND_NICK)) != NULL)
     {
+      username = l_username; host = l_host; ip = l_ip;
       strlcpy(username, userptr->username, MAX_USER);
       strlcpy(host, userptr->host, MAX_HOST);
       strlcpy(ip, userptr->ip_host, MAX_HOST);
@@ -421,48 +437,41 @@ handle_action(int actionid, char *g_nick, char *g_username,
 	}
       else if (actions[actionid].method & METHOD_DLINE)
 	{
-	  if ((inet_addr(host) == INADDR_NONE) && (!ip))
+          /* do we have a valid ip? if not, look it up. */
+          if ((ip == NULL) || (inet_addr(ip) == INADDR_NONE))
 	    {
 	      /* We don't have any IP, so look it up from our tables */
 	      userptr = find_nick_or_host(host, FIND_HOST);
 
-	      if (!userptr || !userptr->ip_host[0])
+	      if (userptr == NULL || !userptr->ip_host[0])
 		{
 		  /* We couldn't find one either, revert to a k-line */
 		  tcm_log(L_WARN, 
-                "handle_action(%s): Reverting to k-line, couldn't find IP for %s",
-		      actions[actionid].name, host);
+                          "handle_action(%s): Reverting to k-line, could not find IP for %s",
+		          actions[actionid].name, host);
 
 		  send_to_server("KLINE *@%s :%s", host,
 				 actions[actionid].reason ?
 				 actions[actionid].reason : "Automated K-Line");
 		  return;
 		}
-
-	      userhost = userptr->ip_host;
+              strlcpy(l_ip, userptr->ip_host, MAX_HOST);
+              ip = l_ip;
 	    }
 
-	  if (inet_addr(host) == INADDR_NONE)
-	    {
-	      /* Oks, passed host isn't in IP form.
-	       * Let's move the passed ip to newhost, then mask it if needed
-	       */
-	      strcpy(userhost, ip);
+	  if ((actions[actionid].hoststrip & HOSTSTRIP_HOST)
+	      == HOSTSTRIP_HOST_BLOCK)
+	  {
+	    p = strrchr(ip, '.');
+	    p++;
+	    strcpy(p, "*");
+	  }
 
-	      if ((actions[actionid].hoststrip & HOSTSTRIP_HOST)
-		  == HOSTSTRIP_HOST_BLOCK)
-	      {
-		p = strrchr(userhost, '.');
-		p++;
-		strcpy(p, "*");
-	      }
-	    }
-
-	  send_to_server("DLINE %s :%s", userhost,
+	  send_to_server("DLINE %s :%s", ip,
 			 actions[actionid].reason ?
 			 actions[actionid].reason : "Automated D-Line");    
 
-	  snprintf(comment, sizeof(comment), "D-line of %s", userhost);
+	  snprintf(comment, sizeof(comment), "D-line of %s", ip);
 	}
     }
   else

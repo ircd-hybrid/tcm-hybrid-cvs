@@ -1,7 +1,7 @@
 #ifndef __BOTHNUT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.58 2002/09/12 22:49:46 bill Exp $ */
+/* $Id: bothunt.h,v 1.59 2002/09/13 03:03:29 bill Exp $ */
 
 
 struct source_client;
@@ -11,7 +11,8 @@ struct connection;
 
 struct reconnect_clone_entry
 {
-  char host [MAX_HOST];
+  char host[MAX_HOST];
+  char ip[MAX_HOST];
   int count;
   time_t first;
 };

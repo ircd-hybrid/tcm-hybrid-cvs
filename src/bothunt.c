@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.201 2002/09/12 22:49:47 bill Exp $
+ * $Id: bothunt.c,v 1.202 2002/09/13 03:03:31 bill Exp $
  */
 
 #include <stdio.h>
@@ -662,7 +662,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if (strstr(q, "possible spambot") == NULL)
       return;
 
-    handle_action(act_spambot, nick, user, host, 0, 0);
+    handle_action(act_spambot, nick, user, host, NULL, NULL);
     break;
 
   /* I-line is full for bill[bill@ummm.E] (127.0.0.1). */
@@ -735,7 +735,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Invalid username: bill (!@$@&&&.com) */
   case INVALIDUH:
-    nick = p+18;
+    nick = strchr(p+18, '(');
     connect_flood_notice(nick, "Invalid user@host");
     break;
 
@@ -833,19 +833,34 @@ connect_flood_notice(char *snotice, char *reason)
   char *user_host;
   char *user;
   char *host;
-  char *p;
+  char *p, *q;
 
   int first_empty_entry = -1;
   int found_entry = NO;
   int i;
 
   p= nick_reported= snotice;
-  while (*p != ' ' && *p != '[')
+  while (*p != ' ' && *p != '[' && *p != '(')
     ++p;
-  user_host=p+1;
+  user_host=p;
 
-  if (get_user_host(&user, &host, user_host) == NULL)
+  if ((p = get_user_host(&user, &host, user_host)) == NULL)
     return;
+
+  /* lets try to find an ip, just in case cflood's action is dline */
+  while (p && *p && (*p == ' ' || *p == '(' || *p == '['))
+   ++p;
+
+  if (*p <= '9' && *p >= '0')
+  {
+    if ((q = strchr(p, ')')) != NULL)
+      *q = '\0';
+    else if ((q = strchr(p, ']')) != NULL)
+      *q = '\0';
+    else
+    /* we couldn't accurately determine the IP, give up. */
+      *p = '\0';
+  }
 
   for(i=0; i<MAX_CONNECT_FAILS; ++i)
     {
@@ -864,13 +879,15 @@ connect_flood_notice(char *snotice, char *reason)
 
 	      connect_flood[i].connect_count++;
 	      if (connect_flood[i].connect_count >= MAX_CONNECT_FAILS)
-		handle_action(act_cflood, nick_reported, user, host, 0, reason);
+		handle_action(act_cflood, nick_reported, user, host,
+                              (connect_flood[i].ip[0] ? connect_flood[i].ip : NULL), reason);
 	    }
 	  else if ((connect_flood[i].last_connect + MAX_CONNECT_TIME)
 		   < current_time)
 	    {
 	      connect_flood[i].user[0] = '\0';
 	      connect_flood[i].host[0] = '\0';
+              connect_flood[i].ip[0] = '\0';
 	    }
 	}
       else if (first_empty_entry < 0)
@@ -885,6 +902,7 @@ connect_flood_notice(char *snotice, char *reason)
 	{
 	  strlcpy(connect_flood[first_empty_entry].user, user, MAX_USER);
 	  strlcpy(connect_flood[first_empty_entry].host, host, MAX_HOST);
+          strlcpy(connect_flood[first_empty_entry].ip, p, MAX_HOST);
 	  connect_flood[first_empty_entry].last_connect = current_time;
 	  connect_flood[first_empty_entry].connect_count = 0;
 	}
@@ -932,65 +950,51 @@ link_look_notice(char *snotice)
 	      nick_reported, user, host ); /* - zaph */
 
   for(i = 0; i < MAX_LINK_LOOKS; i++ )
+  {
+    if (link_look[i].user[0] != '\0')
     {
-      if (link_look[i].user[0] != '\0')
-	{
-	  if ((strcasecmp(link_look[i].user,user) != 0) &&
-	      (strcasecmp(link_look[i].host,host) != 0))
-	    {
-	      found_entry = YES;
+      if ((strcasecmp(link_look[i].user,user) == 0) &&
+          (strcasecmp(link_look[i].host,host) == 0))
+      {
+        found_entry = YES;
 
-	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
-		{
-		  link_look[i].link_look_count = 0;
-		}
+        if ((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
+          link_look[i].link_look_count = 0;
 
-	      link_look[i].link_look_count++;
+        link_look[i].link_look_count++;
 	      
-	      if (link_look[i].link_look_count >= MAX_LINK_LOOKS)
-		{
-		  handle_action(act_link,
-				nick_reported, user, host, 0, 0);
-		  /* the client is dead now */
-		  link_look[i].user[0] = '\0';
-		  link_look[i].host[0] = '\0';
-		}
-	      else
-		{
-		  link_look[i].last_link_look = current_time;
-		}
-	    }
-	  else
-	    {
-	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
-		{
-		  link_look[i].user[0] = '\0';
-		  link_look[i].host[0] = '\0';
-		}
-	    }
-	}
-      else
-	{
-	  if (first_empty_entry < 0)
-	    first_empty_entry = i;
-	}
+        if (link_look[i].link_look_count >= MAX_LINK_LOOKS)
+        {
+          handle_action(act_link,
+	                nick_reported, user, host, 0, 0);
+	  /* the client is dead now */
+	  link_look[i].user[0] = '\0';
+	  link_look[i].host[0] = '\0';
+        }
+	else
+	  link_look[i].last_link_look = current_time;
+      }
+      else if ((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
+      {
+        link_look[i].user[0] = '\0';
+	link_look[i].host[0] = '\0';
+      }
     }
+    else if (first_empty_entry < 0)
+      first_empty_entry = i;
+  }
 
 /*
  *  If this is a new entry, then found_entry will still be NO
  */
 
-  if (!found_entry)
-    {
-      if (first_empty_entry >= 0)
-	{
-	  /* XXX */
-	  strlcpy(link_look[first_empty_entry].user,user,MAX_USER);
-	  strlcpy(link_look[first_empty_entry].user,host,MAX_USER);
-	  link_look[first_empty_entry].last_link_look = current_time;
-          link_look[first_empty_entry].link_look_count = 1;
-	}
-    }
+  if (!found_entry && first_empty_entry >= 0)
+  {
+    strlcpy(link_look[first_empty_entry].user,user,MAX_USER);
+    strlcpy(link_look[first_empty_entry].host,host,MAX_HOST);
+    link_look[first_empty_entry].last_link_look = current_time;
+    link_look[first_empty_entry].link_look_count = 1;
+  }
 }
 
 /*

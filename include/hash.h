@@ -1,7 +1,7 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.26 2002/08/09 21:42:59 wcampbel Exp $ */
+/* $Id: hash.h,v 1.27 2002/09/13 03:03:29 bill Exp $ */
 
 #define HASHTABLESIZE 3001
 
@@ -59,7 +59,7 @@ void report_mem(struct connection *);
 void report_failures(struct connection *, int);
 
 /* XXX - this is now in clones.c */
-void check_reconnect_clones(char *);
+void check_reconnect_clones(char *, char *);
 
 void report_domains(struct connection *connection_p, int num);
 void kill_add_report(char *);

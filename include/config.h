@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.75 2002/06/23 13:24:27 wcampbel Exp $
+ * $Id: config.h,v 1.76 2002/09/13 03:03:29 bill Exp $
  */
 
 /*
@@ -117,7 +117,6 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 #define REASON_VCLONE  "V-hosted clones"
 #define REASON_FLOOD   "Flooding is prohibited"
 #define REASON_LINK    "Link looking is prohibited"
-#define REASON_BOT     "Bots are prohibited"
 #define REASON_SPAMBOT "Spamming is prohibited"
 #define REASON_CLONE   "Clones are prohibited"
 #define REASON_RCLONE  "Reconnect clones"
@@ -293,7 +292,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
  * With links pacing, MAX_LINK_TIME has to go up
  *
  */
-#define MAX_LINK_LOOKS  4
+#define MAX_LINK_LOOKS 10 
 #define MAX_LINK_TIME 240
 
 /* Parameters for detection of connection flooders */

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.55 2002/09/12 22:49:48 bill Exp $
+ * $Id: hash.c,v 1.56 2002/09/13 03:03:31 bill Exp $
  */
 
 #include <stdio.h>
@@ -328,7 +328,7 @@ add_user_host(struct user_entry *user_info, int fromtrace)
 #ifdef VIRTUAL
       check_virtual_host_clones(new_user->ip_class_c);
 #endif
-      check_reconnect_clones(user_info->host);
+      check_reconnect_clones(user_info->host, new_user->ip_host);
     }
 }
 
@@ -716,7 +716,7 @@ check_virtual_host_clones(char *ip_class_c)
   char notice0[MAX_BUFF];
   char user[MAX_USER];
   struct tm *tmrec;
-  int ind, different=NO, ident=YES;
+  int ind, different=NO, ident=NO;
 
   oldest = now = time(NULL);
   lastreport = 0;
@@ -777,19 +777,26 @@ check_virtual_host_clones(char *ip_class_c)
 	  (now - find->info->connecttime < CLONECONNECTFREQ + 1) &&
 	  find->info->reporttime == 0)
 	{
-	  ++clonecount;
-	  tmrec = localtime(&find->info->connecttime);
-
+          /*
+           * slight trick here.  using the first username always works,
+           * because it will be the most recent addition to the hash table.
+           * if we check for vhost clones each time we add to the table,
+           * we know not to bother checking the other usernames, since if
+           * there were vhost clones, they would already have been dealt
+           * with.  does that make sense? -bill
+           */
           if(user[0] == '\0')
 	    snprintf(user, MAX_USER, "%s", find->info->username);
 
           if(strcasecmp(user, find->info->username))
 	    different=YES;
 
-          if(find->info->username[0] == '~')
-	    ident = NO;
-          else
+          if(find->info->username[0] != '~')
 	    ident = YES;
+
+          if (different == NO || ident == NO)
+            ++clonecount;
+          tmrec = localtime(&find->info->connecttime);
 
 	  if(clonecount == 1)
 	    {
@@ -808,13 +815,14 @@ check_virtual_host_clones(char *ip_class_c)
 			     tmrec->tm_hour, tmrec->tm_min, tmrec->tm_sec);
 	    }
 
-          /* apparently we do not want to kline
+          /*
+           * apparently we do not want to kline
 	   * *@some.net.block.0/24 if the idents differ
 	   *
 	   * we do, however, if they differ w/o ident
 	   * (ie ~clone1, ~clone2, ~clone3)        
 	   */
-          if((different == NO && ident == YES) || (ident == NO))
+          if ((different == NO || ident == NO) && (clonecount >= CLONECONNECTCOUNT))
             {
 	      handle_action(act_vclone,
 			    find->info->nick, find->info->username,

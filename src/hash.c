@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.46 2002/06/28 00:53:49 db Exp $
+ * $Id: hash.c,v 1.47 2002/07/31 17:13:23 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -1115,9 +1115,10 @@ list_nicks(struct connection *connection_p, char *nick, int regex)
               numfound++;
 
               send_to_connection(connection_p,
-				 "  %s (%s@%s) {%s}",
+				 "  %s (%s@%s) [%s] {%s}",
 				 ptr->info->nick, ptr->info->username,
-				 ptr->info->host, ptr->info->class);
+				 ptr->info->host, ptr->info->ip_host,
+                                 ptr->info->class);
             }
         }
     }

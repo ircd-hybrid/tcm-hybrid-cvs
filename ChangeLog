@@ -1,3 +1,15 @@
+wcampbel    2002/05/19 12:11:35 EDT	(20020519_1)
+
+  Modified files:
+    src                  userlist.c 
+  Log:
+  Change the bzero() to memset(), it's a better fix and doesn't need strings.h
+  
+  Revision  Changes    Path
+  1.54      +1 -3      tcm-hybrid/src/userlist.c
+
+
+
 wcampbel    2002/05/19 10:27:31 EDT	(20020519_0)
 
   Modified files:

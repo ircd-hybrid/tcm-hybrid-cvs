@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.19 2001/11/08 20:39:51 bill Exp $ */
+/* $Id: main.c,v 1.20 2001/11/10 15:24:40 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -94,11 +94,17 @@ void add_action(char *name, char *method, char *reason);
 void set_action_type(char *name, int type);
 void set_action_reason(char *name, char *reason);
 void set_action_method(char *name, char *method);
+#if 0
+/* XXX - unused */
 int action_log(char *name);
+#endif
 int get_action_type(char *name);
 int get_action(char *name);
 char *get_action_method(char *name);
+#if 0
+/* XXX - unused */
 char *get_action_reason(char *name);
+#endif
 
 /*
  * init_hash_tables
@@ -558,12 +564,15 @@ int get_action_type(char *name)
   else return actions[i].type;
 }
 
+#if 0
+/* XXX - unused */
 int action_log(char *name)
 {
   int i;
   if ((i = get_action(name)) == -1) return 0;
   return (actions[i].report ? YES : NO);
 }
+#endif
 
 char *get_action_method(char *name)
 {
@@ -572,12 +581,15 @@ char *get_action_method(char *name)
   return actions[i].method;
 }
 
+#if 0
+/* XXX - unused */
 char *get_action_reason(char *name)
 {
   int i;
   if ((i = get_action(name)) == -1) return NULL;
   return actions[i].reason;
 }
+#endif
 
 /*
 ** main()

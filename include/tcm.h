@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.19 2001/10/29 04:36:49 wcampbel Exp $ */
+/* $Id: tcm.h,v 1.20 2001/11/10 15:24:40 wcampbel Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -54,7 +54,6 @@ char mychannel[MAX_CHANNEL];
 char mynick[MAX_NICK];
 int amianoper;
 int quit;			/* Quit when = YES */
-int remote_tcm_socket;		/* listening socket */
 
 fd_set readfds;
 
@@ -72,11 +71,9 @@ void add_action(char *name, char *method, char *reason);
 void set_action_type(char *name, int type);
 void set_action_reason(char *name, char *reason);
 void set_action_method(char *name, char *method);
-int action_log(char *name);
 int get_action_type(char *name);
 int get_action(char *name);
 char *get_action_method(char *name);
-char *get_action_reason(char *name);
 unsigned long local_ip(void);
 
 #endif

@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.52 2002/05/08 20:55:38 bill Exp $ */
+/* $Id: stdcmds.c,v 1.53 2002/05/08 21:00:46 einride Exp $ */
 
 #include "setup.h"
 
@@ -452,7 +452,10 @@ void handle_action(int action, int idented, char *nick, char *user, char *host, 
   if (idented) {
     switch(actions[action].hoststrip & HOSTSTRIP_IDENT) {
     case HOSTSTRIP_IDENT_PREFIXED:
-      strncpy(newuser+1, user, sizeof(newuser)-1);
+      p = user;
+      if (strlen(p)>8) 
+        p += strlen(user)-8;
+      strncpy(newuser+1, p, sizeof(newuser)-1);
       newuser[0] = '*';
       newuser[sizeof(newuser)-1] = 0;
       break;
@@ -468,6 +471,9 @@ void handle_action(int action, int idented, char *nick, char *user, char *host, 
   } else {
     switch(actions[action].hoststrip & HOSTSTRIP_NOIDENT) {
     case HOSTSTRIP_NOIDENT_PREFIXED:
+      p = user;
+      if (strlen(p)>8)
+        p += strlen(user)-8;
       strncpy(newuser+1, user, sizeof(newuser)-1);
       newuser[0] = '*';
       newuser[sizeof(newuser)-1] = 0;

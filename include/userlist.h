@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.27 2002/05/05 17:04:44 einride Exp $ */
+/* $Id: userlist.h,v 1.28 2002/05/08 21:00:44 einride Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -52,7 +52,7 @@
 
 #define HS_CFLOOD   HS_DEFAULT
 #define HS_VCLONE   (HOSTSTRIP_HOST_BLOCK | HOSTSTRIP_IDENT_PREFIXED | HOSTSTRIP_NOIDENT_ALL)
-#define HS_FLOOD    HS_DEFAULT
+#define HS_FLOOD    (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
 #define HS_LINK     HS_DEFAULT
 #define HS_BOT      HS_DEFAULT
 #define HS_SPAMBOT  HS_DEFAULT

@@ -1,3 +1,17 @@
+bill        2004/06/02 22:52:50 EDT	(20040603_1)
+
+  Modified files:
+    .                    .cvsignore 
+    src                  .cvsignore 
+  Log:
+  - added some new stuff to cvsignore to shut cvs up every time I commit something
+  
+  Revision  Changes    Path
+  1.4       +1 -0      tcm-hybrid/.cvsignore
+  1.3       +3 -0      tcm-hybrid/src/.cvsignore
+
+
+
 bill        2004/06/02 22:51:38 EDT	(20040603_0)
 
   Modified files:

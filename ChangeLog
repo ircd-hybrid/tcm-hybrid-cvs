@@ -1,3 +1,7 @@
+*** 20011013_2 by bill
+- changed around .vbots and .vmulti to maintain format of .bots and .hmulti
+
+
 *** 20011013_1 by bill
 - added supposed mem leak to BUGS
 - rewrote .save to replace tcm.cf rather than making its own file

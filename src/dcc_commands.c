@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.159 2004/06/03 20:39:10 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.160 2004/06/07 17:14:31 bill Exp $ */
 
 #include "setup.h"
 
@@ -1246,13 +1246,13 @@ m_smartlist(struct connection *connection_p, int argc, char *argv[])
   optind = 1;
 
 #ifdef HAVE_REGEX_H
-  usage = "Usage: %s [-r] [-l list name] [-n nick pattern] [-u user pattern] [-h host pattern] [-i ip pattern] [-g gecos pattern] [-a nick!user@host|ip;gecos pattern] [-m matching pattern]";
+  usage = "Usage: %s [-r] [-l list name] [-n nick pattern] [-u user pattern] [-h host pattern] [-i ip pattern] [-g gecos pattern] [-a nick!user@host|ip;gecos pattern] [-e equality]";
 
-  while ((c = getopt(argc, argv, "rn:u:h:i:g:a:m:")) != -1)
+  while ((c = getopt(argc, argv, "rn:u:h:i:g:a:e:")) != -1)
 #else
-  usage = "Usage: %s [-l list name] [-n nick pattern] [-u user pattern] [-h host pattern] [-i ip pattern] [-g gecos pattern] [-a nick!user@host|ip;gecos pattern] [-m matching pattern]";
+  usage = "Usage: %s [-l list name] [-n nick pattern] [-u user pattern] [-h host pattern] [-i ip pattern] [-g gecos pattern] [-a nick!user@host|ip;gecos pattern] [-e equality]";
 
-  while ((c = getopt(argc, argv, "n:u:h:i:g:a:m:")) != -1)
+  while ((c = getopt(argc, argv, "n:u:h:i:g:a:e:")) != -1)
 #endif
   {
     switch (c)
@@ -1333,7 +1333,7 @@ m_smartlist(struct connection *connection_p, int argc, char *argv[])
         strlcpy(allp, optarg, sizeof(allp));
         break;
 
-      case 'm':
+      case 'e':
         if (optarg == NULL)
         {
           send_to_connection(connection_p, usage, argv[0]);

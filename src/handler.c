@@ -1,7 +1,7 @@
 /* handler.c
  *
  * contains the code for the dcc and server command handlers
- * $Id: handler.c,v 1.6 2002/06/05 14:15:52 leeh Exp $
+ * $Id: handler.c,v 1.7 2002/06/07 06:21:51 db Exp $
  */
 
 #include <assert.h>
@@ -68,7 +68,7 @@ add_dcc_handler(struct dcc_command *ptr)
 void
 del_dcc_handler(struct dcc_command *ptr)
 {
-  struct dcc_command *temp_ptr;
+  struct dcc_command *tptr;
   struct dcc_command *last_ptr = NULL;
   int hashval;
 
@@ -77,25 +77,17 @@ del_dcc_handler(struct dcc_command *ptr)
   /* search the hash table for the command, we dont use
    * find_dcc_handler because we need last_ptr
    */
-  for(temp_ptr = dcc_command_table[hashval]; temp_ptr;
-      temp_ptr = temp_ptr->next)
+  for(tptr = dcc_command_table[hashval]; tptr; tptr = tptr->next)
   {
-    if(temp_ptr == ptr)
+    if(tptr == ptr)
+    {
+      if(last_ptr != NULL)
+	last_ptr->next = ptr->next;
+      else
+	dcc_command_table[hashval] = ptr->next;
       break;
-
-    last_ptr = temp_ptr;
-  }
-
-  /* command was found.. */
-  if(temp_ptr != NULL)
-  {
-    /* something points to this command */
-    if(last_ptr != NULL)
-      last_ptr->next = ptr->next;
-
-    /* this command is first in the hashtable */
-    else
-      dcc_command_table[hashval] = ptr->next;
+    }
+    last_ptr = tptr;
   }
 }
 
@@ -148,28 +140,23 @@ add_serv_handler(struct serv_command *ptr)
 void
 del_serv_handler(struct serv_command *ptr)
 {
-  struct serv_command *temp_ptr;
-  struct serv_command *last_ptr = NULL;
+  struct serv_command *tptr;
+  struct serv_command *last_tptr = NULL;
   int hashval;
 
   hashval = hash_command(ptr->cmd);
 
-  for(temp_ptr = serv_command_table[hashval]; temp_ptr;
-      temp_ptr = temp_ptr->next)
+  for(tptr = serv_command_table[hashval]; tptr; tptr = tptr->next)
   {
-    if(temp_ptr == ptr)
+    if(tptr == ptr)
+    {
+      if(last_tptr != NULL)
+	last_tptr->next = tptr->next;
+      else
+	serv_command_table[hashval] = tptr->next;
       break;
-
-    last_ptr = temp_ptr;
-  }
-
-  /* command was found */
-  if(temp_ptr != NULL)
-  {
-    if(last_ptr != NULL)
-      last_ptr->next = ptr->next;
-    else
-      serv_command_table[hashval] = ptr->next;
+    }
+    last_tptr = tptr;
   }
 }
 
@@ -218,22 +205,21 @@ add_numeric_handler(struct serv_numeric *ptr)
 void
 del_numeric_handler(struct serv_numeric *ptr)
 {
-  struct serv_numeric *temp_ptr;
+  struct serv_numeric *tptr;
   struct serv_numeric *last_ptr = NULL;
 
-  for(temp_ptr = serv_numeric_table; temp_ptr;
-      temp_ptr = temp_ptr->next)
+  for(tptr = serv_numeric_table; tptr; tptr = tptr->next)
   {
-    if(temp_ptr == ptr)
-      break;
-
-    last_ptr = temp_ptr;
+    if(tptr == ptr)
+      {
+	if(last_ptr != NULL)
+	  last_ptr->next = ptr->next;
+	else
+	  serv_numeric_table = ptr->next;
+	break;
+      }
+    last_ptr = tptr;
   }
-
-  if(last_ptr != NULL)
-    last_ptr->next = ptr->next;
-  else
-    serv_numeric_table = ptr->next;
 }
 
 void
@@ -246,22 +232,21 @@ add_serv_notice_handler(struct serv_command *ptr)
 void
 del_serv_notice_handler(struct serv_command *ptr)
 {
-  struct serv_command *temp_ptr;
+  struct serv_command *tptr;
   struct serv_command *last_ptr = NULL;
 
-  for(temp_ptr = serv_notice_table; temp_ptr;
-      temp_ptr = temp_ptr->next)
+  for(tptr = serv_notice_table; tptr; tptr = tptr->next)
   {
-    if(temp_ptr == ptr)
+    if(tptr == ptr)
+    {
+      if(last_ptr != NULL)
+	last_ptr->next = ptr->next;
+      else
+	serv_notice_table = ptr->next;
       break;
-
-    last_ptr = temp_ptr;
+    }
+    last_ptr = tptr;
   }
-
-  if(last_ptr != NULL)
-    last_ptr->next = ptr->next;
-  else
-    serv_notice_table = ptr->next;
 }
 
 /* hash_command()

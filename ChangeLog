@@ -1,3 +1,15 @@
+bill        2002/11/26 21:51:00 EST	(20021127_1)
+
+  Modified files:
+    src                  stdcmds.c 
+  Log:
+  - added sanity checking into do_a_kline()
+  
+  Revision  Changes    Path
+  1.101     +2 -2      tcm-hybrid/src/stdcmds.c
+
+
+
 bill        2002/11/26 21:41:14 EST	(20021127_0)
 
   Modified files:

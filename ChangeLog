@@ -1,3 +1,16 @@
+leeh        2002/05/27 16:26:46 EDT	(20020527_17)
+
+  Modified files:
+    src                  userlist.c 
+  Log:
+  - made type_show use the table
+  - allow umodes to be set for non-connected users..
+  
+  Revision  Changes    Path
+  1.86      +23 -45    tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/05/27 16:15:42 EDT	(20020527_16)
 
   Modified files:

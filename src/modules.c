@@ -297,7 +297,8 @@ int load_a_module(char *name, int log) {
   placed;
 #endif
 
-  snprintf(absolute_path, sizeof(absolute_path), "%s/%s", get_current_dir_name(), name);
+  snprintf(absolute_path, sizeof(absolute_path), "%s/%s", getcwd((char *)NULL, 
+           sizeof(absolute_path)-strlen(name)-1), name);
   if ((modpointer=dlopen(absolute_path, RTLD_NOW)) == NULL)
     {
       const char *err = dlerror();

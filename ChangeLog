@@ -1,3 +1,24 @@
+leeh        2002/05/24 10:32:37 EDT	(20020524_8)
+
+  Modified files:
+    etc                  tcm.cf userlist.cf 
+    include              commands.h config.h 
+    modules              commands.c 
+    src                  bothunt.c userlist.c 
+  Log:
+  - ripped out optional oper only code
+  
+  Revision  Changes    Path
+  1.26      +0 -3      tcm-hybrid/etc/tcm.cf
+  1.18      +0 -4      tcm-hybrid/etc/userlist.cf
+  1.10      +0 -1      tcm-hybrid/include/commands.h
+  1.49      +1 -5      tcm-hybrid/include/config.h
+  1.69      +0 -35     tcm-hybrid/modules/commands.c
+  1.88      +6 -33     tcm-hybrid/src/bothunt.c
+  1.63      +4 -148    tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/05/24 10:14:01 EDT	(20020524_7)
 
   Modified files:

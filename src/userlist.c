@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.121 2002/06/21 14:16:29 leeh Exp $
+ * $Id: userlist.c,v 1.122 2002/06/21 14:59:08 leeh Exp $
  *
  */
 
@@ -911,15 +911,26 @@ add_an_oper(int argc, char *argv[])
     user_list_index++;
   }
 
+  add_exemption(user, host, 0);
+}
+
+void
+add_exemption(char *user, char *host, int type)
+{
   if(host_list_index >= (MAXHOSTS-1))
     return;
 
-  strlcpy(hostlist[host_list_index].user, user, 
+  strlcpy(hostlist[host_list_index].user, user,
           sizeof(hostlist[host_list_index].user));
   strlcpy(hostlist[host_list_index].host, host,
           sizeof(hostlist[host_list_index].host));
-  hostlist[host_list_index].type = 0xFFFFFFFF;
-  ++host_list_index;
+
+  if(type)
+    hostlist[host_list_index].type = type;
+  else
+    hostlist[host_list_index].type = 0xFFFFFFFF;
+
+  host_list_index++;
 }
 
 static void
@@ -955,25 +966,14 @@ load_e_line(char *line)
     }
       
   if ((p = strchr(uhost, '@')) != NULL)
-    {
-      *p = '\0';
-      snprintf(hostlist[host_list_index].user,
-	       sizeof(hostlist[host_list_index].user), "%s", uhost);
-      snprintf(hostlist[host_list_index].host,
-	       sizeof(hostlist[host_list_index].host), "%s", p+1);
-    }
+  {
+    *p++ = '\0';
+    add_exemption(uhost, p, type);
+  }
   else
-    {
-      snprintf(hostlist[host_list_index].user,
-	       sizeof(hostlist[host_list_index].user), "*");
-      snprintf(hostlist[host_list_index].host,
-	       sizeof(hostlist[host_list_index].host), "%s", uhost);
-    }
-
-  hostlist[host_list_index].type = type;
-  ++host_list_index;
-  hostlist[host_list_index].user[0] = '\0';
-  hostlist[host_list_index].host[0] = '\0';
+  {
+    add_exemption("*", uhost, type);
+  }
 }
 
 /*

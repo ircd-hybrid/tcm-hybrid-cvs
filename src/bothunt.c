@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.169 2002/06/21 14:07:37 leeh Exp $
+ * $Id: bothunt.c,v 1.170 2002/06/21 14:59:08 leeh Exp $
  */
 
 #include <stdio.h>
@@ -239,6 +239,8 @@ on_stats_i(int argc, char *argv[])
 {
   char *user;
   char *host;
+  char *p;
+  int set_exempt = 0;
 
   /* No point if I am maxed out going any further */
   if (host_list_index >= (MAXHOSTS - 1))
@@ -248,16 +250,31 @@ on_stats_i(int argc, char *argv[])
   if (get_user_host(&user, &host, argv[6]) == 0)
     return;
 
-  /* if client is exempt, mark it as such in the exemption list */
+  /* check for I: exemption flags, and mark exempt in tcm */
+  for(p = user; *p != '\0'; p++)
+  {
+    switch(*p)
+    {
+      case '^': /* K:/G: Protection (E:) */
+      case '>': /* Exempt from user limits (F:) */
+      case '_': /* Exempt from G: - XXX should this be here? */
+      case '=': /* Spoof...reasoning:  if they're spoofed, they're likely
+                 * trustworthy enough to be exempt from tcm's wrath
+                 */
+	set_exempt = 1;
+	break;
 
-  if(isalnum((int)(*user)))
-    return;
+      default:
+	if(isalnum((int)*p) || *p == '*' || *p == '?' || *p == '~')
+	{
+          if(set_exempt)
+            add_exemption(p, host, 0);
 
-  strlcpy(hostlist[host_list_index].user, user, MAX_NICK);
-  strlcpy(hostlist[host_list_index].host, host, MAX_HOST);
-  hostlist[host_list_index].type = (unsigned int) ~0;
-
-  host_list_index++;
+	  return;
+	}
+        break;
+    }
+  }
 }
 
 /*

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.69 2002/05/10 00:26:27 bill Exp $ */
+/* $Id: bothunt.c,v 1.70 2002/05/13 22:36:37 bill Exp $ */
 
 #include "setup.h"
 
@@ -2453,12 +2453,8 @@ static void connect_flood_notice(char *snotice)
 static void link_look_notice(char *snotice)
 {
   char *nick_reported;
-  char *user_host;
-  char user[MAX_NICK+1];
-  char host[MAX_HOST];
-  char *s;			/* used for source copy */
-  char *d;			/* used for destination copy */
-  char n;			/* used for max length copy */
+  char user_host[MAX_HOST+MAX_NICK+2];
+  char *user, *host;
   char *p;
   time_t current_time;
   int first_empty_entry = -1;
@@ -2480,65 +2476,39 @@ static void link_look_notice(char *snotice)
     return;
   p++;
 
-  user_host = p;
+  user = p;
 /*
  *  Lets try and get it right folks... [user@host] or (user@host)
  */
 
-  if (*user_host == '[')
-    {
-      user_host++;
-      if ( (p = strrchr(user_host,']')) )
-	*p = '\0';
-    }
-  else if (*user_host == '(')
-    {
-      user_host++;
-      if ( (p = strrchr(user_host,')')) )
-	*p = '\0';
-    }
+  if (*user == '[')
+  {
+    user++;
+    if ((p = strchr(user, ']')) == NULL)
+      return;
+    *p = '\0';
+  }
+  else if (*user == '(')
+  {
+    user++;
+    if ((p = strchr(user, ')')) == NULL)
+      return;
+    *p = '\0';
+  }
+  else
+    return;
 
-  s = user_host;
-  d = user;
-  n = MAX_NICK;
-  while(*s)
-    {
-      if (*s == '@')
-	break;
-      *d++ = *s++;
-      n--;
-      if (n == 0)
-	break;
-    }
-  *d = '\0';
-  s++;
+  if ((p = strchr(user, '@')) == NULL)
+    return;
 
-  d = host;
-  n = MAX_HOST;
-  while(*s)
-    {
-      *d++ = *s++;
-      n--;
-      if (n == 0)
-	break;
-    }
-  *d = '\0';
-  
-  /* Don't even complain about opers */
+  *p = '\0';
+  host = p+1; 
 
   sendtoalldcc(SEND_LINK_ONLY,
 	       "[LINKS by %s (%s@%s)]\n",
 	       nick_reported, user, host ); /* - zaph */
 
-  if ( isoper(user,host) )  
-    {
-      if (config_entries.debug && outfile)
-	{
-	  (void)fprintf(outfile, "DEBUG: is oper\n");
-	}
-      return;
-    }
-
+  snprintf(user_host, sizeof(user_host), "%s@%s", user, host);
 
   for(i = 0; i < MAX_LINK_LOOKS; i++ )
     {
@@ -2561,12 +2531,7 @@ static void link_look_notice(char *snotice)
 	      
 	      if (link_look[i].link_look_count >= MAX_LINK_LOOKS)
 		{
-		  sendtoalldcc(SEND_WARN_ONLY,
-			       "*** LINK LOOKER %s (%s)\n", 
-			       nick_reported,user_host);
-
 		  handle_action(act_link, (*user != '~'), nick_reported, user, host, 0, 0);
-
 		  /* the client is dead now */
 		  link_look[i].user_host[0] = '\0';
 		}
@@ -2602,7 +2567,7 @@ static void link_look_notice(char *snotice)
 	  strncpy(link_look[first_empty_entry].user_host,user_host,
 		  MAX_USER+MAX_HOST);
 	  link_look[first_empty_entry].last_link_look = current_time;
-	  link_look[first_empty_entry].link_look_count = 0;
+          link_look[first_empty_entry].link_look_count = 1;
 	}
     }
 }

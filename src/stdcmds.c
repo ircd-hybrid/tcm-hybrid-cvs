@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.54 2002/05/10 00:26:31 bill Exp $ */
+/* $Id: stdcmds.c,v 1.55 2002/05/13 22:36:40 bill Exp $ */
 
 #include "setup.h"
 
@@ -479,7 +479,7 @@ void handle_action(int actionid, int idented, char *nick, char *user, char *host
       newuser[sizeof(newuser)-1] = 0;
       break;
     case HOSTSTRIP_NOIDENT_ALL:
-      strcpy(newuser, "*");
+      strcpy(newuser, "~*");
       break;
     case HOSTSTRIP_NOIDENT_UNIDENTED:
     default:

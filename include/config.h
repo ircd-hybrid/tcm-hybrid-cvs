@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.39 2002/05/10 00:26:24 bill Exp $
+ * $Id: config.h,v 1.40 2002/05/13 22:36:34 bill Exp $
  */
 
 /*
@@ -288,7 +288,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
  *
  */
 #define MAX_LINK_LOOKS  4
-#define MAX_LINK_TIME 120
+#define MAX_LINK_TIME 240
 
 /* Parameters for detection of connection flooders */
 

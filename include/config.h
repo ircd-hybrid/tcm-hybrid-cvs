@@ -178,8 +178,10 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 
 /*
  * define this to flag wingates
+ *
+ * This must also be defined to detect SOCKS
  */
-#define DETECT_WINGATES
+#define DETECT_WINGATE
 
 /*
  * define this to flag open socks

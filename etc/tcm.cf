@@ -60,6 +60,14 @@ M:For basic information, see www.db.net/~db/tcm.html
 #P:6801
 # opers only YES or NO
 D:YES
+# Test this wingate if in this class only
+# NOTE:  This is EXPLICITELY needed, as Wingate and SOCKS checks
+#        will ONLY be done in the classes listed here
+# Multiple entries are permitted
+#
+W:9
+# TCM also supports named classes that Hybrid-7 provides
+# W:broadband
 #where the userlist.cf is for this tcm
 #default is userlist.cf
 #L:phoenix1/userlist.cf

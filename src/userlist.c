@@ -32,7 +32,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.10 2001/07/22 18:44:48 wcampbel Exp $";
+static char *version="$Id: userlist.c,v 1.11 2001/07/23 02:34:09 wcampbel Exp $";
 
 struct config_list config_entries;
 struct auth_file_entry userlist[MAXUSERS];
@@ -1081,7 +1081,7 @@ void load_a_wingate_class(char *class)
 	return;
 
     snprintf(wingate_class_list[wingate_class_list_index++], sizeof(wingate_class_list[wingate_class_list_index]), "%s", class);
-    snprintf(wingate_class_list[wingate_class_list_index], sizeof(wingate_class_list[wingate_class_list]), "unknown");
+    snprintf(wingate_class_list[wingate_class_list_index], sizeof(wingate_class_list[wingate_class_list_index]), "unknown");
   }
 #endif
 

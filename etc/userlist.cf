@@ -88,8 +88,3 @@ F:bots:pro@oc12.net
 # ignore these users if they try to do a /dcc chat
 B:loser@*lamesite.com
 #
-# Test this wingate if in this class only
-#
-W:9
-# TCM also supports named classes that Hybrid-7 provides
-# W:broadband

@@ -1,3 +1,15 @@
+leeh        2002/06/21 08:56:24 EDT	(20020621_4)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - wait till we oper before calling clear_hash()
+  
+  Revision  Changes    Path
+  1.74      +0 -1      tcm-hybrid/src/parse.c
+
+
+
 leeh        2002/06/21 01:45:55 EDT	(20020621_3)
 
   Modified files:

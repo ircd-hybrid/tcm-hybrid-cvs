@@ -6,3 +6,4 @@ Makefile
 tcm
 mkpasswd
 autom4te.cache
+configure.lineno

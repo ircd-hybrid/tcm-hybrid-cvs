@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.163 2002/06/11 22:45:15 leeh Exp $
+ * $Id: bothunt.c,v 1.164 2002/06/11 22:54:33 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1626,22 +1626,12 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
             {
               /* no tilde to guess from:
 	       *
-	       * hyb7 will forbid [ in ident, so jump backwards from the @
-	       * to it.
+	       * the chances of the [ being in their nick is higher than it
+	       * being in their ident, so presume it marks the end.
 	       *
-	       * hyb6 we presume the ident is encrypted (starts with a [)
-	       * and just go back one if possible.
+	       * if we're wrong?  no big deal. --fl_
 	       */
-              if(config_entries.hybrid_version == 7)
-	      {
-                uh == strrchr(nickuserhost, '[');
-	      }
-	      else
-	      {
-                uh = strrchr(nickuserhost, '[');
-		if(*(uh-1) == '[')
-                  uh--;
-	      }
+              uh = strrchr(nickuserhost, '[');
 #if 0
                 while (--uh != nickuserhost)
                   if (*uh == '[' && uh - nickuserhost < 10)

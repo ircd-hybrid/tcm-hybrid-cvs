@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.92 2002/06/21 14:13:46 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.93 2002/06/21 14:16:29 leeh Exp $ */
 
 #include "setup.h"
 
@@ -61,12 +61,12 @@ op(char *chan,char *nick)
 void
 join(void)
 {
-  if((config_entries.defchannel == NULL) || 
-     (*config_entries.defchannel == '\0'))
+  if((config_entries.channel == NULL) || 
+     (*config_entries.channel == '\0'))
     return;
 
   print_to_server("JOIN %s %s", 
- 	          config_entries.defchannel,config_entries.defchannel_key);
+ 	          config_entries.channel, config_entries.channel_key);
 }
 
 void
@@ -106,8 +106,8 @@ report(int type, char *format,...)
   */
   send_to_all(type, "%s", msg);
 
-  if(config_entries.defchannel != '\0')
-    privmsg(config_entries.defchannel, "%s", msg);
+  if(config_entries.channel != '\0')
+    privmsg(config_entries.channel, "%s", msg);
 
   va_end(va);
 }

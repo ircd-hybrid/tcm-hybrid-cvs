@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.30 2002/06/21 14:13:46 leeh Exp $
+ * $Id: actions.c,v 1.31 2002/06/21 14:16:28 leeh Exp $
  */
 
 #include "setup.h"
@@ -486,17 +486,17 @@ handle_action(int actionid, char *nick, char *user,
     }
 
   if (actions[actionid].method & METHOD_IRC_WARN &&
-      (*config_entries.defchannel != '\0'))
+      (*config_entries.channel != '\0'))
     {
       if (addcmt && addcmt[0])
-	privmsg(config_entries.defchannel,
+	privmsg(config_entries.channel,
 		"*** %s violation (%s) from %s (%s@%s): %s",
 		actions[actionid].name, addcmt,
 		(nick && nick[0]) ? nick : "<unknown>", 
 		(user && user[0]) ? user : "<unknown>",
 		host, comment);
       else
-	privmsg(config_entries.defchannel,
+	privmsg(config_entries.channel,
 		"*** %s violation from %s (%s@%s): %s",
 		actions[actionid].name, 
 		(nick && nick[0]) ? nick : "<unknown>", 

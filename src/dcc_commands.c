@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.126 2002/06/21 13:45:21 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.127 2002/06/21 14:16:28 leeh Exp $ */
 
 #include "setup.h"
 
@@ -407,13 +407,13 @@ m_op(int connnum, int argc, char *argv[])
     print_to_socket(connections[connnum].socket,
 		    "Usage: %s <nick>", argv[0]);
   else
-    op(config_entries.defchannel, argv[1]);
+    op(config_entries.channel, argv[1]);
 }
 
 void
 m_cycle(int connnum, int argc, char *argv[])
 {
-  leave(config_entries.defchannel);
+  leave(config_entries.channel);
   send_to_all( FLAGS_ALL, "I'm cycling.  Be right back.");
   sleep(1);
 

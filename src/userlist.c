@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.120 2002/06/21 14:07:38 leeh Exp $
+ * $Id: userlist.c,v 1.121 2002/06/21 14:16:29 leeh Exp $
  *
  */
 
@@ -438,7 +438,7 @@ load_config_file(char *file_name)
   config_entries.oper_pass_config[0] = '\0';
   config_entries.server_pass[0] = '\0';
   config_entries.ircname_config[0] = '\0';
-  config_entries.defchannel[0] = '\0';
+  config_entries.channel[0] = '\0';
   config_entries.dfltnick[0] = '\0';
   config_entries.email_config[0] = '\0';
 
@@ -553,11 +553,11 @@ load_config_file(char *file_name)
 	fprintf(outfile, "Channel = [%s]\n", argv[1]);
 
       if (argc > 2)
-	strlcpy(config_entries.defchannel_key, argv[2], MAX_CONFIG);
+	strlcpy(config_entries.channel_key, argv[2], MAX_CONFIG);
       else
-	config_entries.defchannel_key[0] = '\0';
+	config_entries.channel_key[0] = '\0';
 
-      strlcpy(config_entries.defchannel, argv[1], MAX_CHANNEL);
+      strlcpy(config_entries.channel, argv[1], MAX_CHANNEL);
       break;
 
     case 'w': case 'W':

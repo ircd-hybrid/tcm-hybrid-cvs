@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.80 2002/06/03 14:57:33 db Exp $
+ * $Id: tcm_io.c,v 1.81 2002/06/04 01:18:21 db Exp $
  */
 
 #include <stdio.h>
@@ -114,7 +114,7 @@ read_packet(void)
 	      }
 
 	      /* not sent a ping, and we've actually connected to the server */
-	      else if(connections[i].curr_state != S_PINGSENT &&
+	      else if(tcm_status.ping_state != S_PINGSENT &&
                       connections[i].state == S_SERVER)
 	      {
                 /* no data, send a PING */
@@ -122,7 +122,7 @@ read_packet(void)
                                    + (connections[i].time_out / 2)))
 		{
                   print_to_server("PING tcm");
-		  connections[i].curr_state = S_PINGSENT;
+		  tcm_status.ping_state = S_PINGSENT;
 		}
 	      }
 	    }
@@ -172,8 +172,8 @@ read_packet(void)
                 tscanned = 0;
                 connections[i].last_message_time = current_time;
 
-		if(connections[i].curr_state == S_PINGSENT)
-                  connections[i].curr_state = 0;
+		if(tcm_status.ping_state == S_PINGSENT)
+                  tcm_status.ping_state = 0;
 
 		while ((nscanned =
 			get_line(incomingbuff+tscanned,
@@ -652,8 +652,8 @@ signon_to_server (int unused)
   connections[server_id].io_read_function = parse_server;
   connections[server_id].io_write_function = NULL;
   connections[server_id].state = S_SERVER;
-  connections[server_id].curr_state = S_PINGSENT;
   connections[server_id].nbuf = 0;
+  tcm_status.ping_state = S_PINGSENT;
 
   if (tcm_status.ping_time)
     connections[server_id].time_out = tcm_status.ping_time;

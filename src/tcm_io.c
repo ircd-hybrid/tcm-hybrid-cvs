@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.37 2002/05/26 02:55:10 db Exp $
+ * $Id: tcm_io.c,v 1.38 2002/05/26 03:02:50 leeh Exp $
  */
 
 #include <stdio.h>
@@ -82,7 +82,6 @@ read_packet(void)
   char incomingbuff[BUFFERSIZE];
   char dccbuff[DCCBUFF_SIZE];
   int nread=0;
-  int argc;
   char *argv[MAX_ARGV];
   int i;
   int server_time_out;
@@ -738,6 +737,8 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   connections[i].io_read_function = finish_dcc_chat;
   connections[i].io_write_function = NULL;
   FD_SET(connections[i].socket, &readfds);
+
+  return 1;
 }
 
 /*

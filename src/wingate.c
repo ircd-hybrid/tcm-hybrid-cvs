@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.16 2001/12/16 00:28:26 einride Exp $ */
+/* $Id: wingate.c,v 1.17 2001/12/16 01:33:21 einride Exp $ */
 
 #include <netdb.h>
 #include <unistd.h>
@@ -309,7 +309,9 @@ void _scontinuous(int connnum, int argc, char *argv[])
         {
           if (FD_ISSET(socks[i].socket, &writefds))
             {
-              report_open_socks(i);
+	      char ch=0;
+	      if (write(socks[i].socket, &ch, 1)==1)
+		report_open_socks(i);
               (void)close(socks[i].socket);
               socks[i].state = 0;
               socks[i].socket = INVALID;

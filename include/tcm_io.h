@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.25 2002/05/27 00:42:10 db Exp $
+ * $Id: tcm_io.h,v 1.26 2002/05/27 17:32:18 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -31,7 +31,8 @@ struct connection {
   char	registered_nick[MAX_NICK+2]; /* allow + 2  */
   char	ip[MAX_IP];
   time_t last_message_time;
-  /* XXX later */
+  int	time_out;		/* 0 for no time out */
+  /* XXX later ? */
 #if 0
   struct sockaddr_in socketname;
 #endif

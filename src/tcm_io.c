@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.52 2002/05/27 01:44:34 db Exp $
+ * $Id: tcm_io.c,v 1.53 2002/05/27 17:32:20 db Exp $
  */
 
 #include <stdio.h>
@@ -84,17 +84,7 @@ read_packet(void)
   char incomingbuff[BUFFERSIZE];
   int  nread=0;
   int  i;
-  int  server_time_out;
   struct timeval read_time_out;
-
-  if (pingtime)
-  {
-    server_time_out = pingtime;
-  }
-  else
-  {
-    server_time_out = SERVER_TIME_OUT;
-  }
 
   current_time = time(NULL);
   connections[server_id].last_message_time = current_time;
@@ -105,16 +95,6 @@ read_packet(void)
   {
     current_time = time(NULL);
 
-    if (current_time > (connections[server_id].last_message_time
-			+ server_time_out))
-    {
-      /* timer expired */
-      send_to_all(SEND_ALL, "PING time out on server");
-      tcm_log(L_ERR, "read_packet() ping time out");
-      if (server_id != INVALID)
-	server_link_closed(server_id);
-      return;
-    }
 
     FD_ZERO (&readfds);
     FD_ZERO (&writefds);
@@ -126,6 +106,22 @@ read_packet(void)
 	    FD_SET(connections[i].socket, &readfds);
 	    if(connections[i].io_write_function != NULL)
 	      FD_SET(connections[i].socket, &writefds);
+
+	    if (connections[i].time_out != 0 &&
+		current_time > (connections[i].last_message_time
+				+ connections[i].time_out))
+	      {
+		/* timer expired */
+		if (i == server_id) 
+		  {
+		    tcm_log(L_ERR, "read_packet() ping time out");
+		    send_to_all(SEND_ALL, "PING time out on server");
+		  }
+		if (connections[i].io_close_function != NULL)
+		  (connections[i].io_close_function)(i);
+		else
+		  close_connection(i);
+	      }
 	  }
       }
 
@@ -313,10 +309,15 @@ void
 server_link_closed(int conn_num)
 {
   (void)close(connections[conn_num].socket);
+
+  /* XXX Should not clear out events at this point ? */
+#if wrong
   eventInit();
+#endif
+
   tcm_log(L_ERR, "server_link_closed()");
   amianoper = NO;
-  sleep(30);
+  sleep(5);
 
   connect_to_server(serverhost);
   if (connections[conn_num].socket == INVALID)
@@ -789,6 +790,7 @@ finish_dcc_chat(int i)
   connections[i].state = S_CLIENT;
   connections[i].io_write_function = NULL;
   connections[i].io_close_function = close_dcc_connection;
+  connections[i].time_out = 0;
 }
 
 /*
@@ -897,6 +899,16 @@ connect_to_server(const char *hostport)
   connections[i].io_write_function = NULL;
   connections[i].io_close_function = server_link_closed;
   connections[i].socket = connect_to_given_ip_port(&socketname, port);
+
+  if (pingtime)
+  {
+    connections[i].time_out = pingtime;
+  }
+  else
+  {
+    connections[i].time_out = SERVER_TIME_OUT;
+  }
+
   return(connections[i].socket);
 }
 
@@ -1084,5 +1096,6 @@ init_connections(void)
       connections[i].nick[0] = '\0';
       connections[i].ip[0] = '\0';
       connections[i].registered_nick[0] = '\0';
+      connections[i].time_out = 0;
     }
 }

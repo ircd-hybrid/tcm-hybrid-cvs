@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.44 2002/05/27 01:37:42 db Exp $ */
+/* $Id: wingate.c,v 1.45 2002/05/27 17:32:20 db Exp $ */
 
 
 #include <netdb.h>
@@ -120,16 +120,17 @@ wingate_start_test(struct plus_c_info *info_p)
   int found_slot;
   struct sockaddr_in socketname;
 
-  found_slot = find_free_connection_slot();
-  if (found_slot < 0)
+  if ((found_slot = find_free_connection_slot()) < 0)
     return;
 
   strncpy(connections[found_slot].user,info_p->user,MAX_USER-1);
   strncpy(connections[found_slot].host,info_p->host,MAX_HOST-1);
   strncpy(connections[found_slot].nick,info_p->nick,MAX_NICK-1);
   strncpy(connections[found_slot].ip,info_p->ip,MAX_IP-1);
-  connections[found_slot].io_read_function = NULL;
+  connections[found_slot].io_read_function = read_wingate;
   connections[found_slot].io_write_function = NULL;
+  connections[found_slot].io_close_function = NULL;
+
   if (inet_aton(info_p->ip, &socketname.sin_addr)) 
     {
       connections[found_slot].socket =
@@ -156,8 +157,7 @@ socks_start_test(struct plus_c_info *info_p, int socksversion)
   int found_slot;
   struct sockaddr_in socketname;
 
-  found_slot = find_free_connection_slot();
-  if (found_slot < 0)
+  if ((found_slot = find_free_connection_slot()) < 0)
     return;
 
   if (socksversion == 4)
@@ -173,7 +173,7 @@ socks_start_test(struct plus_c_info *info_p, int socksversion)
   strncpy(connections[found_slot].ip, info_p->ip,MAX_IP-1);
   connections[found_slot].io_read_function = NULL;
   connections[found_slot].io_write_function = NULL;
-
+  connections[found_slot].io_close_function = NULL;
   connections[found_slot].socket = connect_to_given_ip_port(&socketname, 23);
 }
 #endif
@@ -192,8 +192,7 @@ squid_start_test(struct plus_c_info *info_p, int port)
   int found_slot;
   struct sockaddr_in socketname;
 
-  found_slot = find_free_connection_slot();
-  if (found_slot < 0)
+  if ((found_slot = find_free_connection_slot()) < 0)
     return;
 
   connections[found_slot].user_state = SQUID_CONNECTING;
@@ -201,9 +200,9 @@ squid_start_test(struct plus_c_info *info_p, int port)
   strncpy(connections[found_slot].host, info_p->host, MAX_HOST-1);
   strncpy(connections[found_slot].nick, info_p->nick, MAX_NICK-1);
   strncpy(connections[found_slot].ip, info_p->ip, MAX_IP-1);
-
   connections[found_slot].io_read_function = read_squid;
-  connections[found_slot].io_write_function = NULL;
+  connections[found_slot].io_write_function = NULL; 
+  connections[found_slot].io_close_function = NULL;
   if (inet_aton(info_p->ip, &socketname.sin_addr)) 
     {
       connections[found_slot].socket =

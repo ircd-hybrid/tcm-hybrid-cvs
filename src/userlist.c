@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.83 2002/05/27 11:41:59 leeh Exp $
+ * $Id: userlist.c,v 1.84 2002/05/27 17:32:20 db Exp $
  *
  */
 
@@ -965,7 +965,7 @@ clear_userlist()
 
   memset((void *)userlist, 0, sizeof(userlist));
   memset((void *)hostlist, 0, sizeof(hostlist));
-
+  memset((void *)wingate_class_list, 0, sizeof(wingate_class_list));
 }
 
 /*

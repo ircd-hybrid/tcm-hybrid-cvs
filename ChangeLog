@@ -1,3 +1,22 @@
+db          2002/06/28 02:23:16 EDT	(20020628_1)
+
+  Modified files:
+    include              parse.h tcm_io.h userlist.h 
+    src                  main.c stdcmds.c tcm_io.c 
+  Log:
+  - add some fd limiting. This needs a little more cleaning up, i.e.
+    set from config file or read from getrlimit
+  
+  Revision  Changes    Path
+  1.24      +2 -0      tcm-hybrid/include/parse.h
+  1.46      +0 -1      tcm-hybrid/include/tcm_io.h
+  1.86      +2 -7      tcm-hybrid/include/userlist.h
+  1.125     +12 -10    tcm-hybrid/src/main.c
+  1.98      +1 -1      tcm-hybrid/src/stdcmds.c
+  1.97      +11 -5     tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/06/27 20:53:54 EDT	(20020628_0)
 
   Modified files:

@@ -1,3 +1,22 @@
+bill        2002/05/30 00:48:52 EDT	(20020530_3)
+
+  Modified files:
+    .                    ChangeLog 
+    src                  bothunt.c clones.c dcc.c 
+  Log:
+  - properly fix .chat command
+  - redid server notice parsing to use get_user_host()
+  - got rid of a few unnessecary strstr() and strchr() calls in server notice parsing
+  - removed references to deleted commands.h
+  
+  Revision  Changes    Path
+  1.472     +0 -3      tcm-hybrid/ChangeLog
+  1.138     +86 -113   tcm-hybrid/src/bothunt.c
+  1.5       +0 -1      tcm-hybrid/src/clones.c
+  1.2       +2 -3      tcm-hybrid/src/dcc.c
+
+
+
 db          2002/05/29 22:21:56 EDT	(20020530_2)
 
   Modified files:

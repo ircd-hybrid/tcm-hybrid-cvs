@@ -40,7 +40,7 @@
 #include "bothunt.h"
 #include "logging.h"
 
-static char *version="$Id: logging.c,v 1.13 2001/09/22 23:01:33 bill Exp $";
+static char *version="$Id: logging.c,v 1.14 2001/10/11 17:03:43 bill Exp $";
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file
@@ -507,7 +507,7 @@ void logfailure(char *nickuh,int botreject)
 
 
 /*
- * kline_add_report
+ * kline_report
  *
  * inputs	- rest of notice from server
  * output	- NONE
@@ -520,7 +520,7 @@ void logfailure(char *nickuh,int botreject)
  *
  */
 
-void kline_add_report(char *server_notice)
+void kline_report(char *server_notice)
 {
   FILE *fp_log;
   time_t current_time;
@@ -593,7 +593,7 @@ int number_of_bangs = 0;
       p++;
     }
 
-  kline_add_report(server_notice);
+  kline_report(server_notice);
 }
 
 /*

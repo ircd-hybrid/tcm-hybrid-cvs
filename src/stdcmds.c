@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.12 2001/10/11 16:08:45 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.13 2001/10/11 17:03:43 bill Exp $";
 
 int doingtrace = NO;
 
@@ -1318,9 +1318,9 @@ void report_multi_virtuals(int sock,int nclones)
   int foundany = 0;
 
   if(!nclones)
-    nclones = 3;
+    nclones = 5;
 
-  nclones-=2;
+  nclones-=1;
   for (i=0;i<HASHTABLESIZE;++i)
     {
       for ( top = userptr = iptable[i]; userptr; userptr = userptr->collision )

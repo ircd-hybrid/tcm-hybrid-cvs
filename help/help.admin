@@ -25,7 +25,7 @@
  - .actions (see .help clones)
  - .exemptions 
     Show users and sites with tcm kline/kill exemption. (E: lines 
- - .set [messages|nomessage]|[notices|nonotices]
+ - .set [messages|nomessages]|[notices|nonotices]
     See privmsg's sent to the tcm or see selected server notices.
  - .save 
     Saves tcm prefs (actions) (you must be registered and an admin to use this)

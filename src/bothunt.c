@@ -56,7 +56,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.10 2001/10/10 19:40:52 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.11 2001/10/11 17:03:43 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -547,7 +547,17 @@ void onservnotice(int connnum, int argc, char *argv[])
   /* Kline notice requested by Toast */
   if (strstr(p, "added K-Line for"))
     {
-      kline_add_report(p);
+      kline_report(p);
+      return;
+    }
+  else if (strstr(p, "added temporary "))
+    {
+      kline_report(p);
+      return;
+    }
+  else if (strstr(p, "has removed the "))
+    {
+      kline_report(p);
       return;
     }
 

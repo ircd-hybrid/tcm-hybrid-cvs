@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.7 2001/10/10 19:40:52 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.8 2001/10/11 17:03:43 bill Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -611,9 +611,24 @@ void dccproc(int connnum, int argc, char *argv[])
                   }
                 /* .action clone kline 1440 */
                 /* .action clone kline 1440 :Cloning is prohibited */
+                /* .action clone kline Clones */
+                /* .action clone kline Cloning is prohibited */
                 if (!(kline_time = atoi(argv[3])))
                   {
-                    prnt(connections[connnum].socket, "Invalid syntax.\n");
+                    memset(&dccbuff, 0, sizeof(dccbuff));
+                    if (argv[3][0] == ':')
+                      p = &argv[3][1];
+                    else
+                      p = &argv[3][0];
+                    snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
+                    for (i=4;i<argc;++i)
+                      {
+                        strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
+                        strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
+                      }
+                    if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
+
+                    set_actions(connections[connnum].socket, argv[1], argv[2], 0, argv[3]);
                     break;
                   }
                 if (argc == 4)
@@ -621,14 +636,13 @@ void dccproc(int connnum, int argc, char *argv[])
                     set_actions(connections[connnum].socket, argv[1], argv[2], kline_time, NULL);
                     break;
                   }
-                if (argv[4][0] != ':')
-                  {
-                    prnt(connections[connnum].socket, "Invalid syntax.\n");
-                    break;
-                  }
                 memset(&dccbuff, 0, sizeof(dccbuff));
-                p=&argv[4][1];
-                for (i=4;i<argc;++i)
+                if (argv[4][0] == ':')
+                  p = &argv[4][1];
+                else
+                  p = &argv[4][0];
+                snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
+                for (i=5;i<argc;++i)
                   {
                     strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
                     strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
@@ -981,7 +995,7 @@ void dccproc(int connnum, int argc, char *argv[])
 #ifdef HIDE_OPER_IN_KLINES
           toserv("DLINE %s :%s\n", pattern, dccbuff);
 #else
-          toserv("DLINE %s :%s by %s\n", pattern, dccbuff, who_did_command);
+          toserv("DLINE %s :%s [%s]\n", pattern, dccbuff, who_did_command);
 #endif
         }
       else
@@ -2010,7 +2024,7 @@ static void handle_gline(int sock,char *pattern,char *reason,
 		    who_did_command,
 		    reason);
 			
-	  toserv("KLINE %s :%s by %s\n",
+	  toserv("KLINE %s :%s [%s]\n",
 		 pattern,
 		 format_reason(reason),
 		 who_did_command);

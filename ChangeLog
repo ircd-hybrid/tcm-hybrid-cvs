@@ -1,3 +1,24 @@
+db          2002/05/21 22:33:09 EDT	(20020522_3)
+
+  Modified files:
+    include              bothunt.h serverif.h tcm.h 
+    modules              bothunt.c 
+  Log:
+  - moved prototype for makeconn into bothunt.h for now changed to int
+    instead of char result. like why?
+  - removed a pile of mallocs() in bothunt.c
+  - style cleanups
+  
+    I'm not done yet. more changes coming...
+  
+  Revision  Changes    Path
+  1.25      +7 -7      tcm-hybrid/include/bothunt.h
+  1.19      +0 -2      tcm-hybrid/include/serverif.h
+  1.27      +3 -0      tcm-hybrid/include/tcm.h
+  1.79      +148 -129  tcm-hybrid/modules/bothunt.c
+
+
+
 wcampbel    2002/05/21 21:52:42 EDT	(20020522_2)
 
   Modified files:

@@ -4,6 +4,8 @@
 #include <sys/time.h>
 #include "config.h"
 
+#define MAX_ARGV	20
+
 /* Buffer sizes */
 
 /* Size of read buffer on DCC or server connections */

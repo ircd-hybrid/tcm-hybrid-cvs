@@ -1,7 +1,7 @@
 #ifndef __NO_HANDLER_H
 #define __NO_HANDLER_H
 
-/* $Id: handler.h,v 1.1 2002/05/28 12:14:13 leeh Exp $ */
+/* $Id: handler.h,v 1.2 2002/06/04 21:21:41 leeh Exp $ */
 
 #define MAX_HASH 256
 
@@ -23,8 +23,7 @@ struct dcc_command
 struct serv_command
 {
   char *cmd;
-  struct serv_command *next_cmd;
-  struct serv_command *next_func;
+  struct serv_command *next;
   serv_handler handler;
 };
 

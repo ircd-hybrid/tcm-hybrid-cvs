@@ -1,7 +1,7 @@
 /* handler.c
  *
  * contains the code for the dcc and server command handlers
- * $Id: handler.c,v 1.4 2002/06/01 01:12:27 wcampbel Exp $
+ * $Id: handler.c,v 1.5 2002/06/04 21:21:44 leeh Exp $
  */
 
 #include <assert.h>
@@ -130,43 +130,12 @@ find_dcc_handler(char *cmd)
 void
 add_serv_handler(struct serv_command *ptr)
 {
-  struct serv_command *temp_ptr;
-  struct serv_command *last_func_ptr = NULL;
-  struct serv_command *last_cmd_ptr = NULL;
   int hashval;
 
   hashval = hash_command(ptr->cmd);
 
-  /* search across looking for the command */
-  for(temp_ptr = serv_command_table[hashval]; temp_ptr;
-      temp_ptr = temp_ptr->next_func)
-  {
-    /* found same command */
-    if(strcasecmp(ptr->cmd, temp_ptr->cmd) == 0)
-    {
-      /* search downwards so we can add as the last func */
-      for(; temp_ptr; temp_ptr = temp_ptr->next_cmd)
-      {
-        last_cmd_ptr = temp_ptr;
-      }
-
-      break;
-    }
-
-    last_func_ptr = temp_ptr;
-  }
-
-  /* command is already in the hashtable */
-  if(last_cmd_ptr != NULL)
-    last_cmd_ptr->next_cmd = ptr;
-
-  /* something with the same hashval, different command */
-  else if(last_func_ptr != NULL)
-    last_func_ptr->next_func = ptr;
-
-  /* nothing in the table at this hashval */
-  else
-    serv_command_table[hashval] = ptr;
+  ptr->next = serv_command_table[hashval];
+  serv_command_table[hashval] = ptr;
 }
 
 /* del_serv_handler()
@@ -179,56 +148,27 @@ void
 del_serv_handler(struct serv_command *ptr)
 {
   struct serv_command *temp_ptr;
-  struct serv_command *last_cmd_ptr = NULL;
-  struct serv_command *last_func_ptr = NULL;
+  struct serv_command *last_ptr = NULL;
   int hashval;
 
   hashval = hash_command(ptr->cmd);
 
-  /* search across for the right command */
   for(temp_ptr = serv_command_table[hashval]; temp_ptr;
-      temp_ptr = temp_ptr->next_func)
+      temp_ptr = temp_ptr->next)
   {
-    if(strcasecmp(ptr->cmd, temp_ptr->cmd) == 0)
-    {
-      for(; temp_ptr; temp_ptr = temp_ptr->next_cmd)
-      {
-        if(ptr == temp_ptr)
-          break;
-
-        last_cmd_ptr = ptr;
-      }
-
+    if(temp_ptr == ptr)
       break;
-    }
 
-    last_func_ptr = ptr;
+    last_ptr = temp_ptr;
   }
 
-  if(last_cmd_ptr != NULL)
-    last_cmd_ptr->next_cmd = ptr->next_cmd;
-  else
+  /* command was found */
+  if(temp_ptr != NULL)
   {
-    if(last_func_ptr != NULL)
-    {
-      if(ptr->next_cmd != NULL)
-      {
-        last_func_ptr->next_func = ptr->next_cmd;
-        ptr->next_cmd->next_func = ptr->next_func;
-      }
-      else
-        last_func_ptr->next_func = ptr->next_func;
-    }
+    if(last_ptr != NULL)
+      last_ptr->next = ptr->next;
     else
-    {
-      if(ptr->next_cmd != NULL)
-      {
-        ptr->next_cmd->next_func = ptr->next_func;
-        serv_command_table[hashval] = ptr->next_cmd;
-      }
-      else
-        serv_command_table[hashval] = ptr->next_func;
-    }
+      serv_command_table[hashval] = ptr->next;
   }
 }
 
@@ -246,7 +186,7 @@ find_serv_handler(char *cmd)
 
   hashval = hash_command(cmd);
 
-  for(ptr = serv_command_table[hashval]; ptr; ptr = ptr->next_cmd)
+  for(ptr = serv_command_table[hashval]; ptr; ptr = ptr->next)
   {
     if(strcasecmp(cmd, ptr->cmd) == 0)
       return ptr;

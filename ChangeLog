@@ -1,3 +1,18 @@
+leeh        2002/06/22 05:57:38 EDT	(20020622_3)
+
+  Modified files:
+    include              config.h 
+    src                  userlist.c 
+  Log:
+  - made m_umode() loop the full user_list looking for entries to update.
+    this could be a lot cleaner, but for now itll do.
+  
+  Revision  Changes    Path
+  1.72      +1 -1      tcm-hybrid/include/config.h
+  1.131     +42 -12    tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/22 05:21:52 EDT	(20020622_2)
 
   Modified files:

@@ -1,3 +1,15 @@
+wcampbel    2002/06/05 21:58:00 EDT	(20020606_0)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  Stop Solaris's whining
+  
+  Revision  Changes    Path
+  1.30      +2 -2      tcm-hybrid/src/hash.c
+
+
+
 wcampbel    2002/06/05 18:54:20 EDT	(20020605_14)
 
   Modified files:

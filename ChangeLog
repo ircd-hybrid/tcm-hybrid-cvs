@@ -1,3 +1,15 @@
+bill        2002/03/08 23:08:44 EST	(20020309_0)
+
+  Modified files:
+    modules              serverif.c 
+  Log:
+  - off by one in WALLOPS handling
+  
+  Revision  Changes    Path
+  1.43      +1 -1      tcm-hybrid/modules/serverif.c
+
+
+
 einride     2002/03/06 16:17:22 EST	(20020306_7)
 
   Modified files:

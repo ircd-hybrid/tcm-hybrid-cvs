@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.40 2002/04/02 23:24:30 bill Exp $ */
+/* $Id: stdcmds.c,v 1.41 2002/04/03 00:24:12 bill Exp $ */
 
 #include "setup.h"
 
@@ -678,8 +678,7 @@ list_nicks(int sock,char *nick,int regex)
         {
 #ifdef HAVE_REGEX_H
           if ((regex == YES &&
-           !(a=regexec((regex_t *)&reg, userptr->info->nick,1,m,REGEXEC_FLAGS))
-               && strlen(userptr->info->nick) == m[0].rm_eo)
+               !regexec((regex_t *)&reg, userptr->info->nick,1,m,REGEXEC_FLAGS))
               || (regex == NO && !wldcmp(nick, userptr->info->nick)))
 #else
           if (!wldcmp(nick, userptr->info->nick))
@@ -776,9 +775,8 @@ list_users(int sock,char *userhost,int regex)
       snprintf(uhost, 1024, "%s@%s", ipptr->info->user, ipptr->info->host);
 #ifdef HAVE_REGEX_H
       if ((regex == YES &&
-          !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS) &&
-          strlen(uhost) == m[0].rm_eo) ||
-          (regex == NO && !wldcmp(uhostmatch, uhost)))
+          !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS)) 
+          || (regex == NO && !wldcmp(uhostmatch, uhost)))
 #else
       if (!wldcmp(uhostmatch, uhost))
 #endif 
@@ -869,9 +867,8 @@ list_virtual_users(int sock,char *userhost,int regex)
       snprintf(uhost, 1024, "%s@%s", ipptr->info->user, ipptr->info->ip_host);
 #ifdef HAVE_REGEX_H
       if ((regex == YES &&
-          !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS) &&
-          strlen(uhost) == m[0].rm_eo) ||
-          (regex == NO && !wldcmp(uhostmatch, uhost)))
+          !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS))
+          || (regex == NO && !wldcmp(uhostmatch, uhost)))
 #else
       if (!wldcmp(uhostmatch, uhost))
 #endif 
@@ -928,9 +925,8 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
                userptr->info->host);
 #ifdef HAVE_REGEX_H
       if ((regex == YES &&
-           !regexec((regex_t *)&reg, fulluh, 1, m, REGEXEC_FLAGS) &&
-           strlen(fulluh) == m[0].rm_eo) ||
-          (regex == NO && !wldcmp(userhost, fulluh)))
+           !regexec((regex_t *)&reg, fulluh, 1, m, REGEXEC_FLAGS))
+          || (regex == NO && !wldcmp(userhost, fulluh)))
 #else
       if (!wldcmp(userhost, fulluh))
 #endif

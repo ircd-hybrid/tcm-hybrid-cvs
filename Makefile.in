@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.17 2002/04/02 23:58:03 bill Exp $
+# $Id: Makefile.in,v 1.18 2002/04/03 00:24:09 bill Exp $
 CC = @CC@
 RM = @RM@
 MKDEP = ${CC} -MM
@@ -32,58 +32,50 @@ install:
 	fi
 
 	@echo Installing...
-	-@if [ ! -x ${DPATH} ] ; then \
-	echo mkdir ${DPATH} ; \
-	mkdir ${DPATH} ; \
+	-@if [ ! -x @prefix@ ] ; then \
+	echo mkdir @prefix@ ; \
+	mkdir @prefix@ ; \
 	fi
 
-	-@if [ ! -x ${DPATH}/bin ] ; then \
-	echo mkdir ${DPATH}/bin ; \
-	mkdir ${DPATH}/bin ; \
+	-@if [ ! -x @prefix@/bin ] ; then \
+	echo mkdir @prefix@/bin ; \
+	mkdir @prefix@/bin ; \
 	fi
 
-	-@if [ ! -x ${DPATH}/etc ] ; then \
-	echo mkdir ${DPATH}/etc ; \
-	mkdir ${DPATH}/etc ; \
+	-@if [ ! -x @prefix@/etc ] ; then \
+	echo mkdir @prefix@/etc ; \
+	mkdir @prefix@/etc ; \
 	fi
 
-	-@if [ ! -x ${DPATH}/modules ] ; then \
-	echo mkdir ${DPATH}/modules ; \
-	mkdir ${DPATH}/modules ; \
+	-@if [ ! -x @prefix@/modules ] ; then \
+	echo mkdir @prefix@/modules ; \
+	mkdir @prefix@/modules ; \
 	fi
 
-	-@if [ ! -x ${DPATH}/help ] ; then \
-	echo mkdir ${DPATH}/help ; \
-	mkdir ${DPATH}/help ; \
+	-@if [ ! -x @prefix@/help ] ; then \
+	echo mkdir @prefix@/help ; \
+	mkdir @prefix@/help ; \
 	fi
 
-	-@if [ ! -x ${DPATH}/logs ] ; then \
-	echo mkdir ${DPATH}/logs ; \
-	mkdir ${DPATH}/logs ; \
+	-@if [ ! -x @prefix@/logs ] ; then \
+	echo mkdir @prefix@/logs ; \
+	mkdir @prefix@/logs ; \
 	fi
 
-	-@if [ -e ${DPATH}/bin/mkpasswd ] ; then \
-	echo mv bin/tcm ${DPATH}/bin ; \
-	mv bin/tcm ${DPATH}/bin/ ; \
+	mv -f bin/tcm bin/mkpasswd @prefix@/bin/
+
+        -@if [ ! -e @prefix@/etc/tcm.cf ] ; then \
+	echo mv etc/tcm.cf @prefix@/etc/ ; \
+        mv etc/tcm.cf @prefix@/etc/ ; \
+        fi
+
+	-@if [ ! -e @prefix@/etc/userlist.cf ] ; then \
+	echo mv etc/userlist.cf @prefix@/etc/ ; \
+	mv -f etc/userlist.cf @prefix@/etc/ ; \
 	fi
 
-	-@if [ ! -e ${DPATH}/bin/mkpasswd ] ; then \
-	echo mv bin/tcm bin/mkpasswd ${DPATH}/bin/ ; \
-	mv bin/tcm bin/mkpasswd ${DPATH}/bin/ ; \
-	fi
-
-	-@if [ ! -e ${DPATH}/etc/tcm.cf ] ; then \
-	echo mv etc/tcm.cf ${DPATH}/etc/ ; \
-	mv -f etc/tcm.cf ${DPATH}/etc/ ; \
-	fi
-
-	-@if [ ! -e ${DPATH}/etc/userlist.cf ] ; then \
-	echo mv etc/userlist.cf ${DPATH}/etc/ ; \
-	mv -f etc/userlist.cf ${DPATH}/etc/ ; \
-	fi
-
-	cp modules/*.so ${DPATH}/modules/
-	cp help/help.* ${DPATH}/help/
+	cp modules/*.so @prefix@/modules/
+	cp help/help.* @prefix@/help/
 	@echo Done
 
 clean:

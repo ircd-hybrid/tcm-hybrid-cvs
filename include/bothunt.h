@@ -76,10 +76,6 @@ void bot_report_kline(char *,char *);
 void report_nick_flooders(int);
 void initopers(void);
 
-#ifdef DETECT_DNS_SPOOFERS
-void confirm_match_ip(char *,char *,char *);
-#endif
-
 void inithash(void);
 void init_link_look_table(void);
 

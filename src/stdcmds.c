@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.8 2001/10/04 02:25:20 wcampbel Exp $";
+static char *version="$Id: stdcmds.c,v 1.9 2001/10/04 23:14:35 bill Exp $";
 
 int doingtrace = NO;
 
@@ -448,24 +448,11 @@ void suggest_action(int type,
   for (index=0;index<MAX_ACTIONS;++index)
     if (actions[index].type == type) printf("name: \"%s\"\n", actions[index].name);
 
-  return;
   if (strchr(host,'*'))
-    {
-      report(SEND_ALL_USERS,
-             CHANNEL_REPORT_SPOOF,
-             "Bogus dns spoofed host %s@%s\n",
-             user, host );
-      return;
-    }
+    return;
 
   if (strchr(host,'?'))
-    {
-      report(SEND_ALL_USERS,
-             CHANNEL_REPORT_SPOOF,
-             "Bogus dns spoofed host %s@%s\n",
-             user, host );
-      return;
-    }
+    return;
 
   if(identd)
     {

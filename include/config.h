@@ -160,20 +160,6 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
  * requests, unless the ircd tells tcm to use /stats I (hybrid 6)
  */
 
-/* some dns spoofing detect code */
-
-/*
- * If you have hybrid 5 or later, the IP is given on the +c
- * on the connect message.
- *
- * Note:  This should not be used on servers with a large user base,
- *	  because it will try to gethostbyname() every client you have.
- *	  This will lag your tcm considerably, and may even cause it to
- *	  ping timeout.
- *		-bill (proggy@earthling.net)
- */
-#undef DETECT_DNS_SPOOFERS
-
 /*
  * define this to flag wingates
  *

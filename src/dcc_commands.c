@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.5 2001/09/22 23:01:33 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.6 2001/10/04 23:14:34 bill Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -798,7 +798,7 @@ void dccproc(int connnum, int argc, char *argv[])
         break;
 
       case K_DIE:
-	if (connections[connnum].type & TYPE_OPER) 
+	if (connections[connnum].type & TYPE_REGISTERED)
 	  {
 	     sendtoalldcc(SEND_ALL_USERS, "I've been ordered to quit irc, goodbye.");
 	     toserv("QUIT :Dead by request!\n");

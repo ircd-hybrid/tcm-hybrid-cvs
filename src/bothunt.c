@@ -54,7 +54,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.6 2001/09/22 23:01:33 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.7 2001/10/04 23:14:34 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -66,7 +66,6 @@ static void  connect_flood_notice( char *server_notice );
 static void  add_to_nick_change_table( char *user_host, char *last_nick );
 static void  bot_reject( char *text );
 static void  adduserhost( char *, struct plus_c_info *, int, int);
-static int   obvious_dns_spoof( char *nick, struct plus_c_info *userinfo);
 static void  removeuserhost( char *, struct plus_c_info *);
 static void  updateuserhost( char *nick1, char *nick2, char *userhost);
 static void  updatehash(struct hashrec**,char *,char *,char *); 
@@ -78,17 +77,12 @@ static void addtohash(struct hashrec *table[],char *key,struct userentry *item);
 static char removefromhash(struct hashrec *table[], char *key, char *hostmatch,
                     char *usermatch, char *nickmatch);
 
-#ifdef DETECT_DNS_SPOOFERS
-static int   host_is_ip(char *host_name);
-#endif
-
 #define R_CLONE		0x001
 #define R_VCLONE	0x002
 #define R_FLOOD         0x008
 #define R_LINK          0x010
 #define R_BOT		0x020
 #define R_CTCP          0x100
-#define R_SPOOF         0x200
 #define R_SPAMBOT       0x400
 #define R_CFLOOD        0x800
 
@@ -267,26 +261,8 @@ void on_stats_o(int connnum, int argc, char *argv[])
   if( user_list_index == (MAXUSERS - 1))
     return;
 
-  if( !(p = strchr(body,' ')) )
-    return;
-  p++;
-
-  user_at_host = p;		/* NOW its u@h */
-  if( !(p = strchr(user_at_host,' ')) )
-    return;
-  *p = '\0';
-  p++;
-
-  if( !(p = strchr(p, ' ')) )
-    return;
-  p++;
-  nick = p;
-
-  if( !(p = strchr(nick, ' ')) )
-    return;
-  *p = '\0';
-  
-  p = user_at_host;
+  user_at_host = p = argv[4];
+  nick = argv[6];
   non_lame_user_o = NO;
 
   while(*p)
@@ -314,42 +290,41 @@ void on_stats_o(int connnum, int argc, char *argv[])
       p++;
     }
 
-  if(non_lame_host_o)
+  if (!non_lame_host_o)
+    return;
+  user = user_at_host;
+
+  if ((p = strchr(user_at_host,'@')) )
     {
-      user = user_at_host;
+      *p = '\0';
+       p++;
+       host = p;
+    }
+  else
+    {
+      user = "*";
+      host = user_at_host;
+    }
 
-      if( (p = strchr(user_at_host,'@')) )
-	{
-	  *p = '\0';
-	  p++;
-	  host = p;
-	}
-      else
-	{
-	  user = "*";
-	  host = user_at_host;
-	}
+  /*
+   * If this user is already loaded due to userlist.load
+   * don't load them again.
+   */
 
-      /*
-       * If this user is already loaded due to userlist.load
-       * don't load them again.
-       */
+  if (!isoper(user,host) )
+    {
+      strncpy(userlist[user_list_index].user, user, 
+	      sizeof(userlist[user_list_index].user));
 
-      if( !isoper(user,host) )
-	{
-	  strncpy(userlist[user_list_index].user, user, 
-		  sizeof(userlist[user_list_index].user));
+      strncpy(userlist[user_list_index].host, host, 
+	      sizeof(userlist[user_list_index].host));
 
-	  strncpy(userlist[user_list_index].host, host, 
-		  sizeof(userlist[user_list_index].host));
+      strncpy(userlist[user_list_index].usernick, nick, 
+	      sizeof(userlist[user_list_index].usernick));
 
-	  strncpy(userlist[user_list_index].usernick, nick, 
-		  sizeof(userlist[user_list_index].usernick));
-
-	  userlist[user_list_index].password[0] = '\0';
-	  userlist[user_list_index].type = TYPE_OPER;
-	  user_list_index++;
-	}
+      userlist[user_list_index].password[0] = '\0';
+      userlist[user_list_index].type = TYPE_OPER;
+      user_list_index++;
     }
 }
 
@@ -418,7 +393,7 @@ void on_stats_i(int connnum, int argc, char *argv[])
   char *host;
   char *p;
   char body[MAX_BUFF];
-  int  alpha, ok=NO, spoofed=NO;
+  int  alpha, ok=NO;
 
   for (alpha=0;alpha<argc;++alpha)
     {
@@ -446,8 +421,6 @@ void on_stats_i(int connnum, int argc, char *argv[])
     {
       switch(*p)
 	{
-	case '=':
-          spoofed=YES;
         case '<':case '-':case '$':
 	case '%':case '^':case '&':case '>':
 	case '_':
@@ -465,10 +438,7 @@ void on_stats_i(int connnum, int argc, char *argv[])
   if (ok)
     {
       strncpy(hostlist[host_list_index].user, user,sizeof(hostlist[host_list_index].user));
-      if (spoofed)
-        strncpy(hostlist[host_list_index].host, argv[4], sizeof(hostlist[host_list_index].host));
-      else
-        strncpy(hostlist[host_list_index].host, host, sizeof(hostlist[host_list_index].host));
+      strncpy(hostlist[host_list_index].host, host, sizeof(hostlist[host_list_index].host));
       host_list_index++;
     }
 }
@@ -518,94 +488,6 @@ void on_stats_k(int connnum, int argc, char *argv[])
   ++p;
 
 }
-
-#ifdef DETECT_DNS_SPOOFERS
-
-/*
- * confirm_match_ip
- * 
- * inputs	- nick of user
- * 		- ip of seen host
- *              - actual hostname seen
- * output	- NONE
- * side effects	- reverse lookup of hostname as given is done,
- * 		  the ip is then compared with the dns resolved
- *           	  hostname the server "saw"
- * 		  if a mismatch is found, connected opers are messaged
- * 		  about it.
- * BUGS:
- * 	It would be better to do a top level domain match only, i.e.
- *	don't panic about CNAMES or recently changed hostnames etc.
- * 	I'll get to that... Thats why I am not checking all CNAMES
- *	as returned from gethostbyaddr() - Dianora
- *
- */
-
-void confirm_match_ip(char *nick,char *iphost,char *host)
-{
-  unsigned long ip_long;	/* equivalent ip address as long */
-  struct hostent *host_seen;
-  struct hashrec *userptr;
-  char notice[MAX_BUFF];
-
-  if(host_is_ip(host)) /* If its an IP# don't even continue */
-    return;
-
-  ip_long = inet_addr(iphost);
-  host_seen = gethostbyaddr((char *)&ip_long,sizeof(unsigned long),AF_INET);
-
-  if(host_seen)
-    {
-      if(strcasecmp(host_seen->h_name,host) != 0)
-        {
-	  report(SEND_WARN_ONLY,
-		 CHANNEL_REPORT_SPOOF,
-		 " possible dns spoofed nick %s@%s claimed %s found %s\n",
-		 nick,iphost,
-		 host,host_seen->h_name);
-
-	  log("possible dns spoofed nick %s@%s claimed %s locally found %s\n",
-	      nick,iphost,
-	      host,host_seen->h_name);
-	}
-    }
-}
-
-#endif
-/* endif for DETECT_DNS_SPOOFERS */
-
-#ifdef DETECT_DNS_SPOOFERS
-/*
- * host_is_ip
- * 
- * inputs	- hostname
- * output	- YES if hostname is ip# only NO if its not
- * side effects	- NONE
- *
- */
-
-static int host_is_ip(char *host_name)
-{
-  int number_of_dots = 0;
-
-  while(*host_name)
-    {
-      if( *host_name == '.' )
-	{
-	  host_name++;
-	  number_of_dots++;
-	}
-      else if( !isdigit(*host_name) )
-	return(NO);
-      host_name++;
-    }
-
-  if(number_of_dots == 3 )
-    return(YES);
-  else
-    return(NO);
-}
-#endif
 
 /*
  * onservnotice()
@@ -1338,9 +1220,6 @@ static void adduserhost(char *nick,
   int  found_dots;
   char *p;
 
-  if( obvious_dns_spoof( nick, userinfo ) )
-    return;
-
   par[0] = nick;
   par[1] = userinfo->user;
   par[2] = userinfo->host;
@@ -1430,90 +1309,6 @@ static void adduserhost(char *nick,
       check_host_clones(userinfo->host);
       check_virtual_host_clones(newuser->ip_class_c);
     }
-}
-
-/*
- * obvious_dns_spoof
- *
- * inputs	- pointer to nick
- *		- pointer to userinfo
- * output	- YES if obvious spoof
- * side effects	-
- */
-
-static int obvious_dns_spoof( char *nick, struct plus_c_info *userinfo)
-{
-  char *p;
-  int  len;
-
-/*
- *  *sigh* catch some obvious dns spoofs.
- * basically, at least throw off users with a top level domain
- * with more than 3 characters in it, throw off users with a '*' or '@'
- * in hostpart.
- *
- */
-
-  if (okhost(userinfo->user, userinfo->host)) return NO;
-  if ( (p = strrchr(userinfo->host,'.')) )
-    {
-      p++;
-      len = strlen(p);
-      if(len > 3)
-	{
-	  suggest_action(get_action_type("spoof"), nick, userinfo->user, userinfo->ip, NO,YES);
-	  return YES;
-	}
-
-      if(len == 3)
-	{
-	  int legal_top_level=NO;
-
-	  if(!strcasecmp(p,"net"))legal_top_level = YES;
-	  if(!strcasecmp(p,"com"))legal_top_level = YES;
-	  if(!strcasecmp(p,"org"))legal_top_level = YES;
-	  if(!strcasecmp(p,"gov"))legal_top_level = YES;
-	  if(!strcasecmp(p,"edu"))legal_top_level = YES;
-	  if(!strcasecmp(p,"mil"))legal_top_level = YES;
-	  if(!strcasecmp(p,"int"))legal_top_level = YES;
-
-	  if(isdigit(*p) && isdigit(*(p+1)) && isdigit(*(p+2)) )
-	     legal_top_level = YES;
-
-	  if(!legal_top_level)
-	    {
-	      suggest_action(get_action_type("spoof"), nick, userinfo->user, userinfo->ip,
-                             NO, YES);
-	      return YES;
-	    }
-	}
-    }
-
-  if( (strchr(userinfo->host,'@')) )
-    {
-      suggest_action(get_action_type("spoof"), nick, userinfo->user, userinfo->ip, NO, YES);
-      return YES;
-    }
-
-  if(strchr(userinfo->host,'*'))
-    {
-      suggest_action(get_action_type("spoof"), nick, userinfo->user, userinfo->ip, NO, YES);
-      return YES;
-    }
-
-  if( (strchr(userinfo->host,'?')) )
-    {
-      suggest_action(get_action_type("spoof"), nick, userinfo->user, userinfo->ip, NO, YES);
-      return YES;
-    }
-
-
-#ifdef DETECT_DNS_SPOOFERS
-  if(userinfo->ip && !okhost(userinfo->user, userinfo->host))
-    confirm_match_ip(nick,userinfo->ip,userinfo->host);
-#endif
-
-  return NO;
 }
 
 /*

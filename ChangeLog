@@ -1,3 +1,8 @@
+*** 20011026_6 by db
+- corrected typos, it runs...
+
+
+
 *** 20011026_5 by db
 - cleanups, these mallocs were not needed at all.
 

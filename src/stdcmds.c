@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.98 2002/06/28 06:23:14 db Exp $ */
+/* $Id: stdcmds.c,v 1.99 2002/09/13 03:30:59 bill Exp $ */
 
 #include "setup.h"
 
@@ -189,7 +189,7 @@ print_motd(struct connection *connection_p)
 
 void
 do_a_kline(int kline_time, char *pattern,
-	   char *reason, char *who_did_command)
+	   char *reason, struct connection *connection_p)
 {
   if(pattern == NULL)
     return;
@@ -197,7 +197,7 @@ do_a_kline(int kline_time, char *pattern,
   if(reason == NULL)
     return;
 
-  log_kline("KLINE", pattern, kline_time, who_did_command, reason);
+  log_kline("KLINE", pattern, kline_time, connection_p->registered_nick, reason);
 
   if(config_entries.hybrid)
     {
@@ -207,12 +207,20 @@ do_a_kline(int kline_time, char *pattern,
       else
         send_to_server("KLINE %s :%s", pattern, reason);
 #else
-      if(kline_time)
-        send_to_server("KLINE %d %s :%s [%s]", kline_time, pattern,reason,
-			who_did_command);
+      if (connection_p->type & FLAGS_INVS)
+      {
+        if (kline_time)
+          send_to_server("KLINE %d %s :%s", kline_time, pattern, reason);
+        else
+          send_to_server("KLINE %s :%s", pattern, reason);
+      }
       else
-        send_to_server("KLINE %s :%s [%s]", pattern, reason,
-			who_did_command);
+      {
+        if (kline_time)
+          send_to_server("KLINE %d %s :%s [%s]", kline_time, pattern, reason, connection_p->registered_nick);
+        else
+          send_to_server("KLINE %s :%s [%s]", pattern, reason, connection_p->registered_nick);
+      }
 #endif
     }
   else
@@ -220,8 +228,10 @@ do_a_kline(int kline_time, char *pattern,
 #ifdef HIDE_OPER_IN_KLINES
       send_to_server("KLINE %s :%s", pattern, format_reason(reason));
 #else
-      send_to_server("KLINE %s :%s [%s]", pattern,format_reason(reason),
-		      who_did_command);
+      if (connection_p->type & FLAGS_INVS)
+        send_to_server("KLINE %s :%s", pattern, format_reason(reason));
+      else
+        send_to_server("KLINE %s :%s [%s]", pattern, format_reason(reason), connection_p->registered_nick);
 #endif
     }
 }

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.87 2002/08/08 18:10:35 bill Exp $ */
+/* $Id: userlist.h,v 1.88 2002/09/13 03:30:57 bill Exp $ */
 
 #include "tools.h"
 
@@ -124,7 +124,11 @@ void exempt_summary();
 #define FLAGS_ADMIN		0x004000 /* user is an adminstrator */
 #define FLAGS_SPY		0x008000 /* links, motd, info requests */
 #define FLAGS_VIEW_KLINES	0x010000 /* user see's klines/unklines */
+#ifdef ENABLE_W_FLAG
 #define FLAGS_WALLOPS		0x020000 /* user can see OPERWALL */
+#else
+#define FLAGS_WALLOPS		FLAGS_LOCOPS /* with no +W, re-use +o */
+#endif
 
 #define FLAGS_VALID		0x200000 /* valid userfile */
 #define FLAGS_CHANGED		0x400000 /* changed and needs saving */

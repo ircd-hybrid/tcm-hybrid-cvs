@@ -1,4 +1,4 @@
-/* $Id: serv_commands.c,v 1.4 2002/06/28 00:53:49 db Exp $ */
+/* $Id: serv_commands.c,v 1.5 2002/09/13 03:30:59 bill Exp $ */
 
 #include "setup.h"
 
@@ -110,7 +110,7 @@ ms_wallops(struct source_client *source_p, int argc, char *argv[])
     send_to_all(NULL, FLAGS_LOCOPS, "LOCOPS %s -> %s",
 		source_p->name, argv[2]+9);
   else
-    send_to_all(NULL, FLAGS_WALLOPS, "OPERWALL %s -> %s",
+    send_to_all(NULL, FLAGS_WALLOPS, "WALLOPS %s -> %s",
 		source_p->name, argv[2]+12);
 }
 

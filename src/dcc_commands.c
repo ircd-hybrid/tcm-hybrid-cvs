@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.145 2002/09/12 22:49:47 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.146 2002/09/13 03:30:59 bill Exp $ */
 
 #include "setup.h"
 
@@ -207,8 +207,7 @@ m_kline(struct connection *connection_p, int argc, char *argv[])
       }
       else
         snprintf(buff, sizeof(buff), "No reason");
-      do_a_kline(kline_time, argv[2], buff, 
-                 connection_p->registered_nick);
+      do_a_kline(kline_time, argv[2], buff, connection_p);
     }
     else
     {
@@ -216,8 +215,7 @@ m_kline(struct connection *connection_p, int argc, char *argv[])
       {
 	expand_args(buff, MAX_BUFF, argc-2, argv+2);
       }
-      do_a_kline(0, argv[1], buff,
-		 connection_p->registered_nick);
+      do_a_kline(0, argv[1], buff, connection_p);
     }
   }
 }

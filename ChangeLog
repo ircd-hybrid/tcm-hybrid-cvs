@@ -1,3 +1,15 @@
+db          2002/06/04 21:10:45 EDT	(20020605_4)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - function is clearer than argv[1] at this point...
+  
+  Revision  Changes    Path
+  1.57      +8 -8      tcm-hybrid/src/parse.c
+
+
+
 db          2002/06/04 21:01:02 EDT	(20020605_3)
 
   Modified files:

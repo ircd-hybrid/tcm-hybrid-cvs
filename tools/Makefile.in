@@ -6,13 +6,13 @@ INCLUDEDIR=-I../include
 .c.o:
 	${CC} ${CPPFLAGS} ${CFLAGS} -c $<
 
-all: mkpass
+all: mkpasswd
 
-mkpass: mkpass.o
-	$(CC) $(LDFLAGS) -o mkpass mkpass.o ${TCMLIBS}
+mkpasswd: mkpasswd.o
+	$(CC) $(LDFLAGS) -o mkpasswd mkpasswd.o ${TCMLIBS}
 
 clean:
-	${RM} -f mkpass *.o *~ *core
+	${RM} -f mkpasswd *.o *~ *core
 
 distclean: clean
 	${RM} -f Makefile

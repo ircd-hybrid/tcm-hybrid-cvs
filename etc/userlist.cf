@@ -13,7 +13,7 @@
 #
 # Passwords can be encrypted ONLY if USE_CRYPT has been defined
 # By default, USE_CRYPT is defined!
-# use the mkpass utility from the tools/ directory to encrypt
+# use the mkpasswd utility from the tools/ directory to encrypt
 # a password.
 #
 # Flags - privs are O for oper, K for kline/kill/etc

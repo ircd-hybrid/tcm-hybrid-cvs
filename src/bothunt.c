@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.205 2002/12/10 16:35:45 bill Exp $
+ * $Id: bothunt.c,v 1.206 2002/12/13 18:05:31 bill Exp $
  */
 
 #include <stdio.h>
@@ -565,6 +565,8 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     remove_user_host(&userinfo);
     break;
 
+  /* Unauthorized client connection from bill [bill@localhost] [127.0.0.1]
+     on [irc.intranaut.com/6667]. */
   /* Unauthorized client connection from bill[bill@localhost] [127.0.0.1]
      on [irc.intranaut.com/6667]. */
   /* Unauthorised client connection from bill[bill@localhost] [127.0.0.1]
@@ -572,13 +574,17 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   case UNAUTHORIZED:
     if ((q = strchr(p, '[')) == NULL)
       return;
+
     for (p=q;*p != ' '; --p);
     ++p;
+
     if ((q = strchr(p, ' ')) == NULL)
       return;
-    *q = '\0';
+
+    *q++ = '\0';
     chopuh(IS_FROM_TRACE, p, &userinfo);
     log_failure(&userinfo);
+
     break;
 
   /* Nick change: From bill to aa [bill@ummm.E] */
@@ -601,12 +607,14 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     break;
 
   /* Link with test.server[bill@255.255.255.255] established: (TS) link */ 
+  /* Link with test.server [bill@255.255.255.255] established: (TS) link */
   case LINKWITH:
     p+=10;
     send_to_all(NULL, FLAGS_SERVERS, "Link with %s", p);
     break;
 
   /* Received SQUIT test.server from bill[bill@ummm.E] (this is a test) */
+  /* Received SQUIT test.server from bill [bill@ummm.E] (this is a test) */
   case SQUITOF:
     q=p+15; 
     if ((p = strchr(q, ' ')) == NULL)
@@ -686,12 +694,14 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     break;
 
   /* I-line is full for bill[bill@ummm.E] (127.0.0.1). */
+  /* I-line is full for bill [bill@ummm.E] (127.0.0.1). */
   case ILINEFULL:
     nick = p+19;
     connect_flood_notice(nick, "I line full");
     break;
 
   /* Too many on IP for fallacy[unknown@24.123.128.153] (24.123.128.153). */
+  /* Too many on IP for fallacy [unknown@24.123.128.153] (24.123.128.153). */
   case TOOMANY:
     nick = p+19;
     connect_flood_notice(nick, "Too many on IP");
@@ -739,6 +749,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     break;
 
   /* X-line Rejecting [Bill Jonus] [just because] user bill[bill@ummm.E] */
+  /* X-line Rejecting [Bill Jonus] [just because] user bill [bill@ummm.E] */
   case XLINEREJ:
     q=p+18;
     if ((nick = strrchr(q, ' ')) == NULL)
@@ -748,6 +759,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     break;
 
   /* Quarantined nick [bill] from user aa[bill@ummm.E] */
+  /* Quarantined nick [bill] from user aa [bill@ummmm.E] */
   case QUARANTINE:
     nick = p+18; 
     connect_flood_notice(nick, "Quarantined nick");
@@ -755,7 +767,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Invalid username: bill (!@$@&&&.com) */
   case INVALIDUH:
-    nick = strchr(p+18, '(');
+    nick = p+18;
     connect_flood_notice(nick, "Invalid user@host");
     break;
 
@@ -816,8 +828,10 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     memset(&config_entries.testline_umask, 0, sizeof(config_entries.testline_umask));
     break;
 
+  /* KLINE active for bill [bill@ummm.E] */
   /* KLINE active for bill[bill@ummm.E] */
   /* K-line active for bill[bill@ummm.E] */
+  /* note this also works for glines/dlines .. notices are the same */
   case ACTIVE:
     if ((q = strrchr(p, ' ')) == NULL)
       return;
@@ -868,7 +882,7 @@ connect_flood_notice(char *snotice, char *reason)
     return;
 
   /* lets try to find an ip, just in case cflood's action is dline */
-  while (p && *p && (*p == ' ' || *p == '(' || *p == '['))
+  while (*p && (*p == ' ' || *p == '(' || *p == '['))
    ++p;
 
   if (*p <= '9' && *p >= '0')
@@ -1511,13 +1525,14 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
   char *right_square_bracket_pointer;
   char *user;
   char *host;
-/* I try to pick up an [IP] from a connect or disconnect message
- * since this routine is also used on trace, some heuristics are
- * used to determine whether the [IP] is present or not.
- * *sigh* I suppose the traceflag could be used to not even go
- * through these tests
- * bah. I added a flag -Dianora
- */
+
+  /* I try to pick up an [IP] from a connect or disconnect message
+   * since this routine is also used on trace, some heuristics are
+   * used to determine whether the [IP] is present or not.
+   * *sigh* I suppose the traceflag could be used to not even go
+   * through these tests
+   * bah. I added a flag -Dianora
+   */
 
   userinfo->username[0] = '\0';
   userinfo->host[0] = '\0';

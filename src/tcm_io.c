@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.103 2002/09/20 05:06:56 bill Exp $
+ * $Id: tcm_io.c,v 1.104 2002/10/06 15:56:32 bill Exp $
  */
 
 #include <stdio.h>
@@ -287,7 +287,7 @@ get_line(char *in, int *len, struct connection *connections_p)
        * buffer without finding an EOL. Worse, the line is > BUFFERSIZE
        * i.e. its run on. This should be very rare.
        */
-      if (connections_p->nbuf >= BUFFERSIZE) 
+      if (connections_p->nbuf >= BUFFERSIZE-1) 
 	{
 	  connections_p->nbuf = 0;
 	  return (0);

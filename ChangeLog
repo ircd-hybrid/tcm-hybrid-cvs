@@ -1,3 +1,8 @@
+*** 20011029_3 by wcampbel
+Fixed some format string bugs
+And did a couple things for safety (added precaution against FSB's)
+
+
 *** 20011029_2 by wcampbel
 Update of the help files
 

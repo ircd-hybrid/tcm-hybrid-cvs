@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.89 2002/05/27 21:55:19 leeh Exp $
+ * $Id: userlist.c,v 1.90 2002/05/27 22:40:41 leeh Exp $
  *
  */
 
@@ -245,6 +245,19 @@ set_umode(int user, int admin, const char *umode)
       }
     }
   }
+}
+
+int
+has_umode(int conn_num, int type)
+{
+  int user;
+
+  user = find_user_in_userlist(connections[conn_num].registered_nick);
+
+  if(userlist[user].type & type)
+    return type;
+
+  return 0;
 }
 
 int

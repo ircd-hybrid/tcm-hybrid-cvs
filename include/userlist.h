@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.48 2002/05/27 21:55:16 leeh Exp $ */
+/* $Id: userlist.h,v 1.49 2002/05/27 22:40:38 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -81,12 +81,13 @@ struct exception_entry
 
 int find_user_in_userlist(const char *);
 int find_user_in_connections(const char *);
-void init_userlist_handlers(void);
 int get_umodes_from_prefs(int);
 int get_umodes_current(int);
 
 void set_umode(int, int, const char *);
 void add_an_oper(int, char *argv[]);
+
+int has_umode(int, int);
 
 void load_userlist(void);
 void load_config_file(char *);

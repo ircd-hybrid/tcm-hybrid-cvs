@@ -1,3 +1,7 @@
+*** 20011003_1 by wcampbel
+Fixed .umulti and .hmulti once and for all.
+
+
 *** 20011001_1 by bill
 
 - fixed to run on fbsd

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.53 2002/08/14 16:59:36 bill Exp $
+ * $Id: hash.c,v 1.54 2002/08/30 03:46:58 db Exp $
  */
 
 #include <stdio.h>
@@ -651,7 +651,7 @@ check_host_clones(char *host)
   if(reportedclones)
   {
     report(FLAGS_WARN,
-	   "%d more possible clones (%d total) from %s:\n",
+	   "%d more possible clones (%d total) from %s:",
 	   clonecount, clonecount+reportedclones, host);
 
     tcm_log(L_NORM, "%d more possible clones (%d total) from %s:",
@@ -660,7 +660,7 @@ check_host_clones(char *host)
   else
   {
     report(FLAGS_WARN,
-	   "Possible clones from %s detected: %d connects in %d seconds\n",
+	   "Possible clones from %s detected: %d connects in %d seconds",
 	   host, clonecount, now - oldest);
 
     tcm_log(L_NORM, 
@@ -787,7 +787,7 @@ check_virtual_host_clones(char *ip_class_c)
   if(reportedclones)
     {
       report(FLAGS_WARN,
-	     "%d more possible virtual host clones (%d total) from %s.*:\n",
+	     "%d more possible virtual host clones (%d total) from %s.*:",
 	     clonecount, clonecount+reportedclones, ip_class_c);
 
       tcm_log(L_NORM, 
@@ -797,7 +797,7 @@ check_virtual_host_clones(char *ip_class_c)
   else
     {
       report(FLAGS_WARN,
-	     "Possible virtual host clones from %s.* detected: %d connects in %d seconds\n",
+	     "Possible virtual host clones from %s.* detected: %d connects in %d seconds",
 	     ip_class_c, clonecount, now - oldest);
 
       tcm_log(L_NORM,
@@ -863,7 +863,7 @@ check_virtual_host_clones(char *ip_class_c)
 	    ;
 	  else if(clonecount == 2)
 	    {
-	      report(FLAGS_WARN, "%s\n", notice1);
+	      report(FLAGS_WARN, "%s", notice1);
 	      tcm_log(L_NORM, "%s", notice1);
 
 	      report(FLAGS_WARN, "%s", notice0);
@@ -871,7 +871,7 @@ check_virtual_host_clones(char *ip_class_c)
 	    }
 	  else if(clonecount < 5)
 	    {
-	      report(FLAGS_WARN, "%s\n", notice0);
+	      report(FLAGS_WARN, "%s", notice0);
 	      tcm_log(L_NORM, "%s", notice0);
 	    }
 	  else if(clonecount == 5)

@@ -1,3 +1,46 @@
+einride     2002/05/03 18:49:52 EDT	(20020503_0)
+
+  Modified files:
+    etc                  tcm.cf userlist.cf 
+    include              stdcmds.h tcm.h userlist.h 
+    modules              bothunt.c commands.c serverif.c wingate.c 
+    src                  main.c modules.c stdcmds.c userlist.c 
+  Log:
+  Major action handling changes.
+  
+  suggest_action and suggest_host are gone, handle_action replaces them.
+  
+  handle_action does all reporting to irc/dcc, thus some reporting have
+  been removed from misc files. A new action field is used by handle_action
+  to perform user/host modifications before sending k-lines.
+  IPs are passed to handle_action, in case configured handling method should
+  be dline, this does *not work properly now*. Will be fixed soon.
+  
+  actions now are dynamically allocated, and have some changed fields.
+  .action is redone
+  .save works
+  exempts should work
+  Config changes for actions, see tcm.cf
+  
+  dlopen now uses RTLD_GLOBAL, as the modules depend on each other anyway.
+  
+  Revision  Changes    Path
+  1.20      +18 -13    tcm-hybrid/etc/tcm.cf
+  1.15      +8 -2      tcm-hybrid/etc/userlist.cf
+  1.14      +4 -1      tcm-hybrid/include/stdcmds.h
+  1.23      +8 -8      tcm-hybrid/include/tcm.h
+  1.25      +38 -2     tcm-hybrid/include/userlist.h
+  1.61      +55 -109   tcm-hybrid/modules/bothunt.c
+  1.44      +107 -150  tcm-hybrid/modules/commands.c
+  1.53      +10 -20    tcm-hybrid/modules/serverif.c
+  1.23      +10 -10    tcm-hybrid/modules/wingate.c
+  1.31      +37 -59    tcm-hybrid/src/main.c
+  1.21      +1 -1      tcm-hybrid/src/modules.c
+  1.47      +118 -262  tcm-hybrid/src/stdcmds.c
+  1.49      +94 -32    tcm-hybrid/src/userlist.c
+
+
+
 bill        2002/04/28 22:18:37 EDT	(20020429_0)
 
   Modified files:

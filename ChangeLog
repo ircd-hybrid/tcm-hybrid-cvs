@@ -1,3 +1,17 @@
+bill        2002/05/07 18:02:27 EDT	(20020507_2)
+
+  Modified files:
+    modules              commands.c serverif.c 
+  Log:
+  - initialize msg_hash_table
+  - more robust checking in dcc command processing
+  
+  Revision  Changes    Path
+  1.49      +8 -0      tcm-hybrid/modules/commands.c
+  1.57      +1 -1      tcm-hybrid/modules/serverif.c
+
+
+
 leeh        2002/05/07 17:37:44 EDT	(20020507_1)
 
   Modified files:

@@ -68,41 +68,33 @@ int findmodule(char *name)
 /* code goes here later */
 #else
 void mod_add_cmd(struct TcmMessage *msg) {
-  struct TcmMessageHash *ptr;
-  struct TcmMessageHash *new_ptr;
+  char *cmd;
   int msgindex=0;
 
   assert(msg != NULL);
-  while (msg_hash_table[msgindex]) ++msgindex;
+  while (msg_hash_table[msgindex].msg) ++msgindex;
 
-  if ((new_ptr = (struct TcmMessageHash *)malloc(sizeof(struct TcmMessageHash))) == NULL)
-    {
-      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in mod_add_cmd");
-      exit(1);
-    }
-  if ((new_ptr->cmd = (char *)malloc(MAX_BUFF)) == NULL)
+  if ((msg_hash_table[msgindex].cmd = (char *)malloc(MAX_BUFF)) == NULL)
     {
       sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in mod_add_cmd");
       exit(1);
     }
 
-  new_ptr->next = NULL;
-  strcpy(new_ptr->cmd, msg->cmd);
-  new_ptr->msg = msg;
-
-  msg_hash_table[msgindex] = new_ptr;
+  strcpy(msg_hash_table[msgindex].cmd, msg->cmd);
+  msg_hash_table[msgindex].msg = msg;
+/*  msg_hash_table[msgindex].msg->handlers[3] = msg->handlers[3];
+  msg_hash_table[msgindex].msg->handlers[2] = msg->handlers[2];
+  msg_hash_table[msgindex].msg->handlers[1] = msg->handlers[1];
+  msg_hash_table[msgindex].msg->handlers[0] = msg->handlers[0];*/
 }
 
 void mod_del_cmd(struct TcmMessage *msg) {
-  struct TcmMessageHash *ptr;
-  struct TcmMessageHash *last_ptr;
   int msgindex=0;
 
   assert(msg != NULL);
-  while (strcasecmp(msg_hash_table[msgindex]->cmd, msg->cmd)) ++msgindex;
-
-  free(ptr->cmd);
-  free(ptr);
+  while (strcasecmp(msg_hash_table[msgindex].cmd, msg->cmd)) ++msgindex;
+  free(msg_hash_table[msgindex].cmd);
+  free(msg_hash_table[msgindex].msg);
 }
 
 void add_common_function(int type, void *function)
@@ -302,12 +294,12 @@ int load_a_module(char *name, int log) {
     }
   modlist[i].address = modpointer;
   modlist[i].version = ver;
-  modlist[i].name = (char *) dlsym(modpointer, "_name");
-
-  if (modlist[i].name == NULL)
-    modlist[i].name = (char *) dlsym(modpointer, "__name");
-  if (modlist[i].name == NULL)
-    modlist[i].name = (char *)&unknown_ver;
+  if (!(modlist[i].name = (char *)malloc(30)))
+    {
+      sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in load_a_module\n");
+      exit(1);
+    }
+  strcpy(modlist[i].name, name);
   initmod();
   
   if (log)
@@ -348,42 +340,45 @@ int unload_a_module(char *name, int log) {
 }
 
 void m_modload (int connnum, int argc, char *argv[]) {
-  assert(argc == 1);
-  if (load_a_module(argv[0], 1))
+  if (argc != 2) return;
+  if (load_a_module(argv[1], 1) != -1)
     sendtoalldcc(SEND_ADMIN_ONLY, "Loaded by %s", connections[connnum].nick);
+  else
+    prnt(connections[connnum].socket, "Load of %s failed\n", argv[1]);
 }
 
 void m_modunload (int connnum, int argc, char *argv[]) {
-  assert(argc == 1);
-  if (unload_a_module(argv[0], 1))
+  if (argc != 2) return;
+  if (unload_a_module(argv[1], 1) != -1)
     sendtoalldcc(SEND_ADMIN_ONLY, "Loaded by %s", connections[connnum].nick);
 }
 
 void m_modreload (int connnum, int argc, char *argv[]) {
-  assert(argc == 1);
-  if (unload_a_module(argv[0], 0))
+  if (argc != 2) return;
+  if (unload_a_module(argv[1], 0) != -1)
     {
-      if (load_a_module(argv[0], 1))
+      if (load_a_module(argv[1], 1))
         sendtoalldcc(SEND_ADMIN_ONLY, "Reloaded by %s", connections[connnum].nick);
     }
-  else prnt(connections[connnum].socket, "Module %s is not loaded\n", argv[0]);
+  else prnt(connections[connnum].socket, "Module %s is not loaded\n", argv[1]);
 }
 
 void m_modlist (int connnum, int argc, char *argv[]) {
   int i;
-  assert (argc <= 1);
-  if (argc == 1)
-    prnt(connections[connnum].socket, "Listing all modules matching '%s'...\n", argv[0]);
-  else
+
+  if (argc == 2)
+    prnt(connections[connnum].socket, "Listing all modules matching '%s'...\n", argv[1]);
+  else if (argc == 1)
     prnt(connections[connnum].socket, "Listing all modules...\n");
   for (i=0;i<max_mods;++i)
    {
-     if (argc == 1 && wldcmp(argv[0], modlist[i].name))
-       prnt(connections[connnum].socket, "--- %s 0x%lx %s\n", 
-            modlist[i].name, modlist[i].address, modlist[i].version);
-     else if (!argc)
-       prnt(connections[connnum].socket, "--- %s 0x%lx %s\n", 
-            modlist[i].name, modlist[i].address, modlist[i].version);
+     if (modlist[i].name != NULL)
+       if (argc == 2 && !wldcmp(argv[1], modlist[i].name))
+         prnt(connections[connnum].socket, "--- %s 0x%lx %s\n", 
+              modlist[i].name, modlist[i].address, modlist[i].version);
+       else if (argc == 1)
+         prnt(connections[connnum].socket, "--- %s 0x%lx %s\n", 
+              modlist[i].name, modlist[i].address, modlist[i].version);
    }
   prnt(connections[connnum].socket, "Done.\n");
 }

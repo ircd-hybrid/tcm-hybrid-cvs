@@ -63,7 +63,7 @@ struct TcmMessageHash
   struct TcmMessageHash  *next;
 };
 
-struct TcmMessageHash *msg_hash_table[MAX_MSG_HASH];
+struct TcmMessageHash msg_hash_table[MAX_MSG_HASH];
 
 struct TcmMessage
 {

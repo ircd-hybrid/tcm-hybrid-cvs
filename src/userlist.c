@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.98 2002/05/28 16:01:57 leeh Exp $
+ * $Id: userlist.c,v 1.99 2002/05/28 16:05:58 leeh Exp $
  *
  */
 
@@ -122,7 +122,7 @@ m_umode(int connnum, int argc, char *argv[])
 
     print_to_socket(connections[connnum].socket, 
 		    "Your current flags are: %s",
-		    type_show(get_umodes_current(user)));
+		    type_show(userlist[user].type));
     return;
   }
   else if(argc == 2)
@@ -139,7 +139,7 @@ m_umode(int connnum, int argc, char *argv[])
 
       print_to_socket(connections[connnum].socket,
 		      "Your flags are now: %s",
-		      type_show(get_umodes_current(user)));
+		      type_show(userlist[user].type));
       return;
     }
     else
@@ -157,7 +157,7 @@ m_umode(int connnum, int argc, char *argv[])
       {
 	print_to_socket(connections[connnum].socket,
 			"User flags for %s are: %s",
-			argv[1], type_show(get_umodes_current(user)));
+			argv[1], type_show(userlist[user].type));
       }
       else
         print_to_socket(connections[connnum].socket,
@@ -186,12 +186,12 @@ m_umode(int connnum, int argc, char *argv[])
 
         print_to_socket(connections[connnum].socket,
 	  	        "User flags for %s are now: %s",
-		        argv[1], type_show(get_umodes_current(user)));
+		        argv[1], type_show(userlist[user].type));
 
         if(user_conn >= 0)
           print_to_socket(connections[user_conn].socket,
 			  "Your flags are now: %s (changed by %s)",
-			  type_show(get_umodes_current(user)),
+			  type_show(userlist[user].type),
 			  connections[connnum].registered_nick);
       }
       else
@@ -329,12 +329,6 @@ find_user_in_connections(const char *username)
   return -1;
 }
 
-int
-get_umodes_current(int user)
-{
-  return(userlist[user].type);
-}
-
 /* get_umodes_from_prefs()
  *
  * input	- user to get prefs for
@@ -392,7 +386,7 @@ save_umodes(void *unused)
 
     if((fp = fopen(user_pref, "w")) != NULL)
     {
-      fprintf(fp, "%d\n", get_umodes_current(i));
+      fprintf(fp, "%d\n", userlist[i].type);
       (void)fclose(fp);
     }
     else

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.105 2002/05/28 16:01:56 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.106 2002/05/28 16:05:58 leeh Exp $ */
 
 #include "setup.h"
 
@@ -1039,7 +1039,7 @@ register_oper(int connnum, char *password, char *who_did_command)
 		      "Set umodes from preferences");
       print_to_socket(connections[connnum].socket,
 		      "Your current flags are now: %s",
-		      type_show(get_umodes_current(user)));
+		      type_show(userlist[user].type));
 
       if(has_umode(connnum, TYPE_SUSPENDED))
       {

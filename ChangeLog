@@ -1,3 +1,22 @@
+wcampbel    2002/05/05 22:12:00 EDT	(20020506_0)
+
+  Modified files:
+    modules              bothunt.c serverif.c 
+    src                  stdcmds.c 
+  Log:
+  When joining a channel with a key defined in the configuration file,
+    set the key on the channel.  Also marked some sections that will need
+    to be reviewd.
+  
+  Key settings requested by dilli
+  
+  Revision  Changes    Path
+  1.64      +8 -1      tcm-hybrid/modules/bothunt.c
+  1.55      +12 -0     tcm-hybrid/modules/serverif.c
+  1.50      +7 -0      tcm-hybrid/src/stdcmds.c
+
+
+
 einride     2002/05/05 13:04:53 EDT	(20020505_2)
 
   Modified files:

@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <pwd.h>
 #include <string.h>
 
 char* getpass(char *);

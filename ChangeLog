@@ -1,3 +1,9 @@
+*** 20010203_2 by wcampbel
+Format string bugs...
+We must find out what that 0 byte log file bug is...even if it means
+ripping out the mail code...
+
+
 *** 20010203_1 by wcampbel
 Massive cleanup part 4 of 4.  tcm compiles cleanly (except for the version
 variables) with -Wall -Wunused...... and SHOULD be pretty clean now.  I'll

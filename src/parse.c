@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.64 2002/06/05 16:32:39 db Exp $
+ * $Id: parse.c,v 1.65 2002/06/05 22:46:34 leeh Exp $
  */
 
 #include <stdio.h>
@@ -351,6 +351,25 @@ process_server(struct source_client *source_p, char *function, char *param)
 
   switch(numeric)
   {
+    case RPL_WELCOME:
+      if((p = strchr(argv[argc-1], '!')) != NULL)
+        *p = '\0';
+
+      strlcpy(tcm_status.my_nick, argv[argc-1], MAX_NICK);
+      break;
+
+    case RPL_YOURHOST:
+      /* Your host is foo[bar/6667], ... */
+      if((p = strchr(argv[5], '[')) != NULL)
+        *p = '\0';
+
+      /* Your host is foo, ... */
+      if((p = strchr(argv[5], ',')) != NULL)
+        *p = '\0';
+
+      strlcpy(tcm_status.my_server, argv[5], MAX_HOST);
+      break;
+
     case RPL_STATSYLINE:
       if (!strcasecmp(argv[4], tcm_status.my_class))
         tcm_status.ping_time = atoi(argv[5]) * 2 + 15;

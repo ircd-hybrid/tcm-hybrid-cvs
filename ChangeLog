@@ -1,3 +1,21 @@
+leeh        2002/06/07 06:58:10 EDT	(20020607_2)
+
+  Modified files:
+    src                  actions.c bothunt.c dcc_commands.c 
+                         services.c userlist.c wingate.c 
+  Log:
+  - replaced all strncpy() with strlcpy()
+  
+  Revision  Changes    Path
+  1.27      +2 -2      tcm-hybrid/src/actions.c
+  1.154     +7 -8      tcm-hybrid/src/bothunt.c
+  1.123     +4 -6      tcm-hybrid/src/dcc_commands.c
+  1.18      +2 -2      tcm-hybrid/src/services.c
+  1.113     +30 -29    tcm-hybrid/src/userlist.c
+  1.56      +12 -12    tcm-hybrid/src/wingate.c
+
+
+
 leeh        2002/06/07 06:46:10 EDT	(20020607_1)
 
   Modified files:

@@ -1,3 +1,19 @@
+db          2002/06/04 19:49:48 EDT	(20020605_0)
+
+  Modified files:
+    include              dcc.h 
+    src                  dcc.c parse.c 
+  Log:
+  - cleaned up more bogus unnecessary complexity in parse.c
+    removed a function in dcc.c
+  
+  Revision  Changes    Path
+  1.4       +2 -2      tcm-hybrid/include/dcc.h
+  1.6       +24 -69    tcm-hybrid/src/dcc.c
+  1.53      +1 -8      tcm-hybrid/src/parse.c
+
+
+
 db          2002/06/04 17:30:15 EDT	(20020604_6)
 
   Modified files:

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.114 2002/05/30 15:27:29 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.115 2002/05/30 15:59:33 leeh Exp $ */
 
 #include "setup.h"
 
@@ -356,52 +356,7 @@ m_action(int connnum, int argc, char *argv[])
 
   /* changing an action */
   else
-  {
-    int kline_time, i;
-    char methods[MAX_BUFF], reason[MAX_BUFF];
-
-    /* .action clone :Cloning is prohibited */
-    /* .action clone kline */
-    /* .action clone kline :Cloning */
-    /* .action clone kline 1440 ircwarn dccwarn :Cloning is prohibited*/        
-      /* Scan up to first ':' (extracting first found number if any)
-	 and make two strings; methods & reason */
-      kline_time = 0;
-      methods[0] = 0;
-      reason[0] = 0;
-      for (i=2;i<argc;i++)
-	{
-	  if (argv[i][0]==':')
-	    {
-	      snprintf(reason, sizeof(reason), "%s ", argv[i]+1);
-	      for (;i<argc;i++)
-		{
-		  strncat(reason, argv[i], sizeof(reason));
-		  strncat(reason, " ", sizeof(reason));
-		}
-	      break;
-	    }
-	  if ((!kline_time) && (atoi(argv[i])>0))
-	    {
-	      kline_time = atoi(argv[i]);
-	    }
-	  else
-	    {
-	      strncat(methods, argv[i], sizeof(methods));
-	      strncat(methods, " ", sizeof(methods));
-	    }
-	}
-      i = strlen(methods);
-      if (i && (methods[i-1]==' '))
-	methods[i-1] = 0;
-      i = strlen(reason);
-      if (i && (reason[i-1]==' '))
-	reason[i-1] = 0;
-      set_actions(connections[connnum].socket, argv[1], 
-		  methods[0] ? methods : NULL, 
-		  kline_time, 
-		  reason[0] ? reason : NULL);
-  }
+    update_action(connnum, argc, argv);
 }
 
 void

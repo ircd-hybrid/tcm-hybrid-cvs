@@ -1,7 +1,9 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.6 2002/05/30 15:27:26 leeh Exp $ */
+/* $Id: actions.h,v 1.7 2002/05/30 15:59:30 leeh Exp $ */
+
+#define MAX_ACTION	16
 
 extern int act_sdrone;
 extern int act_sclone;
@@ -20,6 +22,7 @@ void init_actions(void);
 void init_one_action(int, char *, int, char *);
 
 void set_action(int argc, char *argv[]);
+void update_action(int, int, char *argv[]);
 void set_action_time(int action, int klinetime);
 void set_action_reason(int action, char *reason);
 void set_action_method(int action, int method);

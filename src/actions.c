@@ -1,3 +1,8 @@
+/* actions.c
+ *
+ * $Id: actions.c,v 1.13 2002/05/30 15:59:33 leeh Exp $
+ */
+
 #include "setup.h"
 
 #include <ctype.h>
@@ -23,11 +28,6 @@
 #include "stdcmds.h"
 #include "wild.h"
 #include "hash.h"
-
-/* actions.c
- *
- * $Id: actions.c,v 1.12 2002/05/30 15:27:29 leeh Exp $
- */
 
 int act_sclone;
 int act_drone;
@@ -146,6 +146,42 @@ set_action(int argc, char *argv[])
   /* reason as well */
   if(argc >= 4)
     set_action_reason(actionid, argv[3]);
+}
+
+void
+update_action(int conn_num, int argc, char *argv[])
+{
+  char reason[MAX_REASON];
+  char *p;
+  char *q;
+  int actionid;
+  int method;
+  int i;
+
+  if(argc < 3)
+    return;
+
+  if((actionid = find_action(argv[1])) < 0)
+    return;
+
+  actions[actionid].method = 0;
+  actions[actionid].klinetime = 0;
+
+  for(i = 2; i < argc; i++)
+  {
+    if(actions[actionid].klinetime == 0 && atoi(argv[i]))
+      actions[actionid].klinetime = atoi(argv[i]);
+    else if((method = get_method_number(argv[i])))
+      actions[actionid].method |= method;
+
+    /* hit the reason */
+    else
+    {
+      expand_args(reason, MAX_REASON, argc-i, argv+i);
+      set_action_reason(actionid, reason);
+      return;
+    }
+  }
 }
 
 void

@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.49 2002/05/30 01:49:45 leeh Exp $ */
+/* $Id: tcm.h,v 1.50 2002/05/30 15:59:31 leeh Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -17,9 +17,6 @@ extern time_t current_time;
 
 /* scratch buffer size */
 #define MAX_BUFF       512
-
-/* maximum amount of actions */
-#define MAX_ACTIONS	32
 
 /* small scratch buffer size */
 #define SMALL_BUFF	32

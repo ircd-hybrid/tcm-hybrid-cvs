@@ -1,3 +1,18 @@
+leeh        2002/05/24 10:35:22 EDT	(20020524_9)
+
+  Modified files:
+    include              userlist.h 
+    src                  parse.c tcm_io.c 
+  Log:
+  - missed a bit
+  
+  Revision  Changes    Path
+  1.35      +0 -1      tcm-hybrid/include/userlist.h
+  1.11      +3 -6      tcm-hybrid/src/parse.c
+  1.10      +1 -1      tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/24 10:32:37 EDT	(20020524_8)
 
   Modified files:

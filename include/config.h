@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.34 2002/04/02 23:24:22 bill Exp $
+ * $Id: config.h,v 1.35 2002/04/08 14:02:26 wcampbel Exp $
  */
 
 /*
@@ -51,6 +51,12 @@
  * If you are careful with your exemptions to D lines...
  */
 #undef AUTO_DLINE
+
+/*
+ * Force tcm to dump core even on systems defaulting to a core
+ * size of 0
+ */
+#define FORCE_CORE
 
 /*
  * The default tcm config file , can be overridden with a file name

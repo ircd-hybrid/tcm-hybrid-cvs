@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.28 2002/04/02 23:24:30 bill Exp $ */
+/* $Id: main.c,v 1.29 2002/04/08 14:02:28 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -60,6 +60,10 @@
 #include "dmalloc.h"
 #endif
 
+#ifdef FORCE_CORE
+#include <sys/resource.h>
+#endif
+
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
 extern struct a_entry actions[100];
@@ -102,6 +106,10 @@ char *get_action_method(char *name);
 #if 0
 /* XXX - unused */
 char *get_action_reason(char *name);
+#endif
+
+#ifdef FORCE_CORE
+static void setup_corefile(void);
 #endif
 
 /*
@@ -565,6 +573,9 @@ int main(int argc, char *argv[])
     printf("Unable to chdir to DPATH\nFatal Error, exiting\n");
     exit(1);
   }
+#ifdef FORCE_CORE
+  setup_corefile();
+#endif
   init_hash_tables();		/* clear those suckers out */
   init_tokenizer();		/* in token.c */
   init_userlist();
@@ -799,5 +810,29 @@ void m_not_oper(int connnum, int argc, char *argv[])
 void m_not_admin(int connnum, int argc, char *argv[])
 {
   prnt(connnum, "Only authorized admins may use this command\n");
+}
+#endif
+
+#ifdef FORCE_CORE
+/*
+ * setup_corefile
+ *
+ * inputs       - nothing
+ * output       - nothing
+ * side effects - setups corefile to system limits.
+ * -kre
+ *
+ * Stolen from Hyb6.2 - Hwy
+ */
+static void setup_corefile(void)
+{
+  struct rlimit rlim; /* resource limits */
+
+  /* Set corefilesize to maximum */
+  if (!getrlimit(RLIMIT_CORE, &rlim))
+  {
+    rlim.rlim_cur = rlim.rlim_max;
+    setrlimit(RLIMIT_CORE, &rlim);
+  }
 }
 #endif

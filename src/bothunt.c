@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.194 2002/08/09 21:43:02 wcampbel Exp $
+ * $Id: bothunt.c,v 1.195 2002/08/10 21:08:11 bill Exp $
  */
 
 #include <stdio.h>
@@ -43,7 +43,6 @@
 #endif
 
 static void check_nick_flood(char *snotice);
-static void cs_nick_flood(char *snotice);
 static void cs_clones(char *snotice);
 static void link_look_notice(char *snotice);
 static void connect_flood_notice(char *snotice, char *reason);
@@ -108,14 +107,12 @@ struct msg_to_action msgs_to_mon[] = {
   {MSG_UNAUTHORIZED, sizeof(MSG_UNAUTHORIZED)-1, UNAUTHORIZED},
   {MSG_UNAUTHORISED, sizeof(MSG_UNAUTHORISED)-1, UNAUTHORIZED},
   {MSG_NICK_CHANGE, sizeof(MSG_NICK_CHANGE)-1, NICKCHANGE},
-  {MSG_NICK_FLOODING, sizeof(MSG_NICK_FLOODING)-1, CS_NICKFLOODING},
-  {MSG_REJECTING, sizeof(MSG_REJECTING)-1, CS_CLONES},
-  {MSG_CLONEBOT_KILLED, sizeof(MSG_CLONEBOT_KILLED)-1, CS_CLONEBOT_KILLED},
   {MSG_IDLE_TIME, sizeof(MSG_IDLE_TIME)-1, IGNORE},
   {MSG_LINKS, sizeof(MSG_LINKS)-1, LINK_LOOK},
   {MSG_KLINE, sizeof(MSG_KLINE)-1, IGNORE},  
   {MSG_STATS, sizeof(MSG_STATS)-1, STATS},
   {MSG_GOT_SIGNAL, sizeof(MSG_GOT_SIGNAL)-1, SIGNAL},
+  {MSG_LINK_WITH, sizeof(MSG_LINK_WITH)-1, LINKWITH},
   {MSG_NICK_COLLISION, sizeof(MSG_NICK_COLLISION)-1, IGNORE},
   {MSG_SEND_MESSAGE, sizeof(MSG_SEND_MESSAGE)-1, IGNORE},
   {MSG_GHOSTED, sizeof(MSG_GHOSTED)-1, IGNORE},
@@ -123,12 +120,10 @@ struct msg_to_action msgs_to_mon[] = {
   {MSG_INVISIBLE_CLIENT, sizeof(MSG_INVISIBLE_CLIENT)-1, IGNORE},
   {MSG_OPER_COUNT_OFF, sizeof(MSG_OPER_COUNT_OFF)-1, IGNORE},
   {MSG_USER_COUNT_OFF, sizeof(MSG_USER_COUNT_OFF)-1, IGNORE},
-  {MSG_LINK_WITH, sizeof(MSG_LINK_WITH)-1, LINKWITH},
   {MSG_SQUIT, sizeof(MSG_SQUIT)-1, SQUITOF},
   {MSG_MOTD, sizeof(MSG_MOTD)-1, MOTDREQ},
   {MSG_FLOODER, sizeof(MSG_FLOODER)-1, FLOODER},
   {MSG_USER, sizeof(MSG_USER)-1, SPAMBOT},
-  {MSG_I_LINE_MASK, sizeof(MSG_I_LINE_MASK)-1, IGNORE},
   {MSG_I_LINE_FULL, sizeof(MSG_I_LINE_FULL)-1, ILINEFULL},
   {MSG_BANNED, sizeof(MSG_BANNED)-1, BANNED},
   {MSG_D_LINED, sizeof(MSG_D_LINED)-1, BANNED},
@@ -552,6 +547,8 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Unauthorized client connection from bill[bill@localhost] [127.0.0.1]
      on [irc.intranaut.com/6667]. */
+  /* Unauthorised client connection from bill[bill@localhost] [127.0.0.1]
+     on [irc.intranaut.com/6667]. */
   case UNAUTHORIZED:
     if ((q = strchr(p, '[')) == NULL)
       return;
@@ -567,16 +564,6 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* Nick change: From bill to aa [bill@ummm.E] */
   case NICKCHANGE:
     check_nick_flood(q);
-    break;
-
-/* CS style of reporting nick flooding */
-  case CS_NICKFLOODING:
-    cs_nick_flood(q);
-    break;
-
-  case CS_CLONES:
-  case CS_CLONEBOT_KILLED:
-    cs_clones(q);
     break;
 
   /* LINKS '' requested by bill (bill@ummm.E) [irc.bill.eagan.mn.us] */
@@ -595,13 +582,13 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Link with test.server[bill@255.255.255.255] established: (TS) link */ 
   case LINKWITH:
-    q+=10;
-    send_to_all(NULL, FLAGS_SERVERS, "Link with %s", q);
+    p+=10
+    send_to_all(NULL, FLAGS_SERVERS, "Link with %s", p);
     break;
 
   /* Received SQUIT test.server from bill[bill@ummm.E] (this is a test) */
   case SQUITOF:
-    q+=15;
+    q=p+15; 
     if ((p = strchr(q, ' ')) == NULL)
       return;
     *p = '\0';
@@ -611,8 +598,8 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* motd requested by bill (bill@ummm.E) [irc.bill.eagan.mn.us] */
   case MOTDREQ:
-    q+=18;
-    send_to_all(NULL, FLAGS_SPY, "[MOTD requested by %s]", q);
+    p+=18;
+    send_to_all(NULL, FLAGS_SPY, "[MOTD requested by %s]", p);
     break;
 
   case  IGNORE:
@@ -620,7 +607,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Flooder bill [bill@ummm.E] on irc.intranaut.com target: #clone */ 
   case FLOODER:
-    q+=8;
+    q=p+8;
     if ((p = strchr(q,' ')) == NULL)
       break;
 
@@ -653,7 +640,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* User bill (bill@ummm.E) is a possible spambot */
   /* User bill (bill@ummm.E) trying to join #tcm is a possible spambot */
   case SPAMBOT:
-    q+=5;
+    q=p+5;
     if ((p = strchr(q,' ')) == NULL)
       return;
     *p++ = '\0';
@@ -676,7 +663,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* I-line is full for bill[bill@ummm.E] (127.0.0.1). */
   case ILINEFULL:
-    nick = q+19;
+    nick = p+19;
     connect_flood_notice(nick, "I line full");
     break;
 
@@ -694,7 +681,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* Possible Drone Flooder bill [bill@ummm.E] on irc.intranaut.com target:
      #clone */
   case DRONE:
-    nick = q + 23;
+    nick = p + 23;
 
     if ((q = strchr(nick, ' ')) == NULL)
       return;
@@ -723,7 +710,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* X-line Rejecting [Bill Jonus] [just because] user bill[bill@ummm.E] */
   case XLINEREJ:
-    q+=17;
+    q=p+18;
     if ((nick = strrchr(q, ' ')) == NULL)
       return;
     ++nick;
@@ -732,20 +719,20 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Quarantined nick [bill] from user aa[bill@ummm.E] */
   case QUARANTINE:
-    nick = q+18; 
+    nick = p+18; 
     connect_flood_notice(nick, "Quarantined nick");
     break;
 
   /* Invalid username: bill (!@$@&&&.com) */
   case INVALIDUH:
-    nick = q+18;
+    nick = p+18;
     connect_flood_notice(nick, "Invalid user@host");
     break;
 
   /* Server ircd.flamed.net split from ircd.secsup.org */
   /* Server irc.intranaut.com being introduced by ircd.secsup.org */
   case SERVER:
-    q += 7;
+    q=p+7;
     if (strstr(q, "split"))
     {
       nick = q;
@@ -769,7 +756,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Failed OPER attempt by bill (bill@holier.than.thou) */
   case FAILEDOPER:
-    nick = q+23;
+    nick = p+23;
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
@@ -780,7 +767,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* info requested by bill (bill@ummm.e) [irc.bill.eagan.mn.us] */
   case INFOREQUESTED:
-    nick = q+18;
+    nick = p+18;
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
@@ -986,41 +973,6 @@ link_look_notice(char *snotice)
 }
 
 /*
- * cs_nick_flood
- *
- * inputs	- rest of notice from server
- * output	- NONE
- * side effects
- *
- * For clones CS uses [user@host] for nick flooding CS uses (user@host)
- * go figure.
- *
- */
-static
-void cs_nick_flood(char *snotice)
-{
-  char *nick_reported;
-  char *user_host;
-  char *user;
-  char *host;
-
-  if ((nick_reported = strchr(snotice,' ')) == NULL)
-    return;
-  nick_reported++;
-
-  if ((user_host = strchr(nick_reported,' ')) == NULL)
-    return;
-
-  if (get_user_host(&user, &host, user_host) == NULL)
-    return;
-
-  send_to_all(NULL, FLAGS_WARN, "CS nick flood user_host = [%s@%s]",
-	      user, host);
-  tcm_log(L_NORM, "%s", "CS nick flood user_host = [%s@%s]", user, host);
-  handle_action(act_flood, nick_reported, user, host, 0, 0);
-}
-
-/*
  * cs_clones
  *
  * inputs	- notice
@@ -1061,6 +1013,7 @@ cs_clones(char *snotice)
  * side effects
  *
  * Audited for H6, H7, cs.
+ * Nick change: From bill to aa [bill@ummm.E] */
  */
 
 static void
@@ -1073,38 +1026,29 @@ check_nick_flood(char *snotice)
   char *user;
   char *host;
 
-  if (*snotice == ' ')
-    snotice++;
-  if ((p = strtok(snotice," ")) == NULL)        /* p will be "From" */
-    return;
-  if ((p = strtok(NULL," ")) == NULL)           /* p will point to the nick */
+  nick1 = snotice+18;
+  if ((p = strchr(nick1, ' ')) == NULL)
     return;
 
-  if (strcasecmp(p,"From") != 0)
-    {
-      nick1 = p;	/* This _should_ be nick1 */
+  *p = '\0';
+  nick2 = p+4;
 
-      if ((p = strtok(NULL," ")) == NULL)               /* to */
-        return;
+  if ((p = strchr(nick2, ' ')) == NULL)
+    return;
 
-      if ((nick2 = strtok(NULL," ")) == NULL)               /* nick2 (aa) */
-        return;
+  *p = '\0';
+  user_host = p+2;
 
-      if ((user_host = strtok(NULL," ")) == NULL)	/* [user@host] */
-	return;
+  if ((p = strrchr(user_host, ']')) == NULL)
+    return;
 
-      if ((p = strrchr(user_host,']')) != NULL)
-	*p = '\0';
+  *p = '\0';
 
-      if (user_host[0] == '[')
-        user_host++;
+  if (get_user_host(&user, &host, user_host) == NULL)
+    return;
 
-      if (get_user_host(&user, &host, user_host) == NULL)
-	return;
-
-      add_to_nick_change_table(user, host, nick2);
-      update_nick(user, host, nick1, nick2);
-    }
+  add_to_nick_change_table(user, host, nick2);
+  update_nick(user, host, nick1, nick2);
 }
 
 /*
@@ -1276,6 +1220,10 @@ stats_notice(char *snotice)
   char *fulluh;
   char *p;
   int stat;
+
+#ifdef DEBUGMODE
+  printf("stats_notice(\"%s\")\n", snotice);
+#endif
 
   stat = *(snotice + 6);
 

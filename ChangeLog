@@ -1,3 +1,9 @@
+*** 20000902_5 by lusky
+fixed SERIALNUM
+started autoconf work
+added .depend
+
+
 *** 20000902_4 by lusky
 Directory /cvsroot/tcm-hybrid/autoconf added to the repository
 

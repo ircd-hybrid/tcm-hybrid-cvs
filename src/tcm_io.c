@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.29 2002/05/25 19:13:26 jmallett Exp $
+ * $Id: tcm_io.c,v 1.30 2002/05/25 19:21:43 jmallett Exp $
  */
 
 #include <stdio.h>
@@ -801,6 +801,7 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   if (connections[i].socket == INVALID)
     return (0);
   connections[i].connecting = 1;
+  FD_SET(connections[i].socket, &readfds);
 }
 
 static void

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.136 2002/06/24 02:35:57 wcampbel Exp $
+ * $Id: userlist.c,v 1.137 2002/06/24 10:35:50 leeh Exp $
  *
  */
 
@@ -48,6 +48,8 @@ static void add_oper(char *, char *, char *, char *, char *);
 static void m_umode(struct connection *, int, char *argv[]);
 static void set_umode_connection(struct connection *, int, const char *);
 static void set_umode_userlist(char *, const char *);
+
+static void save_umodes(struct oper_entry *);
 
 struct dcc_command umode_msgtab = {
   "umode", NULL, {m_unregistered, m_umode, m_umode}
@@ -378,6 +380,31 @@ get_umodes_from_prefs(struct oper_entry *user)
   }
 }
 
+/* save_umodes()
+ *
+ * input	-
+ * output	- usermodes are saved to prefs file
+ * side effects -
+ */
+void
+save_umodes(struct oper_entry *user)
+{
+  FILE *fp;
+  char user_pref[MAX_BUFF];
+
+  snprintf(user_pref, MAX_BUFF, "etc/%s.pref", user->usernick);
+
+  if((fp = fopen(user_pref, "w")) != NULL)
+  {
+    fprintf(fp, "%d\n", (user->type|FLAGS_VALID));
+    (void)fclose(fp);
+  }
+  else
+  {
+    send_to_all(FLAGS_ALL, "Couldn't open %s for writing", user_pref);
+  }
+}
+    
 /*
  * load_config_file
  * 

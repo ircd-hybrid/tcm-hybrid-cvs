@@ -45,14 +45,16 @@ C:&frizzle.net
 #	- dline         <dline the user with the same proper message>
 #	- warn          <do nothing to the user, warn +w users on the tcm>
 #
+#   The default value for "Log to channel" is NO
+#
 A:cflood:dline:Connection flooding
 A:vclone:kline 180:Cloning is prohibited
 A:flood:kline 180:Flooding is prohibited
 A:link:kline:Link Lookers are prohibited
 A:bot:kline:Bots are prohibited
-A:ctcp:kline 180:CTCP Flooding is prohibited
+A:ctcp:kline 180:CTCP Flooding is prohibited:YES
 A:spambot:kline 1440:Spamming is prohibited
-A:clone:kline 1440:Cloning is prohibited 
+A:clone:kline 1440:Cloning is prohibited:NO
 A:sclone:kline 180:clones on multiple servers
 A:drone:kline:Drone bots
 A:wingate:dline:Open Wingate
@@ -64,10 +66,6 @@ M:For basic information, see http://www.ircd-hybrid.org/tcm/
 # email address
 # clone logs etc. will get e-mailed to this address
 #E:db@db.net
-
-# port to listen on if the default is unavailable
-# the default port is defined in config.h
-#P:6801
 
 # keep the tcm opers only? YES or NO
 D:YES

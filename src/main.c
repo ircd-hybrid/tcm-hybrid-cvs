@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.40 2002/05/20 05:31:03 db Exp $ */
+/* $Id: main.c,v 1.41 2002/05/20 18:42:26 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -317,12 +317,13 @@ sendtoalldcc(int type,char *format,...)
 	      break;
 	      
             case SEND_OPERWALL_ONLY:
-	    case SEND_LOCOPS_ONLY:
 #ifdef ENABLE_W_FLAG
-              if (!(connections[i].type & TYPE_OPERWALL))
-                break;
+              if (connections[i].type & TYPE_OPERWALL)
+                prnt(connections[i].socket, msgbuf);
 #endif
-	    case SEND_WALLOPS_ONLY:
+              break;
+
+	    case SEND_LOCOPS_ONLY:
 	      if (connections[i].type & TYPE_LOCOPS)
 		prnt(connections[i].socket, msgbuf);
 	      break;

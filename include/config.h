@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.44 2002/05/20 05:30:56 db Exp $
+ * $Id: config.h,v 1.45 2002/05/20 18:42:24 wcampbel Exp $
  */
 
 /*
@@ -163,8 +163,9 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 /* undef if you don't want klines reported - Toast */
 #define REPORT_KLINES
 
-/* Define this to enable the +W flag, which is required for a user
- * to be able to see OPERWALL/LOCOPS
+/* Define this to enable the +W flag, which is required for a tcm oper
+ * to be able to see OPERWALL/WALLOPS, LOCOPS is provided by the l
+ * user flag.
  */
 #undef ENABLE_W_FLAG
 

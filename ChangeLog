@@ -1,3 +1,20 @@
+einride     2001/12/12 18:08:18 EST	(20011212_0)
+
+  Modified files:
+    modules              wingate.c 
+    src                  modules.c userlist.c 
+  Log:
+  modules.c changed to support multiple hook entries per hook type.
+  userlist.c changed to trigger the config hook.
+  wingate.c changed to assume any open port 1080 is a socks, previous version would not detect SOCKS5 proxies.
+  
+  Revision  Changes    Path
+  1.15      +12 -2     tcm-hybrid/modules/wingate.c
+  1.17      +32 -106   tcm-hybrid/src/modules.c
+  1.40      +4 -1      tcm-hybrid/src/userlist.c
+
+
+
 db          2001/12/11 16:55:34 EST	(20011211_1)
 
   Modified files:

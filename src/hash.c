@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.60 2002/12/30 07:31:36 bill Exp $
+ * $Id: hash.c,v 1.61 2003/01/19 01:18:40 wiz Exp $
  */
 
 #include <stdio.h>
@@ -32,6 +32,10 @@
 #include "match.h"
 #include "wingate.h"
 
+#ifdef IPV6
+#include "ipv6.h"
+#endif
+
 #ifdef HAVE_REGEX_H
 #include <regex.h>
 #endif
@@ -45,6 +49,9 @@ static char* find_domain(char* domain);
 static void check_host_clones(char *);
 #ifdef VIRTUAL
 static void make_ip_class_c(char *p);
+#ifdef VIRTUAL_IPV6
+static void make_ip_slash_64(char *p);
+#endif
 static void check_virtual_host_clones(char *);
 #endif
 
@@ -296,7 +303,12 @@ add_user_host(struct user_entry *user_info, int fromtrace)
             sizeof(new_user->ip_host));
   strlcpy(new_user->ip_class_c, new_user->ip_host,
           sizeof(new_user->ip_class_c));
-  make_ip_class_c(new_user->ip_class_c);
+#ifdef VIRTUAL_IPV6
+  if (strchr(new_user->ip_host, ':'))
+    make_ip_slash_64(new_user->ip_class_c);
+  else
+#endif
+    make_ip_class_c(new_user->ip_class_c);
 #endif
 
   new_user->connecttime = (fromtrace ? 0 : time(NULL));
@@ -1463,4 +1475,26 @@ make_ip_class_c(char *p)
     p++;
   }
 }
-#endif
+
+#ifdef VIRTUAL_IPV6
+/*
+ * make_ip_slash_64
+ *
+ * inputs	- pointer to ipv6 string
+ * output	- none
+ * side effects	- input string is modified in-place
+ */
+
+static void
+make_ip_slash_64(char *p)
+{
+  u_int16_t words[8];
+
+  if (inet_pton6(p, (char *)&words)) {
+    words[4] = words[5] = words[6] = words[7] = 0;
+    inet_ntop6((char *)&words, p, MAX_IP);
+  }
+}
+
+#endif /* VIRTUAL_IPV6 */
+#endif /* VIRTUAL */

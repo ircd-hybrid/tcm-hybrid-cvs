@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.79 2002/12/10 16:35:43 bill Exp $
+ * $Id: config.h,v 1.80 2003/01/19 01:18:38 wiz Exp $
  */
 
 /*
@@ -13,6 +13,14 @@
  * only works on hybrid servers 5.1 and up
  */
 #define VIRTUAL
+
+/*
+ * IPV6: this is still not tested very much and may eat
+ *       your tcm for breakfast and kline all your users
+ *       with the message "fek u", but here it is!  -wiz
+ */
+#undef IPV6
+#undef VIRTUAL_IPV6
 
 /*
  * USE_CRYPT, define this if you want your oper passwords to be encrypted

@@ -43,6 +43,7 @@ hash.o: hash.c ../include/setup.h ../include/config.h ../include/tcm.h \
  ../include/logging.h ../include/wild.h ../include/serno.h \
  ../include/patchlevel.h ../include/hash.h ../include/actions.h \
  ../include/match.h ../include/wingate.h
+ipv6.o: ipv6.c ../include/config.h
 logging.o: logging.c ../include/setup.h ../include/config.h \
  ../include/tcm.h ../include/userlist.h ../include/tools.h \
  ../include/tcm_io.h ../include/bothunt.h ../include/parse.h \
@@ -59,14 +60,15 @@ modules.o: modules.c ../include/config.h ../include/tcm.h \
  ../include/modules.h ../include/stdcmds.h ../include/wild.h \
  ../include/parse.h ../include/handler.h ../include/userlist.h \
  ../include/setup.h
-parse.o: parse.c ../include/config.h ../include/tcm.h \
- ../include/event.h ../include/bothunt.h ../include/userlist.h \
- ../include/setup.h ../include/tools.h ../include/parse.h \
+parse.o: parse.c ../include/config.h ../include/setup.h \
+ ../include/tcm.h ../include/event.h ../include/bothunt.h \
+ ../include/userlist.h ../include/tools.h ../include/parse.h \
  ../include/numeric.h ../include/hash.h ../include/logging.h \
  ../include/stdcmds.h ../include/wild.h ../include/tcm_io.h \
  ../include/serno.h ../include/patchlevel.h ../include/modules.h \
  ../include/handler.h ../include/dcc.h
-respond.o: respond.c
+respond.o: respond.c ../include/setup.h ../include/tcm.h \
+ ../include/config.h ../include/userlist.h ../include/tools.h
 seedrand.o: seedrand.c ../include/tcm.h ../include/config.h \
  ../include/tcm_io.h ../include/tools.h ../include/handler.h \
  ../include/hash.h ../include/modules.h

@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.16 2003/01/16 01:27:10 bill Exp $
+ * $Id: vclones.c,v 1.17 2003/01/19 01:18:40 wiz Exp $
  */
 
 #include <assert.h>
@@ -181,19 +181,21 @@ report_vbots(struct connection *connection_p, int nclones, int check_user)
 		  if (check_user)
 		    {
 		      send_to_connection(connection_p,
-				  " %s %2d connections -- %s@%s.* {%s}",
+				  " %s %2d connections -- %s@%s%s {%s}",
 				      (num_found-nclones > 2) ? "==>" :
 				      "   ", num_found, ptr->info->username,
 				      ptr->info->ip_class_c,
+				      strchr(ptr->info->ip_class_c, ':') ? "/64" : ".*",
 				      ptr->info->class);
 		    }
 		    else
 		    {
 		      send_to_connection(connection_p,
-					 " %s %2d connections -- %s.*",
+					 " %s %2d connections -- %s%s",
 					 (num_found-nclones > 3) ? "==>" : "   ",
 					 num_found,
-					 ptr->info->ip_class_c);
+					 ptr->info->ip_class_c,
+				         strchr(ptr->info->ip_class_c, ':') ? "/64" : ".*");
 		    }
 
                 }

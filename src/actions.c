@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.35 2002/06/28 00:53:48 db Exp $
+ * $Id: actions.c,v 1.36 2002/08/08 19:35:05 bill Exp $
  */
 
 #include "setup.h"
@@ -376,7 +376,7 @@ handle_action(int actionid, char *nick, char *username,
 
   strcpy(comment, "No actions taken");
 
-  if (ok_host(username[0] ? username : "*", host, actionid) == 0)
+  if (ok_host((username && username[0]) ? username : "*", host, actionid) == 0)
     {
       /* Now process the event, we got the needed data */
       if (actions[actionid].method & METHOD_KLINE)

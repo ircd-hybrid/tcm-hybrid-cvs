@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2002 Bill Jonus
  *
- * $Id: seedrand.c,v 1.1 2002/09/13 18:35:04 bill Exp $
+ * $Id: seedrand.c,v 1.2 2002/09/26 15:26:33 bill Exp $
  */
 
 #include <assert.h>
@@ -156,8 +156,8 @@ static void m_seedrand(struct connection *connection_p, int argc, char *argv[])
     {
       if ((match(match_s, find->info->nick) == 0) && ((score_t = score(find->info->nick)) >= threshold))
       {
-        results[numfound++] = find->info;
-        scores[numfound] = score_t;
+        results[numfound] = find->info;
+        scores[numfound++] = score_t;
       }
     }
   }

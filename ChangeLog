@@ -1,3 +1,15 @@
+bill        2004/06/03 16:22:03 EDT	(20040603_3)
+
+  Added files:
+    help                 help.smartlist 
+  Log:
+  - add help file for smartlist
+  
+  Revision  Changes    Path
+  1.1       +17 -0     tcm-hybrid/help/help.smartlist (new)
+
+
+
 bill        2004/06/03 16:15:27 EDT	(20040603_2)
 
   Modified files:

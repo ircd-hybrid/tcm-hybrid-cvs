@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.215 2003/02/26 10:25:40 bill Exp $
+ * $Id: bothunt.c,v 1.216 2003/03/01 02:31:34 bill Exp $
  */
 
 #include <stdio.h>
@@ -1225,6 +1225,7 @@ cs_clones(char *snotice)
  *
  * Audited for H6, H7, cs.
  * Nick change: From bill to aa [bill@ummm.E]
+ * Nick change: From bill to aa[bill@ummm.E]
  */
 
 static void
@@ -1577,6 +1578,8 @@ get_user_host(char **user_p, char **host_p, char *user_host)
   char *user = user_host;
   char *end_p = NULL;
   char *p;
+
+  *user_p = *host_p = NULL;
 
   /* either: [user@host] (user@host) or just user@host */
   if (*user == '[')

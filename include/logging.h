@@ -12,5 +12,6 @@ char *date_stamp(void);
 char *format_reason(char *);
 void log(char *format,...);
 void log_problem(char *,char *);
+void report_uptime(int sock);
 
 #endif

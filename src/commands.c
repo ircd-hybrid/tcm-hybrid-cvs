@@ -40,13 +40,13 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.8 2001/02/01 03:50:01 wcampbel Exp $";
+static char *version="$Id: commands.c,v 1.9 2001/02/03 00:20:16 wcampbel Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
 static int is_kline_time(char *p);
 static int not_legal_remote(int);
-static void set_actions(int socket, char *key, char *action, char *reason,
+static void set_actions(int sock, char *key, char *act, char *reason,
 			char *message );
 static void send_to_nick(char *to_nick,char *buffer);
 static void setup_allow(char *nick);
@@ -55,17 +55,17 @@ static void load_umodes(int connect_id);
 static unsigned long find_user_umodes(char *nick);
 static int  test_ignore(char *line);
 static void set_umode(int connnum, char *flags, char *registered_nick);
-static void show_user_umodes(int socket, char *registered_nick);
-static void not_authorized(int socket);
+static void show_user_umodes(int sock, char *registered_nick);
+static void not_authorized(int sock);
 static void register_oper(int connnum, char *password, char *who_did_command);
-static void list_opers(int socket);
-static void list_tcmlist(int socket);
-static void list_connections(int socket);
-static void list_exemptions(int socket);
-static void handle_allow(int socket, char *param, char *who_did_command);
-static void handle_disconnect(int socket,char *param2,char *who_did_command);
-static void handle_save(int socket,char *nick);
-static void handle_gline(int socket,char *pattern,char *reason,
+static void list_opers(int sock);
+static void list_tcmlist(int sock);
+static void list_connections(int sock);
+static void list_exemptions(int sock);
+static void handle_allow(int sock, char *param, char *who_did_command);
+static void handle_disconnect(int sock,char *param2,char *who_did_command);
+static void handle_save(int sock,char *nick);
+static void handle_gline(int sock,char *pattern,char *reason,
 			 char *who_did_command);
 
 /*
@@ -86,15 +86,17 @@ void dccproc(int connnum)
   char dccbuff[MAX_BUFF];
   char who_did_command[2*MAX_NICK];
   char fulluh[MAX_HOST+MAX_DOMAIN];
-  int i;
+  /* int i; - SAYS unused */
   int opers_only = SEND_ALL_USERS; 	/* Is it an oper only message ? */
   int ignore_bot = NO;
   char *param1;
   char *param2;
   char *param3;
   char *param2_orig;
-  int kline_time;
+  int kline_time = 0;
+#ifdef DEBUGMODE
   placed;
+#endif
 
 /* Make terribly sure that incoming buffer isn't larger than outgoing */
   if(strlen(buffer) > (MAX_BUFF - FLUFF_SIZE))
@@ -865,23 +867,23 @@ void dccproc(int connnum)
     case K_HMULTI:
       if (connections[connnum].type & TYPE_OPER)
 	{
-	  int i;
+	  int j;
 	  if (param2_orig)
 	    {
-	      i=atoi(param2_orig);
-	      if (i<3)
+	      j=atoi(param2_orig);
+	      if (j<3)
 		{
 		  prnt(connections[connnum].socket, "%s",
        "Using a threshold less than 3 is not recommended, changed to 3\n");
-		  i=3;
+		  j=3;
 		}
 	    }
 	  else
 	    {
-	      i=3;
+	      j=3;
 	    }
 
-	  report_multi_host(connections[connnum].socket,i);
+	  report_multi_host(connections[connnum].socket,j);
 	}
       else
 	{
@@ -892,22 +894,22 @@ void dccproc(int connnum)
     case K_UMULTI:
       if (connections[connnum].type & TYPE_OPER)
 	{
-	  int i;
+	  int j;
 	  if (param2_orig)
 	    {
-	      i=atoi(param2_orig);
-	      if (i<3)
+	      j=atoi(param2_orig);
+	      if (j<3)
 		{
 		  prnt(connections[connnum].socket,
        "Using a threshold less than 3 is not recommended, changed to 3\n");
-		  i=3;
+		  j=3;
 		}
 	    }
 	  else
 	    {
-	      i=3;
+	      j=3;
 	    }
-	  report_multi_user(connections[connnum].socket,i);
+	  report_multi_user(connections[connnum].socket,j);
 	}
       else
 	{
@@ -1033,7 +1035,7 @@ void dccproc(int connnum)
       {
 	if(connections[connnum].type & TYPE_OPER)
 	  {
-	    int i;
+	    int j;
 
 	    if(param2)
 	      {
@@ -1045,14 +1047,14 @@ void dccproc(int connnum)
 	    else
 	      {
 		prnt(connections[connnum].socket,"current bans\n");
-		for(i=0; i < MAXBANS; i++)
+		for(j=0; j < MAXBANS; j++)
 		  {
-		    if(!banlist[i].host[0]) break;
-		    if(!banlist[i].user[0]) break;
-		    if(banlist[i].host[0])
+		    if(!banlist[j].host[0]) break;
+		    if(!banlist[j].user[0]) break;
+		    if(banlist[j].host[0])
 		      {
 			prnt(connections[connnum].socket,
-			     "%s@%s\n", banlist[i].user, banlist[i].host);
+			     "%s@%s\n", banlist[j].user, banlist[j].host);
 		      }
 		  }
 	      }
@@ -1069,7 +1071,7 @@ void dccproc(int connnum)
       {
 	if(connections[connnum].type & TYPE_OPER)
 	  {
-	    int i;
+	    int j;
 	    int new_connnum;
 
 	    if( !param2 )
@@ -1079,57 +1081,57 @@ void dccproc(int connnum)
 		return;
 	      }
 
-	    for(i=0; i < MAXTCMS;i++)
+	    for(j=0; j < MAXTCMS;j++)
 	      {
-		int socket;
+		int sock;
 		
-		if(!tcmlist[i].host[0]) break;
+		if(!tcmlist[j].host[0]) break;
 
-		if( !(strcasecmp(tcmlist[i].theirnick, param2)) )
+		if( !(strcasecmp(tcmlist[j].theirnick, param2)) )
 		  continue;
 
-		if(tcmlist[i].port == 0)
+		if(tcmlist[j].port == 0)
 		  (void)sprintf(dccbuff,"%s:%d",
-				tcmlist[i].host,
+				tcmlist[j].host,
 				TCM_PORT);
 		else
 		  (void)sprintf(dccbuff,"%s:%d",
-				tcmlist[i].host,
-				tcmlist[i].port);
+				tcmlist[j].host,
+				tcmlist[j].port);
 
-		if((socket = bindsocket(dccbuff)) > 0)
+		if((sock = bindsocket(dccbuff)) > 0)
 		  {
-		    new_connnum = add_connection(socket,i);
+		    new_connnum = add_connection(sock,j);
 		    if(new_connnum == INVALID)
 		      {
 			sendtoalldcc(SEND_ALL_USERS,
 				     "Failed tcm connection to %s\n",
 				     param2);
-			(void)close(socket);
+			(void)close(sock);
 		      }
 		    else
 		      {
-			int j;
+			int k;
 
 			/* Extra paranoia doesn't hurt at all */
-			if(tcmlist[i].theirnick[0] && tcmlist[i].password[0])
+			if(tcmlist[j].theirnick[0] && tcmlist[j].password[0])
 			  {
-			    prnt(socket,"%s %s %s\n",
-				 tcmlist[i].theirnick,
+			    prnt(sock,"%s %s %s\n",
+				 tcmlist[j].theirnick,
 				 config_entries.dfltnick,
-				 tcmlist[i].password);
+				 tcmlist[j].password);
 			    (void)sprintf(dccbuff,".TCMINTRO %s %s ",
 					  config_entries.dfltnick,
-					  tcmlist[i].theirnick);
+					  tcmlist[j].theirnick);
 
-			    for (j=1;j<maxconns;++j)
-			      if (connections[i].socket != INVALID)
+			    for (k=1;k<maxconns;++k)
+			      if (connections[j].socket != INVALID)
 				{
-				  if(connections[j].type & TYPE_TCM)
+				  if(connections[k].type & TYPE_TCM)
 				    {
 				      (void)strcat(dccbuff," ");
 				      (void)strcat(dccbuff,
-						   connections[i].nick);
+						   connections[j].nick);
 				    }
 				}
 			    strcat(dccbuff,"\n");
@@ -1144,7 +1146,7 @@ void dccproc(int connnum)
 		    sendtoalldcc(SEND_ALL_USERS,
 				 "tcm failed to connect to %s\n",
 				 param2);
-		    (void)close(socket);
+		    (void)close(sock);
 		  }
 	      }
 	  }
@@ -1558,7 +1560,9 @@ static void setup_allow(char *nick)
   int i=0;
   int remove_allow = NO;
   int first_free = -1;
+#ifdef DEBUGMODE
   placed;
+#endif
 
   while(*nick == ' ')
     nick++;
@@ -1622,7 +1626,9 @@ static void send_to_nick(char *to_nick,char *buffer)
 {
   int i;
   char dccbuff[DCCBUFF_SIZE];
+#ifdef DEBUGMODE
   placed;
+#endif
 
   strncpy(dccbuff,buffer,DCCBUFF_SIZE-2);
   strcat(dccbuff,"\n");
@@ -1648,7 +1654,9 @@ static int test_ignore(char *line)
 {
   char botnick[MAX_NICK+4];	/* Allow room for '<' and '>' */
   int i;
+#ifdef DEBUGMODE
   placed;
+#endif
 
   if(line[0] != '<')
     return(NO);
@@ -1683,7 +1691,10 @@ static int test_ignore(char *line)
 void init_allow_nick()
 {
   int i;
+#ifdef DEBUGMODE
   placed;
+#endif
+
   for(i=0;i<MAX_ALLOW_SIZE;i++)
     {
       allow_nick[i][0] = '-';
@@ -1702,7 +1713,10 @@ void init_allow_nick()
 
 static int not_legal_remote(int type)
 {
+#ifdef DEBUGMODE
   placed;
+#endif
+
   if( !(route_entry.to_nick[0]) ) /* not routing,
 				   * its a kill etc. on local server
 				   */
@@ -1722,177 +1736,177 @@ static int not_legal_remote(int type)
  * side effects -
  */
 
-static void set_actions(int socket, char *key, char *action, char *reason,
+static void set_actions(int sock, char *key, char *act, char *reason,
 			char *message )
 {
   if(!key)
     {
-      prnt(socket, "Current actions:\n");
+      prnt(sock, "Current actions:\n");
 
       if(config_entries.cflood_act[0])
-        prnt(socket,
+        prnt(sock,
 	     "Current cflood_act: \"%s\"\n", config_entries.cflood_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current cflood_act: \"warn\"\n");
 
       if(config_entries.clone_act[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current clone_act: \"%s\"\n", config_entries.clone_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current clone_act: \"warn\"\n");
       if(config_entries.clone_reason[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current clone_reason: \"%s\"\n", config_entries.clone_reason);
 
       if(config_entries.channel_report & CHANNEL_REPORT_CLONES)
-	prnt(socket," Reporting clones to channel\n");
+	prnt(sock," Reporting clones to channel\n");
 
 #ifdef AUTO_DLINE
       if(config_entries.vclone_act[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current vclone_act: \"%s\"\n", config_entries.vclone_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current vclone_act: \"warn\"\n");
       if(config_entries.vclone_reason[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current vclone_reason: \"%s\"\n", config_entries.vclone_reason);
 
       if(config_entries.channel_report & CHANNEL_REPORT_VCLONES)
-	prnt(socket," Reporting vclones to channel\n");
+	prnt(sock," Reporting vclones to channel\n");
 #endif
 
 #ifdef SERVICES
       if(config_entries.sclone_act[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current sclone_act: \"%s\"\n", config_entries.sclone_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current sclone_act: \"warn\"\n");
       if(config_entries.sclone_reason[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current sclone_reason: \"%s\"\n", config_entries.sclone_reason);
 
       if(config_entries.channel_report & CHANNEL_REPORT_SCLONES)
-	prnt(socket," Reporting services clones to channel\n");
+	prnt(sock," Reporting services clones to channel\n");
 #endif
 
       if(config_entries.flood_act[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current flood_act: \"%s\"\n", config_entries.flood_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current flood_act: \"warn\"\n");
       if(config_entries.flood_reason[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current flood_reason: \"%s\"\n", config_entries.flood_reason);
       if(config_entries.channel_report & CHANNEL_REPORT_FLOOD)
-	prnt(socket," Reporting flooders to channel\n");
+	prnt(sock," Reporting flooders to channel\n");
 
       if(config_entries.ctcp_act[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current ctcp_act: \"%s\"\n", config_entries.ctcp_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current ctcp_act: \"warn\"\n");
       if(config_entries.ctcp_reason[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current ctcp_reason: \"%s\"\n", config_entries.ctcp_reason);
       if(config_entries.channel_report & CHANNEL_REPORT_CTCP)
-	prnt(socket," Reporting ctcp flooders to channel\n");
+	prnt(sock," Reporting ctcp flooders to channel\n");
 
 #ifdef DETECT_DNS_SPOOFERS
       if(config_entries.spoof_act[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current spoof_act: \"%s\"\n", config_entries.spoof_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current spoof_act: \"warn\"\n");
       if(config_entries.spoof_reason[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current spoof_reason: \"%s\"\n", config_entries.spoof_reason);
       if(config_entries.channel_report & CHANNEL_REPORT_SPOOF)
-	prnt(socket," Reporting DNS spoofers to channel\n");
+	prnt(sock," Reporting DNS spoofers to channel\n");
 #endif
 
       if(config_entries.spambot_act[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current spambot_act: \"%s\"\n", config_entries.spambot_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current spambot_act: \"warn\"\n");
       if(config_entries.spambot_reason[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current spambot_reason: \"%s\"\n", config_entries.spambot_reason);
       if(config_entries.channel_report & CHANNEL_REPORT_SPAMBOT)
-	prnt(socket," Reporting spambots to channel\n");
+	prnt(sock," Reporting spambots to channel\n");
 
       if(config_entries.link_act[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current link_act: \"%s\"\n", config_entries.link_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current link_act: \"warn\"\n");
       if(config_entries.link_reason[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current link_reason: \"%s\"\n", config_entries.link_reason);
       if(config_entries.channel_report & CHANNEL_REPORT_LINK)
-	prnt(socket," Reporting Link Lookers to channel\n");
+	prnt(sock," Reporting Link Lookers to channel\n");
 
       if(config_entries.bot_act[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current bot_act: \"%s\"\n", config_entries.bot_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current bot_act: \"warn\"\n");
       if(config_entries.bot_reason[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current bot_reason: \"%s\"\n", config_entries.bot_reason);
       if(config_entries.channel_report & CHANNEL_REPORT_BOT)
-	prnt(socket," Reporting BOTS to channel\n");
+	prnt(sock," Reporting BOTS to channel\n");
 
 #ifdef DETECT_WINGATE
       if(config_entries.wingate_act[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current wingate_act: \"%s\"\n", config_entries.wingate_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current wingate_act: \"warn\"\n");
       if(config_entries.wingate_reason[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current wingate_reason: \"%s\"\n", config_entries.wingate_reason);
       if(config_entries.channel_report & CHANNEL_REPORT_WINGATE)
-	prnt(socket," Reporting open wingates to channel\n");
+	prnt(sock," Reporting open wingates to channel\n");
 #endif
 
 #ifdef DETECT_SOCKS
       if(config_entries.socks_act[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current socks_act: \"%s\"\n", config_entries.socks_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current socks_act: \"warn\"\n");
       if(config_entries.socks_reason[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current socks_reason: \"%s\"\n", config_entries.socks_reason);
       if(config_entries.channel_report & CHANNEL_REPORT_SOCKS)
-	prnt(socket," Reporting open socks to channel\n");
+	prnt(sock," Reporting open socks to channel\n");
 #endif
 
 #ifdef SERVICES_DRONES
       if(config_entries.drones_act[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current drones_act: \"%s\"\n", config_entries.drones_act);
       else
-	prnt(socket,
+	prnt(sock,
 	     "Current drones_act: \"warn\"\n");
       if(config_entries.drones_reason[0])
-	prnt(socket,
+	prnt(sock,
 	     "Current drones_reason: \"%s\"\n", config_entries.drones_reason);
       if(config_entries.channel_report & CHANNEL_REPORT_DRONE)
-	prnt(socket," Reporting drones to channel\n");
+	prnt(sock," Reporting drones to channel\n");
 #endif
 
     }
@@ -1900,9 +1914,9 @@ static void set_actions(int socket, char *key, char *action, char *reason,
     {
       if(!strcasecmp(key,"clone_act"))
 	{
-	  if(!action)
+	  if(!act)
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set clone_act to \"warn\", was \"%s\"\n",
 		   config_entries.clone_act);
 	      config_entries.clone_act[0] = '\0';
@@ -1910,15 +1924,15 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set clone_act to \"%s\", was \"%s\"\n",
-		   action, config_entries.clone_act);
-	      strncpy(config_entries.clone_act, action, 
+		   act, config_entries.clone_act);
+	      strncpy(config_entries.clone_act, act, 
 		       sizeof(config_entries.clone_act));
 
 	      if(reason)
 		{
-		  prnt(socket,
+		  prnt(sock,
 		       "Set clone_reason to \"%s\", was \"%s\"\n",
 		       reason, config_entries.clone_reason);
 		  strncpy(config_entries.clone_reason, reason, 
@@ -1941,9 +1955,9 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 #ifdef AUTO_DLINE
       else if(!strcasecmp(key,"vclone_act"))
 	{
-	  if(!action)
+	  if(!act)
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set vclone_act to \"warn\", was \"%s\"\n",
 		   config_entries.vclone_act);
 	      config_entries.vclone_act[0] = '\0';
@@ -1951,15 +1965,15 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set vclone_act to \"%s\", was \"%s\"\n",
-		   action, config_entries.vclone_act);
-	      strncpy(config_entries.vclone_act, action, 
+		   act, config_entries.vclone_act);
+	      strncpy(config_entries.vclone_act, act, 
 		       sizeof(config_entries.vclone_act));
 
 	      if(reason)
 		{
-		  prnt(socket,
+		  prnt(sock,
 		       "Set vclone_reason to \"%s\", was \"%s\"\n",
 		       reason, config_entries.vclone_reason);
 		  strncpy(config_entries.vclone_reason, reason, 
@@ -1984,9 +1998,9 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 #ifdef SERVICES
       else if(!strcasecmp(key,"sclone_act"))
 	{
-	  if(!action)
+	  if(!act)
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set sclone_act to \"warn\", was \"%s\"\n",
 		   config_entries.sclone_act);
 	      config_entries.sclone_act[0] = '\0';
@@ -1994,15 +2008,15 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set sclone_act to \"%s\", was \"%s\"\n",
-		   action, config_entries.sclone_act);
-	      strncpy(config_entries.sclone_act, action, 
+		   act, config_entries.sclone_act);
+	      strncpy(config_entries.sclone_act, act, 
 		       sizeof(config_entries.sclone_act));
 
 	      if(reason)
 		{
-		  prnt(socket,
+		  prnt(sock,
 		       "Set sclone_reason to \"%s\", was \"%s\"\n",
 		       reason, config_entries.sclone_reason);
 		  strncpy(config_entries.sclone_reason, reason, 
@@ -2026,24 +2040,24 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 #endif
       else if(!strcasecmp(key,"ctcp_act"))
 	{
-	  if(!action)
+	  if(!act)
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set ctcp_act to \"warn\", was \"%s\"\n",
 		   config_entries.ctcp_act);
 	      config_entries.ctcp_act[0] = '\0';
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set ctcp_act to \"%s\", was \"%s\"\n",
-		   action, config_entries.ctcp_act);
-	      strncpy(config_entries.ctcp_act, action, 
+		   act, config_entries.ctcp_act);
+	      strncpy(config_entries.ctcp_act, act, 
 		      sizeof(config_entries.ctcp_act));
 
 	      if(reason)
 		{
-		  prnt(socket,
+		  prnt(sock,
 		       "Set ctcp_reason to \"%s\", was \"%s\"\n",
 		       reason, config_entries.ctcp_reason);
 		  strncpy(config_entries.ctcp_reason, reason, 
@@ -2065,24 +2079,24 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 	}
       else if(!strcasecmp(key,"flood_act"))
 	{
-	  if(!action)
+	  if(!act)
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set flood_act to \"warn\", was \"%s\"\n",
 		   config_entries.flood_act);
 	      config_entries.flood_act[0] = '\0';
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set flood_act to \"%s\", was \"%s\"\n",
-		   action, config_entries.flood_act);
-	      strncpy(config_entries.flood_act, action, 
+		   act, config_entries.flood_act);
+	      strncpy(config_entries.flood_act, act, 
 		      sizeof(config_entries.flood_act));
 
 	      if(reason)
 		{
-		  prnt(socket,
+		  prnt(sock,
 		       "Set flood_reason to \"%s\", was \"%s\"\n",
 		       reason, config_entries.flood_reason);
 		  strncpy(config_entries.flood_reason, reason, 
@@ -2104,24 +2118,24 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 	}
       else if(!strcasecmp(key,"link_act"))
 	{
-	  if(!action)
+	  if(!act)
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set link_act to \"warn\", was \"%s\"\n",
 		   config_entries.link_act);
 	      config_entries.link_act[0] = '\0';
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set link_act to \"%s\", was \"%s\"\n",
-		   action, config_entries.link_act);
-	      strncpy(config_entries.link_act, action, 
+		   act, config_entries.link_act);
+	      strncpy(config_entries.link_act, act, 
 		      sizeof(config_entries.link_act));
 
 	      if(reason)
 		{
-		  prnt(socket,
+		  prnt(sock,
 		       "Set link_reason to \"%s\", was \"%s\"\n",
 		       reason, config_entries.link_reason);
 		  strncpy(config_entries.link_reason, reason, 
@@ -2143,24 +2157,24 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 	}
       else if(!strcasecmp(key,"bot_act"))
 	{
-	  if(!action)
+	  if(!act)
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set bot_act to \"warn\", was \"%s\"\n",
 		     config_entries.bot_act);
 	      config_entries.bot_act[0] = '\0';
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set bot_act to \"%s\", was \"%s\"\n",
-		     action, config_entries.bot_act);
-	      strncpy(config_entries.bot_act,action,
+		     act, config_entries.bot_act);
+	      strncpy(config_entries.bot_act,act,
 		      sizeof(config_entries.bot_act));
 
 	      if(reason)
 		{
-		  prnt(socket,
+		  prnt(sock,
 		       "Set bot_reason to \"%s\", was \"%s\"\n",
 		       reason, config_entries.bot_reason);
 		  strncpy(config_entries.bot_reason, reason, 
@@ -2182,24 +2196,24 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 	}
       else if(!strcasecmp(key,"spambot_act"))
 	{
-	  if(!action)
+	  if(!act)
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set spambot_act to \"warn\", was \"%s\"\n",
 		     config_entries.spambot_act);
 	      config_entries.spambot_act[0] = '\0';
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set spambot_act to \"%s\", was \"%s\"\n",
-		     action, config_entries.spambot_act);
-	      strncpy(config_entries.spambot_act,action,
+		     act, config_entries.spambot_act);
+	      strncpy(config_entries.spambot_act,act,
 		      sizeof(config_entries.spambot_act));
 
 	      if(reason)
 		{
-		  prnt(socket,
+		  prnt(sock,
 		       "Set spambot_reason to \"%s\", was \"%s\"\n",
 		       reason, config_entries.spambot_reason);
 		  strncpy(config_entries.spambot_reason, reason, 
@@ -2222,24 +2236,24 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 #ifdef DETECT_DNS_SPOOFERS
       else if(!strcasecmp(key,"spoof_act"))
 	{
-	  if(!action)
+	  if(!act)
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set spoof_act to \"warn\", was \"%s\"\n",
 		     config_entries.spoof_act);
 	      config_entries.spoof_act[0] = '\0';
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set spoof_act to \"%s\", was \"%s\"\n",
-		     action, config_entries.spoof_act);
-	      strncpy(config_entries.spoof_act,action,
+		     act, config_entries.spoof_act);
+	      strncpy(config_entries.spoof_act,act,
 		      sizeof(config_entries.spoof_act));
 
 	      if(reason)
 		{
-		  prnt(socket,
+		  prnt(sock,
 		       "Set spoof_reason to \"%s\", was \"%s\"\n",
 		       reason, config_entries.spoof_reason);
 		  strncpy(config_entries.bot_reason, reason, 
@@ -2263,24 +2277,24 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 #ifdef DETECT_WINGATE
       else if(!strcasecmp(key,"wingate_act"))
 	{
-	  if(!action)
+	  if(!act)
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set wingate_act to \"warn\", was \"%s\"\n",
 		   config_entries.wingate_act);
 	      config_entries.wingate_act[0] = '\0';
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set wingate_act to \"%s\", was \"%s\"\n",
-		   action, config_entries.wingate_act);
-	      strncpy(config_entries.wingate_act, action, 
+		   act, config_entries.wingate_act);
+	      strncpy(config_entries.wingate_act, act, 
 		      sizeof(config_entries.wingate_act));
 
 	      if(reason)
 		{
-		  prnt(socket,
+		  prnt(sock,
 		       "Set wingate_reason to \"%s\", was \"%s\"\n",
 		       reason, config_entries.wingate_reason);
 		  strncpy(config_entries.wingate_reason, reason, 
@@ -2304,24 +2318,24 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 #ifdef DETECT_SOCKS
       else if(!strcasecmp(key,"socks_act"))
 	{
-	  if(!action)
+	  if(!act)
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set socks_act to \"warn\", was \"%s\"\n",
 		   config_entries.socks_act);
 	      config_entries.socks_act[0] = '\0';
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set socks_act to \"%s\", was \"%s\"\n",
-		   action, config_entries.socks_act);
-	      strncpy(config_entries.socks_act, action,
+		   act, config_entries.socks_act);
+	      strncpy(config_entries.socks_act, act,
 		       sizeof(config_entries.socks_act));
 
 	      if(reason)
 		{
-		  prnt(socket,
+		  prnt(sock,
 		       "Set socks_reason to \"%s\", was \"%s\"\n",
 		       reason, config_entries.socks_reason);
 		  strncpy(config_entries.socks_reason, reason, 
@@ -2345,24 +2359,24 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 #ifdef SERVICES_DRONES
       else if(!strcasecmp(key,"drones_act"))
 	{
-	  if(!action)
+	  if(!act)
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set drones_act to \"warn\", was \"%s\"\n",
 		   config_entries.drones_act);
 	      config_entries.drones_act[0] = '\0';
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "Set drones_act to \"%s\", was \"%s\"\n",
-		   action, config_entries.drones_act);
-	      strncpy(config_entries.drones_act, action, 
+		   act, config_entries.drones_act);
+	      strncpy(config_entries.drones_act, act, 
 		      sizeof(config_entries.drones_act));
 
 	      if(reason)
 		{
-		  prnt(socket,
+		  prnt(sock,
 		       "Set drones_reason to \"%s\", was \"%s\"\n",
 		       reason, config_entries.drones_reason);
 		  strncpy(config_entries.drones_reason, reason, 
@@ -2385,7 +2399,7 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 #endif
       else
 	{
-	  prnt(socket,"Unknown action\n");
+	  prnt(sock,"Unknown action\n");
 	}
     }
 }
@@ -2401,7 +2415,9 @@ static void set_actions(int socket, char *key, char *action, char *reason,
 static int is_kline_time(char *p)
 {
   int result = 0;
+#ifdef DEBUGMODE
   placed;
+#endif
 
   while(*p)
     {
@@ -2438,7 +2454,7 @@ static int is_kline_time(char *p)
 static void set_umode(int connnum, char *flags, char *registered_nick)
 {
   int i;
-  int reversing;
+  int reversing = NO;
   int z;
   int found = NO;
   unsigned long type;
@@ -2793,13 +2809,13 @@ static unsigned long find_user_umodes(char *registered_nick)
  * side effect	- 
  */
 
-static void show_user_umodes(int socket, char *registered_nick)
+static void show_user_umodes(int sock, char *registered_nick)
 {
   FILE *fp;
   char user_pref[MAX_BUFF];
   char type_string[32];
   int  i;
-  unsigned long type;
+  unsigned long type = 0;
   unsigned long pref_type;
   char *p;
   int  found = NO;
@@ -2819,7 +2835,7 @@ static void show_user_umodes(int socket, char *registered_nick)
 
   if(!found)
     {
-      prnt(socket,"Can't find user [%s]\n", registered_nick );
+      prnt(sock,"Can't find user [%s]\n", registered_nick );
       return;
     }
      
@@ -2827,7 +2843,7 @@ static void show_user_umodes(int socket, char *registered_nick)
 
   if(!(fp = fopen(user_pref,"r")))
     {
-      prnt(socket,"%s user flags are %s\n", 
+      prnt(sock,"%s user flags are %s\n", 
 	   registered_nick,
 	   type_show(type));
       return;
@@ -2845,7 +2861,7 @@ static void show_user_umodes(int socket, char *registered_nick)
 
   pref_type &= ~(TYPE_TCM|TYPE_ADMIN|TYPE_PENDING);
 
-  prnt(socket,"%s user flags are %s\n", 
+  prnt(sock,"%s user flags are %s\n", 
        registered_nick,
        type_show(type|pref_type));
 }
@@ -2912,7 +2928,7 @@ static void register_oper(int connnum, char *password, char *who_did_command)
  * side effects	- list current opers on socket
  */
 
-static void list_opers(int socket)
+static void list_opers(int sock)
 {
   int i;
   
@@ -2923,7 +2939,7 @@ static void list_opers(int socket)
 
       if(userlist[i].type & TYPE_TCM)
 	{
-	  prnt(socket,
+	  prnt(sock,
 	       "%s [%s@%s] %s\n",
 	       userlist[i].user,
 	       userlist[i].host,
@@ -2932,7 +2948,7 @@ static void list_opers(int socket)
 	}
       else
 	{
-	  prnt(socket,
+	  prnt(sock,
 	       "(%s) %s@%s %s\n",
 	       (userlist[i].usernick) ? userlist[i].usernick:"unknown",
 	       userlist[i].user,
@@ -2950,7 +2966,7 @@ static void list_opers(int socket)
  * side effects	- list tcm list on socket
  */
 
-static void list_tcmlist(int socket)
+static void list_tcmlist(int sock)
 {
   int i;
   
@@ -2958,7 +2974,7 @@ static void list_tcmlist(int socket)
     {
       if(!tcmlist[i].host[0])
 	break;
-      prnt(socket,"%s@%s\n", tcmlist[i].theirnick, tcmlist[i].host);
+      prnt(sock,"%s@%s\n", tcmlist[i].theirnick, tcmlist[i].host);
     }
 }
 
@@ -2970,7 +2986,7 @@ static void list_tcmlist(int socket)
  * side effects	- list current exemptions on socket
  */
 
-static void list_exemptions(int socket)
+static void list_exemptions(int sock)
 {
   int i;
 
@@ -2978,7 +2994,7 @@ static void list_exemptions(int socket)
     {
       if(!hostlist[i].host[0])
 	break;
-      prnt(socket,"%s@%s\n", hostlist[i].user, hostlist[i].host);
+      prnt(sock,"%s@%s\n", hostlist[i].user, hostlist[i].host);
     }
 }
 
@@ -2992,7 +3008,7 @@ static void list_exemptions(int socket)
  * side effects	- user is warned they aren't an oper
  */
 
-static void handle_allow(int socket, char *param, char *who_did_command)
+static void handle_allow(int sock, char *param, char *who_did_command)
 {
   int i;
   int found_one=NO;
@@ -3019,13 +3035,13 @@ static void handle_allow(int socket, char *param, char *who_did_command)
 	  if(allow_nick[i][0] != '-')
 	    {
 	      found_one = YES;
-	      prnt(socket,"allowed: %s\n",allow_nick[i]);
+	      prnt(sock,"allowed: %s\n",allow_nick[i]);
 	    }
 	}
 	      
       if(!found_one)
 	{
-	  prnt(socket,"There are no tcm allows in place\n");
+	  prnt(sock,"There are no tcm allows in place\n");
 	}
     }
 }
@@ -3038,7 +3054,7 @@ static void handle_allow(int socket, char *param, char *who_did_command)
  * side effects	- active connections are listed to socket
  */
 
-static void list_connections(int socket)
+static void list_connections(int sock)
 {
   int i;
 
@@ -3048,7 +3064,7 @@ static void list_connections(int socket)
 	{
 	  if(connections[i].registered_nick[0])
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "%s/%s %s (%s@%s) is connected\n",
 		   connections[i].nick,
 		   connections[i].registered_nick,
@@ -3058,7 +3074,7 @@ static void list_connections(int socket)
 	    }
 	  else
 	    {
-	      prnt(socket,
+	      prnt(sock,
 		   "%s %s (%s@%s) is connected\n",
 		   connections[i].nick,
 		   type_show(connections[i].type),
@@ -3078,18 +3094,18 @@ static void list_connections(int socket)
  * side effects	- disconnect user
  */
 
-static void handle_disconnect(int socket,char *nickname,char *who_did_command)
+static void handle_disconnect(int sock,char *nickname,char *who_did_command)
 {
   char *type;
   int  i;
 
   if (!nickname)
-    prnt(socket,
+    prnt(sock,
 	 "Usage: disconnect <nickname>\n");
   else
     {
       for (i=1;i<maxconns;++i)
-	if (socket != INVALID &&
+	if (sock != INVALID &&
 	    !strcasecmp(nickname,connections[i].nick))
 	  {
 	    type = "user";
@@ -3098,11 +3114,11 @@ static void handle_disconnect(int socket,char *nickname,char *who_did_command)
 	    if(connections[i].type & TYPE_TCM)
 	      type = "tcm";
 
-	    prnt(socket,
+	    prnt(sock,
 		 "Disconnecting %s %s\n",
 		 type,
 		 connections[i].nick);
-	    prnt(socket,
+	    prnt(sock,
 		 "You have been disconnected by oper %s\n",
 		 who_did_command);
 	    closeconn(i);
@@ -3119,9 +3135,9 @@ static void handle_disconnect(int socket,char *nickname,char *who_did_command)
  * side effects	- save tcm prefs
  */
 
-static void handle_save(int socket,char *nick)
+static void handle_save(int sock,char *nick)
 {
-  prnt(socket, "Saving tcm.pref file\n");
+  prnt(sock, "Saving tcm.pref file\n");
   sendtoalldcc(SEND_OPERS_ONLY, "%s is saving tcm.pref\n", nick);
   save_prefs();
 }
@@ -3137,7 +3153,7 @@ static void handle_save(int socket,char *nick)
  * side effects	- 
  */
 
-static void handle_gline(int socket,char *pattern,char *reason,
+static void handle_gline(int sock,char *pattern,char *reason,
 			 char *who_did_command)
 {
   char dccbuff[MAX_BUFF];
@@ -3171,13 +3187,13 @@ static void handle_gline(int socket,char *pattern,char *reason,
 	}
       else
 	{
-	  prnt(socket,
+	  prnt(sock,
 	       "missing reason \"kline [nick]|[user@host] reason\"\n");
 	}
     }
   else
     {
-      prnt(socket,
+      prnt(sock,
 	   "missing nick/user@host \".kline [nick]|[user@host] reason\"\n");
     }
 }
@@ -3190,7 +3206,7 @@ static void handle_gline(int socket,char *pattern,char *reason,
  * side effects	- user is warned they aren't an oper
  */
 
-static void not_authorized(int socket)
+static void not_authorized(int sock)
 {
-  prnt(socket,"Only authorized opers may use this command\n");
+  prnt(sock,"Only authorized opers may use this command\n");
 }

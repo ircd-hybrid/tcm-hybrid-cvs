@@ -3,7 +3,7 @@
  *
  * config file parser
  *
- * $Id: tcm_parser.y,v 1.3 2004/06/04 01:54:30 bill Exp $
+ * $Id: tcm_parser.y,v 1.4 2004/06/09 21:23:00 bill Exp $
  */
 
 %{
@@ -51,6 +51,7 @@ char *user, *host;
 %token	GENERAL
 %token	IRCWARN
 %token	JUPE
+%token	KEY
 %token	KLINE
 %token	LINK
 %token	METHOD
@@ -221,10 +222,10 @@ general_entry: GENERAL
   '{' general_items '}' ';';
 
 general_items: general_items general_item | general_item;
-general_item:  general_channel     | general_gecos | general_nick   | general_oper_name       |
-               general_oper_pass   | general_port  | general_server | general_skline_file     |
-               general_ssl_keyfile | general_ssl_keyphrase          | general_stats_p_message |
-               general_username    | general_vhost | error;
+general_item:  general_channel     | general_gecos         | general_key           | general_nick            |
+               general_oper_name   | general_oper_pass     | general_port          | general_server          |
+               general_skline_file | general_ssl_keyfile   | general_ssl_keyphrase | general_stats_p_message |
+               general_username    | general_vhost         | error;
 
 general_channel: CHANNEL '=' QSTRING ';'
 {
@@ -234,6 +235,11 @@ general_channel: CHANNEL '=' QSTRING ';'
 general_gecos: GECOS '=' QSTRING ';'
 {
   strlcpy(config_entries.ircname_config, yylval.string, sizeof(config_entries.ircname_config));
+};
+
+general_key: KEY '=' QSTRING ';'
+{
+  strlcpy(config_entries.channel_key, yylval.string, sizeof(config_entries.channel_key));
 };
 
 general_nick: NICK '=' QSTRING ';'

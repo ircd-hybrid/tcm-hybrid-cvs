@@ -1,7 +1,7 @@
 /*
  * tcm lexer file
  *
- * $Id: tcm_lexer.l,v 1.2 2004/06/04 01:54:30 bill Exp $
+ * $Id: tcm_lexer.l,v 1.3 2004/06/09 21:23:00 bill Exp $
  */
 
 %option case-insensitive
@@ -122,6 +122,7 @@ gecos		{ return GECOS;			}
 general		{ return GENERAL;		}
 ircwarn		{ return IRCWARN;		}
 jupe		{ return JUPE;			}
+key		{ return KEY;			}
 kline		{ return KLINE;			}
 link		{ return LINK;			}
 method		{ return METHOD;		}

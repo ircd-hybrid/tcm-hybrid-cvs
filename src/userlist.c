@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.156 2004/06/03 02:51:37 bill Exp $
+ * $Id: userlist.c,v 1.157 2004/06/09 21:23:00 bill Exp $
  */
 
 #include <errno.h>
@@ -389,9 +389,7 @@ save_umodes(const char *nick)
   char user_pref[MAX_BUFF];
 
   snprintf(user_pref, MAX_BUFF, "etc/%s.pref", nick);
-  user = find_user_in_userlist(nick);
-  
-  if(user == NULL)
+  if ((user = find_user_in_userlist(nick)) == NULL)
     return;
 
   if((fp = fopen(user_pref, "w")) != NULL)
@@ -400,9 +398,7 @@ save_umodes(const char *nick)
     (void)fclose(fp);
   }
   else
-  {
     send_to_all(NULL, FLAGS_ALL, "Couldn't open %s for writing", user_pref);
-  }
 }
     
 /* on_stats_o()

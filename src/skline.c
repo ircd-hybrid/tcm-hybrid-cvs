@@ -3,7 +3,7 @@
  *
  * Temp K: dynamic hosts, perm everyone else
  *
- * $Id: skline.c,v 1.3 2003/11/29 19:46:44 bill Exp $
+ * $Id: skline.c,v 1.4 2004/06/09 21:23:00 bill Exp $
  */
 
 #include <stdio.h>
@@ -14,6 +14,7 @@
 #include "tcm_io.h"
 #include "hash.h"
 #include "userlist.h"
+#include "config.h"
 #include "skline.h"
 #include "match.h"
 
@@ -154,7 +155,7 @@ add_dynamic_info(char *hostmask)
 int
 load_dynamic_info(char *fname)
 {
-  char *filename = BadPtr(fname) ? DEFAULT_DYNAMIC_INFO_FILENAME : fname;
+  char *filename = BadPtr(fname) ? SKLINE_PATH : fname;
   char fromfile[MAX_HOST+3];
   FILE *infile;
   int added=0;

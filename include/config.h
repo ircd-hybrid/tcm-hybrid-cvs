@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.90 2004/06/02 02:00:41 bill Exp $
+ * $Id: config.h,v 1.91 2004/06/09 21:22:58 bill Exp $
  */
 
 /*
@@ -61,6 +61,12 @@
  * argument to tcm.
  */
 #define CONFIG_FILE "etc/tcm.conf"
+
+/*
+ * The default tcm dynamic hostlist file.  This can be overridden
+ * in the tcm.conf
+ */
+#define SKLINE_FILE "etc/dynamic.hosts"
 
 #define HELP_PATH "help"        /* No / at the end */
 #define HELP_FILE "help"        /* Inside of HELP_PATH */

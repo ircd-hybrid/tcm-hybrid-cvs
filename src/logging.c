@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.20 2002/04/06 02:00:18 bill Exp $
+ * $Id: logging.c,v 1.21 2002/05/18 02:53:20 db Exp $
  *
  * - db
  */
@@ -27,9 +27,6 @@
 # include <sys/socketvar.h>
 #endif
 
-#ifdef AIX
-# include <sys/select.h>
-#endif
 
 #include <netinet/in.h>
 #include <arpa/inet.h>

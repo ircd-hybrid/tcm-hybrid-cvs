@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.56 2002/05/18 02:21:11 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.57 2002/05/18 02:53:17 db Exp $ */
 
 #include "setup.h"
 
@@ -24,9 +24,6 @@
 # include <sys/socketvar.h>
 #endif
 
-#ifdef AIX
-# include <sys/select.h>
-#endif
 
 #include <netinet/in.h>
 #include <arpa/inet.h>

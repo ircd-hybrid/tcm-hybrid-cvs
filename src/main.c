@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.34 2002/05/13 15:12:27 wcampbel Exp $ */
+/* $Id: main.c,v 1.35 2002/05/18 02:53:20 db Exp $ */
 
 #include "setup.h"
 
@@ -36,9 +36,6 @@
 # include <sys/socketvar.h>
 #endif
 
-#ifdef AIX
-# include <sys/select.h>
-#endif
 
 #include <netinet/in.h>
 #include <arpa/inet.h>

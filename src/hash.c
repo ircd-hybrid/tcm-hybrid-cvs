@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.49 2002/08/08 19:42:07 bill Exp $
+ * $Id: hash.c,v 1.50 2002/08/09 16:21:25 bill Exp $
  */
 
 #include <stdio.h>
@@ -281,7 +281,7 @@ add_user_host(struct user_entry *user_info, int fromtrace)
   memset(new_user, 0, sizeof(struct user_entry));
 
   strlcpy(new_user->nick, user_info->nick, MAX_NICK);
-  strlcpy(new_user->username, user_info->username, MAX_NICK);
+  strlcpy(new_user->username, user_info->username, MAX_USER);
   strlcpy(new_user->host, user_info->host, MAX_HOST);
   strlcpy(new_user->class, user_info->class, MAX_CLASS);
   strlcpy(new_user->gecos, user_info->gecos, MAX_GECOS);

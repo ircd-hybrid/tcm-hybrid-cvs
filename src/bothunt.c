@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.192 2002/08/09 01:53:56 wcampbel Exp $
+ * $Id: bothunt.c,v 1.193 2002/08/09 16:21:25 bill Exp $
  */
 
 #include <stdio.h>
@@ -522,6 +522,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     break;
 
   /* Client exiting: bill (bill@ummm.E) [255.255.255.255] */
+  /* Client exiting: bill (bill@ummm.E) [Client Quit] [255.255.255.255] */
   case EXITING:
     p+=16;
     if ((q = strchr(p, ' ')) == NULL)
@@ -534,16 +535,17 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     strlcpy(userinfo.username, user, MAX_USER);
     strlcpy(userinfo.host, host, MAX_HOST);
 
-    if ((q = strchr(p, ']')) == NULL)
+    if ((q = strrchr(p, '[')) == NULL)
       return;
-    p = q+3;
-    if ((q = strchr(p, ']')) == NULL)
-      return;
-    *q++ = '\0';
+    q++;
 
-    strlcpy(userinfo.ip_host, p, MAX_IP);
+    if ((p = strchr(q, ']')) == NULL)
+      return;
+    *p = '\0';
+
+    strlcpy(userinfo.ip_host, q, MAX_IP);
 #ifdef VIRTUAL
-    strlcpy(userinfo.ip_class_c, p, MAX_IP);
+    strlcpy(userinfo.ip_class_c, q, MAX_IP);
 #endif
     remove_user_host(&userinfo);
     break;

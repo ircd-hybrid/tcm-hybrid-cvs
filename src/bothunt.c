@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.34 2001/10/31 04:50:03 bill Exp $ */
+/* $Id: bothunt.c,v 1.35 2001/10/31 16:32:54 bill Exp $ */
 
 #include "setup.h"
 
@@ -192,28 +192,31 @@ static int find_banned_host(char *user, char *host)
 
   for (i=0; i < MAXBANS; i++)
   {
-    if (wld[0])
+    if (glines[i].user != NULL && glines[i].host != NULL)
     {
-      if (wldwld(user, glines[i].user))
-	match = NO;
+      if (wld[0])
+      {
+        if (wldwld(user, glines[i].user))
+  	  match = NO;
+      }
+      else
+      {
+        if (wldcmp(user, glines[i].user))
+	  match = NO;
+      }
+      if (match == YES && wld[1])
+      {
+        if (wldwld(host, glines[i].host))
+	  match = NO;
+      }
+      else if (match == YES)
+      {
+        if (wldcmp(host, glines[i].host))
+	  match = NO;
+      }
+      if (match == YES)
+        return i;
     }
-    else
-    {
-      if (wldcmp(user, glines[i].user))
-	match = NO;
-    }
-    if (match == YES && wld[1])
-    {
-      if (wldwld(host, glines[i].host))
-	match = NO;
-    }
-    else if (match == YES)
-    {
-      if (wldcmp(host, glines[i].host))
-	match = NO;
-    }
-    if (match == YES)
-      return i;
   }
 
   /* There was no match above, so we KNOW match == NO - Hwy */

@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.15 2002/05/25 23:27:50 db Exp $
+ * $Id: tcm_io.h,v 1.16 2002/05/26 01:28:17 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -19,6 +19,8 @@ struct connection {
   int	nbuf;			/* number in buffer */
   int	socket;
   int   state;
+  int	(*io_function)(int, int argc, char *argv[]);
+  void	*arg;			/* argument to handler */
   int	type;			/* why was this a char? -bill */
   int	set_modes;		/* for set options */
   char	user[MAX_USER];
@@ -29,16 +31,15 @@ struct connection {
 };
 
 #define	S_IDLE			0
-#define	S_CONNECTING_TO_SERVER	1
-#define	S_CONNECTING_TO_CLIENT	2
-#define	S_LISTENING_TO_CLIENT	3
-
+#define	S_CONNECTING		1
+#define	S_ACTIVE		2
 
 extern struct connection connections[];
 
 extern	int initiated_dcc_socket;
 extern	time_t initiated_dcc_socket_time;
 extern	void initiate_dcc_chat(const char *, const char *, const char *);
+void	init_connections(void);
 
 void notice(const char *nick, const char *format, ...);
 void privmsg(const char *nick, const char *format, ...);
@@ -48,15 +49,15 @@ extern fd_set writefds;
 
 extern void read_packet(void);
 extern void linkclosed(int, int, char *argv[]);
-
 extern void print_to_socket(int, const char *, ...);
 extern void print_to_server(const char *, ...);
 void send_to_all(int type, const char *format,...);	/* - Hendrix (va'd by bill) */
 
-extern	int connect_to_server(const char *hostport);
-extern	int accept_dcc_connection(const char *hostport,
-				  const char *nick, char *userhost);
-extern	int connect_to_given_ip_port(struct sockaddr_in *, int );
+void close_connection(int connect_id);
+int connect_to_server(const char *hostport);
+int accept_dcc_connection(const char *hostport,
+			  const char *nick, char *userhost);
+int connect_to_given_ip_port(struct sockaddr_in *, int );
 
 /* types for send_to_all */
 

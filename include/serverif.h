@@ -1,7 +1,7 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
-/* $Id: serverif.h,v 1.25 2002/05/26 00:44:16 leeh Exp $ */
+/* $Id: serverif.h,v 1.26 2002/05/26 01:28:17 db Exp $ */
 
 /*
  * default ping timeout time from server
@@ -18,7 +18,6 @@ char myclass[100];
 void do_init(void);		
 void report(int type, int channel_report_flag, char *format, ... );
 void sighandlr(int sig);
-void closeconn(int);
 void init_allow_nick();
 void oper();
 void msg_mychannel(char *msg,...);

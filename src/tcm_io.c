@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.33 2002/05/26 00:44:19 leeh Exp $
+ * $Id: tcm_io.c,v 1.34 2002/05/26 01:28:20 db Exp $
  */
 
 #include <stdio.h>
@@ -57,12 +57,12 @@ static int get_line(char *inbuf,int *len, struct connection *connections_p);
 static int connect_to_dcc_ip(const char *nick, const char *hostport);
 static void va_print_to_socket(int sock, const char *format, va_list va);
 static void va_print_to_server(const char *format, va_list va);
-static void finish_accept_dcc_chat(int i);
-static void finish_dcc_chat(int i);
+static int finish_accept_dcc_chat(int i, int unused, char *unused2[]);
+static int finish_dcc_chat(int i, int unused, char *unused2[]);
 
 fd_set readfds;            /* file descriptor set for use with select */
 fd_set writefds;
-
+struct connection connections[MAXDCCCONNS+1]; /*plus 1 for the server, silly*/
 
 /*
  * read_packet()
@@ -121,7 +121,7 @@ read_packet(void)
 
     for (i = 0; i < MAXDCCCONNS; i++)
       {
-	if (connections[i].socket != INVALID)
+	if (connections[i].state != S_IDLE)
 	  {
 	    FD_SET(connections[i].socket, &readfds);
 	    if (connections[i].state != S_IDLE)
@@ -146,24 +146,16 @@ read_packet(void)
 
       for (i=0; i < MAXDCCCONNS; i++)
       {
-	if (FD_ISSET(connections[i].socket, &readfds))
+	if (connections[i].state != S_IDLE &&
+	    FD_ISSET(connections[i].socket, &readfds))
           {
-	    if (connections[i].state == S_CONNECTING_TO_SERVER)
+	    if (connections[i].state == S_CONNECTING)
 	      {
-		connections[i].state = S_IDLE;
-		_signon(0, 0, NULL);
-		continue;
-	      }
-	    else if (connections[i].state == S_CONNECTING_TO_CLIENT)
-	      {
-		connections[i].state = S_IDLE;
-		finish_dcc_chat(i);
-		continue;
-	      }
-	    else if (connections[i].state == S_LISTENING_TO_CLIENT)
-	      {
-		connections[i].state = S_IDLE;
-		finish_accept_dcc_chat(i);
+		connections[i].state = S_ACTIVE;
+		if (i == 0)
+		  _signon(0,0,NULL);
+		else
+		  (connections[i].io_function)(i, argc, argv);
 		continue;
 	      }
 
@@ -182,37 +174,31 @@ read_packet(void)
                   }
                 else
                   {
-                    closeconn(i);
+                    close_connection(i);
                   }
               }
             else if (nread > 0)
               {
                 tscanned = 0;
                 connections[i].last_message_time = current_time;
-                if (i == 0)
-                  {
-                    while ((nscanned =
-                            get_line(incomingbuff+tscanned,
-                                     &nread, &connections[i])))
-                      {
+		while ((nscanned =
+			get_line(incomingbuff+tscanned,
+				 &nread, &connections[i])))
+		  {
 #ifdef DEBUGMODE
-                        printf("<- %s\n", connections[i].buffer);
+		    printf("<- %s\n", connections[i].buffer);
 #endif
-                        parse_server();
-                        tscanned += nscanned;
-                      }
-                  }
-                else
-                  {
-                    while ((nscanned =
-                            get_line(incomingbuff+tscanned,
-                                     &nread, &connections[i])))
-                      {
-                        argc = parse_args(connections[i].buffer, argv);
-                        if (argc != 0)
-                          parse_client(i, argc, argv);
-                        tscanned += nscanned;
-                      }
+		    if (i == 0) /* kludge. someday....*/
+		      {
+			parse_server();
+		      }
+		    else
+		      {
+			argc = parse_args(connections[i].buffer, argv);
+			if (argc != 0)
+			  (connections[i].io_function)(i, argc, argv);
+		      }
+		    tscanned += nscanned;
                   }
               }
           }
@@ -228,6 +214,7 @@ read_packet(void)
         log_problem("read_packet()", dccbuff);
         argv[0] = "select error";
         linkclosed(0, 1, argv);
+	connections[0].state = S_IDLE;
       }
     }
   }
@@ -367,7 +354,10 @@ linkclosed(int connnum, int argc, char *argv[])
   sleep(30);
 
   connections[0].socket = connect_to_server(serverhost);
-  connections[0].state = S_CONNECTING_TO_SERVER;
+  connections[0].state = S_CONNECTING;
+#if 0
+  connections[0].io_function = _signon;
+#endif
   if (connections[0].socket == INVALID)
     {
       log_problem("linkclosed()", "invalid socket quitting");
@@ -396,7 +386,7 @@ find_free_connection_slot(const char *nick)
 
   for (i=1; i < MAXDCCCONNS+1; ++i)
     {
-      if (connections[i].socket == INVALID)
+      if (connections[i].state == S_IDLE)
 	{
 	  if (maxconns < i+1)
 	    maxconns = i+1;
@@ -483,7 +473,8 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
       (void)fprintf(outfile, "DEBUG: dcc socket = %d\n",
 		    connections[i].socket);
 
-  connections[i].state = S_LISTENING_TO_CLIENT;
+  connections[i].state = S_CONNECTING;
+  connections[i].io_function = finish_accept_dcc_chat;
   connections[i].last_message_time = current_time;
 }
 
@@ -746,7 +737,8 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
   connections[i].socket = connect_to_dcc_ip(nick, hostport);
   if (connections[i].socket == INVALID)
     return (0);
-  connections[i].state = S_CONNECTING_TO_CLIENT;
+  connections[i].state = S_CONNECTING;
+  connections[i].io_function = finish_dcc_chat;
   FD_SET(connections[i].socket, &readfds);
 }
 
@@ -758,8 +750,8 @@ accept_dcc_connection(const char *hostport, const char *nick, char *userhost)
  * side effects -
  */
 
-static void
-finish_accept_dcc_chat(int i)
+static int
+finish_accept_dcc_chat(int i, int unused, char *unused2[])
 {
   struct sockaddr_in incoming_addr;
   int addrlen;
@@ -782,7 +774,7 @@ finish_accept_dcc_chat(int i)
   connections[i].nbuf = 0;
   connections[i].type = 0;
 
-  finish_dcc_chat(i);
+  finish_dcc_chat(i,0,0);
 }
 
 /*
@@ -793,8 +785,8 @@ finish_accept_dcc_chat(int i)
  * side effects -
  */
 
-static void
-finish_dcc_chat(int i)
+static int
+finish_dcc_chat(int i, int unused, char *unused2[])
 {
   print_motd(connections[i].socket);
 
@@ -807,6 +799,46 @@ finish_dcc_chat(int i)
 
   print_to_socket(connections[i].socket,
 		  "Connected.  Send '.help' for commands.");
+  connections[i].io_function = parse_client;
+}
+
+/*
+ * close_connection()
+ *
+ * inputs	- connection number
+ * output	- NONE
+ * side effects	- connection on connection number connnum is closed.
+ */
+
+void
+close_connection(int connnum)
+{
+  int i;
+
+  if (connections[connnum].socket != INVALID)
+    close(connections[connnum].socket);
+
+  connections[connnum].socket = INVALID;
+  connections[connnum].state = S_IDLE;
+  connections[connnum].io_function = NULL; /* blow up real good */
+
+  if ((connnum + 1) == maxconns)
+    {
+      for (i=maxconns;i>0;--i)
+	if (connections[i].state != S_IDLE)
+	  break;
+      maxconns = i+1;
+    }
+    
+  send_to_all(SEND_ALL,
+	       "Oper %s (%s@%s) has disconnected",
+               connections[connnum].nick, connections[connnum].user,
+               connections[connnum].host);
+
+  connections[connnum].user[0] = '\0';
+  connections[connnum].host[0] = '\0';
+  connections[connnum].nick[0] = '\0';
+  connections[connnum].registered_nick[0] = '\0';
 }
 
 /*
@@ -970,4 +1002,28 @@ connect_to_given_ip_port(struct sockaddr_in *socketname, int port)
   fcntl(sock, F_SETFL, O_NONBLOCK);
   connect (sock, (struct sockaddr *) socketname, sizeof *socketname);
   return (sock);
+}
+
+/*
+ * init_connections
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	-
+ */
+
+void
+init_connections(void)
+{
+  int i;
+
+  for (i=0; i < MAXDCCCONNS+1; i++)
+    {
+      connections[i].socket = INVALID;
+      connections[i].state = S_IDLE;
+      connections[i].user[0] = '\0';
+      connections[i].host[0] = '\0';
+      connections[i].nick[0] = '\0';
+      connections[i].registered_nick[0] = '\0';
+    }
 }

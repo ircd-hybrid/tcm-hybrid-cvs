@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.75 2002/05/26 00:44:19 leeh Exp $ */
+/* $Id: main.c,v 1.76 2002/05/26 01:28:20 db Exp $ */
 
 #include "setup.h"
 
@@ -55,7 +55,6 @@
 #include <sys/resource.h>
 #endif
 
-struct connection connections[MAXDCCCONNS+1]; /* plus 1 for the server, silly */
 struct s_testline testlines;
 
 time_t current_time;
@@ -92,42 +91,6 @@ static void setup_corefile(void);
 #endif
 
 
-/*
- * closeconn()
- *
- * inputs	- connection number
- * output	- NONE
- * side effects	- connection on connection number connnum is closed.
- */
-
-void
-closeconn(int connnum)
-{
-  int i;
-
-  if (connections[connnum].socket != INVALID)
-    close(connections[connnum].socket);
-
-  connections[connnum].socket = INVALID;
-
-  if ((connnum + 1) == maxconns)
-    {
-      for (i=maxconns;i>0;--i)
-	if (connections[i].socket != INVALID)
-	  break;
-      maxconns = i+1;
-    }
-    
-  send_to_all(SEND_ALL,
-	       "Oper %s (%s@%s) has disconnected",
-               connections[connnum].nick, connections[connnum].user,
-               connections[connnum].host);
-
-  connections[connnum].user[0] = '\0';
-  connections[connnum].host[0] = '\0';
-  connections[connnum].nick[0] = '\0';
-  connections[connnum].registered_nick[0] = '\0';
-}
 
 int
 add_action(char *name)
@@ -303,15 +266,7 @@ main(int argc, char *argv[])
   snprintf(serverhost,sizeof(serverhost), "%s:%d", config_entries.server_name, 
            atoi(config_entries.server_port));
 
-  for (i=0;i<MAXDCCCONNS+1;++i)
-    {
-      connections[i].socket = INVALID;
-      connections[i].user[0] = '\0';
-      connections[i].host[0] = '\0';
-      connections[i].nick[0] = '\0';
-      connections[i].registered_nick[0] = '\0';
-    }
-
+  init_connections();
   srandom(time(NULL));	/* -zaph */
   signal(SIGUSR1,init_debug);
 #if 0
@@ -383,7 +338,7 @@ main(int argc, char *argv[])
 	 }
     }
   connections[0].socket = connect_to_server(serverhost);
-  connections[0].state = S_CONNECTING_TO_SERVER;
+  connections[0].state = S_CONNECTING;
   if (connections[0].socket == INVALID)
     exit(1);
   connections[0].nbuf = 0;

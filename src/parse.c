@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.24 2002/05/26 00:44:19 leeh Exp $
+ * $Id: parse.c,v 1.25 2002/05/26 01:28:20 db Exp $
  */
 
 #include <stdio.h>
@@ -119,7 +119,7 @@ parse_server(void)
  * side effects -
  */
 
-void
+int
 parse_client(int i, int argc, char *argv[])
 {
   struct dcc_command *ptr;
@@ -141,7 +141,7 @@ parse_client(int i, int argc, char *argv[])
       print_to_socket(connections[i].socket,
 		      "Unknown command [%s]", argv[0] + 1);
 
-    return;
+    return(0);
   }
 
   /* message to partyline */
@@ -159,6 +159,7 @@ parse_client(int i, int argc, char *argv[])
       print_to_socket(connections[i].socket,
 		      "You are not +p, not sending to chat line");
   }
+  return(0);
 }
 
 /*

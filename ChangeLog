@@ -1,3 +1,8 @@
+*** 20011029_1 by bill
+
+- fixec vclone detection to only call suggest_action() if the idents are the same
+
+
 *** 20011028_11 by wcampbel
 Removed the last remnants of placed
 

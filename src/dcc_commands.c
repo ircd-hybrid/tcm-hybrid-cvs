@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.58 2002/05/19 14:27:25 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.59 2002/05/19 21:08:19 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -1872,7 +1872,7 @@ struct TcmMessage disconnect_msgtab = {
 };
 struct TcmMessage quit_msgtab = {
  ".quit", 0, 0,
- {m_disconnect, m_disconnect, m_disconnect, m_disconnect}
+ {m_close, m_close, m_close, m_close}
 };
 struct TcmMessage help_msgtab = {
  ".help", 0, 0,
@@ -1888,7 +1888,7 @@ struct TcmMessage save_msgtab = {
 };
 struct TcmMessage close_msgtab = {
  ".close", 0, 0,
- {m_unregistered, m_not_oper, m_not_admin, m_close}
+ {m_close, m_close, m_close, m_close}
 };
 struct TcmMessage op_msgtab = {
  ".op", 0, 0,

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.70 2002/05/25 16:32:39 jmallett Exp $ */
+/* $Id: main.c,v 1.71 2002/05/25 17:34:32 db Exp $ */
 
 #include "setup.h"
 
@@ -365,7 +365,7 @@ main(int argc, char *argv[])
     }
   else
     {
-      if( !(outfile = fopen("etc/tcm.pid","w")) )
+      if ((outfile = fopen("etc/tcm.pid","w")) == NULL)
 	{
 	  fprintf(stderr,"Cannot write tcm.pid\n");
 	  exit(1);
@@ -377,13 +377,14 @@ main(int argc, char *argv[])
 
   if(config_entries.debug && outfile)
     {
-       if( !(outfile = fopen(DEBUG_LOGFILE,"w")) )
+       if ((outfile = fopen(DEBUG_LOGFILE,"w")) == NULL)
 	 {
 	   (void)fprintf(stderr,"Cannot create %s\n",DEBUG_LOGFILE);
 	   exit(1);
 	 }
     }
   connections[0].socket = connect_to_server(serverhost);
+  connections[0].connecting = 1;
   if (connections[0].socket == INVALID)
     exit(1);
   connections[0].nbuf = 0;
@@ -404,7 +405,6 @@ main(int argc, char *argv[])
 
   amianoper = NO;
   startup_time = time(NULL);
-  _signon(0, 0, NULL);
 
   /* enter the main IO loop */
   while(!quit)

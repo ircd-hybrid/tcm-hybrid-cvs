@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.12 2002/05/25 17:08:08 wcampbel Exp $
+ * $Id: tcm_io.h,v 1.13 2002/05/25 17:34:29 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -15,15 +15,16 @@ struct sockaddr_in;
  */
 
 struct connection {
-  char buffer[BUFFERSIZE];
-  int  nbuf;			/* number in buffer */
-  int  socket;
-  int  type;			/* why was this a char? -bill */
-  int  set_modes;		/* for set options */
-  char user[MAX_USER];
-  char host[MAX_HOST];
-  char nick[MAX_NICK+2];	/* allow + 2 for incoming tcm names */
-  char registered_nick[MAX_NICK+2]; /* allow + 2  */
+  char	buffer[BUFFERSIZE];
+  int	nbuf;			/* number in buffer */
+  int	socket;
+  int	connecting;		/* set to 1 if connecting */
+  int	type;			/* why was this a char? -bill */
+  int	set_modes;		/* for set options */
+  char	user[MAX_USER];
+  char	host[MAX_HOST];
+  char	nick[MAX_NICK+2];	/* allow + 2 for incoming tcm names */
+  char	registered_nick[MAX_NICK+2]; /* allow + 2  */
   time_t last_message_time;
 };
 

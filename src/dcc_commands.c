@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.98 2002/05/27 23:39:58 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.99 2002/05/27 23:49:12 leeh Exp $ */
 
 #include "setup.h"
 
@@ -50,12 +50,6 @@
 
 static void set_actions(int sock, char *key, char *act, int duration, char *reason);
 static void save_umodes(char *registered_nick, unsigned long type);
-static void load_umodes(int connect_id);
-static unsigned long find_user_umodes(char *nick);
-#if 0
-static void set_umode(int connnum, char *flags, char *registered_nick);
-#endif
-static void show_user_umodes(int sock, char *registered_nick);
 static void register_oper(int connnum, char *password, char *who_did_command);
 static void list_opers(int sock);
 static void list_connections(int sock);
@@ -1046,108 +1040,8 @@ save_umodes(char *registered_nick, unsigned long type)
   }
 
   fprintf(fp,"%lu\n",
-	  type & ~(TYPE_ADMIN|TYPE_PENDING));
+	  type & ~TYPE_ADMIN);
   (void)fclose(fp);
-}
-
-/*
- * load_umodes
- *
- * input	- connection id 
- * output	- none
- * side effect	- 
- */
-
-static void 
-load_umodes(int connect_id)
-{
-  FILE *fp;
-  char user_pref[MAX_BUFF];
-  char type_string[32];
-  char *p;
-  unsigned long type;
-
-  (void)snprintf(user_pref,sizeof(user_pref) - 1,"etc/%s.pref",
-                connections[connect_id].registered_nick);
-
-  if((fp = fopen(user_pref,"r")) == NULL)
-  {
-    if((fp = fopen(user_pref,"w")) == NULL)
-    {
-      send_to_all( SEND_ALL, "Couldn't open %s for write", user_pref);
-      return;
-    }
-    type = connections[connect_id].type;
-    fprintf(fp,"%lu\n", type & ~(TYPE_ADMIN|TYPE_PENDING));
-    (void)fclose(fp);
-    return;
-  }
-
-  fgets(type_string,30,fp);
-  (void)fclose(fp);
-
-  if((p = strchr(type_string,'\n')) != NULL)
-    *p = '\0';
-  
-  sscanf(type_string,"%lu",&type);
-  type &= ~(TYPE_ADMIN|TYPE_PENDING);
-
-  connections[connect_id].type &= TYPE_ADMIN;
-  connections[connect_id].type |= type;
-
-  if( type & TYPE_SUSPENDED )
-  {
-    type = type & TYPE_SUSPENDED;
-  }
-
-  print_to_socket(connections[connect_id].socket, 
-		  "Set umodes from %s", user_pref );
-  print_to_socket(connections[connect_id].socket,
-		  "Your current flags are now: %s",
-       type_show(connections[connect_id].type));
-}
-
-/*
- * find_user_umodes
- *
- * input	- registered nick
- * output	- none
- * side effect	- 
- */
-
-static unsigned long 
-find_user_umodes(char *registered_nick)
-{
-  FILE *fp;
-  char user_pref[MAX_BUFF];
-  char type_string[32];
-  char *p;
-  int  unsigned long type;
-
-  (void)snprintf(user_pref,sizeof(user_pref) - 1,
-		 "etc/%s.pref",registered_nick);
-
-  if ((fp = fopen(user_pref,"r")) == NULL)
-  {
-    return 0L;
-  }
-
-  if ((fgets(type_string,30,fp)) == NULL)
-  {
-    (void)fclose(fp);
-    return 0L;
-  }
-
-  (void)fclose(fp);
-
-  if((p = strchr(type_string,'\n')) != NULL)
-    *p = '\0';
-
-  sscanf(type_string,"%lu",&type);
-
-  type &= ~(TYPE_ADMIN|TYPE_PENDING);
-
-  return type;
 }
 
 /*
@@ -1167,15 +1061,21 @@ register_oper(int connnum, char *password, char *who_did_command)
   {
     if (is_legal_pass(connnum, password))
     {
-      load_umodes(connnum);
-	  
-      if (connections[connnum].type & TYPE_SUSPENDED)
+      int user;
+
+      user = find_user_in_userlist(connections[connnum].registered_nick);
+
+      print_to_socket(connections[connnum].socket,
+		      "Set umodes from preferences");
+      print_to_socket(connections[connnum].socket,
+		      "Your current flags are now: %s",
+		      type_show(get_umodes_current(user)));
+
+      if(has_umode(connnum, TYPE_SUSPENDED))
       {
 	print_to_socket(connections[connnum].socket,
-	     "You are suspended");
+ 	                "You are suspended");
 	send_to_all(SEND_ALL, "%s is suspended", who_did_command);
-	if (connections[connnum].type & TYPE_PENDING)
-	  connections[connnum].type &= ~TYPE_PENDING;
       }
       else
       {
@@ -1183,10 +1083,8 @@ register_oper(int connnum, char *password, char *who_did_command)
 	                "You are now registered");
 	send_to_all(SEND_ALL, "%s has registered", who_did_command);
 
-	if (connections[connnum].type & TYPE_PENDING)
-	  connections[connnum].type &= ~TYPE_PENDING;
-
-	connections[connnum].type |= TYPE_OPER;
+	/* mark them as registered */
+	userlist[user].type |= TYPE_OPER;
       }
     }
     else

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.50 2002/05/27 23:09:58 leeh Exp $ */
+/* $Id: userlist.h,v 1.51 2002/05/27 23:49:10 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -118,7 +118,6 @@ void exemption_summary();
 #define TYPE_PARTYLINE		0x00010	/* user wants to be on partyline */
 #define TYPE_WARN		0x00080	/* user sees clone reports */
 #define TYPE_INVS		0x00100	/* user is invisible to STATS p list */
-#define TYPE_PENDING		0x00200
 #define TYPE_LOCOPS		0x00400 /* user sees LOCOPS */
 #define TYPE_ADMIN		0x00800 /* user is an adminstrator */
 #define TYPE_DLINE		0x02000 /* user has .dline privs */

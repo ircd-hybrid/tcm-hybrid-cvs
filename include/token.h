@@ -62,6 +62,7 @@
 #define K_KDRONE	60
 #define K_UPTIME        61
 #define K_AUTOPILOT     62
+#define K_QUOTE         63
 
 char *splitc (char *rest, char divider);
 char *split (char *first);

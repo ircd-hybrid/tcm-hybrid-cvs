@@ -212,6 +212,14 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
  */
 #define RESTRICT_REMOTE_DLINE
 
+/*
+ * Define this to allow people with admin privileges on the tcm to
+ * use .quote/.raw.  This is otherwise undocumented!
+ * - The Hybrid team does not support the use of this option, and will
+ *   take no responsibility for any damage it may cause.
+ */
+#undef ENABLE_QUOTE
+
 /* Define this to prevent tcm from forking() */
 #undef DEBUGMODE
 

@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.14 2001/07/22 19:27:50 wcampbel Exp $";
+static char *version="$Id: commands.c,v 1.15 2001/07/22 20:10:01 wcampbel Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -1614,6 +1614,24 @@ void dccproc(int connnum)
 	  prnt(connections[connnum].socket,"You aren't registered\n");
       }
     break;
+#endif
+
+#ifdef ENABLE_QUOTE
+      case K_QUOTE:
+        if(connections[connnum].type & TYPE_ADMIN)
+          {
+            if (param2)
+               toserv("%s\n", param2);
+            else
+               prnt(connections[connnum].socket,"Invalid parameter\n");
+          }
+
+        else
+          {
+            prnt(connections[connnum].socket,
+                 "You don't have admin privileges\n");
+          }
+        break;
 #endif
 
     default:

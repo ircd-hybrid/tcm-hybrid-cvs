@@ -1,3 +1,33 @@
+db          2002/06/22 10:04:50 EDT	(20020622_6)
+
+  Modified files:
+    include              bothunt.h config.h hash.h logging.h 
+                         userlist.h 
+    src                  bothunt.c hash.c logging.c 
+  Log:
+  - its far cleaner (IMO) to keep user/host separate in all cases
+  - added hour_minute_second() function (logging.c), will need this elsewhere
+  - added comment to clarify nick updating, also corrected code
+  
+    My eventual plan is to get rid of the multiple nick change, connect change
+  structs, and use an unified struct. Probably get rid of the statically sized
+  tables as well. It made sense in the early code, but I think using slinks
+  would make sense now.
+  
+    Not all of this is totally tested yet...
+  
+  Revision  Changes    Path
+  1.53      +12 -35    tcm-hybrid/include/bothunt.h
+  1.74      +5 -8      tcm-hybrid/include/config.h
+  1.20      +1 -1      tcm-hybrid/include/hash.h
+  1.17      +1 -0      tcm-hybrid/include/logging.h
+  1.80      +2 -2      tcm-hybrid/include/userlist.h
+  1.176     +85 -100   tcm-hybrid/src/bothunt.c
+  1.37      +21 -30    tcm-hybrid/src/hash.c
+  1.49      +30 -8     tcm-hybrid/src/logging.c
+
+
+
 leeh        2002/06/22 06:23:02 EDT	(20020622_5)
 
   Modified files:

@@ -1,5 +1,5 @@
 /*
- * $Id: modules.c,v 1.46 2002/05/28 12:14:17 leeh Exp $B
+ * $Id: modules.c,v 1.47 2002/05/29 00:59:26 leeh Exp $B
  *
  */
 
@@ -86,8 +86,10 @@ findmodule(char *name)
   int i;
 
   for (i=0; i < max_mods; ++i)
-    if (!strcmp(modlist[i].name, name))
+  {
+    if (strcmp(modlist[i].name, name) == 0)
       return i;
+  }
 
   return -1;
 }
@@ -96,7 +98,9 @@ int
 load_a_module(char *name, int log)
 {
   void *modpointer;
-  char absolute_path[100], *ver, **verp;
+  char absolute_path[MAX_BUFF];
+  char *ver;
+  char **verp;
   void (*initmod) (void);
   int i;
 

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.108 2002/05/28 23:57:21 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.109 2002/05/29 00:59:25 leeh Exp $ */
 
 #include "setup.h"
 
@@ -293,44 +293,6 @@ m_kaction(int connnum, int argc, char *argv[])
   handle_action(actionid, 0, host ? "" : who, host ? who : 0, host ? host : 0, 0, "Manually set");
 }
 
-
-void
-m_hmulti(int connnum, int argc, char *argv[])
-{
-  int t;
-
-  if (argc >= 2)
-  {
-    if ((t = atoi(argv[1])) < 3)
-    {
-      print_to_socket(connections[connnum].socket,
-           "Using a threshold less than 3 is forbidden, changed to 3\n");
-      t = 3;
-    }
-  }
-  else
-    t = 3;
-  report_multi_host(connections[connnum].socket, t);
-}
-
-void
-m_umulti(int connnum, int argc, char *argv[])
-{
-  int t;
-
-  if (argc >= 2)
-  {
-    if ((t = atoi(argv[1])) < 3)
-    {
-      print_to_socket(connections[connnum].socket,
-           "Using a threshold less than 3 is forbidden, changed to 3\n");
-      t = 3;
-    }
-  }
-  else
-    t = 3;
-  report_multi_user(connections[connnum].socket, t);
-}
 
 void
 m_register(int connnum, int argc, char *argv[])
@@ -690,12 +652,6 @@ m_mem(int connnum, int argc, char *argv[])
   report_mem(connections[connnum].socket);
 }
 
-void
-m_clones(int connnum, int argc, char *argv[])
-{
-  report_clones(connections[connnum].socket);
-}
-
 void m_nflood(int connnum, int argc, char *argv[])
 {
   report_nick_flooders(connections[connnum].socket);
@@ -761,15 +717,6 @@ m_domains(int connnum, int argc, char *argv[])
 		    "Usage: %s [min users]", argv[0]);
   else
     report_domains(connections[connnum].socket, atoi(argv[1]));
-}
-
-void
-m_bots(int connnum, int argc, char *argv[])
-{
-  if (argc >= 2)
-    report_multi(connections[connnum].socket, atoi(argv[1]));
-  else
-    report_multi(connections[connnum].socket, 3);
 }
 
 void
@@ -1193,12 +1140,6 @@ struct dcc_command kaction_msgtab = {
 struct dcc_command kspam_msgtab = {
  "kspam", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
 };
-struct dcc_command hmulti_msgtab = {
- "hmulti", NULL, {m_unregistered, m_hmulti, m_hmulti}
-};
-struct dcc_command umulti_msgtab = {
- "umulti", NULL, {m_unregistered, m_umulti, m_umulti}
-};
 struct dcc_command register_msgtab = {
  "register", NULL, {m_register, m_register, m_register}
 };
@@ -1284,9 +1225,6 @@ struct dcc_command quote_msgtab = {
 struct dcc_command mem_msgtab = {
  "mem", NULL, {m_unregistered, m_not_admin, m_mem}
 };
-struct dcc_command clones_msgtab = {
- "clones", NULL, {m_unregistered, m_clones, m_clones}
-};
 struct dcc_command nflood_msgtab = {
  "nflood", NULL, {m_unregistered, m_nflood, m_nflood}
 };
@@ -1301,9 +1239,6 @@ struct dcc_command failures_msgtab = {
 };
 struct dcc_command domains_msgtab = {
  "domains", NULL, {m_unregistered, m_domains, m_domains}
-};
-struct dcc_command bots_msgtab = {
- "bots", NULL, {m_unregistered, m_bots, m_bots}
 };
 struct dcc_command events_msgtab = {
  "events", NULL, {m_unregistered, m_events, m_events}
@@ -1344,8 +1279,6 @@ init_commands(void)
   add_dcc_handler(&kill_msgtab);
   add_dcc_handler(&kaction_msgtab);
   add_dcc_handler(&kspam_msgtab);
-  add_dcc_handler(&hmulti_msgtab);
-  add_dcc_handler(&umulti_msgtab);
   add_dcc_handler(&register_msgtab);
   add_dcc_handler(&opers_msgtab);
   add_dcc_handler(&testline_msgtab);
@@ -1375,13 +1308,11 @@ init_commands(void)
   add_dcc_handler(&quote_msgtab);
 #endif
   add_dcc_handler(&mem_msgtab);
-  add_dcc_handler(&clones_msgtab);
   add_dcc_handler(&nflood_msgtab);
   add_dcc_handler(&rehash_msgtab);
   add_dcc_handler(&trace_msgtab);
   add_dcc_handler(&failures_msgtab);
   add_dcc_handler(&domains_msgtab);
-  add_dcc_handler(&bots_msgtab);
   add_dcc_handler(&events_msgtab);
 #ifdef VIRTUAL
   add_dcc_handler(&vmulti_msgtab);

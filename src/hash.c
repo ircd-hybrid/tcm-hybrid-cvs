@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.3 2002/05/28 03:26:58 db Exp $
+ * $Id: hash.c,v 1.4 2002/05/29 00:59:26 leeh Exp $
  */
 
 #include <stdio.h>
@@ -47,10 +47,10 @@ static void check_host_clones(char *);
 static void check_virtual_host_clones(char *);
 #endif
 
-static struct hashrec *usertable[HASHTABLESIZE];
-static struct hashrec *hosttable[HASHTABLESIZE];
-static struct hashrec *domaintable[HASHTABLESIZE];
-static struct hashrec *iptable[HASHTABLESIZE];
+struct hashrec *usertable[HASHTABLESIZE];
+struct hashrec *hosttable[HASHTABLESIZE];
+struct hashrec *domaintable[HASHTABLESIZE];
+struct hashrec *iptable[HASHTABLESIZE];
 
 /*
  * free_hash_links
@@ -1069,65 +1069,6 @@ kill_add_report(char *server_notice)
 }
 
 
-/*
- * check_clones
- *
- * inputs       - NONE
- * output       - NONE
- * side effects - check for "unseen" clones, i.e. ones that have
- *                crept onto the server slowly
- */
-
-void
-check_clones(void *unused)
-{
-  struct hashrec *userptr;
-  struct hashrec *top;
-  struct hashrec *temp;
-  int numfound;
-  int i;
-  int notip;
-
-  for (i=0; i < HASHTABLESIZE; i++)
-  {
-    for (top = userptr = domaintable[i]; userptr; userptr = userptr->collision)
-    {
-      /* Ensure we haven't already checked this user & domain */
-      for(temp = top, numfound = 0; temp != userptr;
-	  temp = temp->collision)
-      {
-        if (!strcmp(temp->info->user,userptr->info->user) &&
-            !strcmp(temp->info->domain,userptr->info->domain))
-          break;
-      }
-
-      if (temp == userptr)
-      {
-        for(temp = temp->collision; temp; temp = temp->collision)
-        {
-          if (!strcmp(temp->info->user,userptr->info->user) &&
-              !strcmp(temp->info->domain,userptr->info->domain))
-            numfound++; /* - zaph & Dianora :-) */
-        }
-        if (numfound > MIN_CLONE_NUMBER)
-        {
-          notip = strncmp(userptr->info->domain,userptr->info->host,
-                          strlen(userptr->info->domain)) ||
-            (strlen(userptr->info->domain) ==
-             strlen(userptr->info->host));
-
-          send_to_all(SEND_WARN,
-                       "clones> %2d connections -- %s@%s%s {%s}",
-                       numfound,userptr->info->user,
-                       notip ? "*" : userptr->info->domain,
-                       notip ? userptr->info->domain : "*",
-                       userptr->info->class);
-        }
-      }
-    }
-  }
-}
-
 #ifdef VIRTUAL
 void
 report_vbots(int sock,int nclones)
@@ -1571,196 +1512,6 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
 }
 
 /*
- * report_multi_host()
- *
- * inputs       - socket to print out
- * output       - NONE
- * side effects -
- */
-void report_multi_host(int sock,int nclones)
-{     
-  struct hashrec *userptr,*top,*temp;
-  int numfound,i;
-  int foundany = NO;
-
-  nclones-=1;
-  for (i = 0; i < HASHTABLESIZE; ++i)
-    {
-      for (top = userptr = hosttable[i]; userptr; userptr = userptr->collision)
-        {
-          /* Ensure we haven't already checked this user & domain */
-           
-          for(temp = top, numfound = 0; temp != userptr;
-	      temp = temp->collision)
-            {
-              if (!strcmp(temp->info->host,userptr->info->host))
-                break;
-            }  
-    
-          if (temp == userptr)
-            {
-              for (temp = userptr; temp; temp = temp->collision)
-                {
-                  if (!strcmp(temp->info->host,userptr->info->host))
-                    numfound++; /* - zaph & Dianora :-) */
-                }
-      
-              if ( numfound > nclones )
-                {
-                  if (!foundany)
-                    {   
-                      foundany = YES;
-                      print_to_socket(sock,
-                           "Multiple clients from the following userhosts:\n");
-                    }
-      
-                  print_to_socket(sock,
-                       " %s %2d connections -- *@%s {%s}\n",
-                       (numfound-nclones > 2) ? "==>" : "   ",
-                       numfound,
-                       userptr->info->host,
-                       userptr->info->class);
-                }
-            }
-
-        }
-    }
-  if (!foundany)
-    print_to_socket(sock, "No multiple logins found.\n");
-}
-
-/*
- * report_multi()
- *
- * inputs       - socket to print out
- * output       - NONE
- * side effects -
- */
-
-void report_multi(int sock,int nclones)
-{
-  struct hashrec *userptr,*top,*temp;
-  int numfound,i;
-  int notip;
-  int foundany = NO;
-
-  nclones-=2;  /* maybe someday i'll figure out why this is nessecary */
-  for (i=0; i<HASHTABLESIZE; ++i)
-    {
-      for(top = userptr = domaintable[i]; userptr;
-	  userptr = userptr->collision)
-        {
-          /* Ensure we haven't already checked this user & domain */
-          for(temp = top, numfound = 0; temp != userptr;
-	      temp = temp->collision)
-            {
-              if (!strcmp(temp->info->user,userptr->info->user) &&
-                  !strcmp(temp->info->domain,userptr->info->domain))
-                break;
-            }
-
-          if (temp == userptr)
-            {
-              for(temp = temp->collision; temp; temp = temp->collision)
-                {
-                  if (!strcmp(temp->info->user,userptr->info->user) &&
-                      !strcmp(temp->info->domain,userptr->info->domain))
-                    numfound++; /* - zaph & Dianora :-) */
-                }
-
-              if ( numfound > nclones )
-                {
-                  if (!foundany)
-                    {
-                      foundany = YES;
-                      print_to_socket(sock,
-                           "Multiple clients from the following userhosts:\n");
-                    }
-                  notip = strncmp(userptr->info->domain,userptr->info->host,
-                                  strlen(userptr->info->domain)) ||
-                    (strlen(userptr->info->domain) ==
-                     strlen(userptr->info->host));
-                  numfound++;   /* - zaph and next line*/
-                  print_to_socket(sock,
-                       " %s %2d connections -- %s@%s%s {%s}\n",
-                       (numfound-nclones > 2) ? "==>" :
-                       "   ",numfound,userptr->info->user,
-                       notip ? "*." : userptr->info->domain,
-                       notip ? userptr->info->domain : ".*",
-                       userptr->info->class);
-                }
-            }
-        }
-    }
-  if (!foundany)
-    print_to_socket(sock, "No multiple logins found.\n");
-}
-
-/*
- * report_multi_user()
- *
- * inputs       - socket to print out
- * output       - NONE
- * side effects -
- */
-
-void report_multi_user(int sock,int nclones)
-{
-  struct hashrec *userptr,*top,*temp;
-  int numfound;
-  int i;
-  int foundany = NO;
-
-  nclones-=1;
-  for (i=0;i<HASHTABLESIZE;++i)
-    {
-      for (top = userptr = usertable[i]; userptr;
-           userptr = userptr->collision)
-        {
-          numfound = 0;
-          /* Ensure we haven't already checked this user & domain */
-
-          for(temp = top; temp != userptr; temp = temp->collision)
-            {
-              if (!match(temp->info->user,userptr->info->user))
-                break;
-            }
-
-          if (temp == userptr)
-            {
-              numfound=1;       /* fixed minor boo boo -bill */
-              for(temp = temp->collision; temp; temp = temp->collision)
-                {
-                  if (!match(temp->info->user,userptr->info->user))
-                    numfound++; /* - zaph & Dianora :-) */
-                }
-
-              if ( numfound > nclones )
-                {
-                  if (!foundany)
-                    {
-                      print_to_socket(sock,
-                           "Multiple clients from the following usernames:\n");
-                      foundany = YES;
-                    }
-
-                  print_to_socket(sock,
-                       " %s %2d connections -- %s@* {%s}\n",
-                       (numfound-nclones > 2) ? "==>" : "   ",
-                       numfound,userptr->info->user,
-                       userptr->info->class);
-                }
-            }
-        }
-    }
-
-  if (!foundany)
-    {
-      print_to_socket(sock, "No multiple logins found.\n");
-    }
-}
-
-/*
  * report_multi_virtuals()
  *
  * inputs       - socket to print out
@@ -1916,92 +1667,6 @@ void report_mem(int sock)
 	numalloc, totalmem/numalloc);
   print_to_socket(sock,"Average allocated memory not freed %lu in %lu frees\n",
 	(totalmem/numalloc)*(numalloc-numfree), numfree);
-}
-
-/*
- * report_clones
- *
- * inputs       - socket to report on
- * output       - NONE
- * side effects - NONE
- */
-
-void 
-report_clones(int sock)
-{
-  struct hashrec *userptr;
-  struct hashrec *top;
-  struct hashrec *temp;
-  int  numfound;
-  int i;
-  int j=0;
-  int k;
-  int foundany = NO;
-  time_t connfromhost[MAXFROMHOST];
-
-  if(sock < 0)
-    return;
-
-  for (i = 0; i < HASHTABLESIZE; ++i)
-    {
-      for(top = userptr = hosttable[i]; userptr; userptr = userptr->collision)
-        {
-          /* Ensure we haven't already checked this host */
-          for(temp = top, numfound = 0; temp != userptr;
-               temp = temp->collision)
-            {
-              if (!strcmp(temp->info->host,userptr->info->host))
-                break;
-            }
-
-          if (temp == userptr)
-            {
-              connfromhost[numfound++] = temp->info->connecttime;
-              for(temp = temp->collision; temp; temp = temp->collision)
-                {
-                  if (!strcmp(temp->info->host,userptr->info->host) &&
-                      numfound < MAXFROMHOST)
-                    connfromhost[numfound++] = temp->info->connecttime;
-                }
-
-              if (numfound > 2)
-                {
-                  for (k=numfound-1; k>1; --k)
-                    {
-                      for (j=0; j<numfound-k; ++j)
-                        {
-                          if (connfromhost[j] &&
-                              connfromhost[j] - connfromhost[j+k] <= (k+1)
-                              * CLONEDETECTINC)
-                            goto getout;  /* goto rules! */
-                        }
-                    }
-                getout:
-
-                  if (k > 1)
-                    {
-                      if (!foundany)
-                        {
-                            print_to_socket(sock,
-                                 "Possible clonebots from the following hosts:\n");
-                          foundany = YES;
-                        }
-                        print_to_socket(sock,
-                             "  %2d connections in %3d seconds (%2d total) from %s\n",
-                             k+1,
-                             connfromhost[j] - connfromhost[j+k],
-                             numfound+1,
-                             userptr->info->host);
-                    }
-                }
-            }
-        }
-    }
-
-  if (!foundany)
-    {
-        print_to_socket(sock, "No potential clonebots found.\n");
-    }
 }
 
 void

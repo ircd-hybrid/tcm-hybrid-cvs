@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.70 2002/05/28 23:57:21 leeh Exp $
+ * $Id: tcm_io.c,v 1.71 2002/05/29 00:59:26 leeh Exp $
  */
 
 #include <stdio.h>
@@ -88,8 +88,6 @@ read_packet(void)
   int  nread=0;
   int  i;
   struct timeval read_time_out;
-
-  eventAdd("check_clones", check_clones, NULL, CLONE_CHECK_TIME);
 
   FOREVER
   {
@@ -831,10 +829,10 @@ close_dcc_connection(int connnum)
 {
   report(SEND_ALL,
          CHANNEL_REPORT_ROUTINE,
-         "Oper %s (%s@%s) has connected\n",
-         connections[i].nick,
-         connections[i].user,
-         connections[i].host);
+         "Oper %s (%s@%s) has disconnected",
+         connections[connnum].nick,
+         connections[connnum].user,
+         connections[connnum].host);
 
   close_connection(connnum);
 }

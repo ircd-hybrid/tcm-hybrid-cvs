@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.134 2002/05/28 20:01:51 leeh Exp $
+ * $Id: bothunt.c,v 1.135 2002/05/29 00:59:25 leeh Exp $
  */
 
 #include <stdio.h>
@@ -986,65 +986,6 @@ on_server_notice(int argc, char *argv[])
   }
 }
 
-
-/*
- * check_reconnect_clones()
- *
- * inputs	- host
- * outputs	- none
- * side effects -
- */
-
-void
-check_reconnect_clones(char *host)
-{
-  int i;
-  time_t now = time(NULL);
-
-  if (host == NULL)  /* I don't know how this could happen.  ::shrug:: */
-    return;
-
-  for (i=0; i<RECONNECT_CLONE_TABLE_SIZE ; ++i)
-  {
-    if (!strcasecmp(reconnect_clone[i].host, host))
-    {
-      ++reconnect_clone[i].count;
-
-      if ((reconnect_clone[i].count > CLONERECONCOUNT) &&
-          (now - reconnect_clone[i].first <= CLONERECONFREQ))
-      {
-	handle_action(act_rclone, 0, "", "", host, 0, 0);
-        reconnect_clone[i].host[0] = 0;
-        reconnect_clone[i].count = 0;
-        reconnect_clone[i].first = 0;
-      }
-      return;
-    }
-  }
-
-  for (i=0; i < RECONNECT_CLONE_TABLE_SIZE; ++i)
-  {
-    if ((reconnect_clone[i].host[0]) &&
-	(now - reconnect_clone[i].first > CLONERECONFREQ))
-    {
-      reconnect_clone[i].host[0] = 0;
-      reconnect_clone[i].count = 0;
-      reconnect_clone[i].first = 0;
-    }
-  }
-
-  for (i=0 ; i < RECONNECT_CLONE_TABLE_SIZE ; ++i)
-  {
-    if (!reconnect_clone[i].host[0])
-    {
-      strncpy(reconnect_clone[i].host, host, MAX_HOST);
-      reconnect_clone[i].host[MAX_HOST] = 0;
-      reconnect_clone[i].first = now;
-      reconnect_clone[i].count = 1;
-      break;
-    }
-  }
-}
 
 /*
  * connect_flood_notice

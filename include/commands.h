@@ -1,7 +1,7 @@
 #ifndef __COMMANDS_H
 #define __COMMANDS_H
 
-/* $Id: commands.h,v 1.17 2002/05/26 20:44:39 leeh Exp $ */
+/* $Id: commands.h,v 1.18 2002/05/29 00:59:22 leeh Exp $ */
 
 void init_allow_nick();
 
@@ -26,8 +26,6 @@ void m_kill(int connnum, int argc, char *argv[]);
 void m_use_kaction(int connnum, int argc, char *argv[]);
 void m_kaction(int connnum, int argc, char *argv[]);
 void m_kspam(int connnum, int argc, char *argv[]);
-void m_hmulti(int connnum, int argc, char *argv[]);
-void m_umulti(int connnum, int argc, char *argv[]);
 void m_register(int connnum, int argc, char *argv[]);
 void m_opers(int connnum, int argc, char *argv[]);
 void m_testline(int connnum, int argc, char *argv[]);
@@ -53,13 +51,11 @@ void m_vbots(int connnum, int argc, char *argv[]);
 void m_dline(int connnum, int argc, char *argv[]);
 void m_quote(int connnum, int argc, char *argv[]);
 void m_mem(int connnum, int argc, char *argv[]);
-void m_clones(int connnum, int argc, char *argv[]);
 void m_nflood(int connnum, int argc, char *argv[]);
 void m_rehash(int connnum, int argc, char *argv[]);
 void m_trace(int connnum, int argc, char *argv[]);
 void m_failures(int connnum, int argc, char *argv[]);
 void m_domains(int connnum, int argc, char *argv[]);
-void m_bots(int connnum, int argc, char *argv[]);
 void m_vmulti(int connnum, int argc, char *argv[]);
 void m_nfind(int connnum, int argc, char *argv[]);
 void m_list(int connnum, int argc, char *argv[]);

@@ -1,3 +1,17 @@
+wcampbel    2002/06/02 17:23:21 EDT	(20020602_2)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  Fixed some faulty logic in list_class() which caused successful .class and
+  .classt searches to only set the count to 1, not the total count of users
+  in that class.
+  
+  Revision  Changes    Path
+  1.24      +8 -8      tcm-hybrid/src/hash.c
+
+
+
 db          2002/06/02 01:26:42 EDT	(20020602_1)
 
   Modified files:

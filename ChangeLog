@@ -1,3 +1,19 @@
+leeh        2002/05/28 12:01:59 EDT	(20020528_15)
+
+  Modified files:
+    include              userlist.h 
+    src                  commands.c main.c userlist.c 
+  Log:
+  - redid save_umodes(), made it an event
+  
+  Revision  Changes    Path
+  1.53      +4 -0      tcm-hybrid/include/userlist.h
+  1.105     +0 -30     tcm-hybrid/src/commands.c
+  1.92      +2 -0      tcm-hybrid/src/main.c
+  1.98      +80 -1     tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/05/28 11:10:18 EDT	(20020528_14)
 
   Modified files:

@@ -1,3 +1,7 @@
+*** 20011109_1 by wcampbel
+Bunched all the SERVICES defines together, requested by paulsen
+
+
 *** 20011108_1 by bill
 - added ability to specify install directory with ./configure --prefix
   (documented, aren't you proud hwy?)

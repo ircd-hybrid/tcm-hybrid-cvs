@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.7 2001/09/22 23:01:33 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.8 2001/10/04 02:25:20 wcampbel Exp $";
 
 int doingtrace = NO;
 
@@ -703,7 +703,7 @@ void report_multi_host(int sock,int nclones)
   placed;
 #endif
 
-  nclones-=2;
+  nclones-=1;
   for (i=0;i<HASHTABLESIZE;++i)
     {
       for (top = userptr = hosttable[i]; userptr; userptr = userptr->collision)
@@ -1257,7 +1257,7 @@ void report_multi_user(int sock,int nclones)
   placed;
 #endif
 
-  nclones-=2;
+  nclones-=1;
   for (i=0;i<HASHTABLESIZE;++i)
     {
       for( top = userptr = usertable[i]; userptr;

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.41 2001/12/12 23:19:56 db Exp $
+ * $Id: userlist.c,v 1.42 2002/02/24 07:45:04 bill Exp $
  *
  */
 
@@ -338,19 +338,17 @@ save_prefs(void)
       if ((a = get_action(argv[1])) != -1)
       {
 	/* XXX needs error check */
-	fprintf(fp_out, "A:%s:%s:%s:%s:%s\n",
+	fprintf(fp_out, "A:%s:%s:%s:%s\n",
 		actions[a].name, actions[a].method,
 		(actions[a].reason[0] ? actions[a].reason : ""),
 		(actions[a].report ? "YES" : ""));
       }
       break;
     default:
-      fprintf (fp_out, "%s:", argv[0]);
-      for (a=1; a < argc-1 ; a++)
+      for (a=0; a < argc - 1; a++)
       {
 	fprintf (fp_out, "%s:", argv[a]);
       }
-      a++;
       fprintf (fp_out, "%s\n", argv[a]);
       break;
     }

@@ -1,3 +1,15 @@
+wcampbel    2002/05/19 17:13:31 EDT	(20020519_3)
+
+  Modified files:
+    modules              commands.c 
+  Log:
+  .disconnect (tcm's /kill equivalent) should be admin only
+  
+  Revision  Changes    Path
+  1.60      +1 -1      tcm-hybrid/modules/commands.c
+
+
+
 wcampbel    2002/05/19 17:08:21 EDT	(20020519_2)
 
   Modified files:

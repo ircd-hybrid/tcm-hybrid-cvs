@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.54 2002/05/24 14:51:17 db Exp $ */
+/* $Id: main.c,v 1.55 2002/05/24 15:01:31 db Exp $ */
 
 #include "setup.h"
 
@@ -68,7 +68,7 @@ extern int act_drone, act_sclone;
 struct connection connections[MAXDCCCONNS+1]; /* plus 1 for the server, silly */
 struct s_testline testlines;
 
-time_t CurrentTime;
+time_t current_time;
 
 char ourhostname[MAX_HOST];   /* This is our hostname with domainname */
 char serverhost[MAX_HOST];    /* Server tcm will use. */

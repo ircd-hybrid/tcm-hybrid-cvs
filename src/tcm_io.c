@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.10 2002/05/24 14:35:21 leeh Exp $
+ * $Id: tcm_io.c,v 1.11 2002/05/24 15:01:31 db Exp $
  */
 
 #include <stdio.h>
@@ -104,8 +104,8 @@ read_packet(void)
     server_time_out = SERVER_TIME_OUT;
   }
 
-  CurrentTime = time(NULL);
-  connections[0].last_message_time = CurrentTime;
+  current_time = time(NULL);
+  connections[0].last_message_time = current_time;
 
 #ifdef SERVICES
   eventAdd("check_services", check_services, NULL, SERVICES_CHECK_TIME);
@@ -115,9 +115,9 @@ read_packet(void)
 
   FOREVER
   {
-    CurrentTime = time(NULL);
+    current_time = time(NULL);
 
-    if (CurrentTime > (connections[0].last_message_time + server_time_out))
+    if (current_time > (connections[0].last_message_time + server_time_out))
     {
       /* timer expired */
       sendtoalldcc(incoming_connnum, SEND_ALL,
@@ -191,7 +191,7 @@ read_packet(void)
             else if (nread > 0)
               {
                 tscanned = 0;
-                connections[i].last_message_time = CurrentTime;
+                connections[i].last_message_time = current_time;
                 if (i == 0)
                   {
                     while ((nscanned =

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.88 2002/05/24 14:32:34 leeh Exp $
+ * $Id: bothunt.c,v 1.89 2002/05/24 15:01:31 db Exp $
  */
 
 #include <stdio.h>
@@ -182,7 +182,7 @@ gline_request(char *user, char *host, char *reason, char *who)
   strlcpy(glines[i].host, host, MAX_HOST);
   strlcpy(glines[i].reason, reason, MAX_REASON);
   strlcpy(glines[i].who, who, MAX_WHO);
-  glines[i].when = CurrentTime;
+  glines[i].when = current_time;
 
   return 1;
 }
@@ -951,7 +951,7 @@ onservnotice(int connnum, int argc, char *argv[])
       {
 	if (strcasecmp(connect_flood[a].user_host, user) == 0)
 	{
-	  if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < CurrentTime)
+	  if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
 	    connect_flood[a].connect_count = 0;
 
 	  ++connect_flood[a].connect_count;
@@ -970,9 +970,9 @@ onservnotice(int connnum, int argc, char *argv[])
 	      connect_flood[a].user_host[0] = '\0';
 	    }
 	  else
-	    connect_flood[a].last_connect = CurrentTime;
+	    connect_flood[a].last_connect = current_time;
 	}
-	else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < CurrentTime)
+	else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
 	  connect_flood[a].user_host[0] = '\0';
       }
       else c = a;
@@ -988,7 +988,7 @@ onservnotice(int connnum, int argc, char *argv[])
 		 sizeof(connect_flood[c].user_host), "%s@%s",
 		 user, host);
       connect_flood[c].connect_count = 0;
-      connect_flood[c].last_connect = CurrentTime;
+      connect_flood[c].last_connect = current_time;
     }
     break;
 
@@ -1013,7 +1013,7 @@ onservnotice(int connnum, int argc, char *argv[])
       {
         if (strcasecmp(connect_flood[a].user_host, user) == 0)
         {
-          if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < CurrentTime)
+          if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
             connect_flood[a].connect_count = 0;
           ++connect_flood[a].connect_count;
 
@@ -1028,11 +1028,11 @@ onservnotice(int connnum, int argc, char *argv[])
               connect_flood[a].user_host[0] = '\0';
             }
             else
-              connect_flood[a].last_connect = CurrentTime;
+              connect_flood[a].last_connect = current_time;
           return;
         }
         else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME)
-                 < CurrentTime)
+                 < current_time)
           connect_flood[a].user_host[0] = '\0';
       }
       else
@@ -1047,7 +1047,7 @@ onservnotice(int connnum, int argc, char *argv[])
         snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host),
                  "%s@%s", user, host);
       connect_flood[c].connect_count = 0;
-      connect_flood[c].last_connect = CurrentTime;
+      connect_flood[c].last_connect = current_time;
     }
 
   /* Invalid username: bill (!@$@&&&.com) */
@@ -1068,7 +1068,7 @@ onservnotice(int connnum, int argc, char *argv[])
       {
 	if (!strcasecmp(user, connect_flood[a].user_host))
         {
-	  if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < CurrentTime)
+	  if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
 	    connect_flood[a].connect_count = 0;
 
 	  ++connect_flood[a].connect_count;
@@ -1084,7 +1084,7 @@ onservnotice(int connnum, int argc, char *argv[])
 	    }
 	}
 	else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME)
-                 < CurrentTime)
+                 < current_time)
 	  connect_flood[a].user_host[0] = '\0';
       }
       else
@@ -1098,7 +1098,7 @@ onservnotice(int connnum, int argc, char *argv[])
       else
         snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host),
                  "%s@%s", user, host);
-      connect_flood[c].last_connect = CurrentTime;
+      connect_flood[c].last_connect = current_time;
       connect_flood[c].connect_count = 0;
     }
     break;
@@ -2279,7 +2279,7 @@ connect_flood_notice(char *snotice)
 	      found_entry = YES;
 
 	      if ((connect_flood[i].last_connect + MAX_CONNECT_TIME)
-		  < CurrentTime)
+		  < current_time)
 		{
 		  connect_flood[i].connect_count = 0;
 		}
@@ -2293,7 +2293,7 @@ connect_flood_notice(char *snotice)
 		handle_action(act_cflood, ident, nick_reported, user, host, 0, 0);
 	    }
 	  else if ((connect_flood[i].last_connect + MAX_CONNECT_TIME)
-		   < CurrentTime) {
+		   < current_time) {
 	    connect_flood[i].user_host[0] = '\0';
 	  }
 	}
@@ -2309,7 +2309,7 @@ connect_flood_notice(char *snotice)
 	{
 	  strncpy(connect_flood[first_empty_entry].user_host, user_host,
 		  sizeof(connect_flood[first_empty_entry]));
-	  connect_flood[first_empty_entry].last_connect = CurrentTime;
+	  connect_flood[first_empty_entry].last_connect = current_time;
 	  connect_flood[first_empty_entry].connect_count = 0;
 	}
     }
@@ -2399,7 +2399,7 @@ link_look_notice(char *snotice)
 	       * (this should be very unlikely case)
 	       */
 
-	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < CurrentTime)
+	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
 		{
 		  link_look[i].link_look_count = 0;
 		}
@@ -2414,12 +2414,12 @@ link_look_notice(char *snotice)
 		}
 	      else
 		{
-		  link_look[i].last_link_look = CurrentTime;
+		  link_look[i].last_link_look = current_time;
 		}
 	    }
 	  else
 	    {
-	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < CurrentTime)
+	      if ((link_look[i].last_link_look + MAX_LINK_TIME) < current_time)
 		{
 		  link_look[i].user_host[0] = '\0';
 		}
@@ -2443,7 +2443,7 @@ link_look_notice(char *snotice)
 	  /* XXX */
 	  strncpy(link_look[first_empty_entry].user_host,user_host,
 		  MAX_USER+MAX_HOST);
-	  link_look[first_empty_entry].last_link_look = CurrentTime;
+	  link_look[first_empty_entry].last_link_look = current_time;
           link_look[first_empty_entry].link_look_count = 1;
 	}
     }
@@ -2723,7 +2723,7 @@ add_to_nick_change_table(char *user_host,char *last_nick)
       time_t time_difference;
       int time_ticks;
 
-      time_difference = CurrentTime - nick_changes[i].last_nick_change;
+      time_difference = current_time - nick_changes[i].last_nick_change;
 
       /* is it stale ? */
       if (time_difference >= NICK_CHANGE_T2_TIME)
@@ -2749,7 +2749,7 @@ add_to_nick_change_table(char *user_host,char *last_nick)
 
 	  if ((strcasecmp(nick_changes[i].user_host,user_host)) == 0)
 	  {
-	    nick_changes[i].last_nick_change = CurrentTime;
+	    nick_changes[i].last_nick_change = current_time;
 	    (void)strncpy(nick_changes[i].last_nick,
 			  last_nick,MAX_NICK);
 	    nick_changes[i].nick_change_count++;
@@ -2814,8 +2814,8 @@ add_to_nick_change_table(char *user_host,char *last_nick)
 
   if (found_empty_entry > 0)
   {
-    nick_changes[found_empty_entry].first_nick_change = CurrentTime;
-    nick_changes[found_empty_entry].last_nick_change = CurrentTime;
+    nick_changes[found_empty_entry].first_nick_change = current_time;
+    nick_changes[found_empty_entry].last_nick_change = current_time;
     nick_changes[found_empty_entry].nick_change_count = 1;
     nick_changes[found_empty_entry].noticed = NO;
   }

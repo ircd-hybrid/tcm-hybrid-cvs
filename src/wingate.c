@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.27 2002/05/24 05:34:15 bill Exp $ */
+/* $Id: wingate.c,v 1.28 2002/05/24 15:01:28 db Exp $ */
 
 
 #include <netdb.h>
@@ -409,7 +409,7 @@ void _scontinuous(int connnum, int argc, char *argv[])
               else
                 {
                   wingate[i].state = WINGATE_READING;
-                  wingate[i].connect_time = CurrentTime;
+                  wingate[i].connect_time = current_time;
                 }
             }
         }
@@ -575,7 +575,7 @@ void _scontinuous(int connnum, int argc, char *argv[])
         print_to_socket(squid[i].socket, "CONNECT %s:%d HTTP/1.0\r\n\r\n",
                         SOCKS_CHECKIP, SOCKS_CHECKPORT);
         squid[i].state = SQUID_READING;
-        squid[i].connect_time = CurrentTime;
+        squid[i].connect_time = current_time;
       }
     }
 
@@ -617,13 +617,13 @@ void _continuous(int connnum, int argc, char *argv[])
             FD_SET(wingate[i].socket,&writefds);
           else if( (wingate[i].state == WINGATE_READING))
             {
-              if (CurrentTime > (wingate[i].connect_time + 10))
+              if (current_time > (wingate[i].connect_time + 10))
                 {
                   (void)close(wingate[i].socket);
                   wingate[i].socket = INVALID;
                   wingate[i].state = 0;
                 }
-              else if(CurrentTime > (wingate[i].connect_time + 1))
+              else if(current_time > (wingate[i].connect_time + 1))
                 FD_SET(wingate[i].socket,&readfds);
             }
         }
@@ -652,13 +652,13 @@ void _continuous(int connnum, int argc, char *argv[])
     }
     else if ((squid[i].socket != INVALID) && (squid[i].state == SQUID_READING))
     {
-      if (CurrentTime > (squid[i].connect_time + 10))
+      if (current_time > (squid[i].connect_time + 10))
       {
         close(squid[i].socket);
         squid[i].socket = INVALID;
         squid[i].state = 0;
       }
-      else if (CurrentTime > (squid[i].connect_time + 1))
+      else if (current_time > (squid[i].connect_time + 1))
         FD_SET(squid[i].socket, &readfds);
     }
   }

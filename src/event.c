@@ -25,7 +25,7 @@
  *
  *  Original never had a GPL, so GPL removed WITH PLEASURE. -db
  *
- *  $Id: event.c,v 1.5 2002/05/24 14:13:57 leeh Exp $
+ *  $Id: event.c,v 1.6 2002/05/24 15:01:31 db Exp $
  */
 
 /*
@@ -76,7 +76,7 @@ eventAdd(const char *name, EVH *func, void *arg, time_t when)
   event_table[i].func = func;
   event_table[i].name = name;
   event_table[i].arg = arg;
-  event_table[i].when = CurrentTime + when;
+  event_table[i].when = current_time + when;
   event_table[i].frequency = when; 
   event_table[i].active = 1;
 
@@ -151,11 +151,11 @@ eventRun(void)
 
   for (i = 0; i < event_count; i++)
     {
-      if (event_table[i].active && (event_table[i].when <= CurrentTime))
+      if (event_table[i].active && (event_table[i].when <= current_time))
         {
           last_event_ran = event_table[i].name;
           event_table[i].func(event_table[i].arg);
-          event_table[i].when = CurrentTime + event_table[i].frequency;
+          event_table[i].when = current_time + event_table[i].frequency;
           event_time_min = -1;
         }
     }
@@ -176,7 +176,7 @@ eventNextTime(void)
   int i;
 
   if (event_count == 0)
-    return (CurrentTime+1);
+    return (current_time+1);
   else if (event_time_min == -1)
     {
       for (i = 0; i < event_count; i++)
@@ -249,7 +249,7 @@ show_events(int sock)
           print_to_socket(sock,
 		 "*** %-20s %-3d seconds",
 		 event_table[i].name,
-		 (int)(event_table[i].when - CurrentTime));
+		 (int)(event_table[i].when - current_time));
         }
     }
   print_to_socket(sock, "*** Finished");

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.210 2003/01/20 06:16:22 bill Exp $
+ * $Id: bothunt.c,v 1.211 2003/02/01 00:55:37 bill Exp $
  */
 
 #include <stdio.h>
@@ -1168,7 +1168,8 @@ check_nick_flood(char *snotice)
 
   *p = '\0';
 
-  if (get_user_host(&user, &host, user_host) == NULL)
+  get_user_host(&user, &host, user_host);
+  if (user == NULL || host == NULL)
     return;
 
   add_to_nick_change_table(user, host, nick2);

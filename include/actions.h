@@ -1,7 +1,7 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.2 2002/05/27 23:59:42 db Exp $ */
+/* $Id: actions.h,v 1.3 2002/05/28 05:46:38 db Exp $ */
 
 extern int act_cflood;
 extern int act_vclone;
@@ -13,6 +13,13 @@ extern act_clone;
 extern int act_rclone;
 
 void init_actions(void);
+int add_action(char *name);
+void set_action_time(int action, int klinetime);
+void set_action_reason(int action, char *reason);
+void set_action_method(int action, int method);
+void set_action_strip(int action, int hoststrip);
+int find_action(char *name);
+
 void handle_action(int actionid, int idented,
 		   char *nick, char *user, char *host, char *ip,
 		   char * addcmt);

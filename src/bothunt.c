@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.125 2002/05/28 04:32:24 db Exp $
+ * $Id: bothunt.c,v 1.126 2002/05/28 05:46:41 db Exp $
  */
 
 #include <stdio.h>
@@ -417,6 +417,7 @@ on_server_notice(int argc, char *argv[])
     if ((q = strchr(p, ' ')) == NULL)
       return;
     *q = '\0';
+
     target = q+4;
     if ((q = strchr(target, ' ')) == NULL)
       return;

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.88 2002/05/27 23:59:46 db Exp $ */
+/* $Id: main.c,v 1.89 2002/05/28 05:46:41 db Exp $ */
 
 #include "setup.h"
 
@@ -356,14 +356,15 @@ main(int argc, char *argv[])
   startup_time = time(NULL);
 
   /* enter the main IO loop */
-  while(!quit)
-    read_packet();
+  read_packet();
 
+  /* NOT REACHED */
+#if 0
   if(config_entries.debug && outfile)
     {
       fclose(outfile);
     }
-
+#endif
   return 0;
 }
 

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.59 2002/05/28 03:26:58 db Exp $
+ * $Id: tcm_io.c,v 1.60 2002/05/28 05:46:41 db Exp $
  */
 
 #include <stdio.h>
@@ -61,6 +61,7 @@ static void finish_accept_dcc_chat(int i);
 static void finish_dcc_chat(int i);
 static void close_dcc_connection(int connnum);
 static void signon_to_server(int unused);
+void reconnect(void);
 
 static fd_set readfds;		/* file descriptor set for use with select */
 static fd_set writefds;		/* file descriptor set for use with select */
@@ -299,9 +300,7 @@ get_line(char *in, int *len, struct connection *connections_p)
  * side effects	-
  *
  *   Called when an error has causes the server to close our link.
- *   Parameters:
- *     Close the old dead socket.  If we haven't already reconnected
- *     5 times, wait 5 seconds, reconnect to the server, and re-signon.
+ *   Close the old dead socket. Try to reconnect to server.
  */
 void
 server_link_closed(int conn_num)
@@ -309,21 +308,30 @@ server_link_closed(int conn_num)
   server_id = INVALID;
   close_connection(conn_num);
 
-  /* XXX Should not clear out events at this point ? */
-#if wrong
-  eventInit();
-#endif
-
   tcm_log(L_ERR, "server_link_closed()");
   amianoper = NO;
-  sleep(30);
+  eventAdd("reconnect", (EVH *)reconnect, NULL, 30);
+}
 
-  connect_to_server(serverhost);
-  if (connections[conn_num].socket == INVALID)
+/*
+ * reconnect
+ *
+ * inputs	- none
+ * output	- none
+ * side effects	- tiny function started as an event
+ *		  to reconnect to server when necessary.
+ */
+
+void
+reconnect(void)
+{
+  eventDelete((EVH *)reconnect, NULL);
+
+  if (connect_to_server(serverhost) == INVALID)
     {
+      /* This one is fatal folks */
       tcm_log(L_ERR, "server_link_closed() invalid socket quitting");
-      quit = YES;
-      return;
+      exit(-1);
     }
 }
 

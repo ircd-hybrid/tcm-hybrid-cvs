@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.43 2002/05/26 17:43:58 leeh Exp $ */
+/* $Id: tcm.h,v 1.44 2002/05/28 05:46:38 db Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -62,9 +62,7 @@ char mynick[MAX_NICK];
 char serverhost[MAX_HOST];
 char ourhostname[MAX_HOST];
 
-extern int incoming_connnum;
 int amianoper;
-int quit;			/* Quit when = YES */
 
 int maxconns;
 
@@ -72,12 +70,6 @@ extern unsigned long totalmem;
 extern unsigned long numalloc;
 extern unsigned long numfree;
 
-int add_action(char *name);
-void set_action_time(int action, int klinetime);
-void set_action_reason(int action, char *reason);
-void set_action_method(int action, int method);
-void set_action_strip(int action, int hoststrip);
-int find_action(char *name);
 
 /* Fixes for broken operating systems */
 #ifndef HAVE_STRLCAT

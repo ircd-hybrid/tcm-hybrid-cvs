@@ -1,3 +1,15 @@
+db          2002/05/26 20:57:51 EDT	(20020527_4)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - argv was unused
+  
+  Revision  Changes    Path
+  1.50      +0 -1      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/26 20:56:11 EDT	(20020527_3)
 
   Modified files:

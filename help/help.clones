@@ -15,6 +15,10 @@ Note:  Opers as defined in this file are people with TCM O: lines (or
  - .list <wildcarded userhost>  (OPERS ONLY)
     List all connected users who match the given userhost (which
     may contain wildcards). 
+ - .ulist <wildcarded username>  (OPERS ONLY)
+    List all connected users who match the given username
+ - .hlist <wildcarded hostname>  (OPERS ONLY)
+    List all connected users who match the given hostname
  - .umulti [n] (OPERS ONLY)
     List users with multiple hosts with same user names.
  - .hmulti [n] (OPERS ONLY)

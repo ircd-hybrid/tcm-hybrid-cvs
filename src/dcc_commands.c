@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.42 2002/04/19 23:15:09 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.43 2002/04/23 14:31:10 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -986,6 +986,70 @@ void m_list(int connnum, int argc, char *argv[])
     list_users(connections[connnum].socket, argv[1], NO);
 #endif
 }
+
+#ifdef WANT_ULIST
+void m_ulist(int connnum, int argc, char *argv[])
+{
+  char buf[MAX_BUFF];
+
+#ifdef HAVE_REGEX_H
+  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+    prnt(connections[connnum].socket,
+         "Usage: %s [-r] <wildcarded/regex username>\n", argv[0]);
+  else if (argc == 2)
+  {
+    snprintf(buf, MAX_BUFF, "%s@*", argv[1]);
+    list_users(connections[connnum].socket, buf, NO);
+  }
+  else
+  {
+    snprintf(buf, MAX_BUFF, "%s@*", argv[2]);
+    list_users(connections[connnum].socket, buf, YES);
+  }
+#else
+  if (argc < 2)
+    prnt(connections[connnum].socket, "Usage: %s <wildcarded username>\n",
+         argv[0]);
+  else
+  {
+    snprintf(buf, MAX_BUFF, "%s@*", argv[1]);
+    list_users(connections[connnum].socket, argv[1], NO);
+  }
+#endif
+}
+#endif
+
+#ifdef WANT_HLIST
+void m_hlist(int connnum, int argc, char *argv[])
+{
+  char buf[MAX_BUFF];
+
+#ifdef HAVE_REGEX_H
+  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+    prnt(connections[connnum].socket,
+         "Usage: %s [-r] <wildcarded/regex host>\n", argv[0]);
+  else if (argc == 2)
+  {
+    snprintf(buf, MAX_BUFF, "*@%s", argv[1]);
+    list_users(connections[connnum].socket, buf, NO);
+  }
+  else
+  {
+    snprintf(buf, MAX_BUFF, "*@%s", argv[2]);
+    list_users(connections[connnum].socket, buf, YES);
+  }
+#else
+  if (argc < 2)
+    prnt(connections[connnum].socket, "Usage: %s <wildcarded host>\n",
+         argv[0]);
+  else
+  {
+    snprintf(buf, MAX_BUFF, "*@%s", argv[1]);
+    list_users(connections[connnum].socket, argv[1], NO);
+  }
+#endif
+}
+#endif
 
 /*
 ** dccproc()
@@ -1979,6 +2043,18 @@ struct TcmMessage list_msgtab = {
  ".list", 0, 1,
  {m_unregistered, m_not_oper, m_list, m_list}
 };
+#ifdef WANT_ULIST
+struct TcmMessage ulist_msgtab = {
+ ".ulist", 0, 1,
+ {m_unregistered, m_not_oper, m_ulist, m_ulist}
+};
+#endif
+#ifdef WANT_HLIST
+struct TcmMessage hlist_msgtab = {
+ ".hlist", 0, 1,
+ {m_unregistered, m_not_oper, m_hlist, m_hlist}
+};
+#endif
 #endif
 
 void 
@@ -2044,6 +2120,12 @@ _modinit()
   mod_add_cmd(&vmulti_msgtab);
   mod_add_cmd(&nfind_msgtab);
   mod_add_cmd(&list_msgtab);
+#ifdef WANT_ULIST
+  mod_add_cmd(&ulist_msgtab);
+#endif
+#ifdef WANT_HLIST
+  mod_add_cmd(&hlist_msgtab);
+#endif
   mod_add_cmd(&uptime_msgtab);
 }
 
@@ -2062,6 +2144,12 @@ _moddeinit()
   mod_del_cmd(&vmulti_msgtab);
   mod_del_cmd(&nfind_msgtab);
   mod_del_cmd(&list_msgtab);
+#ifdef WANT_ULIST
+  mod_del_cmd(&ulist_msgtab);
+#endif
+#ifdef WANT_HLIST
+  mod_del_cmd(&hlist_msgtab);
+#endif
 }
 
 /*

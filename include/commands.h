@@ -1,7 +1,7 @@
 #ifndef __COMMANDS_H
 #define __COMMANDS_H
 
-/* $Id: commands.h,v 1.6 2002/04/02 23:24:21 bill Exp $ */
+/* $Id: commands.h,v 1.7 2002/04/23 14:31:08 wcampbel Exp $ */
 
 void init_allow_nick();
 void dccproc(int connnum, int argc, char *argv[]);	
@@ -137,6 +137,12 @@ void m_bots(int connnum, int argc, char *argv[]);
 void m_vmulti(int connnum, int argc, char *argv[]);
 void m_nfind(int connnum, int argc, char *argv[]);
 void m_list(int connnum, int argc, char *argv[]);
+#ifdef WANT_ULIST
+void m_ulist(int connnum, int argc, char *argv[]);
+#endif
+#ifdef WANT_HLIST
+void m_hlist(int connnum, int argc, char *argv[]);
+#endif
 
 #endif
 

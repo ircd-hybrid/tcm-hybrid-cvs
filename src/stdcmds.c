@@ -25,6 +25,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdarg.h>
+#include <string.h>
 #include "config.h"
 #include "tcm.h"
 #include "logging.h"
@@ -36,7 +37,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.18 2001/10/26 13:08:29 db Exp $";
+static char *version="$Id: stdcmds.c,v 1.19 2001/10/27 00:05:32 bill Exp $";
 
 int doingtrace = NO;
 
@@ -525,10 +526,10 @@ suggest_action(int type,
       if(okhost(user, host, type))
         return;
 
-      if (strchr(host,'*') != NULL)
+      if (strchr(host,'*') != (char *)NULL)
         return;
 
-      if (strchr(host,'?') != NULL)
+      if (strchr(host,'?') != (char *)NULL)
         return;
 
       if (identd && !different)

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.97 2002/06/28 06:23:14 db Exp $
+ * $Id: tcm_io.c,v 1.98 2002/08/09 21:43:02 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -731,6 +731,8 @@ find_user_in_connections(const char *username)
 
   for(ptr = connections.head; ptr; ptr = ptr->next)
   {
+    connection_p = ptr->data;
+
     if(connection_p->state != S_CLIENT)
       continue;
 

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.193 2002/08/09 16:21:25 bill Exp $
+ * $Id: bothunt.c,v 1.194 2002/08/09 21:43:02 wcampbel Exp $
  */
 
 #include <stdio.h>
@@ -1418,7 +1418,7 @@ char *
 get_user_host(char **user_p, char **host_p, char *user_host)
 {
   char *user = user_host;
-  char *end_p;
+  char *end_p = NULL;
   char *p;
 
   /* either: [user@host] (user@host) or just user@host */

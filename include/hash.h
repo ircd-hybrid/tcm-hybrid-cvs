@@ -1,7 +1,7 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.25 2002/08/08 18:10:35 bill Exp $ */
+/* $Id: hash.h,v 1.26 2002/08/09 21:42:59 wcampbel Exp $ */
 
 #define HASHTABLESIZE 3001
 
@@ -44,7 +44,7 @@ void add_to_hash_table(struct hash_rec *table[], const char *key,
 		       struct user_entry *new_user);
 void add_user_host(struct user_entry *, int);
 void remove_user_host(struct user_entry *);
-void update_nick(char *user, char *host, char *oldnick, char *newnick);
+void update_nick(char *, char *, char *, char *);
 
 void clear_hash(void);
 
@@ -52,13 +52,11 @@ struct user_entry *find_nick_or_host(const char *find, int type);
 #define FIND_NICK 1
 #define FIND_HOST 0
 
-void list_nicks(struct connection *connection_p, char *nick, int regex);
-void kill_or_list_users(struct connection *connection_p,
-			char *userhost, int regex, int kill, 
-			const char *reason);
-void list_gecos(struct connection *connection_p, char *u_gecos, int regex);
-void report_mem(struct connection *connection_p);
-void report_failures(struct connection *connection_p, int num);
+void list_nicks(struct connection *, char *, int);
+void kill_or_list_users(struct connection *, char *, int, int, const char *);
+void list_gecos(struct connection *, char *, int);
+void report_mem(struct connection *);
+void report_failures(struct connection *, int);
 
 /* XXX - this is now in clones.c */
 void check_reconnect_clones(char *);

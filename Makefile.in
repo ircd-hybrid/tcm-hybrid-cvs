@@ -27,7 +27,7 @@ all: tcm
 build: tcm
 
 clean:
-	@${RM} -f DEBUG etc/tcm.pid
+	@${RM} -f DEBUG etc/tcm.pid tcm.core ktrace.out core
 	@for i in $(SUBDIRS); do \
 		echo "Cleaning $$i";\
 		cd $$i;\
@@ -48,6 +48,7 @@ distclean:
 	done
 	${RM} -f Makefile config.status config.cache config.log include/setup.h etc/tcm.pid
 	${RM} -f DEBUG bin/tcm bin/mkpasswd etc/*.pref logs/*log logs/clone_log_*
+	${RM} -f ktrace.out tcm.core core
 	@echo "all:" > Makefile
 	@echo "	@echo \"Run ./configure first, dumby\"" >> Makefile
 

@@ -54,18 +54,6 @@ struct TcmMessage modlist_msgtab = {
 };
 #endif
 
-static int hash (char *p) {
-  int hash_val;
-
-  while (*p)
-   {
-     hash_val += ((int)(*p)&0xDF);
-     p++;
-   }
-
-  return(hash_val % MAX_MSG_HASH);
-}
-
 int findmodule(char *name)
 {
   int i;
@@ -81,18 +69,11 @@ int findmodule(char *name)
 #else
 void mod_add_cmd(struct TcmMessage *msg) {
   struct TcmMessageHash *ptr;
-  struct TcmMessageHash *last_ptr;
   struct TcmMessageHash *new_ptr;
-  int msgindex;
+  int msgindex=0;
 
   assert(msg != NULL);
-  msgindex = hash(msg->cmd);
-
-  for (ptr = msg_hash_table[msgindex]; ptr; ptr = ptr->next)
-    {
-      if (!strcasecmp(msg->cmd, ptr->cmd)) return;
-      last_ptr = ptr;
-    }
+  while (msg_hash_table[msgindex]) ++msgindex;
 
   if ((new_ptr = (struct TcmMessageHash *)malloc(sizeof(struct TcmMessageHash))) == NULL)
     {
@@ -109,32 +90,19 @@ void mod_add_cmd(struct TcmMessage *msg) {
   strcpy(new_ptr->cmd, msg->cmd);
   new_ptr->msg = msg;
 
-  if (last_ptr == NULL) msg_hash_table[msgindex] = new_ptr;
-  else last_ptr->next = new_ptr;
+  msg_hash_table[msgindex] = new_ptr;
 }
 
 void mod_del_cmd(struct TcmMessage *msg) {
   struct TcmMessageHash *ptr;
   struct TcmMessageHash *last_ptr;
-  int msgindex;
+  int msgindex=0;
 
   assert(msg != NULL);
-  msgindex = hash(msg->cmd);
+  while (strcasecmp(msg_hash_table[msgindex]->cmd, msg->cmd)) ++msgindex;
 
-  for(ptr = msg_hash_table[msgindex]; ptr; ptr = ptr->next)
-   {
-     if (!strcasecmp(msg->cmd, ptr->cmd))
-       {
-         free(ptr->cmd);
-         if (last_ptr != NULL)
-           last_ptr->next = ptr->next;
-         else
-           msg_hash_table[msgindex] = ptr->next;
-         free(ptr);
-         return;
-       }
-     last_ptr = ptr;
-   }
+  free(ptr->cmd);
+  free(ptr);
 }
 
 void add_common_function(int type, void *function)

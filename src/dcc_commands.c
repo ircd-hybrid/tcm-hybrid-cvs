@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.45 2002/05/04 20:12:04 einride Exp $ */
+/* $Id: dcc_commands.c,v 1.46 2002/05/05 14:36:44 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -2319,7 +2319,7 @@ report_multi_user(int sock,int nclones)
 
           for( temp = top; temp != userptr; temp = temp->collision )
             {
-              if (!strcmp(temp->info->user,userptr->info->user))
+              if (!match(temp->info->user,userptr->info->user))
                 break;
             }
 
@@ -2328,7 +2328,7 @@ report_multi_user(int sock,int nclones)
               numfound=1;       /* fixed minor boo boo -bill */
               for( temp = temp->collision; temp; temp = temp->collision )
                 {
-                  if (!strcmp(temp->info->user,userptr->info->user))
+                  if (!match(temp->info->user,userptr->info->user))
                     numfound++; /* - zaph & Dianora :-) */
                 }
 

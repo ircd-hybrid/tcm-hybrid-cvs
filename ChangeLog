@@ -1,3 +1,17 @@
+db          2002/05/29 12:05:11 EDT	(20020529_7)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - cleanups.. use memset to zero out a connection struct when closed
+  - use strlcpy instead of strncpy
+  - memset the entire connection array at startup
+  
+  Revision  Changes    Path
+  1.74      +14 -51    tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/29 09:36:44 EDT	(20020529_6)
 
   Modified files:

@@ -1,3 +1,16 @@
+db          2002/05/28 14:16:15 EDT	(20020528_21)
+
+  Modified files:
+    src                  main.c tcm_io.c 
+  Log:
+  - fixed stupid with maxconns. too many globals still, called all over...
+  
+  Revision  Changes    Path
+  1.96      +2 -0      tcm-hybrid/src/main.c
+  1.66      +0 -2      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/28 13:57:12 EDT	(20020528_20)
 
   Modified files:

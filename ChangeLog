@@ -1,3 +1,10 @@
+*** 20011027_2 by db
+- yet more cleanups.
+  add_action called with too many args. 
+  moved function prototypes into tcm.h
+
+
+
 *** 20011027_1 by db
 - Yet more tcm cleanups
 

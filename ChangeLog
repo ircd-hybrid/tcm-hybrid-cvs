@@ -1,3 +1,15 @@
+db          2002/05/24 15:31:29 EDT	(20020524_18)
+
+  Modified files:
+    src                  wingate.c 
+  Log:
+  - style cleanups
+  
+  Revision  Changes    Path
+  1.31      +23 -21    tcm-hybrid/src/wingate.c
+
+
+
 leeh        2002/05/24 14:50:54 EDT	(20020524_17)
 
   Modified files:

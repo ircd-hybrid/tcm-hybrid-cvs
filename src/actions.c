@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.46 2003/02/02 20:37:54 wiz Exp $
+ * $Id: actions.c,v 1.47 2003/02/02 20:57:04 wiz Exp $
  */
 
 #include "setup.h"
@@ -637,7 +637,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
 /* host */	snprintf(p, MAX_HOST, "*%s", s);
 	} else if ((s = strrchr(host, '.')) != NULL) {
 		*s = '\0';
-/* ipv4 */	snprintf(p, MAX_HOST, "%s%s", host, strchr(host, ':') ? "/64" : ".*");
+/* ipv4 */	snprintf(p, MAX_HOST, "%s%s", host, ".*");
 #if defined(IPV6) && defined (VIRTUAL_IPV6)
 	} else if (strchr(host, ':') != NULL) {
 		u_int16_t words[8];

@@ -544,7 +544,7 @@ ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
 
 
 PACKAGE=tcm-hybrid
-VERSION=2.4.6
+VERSION=2.5.1
 
 
 

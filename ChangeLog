@@ -1,3 +1,8 @@
+*** 20010826_2 by bill
+- still from Walter Campbell's patch
+  forgot to remove extra space in kill message
+
+
 *** 20010826_1 by bill
 - added a modified patch by Walter Campbell:
    fixes a few typos

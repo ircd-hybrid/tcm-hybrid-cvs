@@ -1,7 +1,7 @@
 /*  tcm-hybrid/src/tools.c by fl_
  *  Copyright (C) 2002 ircd-hybrid development team
  *
- *  $Id: tools.c,v 1.5 2002/06/24 15:44:56 leeh Exp $
+ *  $Id: tools.c,v 1.6 2002/06/24 16:21:51 leeh Exp $
  */
 
 #include <stdlib.h>
@@ -64,17 +64,14 @@ dlink_delete(dlink_node *m, dlink_list *list)
   /* item is at head */
   if(m->prev == NULL)
     list->head = m->next;
+  else
+    m->prev->next = m->next;
 
   /* item is at tail */
-  else if(m->next == NULL)
+  if(m->next == NULL)
     list->tail = m->prev;
-
-  /* item is in middle somewhere */
   else
-  {
     m->next->prev = m->prev;
-    m->prev->next = m->next;
-  }
 }
 
 dlink_node *

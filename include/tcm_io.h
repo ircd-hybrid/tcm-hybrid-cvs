@@ -2,10 +2,12 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.43 2002/06/24 15:44:53 leeh Exp $
+ * $Id: tcm_io.h,v 1.44 2002/06/24 16:21:48 leeh Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
+
+#include "tools.h"
 
 /* Dummy definition for now XXX */
 struct sockaddr_in;
@@ -45,7 +47,12 @@ struct connection {
 #define	S_SERVER		2
 #define	S_CLIENT		3
 
+struct dlink_list;
+dlink_list connections;
+
 struct connection *find_free_connection(void);
+
+void init_connections(void);
 
 void server_link_closed(struct connection *uplink);
 void close_connection(struct connection *connection_p);

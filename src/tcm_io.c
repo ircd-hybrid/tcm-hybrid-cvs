@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.94 2002/06/24 15:44:56 leeh Exp $
+ * $Id: tcm_io.c,v 1.95 2002/06/24 16:21:51 leeh Exp $
  */
 
 #include <stdio.h>
@@ -67,6 +67,12 @@ fd_set writefds;	/* file descriptor set for use with select */
 dlink_list connections;
 int pingtime;
 static struct connection *server_p;
+
+void
+init_connections(void)
+{
+  memset(&connections, 0, sizeof(connections));
+}
 
 /*
  * read_packet()

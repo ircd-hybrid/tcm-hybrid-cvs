@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.76 2002/05/26 01:28:20 db Exp $ */
+/* $Id: main.c,v 1.77 2002/05/26 02:06:47 leeh Exp $ */
 
 #include "setup.h"
 
@@ -192,6 +192,8 @@ main(int argc, char *argv[])
   eventInit();			/* event.c stolen from ircd */
 
   config_entries.conffile=NULL;
+
+  current_time = time(NULL);
 
   while( (c=getopt(argc, argv, "dvhnf:")) != -1)
     {

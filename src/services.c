@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.1 2002/05/26 00:44:19 leeh Exp $
+ * $Id: services.c,v 1.2 2002/05/26 02:06:47 leeh Exp $
  */
 
 #include <stdio.h>
@@ -46,8 +46,6 @@ struct serv_command services_msgtab = {
 struct services_entry
 {
   char cloning_host[MAX_HOST];
-  char last_cloning_host[MAX_HOST];
-  char user_count[SMALL_BUFF];
   int clones_displayed;
   int kline_suggested;
 };
@@ -87,16 +85,16 @@ services_handler(int argc, char *argv[])
     if((host = strchr(p, '@')) == NULL)
       return;
 
-    host++;
+    *host++ = '\0';
 
     if((p = strchr(host, ' ')) != NULL)
       *p = '\0';
 
     report(SEND_ALL, CHANNEL_REPORT_DRONE, 
-           "%s reports drone %s\n", SERVICES_NAME, nick);
+           "%s reports drone %s", SERVICES_NAME, nick);
 
     handle_action(act_drone, 1, nick, user, host, 0, 0);
-    log("%s reports drone %s [%s@%s]\n", SERVICES_NAME, nick, user, host);
+    log("%s reports drone %s [%s@%s]", SERVICES_NAME, nick, user, host);
     return;
   }
 #endif
@@ -117,10 +115,6 @@ services_handler(int argc, char *argv[])
 
     strncpy(services.cloning_host, argv[3], MAX_HOST-1);
 
-    if(!services.last_cloning_host[0])
-      strncpy(services.last_cloning_host, argv[3], MAX_HOST-1);
-
-    strncpy(services.user_count, p, SMALL_BUFF-1);
     services.clones_displayed = 0;
     services.kline_suggested = NO;
     return;
@@ -138,11 +132,6 @@ services_handler(int argc, char *argv[])
 
     while(*nick == ' ')
       ++nick;
-
-    if(strcmp(services.last_cloning_host, services.cloning_host) != 0)
-      services.clones_displayed = 0;
-
-    strncpy(services.last_cloning_host, services.cloning_host, MAX_HOST-1);
 
     if(services.clones_displayed == 3)
       return;

@@ -1,3 +1,7 @@
+*** 20011028_3 by wcampbel
+Cleaned up more cruft/lint/moldy code/BLOAT
+
+
 *** 20011028_2 by wcampbel
 Removed the BUGS list that Bill created.
 Documented that I repo-moved tcm.check into tools/

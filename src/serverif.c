@@ -57,7 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.21 2001/07/22 04:05:45 wcampbel Exp $";
+static char *version="$Id: serverif.c,v 1.22 2001/07/22 15:25:11 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -2162,6 +2162,9 @@ int argc;
 char *argv[];
 {
   int i;
+  char c;
+  extern char *optarg;
+  extern int optind;
 
   init_hash_tables();		/* clear those suckers out */
   init_tokenizer();		/* in token.c */
@@ -2176,10 +2179,46 @@ char *argv[];
   i=0;
 #endif
 
+#if 0
   if(argc < 2)
     load_config_file(CONFIG_FILE);
   else
     load_config_file(argv[1]);
+#endif
+
+  config_entries.conffile=NULL;
+
+  while( (c=getopt(argc, argv, "dvhnf:")) != -1)
+    {
+      switch (c)
+        {
+          case 'd':
+            config_entries.debug=1;
+            break;
+          case 'v':
+            printf("tcm-hybrid version %s(%s)\n", VERSION, SERIALNUM);
+            exit(0);
+            /* NOT REACHED */
+            break;
+          case 'h':
+            printf("%s [-h|-v] [-d] [-n] [-f conffile]\n-h help\n", argv[0]);
+            printf("-v version\n-d debug\n-n nofork\n-f specify conf file\n");
+            exit(0);
+            /* NOT REACHED */
+            break;
+          case 'n':
+            config_entries.nofork=1;
+            break;
+          case 'f':
+            config_entries.conffile=optarg;
+            break;
+        }
+    }
+
+  if (config_entries.conffile)
+    load_config_file(config_entries.conffile);
+  else
+    load_config_file(CONFIG_FILE);
 
   load_prefs();
 
@@ -2207,7 +2246,7 @@ char *argv[];
   config_entries.debug=1;
 #endif
 
-  if(!config_entries.debug)
+  if(!config_entries.debug && !config_entries.nofork)
     {
       i = fork();
       if (i == -1)

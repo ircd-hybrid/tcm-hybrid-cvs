@@ -71,6 +71,9 @@ struct config_list {
 #endif
 
   char statspmsg[MAX_CONFIG];
+
+  int nofork;
+  char *conffile;
 }CONFIG_LIST;
 
 /*

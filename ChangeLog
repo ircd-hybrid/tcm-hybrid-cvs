@@ -1,3 +1,19 @@
+leeh        2002/05/28 16:01:53 EDT	(20020528_25)
+
+  Modified files:
+    include              bothunt.h config.h 
+    src                  bothunt.c parse.c 
+  Log:
+  - ripped on_trace_class
+  
+  Revision  Changes    Path
+  1.43      +0 -1      tcm-hybrid/include/bothunt.h
+  1.63      +1 -1      tcm-hybrid/include/config.h
+  1.134     +0 -7      tcm-hybrid/src/bothunt.c
+  1.45      +1 -1      tcm-hybrid/src/parse.c
+
+
+
 db          2002/05/28 15:40:54 EDT	(20020528_24)
 
   Modified files:

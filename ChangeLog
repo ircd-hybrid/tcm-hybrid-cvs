@@ -1,3 +1,16 @@
+einride     2001/12/15 19:28:28 EST	(20011216_0)
+
+  Modified files:
+    modules              wingate.c 
+  Log:
+  _config in wingate.c will now compile also if DETECT_SOCKS and DETECT_WINGATE
+  isn't defined
+  
+  Revision  Changes    Path
+  1.16      +2 -1      tcm-hybrid/modules/wingate.c
+
+
+
 einride     2001/12/13 09:21:11 EST	(20011213_1)
 
   Modified files:

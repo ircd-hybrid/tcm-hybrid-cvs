@@ -1,4 +1,4 @@
-/* $Id: parse.h,v 1.1 2002/05/22 22:03:27 leeh Exp $ */
+/* $Id: parse.h,v 1.2 2002/05/23 08:57:49 einride Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
@@ -12,7 +12,7 @@ extern void _signon (int connnum, int argc, char *argv[]);
 extern void check_clones(void *);
 
 #ifdef SERVICES
-extern void check_services(void);
+extern void check_services(void *);
 #endif
 
 #endif

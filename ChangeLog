@@ -1,3 +1,13 @@
+*** 20011124_1 by bill
+
+- made +W affect LOCOPS viewing in addition to OPERWALL
+- made +W off by default, define ENABLE_W_FLAG in include/config.h
+  to enable
+- fixed improper format bug in commands.c
+- fixed typo in do_a_kline() -- found by plan9
+- fixed bug in .kline (and added optional duration) -- also found by plan9
+
+
 *** 20011123_4 by wcampbel
 Paste broke up a string line
 

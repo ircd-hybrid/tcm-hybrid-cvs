@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.216 2003/03/01 02:31:34 bill Exp $
+ * $Id: bothunt.c,v 1.217 2003/03/26 23:33:51 bill Exp $
  */
 
 #include <stdio.h>
@@ -330,35 +330,70 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   else
     faction = IGNORE;
 
-  if (strstr(p, "I-line mask "))
+  if ((q = strstr(p, "I-line mask [")) != NULL)
   {
-    if ((q = strrchr(p, '[')) == NULL)
+    p = q+13;
+    if ((q = strstr(p, "] prefix [")) == NULL)
       return;
-    if ((p = strrchr(q, ']')) == NULL)
+    *q = '\0';
+
+    user = q+10;
+    if ((q = strstr(user, "] name [")) == NULL)
       return;
-    ++q;
-    *p = '\0';
-    /* XXX transition WRONG WRONG WRONG */
-    /* who did this, and would you please explain it to me? -bill */
-    send_to_connection(config_entries.testline_cnctn,
-		    "%s has access to class %s", config_entries.testline_umask, q);
+    *q = '\0';
+
+    host = q+1;
+    if ((q = strstr(host, "] host [")) == NULL)
+      return;
+    host = q+8;
+
+    if ((nick = strstr(host, "] port [")) == NULL)
+      return;
+    *nick++ = '\0';
+    if ((q = strstr(nick, "] class [")) == NULL)
+      return;
+    q+=9;
+
+    if ((nick = strrchr(q, ']')) == NULL)
+      return;
+    *nick = '\0';
+
+    if (strchr(user, '=') != NULL)
+      send_to_connection(config_entries.testline_cnctn, "%s@%s spoofed as %s has access to class \"%s\"",
+                         user, host, p, q);
+    else
+      send_to_connection(config_entries.testline_cnctn, "%s@%s has access to class \"%s\"",
+                         user, host, q);
+
     config_entries.testline_cnctn = NULL;
     memset(&config_entries.testline_umask, 0, sizeof(config_entries.testline_umask));
+
     return;
   }
-  else if (strstr(p, "K-line name "))
+  else if (strstr(p, "-line name [") && (*(p-1) == 'K' || *(p-1) == 'k'))
   {
-    if ((q = strstr(p, "pass [")) == NULL)
+    user = p+12;
+    if ((q = strstr(user, "] host [")) == NULL)
       return;
-    q+=6;
-    if ((p = strchr(q, ']')) == NULL)
+    *q = '\0';
+
+    host = q+8;
+    if ((q = strstr(host, "] pass [")) == NULL)
+      return;
+    *q = '\0';
+    q+=8;
+
+    if ((p = strrchr(q, ']')) == NULL)
       return;
     *p = '\0';
-    /* see above */
+
     send_to_connection(config_entries.testline_cnctn, 
-	 "%s has been K-lined: %s", config_entries.testline_umask, q);
+	               "%s (%s@%s) has been K-lined: %s",
+                       config_entries.testline_umask,
+                       user, host, q);
     config_entries.testline_cnctn = NULL;
     memset(&config_entries.testline_umask, 0, sizeof(config_entries.testline_umask));
+
     return;
   }
 

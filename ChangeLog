@@ -1,3 +1,7 @@
+*** 20010619_1 by wcampbel
+Migrated to the same mkpasswd we use in hyb5 and hyb6
+
+
 *** 20010618_1 by kreator
 - Solaris uses mblk_t from sys/stream.h for sys/socketvar.h; i've added
   necessary tests and includes in source to fix compile

@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.32 2002/09/13 18:35:04 bill Exp $
+# $Id: Makefile.in,v 1.33 2002/10/04 00:28:52 bill Exp $
 
 CC = @CC@
 RM = @RM@
@@ -21,23 +21,23 @@ SOURCES =       actions.c	\
 		clones.c	\
 		dcc.c		\
 		dcc_commands.c	\
-                event.c         \
+		event.c		\
 		handler.c	\
-                hash.c		\
+		hash.c		\
 		logging.c       \
-                main.c          \
-                match.c         \
-                modules.c       \
-                parse.c         \
+		main.c		\
+		match.c		\
+		modules.c	\
+		parse.c		\
 		seedrand.c	\
 		serv_commands.c	\
 		services.c	\
-                stdcmds.c       \
-                tcm_io.c        \
+		stdcmds.c	\
+		tcm_io.c	\
 		tools.c		\
-                userlist.c      \
+		userlist.c	\
 		vclones.c	\
-                wild.c		\
+		wild.c		\
 		wingate.c
 
 OBJECTS = ${SOURCES:.c=.o}

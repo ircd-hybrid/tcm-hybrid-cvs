@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.146 2002/09/13 03:30:59 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.147 2002/10/04 00:28:52 bill Exp $ */
 
 #include "setup.h"
 
@@ -296,6 +296,13 @@ m_kaction(struct connection *connection_p, int argc, char *argv[])
       userhost = get_method_userhost(actionid, argv[2], NULL, NULL);
     }
 
+    if (userhost == NULL)
+    {
+      send_to_connection(connection_p,
+                         "Error in get_method_userhost().  Aborting...");
+      return;
+    }
+                    
     send_to_server("KLINE %s %s :%s", 
 		   argv[1], userhost, actions[actionid].reason);
   }

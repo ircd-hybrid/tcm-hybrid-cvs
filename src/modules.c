@@ -1,5 +1,5 @@
 /*
- * $Id: modules.c,v 1.52 2002/06/28 00:53:49 db Exp $B
+ * $Id: modules.c,v 1.53 2002/10/04 00:28:53 bill Exp $B
  *
  */
 
@@ -237,7 +237,7 @@ m_modlist (struct connection *connection_p, int argc, char *argv[])
 
   for (i=0;i<max_mods;++i)
    {
-     if (modlist[i].name != NULL)
+     if ((modlist[i].name[0] != '\0') && (modlist[i].address != NULL))
        {
          if (argc == 2 && !wldcmp(argv[1], modlist[i].name))
            send_to_connection(connection_p, "--- %s 0x%lx %s", 

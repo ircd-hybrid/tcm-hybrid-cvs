@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.18 2001/10/29 00:12:13 wcampbel Exp $ */
+/* $Id: tcm.h,v 1.19 2001/10/29 04:36:49 wcampbel Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -41,12 +41,6 @@
 
 #define YES 1
 #define NO 0
-
-#ifdef DEBUGMODE
- char placef[16][30];
- int placel[16];
- #define placed { add_placed(__FILE__, __LINE__); }
-#endif
 
 #define SET_PRIVMSG	1	/* See privmsg's to the tcm */
 #define SET_NOTICES	2	/* See some server notices, for remote users */

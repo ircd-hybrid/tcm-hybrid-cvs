@@ -1,3 +1,23 @@
+db          2002/05/26 11:26:02 EDT	(20020526_18)
+
+  Modified files:
+    include              bothunt.h 
+    src                  Makefile.in bothunt.c tcm_io.c wingate.c 
+  Log:
+  - don't add fd to writefds if there is no io_write_function for it
+  - more cleanups of SOCKS code in wingate.c not functional yet. getting there...
+  - add services.c to Makefile.in
+  - more tidy ups class[100] -> class[MAX_CLASS] etc. etc.
+  
+  Revision  Changes    Path
+  1.33      +1 -1      tcm-hybrid/include/bothunt.h
+  1.22      +1 -0      tcm-hybrid/src/Makefile.in
+  1.109     +1 -1      tcm-hybrid/src/bothunt.c
+  1.44      +2 -1      tcm-hybrid/src/tcm_io.c
+  1.41      +67 -82    tcm-hybrid/src/wingate.c
+
+
+
 leeh        2002/05/26 09:09:25 EDT	(20020526_17)
 
   Modified files:

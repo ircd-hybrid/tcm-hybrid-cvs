@@ -4,6 +4,9 @@
  *  - make it actually use MAXUSERS defined in config.h
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
+ *
+ * $Id: userlist.c,v 1.28 2001/10/29 00:12:14 wcampbel Exp $
+ *
  */
 
 #include <fcntl.h>
@@ -36,8 +39,6 @@
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>
 #endif
-
-static char *version="$Id: userlist.c,v 1.27 2001/10/28 22:17:46 wcampbel Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct exception_entry hostlist[MAXHOSTS];

@@ -1,3 +1,5 @@
+/* $Id: dcc_commands.c,v 1.23 2001/10/29 00:12:13 wcampbel Exp $ */
+
 #include "setup.h"
 
 #include <stdio.h>
@@ -46,7 +48,6 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.22 2001/10/28 22:17:46 wcampbel Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);

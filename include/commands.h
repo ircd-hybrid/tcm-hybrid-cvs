@@ -1,10 +1,12 @@
 #ifndef __COMMANDS_H
 #define __COMMANDS_H
 
+/* $Id: commands.h,v 1.5 2001/10/29 00:12:13 wcampbel Exp $ */
+
 void init_allow_nick();
 void dccproc(int connnum, int argc, char *argv[]);	
 
-/* hybrid-7 stuff again.  this time it's ver-batum because ultimately,
+/* hybrid-7 stuff again.  this time it's verbatim because ultimately,
  * waaay down the line, the modules we're loading here will work in
  * both stand-alone tcm AND ircd-hybrid-7.  :)
  *

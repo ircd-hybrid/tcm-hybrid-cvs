@@ -1,6 +1,8 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
+/* $Id: userlist.h,v 1.17 2001/10/29 00:12:13 wcampbel Exp $ */
+
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
 #define MAX_CONFIG	80

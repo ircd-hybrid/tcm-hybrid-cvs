@@ -10,6 +10,8 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
+/* $Id: main.c,v 1.16 2001/10/29 00:12:13 wcampbel Exp $ */
+
 #include "setup.h"
 
 #include <stdio.h>
@@ -59,8 +61,6 @@
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
-
-static char *version="$Id: main.c,v 1.15 2001/10/28 22:17:46 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;

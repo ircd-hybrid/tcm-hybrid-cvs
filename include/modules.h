@@ -1,6 +1,8 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
+/* $Id: modules.h,v 1.8 2001/10/29 00:12:13 wcampbel Exp $ */
+
 struct module {
   char *name;
   char *version;

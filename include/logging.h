@@ -1,6 +1,8 @@
 #ifndef __LOGGING_H
 #define __LOGGING_H
 
+/* $Id: logging.h,v 1.5 2001/10/29 00:12:13 wcampbel Exp $ */
+
 extern FILE *logging_fp; 
 extern FILE *outfile;
 

@@ -1,6 +1,8 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
+/* $Id: bothunt.h,v 1.14 2001/10/29 00:12:13 wcampbel Exp $ */
+
 void report_mem(int);
 void print_motd(int);		
 

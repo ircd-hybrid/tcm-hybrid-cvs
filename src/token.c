@@ -4,6 +4,9 @@
  * command table tokenizer for tcm
  *
  * - Dianora db@db.net
+ *
+ * $Id: token.c,v 1.17 2001/10/29 00:12:13 wcampbel Exp $
+ *
  */
 
 #include <stdio.h>
@@ -17,13 +20,10 @@
 #include "config.h"
 #include "tcm.h"
 #include "token.h"
-//#include "bothunt.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
-
-static char *version="$Id: token.c,v 1.16 2001/10/20 22:13:56 db Exp $";
 
 static int hash_cmd(char *);
 

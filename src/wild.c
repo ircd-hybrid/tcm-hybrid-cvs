@@ -7,13 +7,13 @@
 *   int wldwld                                              *
 *                                                           *
 * removed unneeded match code                               *
+*                                                           *
+* $Id: wild.c,v 1.4 2001/10/29 00:12:14 wcampbel Exp $
 ************************************************************/
 
 #include <ctype.h>
 #include <string.h>
 #include "wild.h"
-
-static char *version="$Id: wild.c,v 1.3 2001/10/17 02:26:12 bill Exp $";
 
 /*
 ** wldcmp()

@@ -1,6 +1,9 @@
 /*
- * much of this code has been copied (though none ver batum)
+ * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
+ *
+ * $Id: modules.c,v 1.13 2001/10/29 00:12:13 wcampbel Exp $
+ *
  */
 
 #include <assert.h>

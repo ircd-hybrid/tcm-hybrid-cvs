@@ -4,6 +4,8 @@
 /*
  * tcm config.h
  * Global definitions obtained by including this file.
+ *
+ * $Id: config.h,v 1.27 2001/10/29 00:12:13 wcampbel Exp $
  */
 
 /*
@@ -156,7 +158,7 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 /*
  * E: lines in userlist.cf will overrule auto kills/klines
  * exemptions are also derived from /stats E /stats F
- * requests, unless the ircd tells tcm to use /stats I (hybrid 6)
+ * requests, unless the ircd tells tcm to use /stats I (hybrid 6 and higher)
  */
 
 /*
@@ -173,29 +175,6 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 
 /* undef if you don't want klines reported - Toast */
 #define REPORT_KLINES
-
-/*
- * define this if you trust remotely connected opers to
- * do klines on your tcm
- *
- * IF you define this, NONE of the remote .kline .kill .kbot .kclone
- * commands will work until they have .registered, i.e. you MUST have
- * a valid "O:user@host:opernick:password:ok" entry in userlist.cf
-*/
-#define REMOTE_KLINE
-
-/*
- * If you don't want to allow registered opers on other tcm's
- * to do remote klines define this..
- * this (for now) disables the ability to do .kill @tcmnick user@host reason
-*/
-#undef RESTRICT_REMOTE_KLINE
-
-/*
- * If you don't want to allow registered opers on other tcm's
- * to do remote dlines define this..
- */
-#define RESTRICT_REMOTE_DLINE
 
 /*
  * Define this to allow people with admin privileges on the tcm to
@@ -225,7 +204,6 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 #define MAXBANS 25
 
 /* whom to message for a global clone report */
-/* in the U.S. services */
 #define SERVICES_NICK "services@services.us"
 
 /* name to expect services reply from */

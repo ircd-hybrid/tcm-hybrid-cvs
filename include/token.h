@@ -3,16 +3,20 @@
 
 /* tokens */
 
+/* $Id: token.h,v 1.12 2001/10/29 00:12:13 wcampbel Exp $ */
+
 #define K_CLONES   	1
 #define K_NFLOOD   	2
 #define K_REHASH   	3
 #define K_TRACE    	4
 #define K_FAILURES 	5
 #define K_DOMAINS  	6
+/*                      7 */
 #define K_BOTS     	8
 #define K_NFIND    	9
 #define K_LIST    	10
 #define K_KILLLIST 	11
+/*                      12 */
 #define K_KLINE   	13
 #define K_KCLONE  	14
 #define K_KFLOOD  	15
@@ -32,6 +36,7 @@
 #define K_OP      	29
 #define K_CYCLE   	30
 #define K_DIE     	31
+/*                      32 */
 #define K_RESTART       33
 #define K_DLINE		34
 #define K_EXEMPTIONS	35
@@ -47,6 +52,7 @@
 #define K_KLINK		45
 #define K_HMULTI	46
 #define K_UMULTI	47
+/*                      48 */
 #define K_MEM		49
 #define K_ACTION	50
 #define K_MOTD		51

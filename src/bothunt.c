@@ -12,7 +12,10 @@
 ** in the stuff that processes user commands... I just wanted to throw it
 ** together quickly.
 */
+
 /* (Hendrix original comments) */
+
+/* $Id: bothunt.c,v 1.28 2001/10/29 00:12:13 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -57,7 +60,6 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.27 2001/10/27 18:14:21 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -366,6 +368,8 @@ void _ontraceclass(int connnum, int argc, char *argv[])
  * Thinking about this.. I think perhaps this code should just go away..
  * Certainly, if you have REMOTE_KLINE etc. defined... You will need
  * to add users to userlist.cf anyway.
+ *
+ * REMOTE_KLINE is gone - Hwy
  * 
  */
 

@@ -14,6 +14,8 @@
 *   void privmsg                                            *
 ************************************************************/
 
+/* $Id: stdcmds.c,v 1.22 2001/10/29 00:12:13 wcampbel Exp $ */
+
 #include <ctype.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -34,8 +36,6 @@
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
-
-static char *version="$Id: stdcmds.c,v 1.21 2001/10/28 17:48:02 wcampbel Exp $";
 
 int doingtrace = NO;
 

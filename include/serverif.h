@@ -1,6 +1,8 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
+/* $Id: serverif.h,v 1.10 2001/10/29 00:12:13 wcampbel Exp $ */
+
 /* Time out for no response from the server 
  * 5 minutes should be plenty to receive a PING from the server
  */

@@ -1,3 +1,5 @@
+/* $Id: wingate.c,v 1.12 2001/10/29 00:12:13 wcampbel Exp $ */
+
 #include <netdb.h>
 #include <unistd.h>
 #include <fcntl.h>

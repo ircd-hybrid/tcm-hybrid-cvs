@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.41 2002/12/10 16:35:45 bill Exp $
+ * $Id: actions.c,v 1.42 2002/12/12 19:30:27 bill Exp $
  */
 
 #include "setup.h"
@@ -32,20 +32,6 @@
 #include "modules.h"
 
 #define valid_string(x) (((x) != NULL) && (*(x) != '\0'))
-
-int act_sclone;
-int act_drone;
-int act_sdrone;
-int act_cflood;
-int act_vclone;
-int act_flood;
-int act_link;
-int act_spambot;
-int act_clone;
-int act_rclone;
-int act_jupe;
-int act_nflood;
-struct a_entry actions[MAX_ACTIONS];
 
 static int add_action(char *name);
 static void update_action(struct connection *, int argc, char *argv[]);

@@ -1,24 +1,24 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.16 2002/12/10 16:35:43 bill Exp $ */
+/* $Id: actions.h,v 1.17 2002/12/12 19:30:26 bill Exp $ */
 
 #define MAX_ACTIONS	16
 
-extern int act_sdrone;
-extern int act_sclone;
+int act_sdrone;
+int act_sclone;
 
-extern int act_drone;
-extern int act_cflood;
-extern int act_vclone;
-extern int act_flood;
-extern int act_link;
-extern int act_bot;
-extern int act_spambot;
-extern int act_clone;
-extern int act_rclone;
-extern int act_jupe;
-extern int act_nflood;
+int act_drone;
+int act_cflood;
+int act_vclone;
+int act_flood;
+int act_link;
+int act_bot;
+int act_spambot;
+int act_clone;
+int act_rclone;
+int act_jupe;
+int act_nflood;
 
 void init_actions(void);
 void init_one_action(int *, char *, int, char *);
@@ -35,7 +35,7 @@ char *get_method_names(int method);
 char *get_method_userhost(int, char *, char *, char *);
 
 int get_method_number(char * name);
-extern struct a_entry actions[MAX_ACTIONS];
+struct a_entry actions[MAX_ACTIONS];
 
 /* Defines for an actions hoststrip field */
 

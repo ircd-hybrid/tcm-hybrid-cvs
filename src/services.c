@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.24 2002/11/26 15:56:25 bill Exp $
+ * $Id: services.c,v 1.25 2002/12/12 19:30:27 bill Exp $
  */
 
 #include <stdio.h>
@@ -99,9 +99,10 @@ services_handler(struct source_client *source_p, int argc, char *argv[])
     if (ok_host(user, host, act_drone))
       return;
 
-    send_to_all(NULL, FLAGS_ALL, "%s reports drone %s", SERVICES_NAME, nick);
+    if (actions[act_drone].method & METHOD_DCC_WARN)
+      send_to_all(NULL, FLAGS_ALL, "%s reports drone %s", SERVICES_NAME, nick);
 
-    if(config_entries.channel != '\0')
+    if (actions[act_drone].method & METHOD_IRC_WARN && config_entries.channel != '\0')
       privmsg(config_entries.channel, "%s reports drone %s", SERVICES_NAME, nick);
 
     handle_action(act_drone, nick, user, host, 0, 0);
@@ -168,11 +169,11 @@ services_handler(struct source_client *source_p, int argc, char *argv[])
     if (ok_host(user, host, act_sclone))
       return;
 
-    /* XXX */
-    send_to_all(NULL, FLAGS_ALL, "%s reports %d cloning %s@%s nick %s",
-                SERVICES_NAME, services.clone_amount, user, host, nick);
+    if (actions[act_sclone].method & METHOD_DCC_WARN)
+      send_to_all(NULL, FLAGS_ALL, "%s reports %d cloning %s@%s nick %s",
+                  SERVICES_NAME, services.clone_amount, user, host, nick);
 
-    if(config_entries.channel != '\0')
+    if (actions[act_sclone].method & METHOD_IRC_WARN && config_entries.channel != '\0')
       privmsg(config_entries.channel, "%s reports %d cloning %s@%s nick %s",
               SERVICES_NAME, services.clone_amount, user, host, nick);
 

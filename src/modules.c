@@ -100,6 +100,7 @@ void mod_del_cmd(struct TcmMessage *msg) {
 void add_common_function(int type, void *function)
 {
   struct common_function *temp;
+  int null=0;
 
   switch (type)
     {
@@ -180,14 +181,91 @@ void add_common_function(int type, void *function)
         break;
     }
 
-  if (!(temp && temp->function == NULL))
-    {
-      while (temp) temp=temp->next;
-      temp = (struct common_function *) malloc(sizeof(struct common_function));
-    }
+  if (temp == NULL) null=YES;
+  temp = (struct common_function *) malloc(sizeof(struct common_function));
   temp->type = type;
   temp->function = function;
   temp->next = (struct common_function *) NULL;
+  if (null == YES)
+    switch (type)
+      {
+        case F_SIGNON:
+          signon = temp;
+          break;
+        case F_SIGNOFF:
+          signoff = temp;
+          break;
+        case F_USER_SIGNON:
+          user_signon = temp;
+          break;
+        case F_USER_SIGNOFF:
+          user_signoff = temp;
+          break;
+        case F_DCC_SIGNON:
+          dcc_signon = temp;
+          break;
+        case F_DCC_SIGNOFF:
+          dcc_signoff = temp;
+          break;
+        case F_DCC:
+          dcc = temp;
+          break;
+        case F_UPPER_CONTINUOUS:
+          upper_continuous = temp;
+          break;
+        case F_CONTINUOUS:
+          continuous = temp;
+          break;
+        case F_SCONTINUOUS:
+          scontinuous = temp;
+          break;
+        case F_CONFIG:
+          config = temp;
+          break;
+        case F_PREFSAVE:
+          prefsave = temp;
+          break;
+        case F_ACTION:
+          action = temp;
+          break;
+        case F_RELOAD:
+          reload = temp;
+          break;
+        case F_WALLOPS:
+          wallops = temp;
+          break;
+        case F_ONJOIN:
+          onjoin = temp;
+          break;
+        case F_ONCTCP:
+          onctcp = temp;
+          break;
+        case F_ONTRACEUSER:
+          ontraceuser = temp;
+          break;
+        case F_ONTRACECLASS:
+          ontraceclass = temp;
+          break;
+        case F_SERVER_NOTICE:
+          server_notice = temp;
+          break;
+        case F_STATSI:
+          statsi = temp;
+          break;
+        case F_STATSK:
+          statsk = temp;
+          break;
+        case F_STATSE:
+          statse = temp;
+          break;
+        case F_STATSO:
+          statso = temp;
+          break;
+        default:
+          return;
+          break;
+      }
+  printf("done.\n");
 }
 
 #endif
@@ -198,7 +276,7 @@ void modules_init(void) {
   mod_add_cmd(&modreload_msgtab);
   mod_add_cmd(&modlist_msgtab);
 
-  if (signon == NULL)
+/*  if (signon == NULL)
     signon = (struct common_function *) malloc(sizeof(struct common_function));
   if (signoff == NULL)
     signoff = (struct common_function *) malloc(sizeof(struct common_function));
@@ -246,6 +324,7 @@ void modules_init(void) {
     statse = (struct common_function *) malloc(sizeof(struct common_function));
   if (statso == NULL)
     statso = (struct common_function *) malloc(sizeof(struct common_function));
+*/
 }
 
 int load_a_module(char *name, int log) {

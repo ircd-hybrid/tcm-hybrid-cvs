@@ -59,7 +59,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.4 2001/10/10 19:40:52 bill Exp $";
+static char *version="$Id: main.c,v 1.5 2001/10/11 16:04:57 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -644,9 +644,10 @@ int main(int argc, char *argv[])
     }
 
   modules_init();
-  dcc_signoff->function = closeconn;
+  add_common_function(F_DCC_SIGNOFF, closeconn);
+/*  dcc_signoff->function = closeconn;
   dcc_signoff->next = (struct common_function *)NULL;
-  dcc_signoff->type = F_DCC_SIGNOFF;
+  dcc_signoff->type = F_DCC_SIGNOFF;*/
   load_all_modules(YES);
 
   if (config_entries.conffile)
@@ -769,6 +770,7 @@ int main(int argc, char *argv[])
     {
       for (temp=upper_continuous;temp;temp=temp->next)
         temp->function(0, 0, NULL);
+      quit=YES;
     }
 
   for (temp=signoff;temp;temp=temp->next)

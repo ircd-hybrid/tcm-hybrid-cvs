@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.147 2002/06/02 22:16:58 db Exp $
+ * $Id: bothunt.c,v 1.148 2002/06/02 23:13:18 db Exp $
  */
 
 #include <stdio.h>
@@ -134,7 +134,7 @@ on_trace_user(int argc, char *argv[])
   char *ip_ptr;
   char *right_bracket_ptr;
 
-  if (!doingtrace)
+  if (tcm_status.doing_trace == NO)
     return;
 
   if (argv[3][0] == 'O')
@@ -510,18 +510,12 @@ on_server_notice(int argc, char *argv[])
 
   switch (faction)
   {
-    /* XXX - These are shadowed variables, should they be something else
-     *       or just use the prior definition of user and host?
-     */
-    char *user;
-    char *host;
-
   /* Client connecting: bill (bill@ummm.E) [255.255.255.255] {1} */
   case CONNECT:
     if ((q = strchr(p, '(')) == NULL)
       return;
     *(q-1) = '\0';
-    strlcpy(userinfo.nick,p+19, MAX_NICK);;
+    strlcpy(userinfo.nick, p+19, MAX_NICK);;
     if ((p = strchr(q, '[')) == NULL)
       return;
     ++p;

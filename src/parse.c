@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.49 2002/06/02 22:16:59 db Exp $
+ * $Id: parse.c,v 1.50 2002/06/02 23:13:19 db Exp $
  */
 
 #include <stdio.h>
@@ -416,7 +416,7 @@ process_server(int conn_num, char *source, char *function, char *param)
       send_umodes(tcm_status.my_nick);
       clear_hash();
       print_to_server("STATS Y");
-      doingtrace = YES;
+      tcm_status.doing_trace = YES;
       print_to_server("TRACE");
       break;
 	
@@ -426,7 +426,7 @@ process_server(int conn_num, char *source, char *function, char *param)
       break;
 	
     case RPL_TRACECLASS:
-      doingtrace = NO;
+      tcm_status.doing_trace = NO;
       break;
 	
     case RPL_STATSILINE:
@@ -516,7 +516,7 @@ do_init(void)
   join();
   clear_bothunt();
   clear_hash();
-  doingtrace = YES;
+  tcm_status.doing_trace = YES;
   print_to_server("TRACE");
 }
 

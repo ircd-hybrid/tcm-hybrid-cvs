@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.86 2002/06/02 22:16:59 db Exp $ */
+/* $Id: stdcmds.c,v 1.87 2002/06/02 23:13:19 db Exp $ */
 
 #include "setup.h"
 
@@ -39,8 +39,6 @@
 #include "userlist.h"
 #include "wild.h"
 #include "hash.h"
-
-int doingtrace = NO;
 
 /* The following are primitives that send messages to the server to perform
  * certain things.  The names are quite self explanatory, so I am not going

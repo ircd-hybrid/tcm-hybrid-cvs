@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.25 2002/06/02 22:16:58 db Exp $
+ * $Id: hash.c,v 1.26 2002/06/02 23:13:18 db Exp $
  */
 
 #include <stdio.h>
@@ -267,7 +267,7 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
   char *domain;
 
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
-  if (!doingtrace)
+  if (tcm_status.doing_trace == NO)
     user_signon(user_info);
 #endif
 

@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.21 2002/06/02 22:16:58 db Exp $
+ * $Id: actions.c,v 1.22 2002/06/02 23:13:18 db Exp $
  */
 
 #include "setup.h"
@@ -611,9 +611,12 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
       {
         s = strchr(host, '.');
 
-	/* XXX - host without dots, fixme for ipv6 */
+	/* it could be an ipv6 host */
 	if(s == NULL)
-          return NULL;
+	  {
+	    if ((s = strchr(host, ':')) == NULL)
+	      return NULL;
+	  }
 
 	snprintf(p, MAX_HOST+1, "*%s", s);
       }

@@ -1,4 +1,4 @@
-/* $Id: parse.h,v 1.14 2002/05/28 17:57:07 db Exp $ */
+/* $Id: parse.h,v 1.15 2002/06/02 23:13:15 db Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
@@ -26,6 +26,7 @@ struct t_tcm_status {
   char serverhost[MAX_HOST];    /* Server tcm will use. */
   int  am_opered;
   int  pingtime;
+  int  doing_trace;		/* presently doing trace */
 };
 
 extern struct t_tcm_status tcm_status;

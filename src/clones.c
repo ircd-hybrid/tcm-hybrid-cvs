@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.13 2002/06/01 12:36:15 wcampbel Exp $
+ * $Id: clones.c,v 1.14 2002/06/02 23:13:18 db Exp $
  */
 
 #include <assert.h>
@@ -36,6 +36,7 @@ static void m_clones(int, int, char *argv[]);
 static void check_clones(void *);
 static void report_clones(int);
 static void report_multi_user_host_domain(struct hash_rec *table[], int, int);
+static int is_an_ip(const char *host);
 
 struct dcc_command bots_msgtab = {
   "bots", NULL, {m_unregistered, m_bots, m_bots}
@@ -339,8 +340,7 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
   int i;
   int foundany = NO;
   int check_type;
-  /* XXX - This notip is never set before being used */
-  int notip;
+  int is_ip = 0;
 
   nclones--;
 
@@ -442,12 +442,13 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
 		}
 	      else if (check_type == DOMAIN_CHECK)
 		{
+		  is_ip = is_an_ip((const char *)ptr->info->domain);
 		  print_to_socket(sock,
 				  " %s %2d connections -- %s@%s%s {%s}\n",
 				  (num_found-nclones > 2) ? "==>" :
 				  "   ",num_found,ptr->info->user,
-				  notip ? "*." : ptr->info->domain,
-				  notip ? ptr->info->domain : ".*",
+				  is_ip ? ptr->info->domain : "*.",
+				  is_ip ? ".*" :ptr->info->domain,
 				  ptr->info->class);
 		}
 	    }
@@ -460,3 +461,12 @@ report_multi_user_host_domain(struct hash_rec *table[], int sock, int nclones)
     }
 }
 
+/* XXX */
+/* initial version */
+static int
+is_an_ip(const char *host)
+{
+  if (strpbrk(host, "GgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz") != NULL)
+    return(NO);
+  return(YES);
+}

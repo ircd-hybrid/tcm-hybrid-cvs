@@ -1,3 +1,16 @@
+wcampbel    2002/08/08 21:53:58 EDT	(20020809_0)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  Corrected nick change behaviour.  H6, H7, and csircd will now be processed
+  correctly with regards to nick changed.
+  
+  Revision  Changes    Path
+  1.192     +16 -22    tcm-hybrid/src/bothunt.c
+
+
+
 bill        2002/08/08 15:42:09 EDT	(20020808_3)
 
   Modified files:

@@ -1,3 +1,8 @@
+*** 20011009_3 by bill
+
+- fixed typo
+
+
 *** 20011009_2 by bill
 - forgot to commit fix for dcc bug (non resolving ips didnt always work)
 - suggest_host() now includes type, so we can suggest a host based on what

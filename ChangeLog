@@ -1,3 +1,10 @@
+*** 20010919_4 by bill
+- thanks to larne for advice regarding compiling modules.  they now load
+  semi-succesfully
+
+  current problem: undefined symbols in loading each module.  suggestions?
+
+
 *** 20010919_3 by bill
 - adding very needed files
 

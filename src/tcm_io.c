@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.105 2002/11/15 00:09:51 bill Exp $
+ * $Id: tcm_io.c,v 1.106 2003/01/04 02:36:48 jmallett Exp $
  */
 
 #include <stdio.h>
@@ -394,7 +394,7 @@ find_free_connection(void)
   tcm_status.n_of_fds_open++;
 
   connection_p = (struct connection *) xmalloc(sizeof(struct connection));
-  memset(connection_p, 0, sizeof(connection_p));
+  memset(connection_p, 0, sizeof(*connection_p));
 
   ptr = dlink_create();
   dlink_add_tail(connection_p, ptr, &connections);

@@ -1,13 +1,22 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.17 2002/12/12 19:30:26 bill Exp $ */
+/* $Id: actions.h,v 1.18 2003/01/04 02:36:46 jmallett Exp $ */
 
 #define MAX_ACTIONS	16
 
+struct a_entry {
+  char name[MAX_CONFIG];
+  char reason[MAX_CONFIG];
+  int method;
+  int hoststrip;
+  int klinetime;
+};
+
+struct a_entry actions[MAX_ACTIONS];
+
 int act_sdrone;
 int act_sclone;
-
 int act_drone;
 int act_cflood;
 int act_vclone;
@@ -23,19 +32,16 @@ int act_nflood;
 void init_actions(void);
 void init_one_action(int *, char *, int, char *);
 
-void set_action(int argc, char *argv[]);
+void set_action(int, char *[]);
 
-int find_action(char *name);
+int find_action(char *);
 
-void handle_action(int actionid,
-		   char *nick, char *user, char *host, char *ip,
-		   char * addcmt);
+void handle_action(int, char *, char *, char *, char *, char *);
 
-char *get_method_names(int method);
+char *get_method_names(int);
 char *get_method_userhost(int, char *, char *, char *);
 
-int get_method_number(char * name);
-struct a_entry actions[MAX_ACTIONS];
+int get_method_number(char *);
 
 /* Defines for an actions hoststrip field */
 
@@ -90,12 +96,5 @@ struct a_entry actions[MAX_ACTIONS];
 #define HS_WINGATE  (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
 #define HS_SOCKS    (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
 #define HS_SQUID    (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
-
-struct a_entry {
-  char name[MAX_CONFIG];
-  char reason[MAX_CONFIG];
-  int method;
-  int hoststrip, klinetime;
-};
 
 #endif

@@ -34,7 +34,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.4 2000/12/10 00:28:09 bill Exp $";
+static char *version="$Id: abuse.c,v 1.5 2001/02/02 03:27:36 wcampbel Exp $";
 
 /*
  * do_a_kline()
@@ -53,7 +53,9 @@ static char *version="$Id: abuse.c,v 1.4 2000/12/10 00:28:09 bill Exp $";
 void do_a_kline(char *command_name,int kline_time, char *pattern,
 		char *reason,char *who_did_command)
 {
+#ifdef DEBUG
   placed;
+#endif
 
 #ifdef RESTRICT_REMOTE_KLINE
   if( route_entry.to_nick[0] )

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.107 2002/05/26 05:48:04 db Exp $
+ * $Id: bothunt.c,v 1.108 2002/05/26 13:09:22 leeh Exp $
  */
 
 #include <stdio.h>
@@ -238,13 +238,13 @@ _ontraceuser(int connnum, int argc, char *argv[])
 
   if (!strncmp(argv[5], mynick, strlen(mynick)))
   {
-    snprintf(myclass, sizeof(myclass), "%s", argv[4]);
+    snprintf(myclass, MAX_CLASS, "%s", argv[4]);
   }
   class_ptr = argv[4];
 
   chopuh(YES,argv[5],&userinfo);
-  snprintf(userinfo.ip, sizeof(userinfo.ip), "%s", argv[6]+1);
-  snprintf(userinfo.class, sizeof(userinfo.class) - 1, "%s", class_ptr);
+  snprintf(userinfo.ip, MAX_IP, "%s", argv[6]+1);
+  snprintf(userinfo.class, MAX_CLASS, "%s", class_ptr);
 
   /* XXX */
   userinfo.nick = argv[5]; /* XXX */
@@ -976,11 +976,11 @@ onservnotice(int connnum, int argc, char *argv[])
     {
       if (strchr(user, '@'))
 	snprintf(connect_flood[c].user_host,
-		 sizeof(connect_flood[c].user_host), "%s", 
+		 MAX_USER+MAX_HOST, "%s", 
 		 user);
       else
 	snprintf(connect_flood[c].user_host,
-		 sizeof(connect_flood[c].user_host), "%s@%s",
+		 MAX_USER+MAX_HOST, "%s@%s",
 		 user, host);
       connect_flood[c].connect_count = 0;
       connect_flood[c].last_connect = current_time;
@@ -1036,11 +1036,11 @@ onservnotice(int connnum, int argc, char *argv[])
     if (c >= 0)
     {
       if (strchr(user, '@'))
-        snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host),
-                 "%s", user);
+        snprintf(connect_flood[c].user_host, MAX_USER + MAX_HOST, "%s", user);
       else
-        snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host),
-                 "%s@%s", user, host);
+        snprintf(connect_flood[c].user_host, MAX_USER + MAX_HOST,
+			"%s@%s", user, host);
+
       connect_flood[c].connect_count = 0;
       connect_flood[c].last_connect = current_time;
     }
@@ -1088,10 +1088,9 @@ onservnotice(int connnum, int argc, char *argv[])
     if (c >= 0)
     {
       if (strchr(user, '@'))
-        snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host),
-                 "%s", user);
+        snprintf(connect_flood[c].user_host, MAX_USER + MAX_HOST, "%s", user);
       else
-        snprintf(connect_flood[c].user_host, sizeof(connect_flood[c].user_host),
+        snprintf(connect_flood[c].user_host, MAX_USER + MAX_HOST,
                  "%s@%s", user, host);
       connect_flood[c].last_connect = current_time;
       connect_flood[c].connect_count = 0;
@@ -1195,7 +1194,7 @@ _onctcp(int connnum, int argc, char *argv[])
   else if (strncasecmp(msg, "DCC CHAT", 8) == 0)
   {
     /* the -6 saves room for the :port */
-    snprintf(dccbuff, sizeof(dccbuff)-7, "#%s", argv[3]+15);
+    snprintf(dccbuff, MAX_BUFF-7, "#%s", argv[3]+15);
     if ((port = strrchr(argv[3], ' ')) == NULL)
     {
       notice(nick, "Invalid port specified for DCC CHAT.  Not funny.");
@@ -1764,7 +1763,7 @@ check_reconnect_clones(char *host)
   {
     if (!reconnect_clone[i].host[0])
     {
-      strncpy(reconnect_clone[i].host, host, sizeof(reconnect_clone[i].host));
+      strncpy(reconnect_clone[i].host, host, MAX_HOST);
       reconnect_clone[i].host[MAX_HOST] = 0;
       reconnect_clone[i].first = now;
       reconnect_clone[i].count = 1;
@@ -1858,7 +1857,7 @@ check_host_clones(char *host)
 
       if (clonecount == 1)
       {
-	(void)snprintf(notice1,sizeof(notice1) - 1,
+	(void)snprintf(notice1, MAX_BUFF-1,
 		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
 		       find->info->nick, 
 		       find->info->user,
@@ -1868,7 +1867,7 @@ check_host_clones(char *host)
       else
       {
         memset((char *)&notice0, 0, sizeof(notice0));
-	(void)snprintf(notice0,sizeof(notice0) - 1,
+	(void)snprintf(notice0, MAX_BUFF-1,
 		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
 		       find->info->nick,
 		       find->info->user,
@@ -2024,7 +2023,7 @@ check_virtual_host_clones(char *ip_class_c)
 	  tmrec = localtime(&find->info->connecttime);
 
           if (user[0] == '\0')
-	    snprintf(user, sizeof(user), "%s", find->info->user);
+	    snprintf(user, MAX_USER-1, "%s", find->info->user);
 
           if (strcasecmp(user, find->info->user))
 	    different=YES;
@@ -2036,7 +2035,7 @@ check_virtual_host_clones(char *ip_class_c)
 
 	  if (clonecount == 1)
 	    {
-	      (void)snprintf(notice1,sizeof(notice1) - 1,
+	      (void)snprintf(notice1,MAX_BUFF - 1,
                             "  %s is %s@%s [%s] (%2.2d:%2.2d:%2.2d)\n",
 			    find->info->nick,
 			    find->info->user,
@@ -2048,7 +2047,7 @@ check_virtual_host_clones(char *ip_class_c)
 	    }
           else
 	    {
-	      (void)snprintf(notice0,sizeof(notice0) - 1,
+	      (void)snprintf(notice0,MAX_BUFF - 1,
                             "  %s is %s@%s [%s] (%2.2d:%2.2d:%2.2d)\n",
 			    find->info->nick,
 			    find->info->user,
@@ -2111,7 +2110,7 @@ connect_flood_notice(char *snotice)
 {
   char *nick_reported;
   char *user_host;
-  char user[MAX_NICK+1];
+  char user[MAX_USER+1];
   char host[MAX_HOST];
   char *ip;
   char *p;
@@ -2140,8 +2139,8 @@ connect_flood_notice(char *snotice)
   p=user_host;
   while (*p != '@') ++p;
   *p='\0';
-  snprintf(user, sizeof(user) - 1, "%s", user_host);
-  snprintf(host, sizeof(host) - 1, "%s", p+1);
+  snprintf(user, MAX_USER - 1, "%s", user_host);
+  snprintf(host, MAX_HOST - 1, "%s", p+1);
   *p='@';
 
   for(i=0;i<MAX_CONNECT_FAILS;++i)
@@ -2258,7 +2257,7 @@ link_look_notice(char *snotice)
   send_to_all(SEND_SPY, "[LINKS by %s (%s@%s)]",
 	       nick_reported, user, host ); /* - zaph */
 
-  snprintf(user_host, sizeof(user_host), "%s@%s", user, host);
+  snprintf(user_host, MAX_USER + MAX_HOST, "%s@%s", user, host);
 
   for(i = 0; i < MAX_LINK_LOOKS; i++ )
     {

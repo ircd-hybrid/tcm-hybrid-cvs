@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.31 2002/05/26 05:48:01 db Exp $ */
+/* $Id: bothunt.h,v 1.32 2002/05/26 13:09:19 leeh Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -12,16 +12,20 @@ struct plus_c_info
   char *nick;
   char *user;
   char *host;
-  char class[100];
-  char ip[MAX_IP];
+  char class[MAX_CLASS+1];
+  char ip[MAX_IP+1];
 };
+
+/* XXXX */
+void _config(int, int, char *argv[]);
+void _reload_wingate(int, int, char *argv[]);
 
 struct banned_info
 {
   char user[MAX_USER+1];
   char host[MAX_HOST+1];
-  char reason[MAX_REASON];
-  char who[MAX_WHO];
+  char reason[MAX_REASON+1];
+  char who[MAX_WHO+1];
   char server[MAX_DOMAIN+1];
   time_t when;
   struct banned_info *next;

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.90 2002/05/26 02:55:09 db Exp $ */
+/* $Id: dcc_commands.c,v 1.91 2002/05/26 13:09:22 leeh Exp $ */
 
 #include "setup.h"
 
@@ -109,12 +109,13 @@ m_killlist(int connnum, int argc, char *argv[])
   char reason[MAX_REASON];
 
 #ifdef HAVE_REGEX_H
-  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+  if ((argc < 2) || (argc < 4 && (strcasecmp(argv[1], "-r") == 0)))
   {
     print_to_socket(connections[connnum].socket,
-		    "Usage: %s [-r] <wildcarded/regex userhost>", argv[0]);
+		    "Usage: .killlist [-r] <wildcarded/regex userhost> <reason>");
     return;
   }
+
   if (argc >= 4)
   {
     expand_args(reason, MAX_REASON-1, argc-3, argv+3);
@@ -123,41 +124,40 @@ m_killlist(int connnum, int argc, char *argv[])
   if (argc < 2)
   {
     print_to_socket(connections[connnum].socket,
-         "Usage: %s <wildcarded userhost>", argv[0]);
+         "Usage: %s <wildcarded userhost> <reason>", argv[0]);
     return;
   }
+
   if (argc >= 3)
   {
-    expand_args(reason, sizeof(reason)-1, argc-3, argv+3);
+    expand_args(reason, sizeof(reason)-1, argc-2, argv+2);
   }
+#endif
   else
     snprintf(reason, sizeof(reason), "No reason");
-#endif
-  if (!(connections[connnum].type & (TYPE_INVS|TYPE_INVM)))
+
+  if((connections[connnum].type & (TYPE_INVS|TYPE_INVM)) == 0)
   {
-    strncat(reason, " (requested by ", sizeof(reason)-strlen(reason));
+    strncat(reason, " (requested by ", MAX_REASON - strlen(reason));
     strncat(reason, connections[connnum].registered_nick,
-            sizeof(reason)-strlen(reason));
-    strncat(reason, ")", sizeof(reason)-strlen(reason));
+            MAX_REASON - strlen(reason));
+    strncat(reason, ")", MAX_REASON - strlen(reason));
   }
+
 #ifdef HAVE_REGEX_H
-  if (strcasecmp(argv[1], "-r"))
+  if (strcasecmp(argv[1], "-r") == 0)
   {
-    send_to_all( SEND_ALL, "*** killlist %s :%s by %s", argv[1],
-                 reason, connections[connnum].registered_nick);
-    kill_list_users(connections[connnum].socket, argv[1], reason, NO);
-  }
-  else
-  {
-    send_to_all( SEND_ALL, "*** killlist %s :%s by %s", argv[2],
-                 reason, connections[connnum].registered_nick);
+    send_to_all(SEND_ALL, "*** killlist %s :%s by %s", argv[2],
+                reason, connections[connnum].registered_nick);
     kill_list_users(connections[connnum].socket, argv[2], reason, YES);
   }
-#else
-  send_to_all( SEND_ALL, "*** killlist %s :%s by %s", argv[1],
-               reason, connections[connnum].registered_nick);
-  kill_list_users(connections[connnum].socket, argv[1], reason, NO);
+  else
 #endif
+  {
+    send_to_all(SEND_ALL, "*** killlist %s :%s by %s", argv[1],
+                reason, connections[connnum].registered_nick);
+    kill_list_users(connections[connnum].socket, argv[1], reason, NO);
+  }
 }
 
 void
@@ -186,7 +186,7 @@ m_kline(int connnum, int argc, char *argv[])
     {
       if (argc >= 3)
       {
-	expand_args(buff, MAX_BUFF-1, argc-3, argv+3);
+	expand_args(buff, MAX_BUFF-1, argc-2, argv+2);
       }
       do_a_kline("kline", 0, argv[1], buff,
 		 connections[connnum].registered_nick);
@@ -208,7 +208,7 @@ m_kperm(int connnum, int argc, char *argv[])
 void
 m_kill(int connnum, int argc, char *argv[])
 {
-  char reason[1024];
+  char reason[MAX_REASON];
 
   if (argc < 2)
   {
@@ -217,21 +217,23 @@ m_kill(int connnum, int argc, char *argv[])
     return;
   }
   else if (argc == 2)
-    snprintf(reason, sizeof(reason), "No reason");
+    snprintf(reason, MAX_REASON-1, "No reason");
   else
   {
-    expand_args(reason, sizeof(reason)-1, argc-2, argv+2);
+    expand_args(reason, MAX_REASON-1, argc-2, argv+2);
   }
-  send_to_all( SEND_KLINE_NOTICES, "*** kill %s :%s by %s",
-               argv[1], reason, connections[connnum].registered_nick);
+
+  send_to_all(SEND_KLINE_NOTICES, "*** kill %s :%s by %s",
+              argv[1], reason, connections[connnum].registered_nick);
   log_kline("KILL", argv[1], 0, connections[connnum].registered_nick, reason);
   if (!(connections[connnum].type & (TYPE_INVS|TYPE_INVM)))
   {
-    strncat(reason, " (requested by ", sizeof(reason)-strlen(reason));
+    strncat(reason, " (requested by ", MAX_REASON - 1 - strlen(reason));
     strncat(reason, connections[connnum].registered_nick,
-            sizeof(reason)-strlen(reason));
-    strncat(reason, ")", sizeof(reason)-strlen(reason));
+            MAX_REASON - 1 - strlen(reason));
+    strncat(reason, ")", MAX_REASON - strlen(reason));
   }
+
   print_to_server("KILL %s :%s", argv[1], reason);
 }
 
@@ -753,7 +755,8 @@ m_quote(int connnum, int argc, char *argv[])
          argv[0]);
     return;
   }
-  expand_args(dccbuff, MAX_BUFF-1, argc, argv);
+
+  expand_args(dccbuff, MAX_BUFF-1, argc-1, argv+1);
   print_to_server("%s", dccbuff);
 }
 #endif

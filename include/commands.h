@@ -1,7 +1,7 @@
 #ifndef __COMMANDS_H
 #define __COMMANDS_H
 
-/* $Id: commands.h,v 1.15 2002/05/25 23:27:50 db Exp $ */
+/* $Id: commands.h,v 1.16 2002/05/26 13:09:19 leeh Exp $ */
 
 void init_allow_nick();
 
@@ -15,7 +15,7 @@ void m_vlist(int connnum, int argc, char *argv[]);
 void m_class(int connnum, int argc, char *argv[]);
 void m_classt(int connnum, int argc, char *argv[]);
 void m_killlist(int connnum, int argc, char *argv[]);
-void m_kline(int connnum, int argc, char *argv[]);
+void m_kline(int connnum, int argc, char **argv);
 void m_kclone(int connnum, int argc, char *argv[]);
 void m_kflood(int connnum, int argc, char *argv[]);
 void m_kperm(int connnum, int argc, char *argv[]);

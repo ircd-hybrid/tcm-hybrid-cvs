@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.39 2002/05/26 07:26:07 db Exp $ */
+/* $Id: wingate.c,v 1.40 2002/05/26 13:09:23 leeh Exp $ */
 
 
 #include <netdb.h>
@@ -56,7 +56,11 @@ static void read_wingate(int i);
 int act_socks;
 static void report_open_socks(int i);
 static void socks_start_test(struct plus_c_info *info_p, int socksversion);
+
+/* XXX */
+#if notyet
 static void read_socks(int i);
+#endif
 #endif
 
 #ifdef DETECT_SQUID
@@ -429,10 +433,14 @@ user_signon(struct plus_c_info *info_p)
     }
 }
 
+
+/* XXX */
 void
 _reload_wingate(int connnum, int argc, char *argv[])
 {
+#if 0
   int cnt;
+#endif
 }
 
 #ifdef DETECT_WINGATE

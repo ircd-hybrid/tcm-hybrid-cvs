@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.75 2002/05/26 05:48:05 db Exp $
+ * $Id: userlist.c,v 1.76 2002/05/26 13:09:22 leeh Exp $
  *
  */
 
@@ -1005,7 +1005,9 @@ local_ip(char *ourhostname)
 int
 wingate_class(char *class)
 {
+#if notyet
   int i;
+#endif
   return YES;
   /* XXX */
 #if notyet

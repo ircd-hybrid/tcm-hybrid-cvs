@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.43 2002/04/23 14:31:10 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.44 2002/05/03 22:49:46 einride Exp $ */
 
 #include "setup.h"
 
@@ -75,6 +75,8 @@ void _moddeinit();
 
 extern struct connection connections[];
 extern struct s_testline testlines;
+extern char * get_method_names(int method);
+extern int get_method_number(char * name);
 
 void m_vlist(int connnum, int argc, char *argv[])
 {
@@ -230,6 +232,7 @@ void m_kline(int connnum, int argc, char *argv[])
   }
 }
 
+extern int act_clone;
 void m_kclone(int connnum, int argc, char *argv[])
 {
   int kline_time=0;
@@ -239,14 +242,14 @@ void m_kclone(int connnum, int argc, char *argv[])
          "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
   else
   {
-    if ((kline_time=atoi(argv[1])))
-      suggest_action(-get_action_type("clone"), argv[2], NULL, NULL,
-                     kline_time, NO);
+    if (!(kline_time = atoi(argv[1])))
+      toserv("KLINE %s :%s\n", argv[1], actions[act_clone].reason);
     else
-      suggest_action(-get_action_type("clone"), argv[1], NULL, NULL, 0, NO);
+      toserv("KLINE %d %s :%s\n", kline_time, argv[2], actions[act_clone].reason);
   }
 }
 
+extern int act_flood;
 void m_kflood(int connnum, int argc, char *argv[])
 {
   int kline_time;
@@ -256,11 +259,10 @@ void m_kflood(int connnum, int argc, char *argv[])
          "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
   else
   {
-    if ((kline_time=atoi(argv[1])))
-      suggest_action(-get_action_type("flood"), argv[2], NULL, NULL,
-                     kline_time, NO);
+    if (!(kline_time=atoi(argv[1])))
+      toserv("KLINE %s :%s\n", argv[1], actions[act_flood].reason);
     else
-      suggest_action(-get_action_type("flood"), argv[1], NULL, NULL, 0, NO);
+      toserv("KLINE %d %s :%s\n", kline_time, argv[2], actions[act_flood].reason);
   }
 }
 
@@ -274,6 +276,7 @@ void m_kperm(int connnum, int argc, char *argv[])
                connections[connnum].registered_nick);
 }
 
+extern int act_link;
 void m_klink(int connnum, int argc, char *argv[])
 {
   int kline_time;
@@ -283,14 +286,14 @@ void m_klink(int connnum, int argc, char *argv[])
          "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
   else
   {
-    if ((kline_time=atoi(argv[1])))
-      suggest_action(-get_action_type("link"), argv[2], NULL, NULL,
-                     kline_time, NO);
+    if (!(kline_time=atoi(argv[1])))
+      toserv("KLINE %s :%s\n", argv[1], actions[act_link].reason);
     else
-      suggest_action(-get_action_type("link"), argv[1], NULL, NULL, 0, NO);
+      toserv("KLINE %d %s :%s\n", kline_time, argv[2], actions[act_link].reason);
   }
 }
 
+extern int act_drone;
 void m_kdrone(int connnum, int argc, char *argv[])
 {
   int kline_time;
@@ -300,14 +303,14 @@ void m_kdrone(int connnum, int argc, char *argv[])
          "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
   else
   {
-    if ((kline_time=atoi(argv[1])))
-      suggest_action(-get_action_type("drone"), argv[2], NULL, NULL,
-                     kline_time, NO);
+    if (!(kline_time=atoi(argv[1])))
+      toserv("KLINE %s :%s\n", argv[1], actions[act_drone].reason);
     else
-      suggest_action(-get_action_type("drone"), argv[1], NULL, NULL, 0, NO);
+      toserv("KLINE %d %s :%s\n", kline_time, argv[2], actions[act_drone].reason);
   }
 }
 
+extern int act_bot;
 void m_kbot(int connnum, int argc, char *argv[])
 {
   int kline_time;
@@ -317,11 +320,10 @@ void m_kbot(int connnum, int argc, char *argv[])
          "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
   else
   {
-    if ((kline_time=atoi(argv[1])))
-      suggest_action(-get_action_type("bot"), argv[2], NULL, NULL,
-                     kline_time, NO);
+    if (!(kline_time=atoi(argv[1])))
+      toserv("KLINE %s :%s\n", argv[1], actions[act_bot].reason);
     else
-      suggest_action(-get_action_type("bot"), argv[1], NULL, NULL, 0, NO);
+      toserv("KLINE %d %s :%s\n", kline_time, argv[2], actions[act_bot].reason);
   }
 }
 
@@ -361,6 +363,7 @@ void m_kill(int connnum, int argc, char *argv[])
   toserv("KILL %s :%s\n", argv[1], reason);
 }
 
+extern int act_spambot;
 void m_kspam(int connnum, int argc, char *argv[])
 {
   int kline_time;
@@ -370,11 +373,10 @@ void m_kspam(int connnum, int argc, char *argv[])
          "Usage: %s [time] <[nick]|[user@host]>\n", argv[0]);
   else
   {
-    if ((kline_time=atoi(argv[1])))
-      suggest_action(-get_action_type("spambot"), argv[2], NULL, NULL,
-                     kline_time, NO);
+    if (!(kline_time=atoi(argv[1])))
+      toserv("KLINE %s :%s\n", argv[1], actions[act_spambot].reason);
     else
-      suggest_action(-get_action_type("spambot"), argv[1], NULL, NULL, 0, NO);
+      toserv("KLINE %d %s :%s\n", kline_time, argv[2], actions[act_spambot].reason);
   }
 }    
 
@@ -451,8 +453,9 @@ void m_testline(int connnum, int argc, char *argv[])
 
 void m_action(int connnum, int argc, char *argv[])
 {
-  char *p, dccbuff[MAX_BUFF];
-  int len, kline_time, i;
+  //  char *p, dccbuff[MAX_BUFF];
+  int kline_time, i;
+  char methods[MAX_BUFF], reason[MAX_BUFF];
 
   switch (argc)
   {
@@ -465,93 +468,42 @@ void m_action(int connnum, int argc, char *argv[])
     case 2:
       set_actions(connections[connnum].socket, argv[1], NULL, 0, NULL);
       break;
-    /* .action clone :Cloning */
+    /* .action clone :Cloning is prohibited */
     /* .action clone kline */
-    case 3:
-      if (argv[2][0] == ':')
-      {
-        p = &argv[2][1];
-        set_actions(connections[connnum].socket, argv[1], NULL, 0, p);
-        break;
-      }
-      set_actions(connections[connnum].socket, argv[1], argv[2], 0, NULL);
-      break;
+    /* .action clone kline :Cloning */
+    /* .action clone kline 1440 ircwarn dccwarn :Cloning is prohibited*/        
     default:
-      if (argc < 4) break;
-      /* .action clone :Cloning is prohibited*/
-      if (argv[2][0] == ':')
-      {
-        p=&argv[2][1];
-        len = snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
-        p = dccbuff + len;
-        for (i = 3; i < argc; i++)
-        {
-          len = sprintf(p, "%s ", argv[i]);
-          p += len;
-        }
-        /* blow away last ' ' */
-        *--p = '\0';
-        set_actions(connections[connnum].socket, argv[1], NULL, 0, dccbuff);
-        break;
+      /* Scan up to first ':' (extracting first found number if any)
+	 and make two strings; methods & reason */
+      kline_time = 0;
+      methods[0] = 0;
+      reason[0] = 0;
+      for (i=2;i<argc;i++) {
+	if (argv[i][0]==':') {
+	  snprintf(reason, sizeof(reason), "%s ", argv[i]+1);
+	  for (;i<argc;i++) {
+	    strncat(reason, argv[i], sizeof(reason));
+	    strncat(reason, " ", sizeof(reason));
+	  }
+	  break;
+	}
+	if ((!kline_time) && (atoi(argv[i])>0)) {
+	  kline_time = atoi(argv[i]);
+	} else {
+	  strncat(methods, argv[i], sizeof(methods));
+	  strncat(methods, " ", sizeof(methods));
+	}
       }
-      /* .action clone kline :Cloning */
-      if (argv[3][0] == ':')
-      {
-        p=&argv[3][1];
-        snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
-        for (i=4;i<argc;++i)
-        {
-          strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
-          strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
-        }
-        if (dccbuff[strlen(dccbuff)-1] == ' ')
-          dccbuff[strlen(dccbuff)-1] = '\0';
-        set_actions(connections[connnum].socket, argv[1], argv[2], 0,
-                    dccbuff);
-        break;
-      }
-      /* .action clone kline 1440 */
-      /* .action clone kline 1440 :Cloning is prohibited */
-      /* .action clone kline Clones */
-      /* .action clone kline Cloning is prohibited */
-      if (!(kline_time = atoi(argv[3])))
-      {
-        if (argv[3][0] == ':')
-          p = &argv[3][1];
-        else
-          p = &argv[3][0];
-        snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
-        for (i=4;i<argc;++i)
-        {
-          strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
-          strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
-        }
-        if (dccbuff[strlen(dccbuff)-1] == ' ')
-          dccbuff[strlen(dccbuff)-1] = '\0';
-        set_actions(connections[connnum].socket, argv[1], argv[2], 0, argv[3]);
-        break;
-      }
-      if (argc == 4)
-      {
-        set_actions(connections[connnum].socket, argv[1], argv[2], kline_time,
-                    NULL);
-        break;
-      }
-      if (argv[4][0] == ':')
-        p = &argv[4][1];
-      else
-        p = &argv[4][0];
-      len = snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
-      p = dccbuff + len;
-      for (i = 5; i < argc; i++)
-      {
-        len = sprintf(p, "%s ", argv[i]);
-        p += len;
-      }
-      /* blow away last ' ' */
-      *--p = '\0';
-      set_actions(connections[connnum].socket,
-                  argv[1], argv[2], kline_time, dccbuff);
+      i = strlen(methods);
+      if (i && (methods[i-1]==' '))
+	methods[i-1] = 0;
+      i = strlen(reason);
+      if (i && (reason[i-1]==' '))
+	reason[i-1] = 0;
+      set_actions(connections[connnum].socket, argv[1], 
+		  methods[0] ? methods : NULL, 
+		  kline_time, 
+		  reason[0] ? reason : NULL);
       break;
   }
 }
@@ -1116,52 +1068,57 @@ dccproc(int connnum, int argc, char *argv[])
  */
 
 static void 
-set_actions(int sock, char *key, char *act, int duration, char *reason)
+set_actions(int sock, char *key, char *methods, int duration, char *reason)
 {
   int i;
+  char * p;
+  int newmethods = 0;
+  int changing = (methods || duration || reason);
+
+  while (methods) {
+    p = strchr(methods, ' ');
+    if (p) 
+      *p++ = 0;
+    // Lookup method constant based on method name
+    i = get_method_number(methods);
+    if (i) {
+      newmethods |= i;
+    } else {
+      prnt(sock, "%s is not a valid method\n", methods);
+      return;
+    }
+    methods = p;
+  }
 
   if (key == NULL)
-  {
-    prnt(sock, "Current actions:\n");
-    for (i=0; i<MAX_ACTIONS; i++)
-    {
-      if (actions[i].name[0])
-      {
-	if (strcasecmp(actions[i].method, "warn") == 0)
-	  prnt(sock, "%s action: %s\n", actions[i].name, actions[i].method);
-	else
-	  prnt(sock, "%s action: %s :%s\n", actions[i].name, actions[i].method,
-	       actions[i].reason);
-	if (actions[i].report != 0)
-	  prnt(sock, " Reported to channel\n");
-      }
-    }
+    key = "*";
+  if (changing) {
+    prnt(sock, "Updating actions matching '%s'\n", key);
+  } else {
+    prnt(sock, "Listing actions matching '%s'\n", key);
   }
-  else
-  {
-    for (i=0; i<MAX_ACTIONS; i++)
-    {
-      if (!wldcmp(key, actions[i].name) && actions[i].name[0])
-      {
-	if (act)
-	  {
-	    if (duration) snprintf(actions[i].method,
-				   sizeof(actions[i].method),
-				   "%s %d", act, duration);
-	    else snprintf(actions[i].method, sizeof(actions[i].method), "%s",
-			  act);
-	  }
-	if (reason && reason[0]) snprintf(actions[i].reason, 
-					  sizeof(actions[i].reason),
-					  "%s", reason);
 
-	if (strcasecmp(actions[i].method, "warn") == 0)
-	  prnt(sock, "%s action: %s\n", actions[i].name, actions[i].method);
-	else
-	  prnt(sock, "%s action: %s :%s\n", actions[i].name, actions[i].method,
+  for (i=0; i<MAX_ACTIONS; i++) {
+    if (actions[i].name[0]) {
+      if (!wldcmp(key, actions[i].name)) {
+	if (newmethods) 
+	  set_action_method(i, newmethods);
+	if (reason)
+	  set_action_reason(i, reason);
+	if (duration)
+	  set_action_time(i, duration);
+	
+	if (changing) {
+	  prnt(sock, "%s action now: %s, duration %d, reason '%s'\n", actions[i].name,
+	       get_method_names(actions[i].method),
+	       actions[i].klinetime,
 	       actions[i].reason);
-	if (actions[i].report != 0)
-	  prnt(sock, " Reported to channel\n");
+	} else {
+	  prnt(sock, "%s action: %s, duration %d, reason '%s'\n", actions[i].name,
+	       get_method_names(actions[i].method),
+	       actions[i].klinetime,
+	       actions[i].reason);
+	}
       }
     }
   }

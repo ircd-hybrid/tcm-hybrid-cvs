@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.22 2002/04/02 23:24:26 bill Exp $ */
+/* $Id: wingate.c,v 1.23 2002/05/03 22:49:47 einride Exp $ */
 
 
 #include <netdb.h>
@@ -62,13 +62,13 @@ extern fd_set readfds;
 #endif
 
 #ifdef DETECT_WINGATE
-#define R_WINGATE 0x040
+int act_wingate;
 static void report_open_wingate(int i);
 struct wingates wingate[MAXWINGATES];
 #endif
 
 #ifdef DETECT_SOCKS
-#define R_SOCKS 0x080
+int act_socks;
 static void report_open_socks(int i);
 struct wingates socks[MAXSOCKS];
 #endif
@@ -546,9 +546,9 @@ static void report_open_wingate(int i)
 {
   if (config_entries.debug && outfile)
     fprintf(outfile, "Found wingate open\n");
-
-  suggest_action(get_action_type("wingate"), wingate[i].nick, wingate[i].user, wingate[i].host,
-                 NO, NO);
+  
+  
+  handle_action(act_wingate, 0, wingate[i].nick, wingate[i].user, wingate[i].host, inet_ntoa(wingate[i].socketname.sin_addr));
   log("Open Wingate %s!%s@%s\n",
       wingate[i].nick, wingate[i].user, wingate[i].host);
 }
@@ -561,7 +561,7 @@ static void report_open_socks(int i)
   if (config_entries.debug && outfile)
     fprintf(outfile, "DEBUG: Found open socks proxy at %s\n", socks[i].host);
 
-  suggest_action(get_action_type("socks"), socks[i].nick, socks[i].user, socks[i].host, NO, NO);
+  handle_action(act_socks, 0, socks[i].nick, socks[i].user, socks[i].host, inet_ntoa(socks[i].socketname.sin_addr));
   log("Open socks proxy %s\n",socks[i].host);
 }
 #endif
@@ -576,14 +576,14 @@ void _modinit()
   add_common_function(F_CONFIG, _config);
   wingate_class_list_index = 0;
 #ifdef DETECT_WINGATE
-  add_action("wingate", "warn", REASON_WINGATE);
-  set_action_type("wingate", R_WINGATE);
+  act_wingate = add_action("wingate");
+  set_action_reason(act_wingate, "Open WinGate proxy");
   for (i=0;i<MAXWINGATES;++i)
     wingate[i].socket = INVALID;
 #endif
 #ifdef DETECT_SOCKS
-  add_action("socks", "warn", "Open SOCKS");
-  set_action_type("socks", R_SOCKS);
+  act_socks = add_action("socks");
+  set_action_reason(act_socks, "Open SOCKS proxy");
   for (i=0;i<MAXWINGATES;++i)
     {
       socks[i].socket = INVALID;

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.48 2002/04/29 02:18:33 bill Exp $
+ * $Id: userlist.c,v 1.49 2002/05/03 22:49:50 einride Exp $
  *
  */
 
@@ -45,10 +45,6 @@ struct auth_file_entry userlist[MAXUSERS];
 struct exception_entry hostlist[MAXHOSTS];
 struct exception_entry banlist[MAXBANS];
 extern struct connection connections[];
-extern void set_action_reason(char *name, char *reason);
-extern void set_action_method(char *name, char *method);
-extern int get_action(char *name);
-extern int get_action_type(char *name);
 
 /* XXX - This is a kludge for Linux systems */
 extern char *crypt(const char *key, const char *salt);
@@ -61,6 +57,40 @@ int  ban_list_index;
 static void load_a_ban(char *);
 static void load_a_user(char *);
 static void load_e_line(char *);
+
+
+int get_method_number (char * methodname) {
+  if (!strcasecmp(methodname, "kline"))
+    return METHOD_KLINE;
+  else if (!strcasecmp(methodname, "tkline"))
+    return METHOD_TKLINE;
+  else if (!strcasecmp(methodname, "dline"))
+    return METHOD_DLINE;
+  else if (!strcasecmp(methodname, "ircwarn"))
+    return METHOD_IRC_WARN;
+  else if (!strcasecmp(methodname, "dccwarn"))
+    return METHOD_DCC_WARN;
+  else
+    return 0;
+}
+
+char * get_method_names(int method) {
+  static char namebuf[128];
+  namebuf[0]=0;
+  if (method & METHOD_IRC_WARN)
+    strcat(namebuf, "ircwarn ");
+  if (method & METHOD_DCC_WARN)
+    strcat(namebuf, "dccwarn ");
+  if (method & METHOD_TKLINE)
+    strcat(namebuf, "tkline ");
+  if (method & METHOD_KLINE)
+    strcat(namebuf, "kline ");
+  if (method & METHOD_DLINE)
+    strcat(namebuf, "dline ");
+  if (namebuf[0])
+    namebuf[strlen(namebuf)-1] = 0;
+  return namebuf;
+}
 
 /*
  * load_config_file
@@ -141,11 +171,39 @@ load_config_file(char *file_name)
     switch(argv[0][0])
     {
     case 'a':case 'A':
-      set_action_method(argv[1], argv[2]);
-      if (argc >=3)
-	set_action_reason(argv[1], argv[3]);
+      {
+	int act, met, klinetime=0;
+	// A:name:methods:reason
+	// A:clone:tkline 360 ircwarn dccwarn:No clones kthx
+	if (argc < 3)
+	  break;
+	act = find_action(argv[1]);
+	if (act<0)
+	  break;
+	actions[act].method = 0;
+	actions[act].reason[0] = 0;
+	actions[act].klinetime = 120;
+	p = argv[2];
+	q = p;
+	while (p) {
+	  q = strchr(p, ' ');
+	  if (q)
+	    *q++ = 0;
+	  if (!klinetime && atoi(p))
+	    klinetime = atoi(p);
+	  else {
+	    met = get_method_number(p);
+	    if (met) 
+	      actions[act].method |= met;
+	  }
+	  p=q;
+	}
+	if (klinetime)
+	  actions[act].klinetime = klinetime;
+	if (argc>=4)
+	  set_action_reason(act, argv[3]);
+      }
       break;
-
     case 'd':case 'D':
       if (config_entries.debug && outfile)
 	(void)fprintf(outfile, "opers_only = [%s]\n", argv[1]);
@@ -336,15 +394,16 @@ save_prefs(void)
     switch (argv[0][0])
     {
     case 'A': case 'a':
-      if ((a = get_action(argv[1])) != -1)
-      {
-	/* XXX needs error check */
-	fprintf(fp_out, "A:%s:%s:%s:%s\n",
-		actions[a].name, actions[a].method,
-		(actions[a].reason[0] ? actions[a].reason : ""),
-		(actions[a].report ? "YES" : ""));
+      a = find_action(argv[1]);
+      if (a>=0) {
+	fprintf(fp_out, "A:%s:%s %d:%s\n",
+		actions[a].name,
+		get_method_names(actions[a].method),
+		actions[a].klinetime,
+		actions[a].reason);
+	break;
+
       }
-      break;
     default:
       for (a=0; a < argc - 1; a++)
       {
@@ -624,28 +683,31 @@ static void load_a_user(char *line)
 
 static void load_e_line(char *line)
 {
-  char *vltn, *p, *q, *uhost;
-  int type=0;
-
+  char *vltn, *p, *uhost, *q;
+  int type=0, action;
+  // E:actionmask[ actionmask]:user@hostmask
+  
   if ((p = strchr(line, ':')) == NULL)
     return;
-
+  
   vltn = line;
   *p = '\0';
   uhost = p+1;
-  while (occurance(vltn, ' ') || occurance(vltn, ','))
-  {
-    if (!(p = strchr(vltn, ' ')))
-      p = strchr(vltn, ',');
-    if (p == NULL)
-      break;
-
-    *p++ = '\0';
-    type |= get_action_type(vltn);
+  while (vltn) {
+    p=strchr(vltn, ' ');
+    q=strchr(vltn, ',');
+    if (p && q)
+      p = (p<q)?p:q;
+    else if (q)
+      p=q;
+    if (p)
+      *p++=0;
+    action = find_action(vltn);
+    if (action >= 0) 
+      type |= action;
     vltn = p;
   }
-  type |= get_action_type(vltn);
-
+      
   if ((p = strchr(uhost, '@')) != NULL)
   {
     *p = '\0';
@@ -952,7 +1014,7 @@ void exemption_summary()
     {
       if (hostlist[j].user[0] == '\0')
         break;
-      if (hostlist[j].type & actions[i].type)
+      if (hostlist[j].type & i)
         printf(" %s@%s", hostlist[j].user, hostlist[j].host);
     }
     printf("\n");

@@ -1,7 +1,7 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.13 2002/04/02 23:24:22 bill Exp $ */
+/* $Id: stdcmds.h,v 1.14 2002/05/03 22:49:43 einride Exp $ */
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
@@ -24,8 +24,11 @@ void report_failures(int sock,int num);
 void do_a_kline(char *command_name,int kline_time, char *pattern, char *reason,
                 char *who_did_command);
 void list_class(int sock,char *class_to_find,int total_only);
-void suggest_action(int type_s, char *nick, char *user, char *host,
+/*
+xxx_ void suggest_action(int type_s, char *nick, char *user, char *host,
                     int different, int identd);
+*/
+void handle_action(int action, int idented, char *nick, char *user, char *host, char *ip);
 void initopers(void);
 void inithash(void);
 void prnt(int,char *,...);              /* - Hendrix (va'd by bill)*/

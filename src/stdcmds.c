@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.46 2002/04/27 10:46:57 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.47 2002/05/03 22:49:50 einride Exp $ */
 
 #include "setup.h"
 
@@ -23,6 +23,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -50,7 +52,6 @@
 int doingtrace = NO;
 
 extern struct connection connections[];
-extern int get_action_type(char *name);
 
 void freehash(void);
 
@@ -311,277 +312,132 @@ report(int type, int channel_send_flag, char *format,...)
 }
 
 /*
- * char *suggest_host(char *host, int type)
+ * handle_action
  *
- * inputs       - raw hostname
- *		- ident?
- *              - type of kline
- * output       - hostname stripped to klinable form
- * side effects - NONE
-*/
-static char *
-suggest_host(char *host, int ident, int type)
-{
-  static char work_host[MAX_HOST];
-  char *p = work_host;
-  char *q = work_host;
-  int dots = 0;
-  int ip_number = YES;
-
-  strncpy(work_host, host, MAX_HOST-1);
-
-  while (*p)
-    {
-      if (*p == '.')
-        ++dots;
-      else if (!isdigit(*p))
-        ip_number = NO;
-      ++p;
-    }
-
-  if (dots != 3)
-    ip_number = NO;
-
-  if (type & get_action_type("cflood"))
-    return q;
-  if (type & get_action_type("link"))
-    return q;
-  if (type & get_action_type("clone"))
-    return q;
-  if (type & get_action_type("sclone"))
-    return q;
-  if (type & get_action_type("rclone"))
-    return q;
-  if (type & get_action_type("drone"))
-    return q;
-  if (type & get_action_type("wingate"))
-    return q;
-  if (type & get_action_type("socks"))
-    return q;
-  if (type & get_action_type("vclone"))
-    {
-      if (ip_number)  /* note: if a vclone is passing a non-ip host to us, something's wrong */
-        {
-           while (*p != '.')
-            if ((--p) == q)                 /* JUST in case */
-              break;
-
-          *(p++) = '.';
-          *(p++) = '*';
-          *p = '\0';
-
-          return q;
-        }
-      /* if we are still here,
-       * hopefully the older part of suggset_host() will catch it
-       */
-    }
-  if (type & get_action_type("flood"))
-    {
-      if (!ident)
-        return q;
-    }
-  if (type & get_action_type("bot"))
-    {
-      if (!ident)
-        return q;
-    }
-  if (type & get_action_type("spambot"))
-    {
-      if (!ident)
-        return q;
-    }
-
-  if (ip_number && !(type & get_action_type("clone")))
-    {
-      while (*p != '.')
-        if ((--p) == q)                 /* JUST in case */
-          break;
-
-      *(p++) = '.';
-      *(p++) = '*';
-      *p = '\0';
-
-      return q;
-    }
-  else if (ip_number)
-    return q;
-
-  if (dots > 1)
-    {
-      while (*q != '.')
-        if (*(++q) == '\0')                     /* JUST in case */
-          break;
-
-      p = q;
-      while (*p) ++p;
-      while (*p != '.') --p;
-      p++;
-
-/* I am now at the end of the hostname. the last little bit is the top
- * level domain. if its only two letters, then its a country domain, and I
- * have to rescan
- */
-      if (strlen(p) != 3)
-        {                       /* sigh try again */
-          q = work_host;
-          if (dots > 2)
-            {
-              while (*q != '.')
-                if (*(++q) == '\0')             /* JUST in case */
-                  break;
-              *(--q) = '*';
-            }
-        }
-      else
-        *(--q) = '*';
-    }
-
-  return q;
-}
-
-/*
- * suggest_action
- *
- *  Suggest an action for the tcm to use
- * inputs       - reason, integer corresponding to type which kline is needed
- *              - nick
- *              - user name
- *              - host name
- *              - identd, its identd'ed or not
- * output       - none
- * side effects - connected opers are dcc'ed a suggested kline or kill
- *
- * I have to reassemble user and host back into a u@h, in order
- * to do matching of users not to KILL or KLINE. urgh. This seems
- * silly as I have had to split them elsewhere.
- *
- *      - Dianora
- *              Changes by bill, 6/2000.
- *
- * revamped and renamed suggest_action during 3.0.1 overhaul 9/2001
- *  -bill
+ * Replaces suggest_action. Uses configured actions and methods to
+ * handle a reported event. 
+ * 
+ * This function does all reporting to DCC and channels, as configured
+ * per action.
  */
 
-void
-suggest_action(int type_s,
-	       char *nick,
-	       char *user,
-	       char *host,
-	       int different,
-	       int identd)
-{
-  char suggested_user[MAX_USER+1];
-  char action[15], reason[MAX_BUFF];
-  char *suggested_host=NULL;
-  int i, type;
+void handle_action(int action, int idented, char *nick, char *user, char *host, char *ip) {
+  char newhost[MAX_HOST];
+  char newuser[MAX_USER];
+  char comment[512];
+  char *p;
 
-  if (type_s < 0)
-    type = -type_s;
-  else
-    type = type_s;
-
-  suggested_user[0] = '\0';
-
-  if (user != NULL && host != NULL)
-    {
-      /* Don't kill or kline exempted users */
-      if(okhost(user, host, type))
-        return;
-
-      if (strchr(host,'*') != (char *)NULL)
-        return;
-
-      if (strchr(host,'?') != (char *)NULL)
-        return;
-
-      if (identd)
-        strcpy(suggested_user,user);
-      else 
-        strcpy(suggested_user, "~*");
-
-      if (type & get_action_type("clone"))
-        {
-          strcpy(suggested_user, "*");
-        }
-      else if (type & get_action_type("sclone"))
-        {
-          strcpy(suggested_user, "*");
-        }
-      else if (type & get_action_type("drone"))
-        {
-          strcpy(suggested_user, "*");
-        }
-      else if (type & get_action_type("wingate"))
-        {
-          strcpy(suggested_user, "*");
-        }
-      else if (type & get_action_type("socks"))
-        {
-          strcpy(suggested_user, "*");
-        }
-      else if (type & get_action_type("rclone") && identd)
-        {
-          strcpy(suggested_user, user);
-        }
-
-      suggested_host=suggest_host(host, identd, type);
-    }
-  else if (user == NULL && host != NULL)
-    {
-      sprintf(suggested_user, "*");
-      suggested_host=suggest_host(host, identd, type);
-    }
-
-  if (suggested_user[0] && suggested_host &&
-      okhost(suggested_user, suggested_host, type))
-    return;
-
-  for (i = 0; i < MAX_ACTIONS; i++)
-    if (type == actions[i].type) break;
-
-  if (type != actions[i].type) return; /* how did we not find it? */
-
-  snprintf(action, sizeof(action), "%s", actions[i].method);
-  snprintf(reason, sizeof(reason), "%s", actions[i].reason);
-
-  if (strcasecmp(action, "warn") == 0 && type_s > 0)
-    return;
-  else if (strcasecmp(action, "warn") == 0 && type_s < 0)
+  // Sane input?
+  if ((action < 0) || (action >= MAX_ACTIONS) || !user || !host || !user[0] || !host[0]
+      || strchr(host, '*') || strchr(host, '?') || strchr(user, '*') || strchr(user, '?')) 
   {
-    if (suggested_user[0] == '\0' || suggested_host == NULL)
-      {
-        if (different)
-          toserv("KLINE %d %s :%s\n", different, nick, reason);
-        else
-          toserv("KLINE %s :%s\n", nick, reason);
-        return;
-      }
-
-    if (different)
-      toserv("KLINE %d %s@%s :%s\n", different, suggested_user,
-             suggested_host, reason);
-    else
-      toserv("KLINE %s@%s :%s\n", suggested_user, suggested_host, reason);
+    return;
   }
 
-  if (suggested_user[0] == '\0' || suggested_host == NULL)
-    {
-      toserv("%s %s :%s\n", action, nick, reason);
-      return;
+  // Valid action?
+  if (!actions[action].method)
+    return;
+
+  // Exempted?
+
+  // Use hoststrip to create a k-line mask.
+  // First the host
+  switch (actions[action].hoststrip & HOSTSTRIP_HOST) {
+  case HOSTSTRIP_HOST_BLOCK:
+    if (inet_addr(host) == INADDR_NONE) {
+      p = host;
+      while (*p && (*p != '.'))
+	p++;
+      if (!*p) {
+	// Host without dots? 
+	strncpy(newhost, host, sizeof(newhost));
+	newhost[sizeof(newhost)-1] = 0;
+	break;
+      }
+      newhost[0] = '*';
+      newhost[1] = 0;
+      strncat(newhost, host, sizeof(newhost));
+    } else {
+      strncpy(newhost, host, sizeof(newhost)-3);
+      newhost[sizeof(newhost)-4] = 0; // This HAVE to be useless, but oh well.
+      p = strrchr(host, '.');
+      if (*p) {
+	p[1] = '*';
+	p[2] = 0;
+      }
     }
+    break;
+  case HOSTSTRIP_HOST_AS_IS:
+  default:
+    strncpy(newhost, host, sizeof(newhost));
+    newhost[sizeof(newhost)-1] = 0;
+    break;
+  }
 
-  if (strncasecmp(action, "dline", 5) == 0)
-    toserv("%s %s :%s\n", action, host, reason);
-  else
-    toserv("%s %s@%s :%s\n", action, suggested_user, suggested_host, reason);
+  if (idented) {
+    switch(actions[action].hoststrip & HOSTSTRIP_IDENT) {
+    case HOSTSTRIP_IDENT_PREFIXED:
+      strncpy(newuser+1, user, sizeof(newuser)-1);
+      newuser[0] = '*';
+      newuser[sizeof(newuser)-1] = 0;
+      break;
+    case HOSTSTRIP_IDENT_ALL:
+      strcpy(newuser, "*");
+      break;
+    case HOSTSTRIP_IDENT_AS_IS:
+    default:
+      strncpy(newuser, user, sizeof(newuser));
+      newuser[sizeof(newuser)-1] = 0;
+      break;
+    }
+  } else {
+    switch(actions[action].hoststrip & HOSTSTRIP_NOIDENT) {
+    case HOSTSTRIP_NOIDENT_PREFIXED:
+      strncpy(newuser+1, user, sizeof(newuser)-1);
+      newuser[0] = '*';
+      newuser[sizeof(newuser)-1] = 0;
+      break;
+    case HOSTSTRIP_NOIDENT_ALL:
+      strcpy(newuser, "*");
+      break;
+    case HOSTSTRIP_NOIDENT_UNIDENTED:
+    default:
+      strcpy(newuser, "*~*");
+      break;
+    }
+  }
+  strcpy(comment, "No actions taken");
 
-
-  /* 
-   * so as to avoid all confusion, it is now the responsibility of the calling
-   * function to inform the DCC users of the infraction.
-   */
+  // Now process the event, we got the needed data
+  if (actions[action].method & METHOD_TKLINE) {    
+    // In case the actions temp k-line time isnt set, set a default
+    if (actions[action].klinetime<=0) 
+      actions[action].klinetime = 60;
+    else if (actions[action].klinetime>14400) 
+      actions[action].klinetime = 14400;
+    toserv("KLINE %d %s@%s :%s\n", actions[action].klinetime, newuser, newhost, 
+	   actions[action].reason ? actions[action].reason : "Automated temporary K-Line");    
+    snprintf(comment, sizeof(comment), "%d minutes temporary k-line of %s@%s", actions[action].klinetime, newuser, newhost);
+  } else if (actions[action].method & METHOD_KLINE) {
+    toserv("KLINE %s@%s :%s\n", newuser, newhost, 
+	   actions[action].reason ? actions[action].reason : "Automated K-Line");    
+    snprintf(comment, sizeof(comment), "Permanent k-line of %s@%s", newuser, newhost);
+  } else if (actions[action].method & METHOD_DLINE) {
+    toserv("DLINE %s :%s\n", newhost, 
+	   actions[action].reason ? actions[action].reason : "Automated D-Line");    
+    snprintf(comment, sizeof(comment), "D-line of %s", newhost);    
+  }
+  if (actions[action].method & METHOD_DCC_WARN) {
+    sendtoalldcc(SEND_WARN_ONLY, "*** %s violation from %s (%s@%s): %s", 
+		 actions[action].name, nick, user, host, comment);
+  }
+  if (actions[action].method & METHOD_IRC_WARN) {
+    msg_mychannel("*** %s violation from %s (%s@%s): %s\n",
+		  actions[action].name, nick, user, host, comment);
+	   
+  }
 }
+		  
 
 /*
  * format_reason()
@@ -1512,7 +1368,7 @@ inithash()
 {
   freehash();
   doingtrace = YES;
-  toserv("TRACE\n");
+  toserv("TRACE EinMon\n");
 }
 
 void

@@ -2,7 +2,7 @@
  * much of this code has been copied (though none ver batum)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.20 2002/04/02 23:24:30 bill Exp $B
+ * $Id: modules.c,v 1.21 2002/05/03 22:49:50 einride Exp $B
  *
  */
 
@@ -266,7 +266,7 @@ int load_a_module(char *name, int log)
 
   snprintf(absolute_path, sizeof(absolute_path), "%s/%s", getcwd((char *)NULL, 
            sizeof(absolute_path)-strlen(name)-1), name);
-  if ((modpointer=dlopen(absolute_path, RTLD_NOW)) == NULL)
+  if ((modpointer=dlopen(absolute_path, RTLD_NOW | RTLD_GLOBAL)) == NULL)
     {
       const char *err = dlerror();
 #ifdef DEBUGMODE

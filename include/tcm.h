@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.22 2001/11/24 00:07:52 wcampbel Exp $ */
+/* $Id: tcm.h,v 1.23 2002/05/03 22:49:43 einride Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -67,12 +67,12 @@ void m_not_admin(int connnum, int argc, char *argv[]);
 #endif
 
 void init_hash_tables(void);
-void add_action(char *name, char *method, char *reason);
-void set_action_type(char *name, int type);
-void set_action_reason(char *name, char *reason);
-void set_action_method(char *name, char *method);
-int get_action_type(char *name);
-int get_action(char *name);
-char *get_action_method(char *name);
+int add_action(char *name);
+void set_action_time(int action, int time);
+void set_action_reason(int action, char *reason);
+void set_action_method(int action, int method);
+void set_action_strip(int action, int hoststrip);
+
+int find_action(char *name);
 
 #endif

@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.30 2002/04/29 02:18:33 bill Exp $ */
+/* $Id: main.c,v 1.31 2002/05/03 22:49:50 einride Exp $ */
 
 #include "setup.h"
 
@@ -92,17 +92,18 @@ void write_debug();
 static void init_debug(int sig);
 
 void init_hash_tables(void);
-void add_action(char *name, char *method, char *reason);
-void set_action_type(char *name, int type);
-void set_action_reason(char *name, char *reason);
-void set_action_method(char *name, char *method);
+
+int add_action(char *name);
+void set_action_reason(int action, char *reason);
+void set_action_method(int action, int method);
+void set_action_strip(int action, int hoststrip);
+void set_action_time(int action, int klinetime);
+
 #if 0
 /* XXX - unused */
 int action_log(char *name);
 #endif
-int get_action_type(char *name);
-int get_action(char *name);
-char *get_action_method(char *name);
+
 #if 0
 /* XXX - unused */
 char *get_action_reason(char *name);
@@ -448,73 +449,62 @@ void gracefuldie(int sig, char *file, int line)
   exit(1);
 }
 
-void add_action(char *name, char *method, char *reason)
+int add_action(char *name)
 {
   int i;
 
   if (name == NULL)
-    return;
+    return -1;
 
   for (i=0;i<MAX_ACTIONS;++i)
     {
-      if (!actions[i].method[0])
+      if ((!actions[i].name[0]) || (!strcasecmp(actions[i].name, name)))
 	break;
     }
-  if (actions[i].method[0])
+  if (i == MAX_ACTIONS)
     {
       fprintf(outfile, "add_action() failed to find free space\n");
-      return;
+      return -1;
     }
-  if (!actions[i].name[0])
+  if (!actions[i].name[0]) {
     snprintf(actions[i].name, sizeof(actions[i].name), "%s", name);
-  if (!actions[i].method[0])
-    snprintf(actions[i].method, sizeof(actions[i].method), "%s", method);
-  if (reason && !actions[i].method[0])
-    snprintf(actions[i].reason, sizeof(actions[i].reason), "%s", reason);
-  else if (!actions[i].method[0])
-    snprintf(actions[i].reason, sizeof(actions[i].reason), "kline");
-}
-
-void set_action_type(char *name, int type)
-{
-  int i;
-  if ((i = get_action(name)) == -1) return;
-  else actions[i].type = type;
-}
-
-void set_action_method(char *name, char *method)
-{
-  int i;
-  if ((i = get_action(name)) == -1) return;
-  snprintf(actions[i].method, sizeof(actions[i].method), "%s", method);
-}
-
-void set_action_reason(char *name, char *reason)
-{
-  int i;
-  if ((i = get_action(name)) == -1) return;
-  snprintf(actions[i].reason, sizeof(actions[i].reason), "%s", reason);
-}
-
-int get_action(char *name)
-{
-  int i;
-  for (i=0 ; i<MAX_ACTIONS ; ++i)
-    if (!strcasecmp(name, actions[i].name)) break;
-  if (strcasecmp(name, actions[i].name)) return -1;
+    actions[i].method = METHOD_IRC_WARN | METHOD_DCC_WARN;
+    actions[i].klinetime = 60;
+    actions[i].hoststrip = HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL;
+  }
   return i;
 }
 
-int get_action_type(char *name)
-{
-  int i, ret=0;
+void set_action_time(int action, int klinetime) {
+  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name))
+    actions[action].klinetime = klinetime;
+}
 
+void set_action_strip(int action, int hoststrip)
+{
+  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name))
+    actions[action].hoststrip = hoststrip;
+}
+
+void set_action_method(int action, int method)
+{
+  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name))
+    actions[action].method = method;    
+}
+
+void set_action_reason(int action, char *reason)
+{
+  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name) && reason && reason[0])
+    snprintf(actions[action].reason, sizeof(actions[action].reason), "%s", reason);
+}
+
+int find_action(char *name)
+{
+  int i;
   for (i=0 ; i<MAX_ACTIONS ; ++i)
-  {
-    if (!wldcmp(name, actions[i].name))
-      ret |= actions[i].type;
-  }
-  return ret;
+    if (!strcasecmp(name, actions[i].name)) 
+      return i;
+  return -1;
 }
 
 #if 0
@@ -526,13 +516,6 @@ int action_log(char *name)
   return (actions[i].report ? YES : NO);
 }
 #endif
-
-char *get_action_method(char *name)
-{
-  int i;
-  if ((i = get_action(name)) == -1) return NULL;
-  return actions[i].method;
-}
 
 #if 0
 /* XXX - unused */
@@ -609,12 +592,7 @@ int main(int argc, char *argv[])
         }
     }
 
-  for (i=0;i<MAX_ACTIONS;++i)
-    {
-      actions[i].method[0] = '\0';
-      actions[i].reason[0] = '\0';
-      actions[i].type = 0;
-    }
+  memset(&actions, 0, sizeof(actions));
 
   modules_init();
   add_common_function(F_DCC_SIGNOFF, closeconn);

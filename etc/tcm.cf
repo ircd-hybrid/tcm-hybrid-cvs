@@ -1,4 +1,4 @@
-# $Id: tcm.cf,v 1.19 2002/04/29 02:18:25 bill Exp $
+# $Id: tcm.cf,v 1.20 2002/05/03 22:49:40 einride Exp $
 # Username for the bot
 U:db
 
@@ -24,7 +24,7 @@ C:&frizzle.net
 # The channel can have a key set
 # C:&frizzle.net:access
 
-# A:case:action:log to channel? <YES/NO>
+# A:case:action:reason
 #  Sets the action to take on various automated situations.
 #
 #   Possible values for case:
@@ -42,24 +42,29 @@ C:&frizzle.net
 #	- rclone      <what action to take when reconnecting clones are found>
 #
 #   Possible values for action:
-#	- kline	[time]  <kline the user using the proper message>
+#	- kline	        <kline the user using the proper message>
+#       - tkline time   <temp kline the user using the proper message>
 #	- dline         <dline the user with the same proper message>
-#	- warn          <do nothing to the user, warn +w users on the tcm>
+#	- dccwarn       <warn +w users on the tcm>
+#       - ircwarn       <warn the tcm's channel>
 #
-#   The default value for "Log to channel" is NO
+#   Actions can be combined, the "least restrictive" of the *line actions
+#   take preference if multiple are defined. 
 #
-A:cflood:dline:Connection flooding
-A:vclone:kline 180:Cloning is prohibited
-A:flood:kline 180:Flooding is prohibited
-A:link:kline 180:Link Lookers are prohibited
+#   The default values for all cases are ircwarn dccwarn
+#
+A:cflood:dline dccwarn ircwarn:Connection flooding
+A:vclone:ircwarn dccwarn tkline 180:Cloning is prohibited
+A:flood:tkline 180:Flooding is prohibited
+A:link:dccwarn tkline 180:Link Lookers are prohibited
 A:bot:kline:Bots are prohibited
-A:spambot:kline 1440:Spamming is prohibited
-A:clone:kline 1440:Cloning is prohibited:NO
-A:sclone:kline 180:Clones on multiple servers
-A:drone:kline:Drone bots
+A:spambot:tkline 1440:Spamming is prohibited
+A:clone:tkline 1440:Cloning is prohibited
+A:sclone:tkline 180:Clones on multiple servers
+A:drone:ccwarn kline:Drone bots
 A:wingate:dline:Open Wingate
 A:socks:dline:Open SOCKS server
-A:rclone:kline 240:Reconnect flood
+A:rclone:ircwarn dccwarn tkline 240:Reconnect flood
 
 # optional message to send to users who request STATS p
 M:For basic information, see http://www.ircd-hybrid.org/tcm/

@@ -1,4 +1,4 @@
-# $Id: userlist.cf,v 1.14 2002/04/29 02:18:26 bill Exp $
+# $Id: userlist.cf,v 1.15 2002/05/03 22:49:41 einride Exp $
 # userlist.cf file
 #
 # each line is colon separated
@@ -61,7 +61,8 @@ B:loser@*lamesite.com
 #  The format for these are as follows:
 #  E:<violation>:<user@host mask>
 #
-#  <violation> is one of the violations listed in tcm.cf
+#  <violation> is one or more of the violations listed in tcm.cf,
+#              separated by spaces
 #  <user@host> is, obviously, the mask of the user you wish to exempt
 #
 # bill@*.parodius.com is exempt from all violations
@@ -72,4 +73,9 @@ E:*:bill@*.parodius.com
 E:*clone*:bill@*.ircd-hybrid.org
 #
 # bot@*.uber-fast.com can clone and flood
-E:clone,flood:bot@*.uber-fast.com
+E:clone flood:bot@*.uber-fast.com
+
+
+
+
+

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.60 2002/04/29 02:18:30 bill Exp $ */
+/* $Id: bothunt.c,v 1.61 2002/05/03 22:49:46 einride Exp $ */
 
 #include "setup.h"
 
@@ -92,15 +92,10 @@ void onservnotice(int connnum, int argc, char *argv[]);
 void _reload_bothunt(int connnum, int argc, char *argv[]);
 void _modinit();
 
-#define R_CLONE		0x001
-#define R_VCLONE	0x002
-#define R_FLOOD         0x008
-#define R_LINK          0x010
-#define R_BOT		0x020
-#define R_CTCP          0x100
-#define R_SPAMBOT       0x400
-#define R_CFLOOD        0x800
-#define R_RCLONE        0x2000
+int act_cflood, act_vclone, act_flood, act_link,
+  act_bot, act_spambot, act_clone, act_rclone,
+  act_sclone, act_drone;
+
 
 struct msg_to_action {
   char *msg_to_mon;
@@ -987,10 +982,7 @@ void onservnotice(int connnum, int argc, char *argv[])
     if (strcasecmp(config_entries.rserver_name,from_server) == 0)
     {
       sendtoalldcc(SEND_WARN_ONLY, "*** Flooder %s (%s@%s) target: %s", nick, user, host, target);
-      if (*user == '~')
-	suggest_action(get_action_type("flood"), nick, user, host, NO, NO);
-      else
-	suggest_action(get_action_type("flood"), nick, user, host, NO, YES);
+      handle_action(act_flood, (*user != '~'), nick, user, host, 0);
     }
 
     break;
@@ -1017,8 +1009,8 @@ void onservnotice(int connnum, int argc, char *argv[])
 
     if (strstr(p,"possible spambot") == NULL)
       return;
-    sendtoalldcc(SEND_WARN_ONLY, "*** Spambot %s (%s@%s)", nick, user, host);
-    suggest_action(get_action_type("spambot"), nick, user, host, NO, YES);
+
+    handle_action(act_spambot, 0, nick, user, host, 0);
     break;
 
   /* I-line is full for bill[bill@ummm.E] (127.0.0.1). */
@@ -1097,20 +1089,15 @@ void onservnotice(int connnum, int argc, char *argv[])
 	  *p++ = '\0';
 	  host = p;
 
-	  if (!okhost(user, host, get_action_type("cflood")))
-	  {
-	    if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
+	  if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
 	    {
 	      if (user[0] == '~')
 		b = NO;
 	      else
 		b = YES;
-              sendtoalldcc(SEND_WARN_ONLY, "*** X: flooder %s (%s@%s)", nick, user, host);
-	      suggest_action(get_action_type("cflood"), nick, user, host, NO,
-                             (user[0] == '~' ? NO : YES));
+	      handle_action(act_cflood, (*user != '~'), nick, user, host, 0);
 	      connect_flood[a].user_host[0] = '\0';
 	    }
-	  }
 	  else
 	    connect_flood[a].last_connect = current_time;
 	}
@@ -1160,20 +1147,13 @@ void onservnotice(int connnum, int argc, char *argv[])
           *p++ = '\0';
           host = p;
 
-          if (!okhost(user, host, get_action_type("cflood")))
-          {
-            if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
+	  if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
             {
-              sendtoalldcc(SEND_WARN_ONLY, "*** Q: flooder %s (%s@%s)", nick, user, host);
-              suggest_action(get_action_type("cflood"), nick, user, host, NO,
-                             (user[0] == '~' ? NO : YES));
+	      handle_action(act_cflood, (*user != '~'), nick, user, host, 0);
               connect_flood[a].user_host[0] = '\0';
             }
             else
               connect_flood[a].last_connect = current_time;
-          }
-          else
-            connect_flood[a].last_connect = current_time;
           return;
         }
         else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME)
@@ -1221,18 +1201,12 @@ void onservnotice(int connnum, int argc, char *argv[])
             return;
           *p++ = '\0';
           host = p;
-	  if (!okhost(user, host, get_action_type("cflood")))
-	  {
 	    if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
 	    {
-              sendtoalldcc(SEND_WARN_ONLY, "*** Bad UH flooder %s (%s@%s)", nick, user, host);
-	      suggest_action(get_action_type("cflood"), nick, user, host, NO,
-                             (user[0] == '~' ? NO : YES));
+	      handle_action(act_cflood, (*user != '~'), 
+			    nick, user, host, 0);
 	      connect_flood[a].user_host[0] = '\0';
 	    }
-	  }
-	  else
-	    connect_flood[a].last_connect = current_time;
 	}
 	else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME)
                  < current_time)
@@ -2010,10 +1984,7 @@ static void check_reconnect_clones(char *host)
       if ((reconnect_clone[i].count > CLONERECONCOUNT) &&
           (now - reconnect_clone[i].first <= CLONERECONFREQ))
       {
-       	suggest_action(get_action_type("rclone"), NULL, NULL, host, NO, NO);
-        report(SEND_WARN_ONLY, CHANNEL_REPORT_CLONES,
-               "Reconnect clones found coming from *@%s...\n", host);
-
+	handle_action(act_rclone, 0, "", "", host, 0);
         reconnect_clone[i].host[0] = 0;
         reconnect_clone[i].count = 0;
         reconnect_clone[i].first = 0;
@@ -2166,9 +2137,9 @@ static void check_host_clones(char *host)
 	if (strcmp(last_user,current_user) && current_identd)
 	  different = YES;
 
-	suggest_action(get_action_type("clone"),
-		       find->info->nick, find->info->user,
-		       find->info->host, different, current_identd);
+	handle_action(act_clone, current_identd, 
+		      find->info->nick, find->info->user,
+		      find->info->host, find->info->ip_host);
       }
 
       find->info->reporttime = now;
@@ -2321,8 +2292,9 @@ static void check_virtual_host_clones(char *ip_class_c)
           /* we do, however, if they differ w/o ident (ie ~clone1, ~clone2, ~clone3)        */
           if ((different == NO && ident == YES) || (ident == NO))
             {
-              suggest_action(get_action_type("vclone"), find->info->nick, find->info->user,
-			     find->info->ip_host, different, ident);
+	      handle_action(act_vclone, 0,
+			    find->info->nick, find->info->user,
+			    find->info->ip_host, find->info->ip_host);
             }
 
 	  find->info->reporttime = now;
@@ -2404,27 +2376,12 @@ static void connect_flood_notice(char *snotice)
 		}
 
 	      connect_flood[i].connect_count++;
-
-	      if (!okhost(user, host, get_action_type("cflood")))
-		{
-		  if (connect_flood[i].connect_count >= MAX_CONNECT_FAILS)
-		    {
-                      if ((user[0] == '~') || (!strcmp(user, "unknown"))) ident = NO;
-                      sendtoalldcc(SEND_WARN_ONLY, "*** Connect flooder %s (%s@%s)",
-                                   nick_reported, user, host);
-		      if (!strncasecmp((char *)get_action_method("cflood"), "dline", 5))
-			suggest_action(get_action_type("cflood"), nick_reported, user, ip,
-                                       NO, ident);
-		      else
-			suggest_action(get_action_type("cflood"), nick_reported, user, host,
-                                       NO, ident);
-		      connect_flood[i].user_host[0] = '\0';
-		    }
-		}
+	      if ((user[0] == '~') || (!strcmp(user, "unknown"))) 
+		ident = 0;
 	      else
-		{
-		  connect_flood[i].last_connect = current_time;
-		}
+		ident = 1;
+	      if (connect_flood[i].connect_count >= MAX_CONNECT_FAILS)
+		handle_action(act_cflood, ident, nick_reported, user, host, 0);
 	    }
 	  else if ((connect_flood[i].last_connect + MAX_CONNECT_TIME)
 		   < current_time) {
@@ -2585,15 +2542,7 @@ static void link_look_notice(char *snotice)
 			       "*** LINK LOOKER %s (%s)\n", 
 			       nick_reported,user_host);
 
-		  if ( !okhost(user,host,get_action_type("link")) )
-		    {
-		      if (*user == '~')
-			suggest_action(get_action_type("link"), nick_reported, user+1, host,
-				       NO, NO);
-		      else
-			suggest_action(get_action_type("link"), nick_reported, user, host,
-				       NO, YES);
-		    }
+		  handle_action(act_link, (*user != '~'), nick_reported, user, host, 0);
 
 		  /* the client is dead now */
 		  link_look[i].user_host[0] = '\0';
@@ -2678,7 +2627,7 @@ void bot_report_kline(char *snotice,char *type_of_bot)
 	       user,
 	       host);
 
-  suggest_action(get_action_type("bot"), nick, user, host, NO, YES);
+  handle_action(act_bot, 1, nick, user, host, 0);
 
   log("bot warning [%s@%s]\n", user, host);
 }
@@ -2737,13 +2686,7 @@ static void cs_nick_flood(char *snotice)
   if ( !(host = strtok(NULL,"")) )
     return;
 
-  if ( (!okhost(user,host,get_action_type("flood"))) && (!isoper(user,host)) )  
-    {
-      if (*user_host == '~')
-	suggest_action(get_action_type("flood"), nick_reported, user, host, NO, NO);
-      else
-	suggest_action(get_action_type("flood"), nick_reported, user, host, NO, YES);
-    }
+  handle_action(act_flood, (*user != '~'), nick_reported, user, host, 0);
 }
 
 /*
@@ -2798,8 +2741,7 @@ static void cs_clones(char *snotice)
 
   *host = '\0';
   host++;
-
-  suggest_action(get_action_type("clone"), "", user, host, NO, identd);
+  handle_action(act_clone, identd, "", user, host, 0);
 }
 
 /*
@@ -3022,12 +2964,7 @@ static void add_to_nick_change_table(char *user_host,char *last_nick)
 	    if ((host = strtok(NULL,"")) == NULL)
 	      return;
 		      
-	    if (*user_host == '~')
-	      suggest_action(get_action_type("flood"),
-			     last_nick, user, host, NO, NO);
-	    else
-	      suggest_action(get_action_type("flood"),
-			     last_nick, user, host, NO, YES);
+	    handle_action(act_flood, (*user_host != '~'), last_nick, user, host, 0);
 	    log(
 		"nick flood %s (%s) %d in %d seconds (%02d/%02d/%d %2.2d:%2.2d:%2.2d)\n",
 		nick_changes[i].user_host,
@@ -3286,22 +3223,31 @@ void _modinit()
   memset(&nick_changes,0,sizeof(nick_changes));
   memset(&reconnect_clone,0, sizeof(reconnect_clone));
   init_link_look_table();
-  add_action("cflood", "dline", "Connect flooding");
-  set_action_type("cflood", R_CFLOOD);
-  add_action("vclone", "warn", "Cloning is prohibited");
-  set_action_type("vclone", R_VCLONE);
-  add_action("flood", "kline", "Flooding is prohibited");
-  set_action_type("flood", R_FLOOD);
-  add_action("link", "kline 180", "Link lookers are prohibited");
-  set_action_type("link", R_LINK);
-  add_action("bot", "kline", "Bots are prohibited");
-  set_action_type("bot", R_BOT);
-  add_action("spambot", "warn", "Spamming is prohibited");
-  set_action_type("spambot", R_SPAMBOT);
-  add_action("clone", "kline", "Cloning is prohibited");
-  set_action_type("clone", R_CLONE);
-  add_action("rclone", "kline", "Reconnect flooding");
-  set_action_type("rclone", R_RCLONE);
+  act_cflood = add_action("cflood");
+  set_action_reason(act_cflood, "Connect flooding");
+
+  act_vclone = add_action("vclone");
+  set_action_reason(act_vclone, "Clones are prohibited");
+  set_action_strip(act_vclone, HOSTSTRIP_HOST_BLOCK | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL);
+
+  act_flood = add_action("flood");
+  set_action_reason(act_flood, "Flooding is prohibited");
+
+  act_link = add_action("link");
+  set_action_reason(act_link, "Link looking is prohibited");
+
+  act_bot = add_action("bot");
+  set_action_reason(act_bot, "Bots are prohibited");
+
+  act_spambot = add_action("spambot");
+  set_action_reason(act_spambot, "Spamming is prohibited");
+
+  act_clone = add_action("clone");
+  set_action_reason(act_clone, "Clones are prohibited");
+
+  act_rclone = add_action("rclone");
+  set_action_reason(act_rclone, "Reconnect clones are prohibited");
+
   if (connections[0].socket)
   {
     doingtrace = YES;

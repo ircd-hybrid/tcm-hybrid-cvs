@@ -1,3 +1,8 @@
+*** 20010829_1 by bill
+- fixed an overshot buffer in the new i/o code
+- fixed a threshhold miscalc (you had to -1 to get the correct output)
+
+
 *** 20010826_2 by bill
 - still from Walter Campbell's patch
   forgot to remove extra space in kill message

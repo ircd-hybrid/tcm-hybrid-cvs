@@ -1,3 +1,16 @@
+bill        2002/11/26 10:56:25 EST	(20021126_0)
+
+  Modified files:
+    src                  services.c 
+  Log:
+  Submitted by:   olofson
+  - do not report/log services clones if they are exempted hosts
+  
+  Revision  Changes    Path
+  1.24      +7 -0      tcm-hybrid/src/services.c
+
+
+
 bill        2002/11/14 19:09:53 EST	(20021115_0)
 
   Modified files:

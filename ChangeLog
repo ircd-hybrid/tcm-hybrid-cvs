@@ -1,3 +1,47 @@
+bill        2004/04/22 04:32:18 EDT	(20040422_0)
+
+  Modified files:
+    .                    Makefile.in 
+    etc                  tcm.cf 
+    html                 admin.html tcm_cfg.html 
+    include              actions.h bothunt.h config.h tcm.h 
+                         userlist.h 
+    src                  .depend Makefile.in bothunt.c 
+                         client_list.c hash.c main.c seedrand.c 
+                         tcm_io.c userlist.c vclones.c 
+  Removed files:
+    .                    README-WINGATES 
+    src                  wingate.c 
+  Log:
+  - removed proxy detection, this never worked anyway
+  - some cosmetic fixes
+  - updated depend
+  
+  Revision  Changes    Path
+  1.28      +5 -1      tcm-hybrid/Makefile.in
+  1.5       +0 -24     tcm-hybrid/README-WINGATES (dead)
+  1.35      +0 -15     tcm-hybrid/etc/tcm.cf
+  1.2       +3 -1      tcm-hybrid/html/admin.html
+  1.2       +3 -16     tcm-hybrid/html/tcm_cfg.html
+  1.22      +0 -3      tcm-hybrid/include/actions.h
+  1.64      +1 -0      tcm-hybrid/include/bothunt.h
+  1.87      +2 -47     tcm-hybrid/include/config.h
+  1.60      +0 -4      tcm-hybrid/include/tcm.h
+  1.94      +0 -1      tcm-hybrid/include/userlist.h
+  1.40      +6 -12     tcm-hybrid/src/.depend
+  1.39      +1 -2      tcm-hybrid/src/Makefile.in
+  1.223     +0 -1      tcm-hybrid/src/bothunt.c
+  1.8       +8 -6      tcm-hybrid/src/client_list.c
+  1.71      +42 -43    tcm-hybrid/src/hash.c
+  1.136     +0 -4      tcm-hybrid/src/main.c
+  1.8       +14 -2     tcm-hybrid/src/seedrand.c
+  1.107     +0 -1      tcm-hybrid/src/tcm_io.c
+  1.151     +0 -34     tcm-hybrid/src/userlist.c
+  1.19      +9 -8      tcm-hybrid/src/vclones.c
+  1.65      +0 -501    tcm-hybrid/src/wingate.c (dead)
+
+
+
 bill        2003/11/29 14:46:45 EST	(20031129_0)
 
   Modified files:

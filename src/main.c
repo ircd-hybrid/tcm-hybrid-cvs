@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.33 2002/05/05 17:04:51 einride Exp $ */
+/* $Id: main.c,v 1.34 2002/05/13 15:12:27 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -780,17 +780,19 @@ void sighandlr(int sig)
 
 void m_unregistered(int connnum, int argc, char *argv[])
 {
-  prnt(connnum, "You have not registered\n");
+  prnt(connections[connnum].socket, "You have not registered\n");
 }
 
 void m_not_oper(int connnum, int argc, char *argv[])
 {
-  prnt(connnum, "Only authorized opers may use this command\n");
+  prnt(connections[connnum].socket,
+       "Only authorized opers may use this command\n");
 }
 
 void m_not_admin(int connnum, int argc, char *argv[])
 {
-  prnt(connnum, "Only authorized admins may use this command\n");
+  prnt(connections[connnum].socket,
+       "Only authorized admins may use this command\n");
 }
 #endif
 

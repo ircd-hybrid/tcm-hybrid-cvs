@@ -46,7 +46,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.20 2001/10/27 16:17:21 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.21 2001/10/28 21:58:58 wcampbel Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -68,7 +68,6 @@ void _modinit();
 
 extern struct connection connections[];
 extern struct s_testline testlines;
-extern char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
 /*
 ** dccproc()

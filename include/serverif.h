@@ -59,8 +59,6 @@ void init_allow_nick();
 
 void init_remote_tcm_listen(void);
 void sendto_all_linkedbots(char *);
-int  add_connection(int,int);
-int  already_have_tcm(char *);
 
 void oper();
 void msg_mychannel(char *msg,...);

@@ -37,10 +37,9 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.25 2001/10/28 17:48:02 wcampbel Exp $";
+static char *version="$Id: userlist.c,v 1.26 2001/10/28 21:58:58 wcampbel Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
-struct tcm_file_entry tcmlist[MAXTCMS];
 struct exception_entry hostlist[MAXHOSTS];
 struct exception_entry banlist[MAXBANS];
 extern struct connection connections[];
@@ -113,8 +112,6 @@ void load_config_file(char *file_name)
       exit(1);
     }
 
-  config_entries.tcm_port = TCM_PORT;
-
   while(fgets(line, MAX_BUFF-1,fp))
     {
       argc=0;
@@ -175,10 +172,6 @@ void load_config_file(char *file_name)
 	case 'o':case 'O':
           strncpy(config_entries.oper_nick_config,argv[1],MAX_NICK);
 	  strncpy(config_entries.oper_pass_config,argv[2],MAX_CONFIG-1);
-	  break;
-
-	case 'p':case 'P':
-	  config_entries.tcm_port = atoi(argv[1]);
 	  break;
 
 	case 'u':case 'U':
@@ -779,14 +772,6 @@ void init_userlist()
       userlist[cnt].password[0] = 0;
       userlist[cnt].type = 0;
     }
-
-    for(cnt = 0; cnt < MAXTCMS; cnt++)
-      {
-	tcmlist[cnt].host[0] = 0;
-	tcmlist[cnt].theirnick[0] = 0;
-	tcmlist[cnt].password[0] = 0;
-	tcmlist[cnt].port = 0;
-      }
 
     for(cnt = 0; cnt < MAXHOSTS; cnt++)
       {

@@ -60,7 +60,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.13 2001/10/27 16:17:21 bill Exp $";
+static char *version="$Id: main.c,v 1.14 2001/10/28 21:58:58 wcampbel Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -75,7 +75,6 @@ struct s_testline testlines;
 
 char ourhostname[MAX_HOST];   /* This is our hostname with domainname */
 char serverhost[MAX_HOST];    /* Server tcm will use. */
-char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
 fd_set writefds;
 
@@ -129,28 +128,6 @@ void init_hash_tables(void)
   if (ontraceclass) memset(ontraceclass,0,sizeof(struct common_function));
   if (server_notice) memset(server_notice,0,sizeof(struct common_function));
   if (statsi) memset(statsi,0,sizeof(struct common_function));
-}
-
-/*
- * init_allow_nick(void)
- *
- * inputs       - NONE
- * output       - NONE
- * side effects - The allow nick table is cleared out.
- */
-
-void init_allow_nick()
-{
-  int i;
-#ifdef DEBUGMODE
-  placed;
-#endif
-
-  for(i=0;i<MAX_ALLOW_SIZE;i++)
-    {
-      allow_nick[i][0] = '-';
-      allow_nick[i][1] = '\0';
-    }
 }
 
 /*
@@ -787,7 +764,6 @@ int main(int argc, char *argv[])
 
   amianoper = NO;
   startup_time = time(NULL);
-  init_allow_nick();
   for (temp=signon;temp;temp=temp->next)
     temp->function(0, 0, NULL);
 

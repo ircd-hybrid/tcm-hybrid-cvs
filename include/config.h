@@ -217,12 +217,6 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 /* Maximum users allowed in tcm userlist */
 #define MAXUSERS 100
 
-/* Maximum linked tcm's allowed in tcm's tcmlist */
-#define MAXTCMS 20
-
-/* Maximum number of klines to keep record of */
-#define MAXKLINES 5000
-
 /* maximum number of hosts not to auto kline */
 #define MAXHOSTS 100
 
@@ -236,6 +230,19 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 
 /* name to expect services reply from */
 #define SERVICES_NAME "services.us"
+
+/* EFnet will be moving SERVICES to services.int some
+** time in the future.  It has (to my knowledge) passed
+** voting, but has not yet been implemented.  When the
+** time comes, you will have to remove the two define's
+** above and uncomment these two.  -Hwy
+**
+** If you do not know what we're talking about, you don't
+** need these options at all.
+*/
+
+/* #define SERVICES_NICK "services@services.int" */
+/* #define SERVICES_NAME "services.us" */
 
 /* how many clones to look for globally */
 #define SERVICES_CLONE_THRESHOLD 4
@@ -284,6 +291,8 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 #define MAX_LINK_LOOKS  4
 #define MAX_LINK_TIME 120
 
+/* Parameters for detection of connection flooders */
+
 #define MAX_CONNECT_FAILS 4
 #define MAX_CONNECT_TIME 20
 
@@ -294,20 +303,6 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
  */
 
 #define MAXDOMAINS     4000
-
-/* remote tcm linking options */
-
-/* This is the default TCM listen port if none is defined in tcm.cfg */
-#define TCM_PORT 6800
-
-/* How long to let a remote tcm attempt to connect, in seconds */
-#define TCM_REMOTE_TIMEOUT 30
-
-/* allow table size 
- * This table is used to .allow certain tcm nicks
- *  i.e. see the "spam" from those tcm's
- */
-#define MAX_ALLOW_SIZE 20
 
 /* Do not touch these unless you know what you are doing */
 #define SPATH DPATH "/bin/tcm"

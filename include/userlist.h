@@ -87,7 +87,6 @@ struct config_list {
   char ircname_config[MAX_CONFIG];
   char email_config[MAX_CONFIG];
   char userlist_config[MAX_CONFIG];
-  int  tcm_port;
   int  debug;
   char defchannel[MAX_CHANNEL];		/* Channel tcm will use. */
   char defchannel_key[MAX_CONFIG];	/* key for Channel tcm will use. */

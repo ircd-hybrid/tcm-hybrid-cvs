@@ -1,3 +1,29 @@
+leeh        2002/05/27 07:42:01 EDT	(20020527_13)
+
+  Modified files:
+    etc                  userlist.cf 
+    include              config.h userlist.h 
+    src                  bothunt.c userlist.c 
+  Log:
+  - split usermodes into 'privs' and 'flags'.  privs are those that grant
+    abilities (KDWM), flags are those that just change what a user sees
+    whilst connected (spy on /links etc)
+  
+    The general idea is, users cant set privs themselves and if admins set
+    them theyre only temporary whilst that users connected.  You set privs
+    in userlist.cf, flags are saved in <user>.prefs
+  
+    I think this is the right approach..
+  
+  Revision  Changes    Path
+  1.22      +5 -13     tcm-hybrid/etc/userlist.cf
+  1.60      +2 -2      tcm-hybrid/include/config.h
+  1.43      +3 -2      tcm-hybrid/include/userlist.h
+  1.115     +2 -0      tcm-hybrid/src/bothunt.c
+  1.83      +80 -39    tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/27 01:03:16 EDT	(20020527_12)
 
   Modified files:

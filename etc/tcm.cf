@@ -1,15 +1,74 @@
-U:bill
-O:billy-jon:mybluemp3
-S:irc.snoogans.org:6667
-N:test-tcm
-I:I am a test tcm -- do not use/trust me!
-C:#warped
-A:cflood:warn:heh
-A:clone:warn:no clones 
-A:ctcp:warn:ctcp flooding
+# Ok, I'm putting the news in here, since no one ever reads the README.
+#  If you're planning to use this with ircd-comstud, you must make sure
+#  you do the following:
+#   /quote set SHOW_NICKCHANGES yes
+#   /quote set CLIENTCONNECT yes
+#
+#  If you do not do these commands, the tcm will not know when clients
+#  connect, and it will not know when they change nicknames.
+#
+#		-bill (proggy@earthling.net) 11/10/2000
+
+# Username for the bot
+U:db
+# virtual host name if needed
+##V:irc.foozle.org
+# O line for the bot with password
+O:dianora:Nope
+# Server for the tcm 
+S:irc.frizzle.net:6666
+# Nick for the tcm
+N:example
+# Bot's IRCNAME
+I:irc.frizzle.net tcm
+# channel for the tcm
+# Note that tcm can only sit in one channel
+C:&frizzle.net
+# The channel can have a key set
+# C:&frizzle.net:access
+#
+# A:case:action:log to channel? <yes/no>
+#  Sets the action to take on various automated situations.
+#   Possible values for case:
+# *NEW* - cflood	<what action to take with connect flooders>
+#	- clone		<what action to take when clones are found>
+#	- flood		<what action to take when a user floods>
+#	- link		<what action to take when a link looker is found>
+#	- bot		<what action to take when a bot is found>
+#	- wingate	<what action to take when an open wingate is found>
+#	- socks		<what action to take when an open soxy proxy is found>
+#	- ctcp		<what action to take when a ctcp flooder is found>
+#   Possible values for action:
+#	- kline		<kline the user using the proper message>
+#	- warn		<do nothing to the user, warn +w users on the tcm>
+#
+A:cflood:dline:connection flooding
+A:clone:kline:no clones 
+A:ctcp:kline 60:ctcp flooding
 A:flood:warn:floodbots
-A:link:warn:link looker
-A:bot:warn:no bots
-A:drones:warn:drone bots
-M:For help, consult the /motd or http://www.snoogans.org (I AM NOT REAL)
+A:link:kline:link looker
+A:bot:kline:no bots
+A:wingate:kline 60:open wingate
+A:socks:kline 60:open socks
+A:drones:kline 60:drone bots
+# optional message to send to users who request STATS p
+M:For basic information, see www.db.net/~db/tcm.html
+# email address
+# clone logs etc. will get e-mailed to this address
+#E:db@db.net
+# port to listen on if 6800 is unavailable
+#P:6801
+# opers only YES or NO
 D:YES
+# Test this wingate if in this class only
+# NOTE:  This is EXPLICITELY needed, as Wingate and SOCKS checks
+#        will ONLY be done in the classes listed here
+# Multiple entries are permitted
+#
+W:9
+# TCM also supports named classes that Hybrid-7 provides
+# W:broadband
+#where the userlist.cf is for this tcm
+#default is userlist.cf
+#L:phoenix1/userlist.cf
+#L:phoenix2/userlist.cf                                        

@@ -1,3 +1,15 @@
+*** 20011010_1 by bill
+- die on KLINE/DLINE
+- Made DCC connects O_NONBLOCKing
+- rewrote .action to be as robust/multi-syntaxed as I can possibly make it
+- fixed = from being added to exempt list in spoofed I-lines
+- spoofed hosts now shown in .whom and STATS p rather than real hosts
+- .chat connects are now treated the same as DCC (printed MOTD, greeting, etc)
+- actions are now properly read from the config file
+- fixed .chat bug in BUGS file requiring both spoofed and real hostname being added to the userlist.cf
+
+
+
 *** 20011009_3 by bill
 
 - fixed typo

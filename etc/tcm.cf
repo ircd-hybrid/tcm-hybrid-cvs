@@ -1,4 +1,4 @@
-# $Id: tcm.cf,v 1.20 2002/05/03 22:49:40 einride Exp $
+# $Id: tcm.cf,v 1.21 2002/05/04 20:11:58 einride Exp $
 # Username for the bot
 U:db
 

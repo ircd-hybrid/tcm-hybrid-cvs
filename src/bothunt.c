@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.61 2002/05/03 22:49:46 einride Exp $ */
+/* $Id: bothunt.c,v 1.62 2002/05/04 20:12:04 einride Exp $ */
 
 #include "setup.h"
 
@@ -458,6 +458,14 @@ void on_stats_o(int connnum, int argc, char *argv[])
     userlist[user_list_index].type = TYPE_OPER;
     user_list_index++;
   }
+  /*
+   * Really should exempt opers, as spoof I-Lines arent shown
+   * on stats I
+   */ 
+  strcpy(hostlist[host_list_index].user, user);
+  strcpy(hostlist[host_list_index].host, host);
+  hostlist[host_list_index].type = 0xFFFFFFFF;
+  ++host_list_index;
 }
 
 /* 
@@ -585,6 +593,8 @@ void on_stats_i(int connnum, int argc, char *argv[])
 
     strncpy(hostlist[host_list_index].host,
 	    host, sizeof(hostlist[host_list_index].host));
+    hostlist[host_list_index].type = 0xFFFFFFFF;
+
     host_list_index++;
   }
 }
@@ -2222,8 +2232,8 @@ static void check_virtual_host_clones(char *ip_class_c)
        }
     }
 
-  if ((reportedclones == 0 && clonecount < CLONECONNECTCOUNT) ||
-      now - lastreport < 10)
+  if (((reportedclones == 0) && (clonecount < CLONECONNECTCOUNT)) ||
+      (now - lastreport < 10))
     return;
 
   if (reportedclones)
@@ -2292,7 +2302,7 @@ static void check_virtual_host_clones(char *ip_class_c)
           /* we do, however, if they differ w/o ident (ie ~clone1, ~clone2, ~clone3)        */
           if ((different == NO && ident == YES) || (ident == NO))
             {
-	      handle_action(act_vclone, 0,
+	      handle_action(act_vclone, ident,
 			    find->info->nick, find->info->user,
 			    find->info->ip_host, find->info->ip_host);
             }
@@ -3228,7 +3238,7 @@ void _modinit()
 
   act_vclone = add_action("vclone");
   set_action_reason(act_vclone, "Clones are prohibited");
-  set_action_strip(act_vclone, HOSTSTRIP_HOST_BLOCK | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL);
+  set_action_strip(act_vclone, HOSTSTRIP_HOST_BLOCK | HOSTSTRIP_IDENT_PREFIXED | HOSTSTRIP_NOIDENT_ALL);
 
   act_flood = add_action("flood");
   set_action_reason(act_flood, "Flooding is prohibited");

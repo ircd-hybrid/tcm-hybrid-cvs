@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.44 2002/05/03 22:49:46 einride Exp $ */
+/* $Id: dcc_commands.c,v 1.45 2002/05/04 20:12:04 einride Exp $ */
 
 #include "setup.h"
 
@@ -361,6 +361,51 @@ void m_kill(int connnum, int argc, char *argv[])
     strncat(reason, ")", sizeof(reason)-strlen(reason));
   }
   toserv("KILL %s :%s\n", argv[1], reason);
+}
+
+void m_use_kaction(int connnum, int argc, char *argv[]) {
+  prnt(connections[connnum].socket,
+       "%s is deprecated, please use .kaction\n", argv[0]);
+
+}
+
+void m_kaction(int connnum, int argc, char *argv[]) {
+  int action;
+  int kline_time = 0;
+  char *who, *host;
+
+  if (argc < 3) {
+    prnt(connections[connnum].socket,
+         "Usage: %s action [time] <[nick]|[user@host]>\n", argv[0]);
+    return;
+  } 
+  action = find_action(argv[1]);
+  if (action < 0) {
+    prnt(connections[connnum].socket,
+	 "%s is not a valid action\n", argv[1]);
+    return;
+  }
+  
+  if (argc == 4) {
+    if (actions[action].method & METHOD_TKLINE) {
+      kline_time = atoi(argv[2]);
+      if (!kline_time) {
+	prnt(connections[connnum].socket,
+	     "%s is not a valid k-line time\n", argv[2]);
+	return;
+      }
+    } else {
+      prnt(connections[connnum].socket,
+	   "The %s action is not configured to use temporary k-lines, k-line time will be ignored\n", argv[1]);
+    }
+    who = argv[3];
+  } else
+    who = argv[2];
+  
+  if ((host = strchr(who, '@')))
+    *host++=0;
+
+  handle_action(action, 0, host ? "" : who, host ? who : 0, host ? host : 0, 0);
 }
 
 extern int act_spambot;
@@ -1664,13 +1709,18 @@ list_opers(int sock)
 static void 
 list_exemptions(int sock)
 {
-  int i;
+  int i, n;
+  char buf[512];
 
   for (i=0; i<MAXHOSTS; i++)
   {
     if(hostlist[i].host[0] == 0)
       break;
-    prnt(sock,"%s@%s\n", hostlist[i].user, hostlist[i].host);
+    sprintf(buf, "%s@%s is exempted for:", hostlist[i].user, hostlist[i].host);
+    for (n=0;actions[n].name[0];n++)
+      if ((1 << n) & hostlist[i].type)
+	snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " %s", actions[n].name);
+    prnt(sock,"%s\n", buf);
   }
 }
 
@@ -1800,11 +1850,11 @@ struct TcmMessage kline_msgtab = {
 };
 struct TcmMessage kclone_msgtab = {
  ".kclone", 0, 0,
- {m_unregistered, m_not_oper, m_kclone, m_kclone}
+ {m_unregistered, m_not_oper, m_use_kaction, m_use_kaction}
 };
 struct TcmMessage kflood_msgtab = {
  ".kflood", 0, 0,
- {m_unregistered, m_not_oper, m_kflood, m_kflood}
+ {m_unregistered, m_not_oper, m_use_kaction, m_use_kaction}
 };
 struct TcmMessage kperm_msgtab = {
  ".kperm", 0, 0,
@@ -1812,23 +1862,27 @@ struct TcmMessage kperm_msgtab = {
 };
 struct TcmMessage klink_msgtab = {
  ".klink", 0, 0,
- {m_unregistered, m_not_oper, m_klink, m_klink}
+ {m_unregistered, m_not_oper, m_use_kaction, m_use_kaction}
 };
 struct TcmMessage kdrone_msgtab = {
  ".kdrone", 0, 0,
- {m_unregistered, m_not_oper, m_kdrone, m_kdrone}
+ {m_unregistered, m_not_oper, m_use_kaction, m_use_kaction}
 };
 struct TcmMessage kbot_msgtab = {
  ".kbot", 0, 0,
- {m_unregistered, m_not_oper, m_kbot, m_kbot}
+ {m_unregistered, m_not_oper, m_use_kaction, m_use_kaction}
 };
 struct TcmMessage kill_msgtab = {
  ".kill", 0, 0,
  {m_unregistered, m_not_oper, m_kill, m_kill}
 };
+struct TcmMessage kaction_msgtab = {
+  ".kaction", 0, 0,
+ {m_unregistered, m_not_oper, m_kaction, m_kaction}
+};
 struct TcmMessage kspam_msgtab = {
  ".kspam", 0, 0,
- {m_unregistered, m_not_oper, m_kspam, m_kspam}
+ {m_unregistered, m_not_oper, m_use_kaction, m_use_kaction}
 };
 struct TcmMessage hmulti_msgtab = {
  ".hmulti", 0, 0,
@@ -2030,6 +2084,7 @@ _modinit()
   mod_add_cmd(&kdrone_msgtab);
   mod_add_cmd(&kbot_msgtab);
   mod_add_cmd(&kill_msgtab);
+  mod_add_cmd(&kaction_msgtab);
   mod_add_cmd(&kspam_msgtab);
   mod_add_cmd(&hmulti_msgtab);
   mod_add_cmd(&umulti_msgtab);

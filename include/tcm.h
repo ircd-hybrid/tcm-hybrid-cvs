@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.23 2002/05/03 22:49:43 einride Exp $ */
+/* $Id: tcm.h,v 1.24 2002/05/04 20:12:01 einride Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -17,7 +17,7 @@
 #define MAX_BUFF       512
 
 /* maximum amount of actions */
-#define MAX_ACTIONS	100
+#define MAX_ACTIONS	32
 
 /* small scratch buffer size */
 #define SMALL_BUFF	32

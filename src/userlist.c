@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.49 2002/05/03 22:49:50 einride Exp $
+ * $Id: userlist.c,v 1.50 2002/05/04 20:12:08 einride Exp $
  *
  */
 
@@ -684,7 +684,7 @@ static void load_a_user(char *line)
 static void load_e_line(char *line)
 {
   char *vltn, *p, *uhost, *q;
-  int type=0, action;
+  unsigned int type=0, i;
   // E:actionmask[ actionmask]:user@hostmask
   
   if ((p = strchr(line, ':')) == NULL)
@@ -702,9 +702,9 @@ static void load_e_line(char *line)
       p=q;
     if (p)
       *p++=0;
-    action = find_action(vltn);
-    if (action >= 0) 
-      type |= action;
+    for (i=0;actions[i].name[0];i++)
+      if (!wldcmp(vltn, actions[i].name))
+	type = type + (1 << i);
     vltn = p;
   }
       
@@ -920,7 +920,7 @@ int okhost(char *user,char *host, int type)
         if (!wldcmp(hostlist[i].host, host))
           ok++;
 
-      if (ok == 2 && (hostlist[i].type & type))
+      if (ok == 2 && (hostlist[i].type & (1 << type)))
         return YES;
     }
   return(NO);

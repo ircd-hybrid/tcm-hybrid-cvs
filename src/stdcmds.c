@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.47 2002/05/03 22:49:50 einride Exp $ */
+/* $Id: stdcmds.c,v 1.48 2002/05/04 20:12:07 einride Exp $ */
 
 #include "setup.h"
 
@@ -312,6 +312,47 @@ report(int type, int channel_send_flag, char *format,...)
 }
 
 /*
+ * find_nick
+ *
+ * Returns a hashrec for the given nick, or NULL if not found
+ *
+ */
+struct hashrec * find_nick(char * nick) {
+  int i;
+  struct hashrec * userptr;
+  if (!nick)
+    return NULL;
+  for (i=0;i<HASHTABLESIZE;++i) {
+    for( userptr = domaintable[i]; userptr; userptr = userptr->collision ) {
+      if (!wldcmp(nick, userptr->info->nick))
+	return userptr;
+    }
+  }
+  return NULL;
+}
+
+/*
+ * find_host
+ *
+ * Returns first hashrec for the given host, or NULL if not found
+ *
+ */
+struct hashrec * find_host(char * host) {
+  int i;
+  struct hashrec * userptr;
+  if (!host)
+    return NULL;
+  for (i=0;i<HASHTABLESIZE;++i) {
+    for( userptr = domaintable[i]; userptr; userptr = userptr->collision ) {
+      if (!wldcmp(host, userptr->info->host))
+	return userptr;
+    }
+  }
+  return NULL;
+}
+
+
+/*
  * handle_action
  *
  * Replaces suggest_action. Uses configured actions and methods to
@@ -319,6 +360,8 @@ report(int type, int channel_send_flag, char *format,...)
  * 
  * This function does all reporting to DCC and channels, as configured
  * per action.
+ * 
+ * Note that if an ip is passed, it *must* be a valid ip, no checks for that
  */
 
 void handle_action(int action, int idented, char *nick, char *user, char *host, char *ip) {
@@ -326,9 +369,21 @@ void handle_action(int action, int idented, char *nick, char *user, char *host, 
   char newuser[MAX_USER];
   char comment[512];
   char *p;
+  struct hashrec * userptr;
+
+  if (!user && !host && nick) {
+    userptr = find_nick(nick);
+    if (userptr) {
+      user = userptr->info->user;
+      host = userptr->info->host;
+      ip = userptr->info->ip_host;
+      if (!strcmp(ip, "255.255.255.255"))
+	ip = 0;
+    }
+  }
 
   // Sane input?
-  if ((action < 0) || (action >= MAX_ACTIONS) || !user || !host || !user[0] || !host[0]
+  if ((action < 0) || (action >= MAX_ACTIONS) || !user || !host || !host[0]
       || strchr(host, '*') || strchr(host, '?') || strchr(user, '*') || strchr(user, '?')) 
   {
     return;
@@ -337,8 +392,6 @@ void handle_action(int action, int idented, char *nick, char *user, char *host, 
   // Valid action?
   if (!actions[action].method)
     return;
-
-  // Exempted?
 
   // Use hoststrip to create a k-line mask.
   // First the host
@@ -360,7 +413,7 @@ void handle_action(int action, int idented, char *nick, char *user, char *host, 
     } else {
       strncpy(newhost, host, sizeof(newhost)-3);
       newhost[sizeof(newhost)-4] = 0; // This HAVE to be useless, but oh well.
-      p = strrchr(host, '.');
+      p = strrchr(newhost, '.');
       if (*p) {
 	p[1] = '*';
 	p[2] = 0;
@@ -408,32 +461,73 @@ void handle_action(int action, int idented, char *nick, char *user, char *host, 
   }
   strcpy(comment, "No actions taken");
 
-  // Now process the event, we got the needed data
-  if (actions[action].method & METHOD_TKLINE) {    
-    // In case the actions temp k-line time isnt set, set a default
-    if (actions[action].klinetime<=0) 
-      actions[action].klinetime = 60;
-    else if (actions[action].klinetime>14400) 
-      actions[action].klinetime = 14400;
-    toserv("KLINE %d %s@%s :%s\n", actions[action].klinetime, newuser, newhost, 
-	   actions[action].reason ? actions[action].reason : "Automated temporary K-Line");    
-    snprintf(comment, sizeof(comment), "%d minutes temporary k-line of %s@%s", actions[action].klinetime, newuser, newhost);
-  } else if (actions[action].method & METHOD_KLINE) {
-    toserv("KLINE %s@%s :%s\n", newuser, newhost, 
-	   actions[action].reason ? actions[action].reason : "Automated K-Line");    
-    snprintf(comment, sizeof(comment), "Permanent k-line of %s@%s", newuser, newhost);
-  } else if (actions[action].method & METHOD_DLINE) {
-    toserv("DLINE %s :%s\n", newhost, 
-	   actions[action].reason ? actions[action].reason : "Automated D-Line");    
-    snprintf(comment, sizeof(comment), "D-line of %s", newhost);    
+
+  if (!okhost(user[0] ? user : "*", host, action)) {
+
+    // Now process the event, we got the needed data
+    if (actions[action].method & METHOD_TKLINE) {    
+      // In case the actions temp k-line time isnt set, set a default
+      if (actions[action].klinetime<=0) 
+	actions[action].klinetime = 60;
+      else if (actions[action].klinetime>14400) 
+	actions[action].klinetime = 14400;
+      toserv("KLINE %d %s@%s :%s\n", actions[action].klinetime, newuser, newhost, 
+	     actions[action].reason ? actions[action].reason : "Automated temporary K-Line");    
+      snprintf(comment, sizeof(comment), "%d minutes temporary k-line of %s@%s", actions[action].klinetime, newuser, newhost);
+    } else if (actions[action].method & METHOD_KLINE) {
+      toserv("KLINE %s@%s :%s\n", newuser, newhost, 
+	     actions[action].reason ? actions[action].reason : "Automated K-Line");    
+      snprintf(comment, sizeof(comment), "Permanent k-line of %s@%s", newuser, newhost);
+    } else if (actions[action].method & METHOD_DLINE) {
+      if ((inet_addr(host) == INADDR_NONE) && (!ip)) {
+	/* We don't have any IP, so look it up */
+	struct in_addr in;
+	struct hostent * he = gethostbyname(host);
+	if (!he) {
+	  /* We couldn't find one either, revert to a k-line */
+	  actions[action].method |= METHOD_KLINE;
+	  handle_action(action, idented, nick, user, host, ip);
+	  actions[action].method &= ~METHOD_KLINE;
+	  return;
+	}
+	in.s_addr = * (unsigned long *) he->h_addr_list[0];
+	ip = strdup(inet_ntoa(in));
+	handle_action(action, idented, nick, user, ip, 0);
+	free(ip);
+	return;
+      }
+      if (inet_addr(host) == INADDR_NONE) {
+	/* Oks, passed host isn't in IP form.
+	 * Let's move the passed ip to newhost, then mask it if needed
+	 */
+	strcpy(newhost, ip);
+	if ((actions[action].hoststrip & HOSTSTRIP_HOST) == HOSTSTRIP_HOST_BLOCK) {
+	  p = strrchr(newhost, '.');
+	  p++;
+	  strcpy(p, "*");
+	}
+      }
+
+      toserv("DLINE %s :%s\n", newhost, 
+	     actions[action].reason ? actions[action].reason : "Automated D-Line");    
+      snprintf(comment, sizeof(comment), "D-line of %s", newhost);    
+    }
+  } else {
+    strcpy(comment, "Exempted host - no actions taken");
   }
   if (actions[action].method & METHOD_DCC_WARN) {
     sendtoalldcc(SEND_WARN_ONLY, "*** %s violation from %s (%s@%s): %s", 
-		 actions[action].name, nick, user, host, comment);
+		 actions[action].name, 
+		 (nick && nick[0]) ? nick : "<unknown>", 
+		 (user && user[0]) ? user : "<unknown>",
+		 host, comment);
   }
   if (actions[action].method & METHOD_IRC_WARN) {
     msg_mychannel("*** %s violation from %s (%s@%s): %s\n",
-		  actions[action].name, nick, user, host, comment);
+		  actions[action].name, 
+		  (nick && nick[0]) ? nick : "<unknown>", 
+		  (user && user[0]) ? user : "<unknown>",
+		  host, comment);
 	   
   }
 }
@@ -1368,7 +1462,7 @@ inithash()
 {
   freehash();
   doingtrace = YES;
-  toserv("TRACE EinMon\n");
+  toserv("TRACE\n");
 }
 
 void

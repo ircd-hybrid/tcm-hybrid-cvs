@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.36 2002/04/23 14:31:08 wcampbel Exp $
+ * $Id: config.h,v 1.37 2002/05/04 20:12:01 einride Exp $
  */
 
 /*
@@ -17,7 +17,7 @@
 /*
  * USE_CRYPT, define this if you want your oper passwords to be encrypted
  */
-#define USE_CRYPT
+#undef USE_CRYPT
 
 /*
  * if you like the tcm to report its users on stats p, define this
@@ -201,7 +201,7 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 #define ENABLE_QUOTE
 
 /* Define this to prevent tcm from forking() */
-#undef DEBUGMODE
+#define DEBUGMODE
 
 /* Define this for dmalloc malloc debugging package */
 #undef DMALLOC

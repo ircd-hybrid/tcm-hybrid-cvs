@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.25 2002/05/03 22:49:43 einride Exp $ */
+/* $Id: userlist.h,v 1.26 2002/05/04 20:12:01 einride Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -65,7 +65,7 @@ struct a_entry {
   int hoststrip, klinetime;
 };
 
-struct a_entry actions[MAX_ACTIONS];
+struct a_entry actions[MAX_ACTIONS+1];
 
 struct nick_change_entry
 {

@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.31 2002/05/03 22:49:50 einride Exp $ */
+/* $Id: main.c,v 1.32 2002/05/04 20:12:07 einride Exp $ */
 
 #include "setup.h"
 
@@ -66,7 +66,7 @@
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
-extern struct a_entry actions[100];
+extern struct a_entry actions[MAX_ACTIONS+1];
 extern int load_all_modules(int log);
 extern void init_tokenizer(void);
 extern void modules_init(void);
@@ -476,25 +476,25 @@ int add_action(char *name)
 }
 
 void set_action_time(int action, int klinetime) {
-  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name))
+  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name[0]))
     actions[action].klinetime = klinetime;
 }
 
 void set_action_strip(int action, int hoststrip)
 {
-  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name))
+  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name[0]))
     actions[action].hoststrip = hoststrip;
 }
 
 void set_action_method(int action, int method)
 {
-  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name))
+  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name[0]))
     actions[action].method = method;    
 }
 
 void set_action_reason(int action, char *reason)
 {
-  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name) && reason && reason[0])
+  if ((action>=0) && (action < MAX_ACTIONS) && (actions[action].name[0]) && reason && reason[0])
     snprintf(actions[action].reason, sizeof(actions[action].reason), "%s", reason);
 }
 

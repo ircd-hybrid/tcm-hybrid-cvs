@@ -23,3 +23,10 @@ tcm-hybrid known bugs
    real hostname in the TCM O: lines, or else when the user issues .register,
    TCM will core.  The reason why is still a mystery to us
    - Hwy, Sun 14 Jan 2001
+
+2) There are some places where the tcm can leak data to unauthenticated
+   users.  These are being worked on too
+   - Hwy/Inglish, Sat 21 July 2001
+
+3) Open Proxy Detection works spotty at best.
+   - Hwy/xyst, Sat 21 July 2001

@@ -28,7 +28,11 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: userlist.c,v 1.8 2001/06/03 20:18:03 greg Exp $";
+#ifdef HAVE_CRYPT_H
+#include <crypt.h>
+#endif
+
+static char *version="$Id: userlist.c,v 1.9 2001/07/22 02:52:37 wcampbel Exp $";
 
 #ifdef NEXT
 char *strdup(char *);

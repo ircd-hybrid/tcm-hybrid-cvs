@@ -11,6 +11,10 @@
 #include <sys/socket.h>
 #include <stdarg.h>
 
+#ifdef HAVE_SYS_STREAM_H
+# include <sys/stream.h>
+#endif
+
 #ifdef HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
 #endif
@@ -34,7 +38,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.10 2001/04/03 04:41:13 db Exp $";
+static char *version="$Id: abuse.c,v 1.11 2001/06/18 16:20:12 kreator Exp $";
 
 /*
  * do_a_kline()

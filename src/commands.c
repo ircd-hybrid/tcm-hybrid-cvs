@@ -13,6 +13,10 @@
 #include <sys/socket.h>
 #include <stdarg.h>
 
+#ifdef HAVE_SYS_STREAM_H
+# include <sys/stream.h>
+#endif
+
 #ifdef HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
 #endif
@@ -40,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.11 2001/06/03 05:41:15 db Exp $";
+static char *version="$Id: commands.c,v 1.12 2001/06/18 16:20:13 kreator Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 

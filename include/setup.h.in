@@ -9,6 +9,9 @@
 /* Define if you have the <sys/socketvar.h> header file.  */
 #undef HAVE_SYS_SOCKETVAR_H
 
+/* Define if you have the <sys/stream.h> header file.  */
+#undef HAVE_SYS_STREAM_H
+
 /* Define if you have the descrypt library (-ldescrypt).  */
 #undef HAVE_LIBDESCRYPT
 

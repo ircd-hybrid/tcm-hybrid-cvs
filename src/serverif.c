@@ -23,6 +23,10 @@
 #include <stdarg.h>
 #include <unistd.h>
 
+#ifdef HAVE_SYS_STREAM_H
+# include <sys/stream.h>
+#endif
+
 #ifdef HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
 #endif
@@ -52,7 +56,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.18 2001/06/03 21:10:36 db Exp $";
+static char *version="$Id: serverif.c,v 1.19 2001/06/18 16:20:14 kreator Exp $";
 
 extern int errno;          /* The Unix internal error number */
 

@@ -17,6 +17,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#ifdef HAVE_SYS_STREAM_H
+# include <sys/stream.h>
+#endif
+
 #ifdef HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
 #endif
@@ -36,7 +40,7 @@
 #include "bothunt.h"
 #include "logging.h"
 
-static char *version="$Id: logging.c,v 1.6 2001/06/17 05:13:20 jdc Exp $";
+static char *version="$Id: logging.c,v 1.7 2001/06/18 16:20:14 kreator Exp $";
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file

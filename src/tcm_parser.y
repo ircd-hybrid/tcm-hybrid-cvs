@@ -3,7 +3,7 @@
  *
  * config file parser
  *
- * $Id: tcm_parser.y,v 1.2 2004/06/03 02:51:37 bill Exp $
+ * $Id: tcm_parser.y,v 1.3 2004/06/04 01:54:30 bill Exp $
  */
 
 %{
@@ -177,7 +177,7 @@ actions_duration: DURATION '=' timespec ';'
   if (current_action == -1)
     break;
 
-  actions[current_action].klinetime = $3;
+  actions[current_action].klinetime = $3 / 60;
 };
 
 actions_name: METHOD
@@ -186,7 +186,8 @@ actions_name: METHOD
     break;
 
   actions[current_action].method = 0;
-} '=' action_types ';'
+} '=' action_types ';';
+
 action_types: action_types ',' action_type_item | action_type_item;
 action_type_item: DLINE
 {

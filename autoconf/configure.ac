@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.53)
 
-AC_COPYRIGHT([$Id: configure.ac,v 1.2 2004/06/02 02:00:38 bill Exp $])
+AC_COPYRIGHT([$Id: configure.ac,v 1.3 2004/06/04 01:54:26 bill Exp $])
 
 AC_INIT([tcm-hybrid],[3.1.0-pre])
 
@@ -78,13 +78,10 @@ AC_SEARCH_LIBS(inet_aton, resolv,
 [if test "$ac_cv_search_inet_aton" = "no"; then UTIL_C=util.c; fi])
 
 dnl Basic check for SSL.
-AC_CHECK_HEADER(openssl/rsa.h, , [error=1])
+AC_CHECK_HEADER(openssl/rsa.h)
 
-AC_CHECK_LIB(crypto, RSA_private_decrypt, , [error=1])
-AC_SEARCH_LIBS(crypt, [crypt descrypt], ,
-[if test "$ac_cv_search_crypt" = "no"; then error=1; fi])
-AC_SEARCH_LIBS(dlopen, [dl c_r], , 
-[if test "$ac_cv_search_dlopen" = "no"; then error=1; fi])
+AC_CHECK_LIB(crypto, RSA_private_decrypt)
+AC_SEARCH_LIBS(crypt, [crypt descrypt], ,[error=1])
 
 if test "$error" = 1; then
   AC_MSG_ERROR([Missing some essential libraries - see output above for more details. Correct and retry.])
@@ -101,17 +98,9 @@ AC_CHECK_TYPE(socklen_t, ,
 dnl Check for stdarg.h - if we can't find it, halt configure
 AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - tcm-hybrid will not compile without it **))
 
-if test "$error" = 1; then
-  AC_MSG_ERROR([Missing some essential headers - see output above for more details. Correct and retry.])
-fi
-
 AC_PROG_GCC_TRADITIONAL
-AC_CHECK_FUNC(setrlimit, , [error=1])
+AC_CHECK_FUNC(setrlimit)
 AC_CHECK_FUNCS([strcasestr strlcpy strlcat snprintf vsnprintf],, [UTIL_C=util.c])
 AC_SUBST(UTIL_C)
-
-if test "$error" = 1; then
-  AC_MSG_ERROR([Missing some essential standard function - see output above for more details. Correct and retry.])
-fi
 
 AC_OUTPUT([Makefile src/Makefile tools/Makefile])

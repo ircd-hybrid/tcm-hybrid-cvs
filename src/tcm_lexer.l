@@ -1,7 +1,7 @@
 /*
  * tcm lexer file
  *
- * $Id: tcm_lexer.l,v 1.1 2004/06/02 02:00:44 bill Exp $
+ * $Id: tcm_lexer.l,v 1.2 2004/06/04 01:54:30 bill Exp $
  */
 
 %option case-insensitive
@@ -111,14 +111,16 @@ admin		{ return ADMIN;			}
 cflood		{ return CFLOOD;		}
 channel		{ return CHANNEL;		}
 clone		{ return CLONE;			}
+dccwarn		{ return DCCWARN;		}
 dline		{ return DLINE;			}
-dron		{ return DRONE;			}
+drone		{ return DRONE;			}
 duration	{ return DURATION;		}
 exempt		{ return EXEMPT;		}
 flags		{ return FLAGS;			}
 flood		{ return FLOOD;			}
 gecos		{ return GECOS;			}
 general		{ return GENERAL;		}
+ircwarn		{ return IRCWARN;		}
 jupe		{ return JUPE;			}
 kline		{ return KLINE;			}
 link		{ return LINK;			}
@@ -136,6 +138,7 @@ rclone		{ return RCLONE;		}
 reason		{ return REASON;		}
 sclone		{ return SCLONE;		}
 server		{ return SERVER;		}
+skline		{ return SKLINE;		}
 skline_file	{ return SKLINE_FILE;		}
 spam		{ return SPAM;			}
 ssl_keyfile	{ return SSL_KEYFILE;		}

@@ -56,7 +56,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.16 2001/10/14 00:02:10 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.17 2001/10/14 03:41:48 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -1739,7 +1739,7 @@ static void connect_flood_notice(char *server_notice)
   time_t current_time;
   int first_empty_entry = -1;
   int found_entry = NO;
-  int i;
+  int i, ident=NO;
 
   current_time = time(NULL);
   server_notice +=5;
@@ -1786,12 +1786,13 @@ static void connect_flood_notice(char *server_notice)
 		{
 		  if (connect_flood[i].connect_count >= MAX_CONNECT_FAILS)
 		    {
+                      if (user[0] == '~') ident = NO;
 		      if (!strncasecmp((char *)get_action_method("cflood"), "dline", 5))
 			suggest_action(get_action_type("cflood"), nick_reported, user, ip,
-                                       NO, YES);
+                                       NO, ident);
 		      else
 			suggest_action(get_action_type("cflood"), nick_reported, user, host,
-                                       NO, YES);
+                                       NO, ident);
 		      connect_flood[i].user_host[0] = '\0';
 		    }
 		}

@@ -1,3 +1,18 @@
+bill        2003/02/03 01:35:46 EST	(20030203_1)
+
+  Modified files:
+    include              bothunt.h 
+    src                  bothunt.c 
+  Log:
+  - added support for h7s Possible Flooder notice
+  - flooder notice parse speed-ups
+  
+  Revision  Changes    Path
+  1.61      +1 -0      tcm-hybrid/include/bothunt.h
+  1.212     +35 -26    tcm-hybrid/src/bothunt.c
+
+
+
 bill        2003/02/02 21:04:20 EST	(20030203_0)
 
   Modified files:

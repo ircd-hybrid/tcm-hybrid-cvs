@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.11 2001/10/12 02:26:22 db Exp $";
+static char *version="$Id: dcc_commands.c,v 1.12 2001/10/12 02:32:40 bill Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -771,8 +771,7 @@ void dccproc(int connnum, int argc, char *argv[])
             if ((argv[2][0] == '+') || (argv[2][0] == '-'))
               set_umode(connnum,argv[2],argv[1]);
             else
-              prnt(connections[connnum].socket, ".umode [user flags] | [user] |
-[flags]\n");
+              prnt(connections[connnum].socket, ".umode [user flags] | [user] | [flags]\n");
           }
         else
           {

@@ -1,5 +1,5 @@
 /*
- * $Id: modules.c,v 1.51 2002/06/24 00:40:21 db Exp $B
+ * $Id: modules.c,v 1.52 2002/06/28 00:53:49 db Exp $B
  *
  */
 
@@ -112,7 +112,7 @@ load_a_module(char *name, int log)
 #ifdef DEBUGMODE
       printf("Error loading module %s\n", err);
 #endif
-      send_to_all(FLAGS_ADMIN, "Error loading module %s: %s", name, err);
+      send_to_all(NULL, FLAGS_ADMIN, "Error loading module %s: %s", name, err);
       return -1;
     }
 
@@ -126,7 +126,8 @@ load_a_module(char *name, int log)
 #ifdef DEBUGMODE
       printf("Module %s has no _modinit() function\n", name);
 #endif
-      send_to_all(FLAGS_ADMIN, "Module %s has no _modinit() function", name);
+      send_to_all(NULL, FLAGS_ADMIN, "Module %s has no _modinit() function",
+		  name);
       dlclose(modpointer);
       return -1;
     }
@@ -144,7 +145,7 @@ load_a_module(char *name, int log)
 
   if (modlist[i].name != NULL)
     {
-      send_to_all(FLAGS_ALL, "Too many modules loaded");
+      send_to_all(NULL, FLAGS_ALL, "Too many modules loaded");
       return -1;
     }
   modlist[i].address = modpointer;
@@ -154,9 +155,9 @@ load_a_module(char *name, int log)
   
   if (log)
     {
-      send_to_all(FLAGS_ADMIN, "Module %s [version: %s] loaded at 0x%lx",
+      send_to_all(NULL, FLAGS_ADMIN, "Module %s [version: %s] loaded at 0x%lx",
                   (modlist[i].name == unknown_ver) ? name : modlist[i].name,
-                   modlist[i].version, (long)modlist[i].address);
+		  modlist[i].version, (long)modlist[i].address);
 #ifdef DEBUGMODE
       printf("Module %s [version: %s] loaded at 0x%lx\n",
             (modlist[i].name == unknown_ver) ? name : modlist[i].name,
@@ -186,7 +187,7 @@ unload_a_module(char *name, int log)
   modlist[modindex].address = NULL;
 
   if (log)
-    send_to_all(FLAGS_ADMIN, "Module %s unloaded", name);
+    send_to_all(NULL, FLAGS_ADMIN, "Module %s unloaded", name);
   return 0;
 }
 
@@ -195,7 +196,7 @@ m_modload (struct connection *connection_p, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (load_a_module(argv[1], 1) != -1)
-    send_to_all(FLAGS_ADMIN, "Loaded by %s", connection_p->nick);
+    send_to_all(NULL, FLAGS_ADMIN, "Loaded by %s", connection_p->nick);
   else
     send_to_connection(connection_p,
 		       "Load of %s failed", argv[1]);
@@ -206,7 +207,7 @@ m_modunload (struct connection *connection_p, int argc, char *argv[])
 {
   if (argc != 2) return;
   if (unload_a_module(argv[1], 1) != -1)
-    send_to_all(FLAGS_ADMIN, "Loaded by %s", connection_p->nick);
+    send_to_all(NULL, FLAGS_ADMIN, "Loaded by %s", connection_p->nick);
 }
 
 void
@@ -216,7 +217,7 @@ m_modreload (struct connection *connection_p, int argc, char *argv[])
   if (unload_a_module(argv[1], 0) != -1)
     {
       if (load_a_module(argv[1], 1))
-        send_to_all(FLAGS_ADMIN, "Reloaded by %s", connection_p->nick);
+        send_to_all(NULL, FLAGS_ADMIN, "Reloaded by %s", connection_p->nick);
     }
   else
     send_to_connection(connection_p,

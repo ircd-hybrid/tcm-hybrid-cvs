@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.123 2002/06/24 16:21:51 leeh Exp $ */
+/* $Id: main.c,v 1.124 2002/06/28 00:53:49 db Exp $ */
 
 #include "setup.h"
 
@@ -345,7 +345,7 @@ handle_sighup(int sig)
   if(sig != SIGHUP)
     return;
 
-  send_to_all(FLAGS_ALL, "*** Caught SIGHUP ***");
+  send_to_all(NULL, FLAGS_ALL, "*** Caught SIGHUP ***");
   reload_userlist();
 }
   
@@ -450,7 +450,8 @@ xmalloc(size_t size)
 
   if (ret == NULL)
   {
-    send_to_all(FLAGS_ALL, "Ran out of memory while attempting to allocate");
+    send_to_all(NULL, FLAGS_ALL,
+		"Ran out of memory while attempting to allocate");
     exit(-1);
   }
 

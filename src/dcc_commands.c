@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.140 2002/06/27 14:39:23 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.141 2002/06/28 00:53:48 db Exp $ */
 
 #include "setup.h"
 
@@ -163,14 +163,14 @@ m_killlist(struct connection *connection_p, int argc, char *argv[])
 #ifdef HAVE_REGEX_H
   if (strcasecmp(argv[1], "-r") == 0)
   {
-    send_to_all(FLAGS_ALL, "*** killlist %s :%s by %s", argv[2],
+    send_to_all(NULL, FLAGS_ALL, "*** killlist %s :%s by %s", argv[2],
                 reason, connection_p->registered_nick);
     kill_or_list_users(connection_p, argv[2], YES, YES, reason);
   }
   else
 #endif
   {
-    send_to_all(FLAGS_ALL, "*** killlist %s :%s by %s", argv[1],
+    send_to_all(NULL, FLAGS_ALL, "*** killlist %s :%s by %s", argv[1],
                 reason, connection_p->registered_nick);
     kill_or_list_users(connection_p, argv[1], NO, YES, reason);
   }
@@ -229,7 +229,7 @@ m_kill(struct connection *connection_p, int argc, char *argv[])
     expand_args(reason, MAX_REASON, argc-2, argv+2);
   }
 
-  send_to_all(FLAGS_VIEW_KLINES, "*** kill %s :%s by %s",
+  send_to_all(NULL, FLAGS_VIEW_KLINES, "*** kill %s :%s by %s",
               argv[1], reason, connection_p->registered_nick);
   log_kline("KILL", argv[1], 0, connection_p->registered_nick, reason);
 
@@ -419,7 +419,7 @@ m_motd(struct connection *connection_p, int argc, char *argv[])
 void
 m_save(struct connection *connection_p, int argc, char *argv[])
 {
-  send_to_all(FLAGS_ALL, "%s is saving %s and preferences",
+  send_to_all(NULL, FLAGS_ALL, "%s is saving %s and preferences",
               connection_p->registered_nick, CONFIG_FILE);
   save_prefs();
 }
@@ -444,7 +444,7 @@ void
 m_cycle(struct connection *connection_p, int argc, char *argv[])
 {
   leave(config_entries.channel);
-  send_to_all( FLAGS_ALL, "I'm cycling.  Be right back.");
+  send_to_all(NULL, FLAGS_ALL, "I'm cycling.  Be right back.");
   sleep(1);
 
   /* probably on a cycle, we'd want the tcm to set
@@ -456,7 +456,7 @@ m_cycle(struct connection *connection_p, int argc, char *argv[])
 void
 m_die(struct connection *connection_p, int argc, char *argv[])
 {
-  send_to_all( FLAGS_ALL, "I've been ordered to quit irc, goodbye.");
+  send_to_all(NULL, FLAGS_ALL, "I've been ordered to quit irc, goodbye.");
   send_to_server("QUIT :Dead by request!");
   tcm_log(L_ERR, "DIEd by oper %s", connection_p->registered_nick);
   exit(1);
@@ -465,7 +465,7 @@ m_die(struct connection *connection_p, int argc, char *argv[])
 void
 m_restart(struct connection *connection_p, int argc, char *argv[])
 {
-  send_to_all( FLAGS_ALL, "I've been ordered to restart.");
+  send_to_all(NULL, FLAGS_ALL, "I've been ordered to restart.");
   send_to_server("QUIT :Restart by request!");
   tcm_log(L_ERR, "RESTART by oper %s", connection_p->registered_nick);
   sleep(1);
@@ -519,7 +519,7 @@ m_unkline(struct connection *connection_p, int argc, char *argv[])
   {
     tcm_log(L_NORM, "UNKLINE %s attempted by oper %s",
             argv[1], connection_p->registered_nick);
-    send_to_all(FLAGS_VIEW_KLINES, "UNKLINE %s attempted by oper %s", 
+    send_to_all(NULL, FLAGS_VIEW_KLINES, "UNKLINE %s attempted by oper %s", 
                  argv[1], connection_p->registered_nick);
     send_to_server("UNKLINE %s",argv[1]);
   }
@@ -553,7 +553,7 @@ m_dline(struct connection *connection_p, int argc, char *argv[])
     else
       log_kline("DLINE", argv[1], 0, connection_p->registered_nick,
                 reason);
-    send_to_all(FLAGS_ALL, "*** dline %s :%s by %s", argv[1],
+    send_to_all(NULL, FLAGS_ALL, "*** dline %s :%s by %s", argv[1],
 		reason, connection_p->registered_nick);
 
     if((connection_p->type & FLAGS_INVS) == 0)
@@ -599,7 +599,7 @@ void m_nflood(struct connection *connection_p, int argc, char *argv[])
 void
 m_rehash(struct connection *connection_p, int argc, char *argv[])
 {
-  send_to_all(FLAGS_ALL,
+  send_to_all(NULL, FLAGS_ALL,
 	      "*** rehash requested by %s", 
 	      connection_p->registered_nick[0] ?
 	      connection_p->registered_nick :
@@ -611,7 +611,7 @@ m_rehash(struct connection *connection_p, int argc, char *argv[])
 void
 m_trace(struct connection *connection_p, int argc, char *argv[])
 {
-  send_to_all(FLAGS_ALL,
+  send_to_all(NULL, FLAGS_ALL,
 	      "Trace requested by %s",
 	      connection_p->registered_nick[0] ?
 	      connection_p->registered_nick :
@@ -776,12 +776,12 @@ register_oper(struct connection *connection_p, char *password,
       if(connection_p->type & FLAGS_SUSPENDED)
       {
 	send_to_connection(connection_p, "You are suspended");
-	send_to_all(FLAGS_ALL, "%s is suspended", who_did_command);
+	send_to_all(NULL, FLAGS_ALL, "%s is suspended", who_did_command);
       }
       else
       {
 	send_to_connection(connection_p, "You are now registered");
-	send_to_all(FLAGS_ALL, "%s has registered", who_did_command);
+	send_to_all(NULL, FLAGS_ALL, "%s has registered", who_did_command);
 
 	/* mark them as registered */
 	connection_p->type |= FLAGS_OPER;
@@ -789,7 +789,8 @@ register_oper(struct connection *connection_p, char *password,
     }
     else
     {
-      send_to_all(FLAGS_ALL, "illegal password from %s", who_did_command);
+      send_to_all(NULL, FLAGS_ALL,
+		  "illegal password from %s", who_did_command);
     }
   }
   else

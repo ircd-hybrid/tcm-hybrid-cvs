@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.141 2002/06/27 14:39:24 leeh Exp $
+ * $Id: userlist.c,v 1.142 2002/06/28 00:53:50 db Exp $
  */
 
 #include <errno.h>
@@ -389,7 +389,7 @@ set_initial_umodes(struct oper_entry *user, const char *umode)
     /* if theres no FLAGS_VALID, its an old userfile */
     if((type & FLAGS_VALID) == 0)
     {
-      send_to_all(FLAGS_ALL, "Preference file %s is invalid, removing",
+      send_to_all(NULL, FLAGS_ALL, "Preference file %s is invalid, removing",
                   user_pref_filename);
       unlink(user_pref_filename);
       return;
@@ -425,7 +425,7 @@ save_umodes(const char *nick)
   }
   else
   {
-    send_to_all(FLAGS_ALL, "Couldn't open %s for writing", user_pref);
+    send_to_all(NULL, FLAGS_ALL, "Couldn't open %s for writing", user_pref);
   }
 }
     
@@ -661,7 +661,7 @@ save_prefs(void)
 
   if ((fp_in = fopen(CONFIG_FILE,"r")) == NULL)
     {
-      send_to_all(FLAGS_ALL, "Couldn't open %s: %s",
+      send_to_all(NULL, FLAGS_ALL, "Couldn't open %s: %s",
 		  CONFIG_FILE, strerror(errno));
       return;
     }
@@ -670,7 +670,8 @@ save_prefs(void)
 
   if ((fp_out = fopen(filename, "w")) == NULL)
     {
-      send_to_all(FLAGS_ALL, "Couldn't open %s: %s", filename, strerror(errno));
+      send_to_all(NULL, FLAGS_ALL,
+		  "Couldn't open %s: %s", filename, strerror(errno));
       fclose(fp_in);
       return;
     }
@@ -734,9 +735,9 @@ save_prefs(void)
   fclose(fp_out);
 
   if (rename(filename, CONFIG_FILE))
-    send_to_all(FLAGS_ALL,
-		 "Error renaming new config file.  Changes may be lost.  %s",
-                 strerror(errno));
+    send_to_all(NULL, FLAGS_ALL,
+		"Error renaming new config file.  Changes may be lost.  %s",
+		strerror(errno));
   chmod(CONFIG_FILE, 0600);
 }
 

@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.44 2002/06/24 16:21:48 leeh Exp $
+ * $Id: tcm_io.h,v 1.45 2002/06/28 00:53:45 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -68,9 +68,7 @@ void client_link_closed(struct connection *, const char *format, ...);
 void send_to_connection(struct connection *, const char *, ...);
 void send_to_server(const char *, ...);
 /* send_to_all - Hendrix (va'd by bill) */
-void send_to_all(int type, const char *format,...);
-void send_to_partyline(struct connection *, const char *format,...);
-
+void send_to_all(struct connection *from, int type, const char *format,...);
 struct connection *connect_to_server(const char *server, const int port);
 int connect_to_given_ip_port(struct sockaddr_in *, int );
 

@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.21 2002/06/24 00:40:20 db Exp $
+ * $Id: clones.c,v 1.22 2002/06/28 00:53:48 db Exp $
  */
 
 #include <assert.h>
@@ -168,12 +168,12 @@ check_clones(void *unused)
             (strlen(ptr->info->domain) ==
              strlen(ptr->info->host));
 
-          send_to_all(FLAGS_WARN,
-                       "clones> %2d connections -- %s@%s%s {%s}",
-                       num_found, ptr->info->username,
-                       notip ? "*" : ptr->info->domain,
-                       notip ? ptr->info->domain : "*",
-                       ptr->info->class);
+          send_to_all(NULL, FLAGS_WARN,
+		      "clones> %2d connections -- %s@%s%s {%s}",
+		      num_found, ptr->info->username,
+		      notip ? "*" : ptr->info->domain,
+		      notip ? ptr->info->domain : "*",
+		      ptr->info->class);
         }
       }
     }

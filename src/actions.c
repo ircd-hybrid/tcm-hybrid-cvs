@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.34 2002/06/24 00:40:19 db Exp $
+ * $Id: actions.c,v 1.35 2002/06/28 00:53:48 db Exp $
  */
 
 #include "setup.h"
@@ -465,19 +465,19 @@ handle_action(int actionid, char *nick, char *username,
     {
 
       if (addcmt && addcmt[0])
-	send_to_all(FLAGS_WARN,
-		     "*** %s violation (%s) from %s (%s@%s): %s", 
-		     actions[actionid].name, addcmt,
-		     (nick && nick[0]) ? nick : "<unknown>", 
-		     (username && username[0]) ? username : "<unknown>",
+	send_to_all(NULL, FLAGS_WARN,
+		    "*** %s violation (%s) from %s (%s@%s): %s", 
+		    actions[actionid].name, addcmt,
+		    (nick && nick[0]) ? nick : "<unknown>", 
+		    (username && username[0]) ? username : "<unknown>",
 		     host, comment);
       else
-	send_to_all(FLAGS_WARN,
-		     "*** %s violation from %s (%s@%s): %s", 
-		     actions[actionid].name, 
-		     (nick && nick[0]) ? nick : "<unknown>", 
-		     (username && username[0]) ? username : "<unknown>",
-		     host, comment);
+	send_to_all(NULL, FLAGS_WARN,
+		    "*** %s violation from %s (%s@%s): %s", 
+		    actions[actionid].name, 
+		    (nick && nick[0]) ? nick : "<unknown>", 
+		    (username && username[0]) ? username : "<unknown>",
+		    host, comment);
 
     }
 

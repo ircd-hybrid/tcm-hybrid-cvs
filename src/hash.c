@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.45 2002/06/26 11:52:50 leeh Exp $
+ * $Id: hash.c,v 1.46 2002/06/28 00:53:49 db Exp $
  */
 
 #include <stdio.h>
@@ -667,7 +667,7 @@ check_host_clones(char *host)
       {
         if(notice0[0] != '\0')
         {
-	  send_to_all(FLAGS_WARN, "%s", notice0);
+	  send_to_all(NULL, FLAGS_WARN, "%s", notice0);
 	  tcm_log(L_NORM, "  [etc.]");
         }
       }
@@ -818,7 +818,7 @@ check_virtual_host_clones(char *ip_class_c)
 	    }
 	  else if(clonecount == 5)
 	    {
-	      send_to_all(FLAGS_WARN, "%s", notice0);
+	      send_to_all(NULL, FLAGS_WARN, "%s", notice0);
 	      tcm_log(L_NORM, "  [etc.]");
 	    }
 	}
@@ -917,7 +917,7 @@ kill_add_report(char *server_notice)
 	{
 	  if(!strcasecmp(nick, ptr->info->nick))
 	    {
-	      send_to_all(FLAGS_VIEW_KLINES, "%s killed by %s: %s",
+	      send_to_all(NULL, FLAGS_VIEW_KLINES, "%s killed by %s: %s",
 			  nick, by, reason);
 	      tcm_log(L_NORM, "%s killed by %s: %s",
 		      nick, by, reason);

@@ -2,7 +2,7 @@
  *
  * module used to interact with efnets services
  *
- * $Id: services.c,v 1.21 2002/06/21 14:16:29 leeh Exp $
+ * $Id: services.c,v 1.22 2002/06/28 00:53:49 db Exp $
  */
 
 #include <stdio.h>
@@ -96,7 +96,7 @@ services_handler(struct source_client *source_p, int argc, char *argv[])
     if((p = strchr(host, ' ')) != NULL)
       *p = '\0';
 
-    send_to_all(FLAGS_ALL, "%s reports drone %s", SERVICES_NAME, nick);
+    send_to_all(NULL, FLAGS_ALL, "%s reports drone %s", SERVICES_NAME, nick);
 
     if(config_entries.channel != '\0')
       privmsg(config_entries.channel, "%s reports drone %s", SERVICES_NAME, nick);
@@ -162,7 +162,7 @@ services_handler(struct source_client *source_p, int argc, char *argv[])
     *host++ = '\0';
 
     /* XXX */
-    send_to_all(FLAGS_ALL, "%s reports %d cloning %s@%s nick %s",
+    send_to_all(NULL, FLAGS_ALL, "%s reports %d cloning %s@%s nick %s",
                 SERVICES_NAME, services.clone_amount, user, host, nick);
 
     if(config_entries.channel != '\0')

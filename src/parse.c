@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.81 2002/06/24 00:40:21 db Exp $
+ * $Id: parse.c,v 1.82 2002/06/28 00:53:49 db Exp $
  */
 
 #include <stdio.h>
@@ -159,7 +159,8 @@ parse_client(struct connection *connection_p)
 
       expand_args(buff, MAX_BUFF, argc, argv);
 
-      send_to_partyline(connection_p, "<%s> %s", connection_p->nick, buff);
+      send_to_all(connection_p, FLAGS_ALL, 
+		  "<%s> %s", connection_p->nick, buff);
     }
     else
       send_to_connection(connection_p,
@@ -448,7 +449,7 @@ process_privmsg(struct source_client *source_p, int argc, char *argv[])
 {
   if (argv[3][0] != '.')
   {
-    send_to_all(FLAGS_PRIVMSG, "[%s!%s@%s] %s",
+    send_to_all(NULL, FLAGS_PRIVMSG, "[%s!%s@%s] %s",
                 source_p->name, source_p->username, source_p->host, argv[3]);
     return;
   }

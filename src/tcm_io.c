@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.95 2002/06/24 16:21:51 leeh Exp $
+ * $Id: tcm_io.c,v 1.96 2002/06/28 00:53:50 db Exp $
  */
 
 #include <stdio.h>
@@ -514,7 +514,7 @@ va_send_to_connection(struct connection *connection_p,
  *
  */
 void
-send_to_all(int send_umode, const char *format,...)
+send_to_all(struct connection *from_p, int send_umode, const char *format,...)
 {
   dlink_node *ptr;
   struct connection *connection_p;
@@ -524,41 +524,11 @@ send_to_all(int send_umode, const char *format,...)
   for(ptr = connections.head; ptr; ptr = ptr->next)
     {
       connection_p = ptr->data;
-
+      if (from_p == connection_p)
+	continue;
       if((connection_p->state == S_CLIENT) &&
          (connection_p->type & send_umode))
         va_send_to_connection(connection_p, format, va);
-    }
-  va_end(va);
-}
-
-/*
- * send_to_partyline
- *
- * inputs	- pointer to struct connection not to send back to
- *		- message to send
- * output	- NONE
- * side effects	- message is sent on /dcc link to all connected users
- *
- */
-void
-send_to_partyline(struct connection *from_p, const char *format,...)
-{
-  dlink_node *ptr;
-  struct connection *connection_p;
-  va_list va;
-
-  va_start(va,format);
-  for(ptr = connections.head; ptr; ptr = ptr->next)
-    {
-      connection_p = ptr->data;
-
-      if (connection_p->state == S_CLIENT)
-	{
-	  if ((from_p != connection_p)
-	      && connection_p->type & FLAGS_PARTYLINE)
-	    va_send_to_connection(connection_p, format, va);
-	}
     }
   va_end(va);
 }
@@ -689,7 +659,7 @@ connect_to_given_ip_port(struct sockaddr_in *socketname, int port)
   /* open an inet socket */
   if ((sock = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
-      send_to_all(FLAGS_ALL, "Can't assign fd for socket");
+      send_to_all(NULL, FLAGS_ALL, "Can't assign fd for socket");
       return(INVALID);
     }
 

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.188 2002/06/26 12:21:34 leeh Exp $
+ * $Id: bothunt.c,v 1.189 2002/06/28 00:53:48 db Exp $
  */
 
 #include <stdio.h>
@@ -333,7 +333,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((q = strrchr(p, ' ')) == NULL)
       return;
     ++q;
-    send_to_all(FLAGS_WARN, "*** %s has just become an irc operator %s", 
+    send_to_all(NULL, FLAGS_WARN, "*** %s has just become an irc operator %s", 
 	        message+14, q);
     return;
   }
@@ -341,19 +341,19 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* Kline notice requested by Toast */
   if (strstr(p, "added K-Line for"))
   {
-    send_to_all(FLAGS_VIEW_KLINES, "%s", p);
+    send_to_all(NULL, FLAGS_VIEW_KLINES, "%s", p);
     tcm_log(L_NORM, "%s", p);
     return;
   }
   else if (strstr(p, "added temporary "))
   {
-    send_to_all(FLAGS_VIEW_KLINES, "%s", p);
+    send_to_all(NULL, FLAGS_VIEW_KLINES, "%s", p);
     tcm_log(L_NORM, "%s", p);
     return;
   }
   else if (strstr(p, "has removed the "))
   {
-    send_to_all(FLAGS_VIEW_KLINES, "%s", p);
+    send_to_all(NULL, FLAGS_VIEW_KLINES, "%s", p);
     tcm_log(L_NORM, "%s", p);
     return;
   }
@@ -382,7 +382,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((q = strchr(p, ']')) == NULL)
       return;
     *q = '\0';
-    send_to_all(FLAGS_VIEW_KLINES,
+    send_to_all(NULL, FLAGS_VIEW_KLINES,
                 "GLINE for %s@%s by %s [%s]: %s", user, host, nick, target, p);
     return;
   }
@@ -408,7 +408,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *p = '\0';
 
-    send_to_all(FLAGS_VIEW_KLINES,
+    send_to_all(NULL, FLAGS_VIEW_KLINES,
 		"GLINE for %s@%s triggered by %s: %s", user, host, nick, q);
     return;
   }
@@ -421,10 +421,10 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     *q++ = '\0';
 
     if (strstr(q, " DNS"))
-      send_to_all(FLAGS_SPY, "*** %s is rehashing DNS", nick);
+      send_to_all(NULL, FLAGS_SPY, "*** %s is rehashing DNS", nick);
     else
     {
-      send_to_all(FLAGS_SPY, "*** %s is rehashing config file", nick);
+      send_to_all(NULL, FLAGS_SPY, "*** %s is rehashing config file", nick);
       reload_userlist();
     }
 
@@ -436,7 +436,8 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
-    send_to_all(FLAGS_VIEW_KLINES, "*** %s is clearing temp klines", nick);
+    send_to_all(NULL, FLAGS_VIEW_KLINES,
+		"*** %s is clearing temp klines", nick);
     return;
   }
   else if (strstr(p, "clearing G-lines"))
@@ -445,7 +446,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
-    send_to_all(FLAGS_VIEW_KLINES, "*** %s is clearing g-lines", nick);
+    send_to_all(NULL, FLAGS_VIEW_KLINES, "*** %s is clearing g-lines", nick);
     return;
   }
   else if (strstr(p, "garbage collecting"))
@@ -454,7 +455,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
-    send_to_all(FLAGS_SPY, "*** %s is garbage collecting", nick);
+    send_to_all(NULL, FLAGS_SPY, "*** %s is garbage collecting", nick);
     return;
   }
   else if (strstr(p, "forcing re-reading of"))
@@ -466,7 +467,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((p = strstr(q, "re-reading of")) == NULL)
       return;
     p+=14;
-    send_to_all(FLAGS_SPY, "*** %is is rehashing %s", nick, p);
+    send_to_all(NULL, FLAGS_SPY, "*** %is is rehashing %s", nick, p);
     return;
   }
 
@@ -579,7 +580,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* Link with test.server[bill@255.255.255.255] established: (TS) link */ 
   case LINKWITH:
     ++q;
-    send_to_all(FLAGS_SERVERS, "Link with %s", q);
+    send_to_all(NULL, FLAGS_SERVERS, "Link with %s", q);
     break;
 
   /* Received SQUIT test.server from bill[bill@ummm.E] (this is a test) */
@@ -589,13 +590,13 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *p = '\0';
     p+=6;
-    send_to_all(FLAGS_SERVERS, "SQUIT for %s from %s", q, p);
+    send_to_all(NULL, FLAGS_SERVERS, "SQUIT for %s from %s", q, p);
     break;
 
   /* motd requested by bill (bill@ummm.E) [irc.bill.eagan.mn.us] */
   case MOTDREQ:
     ++q;
-    send_to_all(FLAGS_SPY, "[MOTD requested by %s]", q);
+    send_to_all(NULL, FLAGS_SPY, "[MOTD requested by %s]", q);
     break;
 
   case  IGNORE:
@@ -625,9 +626,9 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
     if (strcasecmp(tcm_status.my_server, from_server) == 0)
     {
-      send_to_all(FLAGS_WARN,
-		   "*** Flooder %s (%s@%s) target: %s",
-		   nick, user, host, target);
+      send_to_all(NULL, FLAGS_WARN,
+		  "*** Flooder %s (%s@%s) target: %s",
+		  nick, user, host, target);
       handle_action(act_flood, nick, user, host, 0, 0);
     }
 
@@ -652,7 +653,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if (strstr(q, "possible spambot") == NULL)
       return;
 
-    send_to_all(FLAGS_ALL, "Spambot: %s (%s@%s)", nick, user, host);
+    send_to_all(NULL, FLAGS_ALL, "Spambot: %s (%s@%s)", nick, user, host);
 
     handle_action(act_spambot, nick, user, host, 0, 0);
     break;
@@ -667,9 +668,9 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* *** You have been D-lined */
   /* *** Banned: this is a test (2002/04/11 15.10) */
   case BANNED:
-    send_to_all(FLAGS_ALL, "I am banned from %s.  Exiting..", 
-		 tcm_status.my_server ?
-		 tcm_status.my_server : config_entries.server_name);
+    send_to_all(NULL, FLAGS_ALL, "I am banned from %s.  Exiting..", 
+		tcm_status.my_server ?
+		tcm_status.my_server : config_entries.server_name);
     tcm_log(L_ERR, "%s", "onservnotice Banned from server.  Exiting.");
     exit(-1);
     /* NOT REACHED */
@@ -701,8 +702,9 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if (strcasecmp(from_server, tcm_status.my_server))
       return;
 
-    send_to_all(FLAGS_WARN, "Possible drone flooder: %s!%s@%s target: %s",
-                 nick, user, host, q);
+    send_to_all(NULL, FLAGS_WARN,
+		"Possible drone flooder: %s!%s@%s target: %s",
+		nick, user, host, q);
     break;
 
   /* X-line Rejecting [Bill Jonus] [just because] user bill[bill@ummm.E] */
@@ -736,7 +738,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
         return;
       *q = '\0';
       user = q+12;
-      send_to_all(FLAGS_SERVERS, "Server %s split from %s", nick, user);
+      send_to_all(NULL, FLAGS_SERVERS, "Server %s split from %s", nick, user);
     }
     else if (strstr(q, "being introduced"))
     {
@@ -745,7 +747,8 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
         return;
       *q = '\0';
       user = q+21;
-      send_to_all(FLAGS_SERVERS, "Server %s being introduced by %s", nick, user);
+      send_to_all(NULL, FLAGS_SERVERS,
+		  "Server %s being introduced by %s", nick, user);
     }
     break;
 
@@ -755,7 +758,8 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *q = '\0';
     user = q+1;
-    send_to_all(FLAGS_WARN, "*** Failed oper attempt by %s %s", nick, user);
+    send_to_all(NULL, FLAGS_WARN,
+		"*** Failed oper attempt by %s %s", nick, user);
     break;
 
   /* info requested by bill (bill@ummm.e) [irc.bill.eagan.mn.us] */
@@ -768,7 +772,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((q = strchr(user, ')')) == NULL)
       return;
     *q = '\0';
-    send_to_all(FLAGS_SPY, "[INFO requested by %s (%s)]", nick, user);
+    send_to_all(NULL, FLAGS_SPY, "[INFO requested by %s (%s)]", nick, user);
     break;
 
   /* No aconf found */
@@ -787,7 +791,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       p += 14;
     else
       p = message;
-    send_to_all(FLAGS_NOTICE, "Notice: %s", p);
+    send_to_all(NULL, FLAGS_NOTICE, "Notice: %s", p);
     break;
   }
 }
@@ -903,8 +907,8 @@ link_look_notice(char *snotice)
   if (get_user_host(&user, &host, seen_user_host) == NULL)
     return;
 
-  send_to_all(FLAGS_SPY, "[LINKS by %s (%s@%s)]",
-	       nick_reported, user, host ); /* - zaph */
+  send_to_all(NULL, FLAGS_SPY, "[LINKS by %s (%s@%s)]",
+	      nick_reported, user, host ); /* - zaph */
 
   for(i = 0; i < MAX_LINK_LOOKS; i++ )
     {
@@ -997,7 +1001,8 @@ void cs_nick_flood(char *snotice)
   if (get_user_host(&user, &host, user_host) == NULL)
     return;
 
-  send_to_all(FLAGS_WARN, "CS nick flood user_host = [%s@%s]", user, host);
+  send_to_all(NULL, FLAGS_WARN, "CS nick flood user_host = [%s@%s]",
+	      user, host);
   tcm_log(L_NORM, "%s", "CS nick flood user_host = [%s@%s]", user, host);
   handle_action(act_flood, nick_reported, user, host, 0, 0);
 }
@@ -1029,7 +1034,7 @@ cs_clones(char *snotice)
   if (get_user_host(&user, &host, user_host) == NULL)
     return;
 
-  send_to_all(FLAGS_WARN, "CS clones user_host = [%s]", user_host);
+  send_to_all(NULL, FLAGS_WARN, "CS clones user_host = [%s]", user_host);
   tcm_log(L_NORM, "CS clones = [%s]", user_host);
 
   handle_action(act_clone, "", user, host, 0, 0);
@@ -1203,7 +1208,7 @@ add_to_nick_change_table(char *user, char *host,char *last_nick)
 	       NICK_CHANGE_MAX_COUNT)
 	      && !nick_changes[i].noticed)
 	  {
-	    send_to_all(FLAGS_WARN,
+	    send_to_all(NULL, FLAGS_WARN,
 			"nick flood %s@%s (%s) %d in %d seconds (%s)",
 			nick_changes[i].user,
 			nick_changes[i].host,
@@ -1287,8 +1292,8 @@ stats_notice(char *snotice)
   if (stat == 'p')
     show_stats_p((const char *)nick);
 #endif
-  send_to_all(FLAGS_SPY, "[STATS %c requested by %s (%s)]",
-	       stat, nick, fulluh);
+  send_to_all(NULL, FLAGS_SPY, "[STATS %c requested by %s (%s)]",
+	      stat, nick, fulluh);
 }
 
 void

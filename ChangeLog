@@ -1,3 +1,16 @@
+leeh        2002/06/21 01:45:55 EDT	(20020621_3)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  - chopuh() is about as fun to debug as shoving various bodily parts into
+    a bucket of ice.
+  
+  Revision  Changes    Path
+  1.166     +13 -4     tcm-hybrid/src/bothunt.c
+
+
+
 leeh        2002/06/20 21:07:46 EDT	(20020621_2)
 
   Modified files:

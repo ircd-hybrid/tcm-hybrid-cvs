@@ -1,3 +1,27 @@
+wcampbel    2002/05/06 09:37:29 EDT	(20020506_4)
+
+  Modified files:
+    .                    Makefile.in 
+    modules              Makefile.in 
+    src                  Makefile.in 
+  Log:
+  Fixed up CFLAGS handling in the Makefiles.  The variables from the root
+  Makefile are NOT shared, as it is not appropriate to do that with autoconf.
+  
+  To use an alternative set of CFLAGS, use a command such as this:
+  CFLAGS="-O2 -g -ggdb -pg" ./configure
+  
+  -O2 -g is the default CFLAGS line used by configure.
+  
+  Also...Added -Wall to the CFLAGS in modules/ and src/
+  
+  Revision  Changes    Path
+  1.20      +1 -1      tcm-hybrid/Makefile.in
+  1.8       +1 -1      tcm-hybrid/modules/Makefile.in
+  1.16      +1 -1      tcm-hybrid/src/Makefile.in
+
+
+
 wcampbel    2002/05/06 09:28:03 EDT	(20020506_3)
 
   Modified files:

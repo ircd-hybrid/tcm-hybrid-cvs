@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.48 2002/05/06 12:50:54 wcampbel Exp $ */
+/* $Id: dcc_commands.c,v 1.49 2002/05/07 22:02:25 bill Exp $ */
 
 #include "setup.h"
 
@@ -2072,6 +2072,14 @@ struct TcmMessage hlist_msgtab = {
 void 
 _modinit()
 {
+  int i;
+  for (i=0;i<sizeof(msg_hash_table);++i)
+  {
+    msg_hash_table[i].cmd = NULL;
+    msg_hash_table[i].msg = NULL;
+    msg_hash_table[i].next = NULL;
+  }
+
   add_common_function(F_DCC, dccproc);
   mod_add_cmd(&vlist_msgtab);
   mod_add_cmd(&class_msgtab);

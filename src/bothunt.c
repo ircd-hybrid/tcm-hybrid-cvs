@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.166 2002/06/21 05:45:53 leeh Exp $
+ * $Id: bothunt.c,v 1.167 2002/06/21 13:14:49 leeh Exp $
  */
 
 #include <stdio.h>
@@ -200,7 +200,7 @@ on_stats_e(int argc, char *argv[])
   expand_args(body, MAX_BUFF, argc, argv);
 
 /* No point if I am maxed out going any further */
-  if (host_list_index == (MAXHOSTS - 1))
+  if (host_list_index >= (MAXHOSTS - 1))
     return;
 
   if ((strtok(body," ") == NULL) )		/* discard this field */
@@ -241,7 +241,7 @@ on_stats_i(int argc, char *argv[])
   char *host;
 
   /* No point if I am maxed out going any further */
-  if (host_list_index == (MAXHOSTS - 1))
+  if (host_list_index >= (MAXHOSTS - 1))
     return;
 
   /* N.B. get_user_host modifies argv[6] */

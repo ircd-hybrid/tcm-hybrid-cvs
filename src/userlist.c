@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.117 2002/06/21 13:09:42 leeh Exp $
+ * $Id: userlist.c,v 1.118 2002/06/21 13:14:49 leeh Exp $
  *
  */
 
@@ -914,7 +914,7 @@ add_an_oper(int argc, char *argv[])
     user_list_index++;
   }
 
-  if(host_list_index == (MAX_HOST-1))
+  if(host_list_index >= (MAXHOSTS-1))
     return;
 
   strlcpy(hostlist[host_list_index].user, user, 
@@ -932,7 +932,7 @@ load_e_line(char *line)
   unsigned int type=0, i;
   /* E:actionmask[ actionmask]:user@hostmask */
 
-  if(host_list_index == (MAX_HOST-1))
+  if(host_list_index >= (MAXHOSTS-1))
     return;
 
   if ((p = strchr(line, ':')) == NULL)

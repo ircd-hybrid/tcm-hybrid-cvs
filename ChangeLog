@@ -1,3 +1,7 @@
+*** 20011026_2 by bill
+- fixed "is now an operator" notice
+
+
 *** 20011026_1 by db
 - got rid of unnecessary mallocs and frees
 - make function names stand out on own line

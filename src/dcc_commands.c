@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.54 2002/05/10 00:26:27 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.55 2002/05/11 00:39:23 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -629,7 +629,7 @@ void m_close(int connnum, int argc, char *argv[])
 void m_op(int connnum, int argc, char *argv[])
 {
   if (argc != 2)
-    prnt(connections[connnum].socket, "Usage: %s <nick>\n");
+    prnt(connections[connnum].socket, "Usage: %s <nick>\n", argv[0]);
   else
     op(config_entries.defchannel, argv[1]);
 }

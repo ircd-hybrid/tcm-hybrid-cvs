@@ -1,3 +1,15 @@
+bill        2002/03/06 00:36:31 EST	(20020306_1)
+
+  Modified files:
+    src                  stdcmds.c 
+  Log:
+  - oops, minor bugfix.
+  
+  Revision  Changes    Path
+  1.37      +2 -0      tcm-hybrid/src/stdcmds.c
+
+
+
 bill        2002/03/06 00:16:27 EST	(20020306_0)
 
   Modified files:

@@ -71,10 +71,17 @@ extern int okhost(char *user,char *host,int);
 extern void report(int type, int channel_send_flag, char *format,...);
 extern char *date_stamp(void);
 
-
 void m_modload(int connnum, int argc, char *argv[]);
 void m_modunload(int connnum, int argc, char *argv[]);
 void m_modreload(int connnum, int argc, char *argv[]);
 void m_modlist(int connnum, int argc, char *argv[]);
+void mod_add_cmd(struct TcmMessage *msg);
+void mod_del_cmd(struct TcmMessage *msg);
+void add_common_function(int type, void *function);
+void modules_init(void);
+int findmodule(char *name);
+int load_all_modules(int log);
+int load_a_module(char *name, int log);
+int unload_a_module(char *name, int log);
 
 #endif

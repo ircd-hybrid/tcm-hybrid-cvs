@@ -9,6 +9,7 @@
 #include <string.h>
 #include "config.h"
 #include "tcm.h"
+#include "commands.h"
 #include "modules.h"
 #include "userlist.h"
 #include "logging.h"

@@ -23,6 +23,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <stdarg.h>
+#include <time.h>
 #include <unistd.h>
 
 #ifdef HAVE_SYS_STREAM_H
@@ -46,11 +47,11 @@
 #include "serverif.h"
 #include "userlist.h"
 #include "bothunt.h"
+#include "commands.h"
 #include "modules.h"
 #include "stdcmds.h"
 /*#include "token.h"
 #include "logging.h"
-#include "commands.h"
 #include "wild.h"*/
 #include "serno.h"
 #include "patchlevel.h"
@@ -59,12 +60,15 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.9 2001/10/20 22:13:56 db Exp $";
+static char *version="$Id: main.c,v 1.10 2001/10/27 01:53:59 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
 extern struct a_entry actions[100];
 extern int load_all_modules(int log);
+extern void init_tokenizer(void);
+extern void modules_init(void);
+extern void add_common_function(int type, void *function);
 
 unsigned long local_ip(void);
 struct connection connections[MAXDCCCONNS+1]; /* plus 1 for the server, silly */
@@ -87,6 +91,17 @@ void write_debug();
 #endif
 
 static void init_debug(int sig);
+
+void init_hash_tables(void);
+void add_action(char *name, char *method, char *reason, int report);
+void set_action_type(char *name, int type);
+void set_action_reason(char *name, char *reason);
+void set_action_method(char *name, char *method);
+int action_log(char *name);
+int get_action_type(char *name);
+int get_action(char *name);
+char *get_action_method(char *name);
+char *get_action_reason(char *name);
 
 /*
  * init_hash_tables
@@ -278,7 +293,6 @@ void sendtoalldcc(int type,...)
   char *format;
   int i;
   int echo;
-  int local_tcm = NO;	/* local tcm ? */
 #ifdef DEBUGMODE
   placed;
 #endif
@@ -323,6 +337,9 @@ void sendtoalldcc(int type,...)
 		prnt(connections[i].socket, msgbuf);
 	      break;
 	      
+            case SEND_OPERWALL_ONLY:
+              if (!(connections[i].type & TYPE_OPERWALL))
+                break;
 	    case SEND_WALLOPS_ONLY:
 	    case SEND_LOCOPS_ONLY:
 	      if (connections[i].type & TYPE_LOCOPS)

@@ -20,28 +20,35 @@
 *   void privmsg                                            *
 ************************************************************/
 
+#include <ctype.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "config.h"
 #include "tcm.h"
 #include "logging.h"
 #include "serverif.h"
 #include "stdcmds.h"
 #include "userlist.h"
+#include "wild.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.19 2001/10/27 00:05:32 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.20 2001/10/27 01:53:59 bill Exp $";
 
 int doingtrace = NO;
 
 extern struct connection connections[];
+extern int get_action_type(char *name);
+
+void freehash(void);
 
 /*
  * free_hash_links
@@ -156,7 +163,6 @@ toserv(char *format, ... )
 void
 prnt(int sock, ...)
 {
-  char dccbuff[DCCBUFF_SIZE];
   char msgbuf[MAX_BUFF];
   char *format;
   va_list va;
@@ -517,7 +523,7 @@ suggest_action(int type,
 {
   char suggested_user[MAX_USER+1];
   char action[15], reason[MAX_BUFF];
-  char *suggested_host;
+  char *suggested_host=NULL;
   int i;
 
   if (user != NULL && host != NULL)

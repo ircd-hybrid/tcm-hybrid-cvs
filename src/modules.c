@@ -5,6 +5,9 @@
 
 #include <assert.h>
 #include <dlfcn.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <dirent.h>
@@ -14,6 +17,7 @@
 #include "commands.h"
 #include "modules.h"
 #include "serverif.h"
+#include "wild.h"
 
 #define MODS_INCREMENT 25
 
@@ -67,8 +71,8 @@ int findmodule(char *name)
 #ifdef IRCD_HYBRID
 /* code goes here later */
 #else
-void mod_add_cmd(struct TcmMessage *msg) {
-  char *cmd;
+void mod_add_cmd(struct TcmMessage *msg)
+{
   int msgindex=0;
 
   assert(msg != NULL);
@@ -88,7 +92,8 @@ void mod_add_cmd(struct TcmMessage *msg) {
   msg_hash_table[msgindex].msg->handlers[0] = msg->handlers[0];*/
 }
 
-void mod_del_cmd(struct TcmMessage *msg) {
+void mod_del_cmd(struct TcmMessage *msg)
+{
   int msgindex=0;
 
   assert(msg != NULL);
@@ -263,7 +268,8 @@ void add_common_function(int type, void *function)
 
 #endif
 
-void modules_init(void) {
+void modules_init(void)
+{
   mod_add_cmd(&modload_msgtab);
   mod_add_cmd(&modunload_msgtab);
   mod_add_cmd(&modreload_msgtab);
@@ -318,7 +324,8 @@ void modules_init(void) {
 */
 }
 
-int load_a_module(char *name, int log) {
+int load_a_module(char *name, int log)
+{
   void *modpointer;
   char absolute_path[100], *ver, **verp;
   void (*initmod) (void);
@@ -386,7 +393,8 @@ int load_a_module(char *name, int log) {
   return 0;
 }
 
-int unload_a_module(char *name, int log) {
+int unload_a_module(char *name, int log)
+{
   int modindex;
   void (*unloadmod) (void);
 
@@ -436,19 +444,21 @@ void m_modreload (int connnum, int argc, char *argv[]) {
 void m_modlist (int connnum, int argc, char *argv[]) {
   int i;
 
-  if (argc == 2)
+  if (argc >= 2)
     prnt(connections[connnum].socket, "Listing all modules matching '%s'...\n", argv[1]);
-  else if (argc == 1)
+  else
     prnt(connections[connnum].socket, "Listing all modules...\n");
   for (i=0;i<max_mods;++i)
    {
      if (modlist[i].name != NULL)
-       if (argc == 2 && !wldcmp(argv[1], modlist[i].name))
-         prnt(connections[connnum].socket, "--- %s 0x%lx %s\n", 
-              modlist[i].name, modlist[i].address, modlist[i].version);
-       else if (argc == 1)
-         prnt(connections[connnum].socket, "--- %s 0x%lx %s\n", 
-              modlist[i].name, modlist[i].address, modlist[i].version);
+       {
+         if (argc == 2 && !wldcmp(argv[1], modlist[i].name))
+           prnt(connections[connnum].socket, "--- %s 0x%lx %s\n", 
+                modlist[i].name, modlist[i].address, modlist[i].version);
+         else if (argc == 1)
+           prnt(connections[connnum].socket, "--- %s 0x%lx %s\n", 
+                modlist[i].name, modlist[i].address, modlist[i].version);
+       }
    }
   prnt(connections[connnum].socket, "Done.\n");
 }
@@ -462,7 +472,7 @@ int load_all_modules(int log)
   if (!(module_dir = opendir(MODULE_DIRECTORY)))
     {
       gracefuldie(0, __FILE__, __LINE__);
-      return;
+      return 0;
     }
   while ((mdirent = readdir(module_dir)))
     {
@@ -476,4 +486,5 @@ int load_all_modules(int log)
         }
     }
    closedir(module_dir);
+   return 1;
 }

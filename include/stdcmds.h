@@ -13,6 +13,28 @@ void privmsg(char *nick,...);
 void say(char *chan,...);
 void newnick(char *nick);
 void invite(char *nick,char *chan);
+void print_help(int sock,char *text);
+void print_motd(int sock);
+void list_nicks(int sock,char *nick);
+void list_virtual_users(int sock,char *userhost);
+void report_multi_host(int sock,int nclones);
+void report_mem(int sock);
+void report_clones(int sock);
+void report_nick_flooders(int sock);
+void report_vbots(int sock,int nclones);
+void report_domains(int sock,int num);
+void report_multi(int sock,int nclones);
+void report_multi_user(int sock,int nclones);
+void report_multi_virtuals(int sock,int nclones);
+void report_failures(int sock,int num);
+void do_a_kline(char *command_name,int kline_time, char *pattern, char *reason,
+                char *who_did_command);
+void kill_list_users(int sock,char *userhost, char *reason);
+void list_class(int sock,char *class_to_find,int total_only);
+void list_users(int sock,char *userhost);
+void suggest_action(int type, char *nick, char *user, char *host, int different, int identd);
+void initopers(void);
+void inithash(void);
 
 struct s_testline
 {

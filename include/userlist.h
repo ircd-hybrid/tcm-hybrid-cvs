@@ -171,6 +171,7 @@ extern int tcm_list_index;
 #define TYPE_ECHO		0x10000 /* user is echo'ed */
 #define TYPE_KLINE		0x20000 /* user see's klines/unklines */
 #define TYPE_SUSPENDED		0x40000 /* user is suspended */
+#define TYPE_OPERWALL		0x80000 /* user can see OPERWALL */
 
 int isoper(char *user, char *host);
 int islinkedbot(int connnum, char *botname, char *password);

@@ -1,18 +1,20 @@
 main.o: main.c ../include/setup.h ../include/config.h ../include/tcm.h \
  ../include/serverif.h ../include/userlist.h ../include/bothunt.h \
- ../include/modules.h ../include/serno.h ../include/patchlevel.h
-modules.o: modules.c ../include/config.h ../include/commands.h \
- ../include/tcm.h ../include/modules.h ../include/serverif.h
+ ../include/commands.h ../include/modules.h ../include/stdcmds.h \
+ ../include/serno.h ../include/patchlevel.h
+modules.o: modules.c ../include/config.h ../include/tcm.h \
+ ../include/commands.h ../include/modules.h ../include/serverif.h \
+ ../include/wild.h
 logging.o: logging.c ../include/setup.h ../include/config.h \
  ../include/tcm.h ../include/userlist.h ../include/serverif.h \
  ../include/bothunt.h ../include/logging.h
 stdcmds.o: stdcmds.c ../include/config.h ../include/tcm.h \
  ../include/logging.h ../include/serverif.h ../include/stdcmds.h \
- ../include/userlist.h
+ ../include/userlist.h ../include/wild.h
 token.o: token.c ../include/config.h ../include/tcm.h \
  ../include/token.h
 userlist.o: userlist.c ../include/config.h ../include/token.h \
  ../include/tcm.h ../include/serverif.h ../include/userlist.h \
  ../include/logging.h ../include/stdcmds.h ../include/wild.h \
- ../include/modules.h
+ ../include/commands.h ../include/modules.h
 wild.o: wild.c ../include/wild.h

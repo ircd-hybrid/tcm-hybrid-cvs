@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include "config.h"
@@ -25,6 +26,7 @@
 #include "logging.h"
 #include "stdcmds.h"
 #include "wild.h"
+#include "commands.h"
 #include "modules.h"
 
 #ifdef DMALLOC
@@ -35,13 +37,18 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.22 2001/10/17 02:26:12 bill Exp $";
+static char *version="$Id: userlist.c,v 1.23 2001/10/27 01:53:59 bill Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct tcm_file_entry tcmlist[MAXTCMS];
 struct exception_entry hostlist[MAXHOSTS];
 struct exception_entry banlist[MAXBANS];
 extern struct connection connections[];
+extern void set_action_reason(char *name, char *reason);
+extern void set_action_method(char *name, char *method);
+extern int get_action(char *name);
+extern int get_action_type(char *name);
+extern char *crypt(const char *key, const char *salt);
 
 int  user_list_index;
 int  tcm_list_index;
@@ -50,8 +57,6 @@ int  ban_list_index;
 
 static void load_a_ban(char *);
 static void load_a_user(char *,int);
-static void load_a_tcm(char *);
-static void load_a_host(char *);
 static void load_e_line(char *);
 
 /*
@@ -69,16 +74,11 @@ void load_config_file(char *file_name)
 {
   FILE *fp;
   char line[MAX_BUFF];
-  char *key;			/* key/value pairs as found in config file */
-  char *act;
-  char *reason;
-  char *message_ascii;
   char *argv[20];
-  int  message, argc;
+  int  argc;
   char *p;
   char *q;
   int error_in_config;		/* flag if error was found in config file */
-  struct common_function *temp;
 
   error_in_config = NO;
 
@@ -283,7 +283,6 @@ void load_config_file(char *file_name)
 void save_prefs(void)
 {
   FILE *fp;
-  struct common_function *temp;
   char *argv[20], *frombuff, *tobuff, *p, *q, filename[80];
   int argc=0, a, fd;
 
@@ -634,6 +633,9 @@ static void load_a_user(char *line,int link_tcm)
 	      case 'D':
 		type_int |= TYPE_DLINE;
 		break;
+              case 'W':
+                type_int |= TYPE_OPERWALL;
+                break;
 	      case 'l':
 		type_int |= TYPE_LINK;
 		break;
@@ -674,72 +676,6 @@ static void load_a_user(char *line,int link_tcm)
     userlist[user_list_index].type = 0;
 }
 
-/*
- * load_a_tcm
- *
- * inputs	- NONE
- * output	- NONE
- * side effects	- tcm list
- */
-
-static void load_a_tcm(char *line)
-{
-/*
- *
- *  userlist.cf looks like now
- *  C:host:theirnick:password:port   for remote tcm's
- */
-  char *host;
-  char *theirnick;
-  char *password;
-  char *port_string;
-  int  port;
-
-  if( tcm_list_index == (MAXTCMS - 1))
-    return;
-
-  if( !(host = strtok(line,":")) )
-    return;
-
-  tcmlist[tcm_list_index].theirnick[0] = 0;
-  tcmlist[tcm_list_index].password[0] = 0;
-
-  strncpy(tcmlist[tcm_list_index].host, host,
-	  sizeof(tcmlist[tcm_list_index].host));
-
-  theirnick = strtok((char *)NULL,":");
-
-  if(theirnick)
-    strncpy(tcmlist[tcm_list_index].theirnick, theirnick,
-	    sizeof(tcmlist[tcm_list_index].theirnick));
-
-  password = strtok((char *)NULL,":");
-
-  if(password)
-    strncpy(tcmlist[tcm_list_index].password, password,
-	    sizeof(tcmlist[tcm_list_index].password));
-
-  port_string = strtok((char *)NULL,":");
-  port = TCM_PORT;
-
-  if(port_string)
-    {
-      if(isdigit(*port_string))
-	{
-	  port = atoi(port_string);
-	}
-    }
-
-  tcmlist[tcm_list_index].port = port;
-
-  tcm_list_index++;
-
-  tcmlist[tcm_list_index].host[0] = '\0';
-  tcmlist[tcm_list_index].theirnick[0] = '\0';
-  tcmlist[tcm_list_index].password[0] = '\0';
-  tcmlist[tcm_list_index].port = 0;
-}
-
 static void load_e_line(char *line) {
   char *vltn, *p, *uhost;
   int type=0;
@@ -775,59 +711,6 @@ static void load_e_line(char *line) {
   hostlist[host_list_index].host[0] = '\0';
 }
 
-
-/* Added Allowable hostlist for autokline. Monitor checks allowed hosts
- * before adding kline, if it matches, it just returns dianoras
- * suggested kline.  Phisher dkemp@frontiernet.net
- *
- *
- * okhost() is now called on nick floods etc. to mark whether a user
- * should be reported or not.. hence its not just for AUTO_KLINE now
- *
- */
-
-static void load_a_host(char *line)
-{
-  char *host;
-  char *user;
-  char *p;
-#ifdef DEBUGMODE
-  placed;
-#endif
-
-  if(host_list_index == MAXHOSTS)
-    return;
-
-  if( (p = strchr(line,'\n')) )
-    *p = '\0';
-
-  if( (p = strchr(line,'@')) )
-    {
-      user = line;
-      *p = '\0';
-      p++;
-      host = p;
-    }
-  else
-    {
-      host = line;
-      user = "*";
-    }
-
-  if( (p = strchr(host, ' ')) )
-    *p = '\0';
-
-  strncpy(hostlist[host_list_index].host, host, 
-	  sizeof(hostlist[host_list_index].host));
-
-  strncpy(hostlist[host_list_index].user, user,
-	  sizeof(hostlist[host_list_index].user));
-
-  host_list_index++;
-  hostlist[host_list_index].user[0] = '\0';
-  hostlist[host_list_index].host[0] = '\0';
-}
-
 /*
  * clear_userlist
  *
@@ -840,7 +723,6 @@ static void load_a_host(char *line)
 void clear_userlist()
 {
   int cnt;
-  struct common_function *temp;
   user_list_index = 0;
   host_list_index = 0;
 
@@ -1180,6 +1062,7 @@ char *type_show(unsigned long type)
   if(type&TYPE_ADMIN)*p++ = 'M';
   if(type&TYPE_INVM)*p++ = 'I';
   if(type&TYPE_DLINE)*p++ = 'D';
+  if(type&TYPE_OPERWALL)*p++ = 'W';
   if(type&TYPE_PARTYLINE)*p++ = 'p';
   if(type&TYPE_STAT)*p++ = 's';
   if(type&TYPE_WARN)*p++ = 'w';

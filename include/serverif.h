@@ -79,6 +79,7 @@ void msg_mychannel(char *msg,...);
 #define SEND_MOTD_ONLY 9
 #define SEND_KLINE_NOTICES_ONLY 10
 #define SEND_ADMIN_ONLY 11
+#define SEND_OPERWALL_ONLY 12
 
 /* wait five minutes after last PING before figuring server is stoned */
 #define PING_OUT_TIME 300

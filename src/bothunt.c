@@ -50,13 +50,14 @@
 #include "wild.h"
 #include "serno.h"
 #include "patchlevel.h"
+#include "commands.h"
 #include "modules.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.21 2001/10/26 23:41:01 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.22 2001/10/27 01:53:59 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );

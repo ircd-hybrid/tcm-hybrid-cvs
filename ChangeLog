@@ -1,3 +1,15 @@
+wcampbel    2002/05/20 22:12:59 EDT	(20020521_1)
+
+  Modified files:
+    modules              bothunt.c 
+  Log:
+  Minor off-by-one in the "*** Notice -- Received SQUIT ..." message handling.
+  
+  Revision  Changes    Path
+  1.76      +1 -1      tcm-hybrid/modules/bothunt.c
+
+
+
 wcampbel    2002/05/20 20:46:50 EDT	(20020521_0)
 
   Modified files:

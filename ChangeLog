@@ -1,3 +1,20 @@
+jmallett    2002/05/30 18:48:26 EDT	(20020530_13)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  This is a NULL-terminated tail queue, not a circular queue.  Using it as the
+  latter results in infinite loops in a number of locations, since there's no
+  NULL to terminate, ever!
+  
+  Not that this even does circular-queues properly, it enforces tight-circles
+  at the index point.
+  
+  Revision  Changes    Path
+  1.14      +1 -1      tcm-hybrid/src/hash.c
+
+
+
 db          2002/05/30 18:41:00 EDT	(20020530_12)
 
   Modified files:

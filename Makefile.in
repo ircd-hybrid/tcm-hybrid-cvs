@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.25 2002/12/29 09:41:13 bill Exp $
+# $Id: Makefile.in,v 1.26 2003/01/22 02:50:50 bill Exp $
 CC = @CC@
 RM = @RM@
 MKDEP = ${CC} -MM
@@ -86,7 +86,7 @@ install:
 	fi
 
 #	cp modules/*.so @prefix@/modules/
-	cp help/help.* @prefix@/help/
+	cp help/help.* help/help @prefix@/help/
 	@echo Done
 
 clean:

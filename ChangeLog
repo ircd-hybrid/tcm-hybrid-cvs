@@ -1,3 +1,21 @@
+leeh        2002/05/25 11:36:28 EDT	(20020525_11)
+
+  Modified files:
+    include              modules.h tcm.h 
+    src                  main.c modules.c 
+  Log:
+  - added some comments to the module stuff ive added
+  - ripped out m_not_oper
+  - moved m_unregistered and m_not_admin to modules.c
+  
+  Revision  Changes    Path
+  1.24      +3 -0      tcm-hybrid/include/modules.h
+  1.34      +0 -7      tcm-hybrid/include/tcm.h
+  1.64      +0 -24     tcm-hybrid/src/main.c
+  1.40      +61 -5     tcm-hybrid/src/modules.c
+
+
+
 db          2002/05/25 11:11:18 EDT	(20020525_10)
 
   Modified files:

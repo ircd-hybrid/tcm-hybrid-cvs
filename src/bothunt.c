@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.213 2003/02/12 02:42:14 bill Exp $
+ * $Id: bothunt.c,v 1.214 2003/02/16 09:12:56 bill Exp $
  */
 
 #include <stdio.h>
@@ -666,7 +666,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if (get_user_host(&user, &host, q) == NULL)
       break;
 
-    handle_action(act_flood, nick, user, host, NULL, NULL);
+    handle_action(act_flood, nick, user, host, NULL, target);
 
     break;
 

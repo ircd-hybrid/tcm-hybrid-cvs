@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.59 2002/05/24 20:52:43 leeh Exp $ */
+/* $Id: main.c,v 1.60 2002/05/25 02:40:40 db Exp $ */
 
 #include "setup.h"
 
@@ -338,8 +338,6 @@ main(int argc, char *argv[])
 {
   int i;
   char c;
-  extern char *optarg;
-  extern int optind;
 
   /* chdir returns 0 on sucess, -1 on failure */
   if (chdir(DPATH))

@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.8 2001/10/11 17:03:43 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.9 2001/10/11 20:04:36 bill Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -347,7 +347,6 @@ void dccproc(int connnum, int argc, char *argv[])
 	      prnt(connections[connnum].socket, "Usage: .kline [nick]|[user@host] reason\n");
 	      return;
 	    }
-	  
 	  do_a_kline("kline",kline_time,argv[1],argv[2],who_did_command);
 	}
       else
@@ -363,7 +362,7 @@ void dccproc(int connnum, int argc, char *argv[])
 	      prnt(connections[connnum].socket, "Usage: .kclone [nick]|[user@host]\n");
 	      return;
 	    }
-	  do_a_kline("kclone",kline_time,argv[1],REASON_KCLONE,who_did_command);
+          suggest_action(get_action_type("clone"), argv[1], NULL, NULL, NO, NO);
 	}
       else
 	prnt(connections[connnum].socket,"You aren't registered\n");
@@ -378,7 +377,7 @@ void dccproc(int connnum, int argc, char *argv[])
 	      prnt(connections[connnum].socket, "Usage: .kflood [nick]|[user@host]\n");
 	      return;
 	    }
-	  do_a_kline("kflood",kline_time,argv[1],REASON_KFLOOD,who_did_command);
+          suggest_action(get_action_type("flood"), argv[1], NULL, NULL, NO, NO);
 	}
       else
 	prnt(connections[connnum].socket,"You aren't registered\n");
@@ -406,7 +405,7 @@ void dccproc(int connnum, int argc, char *argv[])
 	      prnt(connections[connnum].socket, "Usage: .klink [nick]|[user@host]\n");
               return;
 	    }
-	  do_a_kline("klink",kline_time,argv[1],REASON_LINK,who_did_command);
+          suggest_action(get_action_type("link"), argv[1], NULL, NULL, NO, NO);
 	}
       else
 	prnt(connections[connnum].socket,"You aren't registered\n");
@@ -420,7 +419,7 @@ void dccproc(int connnum, int argc, char *argv[])
 	      prnt(connections[connnum].socket, "Usage: .kdrone [nick]|[user@host]\n");
 	      return;
 	    }
-	  do_a_kline("kdrone",kline_time,argv[1],REASON_KDRONE,who_did_command);
+          suggest_action(get_action_type("drone"), argv[1], NULL, NULL, NO, NO);
 	}
       else
 	prnt(connections[connnum].socket,"You aren't registered\n");
@@ -434,7 +433,7 @@ void dccproc(int connnum, int argc, char *argv[])
 	      prnt(connections[connnum].socket, "Usage: .kbot [nick]|[user@host]\n");
 	      return;
 	    }
-	  do_a_kline("kbot",kline_time,argv[1],REASON_KBOT,who_did_command);
+          suggest_action(get_action_type("bot"), argv[1], NULL, NULL, NO, NO);
 	}
       else
 	prnt(connections[connnum].socket,"You aren't registered\n");
@@ -488,7 +487,7 @@ void dccproc(int connnum, int argc, char *argv[])
 	      prnt(connections[connnum].socket, "Usage: .kspam [nick]|[user@host]\n");
 	      return;
 	    }
-	  do_a_kline("kspam",kline_time,argv[1],REASON_KSPAM,who_did_command);
+          suggest_action(get_action_type("spam"), argv[1], NULL, NULL, NO, NO);
 	}
       else
 	prnt(connections[connnum].socket,"You aren't registered\n");

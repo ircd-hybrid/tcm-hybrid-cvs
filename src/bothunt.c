@@ -56,7 +56,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.12 2001/10/11 17:29:04 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.13 2001/10/11 20:04:36 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -706,8 +706,9 @@ void onservnotice(int connnum, int argc, char *argv[])
       if (!strcasecmp(config_entries.rserver_name,from_server))
 	{
 	  if (*user == '~')
-	    user++;
-	  suggest_action(get_action_type("ctcp"), nick, user, host, NO, YES);
+	    suggest_action(get_action_type("ctcp"), nick, user, host, NO, NO);
+          else
+	    suggest_action(get_action_type("ctcp"), nick, user, host, NO, YES);
 	}
 
       break;

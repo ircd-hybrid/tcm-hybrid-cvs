@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.13 2001/10/11 17:03:43 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.14 2001/10/11 20:04:36 bill Exp $";
 
 int doingtrace = NO;
 
@@ -438,26 +438,29 @@ void suggest_action(int type,
                     int identd)
 {
   char suggested_user[MAX_USER+1];
-  char action[10], reason[MAX_BUFF];
+  char action[15], reason[MAX_BUFF];
   char *suggested_host;
   int index;
 
-  /* Don't kill or kline exempted users */
-  if(okhost(user, host))
-    return;
+  if (user != NULL && host != NULL)
+    {
+      /* Don't kill or kline exempted users */
+      if(okhost(user, host))
+        return;
 
-  if (strchr(host,'*'))
-    return;
+      if (strchr(host,'*'))
+        return;
 
-  if (strchr(host,'?'))
-    return;
+      if (strchr(host,'?'))
+        return;
 
-  if (identd)
-    strcpy(suggested_user,user);
-  else
-    strcpy(suggested_user,"~*");
+      if (identd)
+        strcpy(suggested_user,user);
+      else
+        strcpy(suggested_user,"~*");
 
-  suggested_host=suggest_host(host, type);
+      suggested_host=suggest_host(host, type);
+    }
 
   for (index=0;index<MAX_ACTIONS;++index)
     if (type == actions[index].type) break;
@@ -466,7 +469,13 @@ void suggest_action(int type,
 
   snprintf(action, sizeof(action), "%s", actions[index].method);
   snprintf(reason, sizeof(reason), "%s", actions[index].reason);
+
   if (!strcasecmp(action, "warn")) return;
+  if (suggested_user == NULL || suggested_host == NULL)
+    {
+      toserv("%s %s :%s\n", action, nick, reason);
+      return;
+    }
   if (!strncasecmp(action, "dline", 5)) toserv("%s %s :%s\n", action, host, reason);
   else toserv("%s %s@%s :%s\n", action, suggested_user, suggested_host, reason);
 
@@ -1490,11 +1499,11 @@ void do_a_kline(char *command_name,int kline_time, char *pattern,
                reason);
 #else
       if(kline_time)
-        toserv("KLINE %d %s :%s by %s\n",
+        toserv("KLINE %d %s :%s [%s\\n",
                kline_time,pattern,reason,
                who_did_command);
       else
-        toserv("KLINE %s :%s by %s\n",
+        toserv("KLINE %s :%s [%s]\n",
                pattern,reason,
                who_did_command);
 #endif
@@ -1506,7 +1515,7 @@ void do_a_kline(char *command_name,int kline_time, char *pattern,
              pattern,
              format_reason(reason));
 #else
-      toserv("KLINE %s :%s by %s\n",
+      toserv("KLINE %s :%s [%s]\n",
              pattern,format_reason(reason),
              who_did_command);
 #endif

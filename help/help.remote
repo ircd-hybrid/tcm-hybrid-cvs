@@ -10,18 +10,16 @@ and you are a  oper) AND you are REGISTERED with .register
 If you have a hybrid server, you can set a temporary kline by
 setting a time in seconds, in the [time] field.
 
- - .kclone [time] [nick|user@host]
- - .kbot [time] [nick|user@host]
- - .kflood [time] [nick|user@host]
- - .kdrone [time] [nick|user@host]
- - .kspam [time] [nick|user@host]
- - .kperm [time] [nick|user@host]
+ - .kclone [nick|user@host]
+ - .kbot [nick|user@host]
+ - .kflood [nick|user@host]
+ - .kdrone [nick|user@host]
+ - .kspam [nick|user@host]
+ - .kperm [nick|user@host]
     K-line with a default reason.
 
  - .kline [time] [nick|user@host] reason
     Generic K-line command.
- - .kfind user@host
-    Search for a K-line on the server.
  - .gline user@host reason
    Force the TCM to vote for a G-line.  Note that the TCM must have G-line
    privileges on it's server for this to work.

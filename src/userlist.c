@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.139 2002/06/26 11:52:50 leeh Exp $
+ * $Id: userlist.c,v 1.140 2002/06/26 12:21:35 leeh Exp $
  */
 
 #include <errno.h>
@@ -269,7 +269,11 @@ set_umode_userlist(char *nick, const char *umode)
 
     if(strcasecmp(nick, user->usernick))
       continue;
-    
+
+    /* dont set umodes for those from stats O */
+    if(user->password[0] == '\0')
+      continue;
+
     for(i = 0; umode[i]; i++)
     {
       if(umode[i] == '+')

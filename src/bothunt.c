@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.187 2002/06/26 11:52:50 leeh Exp $
+ * $Id: bothunt.c,v 1.188 2002/06/26 12:21:34 leeh Exp $
  */
 
 #include <stdio.h>
@@ -144,15 +144,6 @@ struct msg_to_action msgs_to_mon[] = {
   {MSG_QUARANTINED, sizeof(MSG_QUARANTINED)-1, QUARANTINE},
   {NULL, 0, INVALID}
 };	
-
-
-static void foob(void);
-
-void
-foob(void)
-{
-  return;
-}
 
 /*
  * on_trace_user()
@@ -350,19 +341,19 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* Kline notice requested by Toast */
   if (strstr(p, "added K-Line for"))
   {
-    foob();
+    send_to_all(FLAGS_VIEW_KLINES, "%s", p);
     tcm_log(L_NORM, "%s", p);
     return;
   }
   else if (strstr(p, "added temporary "))
   {
-    foob();
+    send_to_all(FLAGS_VIEW_KLINES, "%s", p);
     tcm_log(L_NORM, "%s", p);
     return;
   }
   else if (strstr(p, "has removed the "))
   {
-    foob();
+    send_to_all(FLAGS_VIEW_KLINES, "%s", p);
     tcm_log(L_NORM, "%s", p);
     return;
   }

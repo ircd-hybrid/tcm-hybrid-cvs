@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.42 2002/12/12 19:30:27 bill Exp $
+ * $Id: actions.c,v 1.43 2002/12/19 02:26:07 bill Exp $
  */
 
 #include "setup.h"
@@ -396,7 +396,7 @@ handle_action(int actionid, char *g_nick, char *g_username,
   userhost = get_method_userhost(actionid, nick, username, host);
   strcpy(comment, "No actions taken");
 
-  if (ok_host((username && username[0]) ? username : "*", host, actionid) == 0)
+  if (ok_host(valid_string(username) ? username : "*", host, actionid) == 0)
     {
       /* Now process the event, we got the needed data */
       if (actions[actionid].method & METHOD_KLINE)
@@ -609,7 +609,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
       case HOSTSTRIP_IDENT_PREFIXED:
         s = user;
 
-	if(strlen(user) >= MAX_USER)
+	if(strlen(user) >= MAX_USER-1)
           s++;
 
 	snprintf(p, MAX_USER, "*%s", s);

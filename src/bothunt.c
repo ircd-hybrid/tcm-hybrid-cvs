@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.202 2002/09/13 03:03:31 bill Exp $
+ * $Id: bothunt.c,v 1.203 2002/09/20 06:37:23 bill Exp $
  */
 
 #include <stdio.h>
@@ -45,6 +45,7 @@
 static void check_nick_flood(char *snotice);
 static void cs_clones(char *snotice);
 static void link_look_notice(char *snotice);
+static void jupe_joins_notice(char *nick, char *user, char *host, char *channel);
 static void connect_flood_notice(char *snotice, char *reason);
 static void add_to_nick_change_table(char *user, char *host, char *last_nick);
 static void stats_notice(char *snotice);
@@ -55,6 +56,18 @@ static void chopuh(int istrace,char *nickuserhost,struct user_entry *userinfo);
 struct serv_command servnotice_msgtab = {
   "NOTICE", NULL, on_server_notice
 };
+
+/* Juped channel join flood detect */
+struct jupe_joins_entry
+{
+  char user[MAX_USER];
+  char host[MAX_HOST];
+  char channel[MAX_CHANNEL];
+  int  join_count;
+  time_t first_jupe_joins;
+  time_t last_jupe_join;
+};
+static struct jupe_joins_entry jupe_joins[JUPE_JOIN_TABLE_SIZE];
 
 /* Nick change flood detect */
 struct nick_change_entry
@@ -122,7 +135,7 @@ struct msg_to_action msgs_to_mon[] = {
   {MSG_SQUIT, sizeof(MSG_SQUIT)-1, SQUITOF},
   {MSG_MOTD, sizeof(MSG_MOTD)-1, MOTDREQ},
   {MSG_FLOODER, sizeof(MSG_FLOODER)-1, FLOODER},
-  {MSG_USER, sizeof(MSG_USER)-1, SPAMBOT},
+  {MSG_USER, sizeof(MSG_USER)-1, USER},
   {MSG_I_LINE_FULL, sizeof(MSG_I_LINE_FULL)-1, ILINEFULL},
   {MSG_TOOMANY, sizeof(MSG_TOOMANY)-1, TOOMANY},
   {MSG_BANNED, sizeof(MSG_BANNED)-1, BANNED},
@@ -645,7 +658,8 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* User bill (bill@ummm.E) is a possible spambot */
   /* User bill (bill@ummm.E) trying to join #tcm is a possible spambot */
-  case SPAMBOT:
+  /* User billy-jon (bill@holier.than.thou) is attempting to join locally juped channel #twilight_zone */
+  case USER:
     q=p+5;
     if ((p = strchr(q,' ')) == NULL)
       return;
@@ -659,10 +673,17 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if (get_user_host(&user, &host, p) == NULL)
       return;
 
-    if (strstr(q, "possible spambot") == NULL)
-      return;
+    if (strstr(q, "attempting to join locally juped channel") != NULL)
+    {
+      if ((p = strrchr(q, ' ')) == NULL)
+        return;
+      ++p;
 
-    handle_action(act_spambot, nick, user, host, NULL, NULL);
+      jupe_joins_notice(nick, user, host, p);
+    }
+    else if (strstr(q, "possible spambot") != NULL)
+      handle_action(act_spambot, nick, user, host, NULL, NULL);
+
     break;
 
   /* I-line is full for bill[bill@ummm.E] (127.0.0.1). */
@@ -994,6 +1015,62 @@ link_look_notice(char *snotice)
     strlcpy(link_look[first_empty_entry].host,host,MAX_HOST);
     link_look[first_empty_entry].last_link_look = current_time;
     link_look[first_empty_entry].link_look_count = 1;
+  }
+}
+
+/*
+ * jupe_joins_notice
+ *
+ * inputs	- nick, user, host, channel
+ * outputs	- none
+ * side effects	- detects and acts on repeated juped channel join notices
+ */
+static void
+jupe_joins_notice(char *nick, char *user, char *host, char *channel)
+{
+  int first_empty = -1;
+  int found_entry = NO;
+  int i;
+
+  for (i = 0; i < JUPE_JOIN_TABLE_SIZE; ++i)
+  {
+    if (jupe_joins[i].user[0] != '\0')
+    {
+      if ((strcasecmp(jupe_joins[i].user, user) == 0) &&
+          (strcasecmp(jupe_joins[i].host, host) == 0))
+      {
+        found_entry = YES;
+
+        if ((jupe_joins[i].last_jupe_join + MAX_JUPE_TIME) < current_time)
+          jupe_joins[i].join_count = 0;
+
+        jupe_joins[i].join_count++;
+
+        if (jupe_joins[i].join_count >= MAX_JUPE_JOINS)
+        {
+          handle_action(act_flood, nick, user, host, NULL, channel);
+          jupe_joins[i].user[0] = '\0';
+          jupe_joins[i].host[0] = '\0';
+        }
+        else
+          jupe_joins[i].last_jupe_join = current_time;
+      }
+      else if ((jupe_joins[i].last_jupe_join + MAX_JUPE_TIME) < current_time)
+      {
+        jupe_joins[i].user[0] = '\0';
+        jupe_joins[i].host[0] = '\0';
+      }
+    }
+    else if (first_empty == -1)
+      first_empty = i;
+  }
+
+  if ((found_entry == NO) && (first_empty >= 0))
+  {
+    strlcpy(jupe_joins[first_empty].user, user, MAX_USER);
+    strlcpy(jupe_joins[first_empty].host, host, MAX_HOST);
+    jupe_joins[first_empty].last_jupe_join = current_time;
+    jupe_joins[first_empty].join_count = 1;
   }
 }
 

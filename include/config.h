@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.76 2002/09/13 03:03:29 bill Exp $
+ * $Id: config.h,v 1.77 2002/09/20 06:37:21 bill Exp $
  */
 
 /*
@@ -281,22 +281,15 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 #define NICK_CHANGE_T2_TIME 300
 #define NICK_CHANGE_MAX_COUNT 5
 
-/* 
- *  change if you wish - Dianora
- *
- * Link looker parameters
- *
- * Allow a user MAX_LINK_LOOKS link looks within 
- * MAX_LINK_TIME seconds
- *
- * With links pacing, MAX_LINK_TIME has to go up
- *
- */
-#define MAX_LINK_LOOKS 10 
+/* Parameters for detection of link lookers */
+#define MAX_LINK_LOOKS 4
 #define MAX_LINK_TIME 240
 
-/* Parameters for detection of connection flooders */
+/* Parameters for detection of juped channel join flooders */
+#define MAX_JUPE_JOINS 3
+#define MAX_JUPE_TIME 60
 
+/* Parameters for detection of connection flooders */
 #define MAX_CONNECT_FAILS 4
 #define MAX_CONNECT_TIME 20
 

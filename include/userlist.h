@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.88 2002/09/13 03:30:57 bill Exp $ */
+/* $Id: userlist.h,v 1.89 2002/09/20 06:37:22 bill Exp $ */
 
 #include "tools.h"
 
@@ -10,7 +10,8 @@
 #define MAX_CONFIG	80
 #define MAXFROMHOST	50
 #define CLONEDETECTINC	15
-#define NICK_CHANGE_TABLE_SIZE 100
+#define NICK_CHANGE_TABLE_SIZE	100
+#define JUPE_JOIN_TABLE_SIZE	100
 
 #define UMODE_SAVE_TIME 30*60
 

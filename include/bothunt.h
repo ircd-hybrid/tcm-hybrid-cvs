@@ -1,7 +1,7 @@
 #ifndef __BOTHNUT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.59 2002/09/13 03:03:29 bill Exp $ */
+/* $Id: bothunt.h,v 1.60 2002/09/20 06:37:21 bill Exp $ */
 
 
 struct source_client;
@@ -75,7 +75,7 @@ void _config(int, int, char *argv[]);
 #define SQUITOF		19
 #define MOTDREQ		20
 #define FLOODER		21
-#define SPAMBOT		22
+#define USER		22
 #define ILINEFULL	23
 #define TOOMANY		24
 #define BANNED		25

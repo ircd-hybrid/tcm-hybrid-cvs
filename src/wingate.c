@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.30 2002/05/24 18:50:51 leeh Exp $ */
+/* $Id: wingate.c,v 1.31 2002/05/24 19:31:28 db Exp $ */
 
 
 #include <netdb.h>
@@ -26,12 +26,6 @@
 #endif
 
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
-
-#if 0
-/* what was this for? -bill */
-#undef REPORT_WINGATES_TO_CHANNEL
-#undef REPORT_SOCKS_TO_CHANNEL
-#endif
 
 /* Maximum pending connects for wingates */
 #define MAXWINGATE 200
@@ -64,10 +58,6 @@ struct wingates {
 
 char wingate_class_list[MAXWINGATE][100];
 int  wingate_class_list_index;
-
-#ifdef DEBUGMODE
-//extern struct connection connections[];
-#endif
 
 #ifdef DETECT_WINGATE
 int act_wingate;
@@ -148,7 +138,8 @@ void _config(int connnum, int argc, char * argv[]);
 ** wingate_bindsocket()
 **   Sets up a socket and connects to the given host
 */
-int wingate_bindsocket(char *nick,char *user,char *host)
+int
+wingate_bindsocket(char *nick,char *user,char *host)
 {
   int plug;
   int result;
@@ -227,7 +218,8 @@ int wingate_bindsocket(char *nick,char *user,char *host)
 ** socks_bindsocket()
 **   Sets up a socket and connects to the given host
 */
-int socks_bindsocket(char *nick,char *user,char *host, int socksversion)
+int
+socks_bindsocket(char *nick,char *user,char *host, int socksversion)
 {
   int plug;
   int result;
@@ -308,7 +300,8 @@ int socks_bindsocket(char *nick,char *user,char *host, int socksversion)
 ** squit_bindsocket()
 **   Sets up a socket and connects to the given host
 */
-int squid_bindsocket(char *nick, char *user, char *host, int port)
+int
+squid_bindsocket(char *nick, char *user, char *host, int port)
 {
   int plug;
   int result;
@@ -381,7 +374,8 @@ int squid_bindsocket(char *nick, char *user, char *host, int port)
 }
 #endif
 
-void _scontinuous(int connnum, int argc, char *argv[])
+void
+_scontinuous(int connnum, int argc, char *argv[])
 {
   int i;
 
@@ -600,7 +594,8 @@ void _scontinuous(int connnum, int argc, char *argv[])
 #endif
 }
 
-void _continuous(int connnum, int argc, char *argv[])
+void
+_continuous(int connnum, int argc, char *argv[])
 {
   int i;
 
@@ -662,7 +657,9 @@ void _continuous(int connnum, int argc, char *argv[])
 #endif
 }
 
-void _config(int connnum, int argc, char *argv[]) {
+void
+_config(int connnum, int argc, char *argv[])
+{
   if ((argc==2) && ((argv[0][0]=='w') || (argv[0][0]=='W')))
   {
     strncpy(wingate_class_list[wingate_class_list_index], argv[1], 
@@ -671,7 +668,8 @@ void _config(int connnum, int argc, char *argv[]) {
   }
 }
 
-void _user_signon(int connnum, int argc, char *argv[])
+void
+_user_signon(int connnum, int argc, char *argv[])
 {
   if (connnum) return; /* in this case, connnum means if it's from TRACE or not */
   if (wingate_class(argv[4]))
@@ -691,7 +689,8 @@ void _user_signon(int connnum, int argc, char *argv[])
     }
 }
 
-void _reload_wingate(int connnum, int argc, char *argv[])
+void
+_reload_wingate(int connnum, int argc, char *argv[])
 {
   int cnt;
 
@@ -746,7 +745,8 @@ void _reload_wingate(int connnum, int argc, char *argv[])
  * side effects - none
  */
 
-int wingate_class(char *class)
+int
+wingate_class(char *class)
 {
   int i;
 
@@ -775,7 +775,8 @@ static void report_open_wingate(int i)
 #endif
 
 #ifdef DETECT_SOCKS
-static void report_open_socks(int i)
+static
+void report_open_socks(int i)
 {
   if (config_entries.debug && outfile)
     fprintf(outfile, "DEBUG: Found open socks proxy at %s\n", socks[i].host);
@@ -786,7 +787,8 @@ static void report_open_socks(int i)
 #endif
 
 #ifdef DETECT_SQUID
-static void report_open_squid(int i)
+static
+void report_open_squid(int i)
 {
   if (config_entries.debug && outfile)
     fprintf(outfile, "DEBUG: Found open squid proxy at %s\n", squid[i].host);

@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.38 2002/05/25 17:45:12 jmallett Exp $ */
+/* $Id: tcm.h,v 1.39 2002/05/26 00:44:16 leeh Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -86,6 +86,12 @@ size_t strlcat(char *, const char *, size_t);
 
 #ifndef HAVE_STRLCPY
 size_t strlcpy(char *, const char *, size_t);
+#endif
+
+#ifdef SERVICES
+int act_drone, act_sclone;
+void init_services(void);
+void check_services(void *);
 #endif
 
 void *xmalloc(size_t);

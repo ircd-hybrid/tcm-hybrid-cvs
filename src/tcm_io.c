@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.32 2002/05/25 23:11:11 leeh Exp $
+ * $Id: tcm_io.c,v 1.33 2002/05/26 00:44:19 leeh Exp $
  */
 
 #include <stdio.h>
@@ -97,10 +97,6 @@ read_packet(void)
 
   current_time = time(NULL);
   connections[0].last_message_time = current_time;
-
-#ifdef SERVICES
-  eventAdd("check_services", check_services, NULL, SERVICES_CHECK_TIME);
-#endif
 
   eventAdd("check_clones", check_clones, NULL, CLONE_CHECK_TIME);
 

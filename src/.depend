@@ -32,6 +32,12 @@ parse.o: parse.c ../include/config.h ../include/tcm.h \
  ../include/logging.h ../include/stdcmds.h ../include/commands.h \
  ../include/wild.h ../include/tcm_io.h ../include/serno.h \
  ../include/patchlevel.h ../include/modules.h
+services.o: services.c ../include/config.h ../include/tcm.h \
+ ../include/event.h ../include/bothunt.h ../include/userlist.h \
+ ../include/serverif.h ../include/parse.h ../include/numeric.h \
+ ../include/logging.h ../include/stdcmds.h ../include/commands.h \
+ ../include/wild.h ../include/tcm_io.h ../include/serno.h \
+ ../include/patchlevel.h ../include/modules.h
 stdcmds.o: stdcmds.c ../include/setup.h ../include/config.h \
  ../include/tcm.h ../include/tcm_io.h ../include/logging.h \
  ../include/serverif.h ../include/stdcmds.h ../include/userlist.h \

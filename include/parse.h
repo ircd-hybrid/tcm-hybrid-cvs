@@ -1,4 +1,4 @@
-/* $Id: parse.h,v 1.4 2002/05/25 23:27:50 db Exp $ */
+/* $Id: parse.h,v 1.5 2002/05/26 00:44:16 leeh Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
@@ -16,10 +16,6 @@ extern void _signon (int connnum, int argc, char *argv[]);
 
 extern void check_clones(void *);
 
-#ifdef SERVICES
-extern void check_services(void *);
 extern struct a_entry actions[MAX_ACTIONS+1];
-extern int act_drone, act_sclone;
-#endif
 
 #endif

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.74 2002/05/25 23:27:54 db Exp $ */
+/* $Id: main.c,v 1.75 2002/05/26 00:44:19 leeh Exp $ */
 
 #include "setup.h"
 
@@ -65,8 +65,8 @@ char serverhost[MAX_HOST];    /* Server tcm will use. */
 
 /* kludge for ensuring no direct loops */
 int  incoming_connnum;	      /* current connection number incoming */
-/* KLUDGE  *grumble* */
-/* allow for ':' ' ' etc. */
+
+int act_drone, act_sclone;
 
 /* total memory xmalloc'd */
 unsigned long totalmem;
@@ -267,6 +267,10 @@ main(int argc, char *argv[])
   init_commands();
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
   init_wingates();
+#endif
+
+#ifdef SERVICES
+  init_services();
 #endif
 
 #ifdef GLINES

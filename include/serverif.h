@@ -1,7 +1,7 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
-/* $Id: serverif.h,v 1.24 2002/05/25 16:27:25 jmallett Exp $ */
+/* $Id: serverif.h,v 1.25 2002/05/26 00:44:16 leeh Exp $ */
 
 /*
  * default ping timeout time from server
@@ -13,25 +13,7 @@
 int pingtime;
 
 
-#ifndef OPERS_ONLY
-extern int isbanned(char *,char *);
-#endif
-
 char myclass[100];
-
-/*
- * services struct
- * Used to store info about global clones derived from services.us
- */
-
-struct services_entry
-{
-  char   cloning_host[MAX_HOST];
-  char   last_cloning_host[MAX_HOST];
-  char   user_count[SMALL_BUFF];
-  int    clones_displayed;
-  int    kline_suggested;
-};
 
 void do_init(void);		
 void report(int type, int channel_report_flag, char *format, ... );

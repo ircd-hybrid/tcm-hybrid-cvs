@@ -1,3 +1,15 @@
+bill        2003/02/16 18:05:41 EST	(20030216_1)
+
+  Modified files:
+    src                  dcc_commands.c 
+  Log:
+  - off-by-one error caused by .kaction <time> -- reported by Disciple
+  
+  Revision  Changes    Path
+  1.148     +1 -1      tcm-hybrid/src/dcc_commands.c
+
+
+
 bill        2003/02/16 04:12:57 EST	(20030216_0)
 
   Modified files:

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.124 2002/05/28 00:35:08 db Exp $
+ * $Id: bothunt.c,v 1.125 2002/05/28 04:32:24 db Exp $
  */
 
 #include <stdio.h>
@@ -52,6 +52,7 @@ static void link_look_notice(char *snotice);
 static void connect_flood_notice(char *snotice);
 static void add_to_nick_change_table(char *user_host, char *last_nick);
 static void stats_notice(char *snotice);
+static int  get_user_host(char **user_p, char **host_p, char *user_host);
 
 struct s_testline testlines;
 char   myclass[MAX_CLASS]; /* XXX */
@@ -120,7 +121,7 @@ struct msg_to_action msgs_to_mon[] = {
 struct connect_flood_entry connect_flood[CONNECT_FLOOD_TABLE_SIZE];
 
 /*
- * _ontraceuser()
+ * on_trace_user()
  * 
  * inputs	- traceline from server
  * output	- NONE
@@ -129,7 +130,7 @@ struct connect_flood_entry connect_flood[CONNECT_FLOOD_TABLE_SIZE];
  */
 
 void
-_ontraceuser(int connnum, int argc, char *argv[])
+on_trace_user(int argc, char *argv[])
 {
   struct plus_c_info userinfo;
   char *class_ptr;	/* pointer to class number */
@@ -183,7 +184,7 @@ _ontraceuser(int connnum, int argc, char *argv[])
 }
 
 void
-_ontraceclass(int connnum, int argc, char *argv[])
+on_trace_class(int argc, char *argv[])
 {
   if (doingtrace)
   {
@@ -203,7 +204,7 @@ _ontraceclass(int connnum, int argc, char *argv[])
  * 
  */
 void
-on_stats_e(int connnum, int argc, char *argv[])
+on_stats_e(int argc, char *argv[])
 {
   char *user;
   char *host;
@@ -249,11 +250,10 @@ on_stats_e(int connnum, int argc, char *argv[])
  * 
  */
 void
-on_stats_i(int connnum, int argc, char *argv[])
+on_stats_i(int argc, char *argv[])
 {
   char *user;
   char *host;
-  char *p;
   int  alpha, ok=NO;
 
   alpha = NO;
@@ -262,19 +262,15 @@ on_stats_i(int connnum, int argc, char *argv[])
   if (host_list_index == (MAXHOSTS - 1))
     return;
 
-  if ((p = strchr(argv[6],'@')) == NULL)	/* find the u@h part */
+  /* N.B. get_user_host modifies argv[6] */
+  if (get_user_host(&user, &host, argv[6]) == 0)
     return;
-
-  *p = '\0';				/* blast the '@' */
-  host = p+1;				/* host part is past the '@' */
-
-  p = user = argv[6];
 
   /* if client is exempt, mark it as such in the exemption list */
 
-  for(;*p;p++)
+  for(;*user;user++)
   {
-    switch(*p)
+    switch(*user)
     {
     /* Check for flags that set some sort of exemption or protection from
      * something on the ircd side, and not flags that set some sort of
@@ -299,8 +295,6 @@ on_stats_i(int connnum, int argc, char *argv[])
       break;
   }
 
-  user = p;
-
   if (ok)
   {
     strncpy(hostlist[host_list_index].user, 
@@ -315,14 +309,14 @@ on_stats_i(int connnum, int argc, char *argv[])
 }
 
 /*
- * onservnotice()
+ * on_server_notice()
  *
  * inputs	- message from server
  * output	- NONE
  * side effects	-
  */
 void
-onservnotice(int connnum, int argc, char *argv[])
+on_server_notice(int argc, char *argv[])
 {
   int i = -1, a, b, c = -1;
   int faction = -1;
@@ -532,6 +526,9 @@ onservnotice(int connnum, int argc, char *argv[])
 
   switch (faction)
   {
+    char *user;
+    char *host;
+
   /* Client connecting: bill (bill@ummm.E) [255.255.255.255] {1} */
   case CONNECT:
     if ((q = strchr(p, '(')) == NULL)
@@ -1185,49 +1182,26 @@ static void
 link_look_notice(char *snotice)
 {
   char *nick_reported;
+  char *user;
+  char *host;
   char user_host[MAX_HOST+MAX_NICK+2];
-  char *user, *host;
+  char *seen_user_host;
   char *p;
   int first_empty_entry = -1;
   int found_entry = NO;
   int i;
 
-  if ((p = strstr(snotice,"requested by")) == NULL)
+  if ((nick_reported = strstr(snotice,"requested by")) == NULL)
     return;
 
-  nick_reported = p + 13;
+  nick_reported += 13;
 
-  if ((p = strchr(nick_reported,' ')) == NULL)
+  if ((seen_user_host = strchr(nick_reported,' ')) == NULL)
     return;
-  *p++ = '\0';
+  *seen_user_host++ = '\0';
 
-  user = p;
-/*
- *  Lets try and get it right folks... [user@host] or (user@host)
- */
-
-  if (*user == '[')
-  {
-    user++;
-    if ((p = strchr(user, ']')) == NULL)
-      return;
-    *p = '\0';
-  }
-  else if (*user == '(')
-  {
-    user++;
-    if ((p = strchr(user, ')')) == NULL)
-      return;
-    *p = '\0';
-  }
-  else
+  if (get_user_host(&user, &host, seen_user_host) == 0)
     return;
-
-  if ((p = strchr(user, '@')) == NULL)
-    return;
-
-  *p = '\0';
-  host = p+1; 
 
   send_to_all(SEND_SPY, "[LINKS by %s (%s@%s)]",
 	       nick_reported, user, host ); /* - zaph */
@@ -1318,40 +1292,18 @@ void cs_nick_flood(char *snotice)
   char *host;
   char *p;
 
-  if ( !(nick_reported = strtok(snotice," ")) )
+  if ((nick_reported = strchr(snotice,' ')) == NULL)
+    return;
+  nick_reported++;
+
+  if ((user_host = strchr(nick_reported,' ')) == NULL)
     return;
 
-  if ( !(user_host = strtok(NULL," ")) )
+  if (get_user_host(&user, &host, user_host) == 0)
     return;
 
-/*
- * Lets try and get it right folks... [user@host] or (user@host)
- */
-
-  if (*user_host == '[')
-    {
-      user_host++;
-      if ( (p = strrchr(user_host,']')) )
-	*p = '\0';
-    }
-  else if (*user_host == '(')
-    {
-      user_host++;
-      if ( (p = strrchr(user_host,')')) )
-	*p = '\0';
-    }
-
-  send_to_all(SEND_WARN, "CS nick flood user_host = [%s]", user_host);
-
-  tcm_log(L_NORM, "CS nick flood user_host = [%s]\n", user_host);
-
-
-  if ( !(user = strtok(user_host,"@")) )
-    return;
-
-  if ( !(host = strtok(NULL,"")) )
-    return;
-
+  send_to_all(SEND_WARN, "CS nick flood user_host = [%s@%s]", user, host);
+  tcm_log(L_NORM, "CS nick flood user_host = [%s@%s]\n", user, host);
   handle_action(act_flood, (*user != '~'), nick_reported, user, host, 0, 0);
 }
 
@@ -1368,34 +1320,23 @@ static void
 cs_clones(char *snotice)
 {
   int identd = YES;
+  char *nick_reported;
+  char *user_host;
   char *user;
   char *host;
-  char *p;
-  char *user_host;
 
-  if ((strtok(snotice," ") == NULL))
+  if ((nick_reported = strchr(snotice,' ')) == NULL)
+    return;
+  nick_reported++;
+
+  if ((user_host = strchr(nick_reported,' ')) == NULL)
     return;
 
-  if ((user_host = strtok(NULL," ")) == NULL)
+  if (get_user_host(&user, &host, user_host) == 0)
     return;
-
-  if (*user_host == '[')
-    {
-      user_host++;
-      if ( (p = strrchr(user_host,']')) )
-	*p = '\0';
-    }
-  else if (*user_host == '(')
-    {
-      user_host++;
-      if ( (p = strrchr(user_host,')')) )
-	*p = '\0';
-    }
 
   send_to_all(SEND_WARN, "CS clones user_host = [%s]", user_host);
   tcm_log(L_NORM, "CS clones = [%s]\n", user_host);
-
-  user = user_host;
 
   if (*user == '~')
     {
@@ -1403,11 +1344,6 @@ cs_clones(char *snotice)
       identd = NO;
     }
 
-  if ( !(host = strchr(user_host,'@')) )
-    return;
-
-  *host = '\0';
-  host++;
   handle_action(act_clone, identd, "", user, host, 0, 0);
 }
 
@@ -1435,16 +1371,16 @@ check_nick_flood(char *snotice)
     {
       nick1 = p;	/* This _should_ be nick1 */
 
-      if ( !(user_host = strtok(NULL," ")) )	/* (user@host) */
+      if ((user_host = strtok(NULL," ")) == NULL)	/* (user@host) */
 	return;
 
       if (*user_host == '(')
 	user_host++;
 
-      if ( (p = strrchr(user_host,')')) )
+      if ((p = strrchr(user_host,')')) != NULL)
 	*p = '\0';
 
-      if ( !(p = strtok(NULL," ")) )
+      if ((p = strtok(NULL," ")) == NULL)
 	return;
 
       if (strcmp(p,"now") != 0 )
@@ -1705,7 +1641,7 @@ stats_notice(char *snotice)
   if (*fulluh == '(')
     fulluh++;
 
-  if ( (p = strchr(fulluh, ')' )) )
+  if ((p = strchr(fulluh,')')) != NULL)
     *p = '\0';
 
 #ifdef STATS_P
@@ -1751,12 +1687,23 @@ stats_notice(char *snotice)
 	       stat, nick, fulluh);
 }
 
-void _reload_bothunt(int connnum, int argc, char *argv[])
+/*
+ * reload_bothunt
+ *
+ * inputs	- none
+ * output	- none
+ * side effects	-
+ */
+
+void
+reload_bothunt(void)
 {
- if (!amianoper) oper();
+  if (!amianoper)
+    oper();
 }
 
-void init_bothunt(void)
+void
+init_bothunt(void)
 {
   init_hash();
   memset(&nick_changes,0,sizeof(nick_changes));
@@ -1855,3 +1802,51 @@ report_nick_flooders(int sock)
     }
 }
 
+
+/*
+ * get_user_host
+ *
+ * inputs	- user_host pointer to string of form
+ *		  (user@host) or
+ *		  [user@host] or even plain old
+ *		  user@host
+ * outputs	- pointer to user
+ *		- pointer to host
+ * side effects	- input user_host is modified in place
+ */
+
+static int
+get_user_host(char **user_p, char **host_p, char *user_host)
+{
+  char *user = user_host;
+  char *host;
+  char *p;
+
+  /*
+   *  Lets try and get it right folks... [user@host] or (user@host)
+   */
+
+  if (*user == '[')
+    {
+      user++;
+      if ((p = strchr(user, ']')) == NULL)
+	return(0);
+      *p = '\0';
+    }
+  else if (*user == '(')
+    {
+      user++;
+      if ((p = strchr(user, ')')) == NULL)
+	return(0);
+      *p = '\0';
+    }
+
+  *user_p = user;
+
+  if ((p = strchr(user, '@')) == NULL)
+    return(0);
+
+  *p = '\0';
+  *host_p = p+1; 
+  return (1);
+}

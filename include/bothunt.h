@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.40 2002/05/27 23:59:42 db Exp $ */
+/* $Id: bothunt.h,v 1.41 2002/05/28 04:32:22 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -117,17 +117,13 @@ void list_class(int sock,char *class_to_find,int total_only);
 
 extern void init_bothunt(void);
 extern void free_bothunt(void);
-extern void _reload_bothunt(int connnum, int argc, char *argv[]);
-extern void _ontraceuser(int connnum, int argc, char *argv[]);
-extern void _ontraceclass(int connnum, int argc, char *argv[]);
-extern void on_stats_e(int connnum, int argc, char *argv[]);
-extern void on_stats_i(int connnum, int argc, char *argv[]);
-extern void onservnotice(int connnum, int argc, char *argv[]);
+extern void reload_bothunt(void);
+extern void on_trace_user(int argc, char *argv[]);
+extern void on_trace_class(int argc, char *argv[]);
+extern void on_stats_e(int argc, char *argv[]);
+extern void on_stats_i(int argc, char *argv[]);
+extern void on_server_notice(int argc, char *argv[]);
 extern struct s_testline testlines;
 extern int doingtrace;
 extern char myclass[MAX_CLASS]; /* XXX ewww */
-
-/* XXX candidates for hash.c/hash.h */
-struct hashrec *find_nick(const char * nick);
-struct hashrec *find_host(const char * host);
 #endif

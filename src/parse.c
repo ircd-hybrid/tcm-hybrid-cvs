@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.38 2002/05/27 23:59:46 db Exp $
+ * $Id: parse.c,v 1.39 2002/05/28 04:32:24 db Exp $
  */
 
 #include <stdio.h>
@@ -350,7 +350,7 @@ process_server(int conn_num, char *source, char *function, char *param)
   {
     if(strcasecmp(source,config_entries.rserver_name) == 0)
     {
-      onservnotice(0, argc, argv);
+      on_server_notice(argc, argv);
     }
   }
 
@@ -420,15 +420,15 @@ process_server(int conn_num, char *source, char *function, char *param)
 	
     case RPL_TRACEOPERATOR:
     case RPL_TRACEUSER:
-      _ontraceuser(0, argc, argv);
+      on_trace_user(argc, argv);
       break;
 	
     case RPL_TRACECLASS:
-      _ontraceclass(0, argc, argv);
+      on_trace_class(argc, argv);
       break;
 	
     case RPL_STATSILINE:
-      on_stats_i(0, argc, argv);
+      on_stats_i(argc, argv);
       break;
 	
     case RPL_STATSOLINE:
@@ -447,7 +447,7 @@ process_server(int conn_num, char *source, char *function, char *param)
 	
     case RPL_STATSELINE:
     case RPL_STATSFLINE:
-      on_stats_e(0, argc, argv);
+      on_stats_e(argc, argv);
       break;
 
     default:

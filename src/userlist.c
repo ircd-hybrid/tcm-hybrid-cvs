@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.94 2002/05/28 00:35:10 db Exp $
+ * $Id: userlist.c,v 1.95 2002/05/28 04:32:25 db Exp $
  *
  */
 
@@ -1069,7 +1069,7 @@ reload_user_list(int sig)
   if(sig != SIGHUP)     /* should never happen */
     return;
 
-  _reload_bothunt(sig, 0, NULL);
+  reload_bothunt();
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
   _reload_wingate(sig, 0, NULL);
 #endif

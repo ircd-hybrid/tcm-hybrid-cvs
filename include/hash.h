@@ -1,7 +1,7 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.3 2002/05/28 00:35:06 db Exp $ */
+/* $Id: hash.h,v 1.4 2002/05/28 04:32:22 db Exp $ */
 
 
 struct userentry {
@@ -42,6 +42,9 @@ void removeuserhost(char *, struct plus_c_info *);
 void updateuserhost(char *nick1, char *nick2, char *userhost);
 void check_clones(void *);
 void init_hash(void);
+
+struct hashrec *find_nick(const char * nick);
+struct hashrec *find_host(const char * host);
 
 #endif
 

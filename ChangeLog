@@ -1,3 +1,48 @@
+bill        2004/06/01 22:00:46 EDT	(20040602_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.ac 
+    include              actions.h bothunt.h config.h parse.h 
+                         userlist.h 
+    src                  Makefile.in bothunt.c dcc_commands.c 
+                         hash.c main.c serv_commands.c tcm_io.c 
+                         userlist.c 
+  Added files:
+    include              conf.h 
+    src                  conf.c tcm_lexer.l tcm_parser.y 
+  Removed files:
+    etc                  tcm.cf userlist.cf 
+  Log:
+  - redid tcm config file to use lexx/yacc
+  - rebuilt configure
+  - fixed some parsing issues reported by netmunky
+  
+  Revision  Changes     Path
+  1.2       +11 -0      tcm-hybrid/autoconf/configure.ac
+  1.26      +1093 -393  tcm-hybrid/configure
+  1.36      +0 -90      tcm-hybrid/etc/tcm.cf (dead)
+  1.25      +0 -54      tcm-hybrid/etc/userlist.cf (dead)
+  1.23      +0 -2       tcm-hybrid/include/actions.h
+  1.65      +3 -3       tcm-hybrid/include/bothunt.h
+  1.1       +19 -0      tcm-hybrid/include/conf.h (new)
+  1.90      +1 -8       tcm-hybrid/include/config.h
+  1.26      +1 -0       tcm-hybrid/include/parse.h
+  1.95      +6 -8       tcm-hybrid/include/userlist.h
+  1.41      +19 -3      tcm-hybrid/src/Makefile.in
+  1.227     +20 -19     tcm-hybrid/src/bothunt.c
+  1.1       +113 -0     tcm-hybrid/src/conf.c (new)
+  1.155     +1 -7       tcm-hybrid/src/dcc_commands.c
+  1.72      +3 -3       tcm-hybrid/src/hash.c
+  1.138     +7 -2       tcm-hybrid/src/main.c
+  1.9       +3 -3       tcm-hybrid/src/serv_commands.c
+  1.109     +6 -7       tcm-hybrid/src/tcm_io.c
+  1.1       +268 -0     tcm-hybrid/src/tcm_lexer.l (new)
+  1.1       +446 -0     tcm-hybrid/src/tcm_parser.y (new)
+  1.154     +7 -512     tcm-hybrid/src/userlist.c
+
+
+
 bill        2004/05/20 05:26:28 EDT	(20040520_0)
 
   Modified files:

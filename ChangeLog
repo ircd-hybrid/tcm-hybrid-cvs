@@ -1,3 +1,19 @@
+db          2002/05/27 17:19:28 EDT	(20020527_19)
+
+  Modified files:
+    include              bothunt.h 
+    src                  actions.c bothunt.c 
+  Log:
+  - added definition for find_host in bothunt.h
+  - style fixes in actions.
+  
+  Revision  Changes    Path
+  1.37      +3 -0      tcm-hybrid/include/bothunt.h
+  1.2       +33 -30    tcm-hybrid/src/actions.c
+  1.117     +3 -3      tcm-hybrid/src/bothunt.c
+
+
+
 db          2002/05/27 17:02:39 EDT	(20020527_18)
 
   Modified files:

@@ -1,3 +1,17 @@
+db          2002/06/02 19:41:35 EDT	(20020603_2)
+
+  Modified files:
+    src                  commands.c hash.c stdcmds.c 
+  Log:
+  - cleanups, removed one unnecessary include
+  
+  Revision  Changes    Path
+  1.120     +25 -25    tcm-hybrid/src/commands.c
+  1.27      +119 -119  tcm-hybrid/src/hash.c
+  1.88      +6 -7      tcm-hybrid/src/stdcmds.c
+
+
+
 db          2002/06/02 19:30:12 EDT	(20020603_1)
 
   Modified files:

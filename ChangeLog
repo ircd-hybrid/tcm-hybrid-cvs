@@ -1,3 +1,15 @@
+bill        2002/08/08 15:00:47 EDT	(20020808_1)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  - this should fix the remaining broken notice parsers in on_serv_notice()
+  
+  Revision  Changes    Path
+  1.191     +15 -15    tcm-hybrid/src/bothunt.c
+
+
+
 bill        2002/08/08 14:10:43 EDT	(20020808_0)
 
   Modified files:

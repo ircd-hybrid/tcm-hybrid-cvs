@@ -1,3 +1,17 @@
+bill        2002/04/11 21:40:52 EDT	(20020412_1)
+
+  Modified files:
+    modules              bothunt.c 
+  Log:
+  - added documentation for most server notices
+  - fixed parsing of Flooder notice
+  - fixed parsing of incoming/disconnecting server notices
+  
+  Revision  Changes    Path
+  1.55      +28 -17    tcm-hybrid/modules/bothunt.c
+
+
+
 einride     2002/04/11 19:35:42 EDT	(20020412_0)
 
   Modified files:

@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.36 2002/08/08 19:35:05 bill Exp $
+ * $Id: actions.c,v 1.37 2002/08/13 00:39:42 bill Exp $
  */
 
 #include "setup.h"
@@ -229,7 +229,7 @@ update_action(struct connection *connection_p, int argc, char *argv[])
 		       actions[actionid].klinetime, actions[actionid].reason);
   else
     send_to_connection(connection_p,
-		       "%s action now: %s %d, reason '%s'",
+		       "%s action now: %s, reason '%s'",
 		       actions[actionid].name,
 		       get_method_names(actions[actionid].method),
 		       actions[actionid].reason);

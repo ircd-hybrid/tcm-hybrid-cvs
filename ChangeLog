@@ -1,3 +1,16 @@
+wcampbel    2002/05/13 18:44:03 EDT	(20020513_2)
+
+  Modified files:
+    include              config.h 
+  Log:
+  Undef QUOTE by default
+  Fix an incorrect services setting (future EFnet related)
+  
+  Revision  Changes    Path
+  1.41      +2 -2      tcm-hybrid/include/config.h
+
+
+
 bill        2002/05/13 18:36:41 EDT	(20020513_1)
 
   Modified files:

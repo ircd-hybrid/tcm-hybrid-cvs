@@ -31,7 +31,7 @@ Note:  Opers as defined in this file are people with TCM O: lines (or
     This command lists userhosts that have exceeded the threshold
     of connect failures due to being K-lined, detected as a bot,
  - .domains [min connections] (OPERS ONLY)
-    List all connections to  by domain, showing those
+    List all connections to by domain, showing those
     domains with more than [min connections] users.
  - .nflood (OPERS ONLY)
     List nick flooders.

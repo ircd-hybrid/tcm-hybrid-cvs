@@ -1,3 +1,8 @@
+*** 20010721_4 by wcampbel
+Made tcm work with the repo-move to src/
+I believe it's good to go now
+
+
 *** 20010721_3 by wcampbel
 This is the code to support the help files in a subdirectory.
 The repo-move will be done as soon as I finish this commit

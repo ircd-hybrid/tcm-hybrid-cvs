@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.49 2002/06/07 11:20:09 leeh Exp $ */
+/* $Id: bothunt.h,v 1.50 2002/06/09 16:23:16 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -112,7 +112,8 @@ struct link_look_entry link_look[LINK_LOOK_TABLE_SIZE];
 
 struct connect_flood_entry
 {
-  char user_host[MAX_USERHOST];
+  char user[MAX_USER];
+  char host[MAX_HOST];
   char ip[MAX_IP];
   int  connect_count;
   time_t last_connect;

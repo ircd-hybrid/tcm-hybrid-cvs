@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.161 2002/06/09 02:30:14 wcampbel Exp $
+ * $Id: bothunt.c,v 1.162 2002/06/09 16:23:18 db Exp $
  */
 
 #include <stdio.h>
@@ -46,7 +46,7 @@ static void check_nick_flood(char *snotice);
 static void cs_nick_flood(char *snotice);
 static void cs_clones(char *snotice);
 static void link_look_notice(char *snotice);
-static void connect_flood_notice(char *snotice);
+static void connect_flood_notice(char *snotice, char *reason);
 static void add_to_nick_change_table(char *user_host, char *last_nick);
 static void stats_notice(char *snotice);
 static void chopuh(int istrace,char *nickuserhost,struct user_entry *userinfo);
@@ -649,7 +649,9 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* I-line is full for bill[bill@ummm.E] (127.0.0.1). */
   case ILINEFULL:
-    connect_flood_notice(q);
+    /* XXX */
+    nick = q+1; /* XXX confirm */
+    connect_flood_notice(nick, "I line full");
     break;
 
   /* *** You have been D-lined */
@@ -698,165 +700,19 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((nick = strrchr(q, ' ')) == NULL)
       return;
     ++nick;
-
-    if ((p = strrchr(nick, '[')) == NULL)
-      return;
-
-    if (get_user_host(&user, &host, p) != 1)
-      return;
-    *p = '\0';
-
-    *(host-1) = '@'; /* we need user to be the user@host for this for, and we'll fix it later. */
-
-    c=-1;
-    for (a=0;a<MAX_CONNECT_FAILS;++a)
-    {
-      if (connect_flood[a].user_host[0])
-      {
-	if (strcasecmp(connect_flood[a].user_host, user) == 0)
-	{
-	  if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
-	    connect_flood[a].connect_count = 0;
-
-	  ++connect_flood[a].connect_count;
-          *(host-1) = '\0';
-
-	  if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
-	    {
-	      handle_action(act_cflood, nick, user, host, 0, "X-Line rejections");
-	      connect_flood[a].user_host[0] = '\0';
-	    }
-	  else
-	    connect_flood[a].last_connect = current_time;
-	}
-	else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
-	  connect_flood[a].user_host[0] = '\0';
-      }
-      else c = a;
-    }
-    if (c >= 0)
-    {
-      if (strchr(user, '@'))
-	strlcpy(connect_flood[c].user_host, user, MAX_USERHOST);
-      else
-	snprintf(connect_flood[c].user_host, 
-		 MAX_USERHOST, "%s@%s", user, host);
-      connect_flood[c].connect_count = 0;
-      connect_flood[c].last_connect = current_time;
-    }
+    connect_flood_notice(nick, "X-Line rejections");
     break;
 
   /* Quarantined nick [bill] from user aa[bill@ummm.E] */
   case QUARANTINE:
     nick = q+2;
-    /* [ and ] are valid in nicks... find the FIRST space */
-    if ((q = strchr(nick, ' ')) == NULL)
-      return;
-    /* Now take us back to the ] */
-    q--;
-    *q = '\0';
-    user = q+15;
-
-    /* Find the RIGHTMOST ] */
-    if ((p = strrchr(user, ']')) == NULL)
-      return;
-    *p = '\0';
-    for (a=0;a<MAX_CONNECT_FAILS;++a)
-    {
-      if (connect_flood[a].user_host[0])
-      {
-        if (strcasecmp(connect_flood[a].user_host, user) == 0)
-        {
-          if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
-            connect_flood[a].connect_count = 0;
-          ++connect_flood[a].connect_count;
-
-          if ((p = strchr(user, '@')) == NULL)
-            return;
-          *p++ = '\0';
-          host = p;
-
-	  if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
-            {
-	      handle_action(act_cflood, nick, user, host, 0, "Quarantined nick");
-              connect_flood[a].user_host[0] = '\0';
-            }
-            else
-              connect_flood[a].last_connect = current_time;
-          return;
-        }
-        else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME)
-                 < current_time)
-          connect_flood[a].user_host[0] = '\0';
-      }
-      else
-        c = a;
-    }
-    if (c >= 0)
-    {
-      if (strchr(user, '@'))
-        snprintf(connect_flood[c].user_host, MAX_USERHOST, "%s", user);
-      else
-        snprintf(connect_flood[c].user_host, MAX_USERHOST,
-			"%s@%s", user, host);
-
-      connect_flood[c].connect_count = 0;
-      connect_flood[c].last_connect = current_time;
-    }
+    connect_flood_notice(nick, "Quarantined nick");
     break;
 
   /* Invalid username: bill (!@$@&&&.com) */
   case INVALIDUH:
     nick = q+1;
-    if ((p = strchr(nick, ' ')) == NULL)
-      return;
-    *p = '\0';
-
-    if (get_user_host(&user, &host, p+2) != 1)
-      return;
-
-    if ((p = strchr(host, ')')) == NULL)
-      return;
-    *p = '\0';
-
-    *(host-1) = '@';
-
-    c = -1;
-    for (a=0;a<MAX_CONNECT_FAILS;++a)
-    {
-      if (connect_flood[a].user_host[0])
-      {
-	if (!strcasecmp(user, connect_flood[a].user_host))
-        {
-	  if ((connect_flood[a].last_connect + MAX_CONNECT_TIME) < current_time)
-	    connect_flood[a].connect_count = 0;
-
-	  ++connect_flood[a].connect_count;
-          *(host-1) = '\0';
-	    if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
-	    {
-	      handle_action(act_cflood, 
-			    nick, user, host, 0, "Invalid user@host");
-	      connect_flood[a].user_host[0] = '\0';
-	    }
-	}
-	else if ((connect_flood[a].last_connect + MAX_CONNECT_TIME)
-                 < current_time)
-	  connect_flood[a].user_host[0] = '\0';
-      }
-      else
-	c = a;
-    }
-    if (c >= 0)
-    {
-      if (strchr(user, '@'))
-        snprintf(connect_flood[c].user_host, MAX_USERHOST, "%s", user);
-      else
-        snprintf(connect_flood[c].user_host, MAX_USERHOST,
-                 "%s@%s", user, host);
-      connect_flood[c].last_connect = current_time;
-      connect_flood[c].connect_count = 0;
-    }
+    connect_flood_notice(nick, "Invalid user@host");
     break;
 
   /* Server ircd.flamed.net split from ircd.secsup.org */
@@ -929,57 +785,37 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
  * connect_flood_notice
  *
  * input	- pointer to notice
+ *		- pointer to reason to hand to actions
  * output	- none
  * side effects	-
  */
 static void
-connect_flood_notice(char *snotice)
+connect_flood_notice(char *snotice, char *reason)
 {
   char *nick_reported;
   char *user_host;
-  char user[MAX_USER];
-  char host[MAX_HOST];
-  char *ip;
+  char *user;
+  char *host;
   char *p;
 
   int first_empty_entry = -1;
   int found_entry = NO;
   int i;
 
-  snotice +=5;
-
-  p=nick_reported=snotice;
+  p= nick_reported= snotice;
   while (*p != ' ' && *p != '[')
     ++p;
   user_host=p+1;
-  *p = '\0';
 
-  p=user_host;
-  while (*p != ' ' && *p != ']')
-    ++p;
-  if (strlen(p) >= 4)
-    ip=p+3;
-  else return;
-  *p = '\0';
-
-  p=ip;
-  if ((p = strchr(ip, ')')) == NULL)
+  if (get_user_host(&user, &host, user_host) != 1)
     return;
-  *p = '\0';
-
-  p=user_host;
-  while (*p != '@')
-    ++p;
-  *p='\0';
-  snprintf(user, MAX_USER, "%s", user_host);
-  snprintf(host, MAX_HOST, "%s", p+1);
-  *p='@';
 
   for(i=0; i<MAX_CONNECT_FAILS; ++i)
     {
-      if (connect_flood[i].user_host[0])
+      if (connect_flood[i].user[0] != '\0')
 	{
-	  if (strcasecmp(connect_flood[i].user_host, user_host) == 0)
+	  if ((strcasecmp(connect_flood[i].user, user) == 0) &&
+	      (strcasecmp(connect_flood[i].host, host) == 0))
 	    {
 	      found_entry = YES;
 
@@ -991,12 +827,13 @@ connect_flood_notice(char *snotice)
 
 	      connect_flood[i].connect_count++;
 	      if (connect_flood[i].connect_count >= MAX_CONNECT_FAILS)
-		handle_action(act_cflood, nick_reported, user, host, 0, 0);
+		handle_action(act_cflood, nick_reported, user, host, 0, reason);
 	    }
 	  else if ((connect_flood[i].last_connect + MAX_CONNECT_TIME)
 		   < current_time)
 	    {
-	      connect_flood[i].user_host[0] = '\0';
+	      connect_flood[i].user[0] = '\0';
+	      connect_flood[i].host[0] = '\0';
 	    }
 	}
       else if (first_empty_entry < 0)
@@ -1009,8 +846,8 @@ connect_flood_notice(char *snotice)
     {
       if (first_empty_entry >= 0)
 	{
-	  strlcpy(connect_flood[first_empty_entry].user_host, user_host,
-		  sizeof(connect_flood[first_empty_entry]));
+	  strlcpy(connect_flood[first_empty_entry].user, user, MAX_USER);
+	  strlcpy(connect_flood[first_empty_entry].host, host, MAX_HOST);
 	  connect_flood[first_empty_entry].last_connect = current_time;
 	  connect_flood[first_empty_entry].connect_count = 0;
 	}

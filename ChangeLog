@@ -1,3 +1,17 @@
+bill        2001/12/07 15:06:16 EST	(20011207_0)
+
+  Modified files:
+    modules              bothunt.c serverif.c 
+  Log:
+  - fixed +W flag
+  - fixed spambot detection
+  
+  Revision  Changes    Path
+  1.45      +2 -2      tcm-hybrid/modules/bothunt.c
+  1.36      +2 -2      tcm-hybrid/modules/serverif.c
+
+
+
 *** 20011204_2 by bill
 
 - upped patchlevel to 3.0.2

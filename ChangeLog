@@ -1,3 +1,19 @@
+leeh        2002/05/28 07:52:41 EDT	(20020528_11)
+
+  Modified files:
+    include              tcm_io.h 
+    src                  bothunt.c commands.c tcm_io.c 
+  Log:
+  - removed connections[].type
+  
+  Revision  Changes    Path
+  1.27      +0 -1      tcm-hybrid/include/tcm_io.h
+  1.127     +1 -1      tcm-hybrid/src/bothunt.c
+  1.102     +25 -23    tcm-hybrid/src/commands.c
+  1.61      +0 -2      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/28 01:46:43 EDT	(20020528_10)
 
   Modified files:

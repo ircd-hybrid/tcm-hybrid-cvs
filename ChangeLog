@@ -1,3 +1,23 @@
+leeh        2002/06/07 06:46:10 EDT	(20020607_1)
+
+  Modified files:
+    include              userlist.h 
+    src                  bothunt.c dcc_commands.c main.c parse.c 
+                         services.c userlist.c 
+  Log:
+  - got rid of rserver_name and use tcm_status.my_server instead.
+  
+  Revision  Changes    Path
+  1.67      +0 -1      tcm-hybrid/include/userlist.h
+  1.153     +5 -6      tcm-hybrid/src/bothunt.c
+  1.122     +1 -1      tcm-hybrid/src/dcc_commands.c
+  1.113     +1 -0      tcm-hybrid/src/main.c
+  1.70      +0 -2      tcm-hybrid/src/parse.c
+  1.17      +2 -2      tcm-hybrid/src/services.c
+  1.112     +2 -1      tcm-hybrid/src/userlist.c
+
+
+
 db          2002/06/07 02:21:53 EDT	(20020607_0)
 
   Modified files:

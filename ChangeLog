@@ -1,3 +1,22 @@
+db          2002/05/26 02:57:33 EDT	(20020526_13)
+
+  Modified files:
+    include              tcm_io.h wingate.h 
+    src                  tcm_io.c wingate.c 
+  Log:
+  - this should make wingate detection work again.
+    TOTALLY UNTESTED
+  
+  MORE to do...
+  
+  Revision  Changes    Path
+  1.21      +3 -0      tcm-hybrid/include/tcm_io.h
+  1.3       +2 -0      tcm-hybrid/include/wingate.h
+  1.40      +27 -5     tcm-hybrid/src/tcm_io.c
+  1.37      +146 -153  tcm-hybrid/src/wingate.c
+
+
+
 db          2002/05/26 01:48:08 EDT	(20020526_12)
 
   Modified files:

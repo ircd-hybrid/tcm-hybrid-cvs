@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.72 2002/05/29 06:26:14 db Exp $
+ * $Id: tcm_io.c,v 1.73 2002/05/29 13:36:43 leeh Exp $
  */
 
 #include <stdio.h>
@@ -729,6 +729,8 @@ finish_accept_dcc_chat(int i)
 
   connections[i].last_message_time = current_time;
   connections[i].nbuf = 0;
+
+  finish_dcc_chat(i);
 }
 
 /*

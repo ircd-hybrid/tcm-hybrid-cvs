@@ -1,3 +1,24 @@
+wcampbel    2002/06/08 22:10:29 EDT	(20020609_2)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              config.h 
+    src                  .depend wingate.c 
+  Log:
+  Make wingate.c compile on Solaris
+  inet_aton needs libresolv, check SPECIFICALLY for inet_aton in libresolv,
+    and don't include libresolv any other time (Slow^H^H^Holaris)
+  
+  Revision  Changes    Path
+  1.22      +1 -0      tcm-hybrid/autoconf/configure.in
+  1.22      +91 -44    tcm-hybrid/configure
+  1.67      +1 -1      tcm-hybrid/include/config.h
+  1.27      +2 -1      tcm-hybrid/src/.depend
+  1.57      +1 -0      tcm-hybrid/src/wingate.c
+
+
+
 wcampbel    2002/06/08 21:50:35 EDT	(20020609_1)
 
   Modified files:

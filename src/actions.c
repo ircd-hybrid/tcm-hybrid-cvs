@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: actions.c,v 1.54 2004/06/10 23:20:22 bill Exp $
+ *    $Id: actions.c,v 1.55 2004/06/11 20:05:50 bill Exp $
  */
 
 #include "setup.h"
@@ -662,7 +662,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
     switch(hoststrip & HOSTSTRIP_NOIDENT)
     {
       case HOSTSTRIP_NOIDENT_PREFIXED:
-        s = user;
+        s = user+1;
 
 	if(strlen(user) >= MAX_USER)
           s++;
@@ -689,7 +689,7 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
       case HOSTSTRIP_IDENT_PREFIXED:
         s = user;
 
-	if(strlen(user) >= MAX_USER-1)
+	if(strlen(user) >= MAX_USER)
           s++;
 
 	snprintf(p, MAX_USER, "*%s", s);

@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.60 2004/04/22 08:32:13 bill Exp $ */
+/* $Id: tcm.h,v 1.61 2004/06/11 20:05:48 bill Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -27,11 +27,11 @@ extern time_t current_time;
 #define DCCBUFF_SIZE   150
 #define NOTICE_SIZE    150
 
-#define MAX_NICK	10
+#define MAX_NICK	9
 #define MAX_CHANNEL	80
-#define MAX_USER	13
+#define MAX_USER	10
 #define MAX_HOST	80	
-#define MAX_USERHOST	MAX_USER + MAX_HOST
+#define MAX_USERHOST	MAX_USER + 1 + MAX_HOST
 #define MAX_GECOS	55
 #define MAX_REASON	100	/* should be quite long enough */
 #ifdef IPV6
@@ -55,7 +55,6 @@ extern unsigned long totalmem;
 extern unsigned long numalloc;
 extern unsigned long numfree;
 
-/* XXX - these will be modular later */
 void init_clones(void);
 void init_vclones(void);
 void init_commands(void);

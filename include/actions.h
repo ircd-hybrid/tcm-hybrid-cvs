@@ -1,13 +1,13 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.23 2004/06/02 02:00:41 bill Exp $ */
+/* $Id: actions.h,v 1.24 2004/06/11 20:05:48 bill Exp $ */
 
 #define MAX_ACTIONS	16
 
 struct a_entry {
-  char name[MAX_CONFIG];
-  char reason[MAX_CONFIG];
+  char name[MAX_CONFIG+1];
+  char reason[MAX_CONFIG+1];
   int method;
   int hoststrip;
   int klinetime;

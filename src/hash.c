@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: hash.c,v 1.75 2004/06/10 23:20:23 bill Exp $
+ *    $Id: hash.c,v 1.76 2004/06/11 20:05:50 bill Exp $
  */
 
 #include <stdio.h>
@@ -1580,10 +1580,17 @@ list_gecos(struct connection *connection_p, char *u_gecos, int regex, char *list
     send_to_connection(connection_p, "No matches for %s found", u_gecos);
 }
 
+#define MATCH_NICK	0x01
+#define MATCH_USER	0x02
+#define MATCH_HOST	0x04
+#define MATCH_IP	0x08
+#define MATCH_GECOS	0x10
+
 static int
 client_info_match(struct user_entry *user, const char *matchp, int case_sensitive)
 {
   const char *p, *str = NULL;
+  int matched = 0;
 
   for (p = matchp; p && *p; p++)
   {
@@ -1596,6 +1603,9 @@ client_info_match(struct user_entry *user, const char *matchp, int case_sensitiv
           return NO;
         else if (!case_sensitive && strcasecmp(user->nick, str))
           return NO;
+
+        matched |= MATCH_NICK;
+
         break;
 
       case 'u': case 'U':
@@ -1605,6 +1615,9 @@ client_info_match(struct user_entry *user, const char *matchp, int case_sensitiv
           return NO;
         else if (!case_sensitive && strcasecmp(user->username, str))
           return NO;
+
+	matched |= MATCH_USER;
+
         break;
 
       case 'h': case 'H':
@@ -1614,6 +1627,9 @@ client_info_match(struct user_entry *user, const char *matchp, int case_sensitiv
           return NO;
         else if (!case_sensitive && strcasecmp(user->host, str))
           return NO;
+
+        matched |= MATCH_HOST;
+
         break;
 
       case 'i': case 'I':
@@ -1623,6 +1639,9 @@ client_info_match(struct user_entry *user, const char *matchp, int case_sensitiv
           return NO;
         else if (!case_sensitive && strcasecmp(user->ip_host, str))
           return NO;
+
+        matched |= MATCH_IP;
+
         break;
 
       case 'g': case 'G':
@@ -1632,11 +1651,61 @@ client_info_match(struct user_entry *user, const char *matchp, int case_sensitiv
           return NO;
         else if (!case_sensitive && strcasecmp(user->gecos, str))
           return NO;
+
+        matched |= MATCH_GECOS;
+
         break;
 
       default:
         break;
     }
+  }
+
+  /*
+   * If somehow we got nothing, lets assume this feature
+   * isn't being used, and not disqualify the match
+   */
+  if (str == NULL)
+    return YES;
+
+  if (!(matched & MATCH_NICK))
+  {
+    if (case_sensitive && !strcmp(user->nick, str))
+      return NO;
+    else if (!case_sensitive && !strcasecmp(user->nick, str))
+      return NO;
+  }
+
+  if (!(matched & MATCH_USER))
+  {
+    if (case_sensitive && !strcmp(user->username, str))
+      return NO;
+    else if (!case_sensitive && !strcasecmp(user->username, str))
+      return NO;
+  }
+
+  if (!(matched & MATCH_HOST))
+  {
+    if (case_sensitive && !strcmp(user->host, str))
+      return NO;
+    else if (!case_sensitive && !strcasecmp(user->host, str))
+      return NO;
+  }
+
+  if (!(matched & MATCH_IP))
+  {
+    if (case_sensitive && !strcmp(user->ip_host, str))
+      return NO;
+    else if (!case_sensitive && !strcasecmp(user->host, str))
+      return NO;
+  }
+
+  if (!(matched & MATCH_GECOS))
+  {
+    if (case_sensitive && !strcmp(user->gecos, str))
+      return NO;
+    else if (!case_sensitive && !strcasecmp(user->gecos, str))
+      return NO;
   }
 
   return YES;

@@ -1,4 +1,4 @@
-/* $Id: parse.h,v 1.26 2004/06/02 02:00:41 bill Exp $ */
+/* $Id: parse.h,v 1.27 2004/06/11 20:05:48 bill Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
@@ -20,11 +20,11 @@ void expand_args(char *, int, int, char *argv[]);
 #define PRIV_DIE	0x200
 
 struct t_tcm_status {
-  char my_nick[MAX_NICK];
-  char my_channel[MAX_CHANNEL];
-  char my_hostname[MAX_HOST];	/* This is our hostname with domainname */
-  char my_server[MAX_HOST];
-  char my_class[MAX_CLASS];
+  char my_nick[MAX_NICK+1];
+  char my_channel[MAX_CHANNEL+1];
+  char my_hostname[MAX_HOST+1];	/* This is our hostname with domainname */
+  char my_server[MAX_HOST+1];
+  char my_class[MAX_CLASS+1];
   int  am_opered;
   int  ping_time;
   int  doing_trace;		/* presently doing trace */

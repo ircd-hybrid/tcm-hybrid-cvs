@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.97 2004/06/10 18:51:06 bill Exp $ */
+/* $Id: userlist.h,v 1.98 2004/06/11 20:05:48 bill Exp $ */
 
 #include "setup.h"
 #include "tools.h"
@@ -22,14 +22,14 @@
 
 struct f_entry {
   int type;
-  char uhost[MAX_USERHOST];
+  char uhost[MAX_USERHOST+1];
   struct f_entry *next;
 };
 
 struct failrec
 {
-  char username[MAX_USER];
-  char host[MAX_HOST];
+  char username[MAX_USER+1];
+  char host[MAX_HOST+1];
   int failcount;
   struct failrec *next;
 };
@@ -39,30 +39,30 @@ struct failrec *failures;
 struct config_list {
   int  hybrid;
   int  hybrid_version;
-  char tcm_pid_file[MAX_CONFIG];
-  char username_config[MAX_CONFIG];
-  char virtual_host_config[MAX_CONFIG];
-  char oper_nick_config[MAX_CONFIG];
-  char oper_pass_config[MAX_CONFIG];
+  char tcm_pid_file[MAX_CONFIG+1];
+  char username_config[MAX_CONFIG+1];
+  char virtual_host_config[MAX_CONFIG+1];
+  char oper_nick_config[MAX_CONFIG+1];
+  char oper_pass_config[MAX_CONFIG+1];
 #ifndef NO_SSL
-  char oper_keyfile[MAX_CONFIG];	/* CHALLENGE support.  e? */
-  char oper_keyphrase[MAX_CONFIG];
+  char oper_keyfile[MAX_CONFIG+1];	/* CHALLENGE support.  e? */
+  char oper_keyphrase[MAX_CONFIG+1];
 #endif
-  char server_name[MAX_CONFIG];
-  char server_pass[MAX_CONFIG];
+  char server_name[MAX_CONFIG+1];
+  char server_pass[MAX_CONFIG+1];
   int  server_port;
-  char ircname_config[MAX_CONFIG];
-  char email_config[MAX_CONFIG];
-  char userlist_config[MAX_CONFIG];
-  char dynamic_config[MAX_CONFIG];
+  char ircname_config[MAX_CONFIG+1];
+  char email_config[MAX_CONFIG+1];
+  char userlist_config[MAX_CONFIG+1];
+  char dynamic_config[MAX_CONFIG+1];
   int  debug;
-  char channel[MAX_CHANNEL];		/* Channel tcm will use. */
-  char channel_key[MAX_CONFIG];		/* key for Channel tcm will use. */
-  char dfltnick[MAX_NICK];		/* Nickname tcm will use */
-  char testline_umask[MAX_USERHOST];
+  char channel[MAX_CHANNEL+1];		/* Channel tcm will use. */
+  char channel_key[MAX_CONFIG+1];		/* key for Channel tcm will use. */
+  char dfltnick[MAX_NICK+1];		/* Nickname tcm will use */
+  char testline_umask[MAX_USERHOST+1];
   struct connection *testline_cnctn;
 
-  char statspmsg[MAX_CONFIG];
+  char statspmsg[MAX_CONFIG+1];
 
   int nofork;
   char *conffile;
@@ -75,17 +75,17 @@ struct config_list {
 
 struct oper_entry
 {
-  char username[MAX_NICK];
-  char host[MAX_HOST];
-  char usernick[MAX_NICK];
-  char password[MAX_CONFIG];
+  char username[MAX_NICK+1];
+  char host[MAX_HOST+1];
+  char usernick[MAX_NICK+1];
+  char password[MAX_CONFIG+1];
   int type;
 };
 
 struct exempt_entry
 {
-  char username[MAX_NICK];
-  char host[MAX_HOST];
+  char username[MAX_NICK+1];
+  char host[MAX_HOST+1];
   unsigned int type;
 };
 

@@ -1,7 +1,7 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.31 2004/06/03 20:15:23 bill Exp $ */
+/* $Id: hash.h,v 1.32 2004/06/11 20:05:48 bill Exp $ */
 
 #define HASHTABLESIZE 3001
 
@@ -11,16 +11,16 @@ extern struct hash_rec *domain_table[HASHTABLESIZE];
 extern struct hash_rec *ip_table[HASHTABLESIZE];
 
 struct user_entry {
-  char nick[MAX_NICK];
-  char username[MAX_USER];
-  char host[MAX_HOST];
-  char gecos[MAX_GECOS];
-  char ip_host[MAX_IP];         /* host ip as string */
+  char nick[MAX_NICK+1];
+  char username[MAX_USER+1];
+  char host[MAX_HOST+1];
+  char gecos[MAX_GECOS+1];
+  char ip_host[MAX_IP+1];         /* host ip as string */
 #ifdef VIRTUAL
-  char ip_class_c[MAX_IP];      /* /24 of host ip as string */
+  char ip_class_c[MAX_IP+1];      /* /24 of host ip as string */
 #endif
-  char domain[MAX_HOST];
-  char class[MAX_CLASS];
+  char domain[MAX_HOST+1];
+  char class[MAX_CLASS+1];
   time_t connecttime;
   time_t reporttime;
   int  link_count;

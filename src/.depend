@@ -65,6 +65,9 @@ parse.o: parse.c ../include/config.h ../include/setup.h ../include/tcm.h \
   ../include/hash.h ../include/logging.h ../include/stdcmds.h \
   ../include/tcm_io.h ../include/serno.h ../include/patchlevel.h \
   ../include/handler.h ../include/dcc.h ../include/respond.h
+respond.o: respond.c ../include/setup.h ../include/tcm.h \
+  ../include/config.h ../include/userlist.h ../include/tools.h \
+  ../include/tcm_io.h ../include/respond.h
 seedrand.o: seedrand.c ../include/tcm.h ../include/config.h \
   ../include/tcm_io.h ../include/tools.h ../include/handler.h \
   ../include/hash.h ../include/match.h ../include/seedrand.h

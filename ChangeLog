@@ -1,3 +1,24 @@
+bill        2002/05/24 01:34:19 EDT	(20020524_4)
+
+  Modified files:
+    etc                  tcm.cf 
+    include              config.h userlist.h 
+    modules              wingate.c 
+    src                  stdcmds.c 
+  Log:
+  - added squid proxy detection
+  - fixed wingate/socks4/socks5 detection
+  - stop exempt users' violations from being reported
+  
+  Revision  Changes    Path
+  1.25      +2 -0      tcm-hybrid/etc/tcm.cf
+  1.47      +22 -5     tcm-hybrid/include/config.h
+  1.33      +1 -1      tcm-hybrid/include/userlist.h
+  1.27      +299 -45   tcm-hybrid/modules/wingate.c
+  1.63      +1 -1      tcm-hybrid/src/stdcmds.c
+
+
+
 db          2002/05/24 00:04:27 EDT	(20020524_3)
 
   Modified files:

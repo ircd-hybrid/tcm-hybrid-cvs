@@ -34,7 +34,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.7 2001/02/04 04:34:05 wcampbel Exp $";
+static char *version="$Id: abuse.c,v 1.8 2001/04/02 04:05:24 db Exp $";
 
 /*
  * do_a_kline()
@@ -63,9 +63,10 @@ void do_a_kline(char *command_name,int kline_time, char *pattern,
 		 config_entries.dfltnick);
 #endif
 
-  if(!pattern)
+  if(pattern == NULL)
     return;
-  if(!reason)
+
+  if(reason == NULL)
     return;
 
   /* Removed *@ prefix from kline parameter -tlj */
@@ -175,7 +176,9 @@ void suggest_kill_kline(int reason,
   char suggested_user[MAX_USER+1];
   char *suggested_host;
   char *p;
-  int  warn = YES;
+  int  warn;
+
+  warn = YES;
 
   /* Don't kill or kline exempted users */  
   if(okhost(user, host))
@@ -216,9 +219,9 @@ void suggest_kill_kline(int reason,
  switch (reason)
    {
    case R_CFLOOD:  /* connect flooding drones */
-     if (config_entries.cflood_act[0])
+     if (config_entries.cflood_act[0] && config_entries.autopilot)
        {
-	 if(!strncasecmp(config_entries.cflood_act,"kline",5))
+	 if(strncasecmp(config_entries.cflood_act,"kline",5) == 0)
 	   {
 	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
@@ -229,7 +232,9 @@ void suggest_kill_kline(int reason,
 		    config_entries.cflood_act,
 		    suggested_user, suggested_host,
 		    config_entries.cflood_reason);
-	   } else if (!strncasecmp(config_entries.cflood_act, "dline", 5)) {
+	   }
+	 else if (strncasecmp(config_entries.cflood_act, "dline", 5) == 0)
+	   {
 	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
 		"Connect flooder detected %s@%s,auto-\002d\002lining...\n",
@@ -250,9 +255,9 @@ void suggest_kill_kline(int reason,
 
 
    case R_SCLONES: /* services clones */
-     if (config_entries.sclone_act[0])
+     if (config_entries.sclone_act[0] && config_entries.autopilot)
        {
-	 if(!strncasecmp(config_entries.sclone_act,"kline",5))
+	 if(strncasecmp(config_entries.sclone_act,"kline",5) == 0)
 	   {
 	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
@@ -275,9 +280,9 @@ void suggest_kill_kline(int reason,
 
 #ifdef AUTO_DLINE
    case R_VCLONES:
-     if (config_entries.vclone_act[0])
+     if (config_entries.vclone_act[0] && config_entries.autopilot)
        {
-	 if(!strncasecmp(config_entries.clone_act,"dline",5))
+	 if(strncasecmp(config_entries.clone_act,"dline",5) == 0)
 	   {
 	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
@@ -289,7 +294,7 @@ void suggest_kill_kline(int reason,
 		    suggested_host,
 		    config_entries.vclone_reason);
 	   }
-	 else if(!strncasecmp(config_entries.clone_act,"kline",5))
+	 else if(strncasecmp(config_entries.clone_act,"kline",5) == 0)
 	   {
 	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
@@ -312,9 +317,9 @@ void suggest_kill_kline(int reason,
 #endif
 
    case R_CLONES:
-     if (config_entries.clone_act[0])
+     if (config_entries.clone_act[0] && config_entries.autopilot)
        {
-	 if(!strncasecmp(config_entries.clone_act,"kline",5))
+	 if(strncasecmp(config_entries.clone_act,"kline",5) == 0)
 	   {
 	     if( (identd && !different) || (!identd) )
 	       {
@@ -340,9 +345,9 @@ void suggest_kill_kline(int reason,
      break;
 
    case R_FLOOD:
-     if (config_entries.flood_act[0])
+     if (config_entries.flood_act[0] && config_entries.autopilot)
        {
-	 if(!strncasecmp(config_entries.flood_act,"kline",5))
+	 if(strncasecmp(config_entries.flood_act,"kline",5) == 0)
 	   {
 	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
@@ -354,7 +359,7 @@ void suggest_kill_kline(int reason,
 		    suggested_user, suggested_host,
 		    config_entries.flood_reason);
 	   }
-	 else if(!strncasecmp(config_entries.flood_act,"kill",4))
+	 else if(strncasecmp(config_entries.flood_act,"kill",4) == 0)
 	   {
 	     warn = NO;
 	     toserv("KILL %s :%s\n",
@@ -371,9 +376,9 @@ void suggest_kill_kline(int reason,
      break;
 
    case R_CTCP:
-     if (config_entries.ctcp_act[0])
+     if (config_entries.ctcp_act[0] && config_entries.autopilot)
        {
-	 if(!strncasecmp(config_entries.ctcp_act,"kline",5))
+	 if(strncasecmp(config_entries.ctcp_act,"kline",5) == 0)
 	   {
 	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
@@ -387,7 +392,7 @@ void suggest_kill_kline(int reason,
 		    suggested_host,
 		    config_entries.ctcp_reason);
 	   }
-	 else if(!strncasecmp(config_entries.ctcp_act,"kill",4))
+	 else if(strncasecmp(config_entries.ctcp_act,"kill",4) == 0)
 	   {
 	     warn = NO;
 	     toserv("KILL %s :%s\n",
@@ -403,9 +408,9 @@ void suggest_kill_kline(int reason,
      break;
 
    case R_SPOOF:
-     if (config_entries.spoof_act[0])
+     if (config_entries.spoof_act[0] && config_entries.autopilot)
        {
-	 if(!strncasecmp(config_entries.spoof_act,"kill",4))
+	 if(strncasecmp(config_entries.spoof_act,"kill",4) == 0)
 	   {
 	     warn = NO;
 	     toserv("KILL %s :%s\n",
@@ -419,9 +424,9 @@ void suggest_kill_kline(int reason,
      break;
 
    case R_SPAMBOT:
-     if (config_entries.spambot_act[0])
+     if (config_entries.spambot_act[0] && config_entries.autopilot)
        {
-	 if(!strncasecmp(config_entries.spambot_act,"kline",5))
+	 if(strncasecmp(config_entries.spambot_act,"kline",5) == 0)
 	   {
 	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,
@@ -434,7 +439,7 @@ void suggest_kill_kline(int reason,
 		    suggested_host,
 		    config_entries.spambot_reason);
 	   }
-	 else if(!strncasecmp(config_entries.spambot_act,"kill",4))
+	 else if(strncasecmp(config_entries.spambot_act,"kill",4) == 0)
 	   {
 	     warn = NO;
 	     toserv("KILL %s :%s\n",
@@ -451,9 +456,9 @@ void suggest_kill_kline(int reason,
      break;
  
  case R_LINK:
-   if (config_entries.link_act[0])
+   if (config_entries.link_act[0] && config_entries.autopilot)
      {
-       if(!strncasecmp(config_entries.link_act,"kline",5))
+       if(strncasecmp(config_entries.link_act,"kline",5) == 0)
 	 {
 	   warn = NO;
 	   sendtoalldcc(SEND_OPERS_ONLY,
@@ -466,7 +471,7 @@ void suggest_kill_kline(int reason,
 		  suggested_user, suggested_host,
 		  config_entries.link_reason );
 	 }
-       else if(!strncasecmp(config_entries.link_act,"kill",4))
+       else if(strncasecmp(config_entries.link_act,"kill",4) == 0)
 	 {
 	   warn = NO;
 	   toserv("KILL %s :%s\n",
@@ -484,9 +489,9 @@ void suggest_kill_kline(int reason,
 
 #ifdef DETECT_WINGATE
  case R_WINGATE:
-   if (config_entries.wingate_act[0])
+   if (config_entries.wingate_act[0] && config_entries.autopilot)
      {
-       if(!strncasecmp(config_entries.wingate_act,"kline",5))
+       if(strncasecmp(config_entries.wingate_act,"kline",5) == 0)
 	 {
 	   warn = NO;
 	   sendtoalldcc(SEND_OPERS_ONLY,
@@ -512,9 +517,9 @@ void suggest_kill_kline(int reason,
 
 #ifdef DETECT_SOCKS
  case R_SOCKS:
-   if (config_entries.socks_act[0])
+   if (config_entries.socks_act[0] && config_entries.autopilot)
      {
-       if(!strncasecmp(config_entries.socks_act,"kline",5))
+       if(strncasecmp(config_entries.socks_act,"kline",5) == 0)
 	 {
 	   warn = NO;
 	   sendtoalldcc(SEND_OPERS_ONLY,
@@ -539,9 +544,9 @@ void suggest_kill_kline(int reason,
 #endif
 
    case R_BOTS:
-     if (config_entries.bot_act[0])
+     if (config_entries.bot_act[0] && config_entries.autopilot)
        {
-	 if(!strncasecmp(config_entries.bot_act,"kline",5))
+	 if(strncasecmp(config_entries.bot_act,"kline",5) == 0)
 	   {
 	     warn = NO;
 	     sendtoalldcc(SEND_OPERS_ONLY,

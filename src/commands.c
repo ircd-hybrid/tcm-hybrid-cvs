@@ -40,7 +40,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.9 2001/02/03 00:20:16 wcampbel Exp $";
+static char *version="$Id: commands.c,v 1.10 2001/04/02 04:05:25 db Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -1377,6 +1377,8 @@ void dccproc(int connnum)
 	     {
 	       sendtoalldcc(SEND_ALL_USERS, "I've been ordered to quit irc, goodbye.");
 	       toserv("QUIT :Dead by request!\n");
+	       log("DIED by oper %s",
+		   who_did_command);
 	       exit(1);
 	     }
 	   else
@@ -1429,6 +1431,39 @@ void dccproc(int connnum)
 	}
       break;
 
+
+    case K_AUTOPILOT:
+      if(!(connections[connnum].type & TYPE_OPER))
+	{
+	  not_authorized(connections[connnum].socket);
+	}
+      else
+	{
+	  if(config_entries.autopilot)
+	    {
+	      sendtoalldcc(SEND_OPERS_ONLY,
+		"autopilot is now OFF");
+	      config_entries.autopilot = NO;
+	      prnt(connections[connnum].socket,
+		   "autopilot is now OFF");
+	      log("AUTOPILOT turned off by oper %s",
+		  who_did_command);
+
+	    }
+	  else
+	    {
+	      sendtoalldcc(SEND_OPERS_ONLY,
+		"autopilot is now ON");
+	      config_entries.autopilot = YES;
+	      prnt(connections[connnum].socket,
+		   "autopilot is now ON");
+
+	      log("AUTOPILOT turned on by oper %s",
+		  who_did_command);
+	    }
+	}
+      break;
+
     case K_LOCOPS:
       if(!(connections[connnum].type & TYPE_OPER))
 	{
@@ -1464,6 +1499,10 @@ void dccproc(int connnum)
 		return;
 	      }
 	    pattern = param2;
+
+	    log("UNKLINE %s attempted by oper %s",
+		pattern, who_did_command);
+
 	    sendtoalldcc(SEND_OPERS_ONLY,
 			 "UNKLINE %s attempted by oper %s",
 			 pattern,who_did_command);
@@ -2614,6 +2653,9 @@ static void set_umode(int connnum, char *flags, char *registered_nick)
 		  found = YES;
 
 		  new_type = userlist[z].type;
+
+		  /* default them to partyline */
+		  new_type |= TYPE_PARTYLINE;
 
 		  /* Only use user.pref if they exist */
 		  if( (type = find_user_umodes(registered_nick)) )

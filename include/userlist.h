@@ -12,6 +12,8 @@ struct f_entry {
 struct config_list {
   int  hybrid;
   int  hybrid_version;
+  int  autopilot;
+  int  opers_only;
   char tcm_pid_file[MAX_CONFIG];
   char username_config[MAX_CONFIG];
   char virtual_host_config[MAX_CONFIG];

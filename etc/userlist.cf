@@ -72,6 +72,8 @@ O:db@*bsd.org:diane:notrealpassword:OK
 E:db@*.db.net
 E:*@*varner.com
 #
+# opers only YES or NO
+D:YES
 #
 # **NEW**  F lines!
 # F-lines are like E-lines, except they are violation specific

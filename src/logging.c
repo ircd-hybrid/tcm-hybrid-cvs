@@ -35,7 +35,7 @@
 #include "bothunt.h"
 #include "logging.h"
 
-static char *version="$Id: logging.c,v 1.4 2001/02/04 04:34:06 wcampbel Exp $";
+static char *version="$Id: logging.c,v 1.5 2001/04/02 04:05:26 db Exp $";
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file
@@ -93,10 +93,7 @@ static FILE *initlog(void)
 		(broken_up_time->tm_mon)+1,broken_up_time->tm_mday,
 		broken_up_time->tm_year + 1900);
 
-  if( !(l_fp = fopen(filename,"a")) )
-    return (FILE *)NULL;
-
-  if(!config_entries.email_config[0])
+  if( (l_fp = fopen(filename,"a")) == (FILE *)NULL)
     return (FILE *)NULL;
 
   if( !last_filename[0] )
@@ -104,8 +101,11 @@ static FILE *initlog(void)
       strcpy(last_filename,filename);
     }
 
+  if(!config_entries.email_config[0])
+    return (l_fp);
+
 #ifdef HOW_TO_MAIL
-  if( !(strcmp(last_filename,filename)) )
+  if( (strcmp(last_filename,filename)) != 0 )
     {
       (void)sprintf(command,"%s \"clone report\" %s",HOW_TO_MAIL,
 		    config_entries.email_config);
@@ -127,8 +127,6 @@ static FILE *initlog(void)
       (void)fputs(filename,last_log_fp);
       (void)fclose(last_log_fp);
     }
-#else
-  l_fp = (FILE *)NULL;
 #endif
 
   return l_fp;

@@ -52,7 +52,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.11 2001/02/02 04:04:28 wcampbel Exp $";
+static char *version="$Id: serverif.c,v 1.12 2001/04/02 04:05:26 db Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -1381,6 +1381,31 @@ char makeconn(char *hostport,char *nick,char *userhost)
   if (i > MAXDCCCONNS)
     return 0;
 
+  if( (p = strchr(userhost,'@')) )
+    {
+      user = userhost;
+      *p = '\0';
+      p++;
+      host = p;
+    }
+  else
+    {
+      host = userhost;
+      user = "*";
+    }
+
+  if( (p = strchr(host,' ')) )
+    *p = '\0';
+
+  if(config_entries.opers_only)
+    {
+      if(!isoper(user,host))
+	{
+	  notice(nick,"You aren't an oper");
+	  return 0;
+	}
+    }
+
   connections[i].socket = bindsocket(hostport);
 
   if (connections[i].socket == INVALID)
@@ -1398,21 +1423,6 @@ char makeconn(char *hostport,char *nick,char *userhost)
   strncpy(connections[i].nick,nick,MAX_NICK-1);
   connections[i].nick[MAX_NICK-1] = '\0';
 
-  if( (p = strchr(userhost,'@')) )
-    {
-      user = userhost;
-      *p = '\0';
-      p++;
-      host = p;
-    }
-  else
-    {
-      host = userhost;
-      user = "*";
-    }
-
-  if( (p = strchr(host,' ')) )
-    *p = '\0';
 
   strncpy(connections[i].user,user,MAX_USER-1);
   connections[i].user[MAX_USER-1] = '\0';
@@ -1420,27 +1430,9 @@ char makeconn(char *hostport,char *nick,char *userhost)
   connections[i].host[MAX_HOST-1] = '\0';
   connections[i].type = 0;
   connections[i].type |= isoper(user,host);
-  
 
-/* I think the credit for this idea of OPERS_ONLY is from phisher */
-/* my hack though. blame me. - Dianora */
-
-#ifdef OPERS_ONLY
-  if(!(connections[i].type & TYPE_OPER))
-    {
-      prnt(connections[i].socket,
-	   "Sorry, only opers may use this service.\n");
-      (void)close(connections[i].socket);
-      connections[i].socket = INVALID;
-      connections[i].nick[0] = '\0';
-      connections[i].registered_nick[0] = '\0';
-      connections[i].user[0] = '\0';
-      connections[i].type = 0;
-      (void)free(connections[i].buffer);
-      return 0;
-    }
-#else
-  if( !(connections[i].type & TYPE_OPER) && isbanned(user,host)) /* allow opers on */
+  if( !(connections[i].type & TYPE_OPER) &&
+      isbanned(user,host)) /* allow opers on */
     {
       prnt(connections[i].socket,
 	   "Sorry, you are banned.\n");
@@ -1453,7 +1445,6 @@ char makeconn(char *hostport,char *nick,char *userhost)
       (void)free(connections[i].buffer);
       return 0;
     }
-#endif
 
   connections[i].last_message_time = time((time_t *)NULL);
 
@@ -1463,6 +1454,11 @@ char makeconn(char *hostport,char *nick,char *userhost)
 
   prnt(connections[i].socket,"current clone action: %s\n",
        config_entries.clone_act);
+
+  if(config_entries.autopilot)
+    prnt(connections[i].socket,"autopilot is ON\n");
+  else
+    prnt(connections[i].socket,"autopilot is OFF\n");
 
   type = "User";
   if(connections[i].type & TYPE_OPER)
@@ -2581,6 +2577,11 @@ static void connect_remote_client(char *nick,char *user,char *host,int sock)
 
   strncpy(connections[i].nick,initiated_dcc_nick,MAX_NICK);
   strncpy(connections[i].user,initiated_dcc_user,MAX_USER);
+
+  log("OPER DCC connection from %s!%s@%s",
+      nick,
+      user,
+      connections[i].host);
 
   report(SEND_ALL_USERS,
 	 CHANNEL_REPORT_ROUTINE,

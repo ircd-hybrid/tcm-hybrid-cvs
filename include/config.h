@@ -62,8 +62,8 @@
 #define MOTD_FILE "motd.txt"
 #define PREF_FILE "tcm.pref"
 
-#define LOGFILE "clone_log"
-#define LAST_LOG_NAME "last_clone_log_name"
+#define LOGFILE "log"
+#define LAST_LOG_NAME "last_log_name"
 
 /* Where nasty errors are logged */
 #define ERROR_LOG "error.log"
@@ -81,8 +81,6 @@
 /* For Linux this is suggested by zaph */
 #define HOW_TO_MAIL "/bin/mail -s"
 
-/* define this if you want only your opers to connect to tcm */
-#undef OPERS_ONLY
 
 /*
  * tcm normally catches clones because they rapidly connect, and

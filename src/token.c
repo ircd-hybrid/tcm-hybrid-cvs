@@ -23,7 +23,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: token.c,v 1.4 2001/02/02 04:04:29 wcampbel Exp $";
+static char *version="$Id: token.c,v 1.5 2001/04/02 04:05:26 db Exp $";
 
 static int hash_cmd(char *);
 
@@ -113,6 +113,7 @@ struct command_token command_table[] =
   {"ulist",	   K_ULIST},
   {"hlist",	   K_HLIST},
   {"uptime",	   K_UPTIME},
+  {"autopilot",	   K_AUTOPILOT},
   {NULL,	   0}
 };
 

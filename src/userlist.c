@@ -28,7 +28,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: userlist.c,v 1.5 2001/02/04 01:55:43 wcampbel Exp $";
+static char *version="$Id: userlist.c,v 1.6 2001/04/02 04:05:27 db Exp $";
 
 #ifdef NEXT
 char *strdup(char *);
@@ -103,6 +103,9 @@ void load_config_file(char *file_name)
 
   config_entries.hybrid = NO;
   config_entries.hybrid_version = 0;
+
+  config_entries.autopilot = YES;
+  config_entries.opers_only = YES;
 
   config_entries.tcm_pid_file[0] = '\0';
   config_entries.username_config[0] = '\0';
@@ -199,6 +202,13 @@ void load_config_file(char *file_name)
 
       switch(*key)
 	{
+	case 'd':case 'D':
+	  if(strcasecmp(value,"YES") == 0)
+	    config_entries.opers_only = YES;
+	  else
+	    config_entries.opers_only = NO;
+	  break;
+
 	case 'e':case 'E':
 	  if(config_entries.debug && outfile)
 	    {

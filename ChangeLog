@@ -1,3 +1,26 @@
+leeh        2002/05/24 14:29:24 EDT	(20020524_15)
+
+  Modified files:
+    etc                  userlist.cf 
+    include              config.h tcm_io.h userlist.h 
+    modules              commands.c 
+    src                  bothunt.c tcm_io.c userlist.c 
+  Log:
+  - reverted config.h accidental changes
+  - ripped TYPE_STAT and SEND_STATS, merged into TYPE_SPY/SEND_SPY
+  
+  Revision  Changes    Path
+  1.20      +1 -2      tcm-hybrid/etc/userlist.cf
+  1.51      +24 -5     tcm-hybrid/include/config.h
+  1.7       +10 -11    tcm-hybrid/include/tcm_io.h
+  1.37      +0 -1      tcm-hybrid/include/userlist.h
+  1.73      +0 -3      tcm-hybrid/modules/commands.c
+  1.92      +5 -5      tcm-hybrid/src/bothunt.c
+  1.15      +0 -5      tcm-hybrid/src/tcm_io.c
+  1.66      +0 -5      tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/05/24 14:19:33 EDT	(20020524_14)
 
   Modified files:

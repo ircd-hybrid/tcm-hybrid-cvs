@@ -1,3 +1,20 @@
+leeh        2002/05/30 09:33:52 EDT	(20020530_4)
+
+  Modified files:
+    .                    ChangeLog 
+    src                  .depend actions.c 
+  Log:
+  - add set_action() to simplify init_actions()
+  - updated depend
+  - please dont change my commit messages.
+  
+  Revision  Changes    Path
+  1.474     +3 -0      tcm-hybrid/ChangeLog
+  1.23      +1 -1      tcm-hybrid/src/.depend
+  1.11      +26 -31    tcm-hybrid/src/actions.c
+
+
+
 bill        2002/05/30 00:48:52 EDT	(20020530_3)
 
   Modified files:

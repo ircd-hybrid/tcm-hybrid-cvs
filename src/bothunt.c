@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.50 2002/04/04 22:17:47 bill Exp $ */
+/* $Id: bothunt.c,v 1.51 2002/04/04 22:53:44 bill Exp $ */
 
 #include "setup.h"
 
@@ -640,7 +640,7 @@ void onservnotice(int connnum, int argc, char *argv[])
   char *target;
   char *p;
   char *q = NULL;
-  char *message = p = argv[3];
+  char *message = p = argv[2];
 
   if (strncasecmp(p, "*** Notice -- ", 14) == 0)
     p+=14;

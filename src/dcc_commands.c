@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.38 2002/04/02 23:24:25 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.39 2002/04/04 22:53:44 bill Exp $ */
 
 #include "setup.h"
 
@@ -2006,7 +2006,9 @@ _modinit()
   mod_add_cmd(&locops_msgtab);
   mod_add_cmd(&unkline_msgtab);
   mod_add_cmd(&vbots_msgtab);
+#ifndef NO_D_LINE_SUPPORT
   mod_add_cmd(&dline_msgtab);
+#endif
 #ifdef ENABLE_QUOTE
   mod_add_cmd(&quote_msgtab);
 #endif

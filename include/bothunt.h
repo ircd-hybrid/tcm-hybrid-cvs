@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.28 2002/05/25 02:33:34 db Exp $ */
+/* $Id: bothunt.h,v 1.29 2002/05/25 02:51:42 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -111,11 +111,10 @@ void initopers(void);
 
 void inithash(void);
 void init_link_look_table(void);
-
 void report_failures(int sock, int num);
 void report_domains(int sock, int num);
 void report_vbots(int sock,int nclones);
-int  makeconn(char *,char *,char *);
+
 void m_gline(int connnum, int argc, char *argv[]);
 extern void init_bothunt(void);
 extern void _reload_bothunt(int connnum, int argc, char *argv[]);

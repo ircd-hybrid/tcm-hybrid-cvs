@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.8 2002/05/25 02:33:34 db Exp $
+ * $Id: tcm_io.h,v 1.9 2002/05/25 02:51:42 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -29,6 +29,7 @@ extern struct connection connections[];
 extern int initiated_dcc_socket;
 extern time_t initiated_dcc_socket_time;
 extern void initiate_dcc_chat(char *, char *, char *);
+int  makeconn(char *,char *,char *);
 
 extern fd_set readfds;
 extern fd_set writefds;

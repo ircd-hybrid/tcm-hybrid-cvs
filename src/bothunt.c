@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.93 2002/05/24 20:52:43 leeh Exp $
+ * $Id: bothunt.c,v 1.94 2002/05/25 02:51:45 db Exp $
  */
 
 #include <stdio.h>
@@ -151,6 +151,8 @@ remove_gline(char *user, char *host)
   if ((i = find_banned_host(user, host)) == -1)
     return;
 
+  glines[i].user[0] = '\0';
+  glines[i].host[0] = '\0';
   glines[i].next = NULL;
   glines[i].when = 0;
 }
@@ -1158,90 +1160,6 @@ onservnotice(int connnum, int argc, char *argv[])
   }
 }
 
-/*
- * makeconn()
- *
- * inputs	- hostpost
- * 		- nick making the connection
- *		- userhost
- * output	- 
- * side effects	- Makes another connection
- */
-int
-makeconn(char *hostport,char *nick,char *userhost)
-{
-  int  i;               /* index variable */
-  char *p;              /* scratch pointer used for parsing */
-  char *user;
-  char *host;
-
-  for (i=1; i<MAXDCCCONNS+1; ++i)
-  {
-    if (connections[i].socket == INVALID)
-    {
-      if (maxconns < i+1)
-	maxconns = i+1;
-      break;
-    }
-  }
-
-  if (i > MAXDCCCONNS)
-    return (0);
-
-  if ((p = strchr(userhost,'@')) != NULL)
-  {
-    user = userhost;
-    *p = '\0';
-    p++;
-    host = p;
-  }
-  else
-  {
-    host = userhost;
-    user = "*";
-  }
-
-  if ((p = strchr(host,' ')) != NULL)
-    *p = '\0';
-
-  if (!isoper(user,host))
-  {
-    notice(nick,"You are not an operator");
-    return (0);
-  }
-
-  connections[i].socket = bindsocket(hostport);
-
-  if (connections[i].socket == INVALID)
-    return (0);
-
-  fcntl(connections[i].socket, F_SETFL, O_NONBLOCK);
-  FD_SET(connections[i].socket, &readfds);
-  connections[i].set_modes = 0;
-  strncpy(connections[i].nick,nick,MAX_NICK-1);
-  connections[i].nick[MAX_NICK-1] = '\0';
-
-  strncpy(connections[i].user,user,MAX_USER-1);
-  connections[i].user[MAX_USER-1] = '\0';
-  strncpy(connections[i].host,host,MAX_HOST-1);
-  connections[i].host[MAX_HOST-1] = '\0';
-  connections[i].type = 0;
-
-  connections[i].last_message_time = time(NULL);
-
-  print_motd(connections[i].socket);
-
-  report(SEND_ALL,
-         CHANNEL_REPORT_ROUTINE,
-         "Oper %s (%s@%s) has connected\n",
-         connections[i].nick,
-         connections[i].user,
-         connections[i].host);
-
-  print_to_socket(connections[i].socket,
-       "Connected.  Send '.help' for commands.");
-  return (1);
-}
 
 /*
  * _onctcp

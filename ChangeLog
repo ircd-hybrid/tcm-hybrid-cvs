@@ -1,3 +1,15 @@
+wcampbel    2002/05/06 09:10:55 EDT	(20020506_2)
+
+  Modified files:
+    src                  stdcmds.c 
+  Log:
+  .nfind now shows the class a user is a member of (like .[u|h]list)
+  
+  Revision  Changes    Path
+  1.51      +3 -2      tcm-hybrid/src/stdcmds.c
+
+
+
 wcampbel    2002/05/06 08:50:56 EDT	(20020506_1)
 
   Modified files:

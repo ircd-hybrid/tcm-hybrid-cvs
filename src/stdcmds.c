@@ -36,7 +36,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: stdcmds.c,v 1.11 2001/10/09 16:41:51 bill Exp $";
+static char *version="$Id: stdcmds.c,v 1.12 2001/10/11 16:08:45 bill Exp $";
 
 int doingtrace = NO;
 
@@ -1076,7 +1076,7 @@ void report_vmulti(int sock,int nclones)
                     }
                   numfound++;   /* - zaph and next line*/
                   prnt(sock,
-                       " %s %2d connections -- %s@%s* {%s}\n",
+                       " %s %2d connections -- %s@%s.* {%s}\n",
                        (numfound-nclones > 2) ? "==>" :
                        "   ",numfound,userptr->info->user,
                        userptr->info->ip_class_c,

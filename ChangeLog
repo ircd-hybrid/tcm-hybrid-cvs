@@ -1,3 +1,15 @@
+leeh        2002/05/27 20:03:04 EDT	(20020528_4)
+
+  Modified files:
+    src                  stdcmds.c 
+  Log:
+  - removed a extra space in the kline notice
+  
+  Revision  Changes    Path
+  1.79      +3 -3      tcm-hybrid/src/stdcmds.c
+
+
+
 db          2002/05/27 19:59:51 EDT	(20020528_3)
 
   Modified files:

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.87 2003/02/26 10:25:40 bill Exp $
+ * $Id: parse.c,v 1.88 2003/06/01 01:19:05 bill Exp $
  */
 
 #include <stdio.h>
@@ -37,9 +37,8 @@
 #include "modules.h"
 #include "handler.h"
 #include "dcc.h"
-
 #ifdef HAVE_LIBCRYPTO
-int do_challenge(char *challenge_string);
+#include "respond.h"
 #endif
 
 static void do_init(void);

@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.85 2003/03/30 00:47:39 bill Exp $
+ * $Id: config.h,v 1.86 2003/06/01 01:19:03 bill Exp $
  */
 
 /*
@@ -52,7 +52,7 @@
 
 /*
  *  If you don't like the idea of any remote oper including those on the
- * tcm, being able to D line, define this
+ *  tcm, being able to D line, define this
  */
 #undef NO_D_LINE_SUPPORT
 
@@ -235,7 +235,6 @@ for .kflood would be the #define for REASON_FLOOD etc. */
  */
 
 #define SERVICES_DRONES
-#define REASON_DRONES "Auto-kline drones"
 
 /* whom to message for a global clone report */
 #define SERVICES_NICK "services@services.xo"

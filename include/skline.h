@@ -1,8 +1,11 @@
 /*
  * skline.h - Smart K-Lines
  *
- * $Id: skline.h,v 1.1 2003/04/14 08:50:34 bill Exp $
+ * $Id: skline.h,v 1.2 2003/06/01 01:19:03 bill Exp $
  */
+
+#ifndef __SKLINE_H_
+#define __SKLINE_H_
 
 #define DEFAULT_DYNAMIC_INFO_FILENAME	"dynamic.hosts"
 
@@ -21,3 +24,5 @@ void clear_dynamic_info();
 
 int add_dynamic_info(char *);
 int load_dynamic_info(char *);
+
+#endif /* __SKLINE_H_ */

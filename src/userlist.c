@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.149 2003/04/14 08:50:36 bill Exp $
+ * $Id: userlist.c,v 1.150 2003/06/01 01:19:05 bill Exp $
  */
 
 #include <errno.h>
@@ -27,6 +27,7 @@
 #include "bothunt.h"
 #include "actions.h"
 #include "handler.h"
+#include "skline.h"
 
 char wingate_class_list[MAXWINGATE][MAX_CLASS];
 int	wingate_class_list_index;

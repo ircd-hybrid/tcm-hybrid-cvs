@@ -6,7 +6,7 @@
 ** Modernization, getopt, etc for the Hybrid IRCD team
 ** by W. Campbell
 **
-** $Id: mkpasswd.c,v 1.2 2001/10/18 01:24:48 wcampbel Exp $
+** $Id: mkpasswd.c,v 1.3 2003/06/01 01:19:08 bill Exp $
 */
 #include <stdio.h>
 #include <string.h>
@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
 {
   char *plaintext = NULL;
   extern char *optarg;
-  extern int optind;
   int c;
   char *saltpara = NULL;
   char *salt;

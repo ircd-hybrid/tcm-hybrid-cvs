@@ -1,10 +1,11 @@
 /*
  * client_list.c: contains routines for managing lists of clients
  *
- * $Id: client_list.c,v 1.5 2003/05/16 16:23:31 bill Exp $
+ * $Id: client_list.c,v 1.6 2003/06/01 01:19:05 bill Exp $
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "tcm.h"
 #include "config.h"
 #include "tcm_io.h"
@@ -14,14 +15,19 @@
 #include "client_list.h"
 #include "handler.h"
 #include "modules.h"
+#include "event.h"
+#include "match.h"
 
 static int find_empty();
-static void init_list(int index);
+static void init_list(int);
 #ifdef CLIENT_LIST_LIFE
 void expire_lists();
 #endif
 struct dcc_command listdump_msgtab;
 struct dcc_command remove_msgtab;
+
+static void m_listdump(struct connection *, int, char **);
+static void m_remove(struct connection *, int, char **);
 
 static int
 find_empty()
@@ -38,18 +44,18 @@ find_empty()
 }
 
 static void
-init_list(int index)
+init_list(int idx)
 {
   dlink_node *ptr, *nextptr;
 
-  DLINK_FOREACH_SAFE(ptr, nextptr, client_lists[index].dlink.head)
+  DLINK_FOREACH_SAFE(ptr, nextptr, client_lists[idx].dlink.head)
   {
     dlink_free(ptr);
   }
-  memset(&client_lists[index].name, 0, sizeof(client_lists[index].name));
-  client_lists[index].creator = NULL;
-  client_lists[index].creation_time = (time_t) 0;
-  client_lists[index].dlink.count = 0;
+  memset(&client_lists[idx].name, 0, sizeof(client_lists[idx].name));
+  client_lists[idx].creator = NULL;
+  client_lists[idx].creation_time = (time_t) 0;
+  client_lists[idx].dlink.count = 0;
 }
 
 void
@@ -88,15 +94,15 @@ print_list(struct connection *connection_p, char *name)
   time_t now = time(NULL);
   dlink_node *ptr;
   struct user_entry *user;
-  int index;
+  int idx;
 
-  if ((index = find_list(name)) == -1)
+  if ((idx = find_list(name)) == -1)
   {
     send_to_connection(connection_p, "No such list.");
     return;
   }
 
-  if (client_lists[index].dlink.head == NULL)
+  if (client_lists[idx].dlink.head == NULL)
   {
     send_to_connection(connection_p, "List is empty.");
     return;
@@ -104,7 +110,7 @@ print_list(struct connection *connection_p, char *name)
 
   send_to_connection(connection_p, "Clients in list \'%s\':", name);
 
-  DLINK_FOREACH(ptr, client_lists[index].dlink.head)
+  DLINK_FOREACH(ptr, client_lists[idx].dlink.head)
   {
     user = ptr->data;
 
@@ -121,9 +127,9 @@ print_list(struct connection *connection_p, char *name)
   }
 
   send_to_connection(connection_p, "%s) %d entr%s -- created by %s lifetime: %ld",
-                     client_lists[index].name, dlink_length(&client_lists[index].dlink),
-                     (dlink_length(&client_lists[index].dlink) == 1) ? "y" : "ies",
-                     client_lists[index].creator, (now - client_lists[index].creation_time));
+                     client_lists[idx].name, dlink_length(&client_lists[idx].dlink),
+                     (dlink_length(&client_lists[idx].dlink) == 1) ? "y" : "ies",
+                     client_lists[idx].creator, (now - client_lists[idx].creation_time));
 }
 
 void
@@ -148,29 +154,29 @@ print_lists(struct connection *connection_p, char *mask)
 struct client_list *
 create_list(struct connection *connection_p, char *name)
 {
-  int index;
+  int idx;
 
   if (BadPtr(name))
     return NULL;
 
-  if ((index = find_list(name)) >= 0)
+  if ((idx = find_list(name)) >= 0)
   {
     send_to_connection(connection_p, "Error: list already exists!");
     return NULL;
   }
 
-  if ((index = find_empty()) == -1)
+  if ((idx = find_empty()) == -1)
   {
     send_to_connection(connection_p, "Error: client list table is full!");
     return NULL;
   }
 
-  init_list(index);
-  strlcpy((char *)&client_lists[index].name, name, sizeof(client_lists[index].name));
-  client_lists[index].creator = find_user_in_userlist(connection_p->username);
-  client_lists[index].creation_time = time(NULL);
+  init_list(idx);
+  strlcpy((char *)&client_lists[idx].name, name, sizeof(client_lists[idx].name));
+  client_lists[idx].creator = find_user_in_userlist(connection_p->username);
+  client_lists[idx].creation_time = time(NULL);
 
-  return (struct client_list *) &client_lists[index];
+  return (struct client_list *) &client_lists[idx];
 }
 
 int
@@ -261,7 +267,7 @@ find_list(char *name)
   return -1;
 }
 
-void
+static void
 m_listdump(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc != 2)  

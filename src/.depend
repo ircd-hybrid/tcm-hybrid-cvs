@@ -3,14 +3,14 @@ actions.o: actions.c ../include/setup.h ../include/config.h \
  ../include/tools.h ../include/parse.h ../include/logging.h \
  ../include/bothunt.h ../include/userlist.h ../include/actions.h \
  ../include/stdcmds.h ../include/wild.h ../include/hash.h \
- ../include/modules.h
+ ../include/modules.h ../include/skline.h
 bothunt.o: bothunt.c ../include/setup.h ../include/config.h \
  ../include/tcm.h ../include/tcm_io.h ../include/tools.h \
  ../include/stdcmds.h ../include/parse.h ../include/bothunt.h \
  ../include/userlist.h ../include/logging.h ../include/wild.h \
  ../include/serno.h ../include/patchlevel.h ../include/modules.h \
  ../include/wingate.h ../include/actions.h ../include/match.h \
- ../include/handler.h ../include/hash.h
+ ../include/handler.h ../include/hash.h ../include/client_list.h
 clones.o: clones.c ../include/config.h ../include/tcm.h \
  ../include/tcm_io.h ../include/tools.h ../include/bothunt.h \
  ../include/modules.h ../include/stdcmds.h ../include/wild.h \
@@ -20,7 +20,8 @@ clones.o: clones.c ../include/config.h ../include/tcm.h \
 client_list.o: client_list.c ../include/tcm.h ../include/config.h \
  ../include/tcm_io.h ../include/tools.h ../include/userlist.h \
  ../include/setup.h ../include/hash.h ../include/client_list.h \
- ../include/handler.h ../include/modules.h
+ ../include/handler.h ../include/modules.h ../include/event.h \
+ ../include/match.h
 dcc.o: dcc.c ../include/config.h ../include/tcm.h ../include/parse.h \
  ../include/event.h ../include/bothunt.h ../include/userlist.h \
  ../include/setup.h ../include/tools.h ../include/modules.h \
@@ -59,7 +60,7 @@ main.o: main.c ../include/setup.h ../include/config.h ../include/tcm.h \
  ../include/stdcmds.h ../include/wild.h ../include/serno.h \
  ../include/patchlevel.h ../include/parse.h ../include/hash.h \
  ../include/logging.h ../include/actions.h ../include/handler.h \
- ../include/skline.h
+ ../include/skline.h ../include/seedrand.h ../include/client_list.h
 match.o: match.c ../include/match.h ../include/tcm.h \
  ../include/config.h
 modules.o: modules.c ../include/config.h ../include/tcm.h \
@@ -73,12 +74,14 @@ parse.o: parse.c ../include/config.h ../include/setup.h \
  ../include/numeric.h ../include/hash.h ../include/logging.h \
  ../include/stdcmds.h ../include/wild.h ../include/tcm_io.h \
  ../include/serno.h ../include/patchlevel.h ../include/modules.h \
- ../include/handler.h ../include/dcc.h
+ ../include/handler.h ../include/dcc.h ../include/respond.h
 respond.o: respond.c ../include/setup.h ../include/tcm.h \
- ../include/config.h ../include/userlist.h ../include/tools.h
+ ../include/config.h ../include/userlist.h ../include/tools.h \
+ ../include/tcm_io.h ../include/respond.h
 seedrand.o: seedrand.c ../include/tcm.h ../include/config.h \
  ../include/tcm_io.h ../include/tools.h ../include/handler.h \
- ../include/hash.h ../include/modules.h
+ ../include/hash.h ../include/modules.h ../include/match.h \
+ ../include/seedrand.h
 serv_commands.o: serv_commands.c ../include/setup.h \
  ../include/config.h ../include/tcm.h ../include/event.h \
  ../include/parse.h ../include/bothunt.h ../include/userlist.h \
@@ -93,7 +96,10 @@ services.o: services.c ../include/config.h ../include/tcm.h \
  ../include/stdcmds.h ../include/wild.h ../include/tcm_io.h \
  ../include/serno.h ../include/patchlevel.h ../include/modules.h \
  ../include/actions.h ../include/handler.h
-skline.o: skline.c ../include/tools.h
+skline.o: skline.c ../include/tcm.h ../include/config.h \
+ ../include/tools.h ../include/tcm_io.h ../include/hash.h \
+ ../include/userlist.h ../include/setup.h ../include/skline.h \
+ ../include/match.h
 stdcmds.o: stdcmds.c ../include/setup.h ../include/config.h \
  ../include/tcm.h ../include/tcm_io.h ../include/tools.h \
  ../include/parse.h ../include/logging.h ../include/stdcmds.h \
@@ -112,7 +118,7 @@ userlist.o: userlist.c ../include/config.h ../include/tcm.h \
  ../include/setup.h ../include/parse.h ../include/logging.h \
  ../include/stdcmds.h ../include/wild.h ../include/modules.h \
  ../include/match.h ../include/wingate.h ../include/bothunt.h \
- ../include/actions.h ../include/handler.h
+ ../include/actions.h ../include/handler.h ../include/skline.h
 vclones.o: vclones.c ../include/config.h ../include/tcm.h \
  ../include/tcm_io.h ../include/tools.h ../include/bothunt.h \
  ../include/modules.h ../include/stdcmds.h ../include/wild.h \

@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *  $Id: respond.c,v 1.1 2002/12/29 09:41:20 bill Exp $
+ *  $Id: respond.c,v 1.2 2003/06/01 01:19:05 bill Exp $
  */
 #include "setup.h"
 
@@ -26,8 +26,13 @@
 #include <openssl/md5.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "tcm.h"
 #include "userlist.h"
+#include "tcm_io.h"
+#include "respond.h"
 
 static void
 binary_to_hex( unsigned char * bin, char * hex, int length )

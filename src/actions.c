@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.51 2003/04/14 08:50:36 bill Exp $
+ * $Id: actions.c,v 1.52 2003/06/01 01:19:05 bill Exp $
  */
 
 
@@ -31,6 +31,7 @@
 #include "wild.h"
 #include "hash.h"
 #include "modules.h"
+#include "skline.h"
 
 #define valid_string(x) (((x) != NULL) && (*(x) != '\0'))
 

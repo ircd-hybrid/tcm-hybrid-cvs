@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.133 2003/04/14 08:50:36 bill Exp $ */
+/* $Id: main.c,v 1.134 2003/06/01 01:19:05 bill Exp $ */
 
 #include "setup.h"
 
@@ -52,6 +52,8 @@
 #include "actions.h"
 #include "handler.h"
 #include "skline.h"
+#include "seedrand.h"
+#include "client_list.h"
 
 #ifdef DMALLOC
 #include "dmalloc.h"

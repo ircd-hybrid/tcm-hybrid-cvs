@@ -3,7 +3,7 @@
  *
  * Temp K: dynamic hosts, perm everyone else
  *
- * $Id: skline.c,v 1.1 2003/04/14 08:50:36 bill Exp $
+ * $Id: skline.c,v 1.2 2003/06/01 01:19:05 bill Exp $
  */
 
 #include <stdio.h>
@@ -15,6 +15,7 @@
 #include "hash.h"
 #include "userlist.h"
 #include "skline.h"
+#include "match.h"
 
 static int
 find_dynamic_info(char *hostmask)

@@ -3,12 +3,13 @@
  *
  * Copyright (c) 2002-2003 Bill Jonus
  *
- * $Id: seedrand.c,v 1.5 2002/12/29 09:41:20 bill Exp $
+ * $Id: seedrand.c,v 1.6 2003/06/01 01:19:05 bill Exp $
  */
 
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "tcm.h"
 #include "tcm_io.h"
@@ -16,9 +17,22 @@
 #include "handler.h"
 #include "hash.h"
 #include "modules.h"
+#include "match.h"
+#include "seedrand.h"
 
 #define THRESHOLD 2500
 
+int score(char *);
+
+static int IsConsonant(char);
+static int IsLeftBracket(char);
+static int IsRightBracket(char);
+static int IsLower(char);
+static int IsUpper(char);
+static int IsSylableEnd(char);
+static int IsNumeric(char);
+
+static int find_max_score(int[], int, int);
 static void m_seedrand(struct connection *connection_p, int argc, char *argv[]);
 struct dcc_command seedrand_msgtab = {
   "seedrand", NULL, {m_unregistered, m_seedrand, m_seedrand}
@@ -40,7 +54,8 @@ struct node {
   int score;
 };
 
-int IsConsonant(char asc)
+static int
+IsConsonant(char asc)
 {
   if (strchr(s_consonants, asc) != NULL)
     return YES;
@@ -48,7 +63,8 @@ int IsConsonant(char asc)
     return NO;
 }
 
-int IsLeftBracket(char asc)
+static int
+IsLeftBracket(char asc)
 {
   if (strchr(s_left_brackets, asc) != NULL)
     return YES;
@@ -56,7 +72,8 @@ int IsLeftBracket(char asc)
     return NO;
 }
 
-int IsLower(char asc)
+static int
+IsLower(char asc)
 {
   if (strchr(s_lower, asc) != NULL)
     return YES;
@@ -64,7 +81,8 @@ int IsLower(char asc)
     return NO;
 }
 
-int IsNumeric(char asc)
+static int
+IsNumeric(char asc)
 {
   if (strchr(s_numerics, asc) != NULL)
     return YES;
@@ -72,7 +90,8 @@ int IsNumeric(char asc)
     return NO;
 }
 
-int IsRightBracket(char asc)
+static int
+IsRightBracket(char asc)
 {
   if (strchr(s_right_brackets, asc) != NULL)
     return YES;
@@ -80,7 +99,8 @@ int IsRightBracket(char asc)
     return NO;
 }
 
-int IsSylableEnd(char asc)
+static int
+IsSylableEnd(char asc)
 {
   if (strchr(s_sylable_end, asc) != NULL)
     return YES;
@@ -88,7 +108,8 @@ int IsSylableEnd(char asc)
     return NO;
 }
 
-int IsUpper(char asc)
+static int
+IsUpper(char asc)
 {
   if (strchr(s_upper, asc) != NULL)
     return YES;
@@ -96,25 +117,28 @@ int IsUpper(char asc)
     return NO;
 }
 
-int find_max_score(int scores[], int size, int start)
+static int
+find_max_score(int scores[], int size, int start)
 {
-  int a, index=start;
+  int a, idx=start;
 
   for (a=start; a < size; ++a)
   {
-    if (scores[a] > scores[index])
-      index = a;
+    if (scores[a] > scores[idx])
+      idx = a;
   }
 
-  return index;
+  return idx;
 }
 
-void init_seedrand()
+void
+init_seedrand()
 {
   add_dcc_handler(&seedrand_msgtab);
 }
 
-static void m_seedrand(struct connection *connection_p, int argc, char *argv[])
+static void
+m_seedrand(struct connection *connection_p, int argc, char *argv[])
 {
   struct hash_rec *find;
   struct user_entry *results[HASHTABLESIZE], *temp_u;
@@ -192,7 +216,8 @@ static void m_seedrand(struct connection *connection_p, int argc, char *argv[])
     send_to_connection(connection_p, "%d matches for %s found.", numfound, match_s);
 }
 
-int score(char *string)
+int
+score(char *string)
 {
   int consonants;
   int hyphens;

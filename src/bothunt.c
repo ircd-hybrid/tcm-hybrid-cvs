@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.221 2003/04/09 05:02:54 bill Exp $
+ * $Id: bothunt.c,v 1.222 2003/06/01 01:19:05 bill Exp $
  */
 
 #include <stdio.h>
@@ -35,13 +35,13 @@
 #include "match.h"
 #include "handler.h"
 #include "hash.h"
+#include "client_list.h"
 
 #ifdef HAVE_REGEX_H
 #include <regex.h>
 #endif
 static void check_oper_priv_sanity();
 static void check_nick_flood(char *snotice);
-static void cs_clones(char *snotice);
 static void link_look_notice(char *snotice);
 static void jupe_joins_notice(char *nick, char *user, char *host, char *channel);
 static void connect_flood_notice(char *snotice, char *reason);
@@ -629,7 +629,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     *q = '\0';
     strlcpy(userinfo.class, p, sizeof(userinfo.class));
 
-    if (config_entries.hybrid == YES && config_entries.hybrid_version >= 7)
+    if (!(config_entries.hybrid == YES && config_entries.hybrid_version <= 6))
     {
       q += 3;
       if ((p = strrchr(q, ']')) == NULL)
@@ -1265,39 +1265,6 @@ jupe_joins_notice(char *nick, char *user, char *host, char *channel)
     jupe_joins[first_empty].last_jupe_join = current_time;
     jupe_joins[first_empty].join_count = 1;
   }
-}
-
-/*
- * cs_clones
- *
- * inputs	- notice
- * output	- none
- * side effects
- * connected opers are dcc'ed a suggested kline
- *
- */
-static void
-cs_clones(char *snotice)
-{
-  char *nick_reported;
-  char *user_host;
-  char *user;
-  char *host;
-
-  if ((nick_reported = strchr(snotice,' ')) == NULL)
-    return;
-  nick_reported++;
-
-  if ((user_host = strchr(nick_reported,' ')) == NULL)
-    return;
-
-  if (get_user_host(&user, &host, user_host) == NULL)
-    return;
-
-  send_to_all(NULL, FLAGS_WARN, "CS clones user_host = [%s]", user_host);
-  tcm_log(L_NORM, "CS clones = [%s]", user_host);
-
-  handle_action(act_clone, "", user, host, 0, 0);
 }
 
 /*

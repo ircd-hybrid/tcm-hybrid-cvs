@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.68 2003/04/14 09:30:19 bill Exp $
+ * $Id: hash.c,v 1.69 2003/06/01 01:19:05 bill Exp $
  */
 
 #include <stdio.h>
@@ -363,7 +363,6 @@ add_user_host(struct user_entry *user_info, int fromtrace)
 void
 remove_user_host(struct user_entry *user_info)
 {
-  int idx=0;
 #ifdef VIRTUAL
   char ip_class_c[MAX_IP];
 #endif

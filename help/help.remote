@@ -7,13 +7,7 @@
 If you have a hybrid server, you can set a temporary kline by
 setting a time in seconds, in the [time] field.
 
- - .kclone [nick|user@host]
- - .kbot [nick|user@host]
- - .kflood [nick|user@host]
- - .kdrone [nick|user@host]
- - .kspam [nick|user@host]
- - .kperm [nick|user@host]
-    K-line with a default reason.
+ - .kaction <action> [nick|user@host]
 
  - .kline [time] [nick|user@host] reason
     Generic K-line command.

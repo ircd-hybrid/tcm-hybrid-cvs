@@ -1,7 +1,7 @@
 #ifndef __COMMANDS_H
 #define __COMMANDS_H
 
-/* $Id: commands.h,v 1.7 2002/04/23 14:31:08 wcampbel Exp $ */
+/* $Id: commands.h,v 1.8 2002/05/09 23:41:58 bill Exp $ */
 
 void init_allow_nick();
 void dccproc(int connnum, int argc, char *argv[]);	
@@ -104,6 +104,7 @@ void m_umulti(int connnum, int argc, char *argv[]);
 void m_register(int connnum, int argc, char *argv[]);
 void m_opers(int connnum, int argc, char *argv[]);
 void m_testline(int connnum, int argc, char *argv[]);
+void m_actions(int connnum, int argc, char *argv[]);
 void m_action(int connnum, int argc, char *argv[]);
 void m_set(int connnum, int argc, char *argv[]);
 void m_uptime(int connnum, int argc, char *argv[]);

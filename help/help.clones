@@ -1,6 +1,6 @@
 Note:  Opers as defined in this file are people with TCM O: lines (or
        ircd O: lines, as tcm reads them into it's running configuration)
- - .actions (OPERS ONLY)
+ - .action (OPERS ONLY)
     each condition that can cause a kline or kill can be individually
     configured now. typing .actions will show all actions. 
     To set individual action 

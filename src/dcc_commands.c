@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.52 2002/05/08 20:55:35 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.53 2002/05/09 23:42:00 bill Exp $ */
 
 #include "setup.h"
 
@@ -410,6 +410,11 @@ void m_testline(int connnum, int argc, char *argv[])
   snprintf(testlines.umask, sizeof(testlines.umask), "%s", argv[1]);
   testlines.index = connnum;
   toserv("TESTLINE %s\n", argv[1]);
+}
+
+void m_actions(int connnum, int argc, char *argv[])
+{
+  prnt(connections[connnum].socket, "%s is deprecated, use .action\n", argv[0]);
 }
 
 void m_action(int connnum, int argc, char *argv[])
@@ -1820,6 +1825,10 @@ struct TcmMessage opers_msgtab = {
 struct TcmMessage testline_msgtab = {
  ".testline", 0, 0,
  {m_unregistered, m_not_oper, m_testline, m_testline}
+};
+struct TcmMessage actions_msgtab = {
+ ".actions", 0, 0,
+ {m_actions, m_actions, m_actions, m_actions}
 };
 struct TcmMessage action_msgtab = {
  ".action", 0, 0,

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.102 2002/09/20 04:22:43 bill Exp $
+ * $Id: tcm_io.c,v 1.103 2002/09/20 05:06:56 bill Exp $
  */
 
 #include <stdio.h>
@@ -341,7 +341,10 @@ server_link_closed(struct connection *uplink_p)
     close_connection(uplink_p);
   tcm_log(L_ERR, "server_link_closed(0x%lx)", uplink_p);
   tcm_status.am_opered = NO;
-  eventAdd("reconnect", (EVH *)reconnect, NULL, 30);
+
+  /* check to make sure we have not already scheduled this. */
+  if (eventFind((EVH *)reconnect, NULL) == -1)
+    eventAdd("reconnect", (EVH *)reconnect, NULL, 30);
 }
 
 /*

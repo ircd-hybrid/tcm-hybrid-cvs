@@ -23,7 +23,7 @@
  *  developed and/or copyrighted by other sources.  Please see the
  *  CREDITS file for full details.
  *
- *  $Id: event.c,v 1.10 2002/09/19 22:15:00 bill Exp $
+ *  $Id: event.c,v 1.11 2002/09/20 05:06:56 bill Exp $
  */
 
 /*
@@ -46,7 +46,6 @@
 
 static const char *last_event_ran = NULL;
 struct ev_entry event_table[MAX_EVENTS];
-static int event_count = 0;
 static time_t event_time_min = -1;
 
 
@@ -65,12 +64,9 @@ eventAdd(const char *name, EVH *func, void *arg, time_t when)
   int i;
   
   /* find first inactive index, or use next index */
-  for (i = 0; i < event_count; i++)
+  for (i = 0; i < MAX_EVENTS; i++)
     if (event_table[i].active != YES)
       break;
-
-  if (i >= event_count)
-    event_count = i + 1;
 
   event_table[i].func = func;
   event_table[i].name = name;
@@ -105,6 +101,8 @@ eventDelete(EVH *func, void *arg)
   event_table[i].func = NULL;
   event_table[i].arg = NULL;
   event_table[i].active = NO;
+  event_table[i].when = 0;
+  event_table[i].frequency = 0;
 }
 
 /* 
@@ -145,10 +143,7 @@ eventRun(void)
 {
   int i;
 
-  if (event_count == 0)
-    return;
-
-  for (i = 0; i < event_count; i++)
+  for (i = 0; i < MAX_EVENTS; i++)
     {
       if ((event_table[i].active != YES) && (event_table[i].active != NO))
         {
@@ -165,33 +160,6 @@ eventRun(void)
     }
 }
 
-
-/*
- * time_t eventNextTime(void)
- * 
- * Input: None
- * Output: Specifies the next time eventRun() should be run
- * Side Effects: None
- */
- 
-time_t
-eventNextTime(void)
-{
-  int i;
-
-  if (event_count == 0)
-    return (current_time+1);
-  else if (event_time_min == -1)
-    {
-      for (i = 0; i < event_count; i++)
-        {
-          if (event_table[i].active && ((event_table[i].when < event_time_min) || (event_time_min == -1)))
-            event_time_min = event_table[i].when;
-        }
-    }
-  return event_time_min;
-}
-
 /*
  * void eventInit(void)
  *
@@ -203,14 +171,14 @@ void
 eventInit(void)
 {
   last_event_ran = NULL;
-  event_count = 0;
+  memset(&event_table, 0, sizeof(struct ev_entry) * MAX_EVENTS);
 }
 
 /*
  * int eventFind(EVH *func, void *arg)
  *
  * Input: Event function and the argument passed to it
- * Output: Index to the slow in the event_table
+ * Output: Index to the entry in the event table
  * Side Effects: None
  */
 
@@ -218,11 +186,12 @@ int
 eventFind(EVH *func, void *arg)
 {
   int i;
-  for (i = 0; i < event_count; i++)
+
+  for (i = 0; i < MAX_EVENTS; i++)
     {
       if ((event_table[i].func == func) &&
           (event_table[i].arg == arg) &&
-          event_table[i].active)
+          (event_table[i].active == YES))
         return i;
     }
   return -1;
@@ -247,9 +216,9 @@ show_events(struct connection *connection_p)
 
   send_to_connection(connection_p, "*** Operation            Next Execution");
 
-  for (i = 0; i < event_count; i++)
+  for (i = 0; i < MAX_EVENTS; i++)
     {
-      if (event_table[i].active)
+      if (event_table[i].active == YES)
         {
           send_to_connection(connection_p,
 		 "*** %-20s %-3d seconds",
@@ -270,7 +239,8 @@ void
 set_back_events(time_t by)
 {
   int i;
-  for (i = 0; i < event_count; i++)
+
+  for (i = 0; i < MAX_EVENTS; i++)
     if (event_table[i].when > by)
       event_table[i].when -= by;
     else

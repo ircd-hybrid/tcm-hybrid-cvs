@@ -1,3 +1,17 @@
+bill        2004/06/07 13:14:32 EDT	(20040607_0)
+
+  Modified files:
+    help                 help.smartlist 
+    src                  dcc_commands.c 
+  Log:
+  - make things a bit more consistent with Garion's DDD
+  
+  Revision  Changes    Path
+  1.2       +2 -2      tcm-hybrid/help/help.smartlist
+  1.160     +5 -5      tcm-hybrid/src/dcc_commands.c
+
+
+
 bill        2004/06/03 21:55:42 EDT	(20040604_1)
 
   Added files:

@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.11 2002/06/06 22:40:30 db Exp $
+ * $Id: dcc.c,v 1.12 2002/06/07 12:58:29 db Exp $
  */
 
 #include <stdio.h>
@@ -96,11 +96,8 @@ initiate_dcc_chat(struct source_client *source_p)
     socketname.sin_port = htons(dcc_port);
 
     if ((result = bind(connections[i].socket,(struct sockaddr *)&socketname,
-                       sizeof(socketname)) < 0))
-    {
-      continue;
-    }
-    break;
+                       sizeof(socketname)) >= 0))
+      break;
   }
 
   if (result < 0)

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.1 2002/05/22 22:03:35 leeh Exp $
+ * $Id: tcm_io.c,v 1.2 2002/05/23 01:57:22 db Exp $
  */
 
 #include <stdio.h>
@@ -244,6 +244,21 @@ read_packet(void)
  * output       - if parsable buffer return number scanned
  *                if no parsable buffer, output is 0
  * side effects -
+ *
+ * nscanned keeps track of the total scanned input bytes
+ * 
+ * If there is a partial read line without a terminating \r\n (EOL)
+ * connections_p->nbuf keeps track of how many bytes scanned,
+ * connections_p->buffer keeps those bytes scanned for the next read.
+ * I then return a 0 to the caller so it knows there is nothing to parse.
+ *
+ * I alway reset connections_p->nbuf to 0 if I found a complete line
+ * in the input buffer. i.e. one terminated with an EOL. I then return
+ * to the caller the number of bytes available to parse.
+ * 
+ */
+/* XXX there are a couple of obvious optimisations possible here
+ * Lee can tackle 'em :-) -db
  */
 static int
 get_line(char *in, int *len, struct connection *connections_p)
@@ -251,27 +266,44 @@ get_line(char *in, int *len, struct connection *connections_p)
   char *p;
   int nscanned=0;
 
+  /* sanity test. if length read is already 0 or worse, -ve, ignore input */
   if (*len <= 0)
     {
       connections_p->nbuf = 0;
       return(0);
     }
 
+  /* If there was an incomplete buffer, from last read,
+   * continue from that point.
+   */
   p = connections_p->buffer + connections_p->nbuf;
+
+  /* Now, keep stuffing the read input buffer into
+   * the connections buffer until either run out of bytes to stuff (*len==0)
+   * or hit an EOL character.
+   */
 
   while (!EOL(*in) && (connections_p->nbuf < BUFFERSIZE))
     {
       *p++ = *in++;
       (*len)--;
+      connections_p->nbuf++;
+      nscanned++;
       if (*len <= 0)
         {
-          connections_p->nbuf = 0;
           return(0);
         }
-      nscanned++;
-      connections_p->nbuf++;
     }
 
+
+  /* at this point, there is an EOL char found or nbuf >= BUFFERSIZE.
+   * if nbuf > BUFFERSIZE but *in is not an EOL, drop through.
+   * XXX there is an obvious optimisation here available. Hi Lee!
+   * If its an EOL char, pull those out of the input buffer
+   * tell caller how many bytes were looked at and return.
+   * Note again, that since there is a complete buffer here for caller
+   * connections_p->nbuf is again set to 0.
+   */
   if (EOL(*in))
     {
       in++;
@@ -292,6 +324,11 @@ get_line(char *in, int *len, struct connection *connections_p)
       connections_p->nbuf = 0;
       return(nscanned);
     }
+
+  /* Eeek! if this happens, then I have scanned all of the input
+   * fed to me without finding an EOL. Worse, the line is > BUFFERSIZE
+   * i.e. its run on. This should be very rare.
+   */
 
   if (connections_p->nbuf >= BUFFERSIZE)
     {

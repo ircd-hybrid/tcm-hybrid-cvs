@@ -1,3 +1,24 @@
+db          2002/05/30 14:22:18 EDT	(20020530_8)
+
+  Modified files:
+    include              hash.h 
+    src                  actions.c bothunt.c clones.c hash.c 
+                         logging.c vclones.c 
+  Log:
+  - I screwed up on the hash code :-)
+    anyway, this cleans up the hash table code a bit
+  
+  Revision  Changes    Path
+  1.10      +16 -14    tcm-hybrid/include/hash.h
+  1.15      +2 -2      tcm-hybrid/src/actions.c
+  1.139     +6 -14     tcm-hybrid/src/bothunt.c
+  1.6       +49 -47    tcm-hybrid/src/clones.c
+  1.9       +382 -407  tcm-hybrid/src/hash.c
+  1.42      +2 -2      tcm-hybrid/src/logging.c
+  1.4       +19 -18    tcm-hybrid/src/vclones.c
+
+
+
 leeh        2002/05/30 12:36:03 EDT	(20020530_7)
 
   Modified files:

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.66 2002/06/05 22:54:18 wcampbel Exp $
+ * $Id: parse.c,v 1.67 2002/06/06 12:06:15 leeh Exp $
  */
 
 #include <stdio.h>
@@ -352,22 +352,30 @@ process_server(struct source_client *source_p, char *function, char *param)
   switch(numeric)
   {
     case RPL_WELCOME:
-      if((p = strchr(argv[argc-1], '!')) != NULL)
+      if((p = strrchr(argv[argc-1], ' ')) != NULL)
+        *p++ = '\0';
+
+      q = p;
+
+      if((p = strchr(q, '!')) != NULL)
         *p = '\0';
 
-      strlcpy(tcm_status.my_nick, argv[argc-1], MAX_NICK);
+      strlcpy(tcm_status.my_nick, q, MAX_NICK);
       break;
 
     case RPL_YOURHOST:
-      /* Your host is foo[bar/6667], ... */
-      if((p = strchr(argv[5], '[')) != NULL)
+      /* Your host is foo[bar/6667], ...
+       * Your host is foo, ...
+       */
+      q = argv[argc-1]+13;
+      
+      if((p = strchr(q, '[')) != NULL)
         *p = '\0';
 
-      /* Your host is foo, ... */
-      if((p = strchr(argv[5], ',')) != NULL)
+      if((p = strchr(q, ',')) != NULL)
         *p = '\0';
 
-      strlcpy(tcm_status.my_server, argv[5], MAX_HOST);
+      strlcpy(tcm_status.my_server, q, MAX_HOST);
       break;
 
     case RPL_STATSYLINE:

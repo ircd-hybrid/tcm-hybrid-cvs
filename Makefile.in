@@ -46,6 +46,7 @@ distclean: clean
 		${MAKE} distclean; cd ..;\
 	done
 	${RM} -f Makefile config.status config.cache config.log include/setup.h
+	${RM} -f bin/tcm bin/mkpasswd
 
 .c.o:
 	${CC} ${CPPFLAGS} ${CFLAGS} ${DEFINES} -c $<

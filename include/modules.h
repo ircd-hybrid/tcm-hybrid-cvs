@@ -1,7 +1,7 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.22 2002/05/25 08:05:24 jmallett Exp $ */
+/* $Id: modules.h,v 1.23 2002/05/25 12:34:20 leeh Exp $ */
 
 #define MAX_HASH 256
 
@@ -38,7 +38,7 @@ struct serv_command
   serv_handler handler;
 };
 
-extern void add_dcc_handler(char *, void *, void *, void *);
+extern void add_dcc_handler(struct dcc_command *);
 extern void del_dcc_handler(char *);
 extern struct dcc_command *find_dcc_handler(char *);
 
@@ -49,8 +49,6 @@ void m_modload(int connnum, int argc, char *argv[]);
 void m_modunload(int connnum, int argc, char *argv[]);
 void m_modreload(int connnum, int argc, char *argv[]);
 void m_modlist(int connnum, int argc, char *argv[]);
-void mod_add_cmd(struct TcmMessage *msg);
-void mod_del_cmd(struct TcmMessage *msg);
 void modules_init(void);
 int findmodule(char *name);
 int load_all_modules(int logit);

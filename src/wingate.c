@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.33 2002/05/25 02:33:37 db Exp $ */
+/* $Id: wingate.c,v 1.34 2002/05/25 12:34:23 leeh Exp $ */
 
 
 #include <netdb.h>
@@ -119,14 +119,9 @@ void m_proxy(int connnum, int argc, char *argv[])
 #endif
 }
 
-#ifdef IRCD_HYBRID
-/* bleh. */
-#else
-struct TcmMessage proxy_msgtab = {
- ".proxy", 0, 0,
- {m_unregistered, m_not_admin, m_proxy}
+struct dcc_command proxy_msgtab = {
+ "proxy", NULL, {m_unregistered, m_not_admin, m_proxy}
 };
-#endif
 #endif /* DEBUGMODE */
 
 void _scontinuous(int connnum, int argc, char *argv[]);
@@ -811,7 +806,7 @@ void init_wingates(void)
 {
   int i;
 #ifdef DEBUGMODE
-  mod_add_cmd(&proxy_msgtab);
+  add_dcc_handler(&proxy_msgtab);
 #endif
   wingate_class_list_index = 0;
 #ifdef DETECT_WINGATE

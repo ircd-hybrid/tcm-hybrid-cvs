@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.96 2002/05/25 06:42:16 db Exp $
+ * $Id: bothunt.c,v 1.97 2002/05/25 12:34:22 leeh Exp $
  */
 
 #include <stdio.h>
@@ -2909,14 +2909,9 @@ m_gline(int connnum, int argc, char *argv[])
   }
 }
 
-#ifdef IRCD_HYBRID
-
-#else
-struct TcmMessage gline_msgtab = {
- ".gline", 0, 0,
- {m_unregistered, m_gline, m_gline}
+struct dcc_command gline_msgtab = {
+ "gline", NULL, {m_unregistered, m_gline, m_gline}
 };
-#endif
 
 void init_bothunt(void)
 {

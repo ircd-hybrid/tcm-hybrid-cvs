@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.38 2002/05/25 08:05:26 jmallett Exp $B
+ * $Id: modules.c,v 1.39 2002/05/25 12:34:23 leeh Exp $B
  *
  */
 
@@ -42,12 +42,25 @@ struct module modlist[MODS_INCREMENT];
 
 static int hash_command(const char *);
 
+struct dcc_command modload_msgtab = {
+  "modload", NULL, {m_unregistered, m_not_admin, m_modload}
+};
+struct dcc_command modunload_msgtab = {
+  "modunload", NULL, {m_unregistered, m_not_admin, m_modunload}
+};
+struct dcc_command modreload_msgtab = {
+  "modreload", NULL, {m_unregistered, m_not_admin, m_modreload}
+};
+struct dcc_command modlist_msgtab = {
+  "modlist", NULL, {m_unregistered, m_not_admin, m_modlist}
+};
+
 void modules_init(void)
 {
-  add_dcc_handler("modload", m_unregistered, m_not_admin, m_modload);
-  add_dcc_handler("modunload", m_unregistered, m_not_admin, m_modunload);
-  add_dcc_handler("modreload", m_unregistered, m_not_admin, m_modreload);
-  add_dcc_handler("modlist", m_unregistered, m_not_admin, m_modlist);
+  add_dcc_handler(&modload_msgtab);
+  add_dcc_handler(&modunload_msgtab);
+  add_dcc_handler(&modreload_msgtab);
+  add_dcc_handler(&modlist_msgtab);
 }
 
 void init_hashtables(void)
@@ -56,21 +69,11 @@ void init_hashtables(void)
   memset(serv_command_table, 0, sizeof(struct serv_command) * MAX_HASH);
 }
 
-void add_dcc_handler(char *cmd, void *oper_handler,
-		     void *registered_oper_handler, void *admin_handler)
+void add_dcc_handler(struct dcc_command *ptr)
 {
-  struct dcc_command *ptr;
   int hashval;
 
-  ptr = malloc(sizeof(struct dcc_command));
-  memset(ptr, 0, sizeof(struct dcc_command));
-
-  ptr->cmd = strdup(cmd);
-  ptr->handler[0] = oper_handler,
-  ptr->handler[1] = registered_oper_handler;
-  ptr->handler[2] = admin_handler;
-  
-  hashval = hash_command(cmd);
+  hashval = hash_command(ptr->cmd);
 
   if(dcc_command_table[hashval])
     ptr->next = dcc_command_table[hashval];
@@ -100,9 +103,6 @@ void del_dcc_handler(char *cmd)
       last_ptr->next = ptr->next;
     else
       dcc_command_table[hashval] = ptr->next;
-
-    free(ptr->cmd);
-    free(ptr);
   }
 }
 
@@ -146,38 +146,6 @@ int findmodule(char *name)
 
   return -1;
 }
-
-void mod_add_cmd(struct TcmMessage *msg)
-{
-  int msgindex=0;
-
-  assert(msg != NULL);
-  while (msg_hash_table[msgindex].msg) ++msgindex;
-
-  if ((msg_hash_table[msgindex].cmd = (char *)malloc(MAX_BUFF)) == NULL)
-    {
-      send_to_all(SEND_ALL, "Ran out of memory in mod_add_cmd");
-      exit(1);
-    }
-
-  strcpy(msg_hash_table[msgindex].cmd, msg->cmd);
-  msg_hash_table[msgindex].msg = msg;
-/*  msg_hash_table[msgindex].msg->handlers[3] = msg->handlers[3];
-  msg_hash_table[msgindex].msg->handlers[2] = msg->handlers[2];
-  msg_hash_table[msgindex].msg->handlers[1] = msg->handlers[1];
-  msg_hash_table[msgindex].msg->handlers[0] = msg->handlers[0];*/
-}
-
-void mod_del_cmd(struct TcmMessage *msg)
-{
-  int msgindex=0;
-
-  assert(msg != NULL);
-  while (strcasecmp(msg_hash_table[msgindex].cmd, msg->cmd)) ++msgindex;
-  free(msg_hash_table[msgindex].cmd);
-  free(msg_hash_table[msgindex].msg);
-}
-
 
 int load_a_module(char *name, int log)
 {

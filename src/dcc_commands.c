@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.77 2002/05/25 06:39:29 db Exp $ */
+/* $Id: dcc_commands.c,v 1.78 2002/05/25 12:34:23 leeh Exp $ */
 
 #include "setup.h"
 
@@ -1757,246 +1757,188 @@ handle_save(int sock,char *nick)
  * ircd-hybrid-7 loadable module code goes here
  */
 #else
-struct TcmMessage vlist_msgtab = {
- ".vlist", 0, 0,
- {m_unregistered, m_vlist, m_vlist}
+struct dcc_command vlist_msgtab = {
+ "vlist", NULL, {m_unregistered, m_vlist, m_vlist}
 };
-struct TcmMessage class_msgtab = {
- ".class", 0, 0,
- {m_unregistered, m_class, m_class}
+struct dcc_command class_msgtab = {
+ "class", NULL, {m_unregistered, m_class, m_class}
 };
-struct TcmMessage classt_msgtab = {
- ".classt", 0, 0,
- {m_unregistered, m_classt, m_classt}
+struct dcc_command classt_msgtab = {
+ "classt", NULL, {m_unregistered, m_classt, m_classt}
 };
-struct TcmMessage killlist_msgtab = {
- ".killlist", 0, 0,
- {m_unregistered, m_killlist, m_killlist}
+struct dcc_command killlist_msgtab = {
+ "killlist", NULL, {m_unregistered, m_killlist, m_killlist}
 };
-struct TcmMessage kline_msgtab = {
- ".kline", 0, 0,
- {m_unregistered, m_kline, m_kline}
+struct dcc_command kline_msgtab = {
+ "kline", NULL, {m_unregistered, m_kline, m_kline}
 };
-struct TcmMessage kclone_msgtab = {
- ".kclone", 0, 0,
- {m_unregistered, m_use_kaction, m_use_kaction}
+struct dcc_command kclone_msgtab = {
+ "kclone", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
 };
-struct TcmMessage kflood_msgtab = {
- ".kflood", 0, 0,
- {m_unregistered, m_use_kaction, m_use_kaction}
+struct dcc_command kflood_msgtab = {
+ "kflood", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
 };
-struct TcmMessage kperm_msgtab = {
- ".kperm", 0, 0,
- {m_unregistered, m_kperm, m_kperm}
+struct dcc_command kperm_msgtab = {
+ "kperm", NULL, {m_unregistered, m_kperm, m_kperm}
 };
-struct TcmMessage klink_msgtab = {
- ".klink", 0, 0,
- {m_unregistered, m_use_kaction, m_use_kaction}
+struct dcc_command klink_msgtab = {
+ "klink", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
 };
-struct TcmMessage kdrone_msgtab = {
- ".kdrone", 0, 0,
- {m_unregistered, m_use_kaction, m_use_kaction}
+struct dcc_command kdrone_msgtab = {
+ "kdrone", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
 };
-struct TcmMessage kbot_msgtab = {
- ".kbot", 0, 0,
- {m_unregistered, m_use_kaction, m_use_kaction}
+struct dcc_command kbot_msgtab = {
+ "kbot", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
 };
-struct TcmMessage kill_msgtab = {
- ".kill", 0, 0,
- {m_unregistered, m_kill, m_kill}
+struct dcc_command kill_msgtab = {
+ "kill", NULL, {m_unregistered, m_kill, m_kill}
 };
-struct TcmMessage kaction_msgtab = {
-  ".kaction", 0, 0,
- {m_unregistered, m_kaction, m_kaction}
+struct dcc_command kaction_msgtab = {
+ "kaction", NULL, {m_unregistered, m_kaction, m_kaction}
 };
-struct TcmMessage kspam_msgtab = {
- ".kspam", 0, 0,
- {m_unregistered, m_use_kaction, m_use_kaction}
+struct dcc_command kspam_msgtab = {
+ "kspam", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
 };
-struct TcmMessage hmulti_msgtab = {
- ".hmulti", 0, 0,
- {m_unregistered, m_hmulti, m_hmulti}
+struct dcc_command hmulti_msgtab = {
+ "hmulti", NULL, {m_unregistered, m_hmulti, m_hmulti}
 };
-struct TcmMessage umulti_msgtab = {
- ".umulti", 0, 0,
- {m_unregistered, m_umulti, m_umulti}
+struct dcc_command umulti_msgtab = {
+ "umulti", NULL, {m_unregistered, m_umulti, m_umulti}
 };
-struct TcmMessage register_msgtab = {
- ".register", 0, 0,
- {m_register, m_register, m_register}
+struct dcc_command register_msgtab = {
+ "register", NULL, {m_register, m_register, m_register}
 };
-struct TcmMessage opers_msgtab = {
- ".opers", 0, 0,
- {m_unregistered, m_opers, m_opers}
+struct dcc_command opers_msgtab = {
+ "opers", NULL, {m_unregistered, m_opers, m_opers}
 };
-struct TcmMessage testline_msgtab = {
- ".testline", 0, 0,
- {m_unregistered, m_testline, m_testline}
+struct dcc_command testline_msgtab = {
+ "testline", NULL, {m_unregistered, m_testline, m_testline}
 };
-struct TcmMessage actions_msgtab = {
- ".actions", 0, 0,
- {m_actions, m_actions, m_actions}
+struct dcc_command actions_msgtab = {
+ "actions", NULL, {m_actions, m_actions, m_actions}
 };
-struct TcmMessage action_msgtab = {
- ".action", 0, 0,
- {m_unregistered, m_action, m_action}
+struct dcc_command action_msgtab = {
+ "action", NULL, {m_unregistered, m_action, m_action}
 };
-struct TcmMessage set_msgtab = {
- ".set", 0, 0,
- {m_unregistered, m_set, m_set}
+struct dcc_command set_msgtab = {
+ "set", NULL, {m_unregistered, m_set, m_set}
 };
-struct TcmMessage uptime_msgtab = {
- ".uptime", 0, 0,
- {m_uptime, m_uptime, m_uptime}
+struct dcc_command uptime_msgtab = {
+ "uptime", NULL, {m_uptime, m_uptime, m_uptime}
 };
-struct TcmMessage exemptions_msgtab = {
- ".exemptions", 0, 0,
- {m_unregistered, m_exemptions, m_exemptions}
+struct dcc_command exemptions_msgtab = {
+ "exemptions", NULL, {m_unregistered, m_exemptions, m_exemptions}
 };
-struct TcmMessage umode_msgtab = {
- ".umode", 0, 0,
- {m_unregistered, m_umode, m_umode}
+struct dcc_command umode_msgtab = {
+ "umode", NULL, {m_unregistered, m_umode, m_umode}
 };
-struct TcmMessage connections_msgtab = {
- ".connections", 0, 0,
- {m_connections, m_connections, m_connections}
+struct dcc_command connections_msgtab = {
+ "connections", NULL, {m_connections, m_connections, m_connections}
 };
-struct TcmMessage whom_msgtab = {
- ".whom", 0, 0,
- {m_connections, m_connections, m_connections}
+struct dcc_command whom_msgtab = {
+ "whom", NULL, {m_connections, m_connections, m_connections}
 };
-struct TcmMessage who_msgtab = {
- ".who", 0, 0,
- {m_connections, m_connections, m_connections}
+struct dcc_command who_msgtab = {
+ "who", NULL, {m_connections, m_connections, m_connections}
 };
-struct TcmMessage disconnect_msgtab = {
- ".disconnect", 0, 0,
- {m_unregistered, m_not_admin, m_disconnect}
+struct dcc_command disconnect_msgtab = {
+ "disconnect", NULL, {m_unregistered, m_not_admin, m_disconnect}
 };
-struct TcmMessage quit_msgtab = {
- ".quit", 0, 0,
- {m_close, m_close, m_close}
+struct dcc_command quit_msgtab = {
+ "quit", NULL, {m_close, m_close, m_close}
 };
-struct TcmMessage help_msgtab = {
- ".help", 0, 0,
- {m_help, m_help, m_help}
+struct dcc_command help_msgtab = {
+ "help", NULL, {m_help, m_help, m_help}
 };
-struct TcmMessage motd_msgtab = {
- ".motd", 0, 0,
- {m_motd, m_motd, m_motd}
+struct dcc_command motd_msgtab = {
+ "motd", NULL, {m_motd, m_motd, m_motd}
 };
-struct TcmMessage save_msgtab = {
- ".save", 0, 0,
- {m_unregistered, m_not_admin, m_save}
+struct dcc_command save_msgtab = {
+ "save", NULL, {m_unregistered, m_not_admin, m_save}
 };
-struct TcmMessage close_msgtab = {
- ".close", 0, 0,
- {m_close, m_close, m_close}
+struct dcc_command close_msgtab = {
+ "close", NULL, {m_close, m_close, m_close}
 };
-struct TcmMessage op_msgtab = {
- ".op", 0, 0,
- {m_unregistered, m_op, m_op}
+struct dcc_command op_msgtab = {
+ "op", NULL, {m_unregistered, m_op, m_op}
 };
-struct TcmMessage cycle_msgtab = {
- ".cycle", 0, 0,
- {m_unregistered, m_cycle, m_cycle}
+struct dcc_command cycle_msgtab = {
+ "cycle", NULL, {m_unregistered, m_cycle, m_cycle}
 };
-struct TcmMessage die_msgtab = {
- ".die", 0, 0,
- {m_unregistered, m_not_admin, m_die}
+struct dcc_command die_msgtab = {
+ "die", NULL, {m_unregistered, m_not_admin, m_die}
 };
-struct TcmMessage restart_msgtab = {
- ".restart", 0, 0,
- {m_unregistered, m_not_admin, m_restart}
+struct dcc_command restart_msgtab = { 
+ "restart", NULL, {m_unregistered, m_not_admin, m_restart}
 };
-struct TcmMessage info_msgtab = {
- ".info", 0, 0,
- {m_info, m_info, m_info}
+struct dcc_command info_msgtab = {
+ "info", NULL, {m_info, m_info, m_info}
 };
-struct TcmMessage locops_msgtab = {
- ".locops", 0, 0,
- {m_unregistered, m_locops, m_locops}
+struct dcc_command locops_msgtab = {
+ "locops", NULL, {m_unregistered, m_locops, m_locops}
 };
-struct TcmMessage unkline_msgtab = {
- ".unkline", 0, 0,
- {m_unregistered, m_unkline, m_unkline}
+struct dcc_command unkline_msgtab = {
+ "unkline", NULL, {m_unregistered, m_unkline, m_unkline}
 };
-struct TcmMessage vbots_msgtab = {
- ".vbots", 0, 0,
- {m_unregistered, m_vbots, m_vbots}
+struct dcc_command vbots_msgtab = {
+ "vbots", NULL, {m_unregistered, m_vbots, m_vbots}
 };
 #ifndef NO_D_LINE_SUPPORT
-struct TcmMessage dline_msgtab = {
- ".dline", 0, 0,
- {m_unregistered, m_dline, m_dline}
+struct dcc_command dline_msgtab = {
+ "dline", NULL, {m_unregistered, m_dline, m_dline}
 };
 #endif
 #ifdef ENABLE_QUOTE
-struct TcmMessage quote_msgtab = {
- ".quote", 0, 0,
- {m_unregistered, m_not_admin, m_quote}
+struct dcc_command quote_msgtab = {
+ "quote", NULL, {m_unregistered, m_not_admin, m_quote}
 };
 #endif
-struct TcmMessage mem_msgtab = {
- ".mem", 0, 0,
- {m_unregistered, m_not_admin, m_mem}
+struct dcc_command mem_msgtab = {
+ "mem", NULL, {m_unregistered, m_not_admin, m_mem}
 };
-struct TcmMessage clones_msgtab = {
- ".clones", 0, 0,
- {m_unregistered, m_clones, m_clones}
+struct dcc_command clones_msgtab = {
+ "clones", NULL, {m_unregistered, m_clones, m_clones}
 };
-struct TcmMessage nflood_msgtab = {
- ".nflood", 0, 0,
- {m_unregistered, m_nflood, m_nflood}
+struct dcc_command nflood_msgtab = {
+ "nflood", NULL, {m_unregistered, m_nflood, m_nflood}
 };
-struct TcmMessage rehash_msgtab = {
- ".rehash", 0, 0,
- {m_unregistered, m_not_admin, m_rehash}
+struct dcc_command rehash_msgtab = {
+ "rehash", NULL, {m_unregistered, m_not_admin, m_rehash}
 };
-struct TcmMessage trace_msgtab = {
- ".trace", 0, 0,
- {m_unregistered, m_trace, m_trace}
+struct dcc_command trace_msgtab = {
+ "trace", NULL, {m_unregistered, m_trace, m_trace}
 };
-struct TcmMessage failures_msgtab = {
- ".failures", 0, 0,
- {m_unregistered, m_failures, m_failures}
+struct dcc_command failures_msgtab = {
+ "failures", NULL, {m_unregistered, m_failures, m_failures}
 };
-struct TcmMessage domains_msgtab = {
- ".domains", 0, 1,
- {m_unregistered, m_domains, m_domains}
+struct dcc_command domains_msgtab = {
+ "domains", NULL, {m_unregistered, m_domains, m_domains}
 };
-struct TcmMessage bots_msgtab = {
- ".bots", 0, 1,
- {m_unregistered, m_bots, m_bots}
+struct dcc_command bots_msgtab = {
+ "bots", NULL, {m_unregistered, m_bots, m_bots}
 };
-struct TcmMessage events_msgtab = {
- ".events", 0, 1,
- {m_unregistered, m_events, m_events}
+struct dcc_command events_msgtab = {
+ "events", NULL, {m_unregistered, m_events, m_events}
 };
 #ifdef VIRTUAL
-struct TcmMessage vmulti_msgtab = {
- ".vmulti", 0, 1,
- {m_unregistered, m_vmulti, m_vmulti}
+struct dcc_command vmulti_msgtab = {
+ "vmulti", NULL, {m_unregistered, m_vmulti, m_vmulti}
 };
 #endif
-struct TcmMessage nfind_msgtab = {
- ".nfind", 0, 1,
- {m_unregistered, m_nfind, m_nfind}
+struct dcc_command nfind_msgtab = {
+ "nfind", NULL, {m_unregistered, m_nfind, m_nfind}
 };
-struct TcmMessage list_msgtab = {
- ".list", 0, 1,
- {m_unregistered, m_list, m_list}
+struct dcc_command list_msgtab = {
+ "list", NULL, {m_unregistered, m_list, m_list}
 };
 #ifdef WANT_ULIST
-struct TcmMessage ulist_msgtab = {
- ".ulist", 0, 1,
- {m_unregistered, m_ulist, m_ulist}
+struct dcc_command ulist_msgtab = {
+ "ulist", NULL, {m_unregistered, m_ulist, m_ulist}
 };
 #endif
 #ifdef WANT_HLIST
-struct TcmMessage hlist_msgtab = {
- ".hlist", 0, 1,
- {m_unregistered, m_hlist, m_hlist}
+struct dcc_command hlist_msgtab = {
+ "hlist", NULL, {m_unregistered, m_hlist, m_hlist}
 };
 #endif
 #endif
@@ -2004,81 +1946,73 @@ struct TcmMessage hlist_msgtab = {
 void 
 init_commands(void)
 {
-  int i;
-  for (i=0;i<MAX_MSG_HASH;++i)
-  {
-    msg_hash_table[i].cmd = NULL;
-    msg_hash_table[i].msg = NULL;
-    msg_hash_table[i].next = NULL;
-  }
-
-  mod_add_cmd(&vlist_msgtab);
-  mod_add_cmd(&class_msgtab);
-  mod_add_cmd(&classt_msgtab);
-  mod_add_cmd(&killlist_msgtab);
-  mod_add_cmd(&kline_msgtab);
-  mod_add_cmd(&kclone_msgtab);
-  mod_add_cmd(&kflood_msgtab);
-  mod_add_cmd(&kperm_msgtab);
-  mod_add_cmd(&klink_msgtab);
-  mod_add_cmd(&kdrone_msgtab);
-  mod_add_cmd(&kbot_msgtab);
-  mod_add_cmd(&kill_msgtab);
-  mod_add_cmd(&kaction_msgtab);
-  mod_add_cmd(&kspam_msgtab);
-  mod_add_cmd(&hmulti_msgtab);
-  mod_add_cmd(&umulti_msgtab);
-  mod_add_cmd(&register_msgtab);
-  mod_add_cmd(&opers_msgtab);
-  mod_add_cmd(&testline_msgtab);
-  mod_add_cmd(&action_msgtab);
-  mod_add_cmd(&set_msgtab);
-  mod_add_cmd(&exemptions_msgtab);
-  mod_add_cmd(&umode_msgtab);
-  mod_add_cmd(&connections_msgtab);
-  mod_add_cmd(&whom_msgtab);
-  mod_add_cmd(&who_msgtab);
-  mod_add_cmd(&disconnect_msgtab);
-  mod_add_cmd(&quit_msgtab);
-  mod_add_cmd(&help_msgtab);
-  mod_add_cmd(&motd_msgtab);
-  mod_add_cmd(&save_msgtab);
-  mod_add_cmd(&close_msgtab);
-  mod_add_cmd(&op_msgtab);
-  mod_add_cmd(&cycle_msgtab);
-  mod_add_cmd(&die_msgtab);
-  mod_add_cmd(&restart_msgtab);
-  mod_add_cmd(&info_msgtab);
-  mod_add_cmd(&locops_msgtab);
-  mod_add_cmd(&unkline_msgtab);
-  mod_add_cmd(&vbots_msgtab);
+  add_dcc_handler(&vlist_msgtab);
+  add_dcc_handler(&class_msgtab);
+  add_dcc_handler(&classt_msgtab);
+  add_dcc_handler(&killlist_msgtab);
+  add_dcc_handler(&kline_msgtab);
+  add_dcc_handler(&kclone_msgtab);
+  add_dcc_handler(&kflood_msgtab);
+  add_dcc_handler(&kperm_msgtab);
+  add_dcc_handler(&klink_msgtab);
+  add_dcc_handler(&kdrone_msgtab);
+  add_dcc_handler(&kbot_msgtab);
+  add_dcc_handler(&kill_msgtab);
+  add_dcc_handler(&kaction_msgtab);
+  add_dcc_handler(&kspam_msgtab);
+  add_dcc_handler(&hmulti_msgtab);
+  add_dcc_handler(&umulti_msgtab);
+  add_dcc_handler(&register_msgtab);
+  add_dcc_handler(&opers_msgtab);
+  add_dcc_handler(&testline_msgtab);
+  add_dcc_handler(&action_msgtab);
+  add_dcc_handler(&set_msgtab);
+  add_dcc_handler(&exemptions_msgtab);
+  add_dcc_handler(&umode_msgtab);
+  add_dcc_handler(&connections_msgtab);
+  add_dcc_handler(&whom_msgtab);
+  add_dcc_handler(&who_msgtab);
+  add_dcc_handler(&disconnect_msgtab);
+  add_dcc_handler(&quit_msgtab);
+  add_dcc_handler(&help_msgtab);
+  add_dcc_handler(&motd_msgtab);
+  add_dcc_handler(&save_msgtab);
+  add_dcc_handler(&close_msgtab);
+  add_dcc_handler(&op_msgtab);
+  add_dcc_handler(&cycle_msgtab);
+  add_dcc_handler(&die_msgtab);
+  add_dcc_handler(&restart_msgtab);
+  add_dcc_handler(&info_msgtab);
+  add_dcc_handler(&locops_msgtab);
+  add_dcc_handler(&unkline_msgtab);
+  add_dcc_handler(&vbots_msgtab);
 #ifndef NO_D_LINE_SUPPORT
-  mod_add_cmd(&dline_msgtab);
+  add_dcc_handler(&dline_msgtab);
 #endif
 #ifdef ENABLE_QUOTE
-  mod_add_cmd(&quote_msgtab);
+  add_dcc_handler(&quote_msgtab);
 #endif
-  mod_add_cmd(&mem_msgtab);
-  mod_add_cmd(&clones_msgtab);
-  mod_add_cmd(&nflood_msgtab);
-  mod_add_cmd(&rehash_msgtab);
-  mod_add_cmd(&trace_msgtab);
-  mod_add_cmd(&failures_msgtab);
-  mod_add_cmd(&domains_msgtab);
-  mod_add_cmd(&bots_msgtab);
-  mod_add_cmd(&events_msgtab);
+  add_dcc_handler(&mem_msgtab);
+  add_dcc_handler(&clones_msgtab);
+  add_dcc_handler(&nflood_msgtab);
+  add_dcc_handler(&rehash_msgtab);
+  add_dcc_handler(&trace_msgtab);
+  add_dcc_handler(&failures_msgtab);
+  add_dcc_handler(&domains_msgtab);
+  add_dcc_handler(&bots_msgtab);
+  add_dcc_handler(&events_msgtab);
 #ifdef VIRTUAL
-  mod_add_cmd(&vmulti_msgtab);
+  add_dcc_handler(&vmulti_msgtab);
 #endif
-  mod_add_cmd(&nfind_msgtab);
-  mod_add_cmd(&list_msgtab);
+  add_dcc_handler(&nfind_msgtab);
+  add_dcc_handler(&list_msgtab);
 #ifdef WANT_ULIST
-  mod_add_cmd(&ulist_msgtab);
+  add_dcc_handler(&ulist_msgtab);
 #endif
 #ifdef WANT_HLIST
-  mod_add_cmd(&hlist_msgtab);
+  add_dcc_handler(&hlist_msgtab);
 #endif
-  mod_add_cmd(&uptime_msgtab);
+  add_dcc_handler(&uptime_msgtab);
 }
 
 /*

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.72 2002/05/19 14:27:25 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.73 2002/05/20 00:21:31 db Exp $ */
 
 #include "setup.h"
 
@@ -1369,17 +1369,6 @@ char makeconn(char *hostport,char *nick,char *userhost)
   fcntl(connections[i].socket, F_SETFL, O_NONBLOCK);
   FD_SET(connections[i].socket, &readfds);
   connections[i].set_modes = 0;
-
-  connections[i].buffer = (char *)malloc(BUFFERSIZE);
-
-  if (!connections[i].buffer)
-  {
-    sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in makeconn\n");
-    gracefuldie(0, __FILE__, __LINE__);
-  }
-  memset(connections[i].buffer, 0, BUFFERSIZE);
-
-  connections[i].buffend = connections[i].buffer;
   strncpy(connections[i].nick,nick,MAX_NICK-1);
   connections[i].nick[MAX_NICK-1] = '\0';
 

@@ -1,7 +1,7 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
-/* $Id: serverif.h,v 1.14 2002/03/05 07:10:49 bill Exp $ */
+/* $Id: serverif.h,v 1.15 2002/05/20 00:21:28 db Exp $ */
 
 /*
  * default ping timeout time from server
@@ -19,8 +19,8 @@ time_t cur_time;
  */
 
 struct connection {
-  char *buffer;
-  char *buffend;
+  char buffer[BUFFERSIZE];
+  int  nbuf;			/* number in buffer */
   int  socket;
   int  type;			/* why was this a char? -bill */
   int  set_modes;		/* for set options */

@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.36 2002/05/19 14:27:28 wcampbel Exp $ */
+/* $Id: main.c,v 1.37 2002/05/20 00:21:34 db Exp $ */
 
 #include "setup.h"
 
@@ -57,9 +57,7 @@
 #include "dmalloc.h"
 #endif
 
-#ifdef FORCE_CORE
 #include <sys/resource.h>
-#endif
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -106,9 +104,7 @@ int action_log(char *name);
 char *get_action_reason(char *name);
 #endif
 
-#ifdef FORCE_CORE
 static void setup_corefile(void);
-#endif
 
 /*
  * init_hash_tables
@@ -390,10 +386,6 @@ void closeconn(int connnum, int argc, char *argv[])
   if (connections[connnum].socket != INVALID)
     close(connections[connnum].socket);
 
-  if(connections[connnum].buffer)
-    free (connections[connnum].buffer);
-
-  connections[connnum].buffer = (char *)NULL;
   connections[connnum].socket = INVALID;
 
   if ((connnum + 1) == maxconns)
@@ -553,9 +545,7 @@ int main(int argc, char *argv[])
     printf("Unable to chdir to DPATH\nFatal Error, exiting\n");
     exit(1);
   }
-#ifdef FORCE_CORE
   setup_corefile();
-#endif
   init_hash_tables();		/* clear those suckers out */
   init_tokenizer();		/* in token.c */
   init_userlist();
@@ -618,10 +608,12 @@ int main(int argc, char *argv[])
 
   srandom(time(NULL));	/* -zaph */
   signal(SIGUSR1,init_debug);
+#if 0
   signal(SIGSEGV,sighandlr);
   signal(SIGBUS,sighandlr);
   signal(SIGTERM,sighandlr);
   signal(SIGINT,sighandlr);
+#endif
   signal(SIGHUP,reload_user_list);
   signal(SIGPIPE, SIG_IGN);
   signal(SIGTRAP, SIG_IGN);
@@ -687,18 +679,7 @@ int main(int argc, char *argv[])
   connections[0].socket = bindsocket(serverhost);
   if (connections[0].socket == INVALID)
     exit(1);
-
-  connections[0].buffer = (char *)malloc(BUFFERSIZE);
-  if( !connections[0].buffer )
-    {
-      fprintf(stderr,"Memory allocation error in main()\n");
-#ifdef DEBUGMODE
-      printf("Memory allocation error in main()\n");
-#endif
-      exit(1);
-    }
-  memset(connections[0].buffer, 0, BUFFERSIZE);   /* I'm not really sure why this is needed, but it fixed rtmon */
-
+  connections[0].nbuf = 0;
   connections[0].type = 0;
   maxconns = 1;
 
@@ -759,6 +740,7 @@ static void init_debug(int sig)
     }
 }
 
+#if 0
 void sighandlr(int sig)
 {
   if (sig == SIGINT)
@@ -770,6 +752,7 @@ void sighandlr(int sig)
     gracefuldie(sig, __FILE__, __LINE__);
   signal(sig, sighandlr);
 }
+#endif
 
 #ifdef IRCD_HYBRID
 
@@ -793,7 +776,6 @@ void m_not_admin(int connnum, int argc, char *argv[])
 }
 #endif
 
-#ifdef FORCE_CORE
 /*
  * setup_corefile
  *
@@ -815,4 +797,3 @@ static void setup_corefile(void)
     setrlimit(RLIMIT_CORE, &rlim);
   }
 }
-#endif

@@ -1,3 +1,26 @@
+leeh        2002/05/25 20:44:22 EDT	(20020526_3)
+
+  Modified files:
+    include              config.h parse.h serverif.h tcm.h 
+    src                  .depend main.c parse.c tcm_io.c 
+  Added files:
+    src                  services.c 
+  Log:
+  - services code -> services.c
+  
+  Revision  Changes    Path
+  1.53      +12 -25    tcm-hybrid/include/config.h
+  1.5       +0 -4      tcm-hybrid/include/parse.h
+  1.25      +0 -18     tcm-hybrid/include/serverif.h
+  1.39      +6 -0      tcm-hybrid/include/tcm.h
+  1.17      +6 -0      tcm-hybrid/src/.depend
+  1.75      +6 -2      tcm-hybrid/src/main.c
+  1.24      +0 -133    tcm-hybrid/src/parse.c
+  1.1       +177 -0    tcm-hybrid/src/services.c (new)
+  1.33      +0 -4      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/25 19:27:57 EDT	(20020526_2)
 
   Modified files:

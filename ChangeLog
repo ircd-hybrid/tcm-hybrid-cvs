@@ -1,3 +1,19 @@
+wcampbel    2002/04/08 10:02:29 EDT	(20020408_0)
+
+  Modified files:
+    include              config.h 
+    src                  main.c 
+  Log:
+  Added #define FORCE_CORE, defined by default, to automatically ulimit
+  the core file size to "unlimited".  This is used so that tcm can dump
+  core even on systems that default userland cores to 0 (eg. Redhat)
+  
+  Revision  Changes    Path
+  1.35      +6 -0      tcm-hybrid/include/config.h
+  1.29      +35 -0     tcm-hybrid/src/main.c
+
+
+
 bill        2002/04/05 21:00:20 EST	(20020406_0)
 
   Modified files:

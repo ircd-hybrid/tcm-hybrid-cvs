@@ -1,3 +1,11 @@
+*** 20011004_1 by bill
+
+- fixed .opers
+- fixed .locops (and WALLOP parsing)
+- removed obsolete spoof detection code
+- improved Makefile.in to remove *all* logs on distclean
+
+
 *** 20011003_1 by wcampbel
 Fixed .umulti and .hmulti once and for all.
 

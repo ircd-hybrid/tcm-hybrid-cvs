@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.38 2001/12/11 07:00:55 db Exp $
+ * $Id: userlist.c,v 1.39 2001/12/11 21:55:33 db Exp $
  *
  */
 
@@ -375,6 +375,7 @@ void load_userlist()
 {
   FILE *userfile;
   char line[MAX_BUFF];
+  char *p;
 
   if ((userfile = fopen(config_entries.userlist_config,"r")) == NULL)
     {
@@ -403,10 +404,12 @@ void load_userlist()
     {
       char op_char;
 
-      line[strlen(line)-1] = 0;
       if(line[0] == '#')
 	continue;
-      
+
+      if ((p = strchr(line, '\n')) != NULL)
+	*p = '\0';
+
       op_char = line[0];
 
       if(line[1] == ':')
@@ -454,13 +457,13 @@ void load_a_ban(char *line)
     if( ban_list_index == (MAXBANS - 1))
 	return;
     
-    if( (p = strchr(line,'\n')) )
+    if((p = strchr(line,'\n')) != NULL)
       *p = '\0';
 
-    if( !(user = strtok(line,"@")) )
+    if((user = strtok(line,"@")) == NULL)
       return;
     
-    if( !(host = strtok((char *)NULL,"")) )
+    if((host = strtok((char *)NULL,"")) == NULL)
       return;
 
     strncpy(banlist[ban_list_index].user, user,
@@ -503,10 +506,9 @@ static void load_a_user(char *line)
       return;
 
     user = userathost;
-    if( (p = strchr(userathost,'@')) )
+    if((p = strchr(userathost,'@')) != NULL)
       {
-	*p = '\0';
-	p++;
+	*p++ = '\0';
 	host = p;
       }
     else
@@ -515,7 +517,7 @@ static void load_a_user(char *line)
 	host = userathost;
       }
 
-    if( (p = strchr(host,' ')) )
+    if((p = strchr(host,' ')) != NULL)
       *p = '\0';
 
     userlist[user_list_index].usernick[0] = 0;
@@ -529,19 +531,19 @@ static void load_a_user(char *line)
 
     usernick = strtok((char *)NULL,":");
     
-    if(usernick)
+    if(usernick != NULL)
       strncpy(userlist[user_list_index].usernick, usernick, 
 	      sizeof(userlist[user_list_index].usernick));
 
     password = strtok((char *)NULL,":");
 
-    if(password)
+    if(password != NULL)
       strncpy(userlist[user_list_index].password, password, 
 	      sizeof(userlist[user_list_index].password));
 
     type = strtok((char *)NULL,":");
 
-    if(type)
+    if(type != NULL)
       {
 	unsigned long type_int;
 	char *q;
@@ -622,12 +624,14 @@ static void load_a_user(char *line)
     userlist[user_list_index].type = 0;
 }
 
-static void load_e_line(char *line) {
+static void load_e_line(char *line)
+{
   char *vltn, *p, *uhost;
   int type=0;
 
+  if ((p = strchr(line, ':')) == NULL)
+    return;
 
-  if (!(p = strchr(line, ':'))) return;
   vltn = line;
   *p = '\0';
   uhost = p+1;
@@ -666,30 +670,13 @@ static void load_e_line(char *line) {
 
 void clear_userlist()
 {
-  int cnt;
   user_list_index = 0;
   host_list_index = 0;
 
-  for(cnt = 0; cnt < MAXUSERS; cnt++)
-    {
-      userlist[cnt].user[0]='\0';
-      userlist[cnt].host[0] = '\0';
-      userlist[cnt].usernick[0] = '\0';
-      userlist[cnt].password[0] = '\0';
-      userlist[cnt].type = 0;
-    }
+  memset((void *)userlist, 0, sizeof(userlist));
+  memset((void *)hostlist, 0, sizeof(hostlist));
+  memset((void *)banlist, 0, sizeof(banlist))
 
-  for(cnt = 0; cnt < MAXHOSTS; cnt++)
-    {
-      hostlist[cnt].user[0] = '\0';
-      hostlist[cnt].host[0] = '\0';
-    }
-
-  for(cnt = 0; cnt < MAXBANS; cnt++)
-    {
-      banlist[cnt].user[0] = '\0';
-      banlist[cnt].host[0] = '\0';
-    }
 }
 
 /*
@@ -704,32 +691,11 @@ void clear_userlist()
 
 void init_userlist()
 {
-  int cnt;
-  user_list_index = 0;
   tcm_list_index = 0;
-  host_list_index = 0;
   ban_list_index = 0;
 
-  for(cnt = 0; cnt < MAXUSERS; cnt++)
-    {
-      userlist[cnt].user[0] = 0;
-      userlist[cnt].host[0] = 0;
-      userlist[cnt].usernick[0] = 0;
-      userlist[cnt].password[0] = 0;
-      userlist[cnt].type = 0;
-    }
+  clear_userlist();
 
-    for(cnt = 0; cnt < MAXHOSTS; cnt++)
-      {
-	hostlist[cnt].user[0] = 0;
-	hostlist[cnt].host[0] = 0;
-      }
-
-    for(cnt = 0; cnt < MAXBANS; cnt++)
-      {
-	banlist[cnt].user[0] = 0;
-	banlist[cnt].host[0] = 0;
-      }
 }
 
 /*
@@ -745,7 +711,7 @@ int isoper(char *user,char *host)
 {
   int i;
 
-  for(i=0;userlist[i].user[0];i++)
+  for(i=0; userlist[i].user[0]; i++)
     {
       if ((!wldcmp(userlist[i].user,user)) &&
           (!wldcmp(userlist[i].host,host)))
@@ -792,10 +758,10 @@ void ban_manipulate(int sock,char flag,char *userhost)
   char *host;
   int  i;
 
-  if( !(user = strtok(userhost,"@")) )
+  if((user = strtok(userhost,"@")) == NULL)
     return;
 
-  if( !(host = strtok((char *)NULL,"")))
+  if((host = strtok((char *)NULL,"")) == NULL)
     return;
 
   if(flag == '+')
@@ -926,7 +892,7 @@ void reload_user_list(int sig)
   if(sig != SIGHUP)     /* should never happen */
     return;
 
-  for (temp=reload;temp;temp=temp->next)
+  for (temp=reload; temp; temp=temp->next)
     temp->function(sig, 0, NULL);
   clear_userlist();
   load_userlist();

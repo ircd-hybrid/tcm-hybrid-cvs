@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.21 2001/11/25 02:58:35 bill Exp $ */
+/* $Id: userlist.h,v 1.22 2001/12/11 21:55:30 db Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -98,7 +98,7 @@ struct config_list {
 
   int nofork;
   char *conffile;
-}CONFIG_LIST;
+};
 
 /*
  * authentication structure set up in userlist.c

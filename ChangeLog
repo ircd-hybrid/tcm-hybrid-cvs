@@ -1,3 +1,26 @@
+wcampbel    2002/05/20 08:46:35 EDT	(20020520_6)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    modules              .depend Makefile.in 
+    src                  .depend 
+  Log:
+  make depend in modules/ now creates usable .depend files (blah.so instead
+    of blah.o).  This change forces people who make depend to have sed on their
+    machines.
+  Detect sed with autoconf.
+  Update .depend files for the .so change and the addition of the event system.
+  
+  Revision  Changes    Path
+  1.16      +1 -0      tcm-hybrid/autoconf/configure.in
+  1.16      +96 -60    tcm-hybrid/configure
+  1.10      +13 -12    tcm-hybrid/modules/.depend
+  1.9       +4 -1      tcm-hybrid/modules/Makefile.in
+  1.11      +6 -3      tcm-hybrid/src/.depend
+
+
+
 db          2002/05/20 01:31:06 EDT	(20020520_5)
 
   Modified files:

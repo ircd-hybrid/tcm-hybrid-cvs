@@ -1,3 +1,27 @@
+db          2002/05/26 21:37:45 EDT	(20020527_6)
+
+  Modified files:
+    include              config.h logging.h 
+    src                  bothunt.c commands.c logging.c main.c 
+                         services.c stdcmds.c tcm_io.c wingate.c 
+  Log:
+  - rationalised logging. got rid of log_problem and log replaced with tcm_log
+    added L_ERR L_WARN L_NORM
+  
+  Revision  Changes    Path
+  1.59      +3 -0      tcm-hybrid/include/config.h
+  1.8       +5 -2      tcm-hybrid/include/logging.h
+  1.113     +22 -19    tcm-hybrid/src/bothunt.c
+  1.94      +5 -3      tcm-hybrid/src/commands.c
+  1.35      +24 -33    tcm-hybrid/src/logging.c
+  1.84      +1 -1      tcm-hybrid/src/main.c
+  1.5       +2 -1      tcm-hybrid/src/services.c
+  1.76      +20 -12    tcm-hybrid/src/stdcmds.c
+  1.51      +4 -4      tcm-hybrid/src/tcm_io.c
+  1.44      +4 -4      tcm-hybrid/src/wingate.c
+
+
+
 db          2002/05/26 21:08:32 EDT	(20020527_5)
 
   Modified files:

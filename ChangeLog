@@ -1,3 +1,15 @@
+wcampbel    2002/05/10 20:39:24 EDT	(20020511_0)
+
+  Modified files:
+    modules              commands.c 
+  Log:
+  Fixed a format string bug with .op
+  
+  Revision  Changes    Path
+  1.55      +1 -1      tcm-hybrid/modules/commands.c
+
+
+
 bill        2002/05/09 20:26:32 EDT	(20020510_1)
 
   Modified files:

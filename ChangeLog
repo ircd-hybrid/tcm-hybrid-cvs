@@ -1,3 +1,15 @@
+bill        2003/05/16 12:23:32 EDT	(20030516_0)
+
+  Modified files:
+    src                  client_list.c 
+  Log:
+  - fix tcm to compile on linux
+  
+  Revision  Changes    Path
+  1.5       +1 -0      tcm-hybrid/src/client_list.c
+
+
+
 bill        2003/04/14 05:30:20 EDT	(20030414_1)
 
   Modified files:

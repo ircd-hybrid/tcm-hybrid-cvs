@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.172 2002/06/21 15:34:14 leeh Exp $
+ * $Id: bothunt.c,v 1.173 2002/06/21 16:46:46 leeh Exp $
  */
 
 #include <stdio.h>
@@ -395,13 +395,15 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q++ = '\0';
+
     if (strstr(q, " DNS"))
       send_to_all(FLAGS_SPY, "*** %s is rehashing DNS", nick);
     else
     {
       send_to_all(FLAGS_SPY, "*** %s is rehashing config file", nick);
-      print_to_server("STATS Y");
+      reload_userlist();
     }
+
     return;
   }
   else if (strstr(p, "clearing temp klines"))
@@ -532,7 +534,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     break;
 
   case SIGNAL:
-    print_to_server("STATS Y");
+    reload_userlist();
     break;
 
   /* Link with test.server[bill@255.255.255.255] established: (TS) link */ 

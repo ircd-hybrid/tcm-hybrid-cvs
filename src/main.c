@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.117 2002/06/21 13:45:22 leeh Exp $ */
+/* $Id: main.c,v 1.118 2002/06/21 16:46:47 leeh Exp $ */
 
 #include "setup.h"
 
@@ -75,6 +75,7 @@ void write_debug();
 #endif
 
 static void init_debug(int sig);
+static void handle_sighup(int sig);
 
 #ifdef HAVE_SETRLIMIT
 static void setup_corefile(void);
@@ -189,7 +190,7 @@ main(int argc, char *argv[])
   signal(SIGTERM,sighandlr);
   signal(SIGINT,sighandlr);
 #endif
-  signal(SIGHUP,reload_user_list);
+  signal(SIGHUP, handle_sighup);
   signal(SIGPIPE, SIG_IGN);
   signal(SIGTRAP, SIG_IGN);
   /* pick up the name of a pid file from the tcm.cf file */
@@ -340,6 +341,16 @@ setup_corefile(void)
 }
 #endif
 
+static void
+handle_sighup(int sig)
+{
+  if(sig != SIGHUP)
+    return;
+
+  send_to_all(FLAGS_ALL, "*** Caught SIGHUP ***");
+  reload_userlist();
+}
+  
 /*
  * strlcat and strlcpy were ripped from openssh 2.5.1p2
  * They had the following Copyright info:

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.73 2002/06/21 15:55:51 leeh Exp $ */
+/* $Id: userlist.h,v 1.74 2002/06/21 16:46:43 leeh Exp $ */
 
 /* maximum IP length in adduserhost() removeuserhost() */
 #define MAX_IP 20
@@ -135,9 +135,8 @@ void exemption_summary();
 
 #define FLAGS_VALID		0x200000 /* valid userfile */
 
-
 int  is_an_oper(char *user, char *host);
-void reload_user_list(int sig);
+void reload_userlist(void);
 
 struct config_list config_entries;
 

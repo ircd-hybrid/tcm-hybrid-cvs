@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.76 2002/06/21 15:54:56 leeh Exp $
+ * $Id: parse.c,v 1.77 2002/06/21 16:46:47 leeh Exp $
  */
 
 #include <stdio.h>
@@ -397,14 +397,13 @@ process_server(struct source_client *source_p, char *function, char *param)
 
       if (!tcm_status.am_opered)
         do_init();
-      else
-        send_umodes(tcm_status.my_nick);
       break;
 
     case RPL_YOUREOPER:
       tcm_status.am_opered = YES;
       oper_time = time(NULL);
       send_umodes(tcm_status.my_nick);
+      reload_userlist();
       clear_hash();
       break;
 	
@@ -425,10 +424,6 @@ process_server(struct source_client *source_p, char *function, char *param)
       on_stats_o(argc, argv);
       break;
 	
-    case RPL_VERSION:
-      /* version_reply(body); */
-      break;
-
     /* cant oper */
     case ERR_PASSWDMISMATCH:
     case ERR_NOOPERHOST:
@@ -496,23 +491,13 @@ do_init(void)
  * output       - NONE
  * side effects - Hopefully, set proper umodes for this tcm
  */
-
 static void
 send_umodes(char *nick)
 {
   if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
-  {
     print_to_server("MODE %s :+bcdfknrswxyzl", nick);
-    print_to_server("STATS I");
-  }
   else
-  {
     print_to_server("FLAGS +ALL");
-    print_to_server("STATS E");
-    print_to_server("STATS F");
-  }
-
-  init_opers();
 }
 
 /*

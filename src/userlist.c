@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.124 2002/06/21 15:54:56 leeh Exp $
+ * $Id: userlist.c,v 1.125 2002/06/21 16:46:47 leeh Exp $
  *
  */
 
@@ -15,7 +15,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -891,6 +890,9 @@ add_oper(char *user, char *host, char *usernick, char *password, int type)
 void
 add_exemption(char *user, char *host, int type)
 {
+  if(strcmp(host, "*") == 0)
+    return;
+
   if(exempt_list_index >= (MAXHOSTS-1))
     return;
 
@@ -1071,43 +1073,29 @@ type_show(unsigned long type)
   return(type_string);
 }
 
-/*
- * reload_user_list()
+/* reload_userlist()
  *
- * Thanks for the idea garfr
- *
- * inputs - signal number
- * output - NONE
- * side effects -
- *             reloads user list without having to restart tcm
- *
+ * inputs	-
+ * outputs	-
+ * side effects - userlist and exemption list are reloaded.
  */
-
 void
-reload_user_list(int sig)
+reload_userlist(void)
 {
-  if(sig != SIGHUP)     /* should never happen */
-    return;
-
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
-  _reload_wingate(sig, 0, NULL);
+  _reload_wingate(0, 0, NULL);
 #endif
 
+  clear_userlist();
+  load_userlist();
+
+  print_to_server("STATS Y");
+  print_to_server("STATS O");
+
   if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
-    {
-      print_to_server("STATS I");
-      print_to_server("STATS Y");
-    } 
-  else
-    {
-      print_to_server("STATS E");
-      print_to_server("STATS F");
-      print_to_server("STATS Y");
-    }
+    print_to_server("STATS I");
 
-  init_opers();
-
-  send_to_all(FLAGS_ALL, "*** Caught SIGHUP ***");
+  logclear();
 }
 
 #ifdef DEBUGMODE

@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.93 2002/06/21 14:16:29 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.94 2002/06/21 16:46:47 leeh Exp $ */
 
 #include "setup.h"
 
@@ -224,24 +224,6 @@ do_a_kline(int kline_time, char *pattern,
 		      who_did_command);
 #endif
     }
-}
-
-/*
- * init_opers()
- *
- * inputs       - NONE
- * output       - NONE
- * side effects - start determining who by default has dcc privileges
- *                by checking the stats O list of the server.
- *
- */
-
-void
-init_opers(void)
-{
-  clear_userlist();
-  load_userlist();
-  print_to_server("STATS O");
 }
 
 void

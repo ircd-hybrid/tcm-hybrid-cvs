@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.34 2002/06/21 14:07:38 leeh Exp $
+ * $Id: hash.c,v 1.35 2002/06/21 16:46:46 leeh Exp $
  */
 
 #include <stdio.h>
@@ -127,7 +127,6 @@ clear_hash(void)
     }
 
   tcm_status.doing_trace = YES;
-  print_to_server("STATS Y");
   print_to_server("TRACE");
 }
 

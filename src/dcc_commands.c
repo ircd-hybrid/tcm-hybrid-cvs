@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.128 2002/06/21 15:20:51 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.129 2002/06/21 16:46:46 leeh Exp $ */
 
 #include "setup.h"
 
@@ -579,20 +579,7 @@ m_rehash(int connnum, int argc, char *argv[])
                connections[connnum].registered_nick :
                connections[connnum].nick);
 
-  if(config_entries.hybrid && (config_entries.hybrid_version >= 6))
-    {
-      print_to_server("STATS I");
-      print_to_server("STATS Y");
-    }
-  else
-    {
-      print_to_server("STATS E");
-      print_to_server("STATS F");
-      print_to_server("STATS Y");
-    }
-
-  init_opers();
-  logclear();
+  reload_userlist();
 }
 
 void
@@ -752,7 +739,6 @@ m_hlist(int connnum, int argc, char *argv[])
  * output	- NONE
  * side effects	- user is warned they aren't an oper
  */
-
 static void
 register_oper(int connnum, char *password, char *who_did_command)
 {
@@ -788,7 +774,6 @@ register_oper(int connnum, char *password, char *who_did_command)
     }
     else
     {
-      print_to_socket(connections[connnum].socket,"illegal password");
       send_to_all(FLAGS_ALL, "illegal password from %s", who_did_command);
     }
   }

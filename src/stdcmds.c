@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.23 2001/10/29 03:56:31 db Exp $ */
+/* $Id: stdcmds.c,v 1.24 2001/10/29 17:10:06 wcampbel Exp $ */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -289,11 +289,14 @@ report(int type, int channel_send_flag, char *format,...)
   va_start(va,format);
   vsnprintf(msg, sizeof(msg)-2,format,va);
 
-  sendtoalldcc(type,msg);
+  /* Probably not a format string bug, but I'm calling it this way
+  ** for safety sake - Hwy
+  */
+  sendtoalldcc(type,"%s",msg);
 
   if( channel_send_flag & config_entries.channel_report )
     {
-      msg_mychannel(msg);
+      msg_mychannel("%s", msg);
     }
 
   va_end(va);

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.30 2001/10/29 15:02:24 bill Exp $ */
+/* $Id: bothunt.c,v 1.31 2001/10/29 17:10:06 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -1912,20 +1912,20 @@ void check_host_clones(char *host)
       find->info->reporttime = now;
       if (clonecount == 2)
       {
-	report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, notice1);
+	report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, "%s", notice1);
 	log("%s", notice1);
 
-	report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, notice0);
+	report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, "%s", notice0);
 	log("%s", notice0);
       }
       else if (clonecount < 5)
       {
-	report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, notice0);
+	report(SEND_ALL_USERS, CHANNEL_REPORT_CLONES, "%s", notice0);
 	log("%s", notice0);
       }
       else if (clonecount == 5)
       {
-	sendtoalldcc(SEND_ALL_USERS, notice0);
+	sendtoalldcc(SEND_ALL_USERS, "%s", notice0);
 	log("  [etc.]\n");
       }
     }
@@ -2051,20 +2051,20 @@ void check_virtual_host_clones(char *ip_class_c)
 	    ;
 	  else if (clonecount == 2)
 	    {
-	      report(SEND_WARN_ONLY, CHANNEL_REPORT_VCLONES, notice1);
+	      report(SEND_WARN_ONLY, CHANNEL_REPORT_VCLONES, "%s", notice1);
 	      log("%s", notice1);
 
-	      report(SEND_WARN_ONLY, CHANNEL_REPORT_VCLONES, notice0);
+	      report(SEND_WARN_ONLY, CHANNEL_REPORT_VCLONES, "%s", notice0);
 	      log("%s", notice0);
 	    }
 	  else if (clonecount < 5)
 	    {
-	      report(SEND_WARN_ONLY, CHANNEL_REPORT_VCLONES, notice0);
+	      report(SEND_WARN_ONLY, CHANNEL_REPORT_VCLONES, "%s", notice0);
 	      log("%s", notice0);
 	    }
 	  else if (clonecount == 5)
 	    {
-	      sendtoalldcc(SEND_WARN_ONLY, notice0);
+	      sendtoalldcc(SEND_WARN_ONLY, "%s", notice0);
 	      log("  [etc.]\n");
 	    }
 	}

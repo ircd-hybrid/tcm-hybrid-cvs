@@ -1,0 +1,6 @@
+config.log
+lint.out
+config.cache
+config.status
+Makefile
+tcm

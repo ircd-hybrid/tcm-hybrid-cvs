@@ -1,3 +1,20 @@
+leeh        2002/05/30 12:36:03 EDT	(20020530_7)
+
+  Modified files:
+    include              actions.h 
+    src                  actions.c commands.c 
+  Log:
+  - more cleanups.
+  - moved the action commands into actions.c, which allowed a bunch of
+    things to be made static.  hmm.  that wierd static word again.
+  
+  Revision  Changes    Path
+  1.8       +6 -16     tcm-hybrid/include/actions.h
+  1.14      +52 -5     tcm-hybrid/src/actions.c
+  1.116     +8 -105    tcm-hybrid/src/commands.c
+
+
+
 leeh        2002/05/30 11:59:35 EDT	(20020530_6)
 
   Modified files:

@@ -1,9 +1,9 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.7 2002/05/30 15:59:30 leeh Exp $ */
+/* $Id: actions.h,v 1.8 2002/05/30 16:35:59 leeh Exp $ */
 
-#define MAX_ACTION	16
+#define MAX_ACTIONS	16
 
 extern int act_sdrone;
 extern int act_sclone;
@@ -22,21 +22,18 @@ void init_actions(void);
 void init_one_action(int, char *, int, char *);
 
 void set_action(int argc, char *argv[]);
-void update_action(int, int, char *argv[]);
-void set_action_time(int action, int klinetime);
-void set_action_reason(int action, char *reason);
-void set_action_method(int action, int method);
-void set_action_strip(int action, int hoststrip);
 
 int find_action(char *name);
-
-void list_actions(int);
-void list_one_action(int, int);
 
 void handle_action(int actionid, int idented,
 		   char *nick, char *user, char *host, char *ip,
 		   char * addcmt);
 
+char *get_method_names(int method);
+char *get_method_userhost(int, char *, char *, char *);
+
+int get_method_number(char * name);
+extern struct a_entry actions[MAX_ACTIONS+1];
 
 /* Defines for an actions hoststrip field */
 
@@ -94,12 +91,5 @@ struct a_entry {
   int method;
   int hoststrip, klinetime;
 };
-
-
-char * get_method_names(int method);
-char *get_method_userhost(int, char *, char *, char *);
-
-int get_method_number(char * name);
-extern struct a_entry actions[MAX_ACTIONS+1];
 
 #endif

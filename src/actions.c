@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.13 2002/05/30 15:59:33 leeh Exp $
+ * $Id: actions.c,v 1.14 2002/05/30 16:36:01 leeh Exp $
  */
 
 #include "setup.h"
@@ -18,6 +18,7 @@
 #include <time.h>
 
 #include "config.h"
+#include "handler.h"
 #include "tcm.h"
 #include "tcm_io.h"
 #include "parse.h"
@@ -28,6 +29,7 @@
 #include "stdcmds.h"
 #include "wild.h"
 #include "hash.h"
+#include "modules.h"
 
 int act_sclone;
 int act_drone;
@@ -42,9 +44,41 @@ int act_clone;
 int act_rclone;
 struct a_entry actions[MAX_ACTIONS+1];
 
+static int add_action(char *name);
+static void update_action(int connnum, int argc, char *argv[]);
+
+static void m_action(int connnum, int argc, char *argv[]);
+static void list_actions(int conn_num);
+static void list_one_action(int conn_num, int action);
+
+static void set_action_time(int action, int time);
+static void set_action_reason(int action, char *reason);
+static void set_action_method(int action, int method);
+static void set_action_strip(int action, int hoststrip);
+
+struct dcc_command actions_msgtab = {
+  "actions", NULL, {m_action, m_action, m_action}
+};
+struct dcc_command action_msgtab = {
+  "action", NULL, {m_unregistered, m_action, m_action}
+};
+
+void
+m_action(int connnum, int argc, char *argv[])
+{
+  if(argc == 1)
+    list_actions(connnum);
+  else if(argc == 2)
+    list_one_action(connnum, find_action(argv[1]));
+  else
+    update_action(connnum, argc, argv);
+}
+
 void
 init_actions(void)
 {
+  add_dcc_handler(&actions_msgtab);
+  add_dcc_handler(&action_msgtab);
   init_one_action(act_cflood, "cflood", HS_CFLOOD, REASON_CFLOOD);
   init_one_action(act_vclone, "vclone", HS_VCLONE, REASON_VCLONE);
   init_one_action(act_flood, "flood", HS_FLOOD, REASON_FLOOD);
@@ -179,9 +213,22 @@ update_action(int conn_num, int argc, char *argv[])
     {
       expand_args(reason, MAX_REASON, argc-i, argv+i);
       set_action_reason(actionid, reason);
-      return;
+      break;
     }
   }
+
+  if(actions[actionid].klinetime > 0)
+    print_to_socket(connections[conn_num].socket,
+		    "%s action now: %s %d, reason '%s'",
+		    actions[actionid].name,
+		    get_method_names(actions[actionid].method),
+		    actions[actionid].klinetime, actions[actionid].reason);
+  else
+    print_to_socket(connections[conn_num].socket,
+		    "%s action now: %s %d, reason '%s'",
+		    actions[actionid].name,
+		    get_method_names(actions[actionid].method),
+		    actions[actionid].reason);
 }
 
 void
@@ -642,12 +689,12 @@ get_method_names(int method)
     strcat(namebuf, "ircwarn ");
   if (method & METHOD_DCC_WARN)
     strcat(namebuf, "dccwarn ");
-  if (method & METHOD_TKLINE)
-    strcat(namebuf, "tkline ");
-  if (method & METHOD_KLINE)
-    strcat(namebuf, "kline ");
   if (method & METHOD_DLINE)
     strcat(namebuf, "dline ");
+  if (method & METHOD_KLINE)
+    strcat(namebuf, "kline ");
+  if (method & METHOD_TKLINE)
+    strcat(namebuf, "tkline ");
   if (namebuf[0])
     namebuf[strlen(namebuf)-1] = '\0';
   return namebuf;

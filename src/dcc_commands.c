@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.115 2002/05/30 15:59:33 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.116 2002/05/30 16:36:01 leeh Exp $ */
 
 #include "setup.h"
 
@@ -48,7 +48,6 @@
 #include <crypt.h>
 #endif
 
-static void set_actions(int sock, char *key, char *act, int duration, char *reason);
 static void register_oper(int connnum, char *password, char *who_did_command);
 static void list_opers(int sock);
 static void list_exemptions(int sock);
@@ -66,13 +65,11 @@ static void m_klink(int connnum, int argc, char *argv[]);
 static void m_kdrone(int connnum, int argc, char *argv[]);
 static void m_kbot(int connnum, int argc, char *argv[]);
 static void m_kill(int connnum, int argc, char *argv[]);
-static void m_use_kaction(int connnum, int argc, char *argv[]);
+static void m_kaction(int connnum, int argc, char *argv[]);
 static void m_kspam(int connnum, int argc, char *argv[]);
 static void m_register(int connnum, int argc, char *argv[]);
 static void m_opers(int connnum, int argc, char *argv[]);
 static void m_testline(int connnum, int argc, char *argv[]);
-static void m_actions(int connnum, int argc, char *argv[]);
-static void m_action(int connnum, int argc, char *argv[]);
 static void m_set(int connnum, int argc, char *argv[]);
 static void m_uptime(int connnum, int argc, char *argv[]);
 static void m_exemptions(int connnum, int argc, char *argv[]);
@@ -247,7 +244,7 @@ m_kill(int connnum, int argc, char *argv[])
 }
 
 void
-m_use_kaction(int connnum, int argc, char *argv[])
+m_kaction(int connnum, int argc, char *argv[])
 {
   char *userhost;
   char *p;
@@ -335,28 +332,6 @@ m_testline(int connnum, int argc, char *argv[])
   snprintf(testlines.umask, sizeof(testlines.umask), "%s", argv[1]);
   testlines.index = connnum;
   print_to_server("TESTLINE %s", argv[1]);
-}
-
-void
-m_actions(int connnum, int argc, char *argv[])
-{
-  list_actions(connnum);
-}
-
-void
-m_action(int connnum, int argc, char *argv[])
-{
-  /* .action */
-  if(argc == 1)
-    list_actions(connnum);
-
-  /* .action clone */
-  else if(argc == 2)
-    list_one_action(connnum, find_action(argv[1]));
-
-  /* changing an action */
-  else
-    update_action(connnum, argc, argv);
 }
 
 void
@@ -775,70 +750,6 @@ m_hlist(int connnum, int argc, char *argv[])
 }
 
 /*
- * set_actions
- *
- * inputs	- 
- * output	- NONE
- * side effects -
- */
-
-static void 
-set_actions(int sock, char *key, char *methods, int duration, char *reason)
-{
-  int i;
-  char * p;
-  int newmethods = 0;
-
-  while (methods)
-    {
-      p = strchr(methods, ' ');
-      if (p) 
-	*p++ = 0;
-      /* Lookup method constant based on method name */
-      i = get_method_number(methods);
-      if (i)
-	{
-	  newmethods |= i;
-	}
-      else
-	{
-	  print_to_socket(sock, "%s is not a valid method", methods);
-	  return;
-	}
-      methods = p;
-    }
-
-  if (key == NULL)
-    key = "*";
-
-  print_to_socket(sock, "Updating actions matching '%s'", key);
-
-  for (i=0; i<MAX_ACTIONS; i++)
-    {
-      if (actions[i].name[0])
-	{
-	  if (!wldcmp(key, actions[i].name))
-	    {
-	      if (newmethods) 
-		set_action_method(i, newmethods);
-	      if (reason)
-		set_action_reason(i, reason);
-	      if (duration)
-		set_action_time(i, duration);
-	
-		  print_to_socket(
-				  sock,
-			  "%s action now: %s, duration %d, reason '%s'",
-				  actions[i].name,
-				  get_method_names(actions[i].method),
-				  actions[i].klinetime,
-				  actions[i].reason);
-	    }
-	}
-    }
-}
-
-/*
  * register_oper
  *
  * inputs	- socket
@@ -977,25 +888,25 @@ struct dcc_command kline_msgtab = {
  "kline", NULL, {m_unregistered, m_kline, m_kline}
 };
 struct dcc_command kclone_msgtab = {
- "kclone", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
+ "kclone", NULL, {m_unregistered, m_kaction, m_kaction}
 };
 struct dcc_command kflood_msgtab = {
- "kflood", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
+ "kflood", NULL, {m_unregistered, m_kaction, m_kaction}
 };
 struct dcc_command klink_msgtab = {
- "klink", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
+ "klink", NULL, {m_unregistered, m_kaction, m_kaction}
 };
 struct dcc_command kdrone_msgtab = {
- "kdrone", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
+ "kdrone", NULL, {m_unregistered, m_kaction, m_kaction}
 };
 struct dcc_command kbot_msgtab = {
- "kbot", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
+ "kbot", NULL, {m_unregistered, m_kaction, m_kaction}
 };
 struct dcc_command kill_msgtab = {
  "kill", NULL, {m_unregistered, m_kill, m_kill}
 };
 struct dcc_command kspam_msgtab = {
- "kspam", NULL, {m_unregistered, m_use_kaction, m_use_kaction}
+ "kspam", NULL, {m_unregistered, m_kaction, m_kaction}
 };
 struct dcc_command register_msgtab = {
  "register", NULL, {m_register, m_register, m_register}
@@ -1005,12 +916,6 @@ struct dcc_command opers_msgtab = {
 };
 struct dcc_command testline_msgtab = {
  "testline", NULL, {m_unregistered, m_testline, m_testline}
-};
-struct dcc_command actions_msgtab = {
- "actions", NULL, {m_actions, m_actions, m_actions}
-};
-struct dcc_command action_msgtab = {
- "action", NULL, {m_unregistered, m_action, m_action}
 };
 struct dcc_command uptime_msgtab = {
  "uptime", NULL, {m_uptime, m_uptime, m_uptime}
@@ -1127,8 +1032,6 @@ init_commands(void)
   add_dcc_handler(&register_msgtab);
   add_dcc_handler(&opers_msgtab);
   add_dcc_handler(&testline_msgtab);
-  add_dcc_handler(&actions_msgtab);
-  add_dcc_handler(&action_msgtab);
   add_dcc_handler(&exemptions_msgtab);
   add_dcc_handler(&connections_msgtab);
   add_dcc_handler(&whom_msgtab);

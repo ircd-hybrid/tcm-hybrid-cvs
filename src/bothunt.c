@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.177 2002/06/23 13:24:30 wcampbel Exp $
+ * $Id: bothunt.c,v 1.178 2002/06/23 17:18:03 db Exp $
  */
 
 #include <stdio.h>
@@ -497,7 +497,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *q++ = '\0';
 
-    strcpy((char *)&userinfo.ip_host, p);
+    strlcpy(userinfo.ip_host, p, MAX_IP);
 
     if ((p = strchr(q, '{')) == NULL)
       return;
@@ -506,8 +506,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     *q = '\0';
 
-    strcpy((char *)&userinfo.class, p);
-
+    strlcpy(userinfo.class, p, MAX_CLASS);
     add_user_host(&userinfo, NO, NO);
     break;
 

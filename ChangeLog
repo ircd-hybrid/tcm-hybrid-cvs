@@ -1,3 +1,19 @@
+db          2002/06/04 17:30:15 EDT	(20020604_6)
+
+  Modified files:
+    include              bothunt.h 
+    src                  parse.c 
+  Log:
+  - hard coded constants (18) rule
+  - got rid of an extern doingtrace in bothunt.h
+  - got rid of report_bot_kline() no longer used
+  
+  Revision  Changes    Path
+  1.47      +1 -7      tcm-hybrid/include/bothunt.h
+  1.52      +8 -4      tcm-hybrid/src/parse.c
+
+
+
 leeh        2002/06/04 17:21:45 EDT	(20020604_5)
 
   Modified files:

@@ -1,3 +1,10 @@
+*** 20010826_1 by bill
+- added a modified patch by Walter Campbell:
+   fixes a few typos
+   adds idle time to DCC .whom output
+   replaces class_name in usage output to <class name> (it looks prettier, dunchya know?)
+
+
 *** 20010815_2 by bill
 - do not need to report offenders twice per offense.
 

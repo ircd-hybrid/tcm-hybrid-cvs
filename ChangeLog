@@ -1,3 +1,13 @@
+*** 20001110_1 by bill
+
+Added support for ircd-comstud-1.11REL
+ -Compatibility for different syntaxed messages (trace, client connects, etc)
+ -Compatibility for non-numerical connection class identifications (and numerical still)
+ -Updated wingate class code accordingly
+
+Bumped version to 2.5.1
+
+
 *** 20000930_1 by bill
 
 changed comment for DETECT_DNS_SPOOFERS

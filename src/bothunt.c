@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.132 2002/05/28 18:47:15 leeh Exp $
+ * $Id: bothunt.c,v 1.133 2002/05/28 19:40:53 db Exp $
  */
 
 #include <stdio.h>
@@ -73,48 +73,49 @@ static struct nick_change_entry nick_changes[NICK_CHANGE_TABLE_SIZE];
 struct msg_to_action
 {
   char *msg_to_mon;
+  int  len;
   int  action;
 };
 
 struct msg_to_action msgs_to_mon[] = {
-  {"Client connecting: ", CONNECT},
-  {"Client exiting: ", EXITING},
-  {"Unauthorized ", UNAUTHORIZED},
-  {"Unauthorised client connection", UNAUTHORIZED},
-  {"Nick change:", NICKCHANGE},
-  {"Nick flooding detected by:", CS_NICKFLOODING},
-  {"Rejecting ", CS_CLONES},
-  {"Clonebot killed:",CS_CLONEBOT_KILLED},
-  {"Idle time limit exceeded for ", IGNORE},
-  {"LINKS ", LINK_LOOK},
-  {"KLINE ", IGNORE},  
-  {"STATS ", STATS},
-  {"Got signal", SIGNAL},
-  {"Nick collision on", IGNORE},
-  {"Send message", IGNORE},
-  {"Ghosted", IGNORE},
-  {"connect failure",IGNORE},
-  {"Invisible client count",IGNORE},
-  {"Oper count off by",IGNORE},
-  {"User count off by",IGNORE},
-  {"Link with", LINKWITH},
-  {"Received SQUIT", SQUITOF},
-  {"motd requested by",MOTDREQ},
-  {"Flooder", FLOODER},
-  {"User", SPAMBOT},
-  {"I-line mask", IGNORE},
-  {"I-line is full", ILINEFULL},
-  {"*** Banned: ", BANNED},
-  {"*** You have been D-lined", BANNED},
-  {"Possible Drone Flooder", DRONE},
-  {"X-line Rejecting", XLINEREJ},
-  {"Invalid username:", INVALIDUH},
-  {"Server", SERVER},
-  {"Failed OPER attempt", FAILEDOPER},
-  {"info requested by", INFOREQUESTED},
-  {"No aconf found", NOACONFFOUND},
-  {"Quarantined nick", QUARANTINE},
-  {(char *)NULL, INVALID}
+  {MSG_CLIENT_CONNECTING, sizeof(MSG_CLIENT_CONNECTING)-1, CONNECT},
+  {MSG_CLIENT_EXITING, sizeof(MSG_CLIENT_EXITING)-1, EXITING},
+  {MSG_UNAUTHORIZED, sizeof(MSG_UNAUTHORIZED)-1, UNAUTHORIZED},
+  {MSG_UNAUTHORISED, sizeof(MSG_UNAUTHORISED)-1, UNAUTHORIZED},
+  {MSG_NICK_CHANGE, sizeof(MSG_NICK_CHANGE)-1, NICKCHANGE},
+  {MSG_NICK_FLOODING, sizeof(MSG_NICK_FLOODING)-1, CS_NICKFLOODING},
+  {MSG_REJECTING, sizeof(MSG_REJECTING)-1, CS_CLONES},
+  {MSG_CLONEBOT_KILLED, sizeof(MSG_CLONEBOT_KILLED)-1, CS_CLONEBOT_KILLED},
+  {MSG_IDLE_TIME, sizeof(MSG_IDLE_TIME)-1, IGNORE},
+  {MSG_LINKS, sizeof(MSG_LINKS)-1, LINK_LOOK},
+  {MSG_KLINE, sizeof(MSG_KLINE)-1, IGNORE},  
+  {MSG_STATS, sizeof(MSG_STATS)-1, STATS},
+  {MSG_GOT_SIGNAL, sizeof(MSG_GOT_SIGNAL)-1, SIGNAL},
+  {MSG_NICK_COLLISION, sizeof(MSG_NICK_COLLISION)-1, IGNORE},
+  {MSG_SEND_MESSAGE, sizeof(MSG_SEND_MESSAGE)-1, IGNORE},
+  {MSG_GHOSTED, sizeof(MSG_GHOSTED)-1, IGNORE},
+  {MSG_CONNECT_FAILURE, sizeof(MSG_CONNECT_FAILURE)-1, IGNORE},
+  {MSG_INVISIBLE_CLIENT, sizeof(MSG_INVISIBLE_CLIENT)-1, IGNORE},
+  {MSG_OPER_COUNT_OFF, sizeof(MSG_OPER_COUNT_OFF)-1, IGNORE},
+  {MSG_USER_COUNT_OFF, sizeof(MSG_USER_COUNT_OFF)-1, IGNORE},
+  {MSG_LINK_WITH, sizeof(MSG_LINK_WITH)-1, LINKWITH},
+  {MSG_SQUIT, sizeof(MSG_SQUIT)-1, SQUITOF},
+  {MSG_MOTD, sizeof(MSG_MOTD)-1, MOTDREQ},
+  {MSG_FLOODER, sizeof(MSG_FLOODER)-1, FLOODER},
+  {MSG_USER, sizeof(MSG_USER)-1, SPAMBOT},
+  {MSG_I_LINE_MASK, sizeof(MSG_I_LINE_MASK)-1, IGNORE},
+  {MSG_I_LINE_FULL, sizeof(MSG_I_LINE_FULL)-1, ILINEFULL},
+  {MSG_BANNED, sizeof(MSG_BANNED)-1, BANNED},
+  {MSG_D_LINED, sizeof(MSG_D_LINED)-1, BANNED},
+  {MSG_DRONE_FLOODER, sizeof(MSG_DRONE_FLOODER)-1, DRONE},
+  {MSG_X_LINE, sizeof(MSG_X_LINE)-1, XLINEREJ},
+  {MSG_INVALID_USERNAME, sizeof(MSG_INVALID_USERNAME)-1, INVALIDUH},
+  {MSG_SERVER, sizeof(MSG_SERVER)-1, SERVER},
+  {MSG_FAILED_OPER, sizeof(MSG_FAILED_OPER)-1, FAILEDOPER},
+  {MSG_INFO_REQUESTED, sizeof(MSG_INFO_REQUESTED)-1, INFOREQUESTED},
+  {MSG_NO_ACONF, sizeof(MSG_NO_ACONF)-1, NOACONFFOUND},
+  {MSG_QUARANTINED, sizeof(MSG_QUARANTINED)-1, QUARANTINE},
+  {NULL, 0, INVALID}
 };	
 
 struct connect_flood_entry connect_flood[CONNECT_FLOOD_TABLE_SIZE];
@@ -331,14 +332,13 @@ on_server_notice(int argc, char *argv[])
 
   for (i = 0; msgs_to_mon[i].msg_to_mon; i++)
   {
-    if (strncmp(p,msgs_to_mon[i].msg_to_mon,
-		strlen(msgs_to_mon[i].msg_to_mon)) == 0)
+    if (strncmp(p, msgs_to_mon[i].msg_to_mon, msgs_to_mon[i].len) == 0)
       break;
   }
 
   if (msgs_to_mon[i].msg_to_mon != NULL)
   {
-    q = p+strlen(msgs_to_mon[i].msg_to_mon);
+    q = p + msgs_to_mon[i].len;
     faction = msgs_to_mon[i].action;
   }
   else

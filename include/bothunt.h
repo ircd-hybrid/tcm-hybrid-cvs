@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.41 2002/05/28 04:32:22 db Exp $ */
+/* $Id: bothunt.h,v 1.42 2002/05/28 19:40:50 db Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -10,6 +10,44 @@ void print_motd(int);
 /* XXXX */
 void _config(int, int, char *argv[]);
 void _reload_wingate(int, int, char *argv[]);
+
+#define MSG_CLIENT_CONNECTING	"Client connecting: "
+#define MSG_CLIENT_EXITING	"Client exiting: "
+#define MSG_UNAUTHORIZED	"Unauthorized "
+#define MSG_UNAUTHORISED	"Unauthorised client connection"
+#define MSG_NICK_CHANGE		"Nick change:"
+#define MSG_NICK_FLOODING	"Nick flooding detected by:"
+#define MSG_REJECTING		"Rejecting "
+#define MSG_CLONEBOT_KILLED	"Clonebot killed:"
+#define MSG_IDLE_TIME		"Idle time limit exceeded for "
+#define MSG_LINKS		"LINKS "
+#define MSG_KLINE		"KLINE "
+#define MSG_STATS		"STATS "
+#define MSG_GOT_SIGNAL		"Got signal"
+#define MSG_NICK_COLLISION	"Nick collision on"
+#define MSG_SEND_MESSAGE	"Send message"
+#define MSG_GHOSTED		"Ghosted"
+#define MSG_CONNECT_FAILURE	"connect failure"
+#define MSG_INVISIBLE_CLIENT	"Invisible client count"
+#define MSG_OPER_COUNT_OFF	"Oper count off by"
+#define MSG_USER_COUNT_OFF	"User count off by"
+#define MSG_LINK_WITH		"Link with"
+#define MSG_SQUIT		"Received SQUIT"
+#define MSG_MOTD		"motd requested by"
+#define MSG_FLOODER		"Flooder"
+#define MSG_USER		"User"
+#define MSG_I_LINE_MASK		"I-line mask"
+#define MSG_I_LINE_FULL		"I-line is full"
+#define MSG_BANNED		"*** Banned: "
+#define MSG_D_LINED		"*** You have been D-lined"
+#define MSG_DRONE_FLOODER	"Possible Drone Flooder"
+#define MSG_X_LINE		"X-line Rejecting"
+#define MSG_INVALID_USERNAME	"Invalid username:"
+#define MSG_SERVER		"Server"
+#define MSG_FAILED_OPER		"Failed OPER attempt"
+#define MSG_INFO_REQUESTED	"info requested by"
+#define MSG_NO_ACONF		"No aconf found"
+#define MSG_QUARANTINED		"Quaratined nick"
 
 #define IGNORE		-1
 #define CONNECT		 0
@@ -80,40 +118,15 @@ struct connect_flood_entry
   time_t last_connect;
 };
 
-extern int maxconns;
-
-void ilinemask(char *body);
-
 
 #ifdef BOT_WARN
 void bot_report_kline(char *,char *);
 #endif
 
 void report_nick_flooders(int sock);
-void list_nicks(int sock,char *nick,int regex);
-void list_virtual_users(int sock,char *userhost,int regex);
-void list_users(int sock,char *userhost,int regex);
-void kill_list_users(int sock,char *userhost,char *reason,int regex);
-void report_multi(int sock,int nclones);
-void report_multi_user(int sock,int nclones);
-#ifdef VIRTUAL
-void report_multi_virtuals(int sock,int nclones);
-#endif
 void report(int type, int channel_send_flag, char *format,...);
-void report_mem(int sock);
-void report_clones(int sock);
-void report_failures(int sock,int num);
-void check_reconnect_clones(char *);
 
 void init_link_look_table(void);
-void report_failures(int sock, int num);
-void report_domains(int sock, int num);
-void report_multi_host(int sock,int nclones);
-void report_vbots(int sock,int nclones);
-void kill_add_report(char *);
-void report_vbots(int sock,int nclones);
-void report_domains(int sock,int num);
-void list_class(int sock,char *class_to_find,int total_only);
 
 extern void init_bothunt(void);
 extern void free_bothunt(void);
@@ -125,5 +138,4 @@ extern void on_stats_i(int argc, char *argv[]);
 extern void on_server_notice(int argc, char *argv[]);
 extern struct s_testline testlines;
 extern int doingtrace;
-extern char myclass[MAX_CLASS]; /* XXX ewww */
 #endif

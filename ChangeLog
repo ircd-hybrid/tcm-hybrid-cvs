@@ -1,3 +1,12 @@
+*** 20011017_3 by wcampbel
+Added .rehash.  It works but does not properly clean up connections.
+  Someone who knows current tcm code better will need to handle this.
+Removed the less than polite Makefile.  There is no reason for it...
+  If people cannot run ./configure, they shouldn't be running the service
+  in the first place.  This Makefile also interferes with cvs update's and
+  commits if you don't make distclean first.
+
+
 *** 20011017_2 by wcampbel
 Doc cleanups
 Minor cosmetic code cleanups

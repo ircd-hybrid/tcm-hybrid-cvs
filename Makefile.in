@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.18 2002/04/03 00:24:09 bill Exp $
+# $Id: Makefile.in,v 1.19 2002/04/04 22:17:44 bill Exp $
 CC = @CC@
 RM = @RM@
 MKDEP = ${CC} -MM
@@ -64,7 +64,7 @@ install:
 
 	mv -f bin/tcm bin/mkpasswd @prefix@/bin/
 
-        -@if [ ! -e @prefix@/etc/tcm.cf ] ; then \
+	-@if [ ! -e @prefix@/etc/tcm.cf ] ; then \
 	echo mv etc/tcm.cf @prefix@/etc/ ; \
         mv etc/tcm.cf @prefix@/etc/ ; \
         fi

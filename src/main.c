@@ -1,16 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/************************************************************
-* Mrsbot (used in tcm) by Hendrix <jimi@texas.net>          *
-*                                                           *
-*   Main program is here.                                   *
-*   Code to log into server and parse server commands       *
-*   and call routine based on the type of message (public,  *
-*   private, mode change, etc.)                             *
-*   Based heavily on Adam Roach's bot skeleton.             *
-************************************************************/
-
-/* $Id: main.c,v 1.38 2002/05/20 00:52:52 wcampbel Exp $ */
+/* $Id: main.c,v 1.39 2002/05/20 01:59:55 db Exp $ */
 
 #include "setup.h"
 
@@ -36,13 +26,14 @@
 # include <sys/socketvar.h>
 #endif
 
-
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <fcntl.h>
+
 #include "config.h"
 #include "tcm.h"
+#include "event.h"
 #include "serverif.h"
 #include "userlist.h"
 #include "bothunt.h"
@@ -71,6 +62,8 @@ extern void add_common_function(int type, void *function);
 
 struct connection connections[MAXDCCCONNS+1]; /* plus 1 for the server, silly */
 struct s_testline testlines;
+
+time_t CurrentTime;
 
 char ourhostname[MAX_HOST];   /* This is our hostname with domainname */
 char serverhost[MAX_HOST];    /* Server tcm will use. */
@@ -521,21 +514,21 @@ char *get_action_reason(char *name)
 #endif
 
 /*
-** main()
-**   Duh, hey chief... What does a main do?
-**   Parameters:
-**     argc - Count of command line arguments
-**     argv - List of command line arguments
-**   Returns: When the program dies.
-**   PDL:
-**  
-**  tcm only accepts one argument now, the name of a tcm.cf file, then
-**  set up assorted things: random numbers, handlers for seg faults and timers,
-**  Attach tcm to the server, sign her on to IRC, join her up
-**  to the channel, and loop through processing incoming server messages
-**  until tcm is told to quit, is killed, or gives up reconnecting.
-*/
-int main(int argc, char *argv[])
+ * main()
+ *   Parameters:
+ *     argc - Count of command line arguments
+ *     argv - List of command line arguments
+ *   Returns: When the program dies.
+ *   PDL:
+ *  
+ *  tcm only accepts one argument now, the name of a tcm.cf file, then
+ *  set up assorted things: random numbers, handlers for seg faults and timers,
+ *  Attach tcm to the server, sign her on to IRC, join her up
+ *  to the channel, and loop through processing incoming server messages
+ *  until tcm is told to quit, is killed, or gives up reconnecting.
+ */
+int
+main(int argc, char *argv[])
 {
   int i;
   char c;
@@ -555,6 +548,7 @@ int main(int argc, char *argv[])
   init_hash_tables();		/* clear those suckers out */
   init_tokenizer();		/* in token.c */
   init_userlist();
+  eventInit();			/* event.c stolen from ircd */
 
   config_entries.conffile=NULL;
 

@@ -1,10 +1,12 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.25 2002/05/10 00:26:24 bill Exp $ */
+/* $Id: tcm.h,v 1.26 2002/05/20 01:59:49 db Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
+
+extern time_t CurrentTime;
 
 #define MAX_ARGV	80
 

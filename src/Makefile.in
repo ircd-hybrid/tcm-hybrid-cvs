@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.16 2002/05/06 13:37:28 wcampbel Exp $
+# $Id: Makefile.in,v 1.17 2002/05/20 01:59:55 db Exp $
 
 CC = @CC@
 RM = @RM@
@@ -21,6 +21,7 @@ LDFLAGS = @LDFLAGS@
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
 
 SOURCES = 	main.c\
+		event.c\
 		modules.c\
 		logging.c\
 		stdcmds.c\

@@ -1,3 +1,20 @@
+leeh        2002/05/23 19:09:47 EDT	(20020524_0)
+
+  Modified files:
+    include              modules.h 
+    src                  main.c modules.c parse.c tcm_io.c 
+  Log:
+  - ripped out more handler code
+  
+  Revision  Changes    Path
+  1.16      +0 -6      tcm-hybrid/include/modules.h
+  1.49      +2 -14     tcm-hybrid/src/main.c
+  1.28      +1 -16     tcm-hybrid/src/modules.c
+  1.6       +3 -4      tcm-hybrid/src/parse.c
+  1.5       +1 -3      tcm-hybrid/src/tcm_io.c
+
+
+
 bill        2002/05/23 17:59:50 EDT	(20020523_9)
 
   Modified files:

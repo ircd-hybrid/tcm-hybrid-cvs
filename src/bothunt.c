@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.43 2001/11/29 03:09:43 bill Exp $ */
+/* $Id: bothunt.c,v 1.44 2001/12/04 18:20:56 bill Exp $ */
 
 #include "setup.h"
 
@@ -81,6 +81,7 @@ static char removefromhash(struct hashrec *table[], char *key, char *hostmatch,
                     char *usermatch, char *nickmatch);
 static void check_host_clones(char *);
 static void check_virtual_host_clones(char *);
+static void check_reconnect_clones(char *);
 
 void _ontraceuser(int connnum, int argc, char *argv[]);
 void _ontraceclass(int connnum, int argc, char *argv[]);
@@ -150,6 +151,17 @@ struct msg_to_action msgs_to_mon[] = {
 extern struct connection connections[];
 extern struct s_testline testlines;
 extern int doingtrace;
+
+#define RECONNECT_CLONE_TABLE_SIZE 50
+
+struct reconnect_clone_entry
+{
+  char *host;
+  int count;
+  time_t first;
+};
+
+struct reconnect_clone_entry reconnect_clone[RECONNECT_CLONE_TABLE_SIZE];
 
 #define LINK_LOOK_TABLE_SIZE 10
 
@@ -1739,6 +1751,7 @@ static void adduserhost(char *nick,
   {
     check_host_clones(userinfo->host);
     check_virtual_host_clones(newuser->ip_class_c);
+    check_reconnect_clones(userinfo->host);
   }
 }
 
@@ -1845,6 +1858,55 @@ static char* find_domain(char* host)
   else
   {
     return(ip_domain);
+  }
+}
+
+/*
+ * check_reconnect_clones()
+ *
+ * inputs	- host
+ * outputs	- none
+ * side effects -
+ */
+
+static void check_reconnect_clones(char *host)
+{
+  int i;
+  time_t now = time(NULL);
+
+  if (host == NULL)  /* I don't know how this could happen.  ::shrug:: */
+    return;
+
+  for ( i=0; i<RECONNECT_CLONE_TABLE_SIZE ; ++i )
+  {
+    if (reconnect_clone[i].host &&
+        !strcasecmp(reconnect_clone[i].host, host))
+    {
+      ++reconnect_clone[i].count;
+
+      if ((reconnect_clone[i].count > CLONERECONCOUNT) &&
+          (now - reconnect_clone[i].first <= CLONERECONFREQ))
+      {
+        suggest_action(get_action_type("clone"), NULL, NULL, host, NO, NO);
+        report(SEND_WARN_ONLY, CHANNEL_REPORT_CLONES,
+               "Reconnect clones found coming from *@%s...\n", host);
+
+        reconnect_clone[i].host = NULL;
+        reconnect_clone[i].count = 0;
+        reconnect_clone[i].first = 0;
+      }
+      return;
+    }
+  }
+  for ( i=0 ; i<RECONNECT_CLONE_TABLE_SIZE ; ++i )
+  {
+    if (reconnect_clone[i].host == NULL)
+    {
+      reconnect_clone[i].host = host;
+      reconnect_clone[i].first = now;
+      reconnect_clone[i].count = 1;
+      break;
+    }
   }
 }
 

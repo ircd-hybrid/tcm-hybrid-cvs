@@ -1,3 +1,15 @@
+db          2002/06/23 15:24:15 EDT	(20020623_5)
+
+  Modified files:
+    src                  bothunt.c 
+  Log:
+  - fix EXITING CONNECTING to do the same thing
+  
+  Revision  Changes    Path
+  1.181     +18 -13    tcm-hybrid/src/bothunt.c
+
+
+
 leeh        2002/06/23 15:15:08 EDT	(20020623_4)
 
   Modified files:

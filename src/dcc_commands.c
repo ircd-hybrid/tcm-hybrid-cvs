@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.70 2002/05/24 15:17:45 db Exp $ */
+/* $Id: dcc_commands.c,v 1.71 2002/05/24 15:38:30 db Exp $ */
 
 #include "setup.h"
 
@@ -77,7 +77,8 @@ extern struct s_testline testlines;
 extern char * get_method_names(int method);
 extern int get_method_number(char * name);
 
-void m_vlist(int connnum, int argc, char *argv[])
+void
+m_vlist(int connnum, int argc, char *argv[])
 {
 #ifdef HAVE_REGEX_H
   if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
@@ -97,7 +98,8 @@ void m_vlist(int connnum, int argc, char *argv[])
 #endif
 }
 
-void m_class(int connnum, int argc, char *argv[])
+void
+m_class(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
     print_to_socket(connections[connnum].socket,
@@ -106,7 +108,8 @@ void m_class(int connnum, int argc, char *argv[])
     list_class(connections[connnum].socket, argv[1], NO);
 }
 
-void m_classt(int connnum, int argc, char *argv[])
+void
+m_classt(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
     print_to_socket(connections[connnum].socket,
@@ -115,7 +118,8 @@ void m_classt(int connnum, int argc, char *argv[])
     list_class(connections[connnum].socket, argv[1], YES);
 }
 
-void m_killlist(int connnum, int argc, char *argv[])
+void
+m_killlist(int connnum, int argc, char *argv[])
 {
   char reason[MAX_REASON];
 
@@ -171,7 +175,8 @@ void m_killlist(int connnum, int argc, char *argv[])
 #endif
 }
 
-void m_kline(int connnum, int argc, char *argv[])
+void
+m_kline(int connnum, int argc, char *argv[])
 {
   char buff[MAX_BUFF];
   int kline_time;
@@ -204,7 +209,8 @@ void m_kline(int connnum, int argc, char *argv[])
   }
 }
 
-void m_kperm(int connnum, int argc, char *argv[])
+void
+m_kperm(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
     print_to_socket(connections[connnum].socket,
@@ -214,7 +220,8 @@ void m_kperm(int connnum, int argc, char *argv[])
                connections[connnum].registered_nick);
 }
 
-void m_kill(int connnum, int argc, char *argv[])
+void
+m_kill(int connnum, int argc, char *argv[])
 {
   char reason[1024];
 
@@ -243,14 +250,16 @@ void m_kill(int connnum, int argc, char *argv[])
   print_to_server("KILL %s :%s", argv[1], reason);
 }
 
-void m_use_kaction(int connnum, int argc, char *argv[])
+void
+m_use_kaction(int connnum, int argc, char *argv[])
 {
   print_to_socket(connections[connnum].socket,
 		  "%s is deprecated, please use .kaction", argv[0]);
 
 }
 
-void m_kaction(int connnum, int argc, char *argv[])
+void
+m_kaction(int connnum, int argc, char *argv[])
 {
   int actionid;
   int kline_time = 0;
@@ -301,7 +310,8 @@ void m_kaction(int connnum, int argc, char *argv[])
 }
 
 
-void m_hmulti(int connnum, int argc, char *argv[])
+void
+m_hmulti(int connnum, int argc, char *argv[])
 {
   int t;
 
@@ -319,7 +329,8 @@ void m_hmulti(int connnum, int argc, char *argv[])
   report_multi_host(connections[connnum].socket, t);
 }
 
-void m_umulti(int connnum, int argc, char *argv[])
+void
+m_umulti(int connnum, int argc, char *argv[])
 {
   int t;
 
@@ -337,7 +348,8 @@ void m_umulti(int connnum, int argc, char *argv[])
   report_multi_user(connections[connnum].socket, t);
 }
 
-void m_register(int connnum, int argc, char *argv[])
+void
+m_register(int connnum, int argc, char *argv[])
 {
   if (connections[connnum].type & TYPE_REGISTERED)
   {
@@ -357,7 +369,8 @@ void m_opers(int connnum, int argc, char *argv[])
   list_opers(connections[connnum].socket);
 }
 
-void m_testline(int connnum, int argc, char *argv[])
+void
+m_testline(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
   {
@@ -376,15 +389,16 @@ void m_testline(int connnum, int argc, char *argv[])
   print_to_server("TESTLINE %s", argv[1]);
 }
 
-void m_actions(int connnum, int argc, char *argv[])
+void
+m_actions(int connnum, int argc, char *argv[])
 {
   print_to_socket(connections[connnum].socket,
 		  "%s is deprecated, use .action", argv[0]);
 }
 
-void m_action(int connnum, int argc, char *argv[])
+void
+m_action(int connnum, int argc, char *argv[])
 {
-  //  char *p, dccbuff[MAX_BUFF];
   int kline_time, i;
   char methods[MAX_BUFF], reason[MAX_BUFF];
 
@@ -445,7 +459,8 @@ void m_action(int connnum, int argc, char *argv[])
   }
 }
 
-void m_set(int connnum, int argc, char *argv[])
+void
+m_set(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
   {
@@ -492,7 +507,8 @@ void m_set(int connnum, int argc, char *argv[])
   }
 }
 
-void m_uptime(int connnum, int argc, char *argv[])
+void
+m_uptime(int connnum, int argc, char *argv[])
 {
   report_uptime(connections[connnum].socket);
 }
@@ -502,7 +518,8 @@ void m_exemptions(int connnum, int argc, char *argv[])
   list_exemptions(connections[connnum].socket);
 }
 
-void m_umode(int connnum, int argc, char *argv[])
+void
+m_umode(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
   {
@@ -541,12 +558,14 @@ void m_umode(int connnum, int argc, char *argv[])
   }
 }
 
-void m_connections(int connnum, int argc, char *argv[])
+void
+m_connections(int connnum, int argc, char *argv[])
 {
   list_connections(connections[connnum].socket);
 }
 
-void m_disconnect(int connnum, int argc, char *argv[])
+void
+m_disconnect(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
     print_to_socket(connections[connnum].socket,
@@ -556,7 +575,8 @@ void m_disconnect(int connnum, int argc, char *argv[])
                       connections[connnum].registered_nick);
 }
 
-void m_help(int connnum, int argc, char *argv[])
+void
+m_help(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
     print_to_socket(connections[connnum].socket, 
@@ -565,24 +585,28 @@ void m_help(int connnum, int argc, char *argv[])
     print_help(connections[connnum].socket, argv[1]);
 }
 
-void m_motd(int connnum, int argc, char *argv[])
+void
+m_motd(int connnum, int argc, char *argv[])
 {
   print_motd(connections[connnum].socket);
 }
 
-void m_save(int connnum, int argc, char *argv[])
+void
+m_save(int connnum, int argc, char *argv[])
 {
   handle_save(connections[connnum].socket, 
               connections[connnum].registered_nick);
 }
 
-void m_close(int connnum, int argc, char *argv[])
+void
+m_close(int connnum, int argc, char *argv[])
 {
   print_to_socket(connections[connnum].socket, "Closing connection");
   closeconn(connnum, 0, NULL);
 }
 
-void m_op(int connnum, int argc, char *argv[])
+void
+m_op(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
     print_to_socket(connections[connnum].socket,
@@ -591,7 +615,8 @@ void m_op(int connnum, int argc, char *argv[])
     op(config_entries.defchannel, argv[1]);
 }
 
-void m_cycle(int connnum, int argc, char *argv[])
+void
+m_cycle(int connnum, int argc, char *argv[])
 {
   leave(config_entries.defchannel);
   send_to_all( SEND_ALL, "I'm cycling.  Be right back.\n");
@@ -604,7 +629,8 @@ void m_cycle(int connnum, int argc, char *argv[])
             config_entries.defchannel_key);
 }
 
-void m_die(int connnum, int argc, char *argv[])
+void
+m_die(int connnum, int argc, char *argv[])
 {
   send_to_all( SEND_ALL, "I've been ordered to quit irc, goodbye.");
   print_to_server("QUIT :Dead by request!");
@@ -612,7 +638,8 @@ void m_die(int connnum, int argc, char *argv[])
   exit(1);
 }
 
-void m_restart(int connnum, int argc, char *argv[])
+void
+m_restart(int connnum, int argc, char *argv[])
 {
   send_to_all( SEND_ALL, "I've been ordered to restart.");
   print_to_server("QUIT :Restart by request!");
@@ -621,7 +648,8 @@ void m_restart(int connnum, int argc, char *argv[])
   execv(SPATH, NULL);
 }
 
-void m_info(int connnum, int argc, char *argv[])
+void
+m_info(int connnum, int argc, char *argv[])
 {
   print_to_socket(connections[connnum].socket, "real server name [%s]",
        config_entries.rserver_name);
@@ -632,7 +660,8 @@ void m_info(int connnum, int argc, char *argv[])
     print_to_socket(connections[connnum].socket, "Non hybrid server");
 }
 
-void m_locops(int connnum, int argc, char *argv[])
+void
+m_locops(int connnum, int argc, char *argv[])
 {
   char *p, dccbuff[MAX_BUFF];
   int i, len;
@@ -657,7 +686,8 @@ void m_locops(int connnum, int argc, char *argv[])
          "Really, it would help if you said something");
 }
 
-void m_unkline(int connnum, int argc, char *argv[])
+void
+m_unkline(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
     print_to_socket(connections[connnum].socket, 
@@ -672,7 +702,8 @@ void m_unkline(int connnum, int argc, char *argv[])
   }
 }
 
-void m_vbots(int connnum, int argc, char *argv[])
+void
+m_vbots(int connnum, int argc, char *argv[])
 {
   if (argc >= 2)
     report_vbots(connections[connnum].socket, atoi(argv[1]));
@@ -681,7 +712,8 @@ void m_vbots(int connnum, int argc, char *argv[])
 }
 
 #ifndef NO_D_LINE_SUPPORT
-void m_dline(int connnum, int argc, char *argv[])
+void
+m_dline(int connnum, int argc, char *argv[])
 {
   char *p, reason[MAX_BUFF];
   int i, len;
@@ -723,7 +755,8 @@ void m_dline(int connnum, int argc, char *argv[])
 #endif
 
 #ifdef ENABLE_QUOTE
-void m_quote(int connnum, int argc, char *argv[])
+void
+m_quote(int connnum, int argc, char *argv[])
 {
   char *p, dccbuff[MAX_BUFF];
   int i, len;
@@ -747,12 +780,14 @@ void m_quote(int connnum, int argc, char *argv[])
 }
 #endif
 
-void m_mem(int connnum, int argc, char *argv[])
+void
+m_mem(int connnum, int argc, char *argv[])
 {
   report_mem(connections[connnum].socket);
 }
 
-void m_clones(int connnum, int argc, char *argv[])
+void
+m_clones(int connnum, int argc, char *argv[])
 {
   report_clones(connections[connnum].socket);
 }
@@ -762,7 +797,8 @@ void m_nflood(int connnum, int argc, char *argv[])
   report_nick_flooders(connections[connnum].socket);
 }
 
-void m_rehash(int connnum, int argc, char *argv[])
+void
+m_rehash(int connnum, int argc, char *argv[])
 {
   send_to_all( SEND_ALL,
 	       "*** rehash requested by %s", 
@@ -785,7 +821,8 @@ void m_rehash(int connnum, int argc, char *argv[])
   initopers();
 }
 
-void m_trace(int connnum, int argc, char *argv[])
+void
+m_trace(int connnum, int argc, char *argv[])
 {
   send_to_all( SEND_ALL,
 	       "Trace requested by %s",
@@ -797,7 +834,8 @@ void m_trace(int connnum, int argc, char *argv[])
   print_to_server("STATS Y");
 }
 
-void m_failures(int connnum, int argc, char *argv[])
+void
+m_failures(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
     report_failures(connections[connnum].socket, 7);
@@ -808,7 +846,8 @@ void m_failures(int connnum, int argc, char *argv[])
     report_failures(connections[connnum].socket, atoi(argv[1]));
 }
 
-void m_domains(int connnum, int argc, char *argv[])
+void
+m_domains(int connnum, int argc, char *argv[])
 {
   if (argc < 2)
     report_domains(connections[connnum].socket, 5);
@@ -819,7 +858,8 @@ void m_domains(int connnum, int argc, char *argv[])
     report_domains(connections[connnum].socket, atoi(argv[1]));
 }
 
-void m_bots(int connnum, int argc, char *argv[])
+void
+m_bots(int connnum, int argc, char *argv[])
 {
   if (argc >= 2)
     report_multi(connections[connnum].socket, atoi(argv[1]));
@@ -827,7 +867,8 @@ void m_bots(int connnum, int argc, char *argv[])
     report_multi(connections[connnum].socket, 3);
 }
 
-void m_events(int connnum, int argc, char *argv[])
+void
+m_events(int connnum, int argc, char *argv[])
 {
   show_events(connections[connnum].socket);
 }
@@ -842,7 +883,8 @@ void m_vmulti(int connnum, int argc, char *argv[])
 }
 #endif
 
-void m_nfind(int connnum, int argc, char *argv[])
+void
+m_nfind(int connnum, int argc, char *argv[])
 {
 #ifdef HAVE_REGEX_H
   if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
@@ -861,7 +903,8 @@ void m_nfind(int connnum, int argc, char *argv[])
 #endif
 } 
 
-void m_list(int connnum, int argc, char *argv[])
+void
+m_list(int connnum, int argc, char *argv[])
 {
 #ifdef HAVE_REGEX_H
   if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
@@ -882,7 +925,8 @@ void m_list(int connnum, int argc, char *argv[])
 }
 
 #ifdef WANT_ULIST
-void m_ulist(int connnum, int argc, char *argv[])
+void
+m_ulist(int connnum, int argc, char *argv[])
 {
   char buf[MAX_BUFF];
 
@@ -915,7 +959,8 @@ void m_ulist(int connnum, int argc, char *argv[])
 #endif
 
 #ifdef WANT_HLIST
-void m_hlist(int connnum, int argc, char *argv[])
+void
+m_hlist(int connnum, int argc, char *argv[])
 {
   char buf[MAX_BUFF];
 

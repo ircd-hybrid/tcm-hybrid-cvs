@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.5 2002/05/24 15:17:43 db Exp $
+ * $Id: tcm_io.h,v 1.6 2002/05/24 15:38:28 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -19,7 +19,7 @@ extern void linkclosed(int, int, char *argv[]);
 
 extern void print_to_socket(int, const char *, ...);
 extern void print_to_server(const char *, ...);
-void send_to_all(int type,char *format,...);	/* - Hendrix (va'd by bill) */
+void send_to_all(int type, const char *format,...);	/* - Hendrix (va'd by bill) */
 
 /* types for send_to_all */
 

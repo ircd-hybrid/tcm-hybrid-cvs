@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.12 2002/05/24 15:17:49 db Exp $
+ * $Id: tcm_io.c,v 1.13 2002/05/24 15:38:33 db Exp $
  */
 
 #include <stdio.h>
@@ -620,7 +620,7 @@ va_print_to_socket(int sock, const char *format, va_list va)
 }
 
 /*
- * sendtoalldcc
+ * send_to_all
  *
  * inputs	- message to send
  *		- flag if message is to be sent only to all users or opers only
@@ -631,17 +631,13 @@ va_print_to_socket(int sock, const char *format, va_list va)
  */
 
 void
-sendtoalldcc(int incoming_connnum, int type, char *format,...)
+send_to_all(int type, const char *format,...)
 {
   va_list va;
-  char msgbuf[MAX_BUFF];
   int i;
   int echo;
 
   va_start(va,format);
-
-  /* we needn't check for \n here because it is done already in print_to_socket() */
-  vsnprintf(msgbuf, sizeof(msgbuf), format, va);
 
   echo = (connections[incoming_connnum].type & TYPE_ECHO);
 
@@ -656,60 +652,60 @@ sendtoalldcc(int incoming_connnum, int type, char *format,...)
 	    {
 	    case SEND_KLINE_NOTICES:
 	      if (connections[i].type & TYPE_KLINE)
-		print_to_socket(connections[i].socket, msgbuf);
+		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 
 	    case SEND_SPY:
 	      if(connections[i].type & TYPE_SPY)
-                print_to_socket(connections[i].socket, msgbuf);
+                va_print_to_socket(connections[i].socket, format, va);
 	      break;
 
 	    case SEND_WARN:
 	      if (connections[i].type & TYPE_WARN)
-		print_to_socket(connections[i].socket, msgbuf);
+		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 	      
             case SEND_WALLOPS:
 #ifdef ENABLE_W_FLAG
               if (connections[i].type & TYPE_WALLOPS)
-                print_to_socket(connections[i].socket, msgbuf);
+                va_print_to_socket(connections[i].socket, format, va);
 #endif
               break;
 
 	    case SEND_LOCOPS:
 	      if (connections[i].type & TYPE_LOCOPS)
-		print_to_socket(connections[i].socket, msgbuf);
+		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 	      
 	    case SEND_STATS:
 	      if(connections[i].type & TYPE_STAT)
-		print_to_socket(connections[i].socket, msgbuf);
+		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 
 	    case SEND_PRIVMSG:
 	      if((connections[i].type & TYPE_OPER) &&
 		 (connections[i].set_modes & SET_PRIVMSG))
-		print_to_socket(connections[i].socket, msgbuf);
+		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 
 	    case SEND_NOTICES:
 	      if((connections[i].type & TYPE_OPER) &&
 		 (connections[i].set_modes & SET_NOTICES))
-		print_to_socket(connections[i].socket, msgbuf);
+		va_print_to_socket(connections[i].socket, format, va);
 	      break;
 
             case SEND_SERVERS:
               if(connections[i].type & TYPE_SERVERS)
-                print_to_socket(connections[i].socket, msgbuf);
+                va_print_to_socket(connections[i].socket, format, va);
               break;
 
 	    case SEND_ADMINS:
 	      if(connections[i].type & TYPE_ADMIN)
-                print_to_socket(connections[i].socket, msgbuf);
+                va_print_to_socket(connections[i].socket, format, va);
 	      break;
 
 	    case SEND_ALL:
-	      print_to_socket(connections[i].socket, msgbuf);
+	      va_print_to_socket(connections[i].socket, format, va);
 	      break;
 
 	    default:

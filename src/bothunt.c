@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.32 2001/10/30 01:43:48 bill Exp $ */
+/* $Id: bothunt.c,v 1.33 2001/10/30 15:37:58 bill Exp $ */
 
 #include "setup.h"
 
@@ -676,8 +676,8 @@ void onservnotice(int connnum, int argc, char *argv[])
     }
   else if (strstr(p, "K-line name "))
     {
-      snprintf(message, sizeof(message), "%s", argv[6]+1);
-      for (a=7;a<argc;++a)
+      snprintf(message, sizeof(message), "%s", argv[8]+1);
+      for (a=9;a<argc;++a)
         {
           strcat(message, argv[a]);
           strcat(message, " ");

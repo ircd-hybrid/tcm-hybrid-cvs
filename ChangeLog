@@ -1,3 +1,13 @@
+*** 20001208_2 by bill
+
+- medium sized overhaul
+- fixed link looker detection buffer overrun
+- fixed local kill client exiting buffer overrun
+- added CFLOOD action
+  (for connect flooding drones which have been a problem lately)
+- finalizing ircd-comstud compatibility modifications
+
+
 *** 20001204_1 by bill
 
 - added F lines (violation specific E lines)

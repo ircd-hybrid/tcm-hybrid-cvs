@@ -26,7 +26,7 @@
 
 /* actions.c
  *
- * $Id: actions.c,v 1.7 2002/05/29 06:26:12 db Exp $
+ * $Id: actions.c,v 1.8 2002/05/30 01:45:30 db Exp $
  */
 
 int act_sclone;
@@ -104,9 +104,9 @@ handle_action(int actionid, int idented, char *nick, char *user,
     {
       if ((userptr = find_nick(nick)) != NULL)
 	{
-	  user = userptr->info->user;
-	  host = userptr->info->host;
-	  ip = userptr->info->ip_host;
+	  user = userptr->user;
+	  host = userptr->host;
+	  ip = userptr->ip_host;
 	  if (!strcmp(ip, "255.255.255.255"))
 	    ip = 0;
 	}
@@ -271,7 +271,7 @@ handle_action(int actionid, int idented, char *nick, char *user,
 	    {
 	      /* We don't have any IP, so look it up from our tables */
 	      userptr = find_host(host);
-	      if (!userptr || !userptr->info || !userptr->info->ip_host[0])
+	      if (!userptr || !userptr->ip_host[0])
 		{
 		  /* We couldn't find one either, revert to a k-line */
 		  tcm_log(L_WARN,
@@ -284,7 +284,7 @@ handle_action(int actionid, int idented, char *nick, char *user,
 		  return;
 		}
 	      handle_action(actionid, idented, nick, user,
-			    host, userptr->info->ip_host, addcmt);
+			    host, userptr->ip_host, addcmt);
 	      return;
 	    }
 	  if (inet_addr(host) == INADDR_NONE)

@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.1 2002/05/29 01:19:32 leeh Exp $
+ * $Id: vclones.c,v 1.2 2002/05/30 01:45:30 db Exp $
  */
 
 #include <assert.h>
@@ -16,7 +16,6 @@
 #include "config.h"
 #include "tcm.h"
 #include "tcm_io.h"
-#include "commands.h"
 #include "bothunt.h"
 #include "modules.h"
 #include "stdcmds.h"
@@ -118,23 +117,23 @@ report_multi_virtuals(int sock,int nclones)
   nclones-=1;
   for (i=0;i<HASHTABLESIZE;++i)
     {
-      for (top = userptr = iptable[i]; userptr; userptr = userptr->collision)
+      for (top = userptr = iptable[i]; userptr; userptr = userptr->next)
         {
           numfound = 0;
 
-          for (temp = top; temp != userptr; temp = temp->collision)
+          for (temp = top; temp != userptr; temp = temp->next)
             {
-              if (!strcmp(temp->info->ip_class_c,userptr->info->ip_class_c))
+              if (!strcmp(temp->ip_class_c,userptr->ip_class_c))
                 break;
             }
 
           if (temp == userptr)
             {
               numfound=1;
-              for(temp = temp->collision; temp; temp = temp->collision)
+              for(temp = temp->next; temp; temp = temp->next)
                 {
-                  if (!strcmp(temp->info->ip_class_c,
-                              userptr->info->ip_class_c))
+                  if (!strcmp(temp->ip_class_c,
+                              userptr->ip_class_c))
                     numfound++; /* - zaph & Dianora :-) */
                 }
 
@@ -151,7 +150,7 @@ report_multi_virtuals(int sock,int nclones)
                        " %s %2d connections -- %s.*\n",
                        (numfound-nclones > 3) ? "==>" : "   ",
                        numfound,
-                       userptr->info->ip_class_c);
+                       userptr->ip_class_c);
                 }
             }
         }
@@ -173,23 +172,23 @@ report_vbots(int sock,int nclones)
   for (i=0;i<HASHTABLESIZE;++i)
     {
       for(top = userptr = iptable[i]; userptr;
-          userptr = userptr->collision)
+          userptr = userptr->next)
         {
           /* Ensure we haven't already checked this user & domain */
           for(temp = top, numfound = 0; temp != userptr;
-              temp = temp->collision)
+              temp = temp->next)
             {
-              if (!strcmp(temp->info->user,userptr->info->user) &&
-                  !strcmp(temp->info->ip_class_c,userptr->info->ip_class_c))
+              if (!strcmp(temp->user,userptr->user) &&
+                  !strcmp(temp->ip_class_c,userptr->ip_class_c))
                 break;
             }
 
           if (temp == userptr)
             {
-              for (temp = temp->collision; temp; temp = temp->collision)
+              for (temp = temp->next; temp; temp = temp->next)
                 {
-                  if (!strcmp(temp->info->user,userptr->info->user) &&
-                      !strcmp(temp->info->ip_class_c,userptr->info->ip_class_c))
+                  if (!strcmp(temp->user,userptr->user) &&
+                      !strcmp(temp->ip_class_c,userptr->ip_class_c))
                     numfound++; /* - zaph & Dianora :-) */
                 }
 
@@ -206,9 +205,8 @@ report_vbots(int sock,int nclones)
                   print_to_socket(sock,
                        " %s %2d connections -- %s@%s.* {%s}\n",
                        (numfound-nclones > 2) ? "==>" :
-                       "   ",numfound,userptr->info->user,
-                       userptr->info->ip_class_c,
-                       userptr->info->class);
+                       "   ",numfound,userptr->user, userptr->ip_class_c,
+                       userptr->class);
                 }
             }
         }
@@ -257,9 +255,9 @@ list_virtual_users(int sock,char *userhost,int regex)
 
   for (i=0; i < HASHTABLESIZE; ++i)
   {
-    for(ipptr = iptable[i]; ipptr; ipptr = ipptr->collision)
+    for(ipptr = iptable[i]; ipptr; ipptr = ipptr->next)
     {
-      snprintf(uhost, 1024, "%s@%s", ipptr->info->user, ipptr->info->ip_host);
+      snprintf(uhost, 1024, "%s@%s", ipptr->user, ipptr->ip_host);
 #ifdef HAVE_REGEX_H
       if ((regex == YES &&
           !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS))
@@ -271,9 +269,9 @@ list_virtual_users(int sock,char *userhost,int regex)
         if (!numfound++)
           print_to_socket(sock, "The following clients match %s:\n", userhost);
 
-        print_to_socket(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
-             ipptr->info->user, ipptr->info->host, ipptr->info->ip_host,
-             ipptr->info->class);
+        print_to_socket(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->nick,
+             ipptr->user, ipptr->host, ipptr->ip_host,
+             ipptr->class);
       }
     }
   }

@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.2 2002/05/29 06:26:13 db Exp $
+ * $Id: clones.c,v 1.3 2002/05/30 01:45:30 db Exp $
  */
 
 #include <assert.h>
@@ -135,39 +135,39 @@ check_clones(void *unused)
 
   for (i=0; i < HASHTABLESIZE; i++)
   {
-    for (top = userptr = domaintable[i]; userptr; userptr = userptr->collision)
+    for (top = userptr = domaintable[i]; userptr; userptr = userptr->next)
     {
       /* Ensure we haven't already checked this user & domain */
       for(temp = top, numfound = 0; temp != userptr;
-          temp = temp->collision)
+          temp = temp->next)
       {
-        if (!strcmp(temp->info->user,userptr->info->user) &&
-            !strcmp(temp->info->domain,userptr->info->domain))
+        if (!strcmp(temp->user, userptr->user) &&
+            !strcmp(temp->domain, userptr->domain))
           break;
       }
 
       if (temp == userptr)
       {
-        for(temp = temp->collision; temp; temp = temp->collision)
+        for(temp = temp->next; temp; temp = temp->next)
         {
-          if (!strcmp(temp->info->user,userptr->info->user) &&
-              !strcmp(temp->info->domain,userptr->info->domain))
+          if (!strcmp(temp->user, userptr->user) &&
+              !strcmp(temp->domain, userptr->domain))
             numfound++; /* - zaph & Dianora :-) */
         }
 
         if (numfound > MIN_CLONE_NUMBER)
         {
-          notip = strncmp(userptr->info->domain,userptr->info->host,
-                          strlen(userptr->info->domain)) ||
-            (strlen(userptr->info->domain) ==
-             strlen(userptr->info->host));
+          notip = strncmp(userptr->domain, userptr->host,
+                          strlen(userptr->domain)) ||
+            (strlen(userptr->domain) ==
+             strlen(userptr->host));
 
           send_to_all(FLAGS_WARN,
                        "clones> %2d connections -- %s@%s%s {%s}",
-                       numfound,userptr->info->user,
-                       notip ? "*" : userptr->info->domain,
-                       notip ? userptr->info->domain : "*",
-                       userptr->info->class);
+                       numfound,userptr->user,
+                       notip ? "*" : userptr->domain,
+                       notip ? userptr->domain : "*",
+                       userptr->class);
         }
       }
     }
@@ -258,24 +258,24 @@ report_clones(int sock)
 
   for (i = 0; i < HASHTABLESIZE; ++i)
     {
-      for(top = userptr = hosttable[i]; userptr; userptr = userptr->collision)
+      for(top = userptr = hosttable[i]; userptr; userptr = userptr->next)
         {
           /* Ensure we haven't already checked this host */
           for(temp = top, numfound = 0; temp != userptr;
-               temp = temp->collision)
+               temp = temp->next)
             {
-              if (!strcmp(temp->info->host,userptr->info->host))
+              if (!strcmp(temp->host,userptr->host))
                 break;
             }
 
           if (temp == userptr)
             {
-              connfromhost[numfound++] = temp->info->connecttime;
-              for(temp = temp->collision; temp; temp = temp->collision)
+              connfromhost[numfound++] = temp->connecttime;
+              for(temp = temp->next; temp; temp = temp->next)
                 {
-                  if (!strcmp(temp->info->host,userptr->info->host) &&
+                  if (!strcmp(temp->host,userptr->host) &&
                       numfound < MAXFROMHOST)
-                    connfromhost[numfound++] = temp->info->connecttime;
+                    connfromhost[numfound++] = temp->connecttime;
                 }
               if (numfound > 2)
                 {
@@ -304,7 +304,7 @@ report_clones(int sock)
                              k+1,
                              connfromhost[j] - connfromhost[j+k],
                              numfound+1,
-                             userptr->info->host);
+                             userptr->host);
                     }
                 }
             }
@@ -336,23 +336,23 @@ report_multi(int sock,int nclones)
   for (i=0; i<HASHTABLESIZE; ++i)
     {
       for(top = userptr = domaintable[i]; userptr;
-          userptr = userptr->collision)
+          userptr = userptr->next)
         {
           /* Ensure we haven't already checked this user & domain */
           for(temp = top, numfound = 0; temp != userptr;
-              temp = temp->collision)
+              temp = temp->next)
             {
-              if (!strcmp(temp->info->user,userptr->info->user) &&
-                  !strcmp(temp->info->domain,userptr->info->domain))
+              if (!strcmp(temp->user, userptr->user) &&
+                  !strcmp(temp->domain, userptr->domain))
                 break;
             }
 
           if (temp == userptr)
             {
-              for(temp = temp->collision; temp; temp = temp->collision)
+              for(temp = temp->next; temp; temp = temp->next)
                 {
-                  if (!strcmp(temp->info->user,userptr->info->user) &&
-                      !strcmp(temp->info->domain,userptr->info->domain))
+                  if (!strcmp(temp->user, userptr->user) &&
+                      !strcmp(temp->domain, userptr->domain))
                     numfound++; /* - zaph & Dianora :-) */
                 }
 
@@ -365,18 +365,18 @@ report_multi(int sock,int nclones)
                            "Multiple clients from the following userhosts:\n");
                     }
 
-                  notip = strncmp(userptr->info->domain,userptr->info->host,
-                                  strlen(userptr->info->domain)) ||
-                    (strlen(userptr->info->domain) ==
-                     strlen(userptr->info->host));
+                  notip = strncmp(userptr->domain, userptr->host,
+                                  strlen(userptr->domain)) ||
+                    (strlen(userptr->domain) ==
+                     strlen(userptr->host));
                   numfound++;   /* - zaph and next line*/
                   print_to_socket(sock,
                        " %s %2d connections -- %s@%s%s {%s}\n",
                        (numfound-nclones > 2) ? "==>" :
-                       "   ",numfound,userptr->info->user,
-                       notip ? "*." : userptr->info->domain,
-                       notip ? userptr->info->domain : ".*",
-                       userptr->info->class);
+                       "   ",numfound,userptr->user,
+                       notip ? "*." : userptr->domain,
+                       notip ? userptr->domain : ".*",
+                       userptr->class);
                 }
             }
         }
@@ -405,23 +405,23 @@ report_multi_user(int sock, int nclones)
   for (i=0;i<HASHTABLESIZE;++i)
     {
       for (top = userptr = usertable[i]; userptr;
-           userptr = userptr->collision)
+           userptr = userptr->next)
         {
           numfound = 0;
           /* Ensure we haven't already checked this user & domain */
 
-          for(temp = top; temp != userptr; temp = temp->collision)
+          for(temp = top; temp != userptr; temp = temp->next)
             {
-              if (!match(temp->info->user,userptr->info->user))
+              if (!match(temp->user,userptr->user))
                 break;
             }
 
           if (temp == userptr)
             {
               numfound=1;       /* fixed minor boo boo -bill */
-              for(temp = temp->collision; temp; temp = temp->collision)
+              for(temp = temp->next; temp; temp = temp->next)
                 {
-                  if (!match(temp->info->user,userptr->info->user))
+                  if (!match(temp->user,userptr->user))
                     numfound++; /* - zaph & Dianora :-) */
                 }
 
@@ -437,8 +437,7 @@ report_multi_user(int sock, int nclones)
                   print_to_socket(sock,
                        " %s %2d connections -- %s@* {%s}\n",
                        (numfound-nclones > 2) ? "==>" : "   ",
-                       numfound,userptr->info->user,
-                       userptr->info->class);
+                       numfound, userptr->user, userptr->class);
                 }
             }
         }
@@ -466,22 +465,22 @@ void report_multi_host(int sock,int nclones)
   nclones-=1;
   for (i = 0; i < HASHTABLESIZE; ++i)
     {
-      for (top = userptr = hosttable[i]; userptr; userptr = userptr->collision)
+      for (top = userptr = hosttable[i]; userptr; userptr = userptr->next)
         {
           /* Ensure we haven't already checked this user & domain */
 
           for(temp = top, numfound = 0; temp != userptr;
-              temp = temp->collision)
+              temp = temp->next)
             {
-              if (!strcmp(temp->info->host,userptr->info->host))
+              if (!strcmp(temp->host, userptr->host))
                 break;
             }
 
           if (temp == userptr)
             {
-              for (temp = userptr; temp; temp = temp->collision)
+              for (temp = userptr; temp; temp = temp->next)
                 {
-                  if (!strcmp(temp->info->host,userptr->info->host))
+                  if (!strcmp(temp->host, userptr->host))
                     numfound++; /* - zaph & Dianora :-) */
                 }
 
@@ -498,8 +497,8 @@ void report_multi_host(int sock,int nclones)
                        " %s %2d connections -- *@%s {%s}\n",
                        (numfound-nclones > 2) ? "==>" : "   ",
                        numfound,
-                       userptr->info->host,
-                       userptr->info->class);
+                       userptr->host,
+                       userptr->class);
                 }
             }
         }

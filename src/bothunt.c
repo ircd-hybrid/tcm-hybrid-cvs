@@ -23,6 +23,8 @@
 #include <sys/errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #ifdef HAVE_SYS_STREAM_H
 # include <sys/stream.h>
@@ -54,7 +56,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: bothunt.c,v 1.9 2001/10/10 00:03:44 bill Exp $";
+static char *version="$Id: bothunt.c,v 1.10 2001/10/10 19:40:52 bill Exp $";
 char *_version="20012009";
 
 static char* find_domain( char* domain );
@@ -118,6 +120,7 @@ char *msgs_to_mon[] = {
   "User",
   "I-line mask",
   "I-line is full",
+  "*** Banned: ",
   (char *)NULL
 };	
 
@@ -421,7 +424,7 @@ void on_stats_i(int connnum, int argc, char *argv[])
     {
       switch(*p)
 	{
-        case '<':case '-':case '$':
+        case '<':case '-':case '$':case '=':
 	case '%':case '^':case '&':case '>':
 	case '_':
           ok=YES;
@@ -740,6 +743,13 @@ void onservnotice(int connnum, int argc, char *argv[])
       connect_flood_notice(q);
       break;
 
+    case BANNED:
+      sendtoalldcc(SEND_ALL_USERS, "I am banned from %s.  Exiting..\n", 
+                   config_entries.rserver_name[0] ?
+                   config_entries.rserver_name : config_entries.server_name);
+      log_problem("onservnotice", "Banned from server.  Exiting.");
+      gracefuldie(0, __FILE__, __LINE__);
+
     default:
       sendtoalldcc(SEND_OPERS_NOTICES_ONLY, "%s", message);
       break;
@@ -793,7 +803,8 @@ char makeconn(char *hostport,char *nick,char *userhost)
     {
       if (!isoper(user,host))
         {
-          notice(nick,"You aren't an oper");
+          printf("user: \"%s\" host: \"%s\"\n", user, host);
+          notice(nick,"You are not an operator");
           return 0;
         }
     }
@@ -801,6 +812,8 @@ char makeconn(char *hostport,char *nick,char *userhost)
 
   if (connections[i].socket == INVALID)
     return 0;
+  fcntl(connections[i].socket, F_SETFL, O_NONBLOCK);
+  FD_SET(connections[i].socket, &readfds);
   connections[i].set_modes = 0;
 
   connections[i].buffer = (char *)malloc(BUFFERSIZE);
@@ -850,8 +863,6 @@ char makeconn(char *hostport,char *nick,char *userhost)
   type = "User";
   if (connections[i].type & TYPE_OPER)
     type = "Oper";
-  if (connections[i].type & TYPE_TCM)
-    type = "Tcm";
 
   report(SEND_ALL_USERS,
          CHANNEL_REPORT_ROUTINE,
@@ -2607,23 +2618,8 @@ void _prefsave_bothunt(int connnum, int argc, char *argv[])
   write(connnum, buffer, strlen(buffer));
 }
 
-void _config_bothunt(int connnum, int argc, char *argv[])
-{
-  if (*argv[0] != 'A' && *argv[0] != 'a') return;
-
-  if (!strcasecmp(argv[1], "cflood") || !strcasecmp(argv[1], "spambot") || 
-      !strcasecmp(argv[1], "clone")  || !strcasecmp(argv[1], "ctcp") || 
-      !strcasecmp(argv[1], "flood")  || !strcasecmp(argv[1], "link") || 
-      !strcasecmp(argv[1], "bot")    || !strcasecmp(argv[1], "vclone"))
-    {
-      if (argc >= 3) set_action_method(argv[1], argv[2]);
-      if (argc >= 4) set_action_reason(argv[1], argv[3]);
-    }
-}
-
 void _modinit()
 {
-  add_common_function(F_CONFIG, _config_bothunt);
   add_common_function(F_PREFSAVE, _prefsave_bothunt);
   add_common_function(F_RELOAD, _reload_bothunt);
   add_common_function(F_SERVER_NOTICE, onservnotice);

@@ -59,7 +59,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: main.c,v 1.3 2001/09/22 23:01:33 bill Exp $";
+static char *version="$Id: main.c,v 1.4 2001/10/10 19:40:52 bill Exp $";
 
 extern int errno;          /* The Unix internal error number */
 extern FILE *outfile;
@@ -507,10 +507,14 @@ void add_action(char *name, char *method, char *reason, int report)
       fprintf(outfile, "add_action() failed to find free space\n");
       return;
     }
-  snprintf(actions[i].name, sizeof(actions[i].name), "%s", name);
-  snprintf(actions[i].method, sizeof(actions[i].method), "%s", method);
-  if (reason) snprintf(actions[i].reason, sizeof(actions[i].reason), "%s", reason);
-  else snprintf(actions[i].reason, sizeof(actions[i].reason), "kline");
+  if (!actions[i].name[0])
+    snprintf(actions[i].name, sizeof(actions[i].name), "%s", name);
+  if (!actions[i].method[0])
+    snprintf(actions[i].method, sizeof(actions[i].method), "%s", method);
+  if (reason && !actions[i].method[0])
+    snprintf(actions[i].reason, sizeof(actions[i].reason), "%s", reason);
+  else if (!actions[i].method[0])
+    snprintf(actions[i].reason, sizeof(actions[i].reason), "kline");
 }
 
 void set_action_type(char *name, int type)
@@ -632,10 +636,24 @@ int main(int argc, char *argv[])
         }
     }
 
+  for (i=0;i<MAX_ACTIONS;++i)
+    {
+      actions[i].method[0] = '\0';
+      actions[i].reason[0] = '\0';
+      actions[i].type = 0;
+    }
+
+  modules_init();
+  dcc_signoff->function = closeconn;
+  dcc_signoff->next = (struct common_function *)NULL;
+  dcc_signoff->type = F_DCC_SIGNOFF;
+  load_all_modules(YES);
+
   if (config_entries.conffile)
     load_config_file(config_entries.conffile);
   else
     load_config_file(CONFIG_FILE);
+  load_userlist();
   load_prefs();
 
   snprintf(serverhost,sizeof(serverhost), "%s:%d", config_entries.server_name, 
@@ -648,13 +666,6 @@ int main(int argc, char *argv[])
       connections[i].host[0] = '\0';
       connections[i].nick[0] = '\0';
       connections[i].registered_nick[0] = '\0';
-    }
-
-  for (i=0;i<MAX_ACTIONS;++i)
-    {
-      actions[i].method[0] = '\0';
-      actions[i].reason[0] = '\0';
-      actions[i].type = 0;
     }
 
   srandom(time(NULL));	/* -zaph */
@@ -751,11 +762,6 @@ int main(int argc, char *argv[])
   amianoper = NO;
   startup_time = time(NULL);
   init_allow_nick();
-  modules_init();
-  dcc_signoff->function = closeconn;
-  dcc_signoff->next = (struct common_function *)NULL;
-  dcc_signoff->type = F_DCC_SIGNOFF;
-  load_all_modules(YES);
   for (temp=signon;temp;temp=temp->next)
     temp->function(0, 0, NULL);
 

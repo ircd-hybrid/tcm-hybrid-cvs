@@ -67,16 +67,6 @@ int wingate_class_list_index;
 
 extern time_t cur_time;
 
-void _config_wingate(int connnum, int argc, char *argv[])
-{
-  if (argv[0][0] != 'A' && argv[0][0] != 'a') return;
-  if (!strcasecmp(argv[1], "wingate") || !strcasecmp(argv[1], "socks"))
-    {
-      set_action_method(argv[1], argv[2]);
-      set_action_reason(argv[1], argv[3]);
-    }
-}
-
 #ifdef DETECT_WINGATE
 /*
 ** wingate_bindsocket()
@@ -483,7 +473,6 @@ static void report_open_socks(int i)
 void _modinit()
 {
   int i;
-  add_common_function(F_CONFIG, _config_wingate);
   add_common_function(F_PREFSAVE, _prefsave);
   add_common_function(F_RELOAD, _reload_wingate);
   add_common_function(F_USER_SIGNON, _user_signon);

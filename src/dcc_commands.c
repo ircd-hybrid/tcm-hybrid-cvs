@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.6 2001/10/04 23:14:34 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.7 2001/10/10 19:40:52 bill Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -94,7 +94,7 @@ void dccproc(int connnum, int argc, char *argv[])
   int i;
   int opers_only = SEND_ALL_USERS; 	/* Is it an oper only message ? */
   int ignore_bot = NO;
-  char *command, *buffer;
+  char *command, *buffer, *p;
   int kline_time;
   struct common_function *temp;
 #ifndef NO_D_LINE_SUPPORT
@@ -557,21 +557,78 @@ void dccproc(int connnum, int argc, char *argv[])
         {
 	  switch (argc)
             {
+              /* .action */
               case 1:
                 set_actions(connections[connnum].socket, NULL, NULL, 0, NULL);
                 break;
+              /* .action clone */
+              /* .action *c* */
               case 2:
                 set_actions(connections[connnum].socket, argv[1], NULL, 0, NULL);
                 break;
-              default:
-                if (argc < 3) break;
-
-                memset(&dccbuff, 0, sizeof(dccbuff));
+              /* .action clone :Cloning */
+              /* .action clone kline */
+              case 3:
                 if (argv[2][0] == ':')
-                  snprintf(dccbuff, sizeof(dccbuff), "%s", argv[2]);
-
-                kline_time = atoi(argv[2]);
-                for (i=3;i<argc;++i)
+                  {
+                    p = &argv[2][1];
+                    set_actions(connections[connnum].socket, argv[1], NULL, 0, p);
+                    break;
+                  }
+                set_actions(connections[connnum].socket, argv[1], argv[2], 0, NULL);
+                break;
+              default:
+                if (argc < 4) break;
+                /* .action clone :Cloning is prohibited*/
+                if (argv[2][0] == ':')
+                  {
+                    memset(&dccbuff, 0, sizeof(dccbuff));
+                    p=&argv[2][1];
+                    snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
+                    for (i=3;i<argc;++i)
+                      {
+                        strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
+                        strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
+                      }
+                    if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
+                    set_actions(connections[connnum].socket, argv[1], NULL, 0, dccbuff);
+                    break;
+                  }
+                /* .action clone kline :Cloning */
+                if (argv[3][0] == ':')
+                  {
+                    memset(&dccbuff, 0, sizeof(dccbuff));
+                    p=&argv[3][1];
+                    snprintf(dccbuff, sizeof(dccbuff), "%s ", p);
+                    for (i=4;i<argc;++i)
+                      {
+                        strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
+                        strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));
+                      }
+                    if (dccbuff[strlen(dccbuff)-1] == ' ') dccbuff[strlen(dccbuff)-1] = '\0';
+                    set_actions(connections[connnum].socket, argv[1], argv[2], 0, dccbuff);
+                    break;
+                  }
+                /* .action clone kline 1440 */
+                /* .action clone kline 1440 :Cloning is prohibited */
+                if (!(kline_time = atoi(argv[3])))
+                  {
+                    prnt(connections[connnum].socket, "Invalid syntax.\n");
+                    break;
+                  }
+                if (argc == 4)
+                  {
+                    set_actions(connections[connnum].socket, argv[1], argv[2], kline_time, NULL);
+                    break;
+                  }
+                if (argv[4][0] != ':')
+                  {
+                    prnt(connections[connnum].socket, "Invalid syntax.\n");
+                    break;
+                  }
+                memset(&dccbuff, 0, sizeof(dccbuff));
+                p=&argv[4][1];
+                for (i=4;i<argc;++i)
                   {
                     strncat((char *)&dccbuff, argv[i], sizeof(dccbuff)-strlen(dccbuff));
                     strncat((char *)&dccbuff, " ", sizeof(dccbuff)-strlen(dccbuff));

@@ -46,6 +46,7 @@ struct plus_c_info
 #define SPAMBOT		27
 #define ILINEMASK	28
 #define ILINEFULL	29
+#define BANNED		30
 
 #define CLONECONNECTCOUNT 3
 #define CLONECONNECTFREQ  30

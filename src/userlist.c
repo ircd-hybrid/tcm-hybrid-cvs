@@ -35,7 +35,7 @@
 #include <crypt.h>
 #endif
 
-static char *version="$Id: userlist.c,v 1.17 2001/09/22 23:01:33 bill Exp $";
+static char *version="$Id: userlist.c,v 1.18 2001/10/10 19:40:52 bill Exp $";
 
 struct auth_file_entry userlist[MAXUSERS];
 struct tcm_file_entry tcmlist[MAXTCMS];
@@ -140,14 +140,20 @@ void load_config_file(char *file_name)
       if (argv[argc-1][strlen(argv[argc-1])-1] == '\n') 
         argv[argc-1][strlen(argv[argc-1])-1] = '\0';
 
-      for (temp=config;temp;temp=temp->next)
-        temp->function(0, argc, argv);
-
       if(line[0] == '#')
 	continue;
 
       switch(argv[0][0])
 	{
+        case 'a':case 'A':
+          set_action_method(argv[1], argv[2]);
+          if (argc >=3)
+            set_action_reason(argv[1], argv[3]);
+          printf("%s -- %s :%s\n", actions[get_action(argv[1])].name, 
+                 actions[get_action(argv[1])].method,
+                 actions[get_action(argv[1])].reason);
+          break;
+
 	case 'd':case 'D':
           if (config_entries.debug && outfile)
             (void)fprintf(outfile, "opers_only = [%s]\n", argv[1]);
@@ -158,10 +164,8 @@ void load_config_file(char *file_name)
 	  break;
 
 	case 'e':case 'E':
-	  if (config_entries.debug && outfile)
-	    (void)fprintf(outfile, "email address = [%s]\n", argv[1]);
           strncpy(config_entries.email_config,argv[1],MAX_CONFIG-1);
-	break;
+	  break;
 
 	case 'f':case 'F':
 	  if (config_entries.debug && outfile)
@@ -170,14 +174,12 @@ void load_config_file(char *file_name)
 	  break;
 
 	case 'l':case 'L':
-	  if (config_entries.debug && outfile)
-            fprintf(outfile, "userlist = [%s]\n", argv[1]);
 	  strncpy(config_entries.userlist_config,argv[1],MAX_CONFIG-1);
 	  break;
 
 	case 'm':case 'M':
-	    strncpy(config_entries.statspmsg, argv[1],sizeof(config_entries.statspmsg));
-	    break;
+	  strncpy(config_entries.statspmsg, argv[1],sizeof(config_entries.statspmsg));
+	  break;
 
 	case 'o':case 'O':
           strncpy(config_entries.oper_nick_config,argv[1],MAX_NICK);
@@ -1187,7 +1189,6 @@ void reload_user_list(int sig)
 
   for (temp=reload;temp;temp=temp->next)
     temp->function(sig, 0, NULL);
-  printf("erm.\n");
   clear_userlist();
   load_userlist();
   load_prefs();

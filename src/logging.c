@@ -35,7 +35,7 @@
 #include "bothunt.h"
 #include "logging.h"
 
-static char *version="$Id: logging.c,v 1.3 2001/02/04 01:55:43 wcampbel Exp $";
+static char *version="$Id: logging.c,v 1.4 2001/02/04 04:34:06 wcampbel Exp $";
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file
@@ -52,7 +52,7 @@ static char *durtn(double);
  * initlog()
  *
  * inputs - NONE
- * output - NONE
+ * output - FILE pointer to the log file
  * side effects
  *
  */

@@ -34,7 +34,7 @@
 
 static char* suggest_host(char *);
 
-static char *version="$Id: abuse.c,v 1.6 2001/02/02 04:04:27 wcampbel Exp $";
+static char *version="$Id: abuse.c,v 1.7 2001/02/04 04:34:05 wcampbel Exp $";
 
 /*
  * do_a_kline()
@@ -113,20 +113,20 @@ void do_a_kline(char *command_name,int kline_time, char *pattern,
     {
 #ifdef HIDE_OPER_IN_KLINES
       if(kline_time)
-	toserv("KLINE %d %s :%s \n",
+	toserv("KLINE %d %s :%s\n",
 	       kline_time,pattern,
 	       reason);
       else
-	toserv("KLINE %s :%s \n",
+	toserv("KLINE %s :%s\n",
 	       pattern,
 	       reason);
 #else
       if(kline_time)
-	toserv("KLINE %d %s :%s by %s \n",
+	toserv("KLINE %d %s :%s by %s\n",
 	       kline_time,pattern,reason,
 	       who_did_command);
       else
-	toserv("KLINE %s :%s by %s \n",
+	toserv("KLINE %s :%s by %s\n",
 	       pattern,reason,
 	       who_did_command);
 #endif
@@ -134,7 +134,7 @@ void do_a_kline(char *command_name,int kline_time, char *pattern,
   else
     {
 #ifdef HIDE_OPER_IN_KLINES
-      toserv("KLINE %s :%s \n",
+      toserv("KLINE %s :%s\n",
 	     pattern,
 	     format_reason(reason));
 #else

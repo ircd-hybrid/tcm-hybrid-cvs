@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.1 2002/05/22 22:03:34 leeh Exp $
+ * $Id: parse.c,v 1.2 2002/05/23 08:53:48 einride Exp $
  */
 
 #include <stdio.h>
@@ -404,7 +404,7 @@ static void proc(char *source,char *fctn,char *param)
  */
 
 void
-check_services(void *unused)
+check_services(void)
 {
   privmsg(SERVICES_NICK,"clones %d\n", SERVICES_CLONE_THRESHOLD );
 

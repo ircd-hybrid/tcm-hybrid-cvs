@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.46 2002/05/22 22:03:34 leeh Exp $ */
+/* $Id: main.c,v 1.47 2002/05/23 08:53:48 einride Exp $ */
 
 #include "setup.h"
 
@@ -61,6 +61,10 @@ extern int load_all_modules(int log);
 extern void init_tokenizer(void);
 extern void modules_init(void);
 extern void add_common_function(int type, void *function);
+
+#ifdef SERVICES
+extern int act_drone, act_sclone;
+#endif
 
 struct connection connections[MAXDCCCONNS+1]; /* plus 1 for the server, silly */
 struct s_testline testlines;

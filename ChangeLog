@@ -1,3 +1,15 @@
+db          2002/06/05 12:32:40 EDT	(20020605_12)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - solaris is picky about isdigit()
+  
+  Revision  Changes    Path
+  1.64      +6 -2      tcm-hybrid/src/parse.c
+
+
+
 leeh        2002/06/05 11:10:29 EDT	(20020605_11)
 
   Modified files:

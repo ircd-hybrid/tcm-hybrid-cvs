@@ -1,3 +1,8 @@
+*** 20011013_4 by bill
+- document updates
+- connection flooders always klined ident@<whatever> even if there is no ident
+
+
 *** 20011013_3 by bill
 - stat() caused core.  to hell with it.
 

@@ -1,3 +1,7 @@
+*** 20010131_2 by wcampbel
+Brought the configure script up to date
+
+
 *** 20010131_1 by wcampbel
 Major docs cleanup
 Minor bug fixes with the tokenizing code, and the commands parser

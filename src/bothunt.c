@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.66 2002/05/07 17:02:44 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.67 2002/05/07 21:37:42 leeh Exp $ */
 
 #include "setup.h"
 
@@ -1268,11 +1268,11 @@ void onservnotice(int connnum, int argc, char *argv[])
     break;
 
   case FAILEDOPER:
-    nick = q+5;
+    nick = q+4;
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
-    user = q+2;
+    user = q+1;
     sendtoalldcc(SEND_WARN_ONLY,
 		 "*** Failed oper attempt by %s %s", nick, user);
     break;

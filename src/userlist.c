@@ -28,7 +28,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: userlist.c,v 1.6 2001/04/02 04:05:27 db Exp $";
+static char *version="$Id: userlist.c,v 1.7 2001/06/03 05:41:17 db Exp $";
 
 #ifdef NEXT
 char *strdup(char *);
@@ -203,6 +203,10 @@ void load_config_file(char *file_name)
       switch(*key)
 	{
 	case 'd':case 'D':
+          if(config_entries.debug && outfile)
+            {
+              (void)fprintf(outfile, "opers_only = [%s]\n", value );
+            }
 	  if(strcasecmp(value,"YES") == 0)
 	    config_entries.opers_only = YES;
 	  else

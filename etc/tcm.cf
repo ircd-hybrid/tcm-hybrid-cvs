@@ -22,7 +22,10 @@ N:example
 # Bot's IRCNAME
 I:irc.frizzle.net tcm
 # channel for the tcm
+# Note that tcm can only sit in one channel
 C:&frizzle.net
+# The channel can have a key set
+# C:&frizzle.net:access
 #
 # A:case:action:log to channel? <yes/no>
 #  Sets the action to take on various automated situations.
@@ -55,6 +58,8 @@ M:For basic information, see www.db.net/~db/tcm.html
 #E:db@db.net
 # port to listen on if 6800 is unavailable
 #P:6801
+# opers only YES or NO
+D:YES
 #where the userlist.cf is for this tcm
 #default is userlist.cf
 #L:phoenix1/userlist.cf

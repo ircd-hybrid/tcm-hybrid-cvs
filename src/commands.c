@@ -40,7 +40,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.10 2001/04/02 04:05:25 db Exp $";
+static char *version="$Id: commands.c,v 1.11 2001/06/03 05:41:15 db Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -364,11 +364,25 @@ void dccproc(int connnum)
       break;
 
     case K_CLONES:
-      report_clones(connections[connnum].socket);
+      if (connections[connnum].type & TYPE_OPER)
+        {
+          report_clones(connections[connnum].socket);
+        }
+      else
+        {
+          not_authorized(connections[connnum].socket);
+        }
       break;
 
     case K_NFLOOD:
-      report_nick_flooders(connections[connnum].socket);
+      if (connections[connnum].type & TYPE_OPER)
+        {
+          report_nick_flooders(connections[connnum].socket);
+        }
+      else
+        {
+          not_authorized(connections[connnum].socket);
+        }
       break;
 
     case K_REHASH:
@@ -424,25 +438,39 @@ void dccproc(int connnum)
       break;
 
     case K_BOTS:
-      if(param2_orig)
-	{
-	  report_multi(connections[connnum].socket,atoi(param2_orig));
-	}
+      if (connections[connnum].type & TYPE_OPER)
+        {
+          if(param2_orig)
+            {
+              report_multi(connections[connnum].socket,atoi(param2_orig));
+            }
+          else
+            {
+              report_multi(connections[connnum].socket,0);
+            }
+        }
       else
-	{
-	  report_multi(connections[connnum].socket,0);
-	}
+        {
+          not_authorized(connections[connnum].socket);
+        }
       break;
 
     case K_VBOTS:
-      if(param2_orig)
-	{
-	  report_multi_virtuals(connections[connnum].socket,atoi(param2_orig));
-	}
+      if (connections[connnum].type & TYPE_OPER)
+        {
+          if(param2_orig)
+            {
+              report_multi_virtuals(connections[connnum].socket,atoi(param2_orig));
+            }
+          else
+            {
+              report_multi_virtuals(connections[connnum].socket,10);
+            }
+        }
       else
-	{
-	  report_multi_virtuals(connections[connnum].socket,10);
-	}
+        {
+          not_authorized(connections[connnum].socket);
+        }
       break;
       
     case K_NFIND:
@@ -934,15 +962,16 @@ void dccproc(int connnum)
     break;
 
     case K_ACTION:
-      {
-	char *p;
-	char *reason;
-	char *message;
+      if( connections[connnum].type & TYPE_OPER )
+        {
+          char *p;
+          char *reason;
+          char *message;
 
-	message = NULL;
-	reason = NULL;
+          message = NULL;
+          reason = NULL;
 
-	if( param3 && (p = strchr(param3,':')) )
+          if( param3 && (p = strchr(param3,':')) )
 	  {
 	    *p = '\0';
 	    p++;
@@ -955,9 +984,13 @@ void dccproc(int connnum)
 	      }
 	  }
 
-	set_actions(connections[connnum].socket, param2, param3, 
+          set_actions(connections[connnum].socket, param2, param3, 
 		    reason, message);
       }
+      else
+        {
+          not_authorized(connections[connnum].socket);
+        }
     break;
 
     case K_SET:

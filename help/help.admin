@@ -4,8 +4,8 @@
     Disconnect kick a user off of the tcm
  - .register password (also see .help remote)
     Registers a remote oper for REMOTE_KLINE/KILL etc.
- - .op nick nick2 nick3 (may require you be registered first)
-    The tcm will op those nicks if they are on channel.
+ - .op nick nick2 nick3 (requires you to be registered first)
+    The tcm will op those nicks if they are on it's channel.
  - .cycle
     The tcm will part and rejoin it's channel.
  - .die
@@ -24,21 +24,21 @@
     Shows you total number of clients in class n.
  - .actions (see .help clones)
  - .exemptions 
-    Show users and sites with tcm kline/kill exemption. (E: lines )
+    Show users and sites with tcm kline/kill exemption. (E: lines 
  - .set [messages|nomessage]|[notices|nonotices]
     See privmsg's sent to the tcm or see selected server notices.
  - .save 
-    Saves tcm prefs (actions) you must be registered and an admin to use this.
+    Saves tcm prefs (actions) (you must be registered and an admin to use this)
  - .load
-    Load tcm prefs (actions) any oper may use this.
+    Load tcm prefs (actions) (any oper may use this)
  - .info
     Show information about the tcm and the server it monitors.
  - .uptime
-    Show the tcm uptime.
+    Show the tcm's uptime.
  - .mem
     Show rough memory usage.
  - .motd
-    Print the tcm MOTD.
+    Print the tcm's MOTD.
  - .locops
     Issue a LOCOPS message to the server.
 

@@ -72,9 +72,6 @@ O:db@*bsd.org:diane:notrealpassword:OK
 E:db@*.db.net
 E:*@*varner.com
 #
-# opers only YES or NO
-D:YES
-#
 # **NEW**  F lines!
 # F-lines are like E-lines, except they are violation specific
 # You may use any violation given in the A-lines from tcm.cf
@@ -93,3 +90,5 @@ B:loser@*lamesite.com
 # Test this wingate if in this class only
 #
 W:9
+# TCM also supports named classes that Hybrid-7 provides
+# W:broadband

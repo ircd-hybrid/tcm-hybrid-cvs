@@ -52,7 +52,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.15 2001/06/03 02:53:31 greg Exp $";
+static char *version="$Id: serverif.c,v 1.16 2001/06/03 05:41:16 db Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -273,7 +273,9 @@ int wingate_bindsocket(char *nick,char *user,char *host,char *ip)
   int optval;
   int i;
   int found_slot = INVALID;
+#ifdef DEBUGMODE
   placed;
+#endif
 
   for(i=0;i<MAXWINGATES;i++)
     {
@@ -353,7 +355,9 @@ int socks_bindsocket(char *nick,char *user,char *host,char *ip)
   int optval;
   int i;
   int found_slot = -1;
+#ifdef DEBUGMODE
   placed;
+#endif
 
   for(i=0;i<MAXSOCKS;i++)
     {
@@ -1627,10 +1631,13 @@ void privmsgproc(char *nick,char *userhost,char *body)
 
   token = get_token(param1);
 
-  if(!isoper(user,host))
+  if(config_entries.opers_only)
     {
-      notice(nick,"You aren't an oper");
-      return;
+      if(!isoper(user,host))
+        {
+          notice(nick,"You aren't an oper");
+          return;
+        }
     }
 
   switch(token)

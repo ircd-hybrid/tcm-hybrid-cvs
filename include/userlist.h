@@ -104,7 +104,7 @@ struct exception_entry
 void load_userlist(void);
 void load_config_file(char *);
 void clear_userlist(void);
-int  wingate_class(int class);
+int  wingate_class(char *class);
 void ban_manipulate(int sock,char flag,char *userlist);
 void load_prefs(void);
 void save_prefs(void);

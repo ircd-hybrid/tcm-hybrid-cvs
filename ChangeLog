@@ -1,3 +1,15 @@
+db          2002/05/25 13:52:06 EDT	(20020525_27)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - fix dcc chat to tcm
+  
+  Revision  Changes    Path
+  1.28      +19 -22    tcm-hybrid/src/tcm_io.c
+
+
+
 jmallett    2002/05/25 13:45:17 EDT	(20020525_26)
 
   Modified files:

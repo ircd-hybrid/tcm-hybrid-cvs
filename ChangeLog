@@ -1,3 +1,15 @@
+db          2002/05/27 13:42:08 EDT	(20020527_15)
+
+  Modified files:
+    src                  tcm_io.c 
+  Log:
+  - ensure closed connection resets time_out to 0
+  
+  Revision  Changes    Path
+  1.54      +4 -4      tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/27 13:32:22 EDT	(20020527_14)
 
   Modified files:

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.53 2002/04/06 02:00:15 bill Exp $ */
+/* $Id: bothunt.c,v 1.54 2002/04/11 23:35:40 einride Exp $ */
 
 #include "setup.h"
 
@@ -100,6 +100,7 @@ void _modinit();
 #define R_CTCP          0x100
 #define R_SPAMBOT       0x400
 #define R_CFLOOD        0x800
+#define R_RCLONE        0x2000
 
 struct msg_to_action {
   char *msg_to_mon;
@@ -155,7 +156,7 @@ extern int doingtrace;
 
 struct reconnect_clone_entry
 {
-  char *host;
+  char host [MAX_HOST+1];
   int count;
   time_t first;
 };
@@ -1983,30 +1984,37 @@ static void check_reconnect_clones(char *host)
 
   for ( i=0; i<RECONNECT_CLONE_TABLE_SIZE ; ++i )
   {
-    if (reconnect_clone[i].host &&
-        !strcasecmp(reconnect_clone[i].host, host))
+    if (!strcasecmp(reconnect_clone[i].host, host))
     {
       ++reconnect_clone[i].count;
 
       if ((reconnect_clone[i].count > CLONERECONCOUNT) &&
           (now - reconnect_clone[i].first <= CLONERECONFREQ))
       {
-        suggest_action(get_action_type("clone"), NULL, NULL, host, NO, NO);
+       	suggest_action(get_action_type("rclone"), NULL, NULL, host, NO, NO);
         report(SEND_WARN_ONLY, CHANNEL_REPORT_CLONES,
                "Reconnect clones found coming from *@%s...\n", host);
 
-        reconnect_clone[i].host = NULL;
+        reconnect_clone[i].host[0] = 0;
         reconnect_clone[i].count = 0;
         reconnect_clone[i].first = 0;
       }
       return;
     }
   }
+  for (i=0; i<RECONNECT_CLONE_TABLE_SIZE; ++i) {
+    if ((reconnect_clone[i].host[0]) && (now - reconnect_clone[i].first > CLONERECONFREQ)) {
+      reconnect_clone[i].host[0] = 0;
+      reconnect_clone[i].count = 0;
+      reconnect_clone[i].first = 0;
+    }
+  }
   for ( i=0 ; i<RECONNECT_CLONE_TABLE_SIZE ; ++i )
   {
-    if (reconnect_clone[i].host == NULL)
+    if (!reconnect_clone[i].host[0])
     {
-      reconnect_clone[i].host = host;
+      strncpy(reconnect_clone[i].host, host, sizeof(reconnect_clone[i].host));
+      reconnect_clone[i].host[MAX_HOST] = 0;
       reconnect_clone[i].first = now;
       reconnect_clone[i].count = 1;
       break;
@@ -3255,6 +3263,7 @@ void _modinit()
   memset(&iptable,0,sizeof(iptable));
 #endif
   memset(&nick_changes,0,sizeof(nick_changes));
+  memset(&reconnect_clone,0, sizeof(reconnect_clone));
   init_link_look_table();
   add_action("cflood", "dline", "Connect flooding");
   set_action_type("cflood", R_CFLOOD);
@@ -3270,6 +3279,8 @@ void _modinit()
   set_action_type("spambot", R_SPAMBOT);
   add_action("clone", "kline", "Cloning is prohibited");
   set_action_type("clone", R_CLONE);
+  add_action("rclone", "kline", "Reconnect flooding");
+  set_action_type("rclone", R_RCLONE);
   if (connections[0].socket)
   {
     doingtrace = YES;

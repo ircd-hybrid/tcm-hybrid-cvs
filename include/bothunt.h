@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.22 2002/04/06 02:00:13 bill Exp $ */
+/* $Id: bothunt.h,v 1.23 2002/04/11 23:35:38 einride Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -59,7 +59,7 @@ struct banned_info
 #define CLONECONNECTCOUNT 3
 #define CLONECONNECTFREQ  30
 
-#define CLONERECONCOUNT   2	/* this many reconnects */
+#define CLONERECONCOUNT   5	/* this many reconnects */
 #define CLONERECONFREQ    15    /* in this many seconds */
 
 extern int maxconns;

@@ -1,4 +1,4 @@
-# $Id: tcm.cf,v 1.17 2002/04/02 23:24:19 bill Exp $
+# $Id: tcm.cf,v 1.18 2002/04/11 23:35:35 einride Exp $
 # Username for the bot
 U:db
 
@@ -39,6 +39,7 @@ C:&frizzle.net
 #	- drone       <what action to take when services reports drones>
 #	- wingate     <what action to take when an open wingate is found>
 #	- socks       <what action to take when an open soxy proxy is found>
+#	- rclone      <what action to take when reconnecting clones are found>
 #
 #   Possible values for action:
 #	- kline	[time]  <kline the user using the proper message>
@@ -58,6 +59,7 @@ A:sclone:kline 180:clones on multiple servers
 A:drone:kline:Drone bots
 A:wingate:dline:Open Wingate
 A:socks:dline:Open SOCKS server
+A:rclone:kline 240:Reconnect flood
 
 # optional message to send to users who request STATS p
 M:For basic information, see http://www.ircd-hybrid.org/tcm/

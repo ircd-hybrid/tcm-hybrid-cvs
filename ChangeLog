@@ -1,3 +1,16 @@
+leeh        2002/06/21 09:14:51 EDT	(20020621_7)
+
+  Modified files:
+    src                  bothunt.c userlist.c 
+  Log:
+  - helps if I get the right variable name.
+  
+  Revision  Changes    Path
+  1.167     +2 -2      tcm-hybrid/src/bothunt.c
+  1.118     +2 -2      tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/06/21 09:09:43 EDT	(20020621_6)
 
   Modified files:

@@ -1,7 +1,7 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.11 2002/06/03 11:03:03 leeh Exp $ */
+/* $Id: actions.h,v 1.12 2002/06/05 14:43:35 leeh Exp $ */
 
 #define MAX_ACTIONS	16
 
@@ -19,7 +19,7 @@ extern int act_clone;
 extern int act_rclone;
 
 void init_actions(void);
-void init_one_action(int, char *, int, char *);
+void init_one_action(int *, char *, int, char *);
 
 void set_action(int argc, char *argv[]);
 

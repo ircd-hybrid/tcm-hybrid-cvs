@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.25 2002/06/03 21:41:29 leeh Exp $
+ * $Id: actions.c,v 1.26 2002/06/05 14:43:37 leeh Exp $
  */
 
 #include "setup.h"
@@ -80,14 +80,14 @@ init_actions(void)
   memset(&actions, 0, sizeof(actions));
   add_dcc_handler(&actions_msgtab);
   add_dcc_handler(&action_msgtab);
-  init_one_action(act_cflood, "cflood", HS_CFLOOD, REASON_CFLOOD);
-  init_one_action(act_vclone, "vclone", HS_VCLONE, REASON_VCLONE);
-  init_one_action(act_flood, "flood", HS_FLOOD, REASON_FLOOD);
-  init_one_action(act_link, "link", HS_LINK, REASON_LINK);
-  init_one_action(act_bot, "bot", HS_BOT, REASON_BOT);
-  init_one_action(act_spambot, "spam", HS_SPAMBOT, REASON_SPAMBOT);
-  init_one_action(act_clone, "clone", HS_CLONE, REASON_CLONE);
-  init_one_action(act_rclone, "rclone", HS_RCLONE, REASON_RCLONE);
+  init_one_action(&act_cflood, "cflood", HS_CFLOOD, REASON_CFLOOD);
+  init_one_action(&act_vclone, "vclone", HS_VCLONE, REASON_VCLONE);
+  init_one_action(&act_flood, "flood", HS_FLOOD, REASON_FLOOD);
+  init_one_action(&act_link, "link", HS_LINK, REASON_LINK);
+  init_one_action(&act_bot, "bot", HS_BOT, REASON_BOT);
+  init_one_action(&act_spambot, "spam", HS_SPAMBOT, REASON_SPAMBOT);
+  init_one_action(&act_clone, "clone", HS_CLONE, REASON_CLONE);
+  init_one_action(&act_rclone, "rclone", HS_RCLONE, REASON_RCLONE);
 }
 
 /* init_one_action()
@@ -100,11 +100,11 @@ init_actions(void)
  * side effects -
  */
 void
-init_one_action(int actionid, char *action, int hoststrip, char *reason)
+init_one_action(int *actionid, char *action, int hoststrip, char *reason)
 {
-  actionid = add_action(action);
-  set_action_strip(actionid, hoststrip);
-  set_action_reason(actionid, reason);
+  *actionid = add_action(action);
+  set_action_strip(*actionid, hoststrip);
+  set_action_reason(*actionid, reason);
 }
 
 /* add_action()

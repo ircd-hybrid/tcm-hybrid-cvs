@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.79 2002/05/22 02:33:07 db Exp $ */
+/* $Id: bothunt.c,v 1.80 2002/05/22 12:57:15 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -219,7 +219,7 @@ remove_gline(char *user, char *host)
     return;
 
   glines[i].next = NULL;
-  glines[i].when = NULL;
+  glines[i].when = 0;
 }
 
 /*

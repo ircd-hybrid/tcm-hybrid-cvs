@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.204 2002/11/15 00:09:51 bill Exp $
+ * $Id: bothunt.c,v 1.205 2002/12/10 16:35:45 bill Exp $
  */
 
 #include <stdio.h>
@@ -1047,7 +1047,7 @@ jupe_joins_notice(char *nick, char *user, char *host, char *channel)
 
         if (jupe_joins[i].join_count >= MAX_JUPE_JOINS)
         {
-          handle_action(act_flood, nick, user, host, NULL, channel);
+          handle_action(act_jupe, nick, user, host, NULL, channel);
           jupe_joins[i].user[0] = '\0';
           jupe_joins[i].host[0] = '\0';
         }
@@ -1270,7 +1270,7 @@ add_to_nick_change_table(char *user, char *host,char *last_nick)
 			nick_changes[i].first_nick_change,
 			hour_minute_second(nick_changes[i].last_nick_change));
 
-	    handle_action(act_flood, last_nick, user, host, 0, 0);
+	    handle_action(act_nflood, last_nick, user, host, 0, 0);
 	    tcm_log(L_NORM,
 		    "nick flood %s@%s (%s) %d in %d seconds (%s)",
 		    nick_changes[i].user,

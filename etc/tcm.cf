@@ -1,4 +1,4 @@
-# $Id: tcm.cf,v 1.30 2002/09/13 03:03:27 bill Exp $
+# $Id: tcm.cf,v 1.31 2002/12/10 16:35:42 bill Exp $
 # Username for the bot
 U:db
 
@@ -37,6 +37,8 @@ C:&frizzle.net
 #	- rclone      <what action to take when reconnecting clones are found>
 #	- sclone      <what action to take when multi-server clones are found>
 #	- drone       <what action to take when services reports drones>
+#       - nflood      <what action to take when a user nickfloods>
+#       - jupe        <what action on repeated join attempts to juped chans>
 #	- wingate     <what action to take when an open wingate is found>
 #	- socks       <what action to take when an open soxy proxy is found>
 #	- squid       <what action to take when an open squid proxy is found>
@@ -65,6 +67,8 @@ A:clone:tkline 1440:Cloning is prohibited
 A:rclone:ircwarn dccwarn tkline 240:Reconnect flood
 A:sclone:tkline 180:Clones on multiple servers
 A:drone:dccwarn kline:Drone bots
+A:nflood:dccwarn tkline 180:Nickflooding is prohibited
+A:jupe:dccwarn tkline 60:repeated attempts to join juped channels
 A:wingate:dline:Open Wingate
 A:socks:dline:Open SOCKS server
 A:squid:dline:Open Squid/HTTP proxy

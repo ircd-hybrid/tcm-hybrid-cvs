@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.40 2002/09/13 03:03:31 bill Exp $
+ * $Id: actions.c,v 1.41 2002/12/10 16:35:45 bill Exp $
  */
 
 #include "setup.h"
@@ -43,6 +43,8 @@ int act_link;
 int act_spambot;
 int act_clone;
 int act_rclone;
+int act_jupe;
+int act_nflood;
 struct a_entry actions[MAX_ACTIONS];
 
 static int add_action(char *name);
@@ -85,6 +87,8 @@ init_actions(void)
   init_one_action(&act_spambot, "spam", HS_SPAMBOT, REASON_SPAMBOT);
   init_one_action(&act_clone, "clone", HS_CLONE, REASON_CLONE);
   init_one_action(&act_rclone, "rclone", HS_RCLONE, REASON_RCLONE);
+  init_one_action(&act_nflood, "nflood", HS_NFLOOD, REASON_NFLOOD);
+  init_one_action(&act_jupe, "jupe", HS_JUPE, REASON_JUPE);
 }
 
 /* init_one_action()

@@ -1,7 +1,7 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.15 2002/09/27 04:20:06 bill Exp $ */
+/* $Id: actions.h,v 1.16 2002/12/10 16:35:43 bill Exp $ */
 
 #define MAX_ACTIONS	16
 
@@ -17,6 +17,8 @@ extern int act_bot;
 extern int act_spambot;
 extern int act_clone;
 extern int act_rclone;
+extern int act_jupe;
+extern int act_nflood;
 
 void init_actions(void);
 void init_one_action(int *, char *, int, char *);
@@ -77,6 +79,8 @@ extern struct a_entry actions[MAX_ACTIONS];
 #define HS_CFLOOD   HS_DEFAULT
 #define HS_VCLONE   (HOSTSTRIP_HOST_BLOCK | HOSTSTRIP_IDENT_PREFIXED | HOSTSTRIP_NOIDENT_ALL_NONE)
 #define HS_FLOOD    (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)
+#define HS_NFLOOD   HS_DEFAULT
+#define HS_JUPE     HS_DEFAULT
 #define HS_LINK     (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_PREFIXED | HOSTSTRIP_NOIDENT_PREFIXED)
 #define HS_SPAMBOT  (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_AS_IS | HOSTSTRIP_NOIDENT_ALL)
 #define HS_CLONE    (HOSTSTRIP_HOST_AS_IS | HOSTSTRIP_IDENT_ALL | HOSTSTRIP_NOIDENT_ALL)

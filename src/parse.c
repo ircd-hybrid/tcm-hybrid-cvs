@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.83 2002/09/20 04:22:43 bill Exp $
+ * $Id: parse.c,v 1.84 2002/12/10 16:35:45 bill Exp $
  */
 
 #include <stdio.h>
@@ -390,6 +390,11 @@ process_server(struct source_client *source_p, char *function, char *param)
           config_entries.hybrid_version = 6;
         else if(*p == '7')
           config_entries.hybrid_version = 7;
+      }
+      else if((p = strstr(argv[4], "ircd-ratbox")))
+      {
+        config_entries.hybrid = YES;
+        config_entries.hybrid_version = 7;
       }
       else
          config_entries.hybrid = NO;

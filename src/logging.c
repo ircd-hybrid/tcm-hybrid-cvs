@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.53 2002/06/24 00:40:21 db Exp $
+ * $Id: logging.c,v 1.54 2002/12/10 16:35:45 bill Exp $
  *
  * - db
  */
@@ -319,7 +319,7 @@ hour_minute_second(time_t time_val)
   struct tm *broken_up_time;
   static char time_string[SMALL_BUFF];
 
-  if(time_val == NULL)
+  if(time_val == 0)
     broken_up_time = localtime(&current_time);
   else
     broken_up_time = localtime(&time_val);

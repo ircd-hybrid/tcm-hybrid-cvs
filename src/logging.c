@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: logging.c,v 1.56 2004/06/10 23:20:23 bill Exp $
+ *    $Id: logging.c,v 1.57 2004/06/15 22:36:46 bill Exp $
  */
 
 #include "setup.h"
@@ -32,7 +32,6 @@
 #include <signal.h>
 #include <sys/errno.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 
 #ifdef HAVE_SYS_STREAM_H
 # include <sys/stream.h>
@@ -44,8 +43,6 @@
 
 
 #include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 #include <time.h>
 #include "config.h"
 #include "tcm.h"

@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: actions.c,v 1.55 2004/06/11 20:05:50 bill Exp $
+ *    $Id: actions.c,v 1.56 2004/06/15 22:36:46 bill Exp $
  */
 
 #include "setup.h"
@@ -27,10 +27,9 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
+#define _SOCKLEN_T_DECLARED
 #include <arpa/inet.h>
-#include <netdb.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,6 +47,7 @@
 #include "stdcmds.h"
 #include "hash.h"
 #include "skline.h"
+#include "proxy.h"
 
 #define valid_string(x) (((x) != NULL) && (*(x) != '\0'))
 
@@ -93,6 +93,7 @@ init_actions(void)
   init_one_action(&act_rclone, "rclone", HS_RCLONE, REASON_RCLONE);
   init_one_action(&act_nflood, "nflood", HS_NFLOOD, REASON_NFLOOD);
   init_one_action(&act_jupe, "jupe", HS_JUPE, REASON_JUPE);
+  init_one_action(&act_proxy, "proxy", HS_PROXY, REASON_PROXY);
 }
 
 /* init_one_action()

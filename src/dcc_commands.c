@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: dcc_commands.c,v 1.162 2004/06/10 23:20:23 bill Exp $
+ *    $Id: dcc_commands.c,v 1.163 2004/06/15 22:36:46 bill Exp $
  */
 
 #include "setup.h"
@@ -34,7 +34,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <sys/socket.h>
 #include <stdarg.h>
 #include <time.h>
 
@@ -48,8 +47,6 @@
 
 
 #include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 #include <fcntl.h>
 #include "config.h"
 #include "tcm.h"

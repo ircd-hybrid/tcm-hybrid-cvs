@@ -19,10 +19,10 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: serv_commands.c,v 1.10 2004/06/10 23:20:23 bill Exp $
+ *    $Id: serv_commands.c,v 1.11 2004/06/15 22:36:47 bill Exp $
  */
 
-/* $Id: serv_commands.c,v 1.10 2004/06/10 23:20:23 bill Exp $ */
+/* $Id: serv_commands.c,v 1.11 2004/06/15 22:36:47 bill Exp $ */
 
 #include "setup.h"
 
@@ -36,7 +36,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <sys/socket.h>
 #include <stdarg.h>
 #include <time.h>
 

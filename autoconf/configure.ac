@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.53)
 
-AC_COPYRIGHT([$Id: configure.ac,v 1.5 2004/06/10 23:20:19 bill Exp $])
+AC_COPYRIGHT([$Id: configure.ac,v 1.6 2004/06/15 22:36:28 bill Exp $])
 
 AC_INIT([tcm-hybrid],[4-beta1])
 
@@ -11,19 +11,32 @@ AC_PREFIX_DEFAULT(/usr/local/tcm)
 
 PACKAGE=tcm-hybrid
 VERSION=4-beta1
-
-if test "$prefix" = "NONE"; then
-  dnl Be smart.
-  if test -d "/usr/local/ircd/bin"; then
-    prefix="/usr/local/ircd"
-  elif test -d "/home/ircd/bin"; then
-    prefix="/home/ircd"
-  else
-    prefix=$ac_default_prefix
-  fi
-fi
+INCLUDES=-I../include
 
 AC_DEFINE_UNQUOTED(DPATH, "$prefix", [tcm's prefix])
+
+AC_ARG_ENABLE(libopm,
+[AC_HELP_STRING([--enable-libopm], [Enable libopm support (proxy detection).])
+AC_HELP_STRING([--disable-libopm], [Disable libopm support (proxy detection).])],
+              [cf_enable_libopm=$enableval], [cf_enable_libopm=1])
+
+if test "$cf_enable_libopm" != "no"; then
+  L_OPM="-lopm"
+  LDFLAGS="$LDFLAGS -L../libopm/src/.libs/"
+  CFLAGS="$CFLAGS -static"
+  INCLUDES="$INCLUDES -I.."
+  LIBOPM=libopm
+  PROXY_C=proxy.c
+  AC_CONFIG_SUBDIRS(libopm)
+else
+  L_OPM=
+  LIBOPM=
+  PROXY_C=
+  AC_DEFINE(NO_LIBOPM)
+fi
+AC_SUBST(LIBOPM)
+AC_SUBST(PROXY_C)
+AC_SUBST(L_OPM)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -109,4 +122,5 @@ AC_CHECK_FUNC(setrlimit)
 AC_CHECK_FUNCS([strcasestr strlcpy strlcat snprintf vsnprintf],, [UTIL_C=util.c])
 AC_SUBST(UTIL_C)
 
+AC_SUBST(INCLUDES)
 AC_OUTPUT([Makefile src/Makefile tools/Makefile])

@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: stdcmds.c,v 1.105 2004/06/10 23:20:23 bill Exp $
+ *    $Id: stdcmds.c,v 1.106 2004/06/15 22:36:47 bill Exp $
  */
 
 #include "setup.h"
@@ -27,10 +27,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>

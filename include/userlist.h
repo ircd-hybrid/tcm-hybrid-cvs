@@ -1,18 +1,11 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.98 2004/06/11 20:05:48 bill Exp $ */
+/* $Id: userlist.h,v 1.99 2004/06/15 22:36:31 bill Exp $ */
 
 #include "setup.h"
 #include "tools.h"
 
-/* maximum IP length in adduserhost() removeuserhost() */
-#ifdef IPV6
-#define MAX_IP 50
-#else
-#define MAX_IP 20
-#endif
-#define MAX_CONFIG	80
 #define MAXFROMHOST	50
 #define CLONEDETECTINC	15
 #define NICK_CHANGE_TABLE_SIZE	100

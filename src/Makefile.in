@@ -1,14 +1,14 @@
-# $Id: Makefile.in,v 1.44 2004/06/10 23:20:22 bill Exp $
+# $Id: Makefile.in,v 1.45 2004/06/15 22:36:46 bill Exp $
 
 CC = @CC@
 RM = @RM@
 MKDEP = ${CC} -MM
 
-TCMLIBS = @LIBS@
-INCLUDES = -I../include
+TCMLIBS = @LIBS@ @L_OPM@
+INCLUDES = @INCLUDES@
 CPPFLAGS = ${INCLUDES} @CPPFLAGS@
 
-CFLAGS = @CFLAGS@
+CFLAGS = @CFLAGS@ -g -ggdb
 LDFLAGS = @LDFLAGS@
 
 LEX = @LEX@
@@ -17,13 +17,13 @@ YACC = @YACC@
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
 
 y.tab.o: y.tab.c tcm_parser.y
-	${CC} ${CFLAGS} ${CPPFLAGS} -I. -c y.tab.c
+	${CC} ${INCLUDES} ${CFLAGS} -I. -c y.tab.c
 
 y.tab.c: tcm_parser.y
 	${YACC} -d tcm_parser.y
 
 lex.yy.o: y.tab.c lex.yy.c tcm_lexer.l
-	${CC} ${CFLAGS} ${CPPFLAGS} -I. -c lex.yy.c
+	${CC} ${INCLUDES} ${CFLAGS} -I. -c lex.yy.c
 
 lex.yy.c: tcm_lexer.l
 	${LEX} tcm_lexer.l
@@ -43,6 +43,7 @@ SOURCES =       actions.c	\
 		main.c		\
 		match.c		\
 		parse.c		\
+		@PROXY_C@	\
 		@RESPOND_C@	\
 		seedrand.c	\
 		serv_commands.c	\

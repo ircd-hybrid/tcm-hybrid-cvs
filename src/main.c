@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: main.c,v 1.140 2004/06/10 23:20:23 bill Exp $
+ *    $Id: main.c,v 1.141 2004/06/15 22:36:47 bill Exp $
  */
 
 #include "setup.h"
@@ -33,7 +33,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <sys/socket.h>
 #include <stdarg.h>
 #include <time.h>
 #include <unistd.h>
@@ -51,8 +50,6 @@
 #endif
 
 #include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 #include <fcntl.h>
 
 #include "config.h"
@@ -73,6 +70,9 @@
 #include "seedrand.h"
 #include "client_list.h"
 #include "conf.h"
+#ifndef NO_LIBOPM
+#include "proxy.h"
+#endif
 
 #ifdef DMALLOC
 #include "dmalloc.h"
@@ -181,34 +181,28 @@ main(int argc, char *argv[])
   init_bothunt();
   init_client_lists();
   init_dynamic_info();
+  init_actions();
 
 #ifdef SERVICES
   init_services();
 #endif
 
-#if 0
-  if (config_entries.conffile)
-    load_config_file(config_entries.conffile);
-  else
-    load_config_file(CONFIG_FILE);
-#else
   read_conf_files(1);
+
+#ifndef NO_LIBOPM
+  init_proxy_detection();
 #endif
 
   srandom(time(NULL));	/* -zaph */
   signal(SIGUSR1,init_debug);
-#if 0
-  signal(SIGSEGV,sighandlr);
-  signal(SIGBUS,sighandlr);
-  signal(SIGTERM,sighandlr);
-  signal(SIGINT,sighandlr);
-#endif
+
   signal(SIGHUP, handle_sighup);
   signal(SIGPIPE, SIG_IGN);
   signal(SIGTRAP, SIG_IGN);
+
   /* pick up the name of a pid file from the tcm.cf file */
 #ifdef DEBUGMODE
-  config_entries.debug=1;
+  config_entries.debug = YES;
 #endif
 
   if(!config_entries.debug && !config_entries.nofork)

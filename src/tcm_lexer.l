@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: tcm_lexer.l,v 1.4 2004/06/10 23:20:24 bill Exp $
+ *    $Id: tcm_lexer.l,v 1.5 2004/06/15 22:36:47 bill Exp $
  */
 
 %option case-insensitive
@@ -32,6 +32,12 @@
 #define MAX_INCLUDE_DEPTH		10
 
 #include <string.h>
+
+#include "setup.h"
+
+#ifndef NO_LIBOPM
+#include "libopm/src/opm_types.h"
+#endif
 
 #include "tcm.h"
 #include "tcm_io.h"
@@ -134,6 +140,7 @@ dline		{ return DLINE;			}
 drone		{ return DRONE;			}
 duration	{ return DURATION;		}
 exempt		{ return EXEMPT;		}
+fds		{ return FDS;			}
 flags		{ return FLAGS;			}
 flood		{ return FLOOD;			}
 gecos		{ return GECOS;			}
@@ -153,6 +160,8 @@ operator	{ return OPERATOR;		}
 operwall	{ return OPERWALL;		}
 password	{ return PASSWORD;		}
 port		{ return PORT;			}
+protocol	{ return PROTOCOL;		}
+proxy		{ return PROXY;			}
 rclone		{ return RCLONE;		}
 reason		{ return REASON;		}
 sclone		{ return SCLONE;		}
@@ -163,6 +172,10 @@ spam		{ return SPAM;			}
 ssl_keyfile	{ return SSL_KEYFILE;		}
 ssl_keyphrase	{ return SSL_KEYPHRASE;		}
 stats_p_message	{ return STATS_P_MESSAGE;	}
+target_ip	{ return TARGET_IP;		}
+target_port	{ return TARGET_PORT;		}
+target_string	{ return TARGET_STRING;		}
+timeout		{ return TIMEOUT;		}
 type		{ return TYPE;			}
 user		{ return USER;			}
 username	{ return USERNAME;		}
@@ -180,6 +193,48 @@ minutes		{ return MINUTES;	}
 minute		{ return MINUTES;	}
 seconds		{ return SECONDS;	}
 second		{ return SECONDS;	}
+
+HTTP		{
+#ifndef NO_LIBOPM
+		  yylval.number = OPM_TYPE_HTTP;
+		  return PROTOCOLTYPE;
+#endif
+		}
+
+HTTPPOST	{
+#ifndef NO_LIBOPM
+		  yylval.number = OPM_TYPE_HTTPPOST;
+		  return PROTOCOLTYPE;
+#endif
+		}
+
+SOCKS4		{
+#ifndef NO_LIBOPM
+		  yylval.number = OPM_TYPE_SOCKS4;
+		  return PROTOCOLTYPE;
+#endif
+		}
+
+SOCKS5		{
+#ifndef NO_LIBOPM
+		  yylval.number = OPM_TYPE_SOCKS5;
+		  return PROTOCOLTYPE;
+#endif
+		}
+
+WINGATE		{
+#ifndef NO_LIBOPM
+		  yylval.number = OPM_TYPE_WINGATE;
+		  return PROTOCOLTYPE;
+#endif
+		}
+
+ROUTER		{
+#ifndef NO_LIBOPM
+		  yylval.number = OPM_TYPE_ROUTER;
+		  return PROTOCOLTYPE;
+#endif
+		}
 
 .		{ return yytext[0];		}
 <<EOF>>		{ if (ieof()) yyterminate();	}

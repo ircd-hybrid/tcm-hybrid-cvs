@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.61 2004/06/11 20:05:48 bill Exp $ */
+/* $Id: tcm.h,v 1.62 2004/06/15 22:36:31 bill Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -27,6 +27,7 @@ extern time_t current_time;
 #define DCCBUFF_SIZE   150
 #define NOTICE_SIZE    150
 
+#define MAX_CONFIG	80
 #define MAX_NICK	9
 #define MAX_CHANNEL	80
 #define MAX_USER	10

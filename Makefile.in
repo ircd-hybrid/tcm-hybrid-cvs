@@ -1,23 +1,12 @@
-# $Id: Makefile.in,v 1.30 2004/06/10 23:20:17 bill Exp $
-CC = @CC@
-RM = @RM@
-CP = @CP@
-MKDEP = ${CC} -MM
-
-TCMLIBS = @LIBS@
-INCLUDES = -I@SRCDIR@/include
-CPPFLAGS = ${INCLUDES} @CPPFLAGS@
-
-# GNU CC allows us to use -g with -O
-CFLAGS = @CFLAGS@
+# $Id: Makefile.in,v 1.31 2004/06/15 22:36:26 bill Exp $
 
 prefix = @prefix@
-# Debugers can uncomment this line for paranoid output
-# CPPFLAGS = ${INCLUDES} -Wunused -Wall -ggdb -Wshadow -Wmissing-declarations
 
-###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
+RM = @RM@
+MV = @MV@
+CP = @CP@
 
-SUBDIRS = src tools
+SUBDIRS = @LIBOPM@ src tools
 
 OBJECTS = ${SOURCES:.c=.o}
 
@@ -25,8 +14,8 @@ all: tcm
 
 build: tcm
 
-install: tcm
-	@echo Installing...
+install: cm
+	@echo install ==> $(prefix)
 	-@if [ ! -x $(prefix) ] ; then \
 	echo mkdir -p $(prefix) ; \
 	mkdir -p $(prefix) ; \
@@ -55,14 +44,19 @@ install: tcm
 
 	mv -f bin/tcm bin/mkpasswd $(prefix)/bin/
 
-	-@if [ ! -e $(prefix)/etc/tcm.cf ] ; then \
-	echo ${CP} etc/tcm.cf $(prefix)/etc/ ; \
-        ${CP} etc/tcm.cf $(prefix)/etc/ ; \
+	-@if [ ! -e $(prefix)/etc/tcm.conf ] ; then \
+	echo ${CP} etc/tcm.conf $(prefix)/etc/ ; \
+        ${CP} etc/tcm.conf $(prefix)/etc/ ; \
         fi
 
-	-@if [ ! -e $(prefix)/etc/userlist.cf ] ; then \
-	echo ${CP} etc/userlist.cf $(prefix)/etc/ ; \
-	${CP} -f etc/userlist.cf $(prefix)/etc/ ; \
+	-@if [ ! -e $(prefix)/etc/tcm.motd ] ; then \
+	echo ${CP} etc/tcm.motd $(prefix)/etc/ ; \
+	${CP} etc/tcm.motd $(prefix)/etc/ ; \
+	fi
+
+	-@if [ ! -e $(prefix)/etc/example.conf ] ; then \
+	echo ${CP} etc/example.conf $(prefix)/etc/ ; \
+	${CP} etc/example.conf $(prefix)/etc/ ; \
 	fi
 
 	-@if [ ! -e $(prefix)/etc/dynamic.hosts ] ; then \
@@ -71,12 +65,15 @@ install: tcm
 	fi
 
 	${CP} help/help.* help/help $(prefix)/help/
+
 	@echo Done
 
 clean:
+	@echo "clean ==> ."
+
 	@${RM} -f DEBUG etc/tcm.pid tcm.core ktrace.out core
 	@for i in $(SUBDIRS); do \
-		echo "Cleaning $$i";\
+		echo "clean ==> $$i";\
 		cd $$i;\
 		${MAKE} clean; cd ..;\
 	done
@@ -85,22 +82,22 @@ clean:
 	fi
 
 distclean:
-	@for i in $(SUBDIRS); do \
-		echo "Distcleaning $$i";\
- 		cd $$i;\
-		${MAKE} distclean; cd ..;\
-	done
+	@echo "distclean ==> ."
+
 	${RM} -f Makefile configure.lineno config.status config.cache config.log include/setup.h etc/tcm.pid
 	${RM} -f DEBUG bin/tcm bin/mkpasswd etc/*.pref logs/*log logs/clone_log_* logs/tcm.log*
 	${RM} -f ktrace.out tcm.core core
 	${RM} -rf autoconf/autom4te.cache
 
-.c.o:
-	${CC} ${CPPFLAGS} ${CFLAGS} ${DEFINES} -c $<
+	@for i in $(SUBDIRS); do \
+		echo "distclean ==> $$i";\
+ 		cd $$i;\
+		${MAKE} distclean; cd ..;\
+	done
 
 tcm: include/setup.h
 	@for i in $(SUBDIRS); do \
-		echo "Building $$i";\
+		echo "build ==> $$i";\
 		cd $$i && ${MAKE} build || exit; cd ..; \
 	done
 
@@ -109,14 +106,14 @@ include/setup.h:
 
 lint:
 	@for i in $(SUBDIRS); do \
-		echo "Linting $$i";\
+		echo "lint ==> $$i";\
 		cd $$i;\
 		${MAKE} lint; cd ..;\
 	done
 
 depend:
 	@for i in $(SUBDIRS); do \
-		echo "Making Dependencies in $$i";\
+		echo "depend ==> $$i";\
 		cd $$i;\
 		${MAKE} depend; cd ..;\
 	done

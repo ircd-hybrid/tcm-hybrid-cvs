@@ -4,8 +4,9 @@
 #  by the tcm.  All dynamic hosts will receive temporary klines
 #  with the duration set in the appropriate action.
 #
-# $Id: dynamic.hosts,v 1.2 2004/06/10 18:51:04 bill Exp $
+# $Id: dynamic.hosts,v 1.3 2004/06/15 22:36:30 bill Exp $
 
+*.aol.com
 *ppp*.*.*
 *dial*.*.*
 *dyn*.*.*

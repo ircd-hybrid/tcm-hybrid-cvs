@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: bothunt.c,v 1.229 2004/06/10 23:20:22 bill Exp $
+ *    $Id: bothunt.c,v 1.230 2004/06/15 22:36:46 bill Exp $
  */
 
 #include <stdio.h>
@@ -1581,7 +1581,6 @@ init_bothunt(void)
   memset(&nick_changes,0,sizeof(nick_changes));
   memset(&reconnect_clone,0, sizeof(reconnect_clone));
   init_link_look_table();
-  init_actions();
   add_serv_notice_handler(&servnotice_msgtab);
 }
 

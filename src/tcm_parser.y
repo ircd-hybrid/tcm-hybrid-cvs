@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: tcm_parser.y,v 1.5 2004/06/10 23:20:24 bill Exp $
+ *    $Id: tcm_parser.y,v 1.6 2004/06/15 22:36:47 bill Exp $
  */
 
 %{
@@ -28,12 +28,19 @@
 #define YY_NO_UNPUT
 
 #include <stdio.h>
+#include <string.h>
+
+#include "setup.h"
 
 #include "tcm.h"
 #include "userlist.h"
 #include "actions.h"
 #include "conf.h"
 #include "bothunt.h"
+#ifndef NO_LIBOPM
+#include "libopm/src/opm.h"
+#include "proxy.h"
+#endif
 
 int current_action, flags;
 
@@ -42,6 +49,10 @@ char oper_pass[MAX_CONFIG];
 char oper_user[MAX_USER];
 char oper_host[MAX_HOST];
 char *user, *host;
+
+dlink_node *ptr;
+struct scanner_conf *sc;
+struct protocol_conf *pc;
 
 %}
 
@@ -61,6 +72,7 @@ char *user, *host;
 %token	DRONE
 %token	DURATION
 %token	EXEMPT
+%token	FDS
 %token	FLAGS
 %token	FLOOD
 %token	GECOS
@@ -81,6 +93,9 @@ char *user, *host;
 %token	OPERWALL
 %token	PASSWORD
 %token	PORT
+%token	PROTOCOL
+%token	PROTOCOLTYPE
+%token	PROXY
 %token	QSTRING
 %token	RCLONE
 %token	REASON
@@ -92,6 +107,10 @@ char *user, *host;
 %token	SSL_KEYFILE
 %token	SSL_KEYPHRASE
 %token	STATS_P_MESSAGE
+%token	TARGET_IP
+%token	TARGET_PORT
+%token	TARGET_STRING
+%token	TIMEOUT
 %token	TYPE
 %token	USER
 %token	USERNAME
@@ -105,6 +124,7 @@ char *user, *host;
 %type <number> NUMBER
 %type <number> timespec
 %type <number> timespec_
+%type <number> PROTOCOLTYPE
 
 %%
 
@@ -116,6 +136,7 @@ conf_item:	  actions_entry
 	        | general_entry
 		| operator_entry
 		| exempt_entry
+		| proxy_entry
 		| error ';'
 		| error '}'
 	;
@@ -175,6 +196,11 @@ actions_action:	ACTION '=' CFLOOD ';'
 } | ACTION '=' NFLOOD ';'
 {
   current_action = act_nflood;
+} | ACTION '=' PROXY ';'
+{
+#ifndef NO_LIBOPM
+  current_action = act_proxy;
+#endif
 } | ACTION '=' RCLONE ';'
 {
   current_action = act_rclone;
@@ -465,5 +491,121 @@ exempt_type_item: CFLOOD
 } | VCLONE
 {
   flags += (1 << act_vclone);
+};
+
+proxy_entry: PROXY
+{
+#ifndef NO_LIBOPM
+  proxy_fds = DEFAULT_FDS;
+  strlcpy(proxy_vhost, "0.0.0.0", sizeof(proxy_vhost));
+#endif
+} '{' proxy_items '}' ';'
+{
+#ifndef NO_LIBOPM
+  if (sc != NULL)
+    add_scanner(sc);
+#endif
+};
+
+proxy_items: proxy_items proxy_item | proxy_item;
+proxy_item: proxy_fds  | proxy_name  | proxy_protocol | proxy_target_ip | proxy_target_port |
+            proxy_target_string      | proxy_timeout  | proxy_user      | proxy_vhost | error;
+
+proxy_fds: FDS '=' NUMBER ';'
+{
+#ifndef NO_LIBOPM
+  proxy_fds = $3;
+#endif
+};
+
+proxy_name: NAME '=' QSTRING ';'
+{
+#ifndef NO_LIBOPM
+  if (sc != NULL)
+    add_scanner(sc);
+
+  sc = scanner_create();
+  strlcpy(sc->name, yylval.string, sizeof(sc->name));
+#endif
+};
+
+proxy_protocol: PROTOCOL '=' PROTOCOLTYPE ':' NUMBER ';'
+{
+#ifndef NO_LIBOPM
+  if (sc == NULL)
+  {
+    sc = scanner_create();
+    strlcpy(sc->name, "default", sizeof(sc->name));
+    add_scanner(sc);
+  }
+
+  pc = protocol_create();
+  pc->type = $3;
+  pc->port = $5;
+
+  add_protocol_to_scanner(pc, sc);
+#endif
+};
+
+proxy_target_ip: TARGET_IP '=' QSTRING ';'
+{
+#ifndef NO_LIBOPM
+  if (sc == NULL)
+    break;
+
+  strlcpy(sc->target_ip, yylval.string, sizeof(sc->target_ip));
+#endif
+};
+
+proxy_target_port: TARGET_PORT '=' NUMBER ';'
+{
+#ifndef NO_LIBOPM
+  if (sc == NULL)
+    break;
+
+  sc->target_port = $3;
+#endif
+};
+
+proxy_target_string: TARGET_STRING '=' QSTRING ';'
+{
+#ifndef NO_LIBOPM
+  if (sc == NULL)
+    break;
+
+  strlcpy(sc->target_string, yylval.string, sizeof(sc->target_string));
+#endif
+};
+
+proxy_timeout: TIMEOUT '=' timespec ';'
+{
+#ifndef NO_LIBOPM
+  proxy_timeout = $3;
+#endif
+};
+
+proxy_user: USER '=' QSTRING ';'
+{
+#ifndef NO_LIBOPM
+  char *userhost;
+
+  if (sc == NULL)
+  {
+    sc = scanner_create();
+    strlcpy(sc->name, "default", sizeof(sc->name));
+    add_scanner(sc);
+  }
+
+  ptr = dlink_create();
+  ptr->data = userhost = (char *)malloc(strlen(yylval.string) + 1);
+  dlink_add(userhost, ptr, &sc->targets);
+#endif
+};
+
+proxy_vhost: VHOST '=' QSTRING ';'
+{
+#ifndef NO_LIBOPM
+  strlcpy(proxy_vhost, yylval.string, sizeof(proxy_vhost));
+#endif
 };
 

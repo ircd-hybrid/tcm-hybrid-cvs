@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: tcm_io.c,v 1.110 2004/06/10 23:20:23 bill Exp $
+ *    $Id: tcm_io.c,v 1.111 2004/06/15 22:36:47 bill Exp $
  */
 
 #include <stdio.h>
@@ -49,6 +49,10 @@
 # include <sys/select.h>
 #endif
 
+#ifndef NO_LIBOPM
+#include "libopm/src/opm.h"
+#endif
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -67,6 +71,7 @@
 #include "serno.h"
 #include "patchlevel.h"
 #include "tools.h"
+#include "proxy.h"
 
 static int get_line(char *inbuf,int *len, struct connection *connections_p);
 static void va_send_to_connection(struct connection *,
@@ -108,6 +113,8 @@ read_packet(void)
   int  nread=0;
   struct timeval read_time_out;
 
+  /* main loop */
+
   FOREVER
   {
     current_time = time(NULL);
@@ -118,6 +125,10 @@ read_packet(void)
     DLINK_FOREACH_SAFE(ptr, next_ptr, connections.head)
     {
       connection_p = ptr->data;
+
+#ifndef NO_LIBOPM
+      cycle_scanners();
+#endif
 
       if (connection_p->state != S_IDLE)
       {

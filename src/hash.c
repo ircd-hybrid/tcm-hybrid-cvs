@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *    $Id: hash.c,v 1.76 2004/06/11 20:05:50 bill Exp $
+ *    $Id: hash.c,v 1.77 2004/06/15 22:36:46 bill Exp $
  */
 
 #include <stdio.h>
@@ -49,6 +49,7 @@
 #include "actions.h"
 #include "match.h"
 #include "client_list.h"
+#include "proxy.h"
 
 #ifdef IPV6
 #include "ipv6.h"
@@ -353,7 +354,7 @@ add_user_host(struct user_entry *user_info, int fromtrace)
     add_to_hash_table(ip_table, new_user->ip_class_c, new_user);
 #endif
 
-  /* Clonebot check */
+  /* Clonebot/proxy check */
   if(!fromtrace)
     {
       check_host_clones(user_info->host);
@@ -361,6 +362,9 @@ add_user_host(struct user_entry *user_info, int fromtrace)
       check_virtual_host_clones(new_user->ip_class_c);
 #endif
       check_reconnect_clones(user_info->host, new_user->ip_host);
+#ifndef NO_LIBOPM
+      logon_proxy_check(new_user);
+#endif
     }
 }
 

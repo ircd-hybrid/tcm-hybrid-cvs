@@ -6,6 +6,9 @@
 /* Disable openssl for CHALLENGE support? */
 #undef NO_SSL
 
+/* Disable libopm proxy detection support? */
+#undef NO_LIBOPM
+
 /* Define to 1 if you have the <crypt.h> header file. */
 #undef HAVE_CRYPT_H
 

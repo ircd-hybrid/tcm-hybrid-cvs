@@ -1,4 +1,4 @@
-/* $Id: serv_commands.c,v 1.5 2002/09/13 03:30:59 bill Exp $ */
+/* $Id: serv_commands.c,v 1.6 2002/09/24 15:22:36 bill Exp $ */
 
 #include "setup.h"
 
@@ -106,12 +106,13 @@ ms_wallops(struct source_client *source_p, int argc, char *argv[])
   if(strncmp(argv[2], ":OPERWALL - ", 12) == 0)
     send_to_all(NULL, FLAGS_WALLOPS, "OPERWALL %s -> %s",
 		source_p->name, argv[2]+12);
-  else if(strncmp(argv[2], ":LOCOPS - ", 9) == 0)
+  else if(strncmp(argv[2], ":LOCOPS - ", 10) == 0)
     send_to_all(NULL, FLAGS_LOCOPS, "LOCOPS %s -> %s",
-		source_p->name, argv[2]+9);
+                source_p->name, argv[2]+10);
+  else if(strncmp(argv[2], ":WALLOPS - ", 11) == 0)
+    send_to_all(NULL, FLAGS_WALLOPS, "WALLOPS %s -> %s",
+                source_p->name, argv[2]+11);
   else
     send_to_all(NULL, FLAGS_WALLOPS, "WALLOPS %s -> %s",
-		source_p->name, argv[2]+12);
+                source_p->name, argv[2]+1);
 }
-
-  

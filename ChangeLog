@@ -1,3 +1,15 @@
+leeh        2002/05/25 19:06:01 EDT	(20020526_0)
+
+  Modified files:
+    src                  commands.c 
+  Log:
+  - FLAGS_OPERWALL doesnt exist anymore, its FLAGS_WALLOPS
+  
+  Revision  Changes    Path
+  1.87      +3 -3      tcm-hybrid/src/commands.c
+
+
+
 leeh        2002/05/25 18:25:11 EDT	(20020525_34)
 
   Modified files:

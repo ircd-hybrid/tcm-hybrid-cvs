@@ -1,3 +1,11 @@
+*** 20011110_3 by bill
+- set MAX_ARGV to 80 to account for extra long OPERWALLs
+- proc() cleanups
+- list_user*() cleanups
+- fixed : bug in tcm.cf's M:
+- rdpt() cleanups
+
+
 *** 20011110_2 by wcampbel
 More cleanups
 

@@ -1,3 +1,15 @@
+db          2001/12/12 18:19:58 EST	(20011212_1)
+
+  Modified files:
+    src                  userlist.c 
+  Log:
+  - trivial comment change. we no longer support 'b' for remote tcms
+  
+  Revision  Changes    Path
+  1.41      +1 -5      tcm-hybrid/src/userlist.c
+
+
+
 einride     2001/12/12 18:08:18 EST	(20011212_0)
 
   Modified files:

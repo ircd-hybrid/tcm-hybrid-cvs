@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.44 2001/12/04 18:20:56 bill Exp $ */
+/* $Id: bothunt.c,v 1.45 2001/12/07 20:06:14 bill Exp $ */
 
 #include "setup.h"
 
@@ -1021,7 +1021,7 @@ void onservnotice(int connnum, int argc, char *argv[])
     if (strstr(p,"possible spambot") == NULL)
       break;
 
-    suggest_action(get_action_type("spambot"), nick, user, host, NO, YES);
+    suggest_action(get_action_type("spam"), nick, user, host, NO, YES);
     break;
 
   case ILINEFULL:

@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.50 2002/08/09 16:21:25 bill Exp $
+ * $Id: hash.c,v 1.51 2002/08/11 19:46:08 bill Exp $
  */
 
 #include <stdio.h>
@@ -344,6 +344,10 @@ add_user_host(struct user_entry *user_info, int fromtrace)
 void
 remove_user_host(struct user_entry *user_info)
 {
+#ifdef DEBUGMODE
+  struct hash_rec *find;
+  int idx=0;
+#endif
 #ifdef VIRTUAL
   char ip_class_c[MAX_IP];
 #endif
@@ -360,6 +364,19 @@ remove_user_host(struct user_entry *user_info)
 	{
           send_to_all(NULL, FLAGS_ALL, "*** Error removing %s!%s@%s from host table!",
                       user_info->nick, user_info->username, user_info->host);
+#ifdef DEBUGMODE
+          idx = 0;
+          for (find = host_table[0]; find; find = find->next)
+          {
+            ++idx;
+            if (find->info->host[0] == user_info->host[0])
+              printf("HOST: (idx:%d) (hash:%d) Potentially %s!%s@%s\n",
+                     idx, hash_func(user_info->host),
+                     find->info->nick, find->info->username,
+                     find->info->host);
+          }
+#endif
+
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from host table!\n",
@@ -376,6 +393,7 @@ remove_user_host(struct user_entry *user_info)
 	{
           send_to_all(NULL, FLAGS_ALL, "*** Error removing %s!%s@%s from domain table!",
                       user_info->nick, user_info->username, user_info->host);
+
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from domain table!\n",
@@ -392,6 +410,18 @@ remove_user_host(struct user_entry *user_info)
 	{
           send_to_all(NULL, FLAGS_ALL, "*** Error removing %s!%s@%s from user table!",
                       user_info->nick, user_info->username, user_info->host);
+
+#ifdef DEBUGMODE
+          idx = 0;
+          for (find = user_table[0]; find; find = find->next)
+          {
+            ++idx;
+            if (find->info->username[0] == user_info->username[0])
+              printf("USER: (idx:%d) (hash:%d) Potentially %s!%s@%s\n",
+                     idx, hash_func(user_info->username),
+                     find->info->nick, find->info->username, find->info->host);
+          }
+#endif
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from user table!\n",
@@ -415,6 +445,18 @@ remove_user_host(struct user_entry *user_info)
 	{
           send_to_all(NULL, FLAGS_ALL, "*** Error removing %s!%s@%s [%s] from iptable!",
                       user_info->nick, user_info->username, user_info->host, ip_class_c);
+
+#ifdef DEBUGMODE
+          idx = 0;
+          for (find = ip_table[0]; find; find = find->next)
+          {
+            ++idx;
+            if (find->info->nick[0] == user_info->nick[0])
+              printf("IP: (idx:%d) (hash:%d) Potentially %s!%s@%s\n",
+                     idx, hash_func(ip_class_c), find->info->nick,
+                     find->info->username, find->info->host);
+          }
+#endif
 	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.195 2002/08/10 21:08:11 bill Exp $
+ * $Id: bothunt.c,v 1.196 2002/08/11 19:46:07 bill Exp $
  */
 
 #include <stdio.h>
@@ -145,6 +145,7 @@ struct msg_to_action msgs_to_mon[] = {
  * output	- NONE
  * side effects	- user is added to hash tables
  * 
+ * User opers billy-jon[bill@ummm.E] (255.255.255.255) 26 26
  */
 
 void
@@ -158,26 +159,11 @@ on_trace_user(int argc, char *argv[])
     return;
 
   /* /trace format the same now everywhere? */
-  
-  right_bracket_ptr = argv[6]+strlen(argv[6]);
-
-  while(right_bracket_ptr != argv[6])
-  {
-    if (*right_bracket_ptr == ')')
-    {
-      *right_bracket_ptr = '\0';
-      break;
-    }
-    right_bracket_ptr--;
-  }
-
   ip_ptr = argv[6]+1;
 
-  while((*ip_ptr != ')') && *ip_ptr)
-    ++ip_ptr;
-
-  if (*ip_ptr == ')')
-    *ip_ptr = '\0';
+  if ((right_bracket_ptr = strrchr(ip_ptr, ')')) == NULL)
+    return; 
+  *right_bracket_ptr = '\0';
 
   if (!strncmp(argv[5], tcm_status.my_nick, strlen(tcm_status.my_nick)))
   {
@@ -186,8 +172,13 @@ on_trace_user(int argc, char *argv[])
 
   chopuh(IS_FROM_TRACE, argv[5], &userinfo);
   strlcpy(userinfo.class, argv[4], MAX_CLASS);
+
+  /*
+   * we can do this because chopuh() has put a \0 at the end of the nick
+   * in argv[5].
+   */
   strlcpy(userinfo.nick, argv[5], MAX_NICK);
-  strlcpy(userinfo.ip_host, argv[6]+1, MAX_IP);
+  strlcpy(userinfo.ip_host, ip_ptr, MAX_IP);
   add_user_host(&userinfo, YES);
 }
 
@@ -582,7 +573,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* Link with test.server[bill@255.255.255.255] established: (TS) link */ 
   case LINKWITH:
-    p+=10
+    p+=10;
     send_to_all(NULL, FLAGS_SERVERS, "Link with %s", p);
     break;
 
@@ -1013,7 +1004,7 @@ cs_clones(char *snotice)
  * side effects
  *
  * Audited for H6, H7, cs.
- * Nick change: From bill to aa [bill@ummm.E] */
+ * Nick change: From bill to aa [bill@ummm.E]
  */
 
 static void
@@ -1509,17 +1500,7 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
         {
           /* no [, no (, god knows what the separator is */
           if((uh = strchr(nickuserhost,'(')) == NULL)
-            {
-
-              /* XXX - stderr?  shouldnt this be a logfile? --fl_ */
-#if 0
-              (void)fprintf(stderr,
-                            "You have VERY badly screwed up +c output!\n");
-              (void)fprintf(stderr,
-                            "1st case nickuserhost = [%s]\n", nickuserhost);
-#endif
-              return;           /*screwy...prolly core in the caller*/
-            }
+            return;           /*screwy...prolly core in the caller*/
 
 	  /* there was a (, uh points to it.  shift uh up one */
 	  *uh++ = '\0';
@@ -1606,7 +1587,8 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
   else
     uh[strlen(uh)-1] = '\0';   /* Chop ] */
 
-  if (get_user_host(&user, &host, uh) == 0)
+  get_user_host(&user, &host, uh);
+  if (user == NULL || host == NULL)
     return;
   strlcpy(userinfo->username, user, MAX_USER);
   strlcpy(userinfo->host, host, MAX_HOST);

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.86 2002/12/30 07:31:36 bill Exp $
+ * $Id: parse.c,v 1.87 2003/02/26 10:25:40 bill Exp $
  */
 
 #include <stdio.h>
@@ -432,7 +432,13 @@ process_server(struct source_client *source_p, char *function, char *param)
     case RPL_TRACECLASS:
       tcm_status.doing_trace = NO;
       break;
-	
+
+#ifdef AGGRESSIVE_GECOS
+    case RPL_WHOREPLY:
+      on_who_user(argc, argv);
+      break;
+#endif
+
     case RPL_STATSILINE:
       on_stats_i(argc, argv);
       break;

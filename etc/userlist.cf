@@ -1,4 +1,4 @@
-# $Id: userlist.cf,v 1.23 2002/06/21 00:04:11 leeh Exp $
+# $Id: userlist.cf,v 1.24 2003/02/26 10:25:34 bill Exp $
 # userlist.cf file
 #
 # each line is colon separated
@@ -17,8 +17,10 @@
 # themselves, see .help umode in tcm:
 #
 #   +/-M will give the user the admin privs
-#   +/-K will allows this oper to .kline
-#   +/-D will allows this oper to .dline
+#   +/-K will allow this oper to .kline
+#   +/-D will allow this oper to .dline
+#   +/-X will allow this oper to .xline
+#   +/-J will allow this user to .jupe/.unjupe
 #   +/-W will allow this user to see WALLOPS and OPERWALL (this is only used
 #         if ENABLE_W_FLAG is defined)
 #

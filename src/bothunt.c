@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.214 2003/02/16 09:12:56 bill Exp $
+ * $Id: bothunt.c,v 1.215 2003/02/26 10:25:40 bill Exp $
  */
 
 #include <stdio.h>
@@ -39,6 +39,7 @@
 #ifdef HAVE_REGEX_H
 #include <regex.h>
 #endif
+static void check_oper_priv_sanity();
 static void check_nick_flood(char *snotice);
 static void cs_clones(char *snotice);
 static void link_look_notice(char *snotice);
@@ -152,6 +153,7 @@ struct msg_to_action msgs_to_mon[] = {
   {MSG_GACTIVE6, sizeof(MSG_GACTIVE6)-1, ACTIVE},
   {MSG_DACTIVE7, sizeof(MSG_DACTIVE7)-1, ACTIVE},
   {MSG_DACTIVE6, sizeof(MSG_DACTIVE6)-1, ACTIVE},
+  {MSG_OPERPRIVS, sizeof(MSG_OPERPRIVS)-1, OPERPRIVS},
   {NULL, 0, INVALID}
 };	
 
@@ -203,7 +205,36 @@ on_trace_user(int argc, char *argv[])
             sizeof(tcm_status.my_class));
 
   add_user_host(&userinfo, YES);
+#ifdef AGGRESSIVE_GECOS
+  send_to_server("WHO %s", userinfo.nick);
+#endif
 }
+
+#ifdef AGGRESSIVE_GECOS
+/*
+ * on_who_user()
+ *
+ * inputs       - who line from server
+ * outputs      - none
+ * side effects - user's gecos is updated in hash tables
+ *
+ * #ircd-coders bill holier.than.thou irc.intranaut.com billy-jon H* :0 Bill Jonus
+ */
+void
+on_who_user(int argc, char *argv[])
+{
+  char *user = argv[4];
+  char *host = argv[5];
+  char *nick = argv[7];
+  char *gecos, *p = argv[9];
+
+  if ((gecos = strchr(p, ' ')) == NULL)
+    return;
+  ++gecos;
+
+  update_gecos(nick, user, host, gecos);
+}
+#endif
 
 /* 
  * on_stats_i()
@@ -640,6 +671,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
   /* Flooder bill [bill@ummm.E] on irc.intranaut.com target: #clone */ 
   /* Possible Flooder bill [bill@ummm.E] on irc.intranaut.com target: #clone */
   /* Possible Flooder bill[bill@ummm.E] on irc.intranaut.com target: #clone */
+  /* Possible Flooder bill on irc2.intranaut.com target: #clone */
   case FLOODER:
     if (*p == 'P')
       nick = p + 17;
@@ -850,6 +882,52 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     q+=11;
 
     send_to_all(NULL, FLAGS_VIEW_KLINES, "*** Active for %s", q);
+    break;
+
+  /* *** Oper privs are gKXNoRUhda */
+  case OPERPRIVS:
+    tcm_status.oper_privs = 0;
+    for (p+=19;*p;++p)
+    {
+      switch (*p)
+      {
+        case 'G':
+          tcm_status.oper_privs |= PRIV_GLINE;
+          break;
+
+        case 'K':
+          tcm_status.oper_privs |= PRIV_KLINE;
+          break;
+
+        case 'X':
+          tcm_status.oper_privs |= PRIV_XLINE;
+          break;
+
+        case 'N':
+          tcm_status.oper_privs |= PRIV_NKCHG;
+          break;
+
+        case 'O':
+          tcm_status.oper_privs |= PRIV_GKILL;
+          break;
+
+        case 'R':
+          tcm_status.oper_privs |= PRIV_ROUTE;
+          break;
+
+        case 'U':
+          tcm_status.oper_privs |= PRIV_UNLNE;
+          break;
+
+        case 'A':
+          tcm_status.oper_privs |= PRIV_ADMIN;
+          break;
+
+        default:
+          break;
+      }
+    }
+    check_oper_priv_sanity();
     break;
 
   default:
@@ -1707,4 +1785,24 @@ chopuh(int is_trace, char *nickuserhost, struct user_entry *userinfo)
 
   strlcpy(userinfo->username, user, sizeof(userinfo->username));
   strlcpy(userinfo->host, host, sizeof(userinfo->host));
+}
+
+/*
+ * check_oper_priv_sanity()
+ *
+ * inputs       - none
+ * outputs      - none
+ * side effects - makes sure tcm has the privs it needs, and attempt to reconnect if not
+ */
+static void
+check_oper_priv_sanity()
+{
+  if (!(tcm_status.oper_privs & PRIV_NKCHG))
+  {
+    send_to_all(NULL, FLAGS_ALL, "*** tcm-hybrid requires the ability to see nick changes");
+    if (config_entries.debug && outfile)
+      fprintf(outfile, "*** tcm-hybrid requires the ability to see nick changes\n");
+    server_link_closed(0);
+    return;
+  }
 }

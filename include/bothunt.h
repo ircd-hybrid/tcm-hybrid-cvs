@@ -1,7 +1,7 @@
 #ifndef __BOTHNUT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.62 2003/02/03 09:02:15 wiz Exp $ */
+/* $Id: bothunt.h,v 1.63 2003/02/26 10:25:38 bill Exp $ */
 
 
 struct source_client;
@@ -62,6 +62,7 @@ void _config(int, int, char *argv[]);
 #define MSG_GACTIVE6		"G-line active for"
 #define MSG_DACTIVE7		"DLINE active for"
 #define MSG_DACTIVE6		"D-line active for"
+#define MSG_OPERPRIVS		"*** Oper privs are"
 
 #define IGNORE		-1
 #define CONNECT		 0
@@ -89,6 +90,7 @@ void _config(int, int, char *argv[]);
 #define NOACONFFOUND	32
 #define QUARANTINE	33
 #define ACTIVE		34
+#define OPERPRIVS	35
 
 #define CLONECONNECTCOUNT 3
 #define CLONECONNECTFREQ  30

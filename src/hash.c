@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.63 2003/02/03 09:02:16 wiz Exp $
+ * $Id: hash.c,v 1.64 2003/02/26 10:25:40 bill Exp $
  */
 
 #include <stdio.h>
@@ -923,6 +923,36 @@ update_nick(char *user, char *host, char *old_nick, char *new_nick)
     }
   }
 }
+
+#ifdef AGGRESSIVE_GECOS
+/*
+ * update_gecos
+ *
+ * inputs       - nick, user, host, gecos
+ * outputs      - none
+ * side effects - updates a user entry's gecos information
+ */
+void
+update_gecos(char *nick, char *user, char *host, char *gecos)
+{
+  struct hash_rec *find;
+  int hash_val;
+
+  hash_val = hash_func(user);
+
+  for(find = user_table[hash_val]; find; find = find->next)
+  {
+    if((strcmp(find->info->username, user) == 0) &&
+       (strcmp(find->info->host, host) == 0) &&
+       (strcmp(find->info->nick, nick) == 0))
+    {
+      strlcpy(find->info->gecos, gecos,
+              sizeof(find->info->gecos));
+      return;
+    }
+  }
+}
+#endif
 
 /*
  * kill_add_report

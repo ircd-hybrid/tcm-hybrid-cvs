@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.130 2002/12/30 07:31:36 bill Exp $ */
+/* $Id: main.c,v 1.131 2003/02/26 10:25:40 bill Exp $ */
 
 #include "setup.h"
 
@@ -254,8 +254,8 @@ main(int argc, char *argv[])
   tcm_status.my_server[0] = '\0';
   tcm_status.am_opered = NO;
   tcm_status.ping_time = 0;
-  tcm_status.doing_trace = 0;
-  tcm_status.n_of_fds_open=0;
+  tcm_status.doing_trace = NO;
+  tcm_status.n_of_fds_open = 0;
   tcm_status.max_fds = 128; 	/* XXX */
 
   if (connect_to_server(config_entries.server_name,

@@ -1,4 +1,4 @@
-/* $Id: parse.h,v 1.24 2002/06/28 06:23:11 db Exp $ */
+/* $Id: parse.h,v 1.25 2003/02/26 10:25:38 bill Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
@@ -7,6 +7,16 @@ struct connection;
 void parse_server(struct connection *);
 void parse_client(struct connection *);
 void expand_args(char *, int, int, char *argv[]);
+
+#define PRIV_XLINE	0x001
+#define PRIV_DLINE	0x002
+#define PRIV_GLINE	0x004
+#define PRIV_KLINE	0x008
+#define PRIV_NKCHG	0x010
+#define PRIV_GKILL	0x020
+#define PRIV_ROUTE	0x040
+#define PRIV_UNLNE	0x080
+#define PRIV_ADMIN	0x100
 
 struct t_tcm_status {
   char my_nick[MAX_NICK];
@@ -20,6 +30,7 @@ struct t_tcm_status {
   int  ping_state;		/* ping to server */
   int  n_of_fds_open;
   int  max_fds;
+  int  oper_privs;
 };
 
 struct source_client

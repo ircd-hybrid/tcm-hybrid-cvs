@@ -17,4 +17,11 @@ setting a time in seconds, in the [time] field.
    Set a D-line for the IP or IP/CIDR mask.
  - .unkline user@host (must match exactly)
    The tcm will attempt to remove that kline
-
+ - .jupe <channel/nick> [reason]
+   Jupe a channel or nickname
+ - .unjupe <channel/nick>
+   Remove a jupe
+ - .xline <gecos pattern> [reason]
+   Adds an X: to the server
+ - .unxline <gecos pattern>
+   Removes an X:

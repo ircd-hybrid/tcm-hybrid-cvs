@@ -25,6 +25,8 @@ Note:  Opers as defined in this file are people with TCM O: lines (or
     List hosts with multiple users.
  - .nfind <wildcarded nick> (OPERS ONLY)
     List all nicks which match the given wildcarded nick
+ - .gecos [-r] <wildcarded/regex gecos> (OPERS ONLY)
+    List all connected users who match the given gecos
  - .failures
     This command lists userhosts that have exceeded the threshold
     of connect failures due to being K-lined, detected as a bot,

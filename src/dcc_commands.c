@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.148 2003/02/16 23:05:40 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.149 2003/02/26 10:25:40 bill Exp $ */
 
 #include "setup.h"
 
@@ -103,6 +103,10 @@ static void m_hlist(struct connection *connection_p, int argc, char *argv[]);
 #ifdef DEBUGMODE
 static void m_sysnotice(struct connection *connection_p, int argc, char *argv[]);
 #endif
+static void m_xline(struct connection *connection_p, int argc, char *argv[]);
+static void m_unxline(struct connection *connection_p, int argc, char *argv[]);
+static void m_jupe(struct connection *connection_p, int argc, char *argv[]);
+static void m_unjupe(struct connection *connection_p, int argc, char *argv[]);
 
 void
 m_class(struct connection *connection_p, int argc, char *argv[])
@@ -548,9 +552,14 @@ m_dline(struct connection *connection_p, int argc, char *argv[])
   char *p, reason[MAX_BUFF];
   int i, len;
 
-  if(connection_p->type & FLAGS_DLINE)
+  if (!(connection_p->type & FLAGS_DLINE))
   {
     send_to_connection(connection_p, "You do not have access to .dline");
+    return;
+  }
+  if (config_entries.hybrid && !(tcm_status.oper_privs & PRIV_DLINE))
+  {
+    send_to_connection(connection_p, "We do not have access to DLINE on the server");
     return;
   }
   if(argc >= 3)
@@ -818,6 +827,146 @@ m_sysnotice(struct connection *connection_p, int argc, char *argv[])
 }
 #endif
 
+static void
+m_xline(struct connection *connection_p, int argc, char *argv[])
+{
+  char buf[MAX_BUFF];
+  int a;
+
+  if (!(connection_p->type & FLAGS_XLINE))
+  {
+    send_to_connection(connection_p, "You do not have access to .xline");
+    return;
+  }
+  if (!config_entries.hybrid || !(tcm_status.oper_privs & PRIV_XLINE))
+  {
+    send_to_connection(connection_p, "Error: XLINE not possible");
+    return;
+  }
+
+  if (argc <= 1)
+  {
+    send_to_connection(connection_p, "Usage: %s <gecos pattern> [reason]",
+                       argv[0]);
+    return;
+  }
+
+  buf[0] = '\0';
+
+  for (a=2; a<argc; ++a)
+  {
+    strlcat(buf, argv[a], sizeof(buf)-strlen(buf));
+    strlcat(buf, " ", sizeof(buf)-strlen(buf));
+  }
+  buf[strlen(buf)-1] = '\0';
+
+  send_to_server("XLINE %s :%s", argv[1], buf);
+}
+
+static void
+m_unxline(struct connection *connection_p, int argc, char *argv[])
+{
+  if (!(connection_p->type & FLAGS_XLINE))
+  {
+    send_to_connection(connection_p, "You do not have access to .unxline");
+    return;
+  }
+  if (!config_entries.hybrid || !(tcm_status.oper_privs & PRIV_XLINE))
+  {
+    send_to_connection(connection_p, "Error: UNXLINE not possible");
+    return;
+  }
+
+  if (argc <= 1)
+  {
+    send_to_connection(connection_p, "Usage: %s <gecos pattern>",
+                       argv[0]);
+    return;
+  }
+
+  send_to_server("UNXLINE %s", argv[1]);
+}
+
+static void
+m_jupe(struct connection *connection_p, int argc, char *argv[])
+{
+  char buf[MAX_BUFF];
+  int a;
+
+  if (!(connection_p->type & FLAGS_JUPE))
+  {
+    send_to_connection(connection_p, "You do not have access to .jupe");
+    return;
+  }
+  if (config_entries.hybrid == NO)
+  {
+    send_to_connection(connection_p, "Error: RESV not possible");
+    return;
+  }
+
+  if (argc <= 1)
+  {
+    send_to_connection(connection_p, "Usage: %s <channel/nick> [reason]",
+                       argv[0]);
+    return;
+  }
+
+  buf[0] = '\0';
+
+  for (a=2; a<argc; ++a)
+  {
+    strlcat(buf, argv[a], sizeof(buf)-strlen(buf));
+    strlcat(buf, " ", sizeof(buf)-strlen(buf));
+  }
+  buf[strlen(buf)-1] = '\0';
+
+  if (config_entries.hybrid_version >= 7)
+    send_to_server("RESV %s :%s", argv[1], buf);
+  else
+  {
+    if (argv[1][0] != '#')
+    {
+      send_to_connection(connection_p, "Error: hybrid-6 cannot jupe nicknames");
+      return;
+    }
+    send_to_server("MODE %s +j", argv[1]);
+  }
+}
+
+static void
+m_unjupe(struct connection *connection_p, int argc, char *argv[])
+{
+  if (!(connection_p->type & FLAGS_JUPE))
+  {
+    send_to_connection(connection_p, "You do not have access to .unjupe");
+    return;
+  }
+  if (config_entries.hybrid == NO)
+  {
+    send_to_connection(connection_p, "Error: UNRESV not possible");
+    return;
+  }
+
+  if (argc <= 1)
+  {
+    send_to_connection(connection_p, "Usage: %s <channel/nick>",
+                       argv[0]);
+    return;
+  }
+
+  if (config_entries.hybrid_version >= 7)
+    send_to_server("UNRESV %s", argv[1]);
+  else
+  {
+    if (argv[1][0] != '#')
+    {
+      send_to_connection(connection_p, "Error: hybrid-6 cannot jupe nicknames");
+      return;
+    }
+    send_to_server("MODE %s -j", argv[1]);
+  }
+}
+
 /*
  * register_oper
  *
@@ -1015,6 +1164,18 @@ struct dcc_command sysnotice_msgtab = {
  "sysnotice", NULL, {m_unregistered, m_not_admin, m_sysnotice}
 };
 #endif
+struct dcc_command xline_msgtab = {
+ "xline", NULL, {m_unregistered, m_xline, m_xline}
+};
+struct dcc_command unxline_msgtab = {
+ "unxline", NULL, {m_unregistered, m_unxline, m_unxline}
+};
+struct dcc_command jupe_msgtab = {
+ "jupe", NULL, {m_unregistered, m_jupe, m_jupe}
+};
+struct dcc_command unjupe_msgtab = {
+ "unjupe", NULL, {m_unregistered, m_unjupe, m_unjupe}
+};
 
 void 
 init_commands(void)
@@ -1073,6 +1234,10 @@ init_commands(void)
   add_dcc_handler(&sysnotice_msgtab);
 #endif
   add_dcc_handler(&uptime_msgtab);
+  add_dcc_handler(&xline_msgtab);
+  add_dcc_handler(&unxline_msgtab);
+  add_dcc_handler(&jupe_msgtab);
+  add_dcc_handler(&unjupe_msgtab);
 }
 
 /*

@@ -1,7 +1,7 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-/* $Id: hash.h,v 1.27 2002/09/13 03:03:29 bill Exp $ */
+/* $Id: hash.h,v 1.28 2003/02/26 10:25:38 bill Exp $ */
 
 #define HASHTABLESIZE 3001
 
@@ -45,6 +45,9 @@ void add_to_hash_table(struct hash_rec *table[], const char *key,
 void add_user_host(struct user_entry *, int);
 void remove_user_host(struct user_entry *);
 void update_nick(char *, char *, char *, char *);
+#ifdef AGGRESSIVE_GECOS
+void update_gecos(char *, char *, char *, char *);
+#endif
 
 void clear_hash(void);
 

@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.91 2003/01/19 01:18:38 wiz Exp $ */
+/* $Id: userlist.h,v 1.92 2003/02/26 10:25:38 bill Exp $ */
 
 #include "setup.h"
 #include "tools.h"
@@ -122,6 +122,8 @@ void exempt_summary();
 #define FLAGS_PARTYLINE		0x000008 /* user wants to be on partyline */
 #define FLAGS_DLINE		0x000010 /* user has .dline privs */
 #define FLAGS_SUSPENDED		0x000020 /* user is suspended */
+#define FLAGS_XLINE		0x000040 /* user has .xline privs */
+#define FLAGS_JUPE		0x000080 /* user has .jupe privs */
 
 /* send second */
 #define FLAGS_ALL		0x000100 /* notices destined for all users */

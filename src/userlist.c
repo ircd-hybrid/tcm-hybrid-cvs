@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.147 2002/12/30 07:31:36 bill Exp $
+ * $Id: userlist.c,v 1.148 2003/02/26 10:25:40 bill Exp $
  */
 
 #include <errno.h>
@@ -67,6 +67,8 @@ static struct umode_struct umode_privs[] =
 #ifdef ENABLE_W_FLAG
   { 'W', FLAGS_WALLOPS,		},
 #endif
+  { 'X', FLAGS_XLINE,		},
+  { 'J', FLAGS_JUPE,		},
   { (char)0, 0,			}
 };
 

@@ -1,3 +1,24 @@
+wcampbel    2002/06/04 09:24:33 EDT	(20020604_4)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              setup.h.in 
+    src                  bothunt.c dcc.c tcm_io.c 
+  Log:
+  Use a proper check for sys/select.h, not #ifdef AIX
+  lint cleanups
+  
+  Revision  Changes    Path
+  1.20      +1 -0      tcm-hybrid/autoconf/configure.in
+  1.20      +52 -12    tcm-hybrid/configure
+  1.8       +4 -1      tcm-hybrid/include/setup.h.in
+  1.150     +1 -5      tcm-hybrid/src/bothunt.c
+  1.5       +0 -4      tcm-hybrid/src/dcc.c
+  1.85      +1 -18     tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/06/04 04:36:31 EDT	(20020604_3)
 
   Modified files:

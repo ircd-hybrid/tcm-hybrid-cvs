@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.54 2002/04/11 23:35:40 einride Exp $ */
+/* $Id: bothunt.c,v 1.55 2002/04/12 01:40:50 bill Exp $ */
 
 #include "setup.h"
 
@@ -128,7 +128,6 @@ struct msg_to_action msgs_to_mon[] = {
   {"Oper count off by",IGNORE},
   {"User count off by",IGNORE},
   {"Link with", LINKWITH},
-  {"Write error to", WRITEERR},
   {"Received SQUIT", SQUITOF},
   {"motd requested by",MOTDREQ},
   {"Flooder", FLOODER},
@@ -136,6 +135,7 @@ struct msg_to_action msgs_to_mon[] = {
   {"I-line mask", IGNORE},
   {"I-line is full", ILINEFULL},
   {"*** Banned: ", BANNED},
+  {"*** You have been D-lined", BANNED},
   {"Possible Drone Flooder", DRONE},
   {"X-line Rejecting", XLINEREJ},
   {"Invalid username:", INVALIDUH},
@@ -634,16 +634,6 @@ void onservnotice(int connnum, int argc, char *argv[])
   else
     faction = IGNORE;
 
-  if (strstr(p, "closed the connection") && (strncmp(p, "Server", 6) == 0)) 
-  {
-    q = message+8;
-    if ((p = strchr(q, ' ')) == NULL)
-      return;
-    *p = '\0';
-    sendtoalldcc(SEND_LINK_ONLY, "Lost server: %s\n", q);
-    return;
-  }
-
   if (strstr(p, "I-line mask "))
   {
     if ((q = strrchr(p, '[')) == NULL)
@@ -831,6 +821,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 
   switch (faction)
   {
+  /* Client connecting: bill (bill@ummm.E) [255.255.255.255] {1} */
   case CONNECT:
     if ((q = strchr(p, '(')) == NULL)
       return;
@@ -867,11 +858,14 @@ void onservnotice(int connnum, int argc, char *argv[])
     adduserhost(nick, &userinfo, NO, NO);
     break;
 
+  /* Client exiting: bill (bill@ummm.E) [e?] [255.255.255.255]*/
   case EXITING:
     chopuh(NO,q,&userinfo);
     removeuserhost(q,&userinfo);
     break;
 
+  /* Unauthorized client connection from bill[bill@localhost] [127.0.0.1]
+     on [irc.intranaut.com/6667]. */
   case UNAUTHORIZED:
     if ((q = strchr(p, '[')) == NULL)
       return;
@@ -883,6 +877,7 @@ void onservnotice(int connnum, int argc, char *argv[])
     logfailure(p,NO);
     break;
 
+  /* Nick change: From bill to aa [bill@ummm.E] */
   case NICKCHANGE:
     check_nick_flood(q);
     break;
@@ -897,10 +892,12 @@ void onservnotice(int connnum, int argc, char *argv[])
     cs_clones(q);
     break;
 
+  /* LINKS '' requested by bill (bill@ummm.E) [irc.bill.eagan.mn.us] */
   case LINK_LOOK:
     link_look_notice(q);
     break;
 
+  /* STATS p requested by bill (bill@ummm.E) [irc.bill.eagan.mn.us] */
   case STATS:
     stats_notice(q);
     break;
@@ -909,15 +906,13 @@ void onservnotice(int connnum, int argc, char *argv[])
     toserv("STATS Y\n");
     break;
 
+  /* Link with test.server[bill@255.255.255.255] established: (TS) link */ 
   case LINKWITH:
     ++q;
     sendtoalldcc(SEND_LINK_ONLY, "Link with %s\n", q);
     break;
 
-  case WRITEERR:
-    sendtoalldcc(SEND_LINK_ONLY, "%s", q);
-    break;
-
+  /* Received SQUIT test.server from bill[bill@ummm.E] (this is a test) */
   case SQUITOF:
     ++q;
     if ((p = strchr(q, ' ')) == NULL)
@@ -927,6 +922,7 @@ void onservnotice(int connnum, int argc, char *argv[])
     sendtoalldcc(SEND_LINK_ONLY, "SQUIT for %s from %s\n", q, p);
     break;
 
+  /* motd requested by bill (bill@ummm.E) [irc.bill.eagan.mn.us] */
   case MOTDREQ:
     ++q;
     sendtoalldcc(SEND_MOTD_ONLY, "[MOTD requested by %s]\n", q);
@@ -939,6 +935,7 @@ void onservnotice(int connnum, int argc, char *argv[])
        they see them */
      /* WHAT?! -bill */
 
+  /* Flooder bill [bill@ummm.E] on irc.intranaut.com target: #clone */ 
   case FLOODER:
     ++q;
     if ((p = strchr(q,' ')) == NULL)
@@ -994,6 +991,8 @@ void onservnotice(int connnum, int argc, char *argv[])
 
     break;
 
+  /* User bill (bill@ummm.E) is a possible spambot */
+  /* User bill (bill@ummm.E) trying to join #tcm is a possible spambot */
   case SPAMBOT:
     ++q;
     if ((p = strchr(q,' ')) == NULL)
@@ -1018,10 +1017,13 @@ void onservnotice(int connnum, int argc, char *argv[])
     suggest_action(get_action_type("spambot"), nick, user, host, NO, YES);
     break;
 
+  /* I-line is full for bill[bill@ummm.E] (127.0.0.1). */
   case ILINEFULL:
     connect_flood_notice(q);
     break;
 
+  /* *** You have been D-lined */
+  /* *** Banned: this is a test (2002/04/11 15.10) */
   case BANNED:
     sendtoalldcc(SEND_ALL_USERS, "I am banned from %s.  Exiting..\n", 
 		 config_entries.rserver_name[0] ?
@@ -1031,6 +1033,8 @@ void onservnotice(int connnum, int argc, char *argv[])
     /* NOT REACHED */
     break;
 
+  /* Possible Drone Flooder bill [bill@ummm.E] on irc.intranaut.com target:
+     #clone */
   case DRONE:
     ++q;
     nick = q;
@@ -1058,6 +1062,7 @@ void onservnotice(int connnum, int argc, char *argv[])
                  nick, user, host, p);
     break;
 
+  /* X-line Rejecting [Bill Jonus] [just because] user bill[bill@ummm.E] */
   case XLINEREJ:
     if ((nick = strrchr(q, ' ')) == NULL)
       return;
@@ -1124,12 +1129,13 @@ void onservnotice(int connnum, int argc, char *argv[])
     }
     break;
 
+  /* Quarantined nick [bill] from user aa[bill@ummm.E] */
   case QUARANTINE:
     nick = q+2;
     if ((q = strchr(nick, ']')) == NULL)
       return;
     *q = '\0';
-    user = q+13;
+    user = q+15;
 
     if ((p = strchr(user, ']')) == NULL)
       return;
@@ -1182,7 +1188,8 @@ void onservnotice(int connnum, int argc, char *argv[])
       connect_flood[c].connect_count = 0;
       connect_flood[c].last_connect = current_time;
     }
-    
+
+  /* Invalid username: bill (!@$@&&&.com) */
   case INVALIDUH:
     nick = q+1;
     if ((p = strchr(nick, ' ')) == NULL)
@@ -1240,6 +1247,8 @@ void onservnotice(int connnum, int argc, char *argv[])
     }
     break;
 
+  /* Server ircd.flamed.net split from ircd.secsup.org */
+  /* Server irc.intranaut.com being introduced by ircd.secsup.org */
   case SERVER:
     ++q;
     if (strstr(q, "split"))
@@ -1273,6 +1282,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 		 "*** Failed oper attempt by %s %s", nick, user);
     break;
 
+  /* info requested by bill (bill@ummm.e) [irc.bill.eagan.mn.us] */
   case INFOREQUESTED:
     nick = q+1;
     if ((q = strchr(nick, ' ')) == NULL)
@@ -1286,6 +1296,7 @@ void onservnotice(int connnum, int argc, char *argv[])
 		 "[INFO requested by %s (%s)]", nick, user);
     break;
 
+  /* No aconf found */
   case NOACONFFOUND:
     prnt(connections[testlines.index].socket, "%s does not have access\n",
          testlines.umask);

@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.34 2001/12/04 18:20:56 bill Exp $ */
+/* $Id: stdcmds.c,v 1.35 2001/12/16 20:22:39 einride Exp $ */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -488,45 +488,28 @@ suggest_action(int type_s,
 
       if (identd && !different)
         strcpy(suggested_user,user);
-      else if (identd && different)
+      else 
         strcpy(suggested_user, "*");
-      else
-        strcpy(suggested_user,"~*");
 
       if (type & get_action_type("clone"))
         {
-          if (identd)
-            strcpy(suggested_user, "*");
-          else
-            strcpy(suggested_user, "~*");
+          strcpy(suggested_user, "*");
         }
       else if (type & get_action_type("sclone"))
         {
-          if (identd)
-            strcpy(suggested_user, "*");
-          else
-            strcpy(suggested_user, "~*");
+          strcpy(suggested_user, "*");
         }
       else if (type & get_action_type("drone"))
         {
-          if (identd)
-            strcpy(suggested_user, "*");
-          else
-            strcpy(suggested_user, "~*");
+          strcpy(suggested_user, "*");
         }
       else if (type & get_action_type("wingate"))
         {
-          if (identd)
-            strcpy(suggested_user, "*");
-          else
-            strcpy(suggested_user, "~*");
+          strcpy(suggested_user, "*");
         }
       else if (type & get_action_type("socks"))
         {
-          if (identd)
-            strcpy(suggested_user, "*");
-          else
-            strcpy(suggested_user, "~*");
+          strcpy(suggested_user, "*");
         }
 
       suggested_host=suggest_host(host, identd, type);

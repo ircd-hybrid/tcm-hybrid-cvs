@@ -1,3 +1,19 @@
+jmallett    2003/01/03 21:36:49 EST	(20030104_0)
+
+  Modified files:
+    include              actions.h 
+    src                  tcm_io.c 
+  Log:
+  Define a structure before using it.
+  
+  When zeroing a structure, zero the whole thing, not just sizeof(pointer).
+  
+  Revision  Changes    Path
+  1.18      +15 -16    tcm-hybrid/include/actions.h
+  1.106     +1 -1      tcm-hybrid/src/tcm_io.c
+
+
+
 bill        2002/12/30 02:31:38 EST	(20021230_0)
 
   Modified files:

@@ -44,7 +44,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: dcc_commands.c,v 1.10 2001/10/11 20:45:22 bill Exp $";
+static char *version="$Id: dcc_commands.c,v 1.11 2001/10/12 02:26:22 db Exp $";
 char *_version="20012009";
 
 static int is_kline_time(char *p);
@@ -739,7 +739,57 @@ void dccproc(int connnum, int argc, char *argv[])
       }
       break;
 #endif
-      
+     
+    case K_ALLOW:
+      if (connections[connnum].type & TYPE_REGISTERED)
+        handle_allow(connections[connnum].socket,argv[1],who_did_command);
+      else
+        prnt(connections[connnum].socket,"You aren't registered\n");
+      break;
+
+      case K_UMODE:
+
+        if (!(connections[connnum].type & TYPE_REGISTERED))
+          {
+            prnt(connections[connnum].socket, "You aren't registered\n");
+            return;
+          }
+
+        if (argc < 2)
+          {
+            prnt(connections[connnum].socket, "Your current flags are: %s\n",
+                 type_show(connections[connnum].type));
+            break;
+          }
+        if (argc >= 3)
+          {
+            if (!(connections[connnum].type & TYPE_ADMIN))
+              {
+                prnt(connections[connnum].socket, "You aren't an admin\n");
+                return;
+              }
+            if ((argv[2][0] == '+') || (argv[2][0] == '-'))
+              set_umode(connnum,argv[2],argv[1]);
+            else
+              prnt(connections[connnum].socket, ".umode [user flags] | [user] |
+[flags]\n");
+          }
+        else
+          {
+            if ((argv[1][0] == '+') || (argv[1][0] == '-'))
+              set_umode(connnum, argv[1], NULL);
+            else
+              {
+                if (!(connections[connnum].type & TYPE_ADMIN))
+                  {
+                    prnt(connections[connnum].socket, "You aren't an admin\n");
+                    return;
+                  }
+                show_user_umodes(connections[connnum].socket,argv[1]);
+              }
+          }
+        break;
+
       case K_CONNECTIONS:
 	list_connections(connections[connnum].socket);
 	break;

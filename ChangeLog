@@ -1,3 +1,15 @@
+db          2002/06/07 08:58:30 EDT	(20020607_6)
+
+  Modified files:
+    src                  dcc.c 
+  Log:
+  - simplified some logic
+  
+  Revision  Changes    Path
+  1.12      +2 -5      tcm-hybrid/src/dcc.c
+
+
+
 leeh        2002/06/07 07:25:09 EDT	(20020607_5)
 
   Modified files:

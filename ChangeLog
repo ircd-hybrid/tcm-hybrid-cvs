@@ -1,3 +1,26 @@
+db          2002/05/27 20:35:14 EDT	(20020528_6)
+
+  Modified files:
+    include              hash.h parse.h 
+    src                  actions.c bothunt.c commands.c hash.c 
+                         logging.c stdcmds.c userlist.c wingate.c 
+  Log:
+  - removed hash.h from files that didn't need it, replaced with parse.
+  
+  Revision  Changes    Path
+  1.3       +1 -8      tcm-hybrid/include/hash.h
+  1.11      +8 -2      tcm-hybrid/include/parse.h
+  1.5       +2 -1      tcm-hybrid/src/actions.c
+  1.124     +1 -1      tcm-hybrid/src/bothunt.c
+  1.101     +1 -2      tcm-hybrid/src/commands.c
+  1.2       +1 -1      tcm-hybrid/src/hash.c
+  1.39      +1 -1      tcm-hybrid/src/logging.c
+  1.80      +1 -1      tcm-hybrid/src/stdcmds.c
+  1.94      +1 -1      tcm-hybrid/src/userlist.c
+  1.48      +1 -2      tcm-hybrid/src/wingate.c
+
+
+
 db          2002/05/27 20:20:25 EDT	(20020528_5)
 
   Modified files:

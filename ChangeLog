@@ -1,3 +1,7 @@
+*** 20010617_1 by jdc
+- bothunt.c, logging.c: Linux needs time.h (patch by Hwy).
+
+
 *** 20010614_1 by db
 - just upped version
 

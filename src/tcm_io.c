@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.18 2002/05/25 02:51:45 db Exp $
+ * $Id: tcm_io.c,v 1.19 2002/05/25 06:39:30 db Exp $
  */
 
 #include <stdio.h>
@@ -57,8 +57,10 @@
 
 static int parse_args(char *, char *argv[]);
 static int get_line(char *inbuf,int *len, struct connection *connections_p);
+static int connect_to_dcc_ip(const char *nick, const char *hostport);
 static void connect_remote_client(char *, char *, char *, int);
 static void va_print_to_socket(int sock, const char *format, va_list va);
+static void va_print_to_server(const char *format, va_list va);
 
 /* -1 indicates listening for connection */
 int initiated_dcc_socket = -1;
@@ -409,13 +411,13 @@ linkclosed(int connnum, int argc, char *argv[])
   log_problem("linkclosed()", "sleeping 30");
   sleep(30);
 
-  connections[0].socket = bindsocket(serverhost);
+  connections[0].socket = connect_to_server(serverhost);
   if (connections[0].socket == INVALID)
-  {
-    log_problem("linkclosed()", "invalid socket quitting");
-    quit = YES;
-    return;
-  }
+    {
+      log_problem("linkclosed()", "invalid socket quitting");
+      quit = YES;
+      return;
+    }
 
   _signon(0, 0, NULL);
 }
@@ -500,8 +502,9 @@ connect_remote_client(char *nick,char *user,char *host,int sock)
  * output       - none
  * side effects - initiate a dcc chat =to= a requester
  */
+
 void
-initiate_dcc_chat(char *nick, char *user, char *host)
+initiate_dcc_chat(const char *nick, const char *user, const char *host)
 {
   int dcc_port;                         /* dcc port to use */
   struct sockaddr_in socketname;
@@ -553,14 +556,14 @@ initiate_dcc_chat(char *nick, char *user, char *host)
     return;
   }
 
-  privmsg(nick,"\001DCC CHAT chat %lu %d\001\n",
+  privmsg(nick,"\001DCC CHAT chat %lu %d\001",
           local_ip(ourhostname),dcc_port);
 
   if (config_entries.debug && outfile)
       (void)fprintf(outfile, "DEBUG: initiated_dcc_socket = %d\n",
                     initiated_dcc_socket);
 
-  initiated_dcc_socket_time = time(NULL);
+  initiated_dcc_socket_time = current_time;
 }
 
 /*
@@ -575,7 +578,6 @@ void
 print_to_socket(int sock, const char *format, ...)
 {
   va_list va;
-
   va_start(va,format);
   va_print_to_socket(sock, format, va);
   va_end(va);
@@ -592,10 +594,64 @@ void
 print_to_server(const char *format, ...)
 {
   va_list va;
-
   va_start(va,format);
-  va_print_to_socket(connections[0].socket, format, va);
+  va_print_to_server(format, va);
   va_end(va);
+}
+
+/*
+ * notice
+ *
+ * inputs	- nick to privmsg
+ * 		- var args to send
+ * output	- none
+ * side effects	- nick is notice'd
+ */
+
+void
+notice(const char *nick,...)
+{
+  char command[MAX_NICK+20];
+  va_list va;
+  snprintf(command, MAX_NICK+20, "NOTICE %s :%%s", nick);
+  command[MAX_NICK+19] = '\0';
+  va_start(va,nick);
+  va_print_to_server(command, va);
+  va_end(va);
+}
+
+/*
+ * privmsg
+ *
+ * inputs	- nick to privmsg
+ * 		- var args to send
+ * output	- none
+ * side effects	- nick is privmsg'd
+ */
+
+void
+privmsg(const char *nick,...)
+{
+  char command[MAX_NICK+20];
+  va_list va;
+  snprintf(command, MAX_NICK+20, "PRIVMSG %s :%%s", nick);
+  command[MAX_NICK+19] = '\0';
+  va_start(va,nick);
+  va_print_to_server(command, va);
+  va_end(va);
+}
+
+/*
+ * va_print_to_server()
+ *
+ * inputs	- format string to output to server
+ * output	- NONE
+ * side effects	- NONE
+ */
+static void
+va_print_to_server(const char *format, va_list va)
+{
+  va_print_to_socket(connections[0].socket, format, va);
 }
 
 /*
@@ -612,7 +668,10 @@ va_print_to_socket(int sock, const char *format, va_list va)
   char msgbuf[MAX_BUFF];
 
   vsnprintf(msgbuf, sizeof(msgbuf)-2, format, va);
-  if (msgbuf[strlen(msgbuf)-1] != '\n') strncat(msgbuf, "\n\0", 2);
+
+  if (msgbuf[strlen(msgbuf)-1] != '\n')
+    strcat(msgbuf, "\n");
+
   send(sock, msgbuf, strlen(msgbuf), 0);
 }
 
@@ -707,7 +766,7 @@ send_to_all(int type, const char *format,...)
 }
 
 /*
- * makeconn()
+ * accept_dcc_connection()
  *
  * inputs	- hostpost
  * 		- nick making the connection
@@ -717,14 +776,15 @@ send_to_all(int type, const char *format,...)
  */
 
 int
-makeconn(char *hostport,char *nick,char *userhost)
+accept_dcc_connection(const char *hostport,
+		      const char *nick, char *userhost)
 {
   int  i;               /* index variable */
   char *p;              /* scratch pointer used for parsing */
   char *user;
   char *host;
 
-  for (i=1; i<MAXDCCCONNS+1; ++i)
+  for (i=1; i < MAXDCCCONNS+1; ++i)
   {
     if (connections[i].socket == INVALID)
     {
@@ -759,12 +819,12 @@ makeconn(char *hostport,char *nick,char *userhost)
     return (0);
   }
 
-  connections[i].socket = bindsocket(hostport);
+  connections[i].socket = connect_to_dcc_ip(nick, hostport);
 
   if (connections[i].socket == INVALID)
     return (0);
 
-  fcntl(connections[i].socket, F_SETFL, O_NONBLOCK);
+
   FD_SET(connections[i].socket, &readfds);
   connections[i].set_modes = 0;
   strncpy(connections[i].nick,nick,MAX_NICK-1);
@@ -790,4 +850,186 @@ makeconn(char *hostport,char *nick,char *userhost)
   print_to_socket(connections[i].socket,
        "Connected.  Send '.help' for commands.");
   return (1);
+}
+
+
+
+/*
+ * connect_to_server
+ *
+ * input	- pointer to string giving hostname:port OR
+ * output	- socket or -1 if no socket
+ * side effects	- Sets up a socket and connects to the given host and port
+ *		  or given DCC chat IP
+ */
+int
+connect_to_server(const char *hostport)
+{
+  struct sockaddr_in socketname;
+  int port = 6667;
+  char server[MAX_HOST];
+  struct hostent *remote_hostent;
+  char *p;
+
+  /* Parse serverhost to look for port number */
+  strcpy(server, hostport);
+
+  if ((p = strchr(server,':')))
+    {
+      *p++ = '\0';
+      port = atoi(p);
+    }
+
+  if ((remote_hostent = gethostbyname (server)) == NULL)
+    {
+      printf ("error: unknown host: %s\n", server);
+      return (INVALID);
+    }
+
+  memcpy ((void *) &socketname.sin_addr,
+	  (void *) remote_hostent->h_addr,
+	  remote_hostent->h_length);
+
+  return(connect_to_given_ip_port(&socketname, port));
+}
+
+/*
+ * connect_to_dcc_ip
+ *
+ * input	- pointer to nick
+ *		- pointer to string giving dcc ip
+ * output	- socket or -1 if no socket
+ * side effects	- Sets up a socket and connects to the given host and port
+ *		  or given DCC chat IP
+ */
+static int
+connect_to_dcc_ip(const char *nick, const char *hostport)
+{
+  struct sockaddr_in socketname;
+  char server[MAX_HOST];
+  char *p;
+  unsigned long remoteaddr;
+  int port;
+
+  strcpy(server, hostport);
+
+  /* kludge for DCC CHAT precalculated sin_addrs */
+  if (*server == '#')
+    {
+       (void)sscanf(server+1,"%lu",&remoteaddr);
+       /* Argh.  Didn't they teach byte order in school??? --cah */
+       socketname.sin_addr.s_addr=htonl(remoteaddr);
+    }
+  else
+    {
+      return(INVALID);
+    }
+
+  if ((p = strchr(server,' ')))
+    {
+      *p++ = '\0';
+      port = atoi(p);
+    }
+
+  if (port < 1024)
+    {
+      notice(nick, "Invalid port specified for DCC CHAT.  Not funny.");
+      return (INVALID);
+    }
+
+  return(connect_to_given_ip_port(&socketname, port));
+}
+
+
+/*
+ * connect_to_given_ip_port
+ *
+ * inputs	- pointer to struct sockaddr_in entry
+ *		- port number to use
+ * output	- INVALID if cannot connect, otherwise a socket
+ * side effects	- try to connect to host ip given blocking connect for now...
+ */
+
+int
+connect_to_given_ip_port(struct sockaddr_in *socketname, int port)
+{
+  int sock;
+  struct sockaddr_in localaddr;
+  struct hostent *local_host;
+  int optval;
+
+  /* open an inet socket */
+  if ((sock = socket (AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+      send_to_all(SEND_ALL,
+		   "Can't assign fd for socket\n");
+      return(INVALID);
+    }
+
+  optval = 1;
+  setsockopt(sock, SOL_SOCKET,SO_REUSEADDR, (char *)&optval, sizeof(optval));
+
+  /* virtual host support  */
+  if(config_entries.virtual_host_config[0])
+    {
+      if ((local_host = gethostbyname (config_entries.virtual_host_config)) )
+	{
+	  if(config_entries.debug && outfile)
+	    {
+	      fprintf(outfile,
+		      "virtual host [%s]\n",
+		      config_entries.virtual_host_config);
+	      fprintf(outfile, "found official name [%s]\n",
+		      local_host->h_name);
+	    }
+
+	  (void) memset(&localaddr, 0, sizeof(struct sockaddr_in));
+	  (void) memcpy ((void *) &localaddr.sin_addr,
+			 (void *) local_host->h_addr,
+			 local_host->h_length);
+	  localaddr.sin_family = AF_INET;
+	  localaddr.sin_port = 0;
+
+	  if(bind(sock,(struct sockaddr *)&localaddr,
+	       sizeof(localaddr)) < 0)
+	    {
+	      if(config_entries.debug && outfile)
+		{
+		  fprintf(outfile, "unable to bind virtual host");
+		}
+	    }
+	  else
+	    {
+	      if(config_entries.debug && outfile)
+		{
+		  fprintf(outfile, "bound to virtual host\n");
+		}
+	    }
+	}
+    }
+      
+  socketname->sin_family = AF_INET;
+  socketname->sin_port = htons (port);
+
+  /* XXX next step is to make this a non blocking connect */
+  /* connect socket */
+  while(connect (sock, (struct sockaddr *) socketname,
+		 sizeof *socketname) < 0)
+    {
+      if (errno != EINTR)
+	{
+	  close(sock);
+	  if(config_entries.debug && outfile)
+	    {
+	      fprintf(outfile, "Error: connect %i\n", errno);
+#ifdef DEBUGMODE
+	      perror("connect()");
+#endif
+	    }
+	  return (INVALID);
+	}
+    }
+
+  fcntl(sock, F_SETFL, O_NONBLOCK);
+  return (sock);
 }

@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.76 2002/05/25 02:37:36 db Exp $ */
+/* $Id: dcc_commands.c,v 1.77 2002/05/25 06:39:29 db Exp $ */
 
 #include "setup.h"
 
@@ -64,7 +64,7 @@ static void list_connections(int sock);
 static void list_exemptions(int sock);
 static void handle_disconnect(int sock,char *param2,char *who_did_command);
 static void handle_save(int sock,char *nick);
-static int  islegal_pass(int connect_id,char *password);
+static int  is_legal_pass(int connect_id,char *password);
 static void print_help(int sock,char *text);
 
 extern struct s_testline testlines;
@@ -1573,9 +1573,9 @@ show_user_umodes(int sock, char *registered_nick)
 static void
 register_oper(int connnum, char *password, char *who_did_command)
 {
-  if (password)
+  if (password != NULL)
   {
-    if (islegal_pass(connnum, password))
+    if (is_legal_pass(connnum, password))
     {
       load_umodes(connnum);
 	  
@@ -2082,26 +2082,32 @@ init_commands(void)
 }
 
 /*
- * islegal_pass()
+ * is_legal_pass()
  *
  * inputs       - user
  *              - host
  *              - password
  *              - int connect id
- * output       - YES if legal NO if not
+ * output       - oper type if legal 0 if not
  * side effects - NONE
  */
 
-static int islegal_pass(int connect_id,char *password)
+static int
+is_legal_pass(int connect_id, char *password)
 {
   int i;
 
-  for(i=0;userlist[i].user && userlist[i].user[0];i++)
+  for(i=0; userlist[i].user && userlist[i].host[0]; i++)
     {
       if ((!match(userlist[i].user,connections[connect_id].user)) &&
           (!wldcmp(userlist[i].host,connections[connect_id].host)))
         {
-          if(userlist[i].password)
+	  /* 
+	   * userlist entries discovered from stats O
+	   * has no valid password field. ignore them.
+	   */
+
+          if(userlist[i].password[0])
             {
 #ifdef USE_CRYPT
               if(!strcmp((char*)crypt(password,userlist[i].password),
@@ -2113,8 +2119,6 @@ static int islegal_pass(int connect_id,char *password)
                   connections[connect_id].type = userlist[i].type;
                   return userlist[i].type;
                 }
-              else
-                return 0;
 #else
               if(!strcmp(userlist[i].password,password))
                 {
@@ -2124,8 +2128,6 @@ static int islegal_pass(int connect_id,char *password)
                   connections[connect_id].type = userlist[i].type;
                   return(userlist[i].type);
                 }
-              else
-                return(0);
 #endif
             }
         }

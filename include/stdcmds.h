@@ -1,15 +1,13 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.19 2002/05/24 02:31:48 db Exp $ */
+/* $Id: stdcmds.h,v 1.20 2002/05/25 06:39:26 db Exp $ */
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
 void join(char *chan,char *key);
 void set_modes(char *chan,char *mode,char *key);
 void leave(char *chan);
-void notice(char *nick,...);
-void privmsg(char *nick,...);
 void newnick(char *nick);
 void print_motd(int sock);
 

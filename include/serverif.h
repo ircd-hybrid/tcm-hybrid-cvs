@@ -1,7 +1,7 @@
 #ifndef __SERVERIF_H
 #define __SERVERIF_H
 
-/* $Id: serverif.h,v 1.22 2002/05/25 02:33:34 db Exp $ */
+/* $Id: serverif.h,v 1.23 2002/05/25 06:39:26 db Exp $ */
 
 /*
  * default ping timeout time from server
@@ -34,7 +34,6 @@ struct services_entry
 };
 
 void do_init(void);		
-int  bindsocket(char *);		
 void report(int type, int channel_report_flag, char *format, ... );
 void sighandlr(int sig);
 void closeconn(int, int, char **);

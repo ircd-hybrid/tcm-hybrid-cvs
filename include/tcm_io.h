@@ -2,10 +2,13 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.9 2002/05/25 02:51:42 db Exp $
+ * $Id: tcm_io.h,v 1.10 2002/05/25 06:39:26 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
+
+/* dummy definitions */
+struct sockaddr_in;
 
 /*
  * This structure defines who is connected to this tcm.
@@ -26,10 +29,12 @@ struct connection {
 
 extern struct connection connections[];
 
-extern int initiated_dcc_socket;
-extern time_t initiated_dcc_socket_time;
-extern void initiate_dcc_chat(char *, char *, char *);
-int  makeconn(char *,char *,char *);
+extern	int initiated_dcc_socket;
+extern	time_t initiated_dcc_socket_time;
+extern	void initiate_dcc_chat(const char *, const char *, const char *);
+
+void notice(const char *nick,...);
+void privmsg(const char *nick,...);
 
 extern fd_set readfds;
 extern fd_set writefds;
@@ -40,6 +45,11 @@ extern void linkclosed(int, int, char *argv[]);
 extern void print_to_socket(int, const char *, ...);
 extern void print_to_server(const char *, ...);
 void send_to_all(int type, const char *format,...);	/* - Hendrix (va'd by bill) */
+
+extern	int connect_to_server_or_dcc(const char *hostport);
+extern	int accept_dcc_connection(const char *hostport,
+				  const char *nick, char *userhost);
+extern	int connect_to_given_ip_port(struct sockaddr_in *, int );
 
 /* types for send_to_all */
 

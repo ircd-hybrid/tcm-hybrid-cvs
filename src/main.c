@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.60 2002/05/25 02:40:40 db Exp $ */
+/* $Id: main.c,v 1.61 2002/05/25 06:39:29 db Exp $ */
 
 #include "setup.h"
 
@@ -92,127 +92,6 @@ void set_action_time(int action, int klinetime);
 #ifdef HAVE_SETRLIMIT
 static void setup_corefile(void);
 #endif
-
-/*
- * bindsocket()
- *   Sets up a socket and connects to the given host and port
- */
-int
-bindsocket(char *hostport)
-{
-  int plug;
-  struct sockaddr_in socketname;
-  struct sockaddr_in localaddr;
-  struct hostent *remote_host;
-  /* virtual host support - dianora */
-  struct hostent *local_host;
-  int portnum = 6667;
-  char server[MAX_HOST];
-  char *hold;
-  int optval;
-  unsigned long remoteaddr;
-
-  /* Parse serverhost to look for port number */
-  strcpy (server,hostport);
-
-  if ((hold = strchr(server,':')))
-    {
-      *(hold++) = '\0';
-      portnum = atoi(hold);
-    }
-
-  /* open an inet socket */
-  if ((plug = socket (AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-      send_to_all(SEND_ALL,
-		   "Can't assign fd for socket\n");
-      exit(0);
-    }
-
-  optval = 1;
-
-  (void)setsockopt(plug,SOL_SOCKET,SO_REUSEADDR,(char *)&optval,
-		   sizeof(optval));
-  (void) memset(&socketname, 0, sizeof(socketname));
-
-  /* virtual host support  */
-  if(config_entries.virtual_host_config[0])
-    {
-      if ((local_host = gethostbyname (config_entries.virtual_host_config)) )
-	{
-	  if(config_entries.debug && outfile)
-	    {
-	      fprintf(outfile,
-		      "virtual host [%s]\n",
-		      config_entries.virtual_host_config);
-	      fprintf(outfile, "found official name [%s]\n",
-		      local_host->h_name);
-	    }
-
-	  (void) memset(&localaddr, 0, sizeof(struct sockaddr_in));
-	  (void) memcpy ((void *) &localaddr.sin_addr,
-			 (void *) local_host->h_addr,
-			 local_host->h_length);
-	  localaddr.sin_family = AF_INET;
-	  localaddr.sin_port = 0;
-
-	  if(bind(plug,(struct sockaddr *)&localaddr,
-	       sizeof(socketname)) < 0)
-	    {
-	      if(config_entries.debug && outfile)
-		{
-		  fprintf(outfile, "unable to bind virtual host");
-		}
-	    }
-	  else
-	    {
-	      if(config_entries.debug && outfile)
-		{
-		  fprintf(outfile, "bound to virtual host\n");
-		}
-	    }
-	}
-    }
-      
-  socketname.sin_family = AF_INET;
-  socketname.sin_port = htons (portnum);
-
-  /* kludge for DCC CHAT precalculated sin_addrs */
-  if (*server == '#')
-    {
-       (void)sscanf(server+1,"%lu",&remoteaddr);
-       /* Argh.  Didn't they teach byte order in school??? --cah */
-       socketname.sin_addr.s_addr=htonl(remoteaddr);
-    }
-  /* lookup host */
-  else
-    {
-      if ( !(remote_host = gethostbyname (server)) )
-	{
-	  printf ("error: unknown host: %s\n", server);
-	  return (INVALID);
-	}
-      (void) memcpy ((void *) &socketname.sin_addr,
-		    (void *) remote_host->h_addr,
-		    remote_host->h_length);
-    }
-
-  /* connect socket */
-  while(connect (plug, (struct sockaddr *) &socketname, sizeof socketname) < 0)
-    if (errno != EINTR)
-      {
-	close(plug);
-	if( config_entries.debug && outfile)
-	  {
-	    fprintf(outfile, "Error: connect %i\n", errno);
-#ifdef DEBUGMODE
-	    perror("connect()");
-#endif
-	  }
-	return (INVALID);
-      }
-  return (plug);
-}
 
 
 /*
@@ -502,7 +381,7 @@ main(int argc, char *argv[])
 	   exit(1);
 	 }
     }
-  connections[0].socket = bindsocket(serverhost);
+  connections[0].socket = connect_to_server(serverhost);
   if (connections[0].socket == INVALID)
     exit(1);
   connections[0].nbuf = 0;
@@ -569,21 +448,21 @@ init_debug(int sig)
 void
 m_unregistered(int connnum, int argc, char *argv[])
 {
-  print_to_socket(connections[connnum].socket, "You have not registered\n");
+  print_to_socket(connections[connnum].socket, "You have not registered");
 }
 
 void
 m_not_oper(int connnum, int argc, char *argv[])
 {
   print_to_socket(connections[connnum].socket,
-       "Only authorized opers may use this command\n");
+       "Only authorized opers may use this command");
 }
 
 void
 m_not_admin(int connnum, int argc, char *argv[])
 {
   print_to_socket(connections[connnum].socket,
-       "Only authorized admins may use this command\n");
+       "Only authorized admins may use this command");
 }
 #endif
 

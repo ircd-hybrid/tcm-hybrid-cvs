@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.94 2002/05/25 02:51:45 db Exp $
+ * $Id: bothunt.c,v 1.95 2002/05/25 06:39:29 db Exp $
  */
 
 #include <stdio.h>
@@ -1201,14 +1201,9 @@ _onctcp(int connnum, int argc, char *argv[])
     if ((a = strrchr(port, '\001')) != NULL)
       *a = '\0';
 
-    if (atoi(port) < 1024)
-    {
-      notice(nick, "Invalid port specified for DCC CHAT.  Not funny.");
-      return;
-    }
     strcat(dccbuff, ":");
     strcat(dccbuff, port);
-    if (!makeconn(dccbuff, nick, hold))
+    if (!accept_dcc_connection(dccbuff, nick, hold))
     {
       notice(nick, "\001DCC REJECT CHAT chat\001");
       notice(nick,"DCC CHAT connection failed");

@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.66 2002/05/25 02:37:37 db Exp $ */
+/* $Id: stdcmds.c,v 1.67 2002/05/25 06:39:29 db Exp $ */
 
 #include "setup.h"
 
@@ -185,37 +185,6 @@ leave(char *chan)
   print_to_server("PART %s", chan);
 }
 
-void
-notice(char *nick,...)
-{
-  va_list va;
-  char msg[MAX_BUFF];
-  char *format;
-
-  va_start(va,nick);
-
-  format = va_arg(va, char*);
-  vsprintf(msg, format, va );
-
-  print_to_server("NOTICE %s :%s", nick, msg);
-  va_end(va);
-}
-
-void
-privmsg(char *nick,...)
-{
-  va_list va;
-  char msg[MAX_BUFF];
-  char *format;
-
-  va_start(va,nick);
-
-  format = va_arg(va, char*);
-  vsprintf(msg, format, va );
-  print_to_server("PRIVMSG %s :%s", nick, msg);
-
-  va_end(va);
-}
 
 void
 newnick(char *nick)

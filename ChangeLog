@@ -1,3 +1,25 @@
+bill        2002/09/12 18:49:49 EDT	(20020912_0)
+
+  Modified files:
+    include              bothunt.h 
+    src                  actions.c bothunt.c clones.c 
+                         dcc_commands.c hash.c 
+  Log:
+  - made handle_action() mangle a local copy of the userinfo, rather than the hash table's copy
+  - added support for "Too many from IP" notice
+  - added debug command, .sysnotice, to simmulate system notices when in DEBUGMODE
+  - removed hash table debug statements
+  
+  Revision  Changes    Path
+  1.58      +3 -2      tcm-hybrid/include/bothunt.h
+  1.39      +26 -12    tcm-hybrid/src/actions.c
+  1.201     +13 -6     tcm-hybrid/src/bothunt.c
+  1.23      +11 -1     tcm-hybrid/src/clones.c
+  1.145     +40 -0     tcm-hybrid/src/dcc_commands.c
+  1.55      +0 -37     tcm-hybrid/src/hash.c
+
+
+
 db          2002/09/11 13:55:41 EDT	(20020911_0)
 
   Modified files:

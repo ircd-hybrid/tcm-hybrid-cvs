@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.110 2002/05/29 01:19:32 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.111 2002/05/29 01:47:32 leeh Exp $ */
 
 #include "setup.h"
 
@@ -1053,11 +1053,6 @@ handle_save(int sock,char *nick)
   save_prefs();
 }
 
-#ifdef IRCD_HYBRID
-/*
- * ircd-hybrid-7 loadable module code goes here
- */
-#else
 struct dcc_command class_msgtab = {
  "class", NULL, {m_unregistered, m_class, m_class}
 };
@@ -1209,7 +1204,6 @@ struct dcc_command ulist_msgtab = {
 struct dcc_command hlist_msgtab = {
  "hlist", NULL, {m_unregistered, m_hlist, m_hlist}
 };
-#endif
 
 void 
 init_commands(void)

@@ -1,3 +1,15 @@
+bill        2002/09/20 01:43:01 EDT	(20020920_3)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  - oops, fixed minor typo in add_to_hash_table() calls
+  
+  Revision  Changes    Path
+  1.58      +3 -3      tcm-hybrid/src/hash.c
+
+
+
 db          2002/09/20 01:15:30 EDT	(20020920_2)
 
   Modified files:

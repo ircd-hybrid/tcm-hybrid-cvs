@@ -1,6 +1,6 @@
 /* Patchlevel revision 
 ** 
-** $Id: patchlevel.h,v 1.4 2002/03/20 05:08:22 bill Exp $
+** $Id: patchlevel.h,v 1.5 2002/05/05 03:06:04 wcampbel Exp $
 **
 */
 
@@ -9,6 +9,6 @@
 
 #include "serno.h"
 
-#define VERSION "tcm-hybrid-v3.0.3"
+#define VERSION "tcm-hybrid-v3.1.0-pre"
 
 #endif

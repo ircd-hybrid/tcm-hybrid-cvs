@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.53 2002/05/19 14:27:29 wcampbel Exp $
+ * $Id: userlist.c,v 1.54 2002/05/19 16:11:34 wcampbel Exp $
  *
  */
 
@@ -17,8 +17,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-/* Solaris needs this for bzero() */
-#include <strings.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -951,7 +949,7 @@ char *type_show(unsigned long type)
   static char type_string[SMALL_BUFF];
   char *p;
 
-  bzero(&type_string, sizeof(type_string));
+  memset(&type_string, 0, sizeof(type_string));
   p = type_string;
   if(type&TYPE_OPER)*p++ = 'O';
   if(type&TYPE_REGISTERED)*p++ = 'K';

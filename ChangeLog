@@ -1,3 +1,9 @@
+*** 20000902_9 by db
+- discovered I had a previously released 2.4.7, bumped to 2.5.0 again
+  to reduce confusion.
+
+
+
 *** 20000902_8 by db
 - doc cleanups only, but I bumped the version # to reduce confusion.
 

@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.59 2002/05/27 01:37:38 db Exp $
+ * $Id: config.h,v 1.60 2002/05/27 11:41:56 leeh Exp $
  */
 
 /*
@@ -146,12 +146,12 @@ for .kflood would be the #define for REASON_FLOOD etc. */
  *
  * This must also be defined to detect SOCKS
  */
-#define DETECT_WINGATE
+#undef DETECT_WINGATE
 
 /*
  * define this to flag open socks
  */
-#define DETECT_SOCKS
+#undef DETECT_SOCKS
 
 /*
  * define the ip and port you want a Socks 4 test to connect back to.

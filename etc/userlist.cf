@@ -1,4 +1,4 @@
-# $Id: userlist.cf,v 1.21 2002/05/26 16:10:22 leeh Exp $
+# $Id: userlist.cf,v 1.22 2002/05/27 11:41:53 leeh Exp $
 # userlist.cf file
 #
 # each line is colon separated
@@ -15,24 +15,16 @@
 # use the mkpasswd utility from the tools/ directory to encrypt
 # a password.
 #
-# Flags:
+# The flags in this file are the ones that grant users the ability to
+# do things (such as kline), there are other umodes the user can set
+# themselves, see .help umode in tcm:
+#
 #   +/-M will give the user the admin privs
 #   +/-K will allows this oper to .kline
 #   +/-D will allows this oper to .dline
 #   +/-I will, if set, override the dyanmic i flag
 #   +/-W will allow this user to see WALLOPS and OPERWALL (this is only used
 #         if ENABLE_W_FLAG is defined)
-#   +/-k will show this user K-lines being set/unset
-#   +/-y will show this user INFO, MOTD, LINKS and STATS requests.
-#   +/-w will show this user misc. warnings, such as clones detected and
-#         the like
-#   +/-i will make this user invisible to the list of tcm opers connected
-#         to our bot in a STATS p reply (this is only used if INVISIBLE_OPERS
-#	  is defined)
-#   +/-o will show this user LOCOPs
-#   +/-p will give this user access to the party-line
-#   +/-e will echo a users party-line chat back
-#   +/-x will show server introductions and quits
 #
 # Examples:
 #
@@ -42,7 +34,7 @@ O:db@*.db.net:diane:notrealpassword:KD
 #
 # bill@*.parodius.com has oper remote kline dline and is invisible to irc users
 #
-O:bill@*.parodius.com:pro:notrealpassword:KDi
+O:bill@*.parodius.com:pro:notrealpassword:KDI
 
 # E-lines
 #  The format for these are as follows:

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.82 2002/05/27 02:24:46 db Exp $
+ * $Id: userlist.c,v 1.83 2002/05/27 11:41:59 leeh Exp $
  *
  */
 
@@ -58,32 +58,44 @@ struct dcc_command umode_msgtab = {
 struct umode_struct
 {
   char umode;
-  int need_admin;
   int type;
 };
 
-/* umode table for converting back to strings.. */
-static struct umode_struct umode_table[] =
+/* this table contains privleges that allow the user to do
+ * certain things within tcm, such as kline.  users are
+ * not able to set any of these flags themselves and they
+ * are permanent and read via the userlist.cf
+ */
+static struct umode_struct umode_privs[] =
 {
-  { 'M',  1,	TYPE_ADMIN,		},
-  { 'K',  1,	TYPE_KLINE,		},
+  { 'M', TYPE_ADMIN,		},
+  { 'K', TYPE_KLINE,		},
 #ifndef NO_D_LINE_SUPPORT
-  { 'D',  1,	TYPE_DLINE,		},
+  { 'D', TYPE_DLINE,		},
 #endif
-  { 'S',  1,	TYPE_SUSPENDED, 	},
-  { 'I',  1,	TYPE_INVM,		},
+  { 'S', TYPE_SUSPENDED, 	},
+  { 'I', TYPE_INVM,		},
 #ifdef ENABLE_W_FLAG
-  { 'W',  1,	TYPE_WALLOPS,		},
+  { 'W', TYPE_WALLOPS,		},
 #endif
-  { 'k',  0,	TYPE_VIEW_KLINES, 	},
-  { 'w',  0,	TYPE_WARN,		},
-  { 'y',  0,	TYPE_SPY,		},
-  { 'i',  0,	TYPE_INVS,		},
-  { 'o',  0,	TYPE_LOCOPS,		},
-  { 'p',  0,	TYPE_PARTYLINE,		},
-  { 'e',  0,	TYPE_ECHO,		},
-  { 'x',  0,	TYPE_SERVERS,		},
-  { (char)0, 0, 0,			}
+  { (char)0, 0,			}
+};
+
+/* this table contains the flags that a user can set themselves
+ * so that they can see certain things within tcm.  these are
+ * stored in <username>.prefs
+ */
+static struct umode_struct umode_flags[] =
+{
+  { 'k', TYPE_VIEW_KLINES, 	},
+  { 'w', TYPE_WARN,		},
+  { 'y', TYPE_SPY,		},
+  { 'i', TYPE_INVS,		},
+  { 'o', TYPE_LOCOPS,		},
+  { 'p', TYPE_PARTYLINE,	},
+  { 'e', TYPE_ECHO,		},
+  { 'x', TYPE_SERVERS,		},
+  { (char)0, 0,			}
 };
 
 void
@@ -93,7 +105,7 @@ init_userlist_handlers(void)
 }
 
 void
-set_umode(int connnum, int override, const char *umode)
+set_umode(int connnum, int admin, const char *umode)
 {
   int plus;
   int i;
@@ -113,21 +125,31 @@ set_umode(int connnum, int override, const char *umode)
       continue;
     }
 
-    for(j = 0; umode_table[j].umode; j++)
+    for(j = 0; umode_flags[j].umode; j++)
     {
-      if(umode_table[j].umode == umode[i])
+      if(umode_flags[j].umode == umode[i])
       {
-        /* flag needs admin */
-        if(!override && umode_table[j].need_admin &&
-           ((connections[connnum].type & TYPE_ADMIN) == 0))
-          break;
-
 	if(plus)
-          connections[connnum].type |= umode_table[j].type;
+          connections[connnum].type |= umode_flags[j].type;
 	else
-          connections[connnum].type &= ~umode_table[j].type;
+          connections[connnum].type &= ~umode_flags[j].type;
 
 	break;
+      }
+    }
+
+    /* an admin is allowed to set temp privs as well */
+    if(admin)
+    {
+      for(j = 0; umode_privs[j].umode; j++)
+      {
+        if(umode_privs[j].umode == umode[i])
+	{
+          if(plus)
+            connections[connnum].type |= umode_privs[j].type;
+	  else
+            connections[connnum].type &= ~umode_privs[j].type;
+	}
       }
     }
   }
@@ -141,7 +163,7 @@ void m_umode(int connnum, int argc, char *argv[])
   {
     print_to_socket(connections[connnum].socket, 
 		    "Your current flags are: %s",
-		    type_show(connections[connnum].type));
+		    type_show(get_umodes_from_conf(connnum)));
     return;
   }
   else if(argc == 2)
@@ -162,13 +184,13 @@ void m_umode(int connnum, int argc, char *argv[])
 	return;
       }
 
-      user = find_user(argv[1]);
+      user = find_user_in_userlist(argv[1]);
       
       if(user >= 0)
       {
         unsigned long type;
 
-	type = get_umodes_from_prefs(user);
+	type = get_umodes_from_conf(user);
 	print_to_socket(connections[connnum].socket,
 			"%s user flags are %s",
 			argv[1], type_show(type));
@@ -188,10 +210,10 @@ void m_umode(int connnum, int argc, char *argv[])
     }
 
     /* XXX - find_user doesnt return the right connnum */
-#if 0
     if((argv[2][0] == '+') || (argv[2][0] == '-'))
     {
-      user = find_user(argv[1]);
+
+      user = find_user_in_connections(argv[1]);
 
       if(user >= 0)
         set_umode(user, 1, argv[2]);
@@ -202,12 +224,11 @@ void m_umode(int connnum, int argc, char *argv[])
     else
       print_to_socket(connections[connnum].socket,
 		      ".umode [user] [flags] | [user] | [flags]");
-#endif
   }
 }
       
 int
-find_user(const char *username)
+find_user_in_userlist(const char *username)
 {
   int i;
 
@@ -220,11 +241,27 @@ find_user(const char *username)
   return (-1);
 }
 
+int
+find_user_in_connections(const char *username)
+{
+  int i;
+  for(i = 0; i < maxconns; i++)
+  {
+    if(connections[i].state != S_CLIENT)
+      continue;
+
+    if(strcasecmp(connections[i].registered_nick, username) == 0)
+      return i;
+  }
+
+  return -1;
+}
+
 unsigned long
-get_umodes_from_prefs(int user)
+get_umodes_from_conf(int user)
 {
   FILE *fp;
-  unsigned long type=userlist[user].type;
+  unsigned long type;
   unsigned long pref_type = 0;
   char user_pref_filename[MAX_BUFF+1];
   char type_string[SMALL_BUFF+1];
@@ -232,6 +269,9 @@ get_umodes_from_prefs(int user)
 
   snprintf(user_pref_filename,
 	   MAX_BUFF, "etc/%s.pref", userlist[user].usernick);
+
+  type = userlist[user].type;
+  type &= ~TYPE_PENDING;
 
   if ((fp = fopen(user_pref_filename, "r")) != NULL)
   {
@@ -243,8 +283,7 @@ get_umodes_from_prefs(int user)
       *p = '\0';
 
     sscanf(type_string, "%lu", &pref_type);
-    pref_type &= ~TYPE_PENDING;
-    return (pref_type); /* XXX |type); eh? */
+    return (pref_type|type);
   }
   else
   {
@@ -1091,7 +1130,9 @@ reload_user_list(int sig)
     return;
 
   _reload_bothunt(sig, 0, NULL);
+#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
   _reload_wingate(sig, 0, NULL);
+#endif
 
   if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
     {

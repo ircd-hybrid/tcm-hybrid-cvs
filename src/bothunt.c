@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.114 2002/05/27 05:03:14 db Exp $
+ * $Id: bothunt.c,v 1.115 2002/05/27 11:41:58 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1387,8 +1387,10 @@ adduserhost(struct plus_c_info *userinfo, int fromtrace, int is_oper)
   char *p;
 #endif
 
+#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
   if (!doingtrace)
     user_signon(userinfo);
+#endif
 
   newuser = (struct userentry *)xmalloc(sizeof(struct userentry));
 

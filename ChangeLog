@@ -1,3 +1,16 @@
+wcampbel    2002/05/20 15:05:13 EDT	(20020520_12)
+
+  Modified files:
+    src                  userlist.c 
+  Log:
+  Don't allow *@* or user@* O: lines.  We block them on STATS o, but not
+    in the userlist
+  
+  Revision  Changes    Path
+  1.56      +4 -0      tcm-hybrid/src/userlist.c
+
+
+
 wcampbel    2002/05/20 14:42:28 EDT	(20020520_11)
 
   Modified files:

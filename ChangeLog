@@ -1,3 +1,16 @@
+einride     2002/05/23 04:53:49 EDT	(20020523_2)
+
+  Modified files:
+    src                  main.c parse.c 
+  Log:
+  Didn't compile with SERVICES defined... small changes.
+  
+  Revision  Changes    Path
+  1.47      +4 -0      tcm-hybrid/src/main.c
+  1.2       +1 -1      tcm-hybrid/src/parse.c
+
+
+
 db          2002/05/23 02:41:57 EDT	(20020523_1)
 
   Modified files:

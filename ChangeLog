@@ -1,3 +1,7 @@
+*** 20010815_2 by bill
+- do not need to report offenders twice per offense.
+
+
 *** 20010815_1 by bill
 - more robust makefile to avoid problems if the binary is moved around
 

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.78 2002/06/02 23:30:10 db Exp $
+ * $Id: tcm_io.c,v 1.79 2002/06/03 02:10:15 db Exp $
  */
 
 #include <stdio.h>
@@ -182,6 +182,12 @@ read_packet(void)
 #ifdef DEBUGMODE
 		    printf("<- %s\n", connections[i].buffer);
 #endif
+		    /* io_read_function e.g. server_parse()
+		     * can call close_connection(i), hence
+		     * making io_read_function NULL
+		     */
+		    if (connections[i].io_read_function == NULL)
+		      break;
 		    (connections[i].io_read_function)(i);
 		    tscanned += nscanned;
                   }

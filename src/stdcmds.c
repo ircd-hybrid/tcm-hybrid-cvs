@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.88 2002/06/02 23:41:33 db Exp $ */
+/* $Id: stdcmds.c,v 1.89 2002/06/03 02:10:15 db Exp $ */
 
 #include "setup.h"
 
@@ -198,11 +198,6 @@ do_a_kline(int kline_time, char *pattern,
 
   if(reason == NULL)
     return;
-
-  /* If the kline doesn't come from the local tcm
-   * and tcm has been compiled to restrict remote klines
-   * then just ignore it
-   */
 
   log_kline("KLINE", pattern, kline_time, who_did_command, reason);
 

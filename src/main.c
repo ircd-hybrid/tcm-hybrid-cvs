@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.135 2003/08/17 02:59:07 joshk Exp $ */
+/* $Id: main.c,v 1.136 2004/04/22 08:32:16 bill Exp $ */
 
 #include "setup.h"
 
@@ -163,10 +163,6 @@ main(int argc, char *argv[])
   init_bothunt();
   init_client_lists();
   init_dynamic_info();
-
-#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
-  init_wingates();
-#endif
 
 #ifdef SERVICES
   init_services();

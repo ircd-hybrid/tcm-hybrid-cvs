@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.59 2003/03/29 10:06:03 bill Exp $ */
+/* $Id: tcm.h,v 1.60 2004/04/22 08:32:13 bill Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -73,10 +73,6 @@ size_t strlcpy(char *, const char *, size_t);
 #ifdef SERVICES
 void init_services(void);
 void check_services(void *);
-#endif
-
-#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
-extern void init_wingates(void);
 #endif
 
 void *xmalloc(size_t);

@@ -1,9 +1,10 @@
 /*
  * client_list.c: contains routines for managing lists of clients
  *
- * $Id: client_list.c,v 1.7 2003/08/13 02:43:31 joshk Exp $
+ * $Id: client_list.c,v 1.8 2004/04/22 08:32:15 bill Exp $
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -95,6 +96,7 @@ print_list(struct connection *connection_p, char *name)
   time_t now = time(NULL);
   dlink_node *ptr;
   struct user_entry *user;
+  char format[100];
   int idx;
 
   if ((idx = find_list(name)) == -1)
@@ -117,14 +119,14 @@ print_list(struct connection *connection_p, char *name)
 
 #ifndef AGGRESSIVE_GECOS
     if (user->gecos[0] == '\0')
-      send_to_connection(connection_p, "  %s (%s@%s) [%s] {%s}",
-                         user->nick, user->username, user->host,
-                         user->ip_host, user->class);
+      snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s}", MAX_NICK);
     else
 #endif
-      send_to_connection(connection_p, "  %s (%s@%s) [%s] {%s} [%s]",
-                         user->nick, user->username, user->host,
-                         user->ip_host, user->class, user->gecos);
+      snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s}", MAX_NICK);
+
+    send_to_connection(connection_p, format,
+                       user->nick, user->username, user->host,
+                       user->ip_host, user->class, user->gecos);
   }
 
   send_to_connection(connection_p, "%s) %d entr%s -- created by %s lifetime: %ld",

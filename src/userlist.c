@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.150 2003/06/01 01:19:05 bill Exp $
+ * $Id: userlist.c,v 1.151 2004/04/22 08:32:16 bill Exp $
  */
 
 #include <errno.h>
@@ -23,14 +23,10 @@
 #include "wild.h"
 #include "modules.h"
 #include "match.h"
-#include "wingate.h"
 #include "bothunt.h"
 #include "actions.h"
 #include "handler.h"
 #include "skline.h"
-
-char wingate_class_list[MAXWINGATE][MAX_CLASS];
-int	wingate_class_list_index;
 
 static void load_a_user(char *);
 static void load_e_line(char *);
@@ -620,12 +616,6 @@ load_config_file(char *file_name)
               sizeof(config_entries.channel));
       break;
 
-    case 'w': case 'W':
-      strlcpy(wingate_class_list[wingate_class_list_index], argv[1],
-              sizeof(wingate_class_list[wingate_class_list_index]));
-      wingate_class_list_index++;
-      break;
-
     default:
       break;
     }
@@ -1028,9 +1018,6 @@ clear_userlist()
   dlink_node *ptr;
   dlink_node *next_ptr;
 
-  wingate_class_list_index = 0;
-  memset((void *)wingate_class_list, 0, sizeof(wingate_class_list));
-
   DLINK_FOREACH_SAFE(ptr, next_ptr, user_list.head)
   {
     xfree(ptr->data);
@@ -1271,25 +1258,4 @@ local_ip(char *ourhostname)
   }
   /* NOT REACHED */
   return (0L);
-}
-
-/*
- * wingate_class
- *
- * inputs       - class
- * output       - if this class is a wingate class to check
- * side effects - none
- */
-
-int
-wingate_class(char *class)
-{
-  int i;
-
-  for(i=0; (wingate_class_list[i] != '\0') && (i < MAXWINGATE) ;i++)
-  {
-    if(strcasecmp(wingate_class_list[i], class) == 0)
-      return(YES);
-  }
-  return(NO);
 }

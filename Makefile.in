@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.27 2003/08/17 02:59:00 joshk Exp $
+# $Id: Makefile.in,v 1.28 2004/04/22 08:32:08 bill Exp $
 CC = @CC@
 RM = @RM@
 CP = @CP@
@@ -80,7 +80,11 @@ install: tcm
 	${CP} -f etc/userlist.cf $(prefix)/etc/ ; \
 	fi
 
-#	cp modules/*.so $(prefix)/modules/
+	-@if [ ! -e $(prefix)/etc/dynamic.hosts ] ; then \
+	echo ${CP} etc/dynamic.hosts $(prefix)/etc/ ; \
+	${CP} -f etc/dynamic.hosts $(prefix)/etc/ ; \
+	fi
+
 	${CP} help/help.* help/help $(prefix)/help/
 	@echo Done
 

@@ -1,4 +1,4 @@
-# $Id: tcm.cf,v 1.34 2003/04/14 08:50:31 bill Exp $
+# $Id: tcm.cf,v 1.35 2004/04/22 08:32:10 bill Exp $
 # Username for the bot
 U:db
 
@@ -45,9 +45,6 @@ C:&frizzle.net
 #	- drone       <what action to take when services reports drones>
 #       - nflood      <what action to take when a user nickfloods>
 #       - jupe        <what action on repeated join attempts to juped chans>
-#	- wingate     <what action to take when an open wingate is found>
-#	- socks       <what action to take when an open soxy proxy is found>
-#	- squid       <what action to take when an open squid proxy is found>
 #
 #   Possible values for action:
 #	- kline	        <kline the user using the proper message>
@@ -76,9 +73,6 @@ A:sclone:tkline 180:Clones on multiple servers
 A:drone:dccwarn kline:Drone bots
 A:nflood:dccwarn tkline 180:Nickflooding is prohibited
 A:jupe:dccwarn tkline 60:repeated attempts to join juped channels
-A:wingate:dline:Open Wingate
-A:socks:dline:Open SOCKS server
-A:squid:dline:Open Squid/HTTP proxy
 
 # optional message to send to users who request STATS p
 M:For basic information, see http://www.ircd-hybrid.org/tcm/
@@ -86,15 +80,6 @@ M:For basic information, see http://www.ircd-hybrid.org/tcm/
 # email address
 # clone logs etc. will get e-mailed to this address
 #E:db@no.spam.net
-
-# Test this wingate if in this class only
-# NOTE:  This is EXPLICITLY needed, as Wingate and SOCKS checks
-#        will ONLY be done in the classes listed here
-# Multiple entries are permitted
-#
-W:9
-# TCM also supports named classes that Hybrid-7 provides
-#W:broadband
 
 #where the userlist.cf is for this tcm
 #default is etc/userlist.cf

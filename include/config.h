@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.86 2003/06/01 01:19:03 bill Exp $
+ * $Id: config.h,v 1.87 2004/04/22 08:32:13 bill Exp $
  */
 
 /*
@@ -27,7 +27,7 @@
  * perform a WHO on all users, building a gecos listing.
  * WARNING! This can severly lag your tcm on larger servers
  */
-#undef AGGRESSIVE_GECOS
+#define AGGRESSIVE_GECOS
 
 /*
  * USE_CRYPT, define this if you want your oper passwords to be encrypted
@@ -142,9 +142,6 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 #define REASON_RCLONE  "Reconnect clones"
 #define REASON_SCLONE  "Clones on multiple servers"
 #define REASON_DRONE   "Drones"
-#define REASON_SOCKS   "Open SOCKS Proxy"
-#define REASON_WINGATE "Open WinGate Proxy"
-#define REASON_SQUID   "Open Squid/HTTP Proxy"
 
 /* .kperm */
 #define REASON_KPERM   "Permanent K-Line"
@@ -154,38 +151,6 @@ for .kflood would be the #define for REASON_FLOOD etc. */
  * exemptions are also derived from /stats E /stats F
  * requests, unless the ircd tells tcm to use /stats I (hybrid 6 and higher)
  */
-
-/*
- * define this to flag wingates
- *
- * This must also be defined to detect SOCKS
- */
-#undef DETECT_WINGATE
-
-/*
- * define this to flag open socks
- */
-#undef DETECT_SOCKS
-
-/*
- * define the ip and port you want a Socks 4 test to connect back to.
- * Suggest using the relevant irc servers ip for a proper check.
- * Do not use hostnames here.
- */
-#define SOCKS_CHECKPORT 6667
-#define SOCKS_CHECKIP "10.0.0.1"
-
-/*
- * define this to flag open squid/http proxies
- * XXX - Still in development, not yet working
- */
-#undef DETECT_SQUID
-
-/*
- * define this to the string the checkport/checkip above sends.  This is
- * used to verify the HTTP proxy is open.
- */
-#define SQUID_STRING "Looking up your hostname..."
 
 /* undef if you don't want glines reported */
 #define REPORT_GLINES
@@ -205,7 +170,7 @@ for .kflood would be the #define for REASON_FLOOD etc. */
  * - The Hybrid team does not support the use of this option, and will
  *   take no responsibility for any damage it may cause.
  */
-#undef ENABLE_QUOTE
+#define ENABLE_QUOTE
 
 /* Define this to prevent tcm from forking() */
 #undef DEBUGMODE
@@ -215,15 +180,6 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 
 /* Maximum number of reconnections to a server allowed before quitting.  */
 #define MAXRECONNECTS 5
-
-/* Maximum pending connects for wingates */
-#define MAXWINGATE 200
-
-/* Maximum pending connects for socks */
-#define MAXSOCKS 400 
-
-/* Maximum pending connects for squid */
-#define MAXSQUID 400
 
 /*
  * define this if you want services code at all
@@ -264,7 +220,6 @@ for .kflood would be the #define for REASON_FLOOD etc. */
 /* END OF SERVICES DEFINES */
 
 /* Maximum connections;
- * this is now shared with squid, socks, wingate checks
  * XXX could make this FD_SETSIZE, but that might be a tad too large
  */
 #define MAXDCCCONNS 1024

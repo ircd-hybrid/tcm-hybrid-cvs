@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2002-2003 Bill Jonus
  *
- * $Id: seedrand.c,v 1.7 2003/08/13 02:43:31 joshk Exp $
+ * $Id: seedrand.c,v 1.8 2004/04/22 08:32:16 bill Exp $
  */
 
 #include <assert.h>
@@ -145,6 +145,7 @@ m_seedrand(struct connection *connection_p, int argc, char *argv[])
   int scores[HASHTABLESIZE], temp_s;
   int numfound = 0, score_t, temp, threshold;
   char *match_s = NULL;
+  char format[100];
 
   if (argc == 1)
   {
@@ -204,8 +205,19 @@ m_seedrand(struct connection *connection_p, int argc, char *argv[])
   {
     if (scores[score_t] >= threshold && (results[score_t] != NULL))
     {
-      send_to_connection(connection_p, "  %4d -- %s (%s@%s) [%s]", scores[score_t], results[score_t]->nick,
-                         results[score_t]->username, results[score_t]->host, results[score_t]->ip_host);
+#ifndef AGGRESSIVE_GECOS
+      if (results[score_t]->gecos[0] == '\0')
+        snprintf(format, sizeof(format), "  %%4d -- %%%ds (%%s@%%s) [%%s] {%%s}",
+                 MAX_NICK);
+      else
+#endif
+        snprintf(format, sizeof(format), "  %%4d -- %%%ds (%%s@%%s) [%%s] {%%s} [%%s]",
+                 MAX_NICK);
+
+      send_to_connection(connection_p, format,
+                         scores[score_t], results[score_t]->nick, results[score_t]->username,
+                         results[score_t]->host, results[score_t]->ip_host, results[score_t]->class,
+                         results[score_t]->gecos);
     }
   }
   if (numfound == 0)

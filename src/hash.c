@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.70 2003/08/13 02:43:31 joshk Exp $
+ * $Id: hash.c,v 1.71 2004/04/22 08:32:16 bill Exp $
  */
 
 #include <stdio.h>
@@ -30,7 +30,6 @@
 #include "hash.h"
 #include "actions.h"
 #include "match.h"
-#include "wingate.h"
 #include "client_list.h"
 
 #ifdef IPV6
@@ -277,11 +276,6 @@ add_user_host(struct user_entry *user_info, int fromtrace)
 {
   struct user_entry *new_user;
   char *domain;
-
-#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
-  if(tcm_status.doing_trace == NO)
-    user_signon(user_info);
-#endif
 
   new_user = (struct user_entry *)xmalloc(sizeof(struct user_entry));
   memset(new_user, 0, sizeof(struct user_entry));
@@ -1124,6 +1118,7 @@ list_class(struct connection *connection_p, char *class_to_find, int total_only,
   int i, idx=-1;
   int num_found=0;
   int num_unknown=0;
+  char format[100];
 
   if (!BadPtr(list_name))
   {
@@ -1164,16 +1159,16 @@ list_class(struct connection *connection_p, char *class_to_find, int total_only,
           {
 #ifndef AGGRESSIVE_GECOS
             if (ptr->info->gecos[0] == '\0')
-              send_to_connection(connection_p,
-                                 "  %s (%s@%s) [%s] {%s}",
-		                 ptr->info->nick, ptr->info->username, ptr->info->host,
-                                 ptr->info->ip_host, ptr->info->class);
+              snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s}",
+                       MAX_NICK);
             else
 #endif
-              send_to_connection(connection_p,
-                                 "  %s (%s@%s) [%s] {%s} [%s]",
-                                 ptr->info->nick, ptr->info->username, ptr->info->host,
-                                 ptr->info->ip_host, ptr->info->class, ptr->info->gecos);
+              snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s} [%%s]",
+                       MAX_NICK);
+
+            send_to_connection(connection_p, format,
+                               ptr->info->nick, ptr->info->username, ptr->info->host,
+                               ptr->info->ip_host, ptr->info->class, ptr->info->gecos);
           }
           else
           {
@@ -1211,6 +1206,7 @@ list_class(struct connection *connection_p, char *class_to_find, int total_only,
 void 
 list_nicks(struct connection *connection_p, char *nick, int regex, char *list_name)
 {
+  char format[100];
   struct hash_rec *ptr;
   int i=0, numfound=0, idx=-1;
 
@@ -1269,18 +1265,17 @@ list_nicks(struct connection *connection_p, char *nick, int regex, char *list_na
         {
 #ifndef AGGRESSIVE_GECOS
           if (ptr->info->gecos[0] == '\0')
-            send_to_connection(connection_p,
-                               "  %s (%s@%s) [%s] {%s}",
-                               ptr->info->nick, ptr->info->username,
-                               ptr->info->host, ptr->info->ip_host,
-                               ptr->info->class);
+            snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s}",
+                     MAX_NICK);
           else
 #endif
-            send_to_connection(connection_p,
-                               "  %s (%s@%s) [%s] {%s} [%s]",
-                               ptr->info->nick, ptr->info->username,
-                               ptr->info->host, ptr->info->ip_host,
-                               ptr->info->class, ptr->info->gecos);
+            snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s} [%%s]",
+                     MAX_NICK);
+
+          send_to_connection(connection_p, format,
+                             ptr->info->nick, ptr->info->username,
+                             ptr->info->host, ptr->info->ip_host,
+                             ptr->info->class, ptr->info->gecos);
         }
         else
         {
@@ -1325,6 +1320,7 @@ kill_or_list_users(struct connection *connection_p, char *userhost, int regex,
   struct client_list *list;
   struct user_entry *user;
   char uhost[MAX_USERHOST], *rsn = BadPtr(reason) ? "No reason" : (char *)reason;
+  char format[100];
   int numfound = 0, i, idx = 0;
   dlink_node *dptr;
 
@@ -1410,16 +1406,18 @@ kill_or_list_users(struct connection *connection_p, char *userhost, int regex,
                                  "The following clients match %s:",
                                  userhost);
 
-	    if(ptr->info->ip_host[0] > '9' || ptr->info->ip_host[0] < '0')
-	      send_to_connection(connection_p,
-				 "  %s (%s@%s) {%s}", ptr->info->nick,
-				 ptr->info->username,
-				 ptr->info->host, ptr->info->class);
-	    else
-	      send_to_connection(connection_p,
-				 "  %s (%s@%s) [%s] {%s}", ptr->info->nick,
-				 ptr->info->username, ptr->info->host,
-				 ptr->info->ip_host, ptr->info->class);
+#ifndef AGGRESSIVE_GECOS
+            if (ptr->info->gecos[0] == '\0')
+              snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s}",
+                       MAX_NICK);
+            else
+#endif
+              snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s}",
+                       MAX_NICK);
+
+            send_to_connection(connection_p, format,
+                               ptr->info->nick, ptr->info->username, ptr->info->host,
+                               ptr->info->ip_host, ptr->info->class, ptr->info->gecos);
             break;
 
           case MAKE:
@@ -1464,6 +1462,7 @@ list_gecos(struct connection *connection_p, char *u_gecos, int regex, char *list
 {
   struct hash_rec *ptr;
   char gecos[MAX_GECOS];
+  char format[100];
   int i, numfound = 0, idx = -1;
 
 #ifdef HAVE_REGEX_H
@@ -1528,17 +1527,17 @@ list_gecos(struct connection *connection_p, char *u_gecos, int regex, char *list
         {
 #ifndef AGGRESSIVE_GECOS
           if (ptr->info->gecos[0] == '\0')
-            send_to_connection(connection_p,
-                               "  %s (%s@%s) {%s} [%s]", ptr->info->nick,
-                               ptr->info->username, ptr->info->host,
-                               ptr->info->class);
+            snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s}",
+                     MAX_NICK);
           else
 #endif
-            send_to_connection(connection_p,
-                               "  %s (%s@%s) [%s] {%s} [%s]", ptr->info->nick,
-                               ptr->info->username, ptr->info->host,
-                               ptr->info->ip_host, ptr->info->class,
-                               ptr->info->gecos);
+            snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s} [%%s]",
+                     MAX_NICK);
+
+          send_to_connection(connection_p, format,
+                             ptr->info->username, ptr->info->host,
+                             ptr->info->ip_host, ptr->info->class,
+                             ptr->info->gecos);
         }
         else
         {

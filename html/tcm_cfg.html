@@ -33,8 +33,6 @@ C:&noserver.net
 #       - flood         <what action to take when a user floods>
 #       - link          <what action to take when a link looker is found>
 #       - bot           <what action to take when a bot is found>
-#       - wingate       <what action to take when an open wingate is found>
-#       - socks         <what action to take when an open soxy proxy is found>
 #   Possible values for action:
 #       - kline         <kline the user using the proper message>
 #       - warn          <do nothing to the user, warn +w users on the tcm>
@@ -43,8 +41,6 @@ A:clone:kline
 A:flood:warn
 A:link:kline
 A:bot:kline
-A:wingate:kline 60
-A:socks:kline 60                                                    
 #
 # optional message to send to users who request STATS p
 M:For basic information, see www.db.net/~db/tcm.html           
@@ -59,18 +55,9 @@ M:For basic information, see www.db.net/~db/tcm.html
 #L:phoenix1/userlist.cf
 #L:phoenix2/userlist.cf
 </PRE>
-<PRE>
-#
-# Test this wingate/socks if in this class only
-#
-W:9                        
-W:3
-</PRE>
-<P> tcm will only test for wingate/socks if it is in one of these
-listed classes, as set in W lines. i.e. Set up a class that only
-matches *ppp* connects, and set up the W line to only test connections
-in that class.
-</P>
+
+<br>$Id: tcm_cfg.html,v 1.2 2004/04/22 08:32:11 bill Exp $<br>
+
 <a href="tcm.html">back</a>
 </BODY>
 </HTML>

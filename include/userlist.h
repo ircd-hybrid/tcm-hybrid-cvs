@@ -1,7 +1,7 @@
 #ifndef __USERLIST_H
 #define __USERLIST_H
 
-/* $Id: userlist.h,v 1.93 2003/04/14 08:50:34 bill Exp $ */
+/* $Id: userlist.h,v 1.94 2004/04/22 08:32:13 bill Exp $ */
 
 #include "setup.h"
 #include "tools.h"
@@ -102,7 +102,6 @@ void clear_userlist(void);
 void save_prefs(void);
 int  ok_host(char *,char *,int);
 char *type_show(unsigned long type);
-int  wingate_class(char *class);
 int  is_an_oper(char *user, char *host);
 
 /* local_ip is clearly not going to be an unsigned long FIX THIS -db */

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.106 2003/01/04 02:36:48 jmallett Exp $
+ * $Id: tcm_io.c,v 1.107 2004/04/22 08:32:16 bill Exp $
  */
 
 #include <stdio.h>
@@ -49,7 +49,6 @@
 #include "logging.h"
 #include "stdcmds.h"
 #include "wild.h"
-#include "wingate.h"
 #include "serno.h"
 #include "patchlevel.h"
 #include "tools.h"

@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.222 2003/06/01 01:19:05 bill Exp $
+ * $Id: bothunt.c,v 1.223 2004/04/22 08:32:15 bill Exp $
  */
 
 #include <stdio.h>
@@ -30,7 +30,6 @@
 #include "modules.h"
 #include "tcm_io.h"
 #include "parse.h"
-#include "wingate.h"
 #include "actions.h"
 #include "match.h"
 #include "handler.h"

@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.18 2003/03/30 00:27:27 bill Exp $
+ * $Id: vclones.c,v 1.19 2004/04/22 08:32:16 bill Exp $
  */
 
 #include <assert.h>
@@ -313,6 +313,7 @@ list_virtual_users(struct connection *connection_p, char *userhost, int regex, c
 {
   struct hash_rec *ipptr;
   char uhost[MAX_USERHOST];
+  char format[100];
   int i, idx=-1, num_found=0;
 #ifdef HAVE_REGEX_H
   regex_t reg;
@@ -376,16 +377,16 @@ list_virtual_users(struct connection *connection_p, char *userhost, int regex, c
         {
 #ifndef AGGRESSIVE_GECOS
           if (ipptr->info->gecos[0] == '\0')
-            send_to_connection(connection_p,
-		    	       "  %s (%s@%s) [%s] {%s}", ipptr->info->nick,
-			       ipptr->info->username, ipptr->info->host, ipptr->info->ip_host,
-			       ipptr->info->class);
+            snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s}",
+                     MAX_NICK);
           else
 #endif
-            send_to_connection(connection_p,
-                               "  %s (%s@%s) [%s] {%s} [%s]",
-                               ipptr->info->nick, ipptr->info->username, ipptr->info->host,
-                               ipptr->info->ip_host, ipptr->info->class, ipptr->info->gecos);
+            snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s} [%%s]",
+                     MAX_NICK);
+
+          send_to_connection(connection_p, format,
+                             ipptr->info->nick, ipptr->info->username, ipptr->info->host,
+                             ipptr->info->ip_host, ipptr->info->class, ipptr->info->gecos);
         }
         else
         {

@@ -28,7 +28,7 @@ struct userentry {
   char domain[MAX_DOMAIN];
   char link_count;
   char isoper;
-  int  class;			/*  -1 if unknown */
+  char class[100];  /* -1 if unknown */
   time_t connecttime;
   time_t reporttime;
   };
@@ -43,7 +43,7 @@ struct plus_c_info
   {
     char *user;
     char *host;
-    int	 class;
+    char class[100];
     char *ip;
   };
 
@@ -103,7 +103,7 @@ extern struct connection connections[];
 extern int maxconns;
 
 void list_nicks(int, char *);	
-void list_class(int ,int ,int);	
+void list_class(int, char *, int);	
 
 void kill_list_users(int socket, char *userhost, char *reason);
 void list_users(int socket,char *userhost);

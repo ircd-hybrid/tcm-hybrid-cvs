@@ -40,7 +40,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: commands.c,v 1.2 2000/09/02 05:42:36 lusky Exp $";
+static char *version="$Id: commands.c,v 1.3 2000/11/10 18:53:35 bill Exp $";
 
 char allow_nick[MAX_ALLOW_SIZE][MAX_NICK+4];
 
@@ -536,12 +536,12 @@ void dccproc(int connnum)
 
 	  if(param2)
 	    {
-	      list_class(connections[connnum].socket,atoi(param2),NO);
+	      list_class(connections[connnum].socket,param2,NO);
 	    }
 	  else
 	    {
 	      prnt(connections[connnum].socket,
-		   "Usage: .class class_number\n");
+		   "Usage: .class class_name\n");
 	    }
 	}
       else
@@ -561,12 +561,12 @@ void dccproc(int connnum)
 
 	  if(param2)
 	    {
-	      list_class(connections[connnum].socket,atoi(param2),YES);
+	      list_class(connections[connnum].socket,param2,YES);
 	    }
 	  else
 	    {
 	      prnt(connections[connnum].socket,
-		   "Usage: .class class_number\n");
+		   "Usage: .class class_name\n");
 	    }
 	}
       else

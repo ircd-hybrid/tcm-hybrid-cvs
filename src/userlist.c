@@ -28,7 +28,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: userlist.c,v 1.1 2000/09/02 04:30:50 bill Exp $";
+static char *version="$Id: userlist.c,v 1.2 2000/11/10 18:53:36 bill Exp $";
 
 #ifdef NEXT
 char *strdup(char *);
@@ -41,7 +41,7 @@ struct exception_entry hostlist[MAXHOSTS];
 struct exception_entry banlist[MAXBANS];
 
 #if defined(DETECT_WINGATE)||defined(DETECT_SOCKS)
-int wingate_class_list[MAXWINGATES];
+char wingate_class_list[MAXWINGATES][100];
 int  wingate_class_list_index;
 #endif
 
@@ -63,7 +63,7 @@ static void load_a_user(char *,int);
 static void load_a_tcm(char *);
 static void load_a_host(char *);
 static void load_f_line(char *);
-static void load_a_wingate_class(int class);
+static void load_a_wingate_class(char *class);
 static void add_action(char *value, char *action, char *reason,int message);
 
 struct f_entry *flines;
@@ -287,7 +287,7 @@ void load_config_file(char *file_name)
 
 #ifdef DETECT_WINGATE
 	case 'w': case 'W':
-	  load_a_wingate_class(atoi(value));
+	  load_a_wingate_class(value);
 	  break;
 #endif
 
@@ -568,7 +568,6 @@ static void add_action(char *value, char *action, char *reason, int message)
 
   if (!strcasecmp(value, "clone"))
     {
-      if(strcasecmp(action,"warn"))
 	strncpy(config_entries.clone_act, action, 
 		sizeof(config_entries.clone_act));
       
@@ -578,14 +577,13 @@ static void add_action(char *value, char *action, char *reason, int message)
 
       if(message > 0)
 	config_entries.channel_report |= CHANNEL_REPORT_CLONES;
-      else if(message < 0)
+      else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_CLONES;
 
     }
 #ifdef AUTO_DLINE
   else if (!strcasecmp(value, "vclone"))
     {
-      if(strcasecmp(action,"warn"))
 	strncpy(config_entries.clone_act, action, 
 		sizeof(config_entries.vclone_act));
       
@@ -595,13 +593,12 @@ static void add_action(char *value, char *action, char *reason, int message)
 
       if(message > 0)
 	config_entries.channel_report |= CHANNEL_REPORT_VCLONES;
-      else if(message < 0)
+      else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_VCLONES;
     }
 #endif
   else if (!strcasecmp(value, "sclone"))
     {
-      if(strcasecmp(action,"warn"))
 	strncpy(config_entries.sclone_act, action, 
 		sizeof(config_entries.sclone_act));
       
@@ -611,12 +608,11 @@ static void add_action(char *value, char *action, char *reason, int message)
 
       if(message > 0)
 	config_entries.channel_report |= CHANNEL_REPORT_SCLONES;
-      else if(message < 0)
+      else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_SCLONES;
     }
   else if (!strcasecmp(value, "flood"))
     {
-      if(strcasecmp(action,"warn"))
 	strncpy(config_entries.flood_act, action, 
 		sizeof(config_entries.flood_act));
       
@@ -626,12 +622,11 @@ static void add_action(char *value, char *action, char *reason, int message)
 
       if(message > 0)
 	config_entries.channel_report |= CHANNEL_REPORT_FLOOD;
-      else if(message < 0)
+      else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_FLOOD;
     }
   else if (!strcasecmp(value, "ctcp"))
     {
-      if(strcasecmp(action,"warn"))
 	strncpy(config_entries.ctcp_act, action, 
 		sizeof(config_entries.ctcp_act));
       
@@ -641,12 +636,11 @@ static void add_action(char *value, char *action, char *reason, int message)
 
       if(message > 0)
 	config_entries.channel_report |= CHANNEL_REPORT_CTCP;
-      else if(message < 0)
+      else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_CTCP;
     }
   else if (!strcasecmp(value, "link"))
     {
-      if(strcasecmp(action,"warn"))
 	strncpy(config_entries.link_act, action, 
 		sizeof(config_entries.link_act));
       
@@ -656,12 +650,11 @@ static void add_action(char *value, char *action, char *reason, int message)
 
       if(message > 0)
 	config_entries.channel_report |= CHANNEL_REPORT_LINK;
-      else if(message < 0)
+      else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_LINK;
     }
   else if (!strcasecmp(value, "bot"))
     {
-      if(strcasecmp(action,"warn"))
 	strncpy(config_entries.bot_act, action, 
 		sizeof(config_entries.bot_act));
       
@@ -671,12 +664,11 @@ static void add_action(char *value, char *action, char *reason, int message)
 
       if(message > 0)
 	config_entries.channel_report |= CHANNEL_REPORT_BOT;
-      else if(message < 0)
+      else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_BOT;
     }
   else if (!strcasecmp(value, "spoof"))
     {
-      if(strcasecmp(action,"warn"))
 	strncpy(config_entries.spoof_act, action, 
 		sizeof(config_entries.spoof_act));
       
@@ -686,12 +678,11 @@ static void add_action(char *value, char *action, char *reason, int message)
 
       if(message > 0)
 	config_entries.channel_report |= CHANNEL_REPORT_SPOOF;
-      else if(message < 0)
+      else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_SPOOF;
     }
   else if (!strcasecmp(value, "spambot"))
     {
-      if(strcasecmp(action,"warn"))
 	strncpy(config_entries.spambot_act, action, 
 		sizeof(config_entries.spambot_act));
 
@@ -701,13 +692,12 @@ static void add_action(char *value, char *action, char *reason, int message)
 
       if(message > 0)
 	config_entries.channel_report |= CHANNEL_REPORT_SPAMBOT;
-      else if(message < 0)
+      else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_SPAMBOT;
     }
 #ifdef DETECT_WINGATE
   else if (!strcasecmp(value, "wingate"))
     {
-      if(strcasecmp(action,"warn"))
 	strncpy(config_entries.wingate_act, action, 
 		sizeof(config_entries.wingate_act));
       
@@ -717,14 +707,13 @@ static void add_action(char *value, char *action, char *reason, int message)
 
       if(message > 0)
 	config_entries.channel_report |= CHANNEL_REPORT_WINGATE;
-      else if(message < 0)
+      else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_WINGATE;
     }
 #endif
 #ifdef DETECT_SOCKS
   else if (!strcasecmp(value, "socks"))
     {
-      if(strcasecmp(action,"warn"))
 	strncpy(config_entries.socks_act, action,
 		sizeof(config_entries.socks_act));
       
@@ -734,14 +723,13 @@ static void add_action(char *value, char *action, char *reason, int message)
 
       if(message > 0)
 	config_entries.channel_report |= CHANNEL_REPORT_SOCKS;
-      else if(message < 0)
+      else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_SOCKS;
     }
 #endif
 #ifdef SERVICES_DRONES
   else if (!strcasecmp(value, "drones"))
     {
-      if(strcasecmp(action,"warn"))
 	strncpy(config_entries.drones_act, action,
 		sizeof(config_entries.drones_act));
       if(reason)
@@ -750,7 +738,7 @@ static void add_action(char *value, char *action, char *reason, int message)
 
       if(message > 0)
 	config_entries.channel_report |= CHANNEL_REPORT_DRONE;
-      else if(message < 0)
+      else if(message <= 0)
 	config_entries.channel_report &= ~CHANNEL_REPORT_DRONE;
     }
 #endif
@@ -1045,13 +1033,13 @@ static void load_a_user(char *line,int link_tcm)
  * side effects	- userlist is updated
  */
 
-static void load_a_wingate_class(int class)
+static void load_a_wingate_class(char *class)
   {
     if( wingate_class_list_index == (MAXWINGATES - 1))
 	return;
 
-    wingate_class_list[wingate_class_list_index++] = class;
-    wingate_class_list[wingate_class_list_index] = -1;  
+    snprintf(wingate_class_list[wingate_class_list_index++], sizeof(wingate_class_list[wingate_class_list_index]), "%s", class);
+    snprintf(wingate_class_list[wingate_class_list_index], sizeof(wingate_class_list[wingate_class_list]), "unknown");
   }
 #endif
 
@@ -1663,13 +1651,13 @@ int okhost(char *user,char *host)
  * side effects	- none
  */
 
-int wingate_class(int class)
+int wingate_class(char *class)
 {
   int i;
 
-  for(i=0; (wingate_class_list[i] > 0) ;i++)
+  for(i=0; (strlen(wingate_class_list[i]) > 0) ;i++)
     {
-      if(wingate_class_list[i] == class)
+      if(!strcasecmp(wingate_class_list[i], class))
 	{
 	  return YES;
 	}

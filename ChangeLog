@@ -1,3 +1,9 @@
+*** 20010113_1 by wcampbel
+1. Added a missing \n to the DCC CHAT msg()
+2. Fixed the if's in local_ip() so that it will actually return a valid
+   IP for the DCC CHAT message
+
+
 *** 20001209_1 by bill
 
 - fixed suggested_host in suggest_kill_kline()

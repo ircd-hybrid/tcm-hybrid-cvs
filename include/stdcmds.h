@@ -1,7 +1,7 @@
 #ifndef __STDCMDS_H
 #define __STDCMDS_H
 
-/* $Id: stdcmds.h,v 1.18 2002/05/18 02:21:08 wcampbel Exp $ */
+/* $Id: stdcmds.h,v 1.19 2002/05/24 02:31:48 db Exp $ */
 
 void op(char *chan,char *nick);
 void kick(char* chan,char* nick,char *comment);
@@ -12,6 +12,8 @@ void notice(char *nick,...);
 void privmsg(char *nick,...);
 void newnick(char *nick);
 void print_motd(int sock);
+
+/* XXXX go into bothunt.h ? */
 void list_nicks(int sock,char *nick,int regex);
 void list_virtual_users(int sock,char *userhost,int regex);
 void list_users(int sock,char *userhost,int regex);
@@ -38,7 +40,6 @@ xxx_ void suggest_action(int type_s, char *nick, char *user, char *host,
 void handle_action(int actionid, int idented, char *nick, char *user, char *host, char *ip, char * addcmt);
 void initopers(void);
 void inithash(void);
-void prnt(int,char *,...);              /* - Hendrix (va'd by bill)*/
 
 struct s_testline
 {

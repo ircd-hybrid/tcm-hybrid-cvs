@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.50 2002/05/23 23:26:59 leeh Exp $ */
+/* $Id: main.c,v 1.51 2002/05/24 02:31:54 db Exp $ */
 
 #include "setup.h"
 
@@ -263,7 +263,7 @@ sendtoalldcc(int type,char *format,...)
 
   va_start(va,format);
 
-  /* we needn't check for \n here because it is done already in prnt() */
+  /* we needn't check for \n here because it is done already in print_to_socket() */
   vsnprintf(msgbuf, sizeof(msgbuf), format, va);
 
   echo = (connections[incoming_connnum].type & TYPE_ECHO);
@@ -279,65 +279,65 @@ sendtoalldcc(int type,char *format,...)
 	    {
 	    case SEND_KLINE_NOTICES_ONLY:
 	      if (connections[i].type & TYPE_KLINE)
-		prnt(connections[i].socket, msgbuf);
+		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
 	    case SEND_MOTD_ONLY:
 	      if (connections[i].type & TYPE_MOTD)
-		prnt(connections[i].socket, msgbuf);
+		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
 	    case SEND_LINK_ONLY:
 	      if (connections[i].type & TYPE_LINK)
-		prnt(connections[i].socket, msgbuf);
+		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
 	    case SEND_WARN_ONLY:
 	      if (connections[i].type & TYPE_WARN)
-		prnt(connections[i].socket, msgbuf);
+		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 	      
             case SEND_OPERWALL_ONLY:
 #ifdef ENABLE_W_FLAG
               if (connections[i].type & TYPE_OPERWALL)
-                prnt(connections[i].socket, msgbuf);
+                print_to_socket(connections[i].socket, msgbuf);
 #endif
               break;
 
 	    case SEND_LOCOPS_ONLY:
 	      if (connections[i].type & TYPE_LOCOPS)
-		prnt(connections[i].socket, msgbuf);
+		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 	      
 	    case SEND_OPERS_STATS_ONLY:
 	      if(connections[i].type & TYPE_STAT)
-		prnt(connections[i].socket, msgbuf);
+		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
 	    case SEND_OPERS_ONLY:
 	      if(connections[i].type & (TYPE_OPER | TYPE_WARN))
-		prnt(connections[i].socket, msgbuf);
+		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
 	    case SEND_OPERS_PRIVMSG_ONLY:
 	      if((connections[i].type & TYPE_OPER) &&
 		 (connections[i].set_modes & SET_PRIVMSG))
-		prnt(connections[i].socket, msgbuf);
+		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
 	    case SEND_OPERS_NOTICES_ONLY:
 	      if((connections[i].type & TYPE_OPER) &&
 		 (connections[i].set_modes & SET_NOTICES))
-		prnt(connections[i].socket, msgbuf);
+		print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
             case SEND_SERVERS_ONLY:
               if(connections[i].type & TYPE_SERVERS)
-                prnt(connections[i].socket, msgbuf);
+                print_to_socket(connections[i].socket, msgbuf);
               break;
 
 	    case SEND_ALL_USERS:
-	      prnt(connections[i].socket, msgbuf);
+	      print_to_socket(connections[i].socket, msgbuf);
 	      break;
 
 	    default:
@@ -701,20 +701,20 @@ init_debug(int sig)
 void
 m_unregistered(int connnum, int argc, char *argv[])
 {
-  prnt(connections[connnum].socket, "You have not registered\n");
+  print_to_socket(connections[connnum].socket, "You have not registered\n");
 }
 
 void
 m_not_oper(int connnum, int argc, char *argv[])
 {
-  prnt(connections[connnum].socket,
+  print_to_socket(connections[connnum].socket,
        "Only authorized opers may use this command\n");
 }
 
 void
 m_not_admin(int connnum, int argc, char *argv[])
 {
-  prnt(connections[connnum].socket,
+  print_to_socket(connections[connnum].socket,
        "Only authorized admins may use this command\n");
 }
 #endif

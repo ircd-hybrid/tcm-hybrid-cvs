@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.84 2002/05/23 09:50:59 leeh Exp $
+ * $Id: bothunt.c,v 1.85 2002/05/24 02:31:54 db Exp $
  */
 
 #include <stdio.h>
@@ -501,7 +501,7 @@ onservnotice(int connnum, int argc, char *argv[])
       return;
     ++q;
     *p = '\0';
-    prnt(connections[testlines.index].socket,
+    print_to_socket(connections[testlines.index].socket,
 	 "%s has access to class %s\n", testlines.umask, q);
     testlines.index = -1;
     memset(&testlines.umask, 0, sizeof(testlines.umask));
@@ -515,7 +515,7 @@ onservnotice(int connnum, int argc, char *argv[])
     if ((p = strchr(q, ']')) == NULL)
       return;
     *p = '\0';
-    prnt(connections[testlines.index].socket, 
+    print_to_socket(connections[testlines.index].socket, 
 	 "%s has been K-lined: %s\n", testlines.umask, q);
     testlines.index = -1;
     memset(&testlines.umask, 0, sizeof(testlines.umask));
@@ -620,7 +620,7 @@ onservnotice(int connnum, int argc, char *argv[])
     {
       sendtoalldcc(SEND_OPERS_STATS_ONLY, "*** %s is rehashing config file",
                    nick);
-      toserv("STATS Y\n");
+      print_to_server("STATS Y");
     }
     return;
   }
@@ -762,7 +762,7 @@ onservnotice(int connnum, int argc, char *argv[])
     break;
 
   case SIGNAL:
-    toserv("STATS Y\n");
+    print_to_server("STATS Y");
     break;
 
   /* Link with test.server[bill@255.255.255.255] established: (TS) link */ 
@@ -1144,7 +1144,7 @@ onservnotice(int connnum, int argc, char *argv[])
 
   /* No aconf found */
   case NOACONFFOUND:
-    prnt(connections[testlines.index].socket, "%s does not have access\n",
+    print_to_socket(connections[testlines.index].socket, "%s does not have access\n",
          testlines.umask);
     testlines.index = -1;
     memset((char *)&testlines.umask, 0, sizeof(testlines.umask));
@@ -1239,7 +1239,7 @@ makeconn(char *hostport,char *nick,char *userhost)
 #endif
        ) /* allow opers on */
   {
-    prnt(connections[i].socket,
+    print_to_socket(connections[i].socket,
 	 "Sorry, you are banned.\n");
     (void)close(connections[i].socket);
     connections[i].socket = INVALID;
@@ -1267,7 +1267,7 @@ makeconn(char *hostport,char *nick,char *userhost)
          connections[i].user,
          connections[i].host);
 
-  prnt(connections[i].socket,
+  print_to_socket(connections[i].socket,
        "Connected.  Send '.help' for commands.\n");
   return (1);
 }
@@ -1369,7 +1369,7 @@ addtohash(struct hashrec *table[],char *key,struct userentry *item)
   newhashrec = (struct hashrec *)malloc(sizeof(struct hashrec));
   if ( !newhashrec )
   {
-    prnt(connections[0].socket,"Ran out of memory in addtohash\n");
+    print_to_socket(connections[0].socket,"Ran out of memory in addtohash\n");
     sendtoalldcc(SEND_ALL_USERS,"Ran out of memory in addtohash\n");
     exit(-1);
   }
@@ -1660,7 +1660,7 @@ adduserhost(char *nick, struct plus_c_info *userinfo,int fromtrace,int is_oper)
   if (newuser == NULL)
   {
     fprintf(outfile, "Ran out of memory in adduserhost\n");
-    prnt(connections[0].socket,"QUIT :Ran out of memory in adduserhost\n");
+    print_to_socket(connections[0].socket,"QUIT :Ran out of memory in adduserhost\n");
     sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in adduserhost\n");
     exit(-1);
   }
@@ -2934,7 +2934,7 @@ m_gline(int connnum, int argc, char *argv[])
 
   if (!(connections[connnum].type & TYPE_GLINE))
   {
-    prnt(connections[connnum].socket, "You do not have %s access\n", argv[0]);
+    print_to_socket(connections[connnum].socket, "You do not have %s access\n", argv[0]);
     return;
   }
 
@@ -2943,7 +2943,7 @@ m_gline(int connnum, int argc, char *argv[])
     for (i=0; i < MAXBANS; i++)
     { 
       if (glines[i].user[0] && glines[i].host[0])
-        prnt(connections[connnum].socket, "%d) %s@%s :%s -- %s\n", i+1,
+        print_to_socket(connections[connnum].socket, "%d) %s@%s :%s -- %s\n", i+1,
              glines[i].user, glines[i].host, glines[i].reason, glines[i].who);
     }
     return;
@@ -2953,7 +2953,7 @@ m_gline(int connnum, int argc, char *argv[])
   {
     if ((i = atoi(argv[1])) && glines[i-1].user[0] && glines[i-1].host[0])
     {
-      toserv("GLINE %s@%s :%s\n", glines[i-1].user, glines[i-1].host,
+      print_to_server("GLINE %s@%s :%s", glines[i-1].user, glines[i-1].host,
              (glines[i-1].reason[0] == '\0') ? "No reason" : glines[i-1].reason);
       return;
     }
@@ -2967,19 +2967,19 @@ m_gline(int connnum, int argc, char *argv[])
 
       if (number_nonwilds < 4)
       {
-        prnt(connections[connnum].socket,
+        print_to_socket(connections[connnum].socket,
         "Please include at least 4 non-wildcard characters in the user@host\n");
         return;
       }
 
       if ((hostname = strchr(argv[1], '@')) == NULL)
       {
-        prnt(connections[connnum].socket,
+        print_to_socket(connections[connnum].socket,
              "Please include a \'@\' in the user@host\n");
         return;
       }
       *hostname++ = '\0';
-      toserv("GLINE %s@%s :No reason\n", argv[1], hostname);
+      print_to_server("GLINE %s@%s :No reason", argv[1], hostname);
       return;
     }
   }
@@ -2988,7 +2988,7 @@ m_gline(int connnum, int argc, char *argv[])
     if ((i = atoi(argv[1])) && glines[i-1].user[0] && glines[i-1].host[0])
     {
       expand_args(gline_reason, MAX_REASON, argc-2, argv+2);
-      toserv("GLINE %s@%s :%s\n", glines[i-1].user, glines[i-1].host,
+      print_to_server("GLINE %s@%s :%s", glines[i-1].user, glines[i-1].host,
              (*gline_reason == ':') ? gline_reason+1 : gline_reason);
       return;
     }
@@ -3002,19 +3002,19 @@ m_gline(int connnum, int argc, char *argv[])
 
       if (number_nonwilds < 4)
       {
-        prnt(connections[connnum].socket,
+        print_to_socket(connections[connnum].socket,
       "Please include at least 4 non-wildcard characters with the user@host\n");
         return;
       }
       if ((hostname = strchr(argv[1], '@')) == NULL)
       {
-        prnt(connections[connnum].socket,
+        print_to_socket(connections[connnum].socket,
              "Please include a \'@\' with the user@host\n");
         return;
       }
 
       expand_args(gline_reason, MAX_REASON, argc, argv);
-      toserv("GLINE %s@%s :%s\n", argv[1], hostname, gline_reason);
+      print_to_server("GLINE %s@%s :%s", argv[1], hostname, gline_reason);
       return;
     }
   }
@@ -3075,7 +3075,7 @@ void init_bothunt(void)
   if (connections[0].socket)
   {
     doingtrace = YES;
-    toserv("TRACE\n");
+    print_to_server("TRACE");
   }
 }
 

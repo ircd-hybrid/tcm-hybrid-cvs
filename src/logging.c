@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.24 2002/05/22 01:40:11 db Exp $
+ * $Id: logging.c,v 1.25 2002/05/24 02:31:54 db Exp $
  *
  * - db
  */
@@ -48,7 +48,7 @@ extern struct connection connections[];
 
 static FILE *initlog(void);
 static void timestamp_log(FILE *);
-static char *durtn(double);
+static char *duration(double);
 
 /*
  *   Chop a string of form "nick [user@host]" or "nick[user@host]" into
@@ -476,7 +476,7 @@ logfailure(char *nickuh,int botreject)
       tmp = (struct failrec *)malloc(sizeof(struct failrec));
       if(tmp == NULL)
         {
-          prnt(connections[0].socket,"Ran out of memory in logfailure\n");
+          print_to_socket(connections[0].socket,"Ran out of memory in logfailure\n");
           sendtoalldcc(SEND_ALL_USERS, "Ran out of memory in logfailure");
 	  exit(0);
         }
@@ -699,16 +699,16 @@ log(char *format,...)
 void 
 report_uptime(int sock)
 {
-  prnt(sock, "*** tcm has been up for %s\n",
-       durtn((double) time(NULL)-startup_time));
+  print_to_socket(sock, "*** tcm has been up for %s\n",
+       duration((double) time(NULL)-startup_time));
 
-  prnt(sock, "*** tcm has been opered up for %s\n",
-       durtn((double) time(NULL)-oper_time));
+  print_to_socket(sock, "*** tcm has been opered up for %s\n",
+       duration((double) time(NULL)-oper_time));
 }
 
 
 /*
- * durtn
+ * duration
  *
  * inputs	- double time in seconds 
  * output	- uptime formatted
@@ -716,7 +716,7 @@ report_uptime(int sock)
  */
 
 static char *
-durtn(double a)
+duration(double a)
 {
  int seconds;
  int minutes;

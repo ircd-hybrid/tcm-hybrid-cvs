@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.7 2002/05/23 23:26:59 leeh Exp $
+ * $Id: parse.c,v 1.8 2002/05/24 02:31:54 db Exp $
  */
 
 #include <stdio.h>
@@ -237,7 +237,7 @@ static void proc(char *source,char *fctn,char *param)
                                            ** alive.
                                            */
     {
-      toserv("PONG %s\n", argv[1]);
+      print_to_server("PONG %s", argv[1]);
     }
     else if (strcmp(argv[0],"ERROR") == 0)
     {
@@ -330,7 +330,7 @@ static void proc(char *source,char *fctn,char *param)
         oper_time = time(NULL);
         send_umodes(mynick);
         inithash();
-        toserv("STATS Y\n");
+        print_to_server("STATS Y");
         break;
       case RPL_TRACEOPERATOR:
       case RPL_TRACEUSER:
@@ -548,7 +548,7 @@ do_init(void)
 {
   oper();
 
-  toserv("VERSION\n");
+  print_to_server("VERSION");
   join(config_entries.defchannel, config_entries.defchannel_key);
   set_modes(config_entries.defchannel, config_entries.defchannel_mode,
             config_entries.defchannel_key);
@@ -592,9 +592,9 @@ _wallops(int connnum, int argc, char *argv[])
 static void send_umodes(char *nick)
 {
   if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
-    toserv("MODE %s :+bcdfknrswxyzl\nSTATS I\n", nick );
+    print_to_server("MODE %s :+bcdfknrswxyzl\nSTATS I", nick );
   else
-    toserv("FLAGS +ALL\nSTATS E\nSTATS F\n");
+    print_to_server("FLAGS +ALL\nSTATS E\nSTATS F");
   initopers();
 }
 
@@ -726,15 +726,15 @@ _signon (int connnum, int argc, char *argv[])
       strcpy (mynick,config_entries.dfltnick);
 
     if( config_entries.server_pass[0] )
-      toserv("PASS %s\n", config_entries.server_pass);
+      print_to_server("PASS %s", config_entries.server_pass);
 
-    toserv("USER %s %s %s :%s\r\n",
+    print_to_server("USER %s %s %s :%s",
            config_entries.username_config,
            ourhostname,
            config_entries.server_name,
            config_entries.ircname_config);
 
-    toserv("NICK %s\r\n", mynick);
+    print_to_server("NICK %s", mynick);
 }
 
 /*

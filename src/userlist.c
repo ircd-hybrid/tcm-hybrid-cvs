@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.59 2002/05/22 22:09:27 leeh Exp $
+ * $Id: userlist.c,v 1.60 2002/05/24 02:31:55 db Exp $
  *
  */
 
@@ -859,7 +859,7 @@ void ban_manipulate(int sock,char flag,char *userhost)
     {
       if(isbanned(user,host))
 	{
-	  prnt(sock,"%s@%s is already banned.\n",user,host);
+	  print_to_socket(sock,"%s@%s is already banned.\n",user,host);
 	  return;
 	}
       for(i=0; i < MAXBANS; i++)
@@ -883,7 +883,7 @@ void ban_manipulate(int sock,char flag,char *userhost)
 	  strncpy(banlist[i].host, host, sizeof(banlist[i].host));
 	}
 
-      prnt(sock,"%s@%s now banned.\n", user, host);
+      print_to_socket(sock,"%s@%s now banned.\n", user, host);
     }
   else
     {
@@ -896,7 +896,7 @@ void ban_manipulate(int sock,char flag,char *userhost)
 	    {
 	      banlist[i].user[0] = 0;
 	      banlist[i].host[0] = 0;
-	      prnt(sock, "%s@%s is removed.\n", user, host);
+	      print_to_socket(sock, "%s@%s is removed.\n", user, host);
 	    }
 	}
     }
@@ -1029,9 +1029,16 @@ void reload_user_list(int sig)
   for (temp=reload; temp; temp=temp->next)
     temp->function(sig, 0, NULL);
   if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
-    toserv("STATS I\nSTATS Y\n");
+    {
+      print_to_server("STATS I");
+      print_to_server("STATS Y");
+    } 
   else
-    toserv("STATS E\nSTATS F\nSTATS Y\n");
+    {
+      print_to_server("STATS E");
+      print_to_server("STATS F");
+      print_to_server("STATS Y");
+    }
 
   initopers();
 

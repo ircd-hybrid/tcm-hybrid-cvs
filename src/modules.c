@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.29 2002/05/23 23:26:59 leeh Exp $B
+ * $Id: modules.c,v 1.30 2002/05/24 02:31:54 db Exp $B
  *
  */
 
@@ -276,7 +276,7 @@ void m_modload (int connnum, int argc, char *argv[])
   if (load_a_module(argv[1], 1) != -1)
     sendtoalldcc(SEND_ADMIN_ONLY, "Loaded by %s", connections[connnum].nick);
   else
-    prnt(connections[connnum].socket, "Load of %s failed\n", argv[1]);
+    print_to_socket(connections[connnum].socket, "Load of %s failed\n", argv[1]);
 }
 
 void m_modunload (int connnum, int argc, char *argv[]) {
@@ -292,29 +292,29 @@ void m_modreload (int connnum, int argc, char *argv[]) {
       if (load_a_module(argv[1], 1))
         sendtoalldcc(SEND_ADMIN_ONLY, "Reloaded by %s", connections[connnum].nick);
     }
-  else prnt(connections[connnum].socket, "Module %s is not loaded\n", argv[1]);
+  else print_to_socket(connections[connnum].socket, "Module %s is not loaded\n", argv[1]);
 }
 
 void m_modlist (int connnum, int argc, char *argv[]) {
   int i;
 
   if (argc >= 2)
-    prnt(connections[connnum].socket, "Listing all modules matching '%s'...\n", argv[1]);
+    print_to_socket(connections[connnum].socket, "Listing all modules matching '%s'...\n", argv[1]);
   else
-    prnt(connections[connnum].socket, "Listing all modules...\n");
+    print_to_socket(connections[connnum].socket, "Listing all modules...\n");
   for (i=0;i<max_mods;++i)
    {
      if (modlist[i].name != NULL)
        {
          if (argc == 2 && !wldcmp(argv[1], modlist[i].name))
-           prnt(connections[connnum].socket, "--- %s 0x%lx %s\n", 
+           print_to_socket(connections[connnum].socket, "--- %s 0x%lx %s\n", 
                 modlist[i].name, modlist[i].address, modlist[i].version);
          else if (argc == 1)
-           prnt(connections[connnum].socket, "--- %s 0x%lx %s\n", 
+           print_to_socket(connections[connnum].socket, "--- %s 0x%lx %s\n", 
                 modlist[i].name, modlist[i].address, modlist[i].version);
        }
    }
-  prnt(connections[connnum].socket, "Done.\n");
+  print_to_socket(connections[connnum].socket, "Done.\n");
 }
 
 /* XXX - Return value is ignored...use it or lose it... */

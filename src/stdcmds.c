@@ -14,7 +14,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.60 2002/05/22 22:03:34 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.61 2002/05/24 02:31:54 db Exp $ */
 
 #include "setup.h"
 
@@ -131,33 +131,6 @@ freehash(void)
     }
 }
 
-/*
- * prnt()
- *
- * inputs        - socket to reply on
- * output        - NONE
- * side effects  - NONE
- */
-void
-prnt(int sock, char *format, ...)
-{
-  char msgbuf[MAX_BUFF];
-  va_list va;
-
-  va_start(va,format);
-
-  vsnprintf(msgbuf, sizeof(msgbuf)-2, format, va);
-  if (msgbuf[strlen(msgbuf)-1] != '\n') strncat(msgbuf, "\n\0", 2);
-  send(sock, msgbuf, strlen(msgbuf), 0);
-
-  if(config_entries.debug)
-    {
-      (void)printf("-> %s",msgbuf);     /* - zaph */
-      if(outfile)
-        (void)fprintf(outfile,"%s",msgbuf);
-    }
- va_end(va);
-}
 
 
 /* The following are primitives that send messages to the server to perform
@@ -168,7 +141,7 @@ prnt(int sock, char *format, ...)
 void
 oper()
 {
-  toserv("OPER %s %s\n",
+  print_to_server("OPER %s %s",
           config_entries.oper_nick_config,
           config_entries.oper_pass_config);
 }
@@ -176,7 +149,7 @@ oper()
 void
 op(char *chan,char *nick)
 {
-  toserv("MODE %s +o %s\n", chan, nick);
+  print_to_server("MODE %s +o %s", chan, nick);
 }
 
 void
@@ -185,9 +158,9 @@ join(char *chan, char *key)
   if ((chan == NULL) || (*chan == '\0'))
     return;
   if (key != NULL)
-    toserv("JOIN %s %s\n", chan, key);
+    print_to_server("JOIN %s %s", chan, key);
   else
-    toserv("JOIN %s\n", chan);
+    print_to_server("JOIN %s", chan);
 }
 
 void
@@ -198,21 +171,21 @@ set_modes(char *chan, char *mode, char *key)
   if (mode != NULL)
   {
     if (key != NULL)
-      toserv("MODE %s +%sk %s\n", chan, mode, key);
+      print_to_server("MODE %s +%sk %s", chan, mode, key);
     else
-      toserv("MODE %s +%s\n", chan, mode);
+      print_to_server("MODE %s +%s", chan, mode);
   }
   else
   {
     if (key != NULL)
-      toserv("MODE %s +k %s\n", chan, key);
+      print_to_server("MODE %s +k %s", chan, key);
   }
 }
 
 void
 leave(char *chan)
 {
-  toserv("PART %s\n", chan);
+  print_to_server("PART %s", chan);
 }
 
 void
@@ -227,7 +200,7 @@ notice(char *nick,...)
   format = va_arg(va, char*);
   vsprintf(msg, format, va );
 
-  toserv("NOTICE %s :%s\n", nick, msg);
+  print_to_server("NOTICE %s :%s", nick, msg);
   va_end(va);
 }
 
@@ -242,7 +215,7 @@ privmsg(char *nick,...)
 
   format = va_arg(va, char*);
   vsprintf(msg, format, va );
-  toserv("PRIVMSG %s :%s", nick, msg);
+  print_to_server("PRIVMSG %s :%s", nick, msg);
 
   va_end(va);
 }
@@ -250,7 +223,7 @@ privmsg(char *nick,...)
 void
 newnick(char *nick)
 {
-  toserv("NICK %s\n", nick);
+  print_to_server("NICK %s", nick);
 }
 
 /*
@@ -513,7 +486,7 @@ handle_action(int actionid, int idented, char *nick, char *user,
 	    actions[actionid].klinetime = 60;
 	  else if (actions[actionid].klinetime>14400) 
 	    actions[actionid].klinetime = 14400;
-	  toserv("KLINE %d %s@%s :%s\n",
+	  print_to_server("KLINE %d %s@%s :%s",
 		 actions[actionid].klinetime, newuser, newhost, 
 		 actions[actionid].reason ?
 		 actions[actionid].reason : "Automated temporary K-Line");    
@@ -523,7 +496,7 @@ handle_action(int actionid, int idented, char *nick, char *user,
 	}
       else if (actions[actionid].method & METHOD_KLINE)
 	{
-	  toserv("KLINE %s@%s :%s\n", newuser, newhost, 
+	  print_to_server("KLINE %s@%s :%s", newuser, newhost, 
 		 actions[actionid].reason ? 
 		 actions[actionid].reason : "Automated K-Line");    
 	  snprintf(comment, sizeof(comment),
@@ -564,7 +537,7 @@ handle_action(int actionid, int idented, char *nick, char *user,
 	      }
 	    }
 
-	  toserv("DLINE %s :%s\n", newhost, 
+	  print_to_server("DLINE %s :%s", newhost, 
 		 actions[actionid].reason ?
 		 actions[actionid].reason : "Automated D-Line");    
 	  snprintf(comment, sizeof(comment), "D-line of %s", newhost);    
@@ -659,13 +632,13 @@ print_motd(int sock)
 
   if((userfile = fopen(MOTD_FILE,"r")) == NULL)
     {
-      prnt(sock,"No MOTD\n");
+      print_to_socket(sock,"No MOTD\n");
       return;
     }
 
   while (fgets(line, MAX_BUFF-1, userfile))
     {
-      prnt(sock, "%s", line);
+      print_to_socket(sock, "%s", line);
     }
   fclose(userfile);
 }
@@ -699,7 +672,7 @@ list_nicks(int sock,char *nick,int regex)
       exit(0);
     }
     regerror(i, (regex_t *)&reg, errbuf, 1024); 
-    prnt(sock, "Error compiling regular expression: %s\n", errbuf);
+    print_to_socket(sock, "Error compiling regular expression: %s\n", errbuf);
     free(errbuf);
     return;
   }
@@ -719,12 +692,12 @@ list_nicks(int sock,char *nick,int regex)
             {
               if(!numfound)
                 {
-                  prnt(sock,
-                       "The following clients match %.150s:\n",nick);
+                  print_to_socket(sock,
+				  "The following clients match %.150s:\n",nick);
                 }
               numfound++;
 
-              prnt(sock,
+              print_to_socket(sock,
                    "  %s (%s@%s) {%s}\n",
                    userptr->info->nick,
                    userptr->info->user,userptr->info->host,
@@ -734,11 +707,11 @@ list_nicks(int sock,char *nick,int regex)
     }
 
   if (numfound)
-    prnt(sock,
-         "%d matches for %s found\n",numfound,nick);
+    print_to_socket(sock,
+		    "%d matches for %s found\n",numfound,nick);
   else
-    prnt(sock,
-         "No matches for %s found\n",nick);
+    print_to_socket(sock,
+		    "No matches for %s found\n",nick);
 #ifdef HAVE_REGEX_H
   if (errbuf != NULL)
     free(errbuf);
@@ -782,14 +755,16 @@ list_users(int sock,char *userhost,int regex)
       exit(0);
     }
     regerror(i, (regex_t *)&reg, errbuf, 1024); 
-    prnt(sock, "Error compiling regular expression: %s\n", errbuf);
+    print_to_socket(sock, "Error compiling regular expression: %s\n",
+		    errbuf);
     free(errbuf);
     return;
   }
 #endif
   if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
     {
-      prnt(sock, "Listing all users is not recommended.  To do it anyway, use '.list ?*@*'.\n");
+      print_to_socket(sock,
+"Listing all users is not recommended.  To do it anyway, use '.list ?*@*'.\n");
       return;
     }
 
@@ -807,23 +782,23 @@ list_users(int sock,char *userhost,int regex)
 #endif 
       {
         if (!numfound++)
-          prnt(sock, "The following clients match %s:\n", userhost);
+          print_to_socket(sock, "The following clients match %s:\n", userhost);
 
         if (ipptr->info->ip_host[0] > '9' || ipptr->info->ip_host[0] < '0')
-          prnt(sock, "  %s (%s@%s) {%s}\n", ipptr->info->nick,
+          print_to_socket(sock, "  %s (%s@%s) {%s}\n", ipptr->info->nick,
                ipptr->info->user, ipptr->info->host, ipptr->info->class);
         else
-          prnt(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
+          print_to_socket(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
                ipptr->info->user, ipptr->info->host, ipptr->info->ip_host,
                ipptr->info->class);
       }
     }
   }
   if (numfound > 0)
-    prnt(sock, "%d match%sfor %s found\n", numfound,
-         (numfound > 1 ? "es " : " "), userhost);
+    print_to_socket(sock, "%d match%sfor %s found\n", numfound,
+		    (numfound > 1 ? "es " : " "), userhost);
   else
-    prnt(sock, "No matches for %s found\n", userhost);
+    print_to_socket(sock, "No matches for %s found\n", userhost);
   free(uhost);
 }
 
@@ -864,14 +839,16 @@ list_virtual_users(int sock,char *userhost,int regex)
       exit(0);
     }
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE); 
-    prnt(sock, "Error compiling regular expression: %s\n", errbuf);
+    print_to_socket(sock, "Error compiling regular expression: %s\n",
+		    errbuf);
     free(errbuf);
     return;
   }
 #endif
   if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
     {
-      prnt(sock, "Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.\n");
+      print_to_socket(sock,
+"Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.\n");
       return;
     }
 
@@ -889,19 +866,19 @@ list_virtual_users(int sock,char *userhost,int regex)
 #endif 
       {
         if (!numfound++)
-          prnt(sock, "The following clients match %s:\n", userhost);
+          print_to_socket(sock, "The following clients match %s:\n", userhost);
 
-        prnt(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
+        print_to_socket(sock, "  %s (%s@%s) [%s] {%s}\n", ipptr->info->nick,
              ipptr->info->user, ipptr->info->host, ipptr->info->ip_host,
              ipptr->info->class);
       }
     }
   }
   if (numfound > 0)
-    prnt(sock, "%d match%sfor %s found\n", numfound,
+    print_to_socket(sock, "%d match%sfor %s found\n", numfound,
          (numfound > 1 ? "es " : " "), userhost);
   else
-    prnt(sock, "No matches for %s found\n", userhost);
+    print_to_socket(sock, "No matches for %s found\n", userhost);
   free(uhost);
 }
 
@@ -925,7 +902,7 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
       exit(0);
     }
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE);
-    prnt(sock, "Error compiling regular expression: %s\n", errbuf);
+    print_to_socket(sock, "Error compiling regular expression: %s\n", errbuf);
     free(errbuf);
     return;
   }
@@ -947,14 +924,14 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
       {
         if (!numfound++)
           log("killlisted %s\n", fulluh);
-        toserv("KILL %s :%s\n", userptr->info->nick, reason);
+        print_to_server("KILL %s :%s", userptr->info->nick, reason);
       }
     }
   }
   if (numfound > 0)
-    prnt(sock, "%d matches for %s found\n", userhost);
+    print_to_socket(sock, "%d matches for %s found\n", userhost);
   else
-    prnt(sock, "No matches for %s found\n", userhost);
+    print_to_socket(sock, "No matches for %s found\n", userhost);
 #ifdef HAVE_REGEX_H
   if (errbuf != NULL)
     free(errbuf);
@@ -1001,11 +978,11 @@ void report_multi_host(int sock,int nclones)
                   if (!foundany)
                     {   
                       foundany = YES;
-                      prnt(sock,
+                      print_to_socket(sock,
                            "Multiple clients from the following userhosts:\n");
                     }
       
-                  prnt(sock,
+                  print_to_socket(sock,
                        " %s %2d connections -- *@%s {%s}\n",
                        (numfound-nclones > 2) ? "==>" : "   ",
                        numfound,
@@ -1017,7 +994,7 @@ void report_multi_host(int sock,int nclones)
         }
     }
   if (!foundany)
-    prnt(sock, "No multiple logins found.\n");
+    print_to_socket(sock, "No multiple logins found.\n");
 }
 
 /*
@@ -1064,7 +1041,7 @@ void report_multi(int sock,int nclones)
                   if (!foundany)
                     {
                       foundany = YES;
-                      prnt(sock,
+                      print_to_socket(sock,
                            "Multiple clients from the following userhosts:\n");
                     }
                   notip = strncmp(userptr->info->domain,userptr->info->host,
@@ -1072,7 +1049,7 @@ void report_multi(int sock,int nclones)
                     (strlen(userptr->info->domain) ==
                      strlen(userptr->info->host));
                   numfound++;   /* - zaph and next line*/
-                  prnt(sock,
+                  print_to_socket(sock,
                        " %s %2d connections -- %s@%s%s {%s}\n",
                        (numfound-nclones > 2) ? "==>" :
                        "   ",numfound,userptr->info->user,
@@ -1084,7 +1061,7 @@ void report_multi(int sock,int nclones)
         }
     }
   if (!foundany)
-    prnt(sock, "No multiple logins found.\n");
+    print_to_socket(sock, "No multiple logins found.\n");
 }
 
 /*
@@ -1130,12 +1107,12 @@ void report_multi_user(int sock,int nclones)
                 {
                   if (!foundany)
                     {
-                      prnt(sock,
+                      print_to_socket(sock,
                            "Multiple clients from the following usernames:\n");
                       foundany = YES;
                     }
 
-                  prnt(sock,
+                  print_to_socket(sock,
                        " %s %2d connections -- %s@* {%s}\n",
                        (numfound-nclones > 2) ? "==>" : "   ",
                        numfound,userptr->info->user,
@@ -1147,7 +1124,7 @@ void report_multi_user(int sock,int nclones)
 
   if (!foundany)
     {
-      prnt(sock, "No multiple logins found.\n");
+      print_to_socket(sock, "No multiple logins found.\n");
     }
 }
 
@@ -1200,12 +1177,12 @@ void report_multi_virtuals(int sock,int nclones)
                 {
                   if (!foundany)
                     {
-                      prnt(sock,
+                      print_to_socket(sock,
                            "Multiple clients from the following ip blocks:\n");
                       foundany = YES;
                     }
 
-                  prnt(sock,
+                  print_to_socket(sock,
                        " %s %2d connections -- %s.*\n",
                        (numfound-nclones > 3) ? "==>" : "   ",
                        numfound,
@@ -1216,7 +1193,7 @@ void report_multi_virtuals(int sock,int nclones)
     }
 
   if (!foundany)
-    prnt(sock, "No multiple virtual logins found.\n");
+    print_to_socket(sock, "No multiple virtual logins found.\n");
 }
 #endif
 
@@ -1284,22 +1261,22 @@ void report_mem(int sock)
         }
     }
 
-  prnt(sock,"Total hosttable memory %lu/%d entries\n",
+  print_to_socket(sock,"Total hosttable memory %lu/%d entries\n",
        total_hosttable,count_hosttable);
 
-  prnt(sock,"Total usertable memory %lu/%d entries\n",
+  print_to_socket(sock,"Total usertable memory %lu/%d entries\n",
        total_usertable,count_usertable);
 
-  prnt(sock,"Total domaintable memory %lu/%d entries\n",
+  print_to_socket(sock,"Total domaintable memory %lu/%d entries\n",
        total_domaintable,count_domaintable);
 
-  prnt(sock,"Total iptable memory %lu/%d entries\n",
+  print_to_socket(sock,"Total iptable memory %lu/%d entries\n",
        total_iptable, count_iptable);
 
-  prnt(sock,"Total user entry memory %lu/%d entries\n",
+  print_to_socket(sock,"Total user entry memory %lu/%d entries\n",
        total_userentry, count_userentry);
 
-  prnt(sock,"Total memory in use %lu\n",
+  print_to_socket(sock,"Total memory in use %lu\n",
        total_hosttable + total_domaintable + total_iptable + total_userentry );
 }
 
@@ -1367,11 +1344,11 @@ report_clones(int sock)
                     {
                       if (!foundany)
                         {
-                            prnt(sock,
+                            print_to_socket(sock,
                                  "Possible clonebots from the following hosts:\n");
                           foundany = YES;
                         }
-                        prnt(sock,
+                        print_to_socket(sock,
                              "  %2d connections in %3d seconds (%2d total) from %s\n",
                              k+1,
                              connfromhost[j] - connfromhost[j+k],
@@ -1385,7 +1362,7 @@ report_clones(int sock)
 
   if (!foundany)
     {
-        prnt(sock, "No potential clonebots found.\n");
+        print_to_socket(sock, "No potential clonebots found.\n");
     }
 }
 
@@ -1441,7 +1418,7 @@ report_nick_flooders(int sock)
                   nick_changes[i].nick_change_count -= time_ticks;
                   if( nick_changes[i].nick_change_count > 1 )
                     {
-                      prnt(sock,
+                      print_to_socket(sock,
                            "user: %s (%s) %d in %d\n",
                            nick_changes[i].user_host,
                            nick_changes[i].last_nick,
@@ -1457,7 +1434,7 @@ report_nick_flooders(int sock)
 
   if(!reported_nick_flooder)
     {
-      prnt(sock, "No nick flooders found\n" );
+      print_to_socket(sock, "No nick flooders found\n" );
     }
 }
 
@@ -1492,14 +1469,14 @@ list_class(int sock,char *class_to_find,int total_only)
                 {
                   if(!total_only)
                     {
-                      prnt(sock,
+                      print_to_socket(sock,
                            "The following clients are in class %s\n",
                            class_to_find);
                     }
                 }
               if(!total_only)
                 {
-                  prnt(sock,
+                  print_to_socket(sock,
                        "  %s (%s@%s)\n",
                        userptr->info->nick,
                        userptr->info->user,userptr->info->host);
@@ -1509,12 +1486,12 @@ list_class(int sock,char *class_to_find,int total_only)
     }
 
   if (num_found)
-    prnt(sock,
+    print_to_socket(sock,
          "%d are in class %s\n", num_found, class_to_find );
   else
-    prnt(sock,
+    print_to_socket(sock,
          "Nothing found in class %s\n", class_to_find );
-  prnt(sock,"%d unknown class\n", num_unknown);
+  print_to_socket(sock,"%d unknown class\n", num_unknown);
 }
 
 #ifdef VIRTUAL
@@ -1554,11 +1531,11 @@ report_vbots(int sock,int nclones)
                   if (!foundany)
                     {
                       foundany = YES;
-                      prnt(sock,
+                      print_to_socket(sock,
                            "Multiple clients from the following userhosts:\n");
                     }
                   numfound++;   /* - zaph and next line*/
-                  prnt(sock,
+                  print_to_socket(sock,
                        " %s %2d connections -- %s@%s.* {%s}\n",
                        (numfound-nclones > 2) ? "==>" :
                        "   ",numfound,userptr->info->user,
@@ -1569,7 +1546,7 @@ report_vbots(int sock,int nclones)
         }
     }
   if (!foundany)
-    prnt(sock, "No multiple logins found.\n");
+    print_to_socket(sock, "No multiple logins found.\n");
 }
 #endif
 
@@ -1632,21 +1609,21 @@ report_domains(int sock,int num)
       if (!foundany)
         {
           foundany = YES;
-          prnt(sock,"Domains with most users on the server:\n");
+          print_to_socket(sock,"Domains with most users on the server:\n");
         }
 
-      prnt(sock,"  %-40s %3d users\n",
+      print_to_socket(sock,"  %-40s %3d users\n",
            sort[found].domainrec->domain,maxx);
       sort[found].count = 0;
     }
 
   if (!foundany)
     {
-      prnt(sock, "No domains have %d or more users.\n",num);
+      print_to_socket(sock, "No domains have %d or more users.\n",num);
     }
   else
     {
-      prnt(sock, "%d domains found\n", inuse);
+      print_to_socket(sock, "%d domains found\n", inuse);
     }
 }
 
@@ -1718,20 +1695,20 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
     {
 #ifdef HIDE_OPER_IN_KLINES
       if(kline_time)
-        toserv("KLINE %d %s :%s\n",
+        print_to_server("KLINE %d %s :%s",
                kline_time,pattern,
                reason);
       else
-        toserv("KLINE %s :%s\n",
+        print_to_server("KLINE %s :%s",
                pattern,
                reason);
 #else
       if(kline_time)
-        toserv("KLINE %d %s :%s [%s]\n",
+        print_to_server("KLINE %d %s :%s [%s]",
                kline_time,pattern,reason,
                who_did_command);
       else
-        toserv("KLINE %s :%s [%s]\n",
+        print_to_server("KLINE %s :%s [%s]",
                pattern,reason,
                who_did_command);
 #endif
@@ -1739,11 +1716,11 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
   else
     {
 #ifdef HIDE_OPER_IN_KLINES
-      toserv("KLINE %s :%s\n",
+      print_to_server("KLINE %s :%s",
              pattern,
              format_reason(reason));
 #else
-      toserv("KLINE %s :%s [%s]\n",
+      print_to_server("KLINE %s :%s [%s]",
              pattern,format_reason(reason),
              who_did_command);
 #endif
@@ -1765,7 +1742,7 @@ initopers(void)
 {
   clear_userlist();
   load_userlist();
-  toserv("STATS O\n");
+  print_to_server("STATS O");
 }
 
 void
@@ -1773,7 +1750,7 @@ inithash()
 {
   freehash();
   doingtrace = YES;
-  toserv("TRACE\n");
+  print_to_server("TRACE");
 }
 
 void
@@ -1804,8 +1781,8 @@ report_failures(int sock,int num)
 
       if (!foundany++)
         {
-          prnt(sock, "Userhosts with most connect rejections:\n");
-          prnt(sock," %5d rejections: %s@%s%s\n", found->failcount,
+          print_to_socket(sock, "Userhosts with most connect rejections:\n");
+          print_to_socket(sock," %5d rejections: %s@%s%s\n", found->failcount,
                (*found->user ? found->user : "<UNKNOWN>"), found->host,
                (found->botcount ? " <BOT>" : ""));
         }
@@ -1814,7 +1791,7 @@ report_failures(int sock,int num)
 
   if (!foundany)
     {
-      prnt(sock,"No userhosts have %d or more rejections.\n",num);
+      print_to_socket(sock,"No userhosts have %d or more rejections.\n",num);
     }
 
   for( tmp = failures; tmp; tmp = tmp->next )

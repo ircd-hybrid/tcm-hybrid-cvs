@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.6 2002/05/23 23:27:00 leeh Exp $
+ * $Id: tcm_io.c,v 1.7 2002/05/24 02:31:55 db Exp $
  */
 
 #include <stdio.h>
@@ -58,6 +58,7 @@
 static int parse_args(char *, char *argv[]);
 static int get_line(char *inbuf,int *len, struct connection *connections_p);
 static void connect_remote_client(char *, char *, char *, int);
+static void va_print_to_socket(int sock, const char *format, va_list va);
 
 /* -1 indicates listening for connection */
 int initiated_dcc_socket = -1;
@@ -67,7 +68,6 @@ char initiated_dcc_nick[MAX_NICK];
 char initiated_dcc_user[MAX_USER];
 char initiated_dcc_host[MAX_HOST];
 
-extern int errno;          /* The Unix internal error number */
 fd_set readfds;            /* file descriptor set for use with select */
 fd_set writefds;
 
@@ -249,14 +249,18 @@ read_packet(void)
  * nscanned keeps track of the total scanned input bytes
  * 
  * If there is a partial read line without a terminating \r\n (EOL)
- * connections_p->nbuf keeps track of how many bytes scanned,
+ * connections_p->nbuf keeps track of how many bytes were scanned,
  * connections_p->buffer keeps those bytes scanned for the next read.
  * I then return a 0 to the caller so it knows there is nothing to parse.
  *
  * I alway reset connections_p->nbuf to 0 if I found a complete line
  * in the input buffer. i.e. one terminated with an EOL. I then return
  * to the caller the number of bytes available to parse.
- * 
+ *
+ * WARNING: the input buffer (*in) has to be larger than the output
+ * this code will not handle needing three reads to produce one 
+ * output buffer to parse for example. Since this code is dealing
+ * with RFC irc buffer sizes (512) input size of 1024 or greater is fine.
  */
 
 static int
@@ -303,7 +307,6 @@ get_line(char *in, int *len, struct connection *connections_p)
 	  return (0);
 	}
     }
-
 
   /* At this point, there is an EOL char found, pull the EOL
    * chars out of the input buffer, tell caller how many bytes were
@@ -374,34 +377,6 @@ parse_args(char *buffer, char *argv[])
     argv[argc++] = r;
 
   return(argc);
-}
-
-/*
- * toserv
- *
- * inputs       - msg to send directly to server
- * output       - NONE
- * side effects - server executes command.
- */
-void
-toserv(char *format, ... )
-{
-  char msgbuf[MAX_BUFF];
-  va_list va;
-
-  va_start(va,format);
-
-  if (connections[0].socket != INVALID)
-  {
-    vsnprintf(msgbuf,sizeof(msgbuf),format, va);
-    send(connections[0].socket, msgbuf, strlen(msgbuf), 0);
-  }
-
-#ifdef DEBUGMODE
-  printf("-> %s", msgbuf);
-#endif
-
-  va_end(va);
 }
 
 /*
@@ -508,7 +483,8 @@ connect_remote_client(char *nick,char *user,char *host,int sock)
   strncpy(connections[i].host,initiated_dcc_host,MAX_HOST);
 
   print_motd(connections[i].socket);
-  prnt(connections[i].socket,"Connected.  Send '.help' for commands.\n");
+  print_to_socket(connections[i].socket,
+		  "Connected.  Send '.help' for commands.");
   report(SEND_ALL_USERS, CHANNEL_REPORT_ROUTINE, "%s %s (%s@%s) has connected\n",
          connections[i].type & TYPE_OPER ? "Oper" : "User", connections[i].nick,
          connections[i].user, connections[i].host);
@@ -590,3 +566,56 @@ initiate_dcc_chat(char *nick, char *user, char *host)
   initiated_dcc_socket_time = time(NULL);
 }
 
+/*
+ * print_to_socket()
+ *
+ * inputs	- socket to output on
+ *		- format string to output
+ * output	- NONE
+ * side effects	- NONE
+ */
+void
+print_to_socket(int sock, const char *format, ...)
+{
+  char msgbuf[MAX_BUFF];
+  va_list va;
+
+  va_start(va,format);
+  va_print_to_socket(sock, format, va);
+  va_end(va);
+}
+
+/*
+ * print_to_server()
+ *
+ * inputs	- format string to output to server
+ * output	- NONE
+ * side effects	- NONE
+ */
+void
+print_to_server(const char *format, ...)
+{
+  va_list va;
+
+  va_start(va,format);
+  va_print_to_socket(connections[0].socket, format, va);
+  va_end(va);
+}
+
+/*
+ * va_print_to_socket() (helper function for above two)
+ *
+ * inputs	- socket to output on
+ *		- format string to output
+ * output	- NONE
+ * side effects	- NONE
+ */
+static void
+va_print_to_socket(int sock, const char *format, va_list va)
+{
+  char msgbuf[MAX_BUFF];
+
+  vsnprintf(msgbuf, sizeof(msgbuf)-2, format, va);
+  if (msgbuf[strlen(msgbuf)-1] != '\n') strncat(msgbuf, "\n\0", 2);
+  send(sock, msgbuf, strlen(msgbuf), 0);
+}

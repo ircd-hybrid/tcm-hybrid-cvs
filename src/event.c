@@ -25,7 +25,7 @@
  *
  *  Original never had a GPL, so GPL removed WITH PLEASURE. -db
  *
- *  $Id: event.c,v 1.2 2002/05/20 05:31:03 db Exp $
+ *  $Id: event.c,v 1.3 2002/05/24 02:31:54 db Exp $
  */
 
 /*
@@ -237,21 +237,21 @@ show_events(int sock)
   int i;
 
   if (last_event_ran)
-    prnt(sock, "*** Last event to run: %s\n", last_event_ran);
+    print_to_socket(sock, "*** Last event to run: %s\n", last_event_ran);
 
-  prnt(sock, "*** Operation            Next Execution\n");
+  print_to_socket(sock, "*** Operation            Next Execution\n");
 
   for (i = 0; i < event_count; i++)
     {
       if (event_table[i].active)
         {
-          prnt(sock,
+          print_to_socket(sock,
 		 "*** %-20s %-3d seconds\n",
 		 event_table[i].name,
 		 (int)(event_table[i].when - CurrentTime));
         }
     }
-  prnt(sock, "*** Finished\n");
+  print_to_socket(sock, "*** Finished\n");
 }
 
 /* 

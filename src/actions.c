@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.17 2002/05/31 01:54:17 wcampbel Exp $
+ * $Id: actions.c,v 1.18 2002/05/31 02:02:39 wcampbel Exp $
  */
 
 /* XXX
@@ -568,8 +568,6 @@ get_method_userhost(int actionid, char *nick, char *m_user, char *m_host)
   }
   else
   {
-/* XXX - We can't do this without p set prior! */
-    *p++ = '\0';
     user = m_user;
     host = m_host;
   }

@@ -1,3 +1,23 @@
+db          2002/05/29 14:47:50 EDT	(20020529_8)
+
+  Modified files:
+    include              tcm_io.h 
+    src                  Makefile.in tcm_io.c 
+  Added files:
+    include              dcc.h 
+    src                  dcc.c 
+  Log:
+  - split dcc handling out of tcm_io.c into dcc.c
+  
+  Revision  Changes    Path
+  1.1       +15 -0     tcm-hybrid/include/dcc.h (new)
+  1.31      +0 -5      tcm-hybrid/include/tcm_io.h
+  1.28      +1 -0      tcm-hybrid/src/Makefile.in
+  1.1       +332 -0    tcm-hybrid/src/dcc.c (new)
+  1.75      +5 -283    tcm-hybrid/src/tcm_io.c
+
+
+
 db          2002/05/29 12:05:11 EDT	(20020529_7)
 
   Modified files:

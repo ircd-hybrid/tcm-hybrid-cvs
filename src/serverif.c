@@ -52,7 +52,7 @@
 #include "dmalloc.h"
 #endif
 
-static char *version="$Id: serverif.c,v 1.13 2001/04/03 04:49:25 db Exp $";
+static char *version="$Id: serverif.c,v 1.14 2001/06/03 02:26:03 greg Exp $";
 
 extern int errno;          /* The Unix internal error number */
 
@@ -1649,10 +1649,6 @@ void privmsgproc(char *nick,char *userhost,char *body)
 	}
       else
 	initiate_dcc_chat(nick,user,host);
-      break;
-
-    case K_CLONES:
-      report_clones(0);
       break;
 
     default:

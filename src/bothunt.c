@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.162 2002/06/09 16:23:18 db Exp $
+ * $Id: bothunt.c,v 1.163 2002/06/11 22:45:15 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1622,17 +1622,31 @@ chopuh(int is_trace,char *nickuserhost,struct user_entry *userinfo)
       if (strchr(uh+1,'[') != NULL)
         {
           /*moron has a [ in the nickname or username.  Let's do some AI crap*/
-          if ((uh = strchr(uh, '~')) != NULL)
+          if ((strchr(uh, '~')) == NULL)
             {
-              /* No tilde to guess off of... means the lamer checks out with
-                 identd and has (more likely than not) a valid username.
-                 Find the last [ in the string and assume this is the
-                 divider, unless it creates an illegal length username
-                 or nickname */
-              uh = nickuserhost + strlen(nickuserhost);
-              while (--uh != nickuserhost)
-                if (*uh == '[' && *(uh+1) != '@' && uh - nickuserhost < 10)
-                  break;
+              /* no tilde to guess from:
+	       *
+	       * hyb7 will forbid [ in ident, so jump backwards from the @
+	       * to it.
+	       *
+	       * hyb6 we presume the ident is encrypted (starts with a [)
+	       * and just go back one if possible.
+	       */
+              if(config_entries.hybrid_version == 7)
+	      {
+                uh == strrchr(nickuserhost, '[');
+	      }
+	      else
+	      {
+                uh = strrchr(nickuserhost, '[');
+		if(*(uh-1) == '[')
+                  uh--;
+	      }
+#if 0
+                while (--uh != nickuserhost)
+                  if (*uh == '[' && uh - nickuserhost < 10)
+                    break;
+#endif
             }
           else
             {

@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.29 2002/05/24 18:19:27 leeh Exp $ */
+/* $Id: wingate.c,v 1.30 2002/05/24 18:50:51 leeh Exp $ */
 
 
 #include <netdb.h>
@@ -61,8 +61,6 @@ struct wingates {
   time_t connect_time;
   struct sockaddr_in socketname;
 };
-
-char *_version="20012009";
 
 char wingate_class_list[MAXWINGATE][100];
 int  wingate_class_list_index;
@@ -144,7 +142,6 @@ void _continuous(int connnum, int argc, char *argv[]);
 void _user_signon(int connnum, int argc, char *argv[]);
 void _reload_wingate(int connnum, int argc, char *argv[]);
 void _config(int connnum, int argc, char * argv[]);
-void _modinit();
 
 #ifdef DETECT_WINGATE
 /*
@@ -800,7 +797,7 @@ static void report_open_squid(int i)
 }
 #endif
 
-void _modinit()
+void init_wingates(void)
 {
   int i;
   add_common_function(F_RELOAD, _reload_wingate);

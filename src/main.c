@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.57 2002/05/24 18:19:30 leeh Exp $ */
+/* $Id: main.c,v 1.58 2002/05/24 18:50:51 leeh Exp $ */
 
 #include "setup.h"
 
@@ -414,7 +414,14 @@ main(int argc, char *argv[])
   memset(&actions, 0, sizeof(actions));
 
   modules_init();
+#if 0
   load_all_modules(YES);
+#endif
+
+  init_commands();
+#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
+  init_wingates();
+#endif
 
   /* XXX - these used to be in the modules, need to be done properly */
   add_common_function(F_RELOAD, _reload_bothunt);

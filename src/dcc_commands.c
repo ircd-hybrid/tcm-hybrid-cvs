@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.73 2002/05/24 18:29:19 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.74 2002/05/24 18:50:51 leeh Exp $ */
 
 #include "setup.h"
 
@@ -52,8 +52,6 @@
 #include <crypt.h>
 #endif
 
-char *_version="20012009";
-
 static void set_actions(int sock, char *key, char *act, int duration, char *reason);
 static void save_umodes(char *registered_nick, unsigned long type);
 static void load_umodes(int connect_id);
@@ -68,9 +66,6 @@ static void handle_disconnect(int sock,char *param2,char *who_did_command);
 static void handle_save(int sock,char *nick);
 static int  islegal_pass(int connect_id,char *password);
 static void print_help(int sock,char *text);
-
-void _modinit();
-void _moddeinit();
 
 extern struct connection connections[];
 extern struct s_testline testlines;
@@ -2008,7 +2003,7 @@ struct TcmMessage hlist_msgtab = {
 #endif
 
 void 
-_modinit()
+init_commands(void)
 {
   int i;
   for (i=0;i<MAX_MSG_HASH;++i)
@@ -2086,31 +2081,6 @@ _modinit()
   mod_add_cmd(&hlist_msgtab);
 #endif
   mod_add_cmd(&uptime_msgtab);
-}
-
-void
-_moddeinit()
-{
-  mod_del_cmd(&uptime_msgtab);
-  mod_del_cmd(&mem_msgtab);
-  mod_del_cmd(&clones_msgtab);
-  mod_del_cmd(&nflood_msgtab);
-  mod_del_cmd(&rehash_msgtab);
-  mod_del_cmd(&trace_msgtab);
-  mod_del_cmd(&failures_msgtab);
-  mod_del_cmd(&domains_msgtab);
-  mod_del_cmd(&bots_msgtab);
-#ifdef VIRTUAL
-  mod_del_cmd(&vmulti_msgtab);
-#endif
-  mod_del_cmd(&nfind_msgtab);
-  mod_del_cmd(&list_msgtab);
-#ifdef WANT_ULIST
-  mod_del_cmd(&ulist_msgtab);
-#endif
-#ifdef WANT_HLIST
-  mod_del_cmd(&hlist_msgtab);
-#endif
 }
 
 /*

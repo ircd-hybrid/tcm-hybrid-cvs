@@ -1,7 +1,7 @@
 #ifndef __COMMANDS_H
 #define __COMMANDS_H
 
-/* $Id: commands.h,v 1.11 2002/05/24 18:19:23 leeh Exp $ */
+/* $Id: commands.h,v 1.12 2002/05/24 18:50:49 leeh Exp $ */
 
 void init_allow_nick();
 void dccproc(int connnum, int argc, char *argv[]);	
@@ -27,6 +27,12 @@ struct TcmMessage
   /* handlers: oper, registered oper, admin */
   TcmMessageHandler handlers[3];
 };
+
+extern void init_commands(void);
+
+#if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
+extern void init_wingates(void);
+#endif
 
 void m_vlist(int connnum, int argc, char *argv[]);
 void m_class(int connnum, int argc, char *argv[]);

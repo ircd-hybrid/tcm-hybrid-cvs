@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.23 2002/05/24 18:35:17 leeh Exp $
+# $Id: Makefile.in,v 1.24 2002/05/24 18:50:46 leeh Exp $
 CC = @CC@
 RM = @RM@
 MKDEP = ${CC} -MM
@@ -85,7 +85,7 @@ install:
 	mv -f etc/userlist.cf @prefix@/etc/ ; \
 	fi
 
-	cp modules/*.so @prefix@/modules/
+#	cp modules/*.so @prefix@/modules/
 	cp help/help.* @prefix@/help/
 	@echo Done
 

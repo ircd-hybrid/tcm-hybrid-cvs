@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.19 2002/05/23 21:59:49 bill Exp $
+# $Id: Makefile.in,v 1.20 2002/05/24 18:50:51 leeh Exp $
 
 CC = @CC@
 RM = @RM@
@@ -17,6 +17,7 @@ LDFLAGS = @LDFLAGS@
 ###### CHANGES BELOW HERE ONLY IF YOU KNOW WHAT YOU'RE DOING ######
 
 SOURCES =       bothunt.c       \
+		commands.c	\
                 event.c         \
                 logging.c       \
                 main.c          \
@@ -27,7 +28,8 @@ SOURCES =       bothunt.c       \
                 tcm_io.c        \
                 token.c         \
                 userlist.c      \
-                wild.c
+                wild.c		\
+		wingate.c
 
 OBJECTS = ${SOURCES:.c=.o}
 

@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.1 2002/05/29 18:47:48 db Exp $
+ * $Id: dcc.c,v 1.2 2002/05/30 04:48:50 bill Exp $
  */
 
 #include <stdio.h>
@@ -41,7 +41,6 @@
 #include "event.h"
 #include "bothunt.h"
 #include "userlist.h"
-#include "commands.h"
 #include "modules.h"
 #include "tcm_io.h"
 #include "dcc.h"
@@ -133,6 +132,7 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
   connections[i].io_write_function = NULL;
   connections[i].io_close_function = close_connection;
   connections[i].last_message_time = current_time;
+  FD_SET(connections[i].socket, &readfds);
 }
 
 /*
@@ -228,10 +228,9 @@ finish_accept_dcc_chat(int i)
   /* close the listening socket, I've got a working socket now */
   close(sock);
 
+  connections[i].io_write_function = finish_dcc_chat;
   connections[i].last_message_time = current_time;
   connections[i].nbuf = 0;
-
-  finish_dcc_chat(i);
 }
 
 /*

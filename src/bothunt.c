@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.137 2002/05/30 01:49:48 leeh Exp $
+ * $Id: bothunt.c,v 1.138 2002/05/30 04:48:50 bill Exp $
  */
 
 #include <stdio.h>
@@ -397,6 +397,8 @@ on_server_notice(int argc, char *argv[])
     return;
   }
 
+  /* *** Notice -- billy-jon!bill@aloha.from.hilo on irc.intranaut.com is
+         requesting gline for [this@is.a.test] [test test2] */
   if (strstr(p, "is requesting gline for "))
   {
     nick = p;
@@ -408,34 +410,44 @@ on_server_notice(int argc, char *argv[])
     if ((q = strchr(target, ' ')) == NULL)
       return;
     *q = '\0';
-    user = q+26;
-    if ((q = strchr(user, '@')) == NULL)
+    q+=25;
+    if ((p = strchr(q, ' ')) == NULL)
+      return;
+    p+=2;
+
+    if (get_user_host(&user, &host, q) != 1)
+      return;
+
+    if ((q = strchr(p, ']')) == NULL)
       return;
     *q = '\0';
-    host = q+1;
-    if ((q = strchr(host, ']')) == NULL)
-      return;
-    *q = '\0';
-    q+=3;
-    if ((p = strrchr(q, ']')) == NULL)
-      return;
-    *p = '\0'; 
     send_to_all(FLAGS_VIEW_KLINES,
-                 "GLINE for %s@%s by %s [%s]: %s", user, host, nick, target, q);
+                "GLINE for %s@%s by %s [%s]: %s", user, host, nick, target, p);
     return;
   }
+  /* billy-jon!bill@ummm.E on irc.intranaut.com has triggered gline for [test@this.is.a.test] [test1 test2] */
   else if (strstr(p, "has triggered gline for "))
   {
-    q = strstr(p, "has triggered");
+    nick = p;
+    if ((q = strchr(nick, ' ')) == NULL)
+      return;
+    *q++ = '\0';
 
-    q += 24;
-    get_user_host(&user, &host, q);
-    if ((p = strchr(message+14, ' ')) != NULL)
-      *p = '\0';
-    p = host + strlen(host) + 1;
-    send_to_all(FLAGS_VIEW_KLINES,
-		 "G-line for %s@%s triggered by %s: %s", user, host,
-                 message+14, p);
+    p = strstr(q, "has triggered");
+    p+=24;
+
+    if ((q = strrchr(p, '[')) == NULL)
+      return;
+    q++;
+
+    if (get_user_host(&user, &host, p) != 1)
+      return;
+
+    if ((p = strrchr(q, ']')) == NULL)
+      return;
+    *p = '\0';
+
+    send_to_all(FLAGS_VIEW_KLINES, "GLINE for %s@%s triggered by %s: %s", user, host, nick, q);
     return;
   }
 
@@ -509,35 +521,29 @@ on_server_notice(int argc, char *argv[])
   case CONNECT:
     if ((q = strchr(p, '(')) == NULL)
       return;
-    *q = '\0';
-    userinfo.user = q+1;
     *(q-1) = '\0';
-
-    if ((q = strrchr(p, ' ')) == NULL)
+    userinfo.nick = p+19;
+    if ((p = strchr(q, '[')) == NULL)
       return;
-    userinfo.nick = q+1;
+    ++p;
 
-    if ((q = strchr(userinfo.user, '@')) == NULL)
+    if (get_user_host(&userinfo.user, &userinfo.host, q) != 1)
+      return;
+
+    if ((q = strchr(p, ']')) == NULL)
       return;
     *q++ = '\0';
-    userinfo.host = q;
 
-    if ((q = strchr(userinfo.host, ')')) == NULL)
+    strcpy((char *)&userinfo.ip, p);
+
+    if ((p = strchr(q, '{')) == NULL)
+      return;
+    p++;
+    if ((q = strchr(p, '}')) == NULL)
       return;
     *q = '\0';
-    q += 3;
-    if ((p = strchr(q, ']')) == NULL)
-      return;
-    *p++ = '\0';
-    strcpy((char *)&userinfo.ip, q);
 
-    if ((q = strchr(p, '{')) == NULL)
-      return;
-    q++;
-    if ((p = strchr(q, '}')) == NULL)
-      return;
-    *p = '\0';
-    strcpy((char *)&userinfo.class, q);
+    strcpy((char *)&userinfo.class, p);
 
     adduserhost(&userinfo, NO, NO);
     break;
@@ -615,10 +621,6 @@ on_server_notice(int argc, char *argv[])
   case  IGNORE:
     break;
 
-    /* send the unknown server message to opers who have requested
-       they see them */
-     /* WHAT?! -bill */
-
   /* Flooder bill [bill@ummm.E] on irc.intranaut.com target: #clone */ 
   case FLOODER:
     ++q;
@@ -629,42 +631,18 @@ on_server_notice(int argc, char *argv[])
     p++;
     nick = q;
 
-    user = p;
-    if ((p = strchr(user,'[')) == NULL)
+    if ((q = strchr(p, ' ')) == NULL)
       break;
-    p++;
-    user = p;
+    from_server = q+4;
 
-    if ((p = strchr(user,'@')) == NULL)
+    if (get_user_host(&user, &host, p) != 1)
       break;
-    *p = '\0';
-    p++;
 
-    host = p;
-    if ((p = strchr(host,']')) == NULL)
-      break;
-    *p = '\0';
-    p++;
-
-    if (*p != ' ')
-      break;
-    p++;
-
-    /* p =should= be pointing at "on" */
-    if ((p = strchr(p,' ')) == NULL)
-      break;
-    p++;
-
-    from_server = p;
     if ((p = strchr(from_server,' ')) == NULL)
       break;
     *p = '\0';
-    p++;
+    target = p+9;
 
-    if ((p = strstr(p, "target")) == NULL)
-      break;
-
-    target = p + 8;
     if (strcasecmp(config_entries.rserver_name,from_server) == 0)
     {
       send_to_all(FLAGS_WARN,
@@ -681,22 +659,20 @@ on_server_notice(int argc, char *argv[])
     ++q;
     if ((p = strchr(q,' ')) == NULL)
       return;
+    *p++ = '\0';
 
-    *p = '\0';
     nick = q;
-    user = p+2;
-
-    if ((p = strchr(user,'@')) == NULL)
+    if ((q = strchr(p, ' ')) == NULL)
       return;
-    *p++ = '\0';
+    q++;
 
-    host = p;
-    if ((p = strchr(host,')')) == NULL)
+    if (get_user_host(&user, &host, p) != 1)
       return;
-    *p++ = '\0';
 
-    if (strstr(p,"possible spambot") == NULL)
+    if (strstr(q, "possible spambot") == NULL)
       return;
+
+    send_to_all(FLAGS_ALL, "Spambot: %s (%s@%s)", nick, user, host);
 
     handle_action(act_spambot, 0, nick, user, host, 0, 0);
     break;
@@ -722,28 +698,30 @@ on_server_notice(int argc, char *argv[])
   case DRONE:
     ++q;
     nick = q;
+
     if ((q = strchr(nick, ' ')) == NULL)
       return;
-    *q = '\0';
-    user = q+2;
-    if ((q = strchr(user, '@')) == NULL)
-      return;
     *q++ = '\0';
-    host = q;
-    if ((q = strchr(host, ']')) == NULL)
+
+    if ((p = strchr(q, ']')) == NULL)
+      return;
+    p+=5;
+
+    if (get_user_host(&user, &host, q) != 1)
+      return;
+
+    from_server = p;
+    if ((q = strchr(p, ' ')) == NULL)
       return;
     *q = '\0';
-    q+=5;
-    if ((p = strchr(q, ' ')) == NULL)
+    q+=9;
+
+    if (strcasecmp(from_server, config_entries.rserver_name) &&
+        strcasecmp(from_server, config_entries.server_name))
       return;
-    *p = '\0';
-    if (strcasecmp(q, config_entries.rserver_name) &&
-        strcasecmp(q, config_entries.server_name))
-      break;
-    p+=9; 
 
     send_to_all(FLAGS_WARN, "Possible drone flooder: %s!%s@%s target: %s",
-                 nick, user, host, p);
+                 nick, user, host, q);
     break;
 
   /* X-line Rejecting [Bill Jonus] [just because] user bill[bill@ummm.E] */
@@ -752,16 +730,16 @@ on_server_notice(int argc, char *argv[])
       return;
     ++nick;
 
-    if ((p = strchr(nick, '[')) == NULL)
+    if ((p = strrchr(nick, '[')) == NULL)
       return;
-    *p++ = '\0';
-    user = p;
 
-    if ((p = strrchr(user, ']')) == NULL)
+    if (get_user_host(&user, &host, p) != 1)
       return;
     *p = '\0';
-    c=-1;
 
+    *(host-1) = '@'; /* we need user to be the user@host for this for, and we'll fix it later. */
+
+    c=-1;
     for (a=0;a<MAX_CONNECT_FAILS;++a)
     {
       if (connect_flood[a].user_host[0])
@@ -772,17 +750,10 @@ on_server_notice(int argc, char *argv[])
 	    connect_flood[a].connect_count = 0;
 
 	  ++connect_flood[a].connect_count;
-	  if ((p = strchr(user, '@')) == NULL)
-	    break;
-	  *p++ = '\0';
-	  host = p;
+          *(host-1) = '\0';
 
 	  if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
 	    {
-	      if (user[0] == '~')
-		b = NO;
-	      else
-		b = YES;
 	      handle_action(act_cflood, (*user != '~'), nick, user, host, 0, "X-Line rejections");
 	      connect_flood[a].user_host[0] = '\0';
 	    }
@@ -873,10 +844,15 @@ on_server_notice(int argc, char *argv[])
     if ((p = strchr(nick, ' ')) == NULL)
       return;
     *p = '\0';
-    user = p+2;
-    if ((p = strchr(user, ')')) == NULL)
+
+    if (get_user_host(&user, &host, p+2) != 1)
       return;
-    *p++ = '\0';
+
+    if ((p = strchr(host, ')')) == NULL)
+      return;
+    *p = '\0';
+
+    *(host-1) = '@';
 
     c = -1;
     for (a=0;a<MAX_CONNECT_FAILS;++a)
@@ -889,10 +865,7 @@ on_server_notice(int argc, char *argv[])
 	    connect_flood[a].connect_count = 0;
 
 	  ++connect_flood[a].connect_count;
-          if ((p = strchr(user, '@')) == NULL)
-            return;
-          *p++ = '\0';
-          host = p;
+          *(host-1) = '\0';
 	    if (connect_flood[a].connect_count >= MAX_CONNECT_FAILS)
 	    {
 	      handle_action(act_cflood, (*user != '~'), 

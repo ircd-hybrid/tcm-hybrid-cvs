@@ -32,9 +32,6 @@ leeh        2002/05/29 21:49:54 EDT	(20020530_1)
   - ripped m_kperm (use .kline), brought back m_kclones etc and ripped
     m_kaction.
   
-    of course, not having bills intelligence means I dont have any clue
-    what I just said..
-  
   Revision  Changes    Path
   1.5       +2 -2      tcm-hybrid/include/actions.h
   1.20      +0 -63     tcm-hybrid/include/commands.h (dead)

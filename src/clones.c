@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.4 2002/05/30 02:21:54 db Exp $
+ * $Id: clones.c,v 1.5 2002/05/30 04:48:50 bill Exp $
  */
 
 #include <assert.h>
@@ -16,7 +16,6 @@
 #include "config.h"
 #include "tcm.h"
 #include "tcm_io.h"
-#include "commands.h"
 #include "bothunt.h"
 #include "modules.h"
 #include "stdcmds.h"

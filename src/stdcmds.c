@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.87 2002/06/02 23:13:19 db Exp $ */
+/* $Id: stdcmds.c,v 1.88 2002/06/02 23:41:33 db Exp $ */
 
 #include "setup.h"
 
@@ -34,7 +34,6 @@
 #include "tcm_io.h"
 #include "parse.h"
 #include "logging.h"
-#include "bothunt.h" /* XXX */
 #include "stdcmds.h"
 #include "userlist.h"
 #include "wild.h"
@@ -107,7 +106,7 @@ report(int type, int channel_send_flag, char *format,...)
   */
   send_to_all(type, "%s",msg);
 
-  if( channel_send_flag & config_entries.channel_report )
+  if(channel_send_flag & config_entries.channel_report)
     {
       privmsg(config_entries.defchannel, "%s", msg);
     }
@@ -268,17 +267,17 @@ report_failures(int sock,int num)
 
       for (ptr = failures; ptr; ptr = ptr->next)
         {
-          if (ptr->failcount > maxx)
+          if(ptr->failcount > maxx)
             {
               found = ptr;
               maxx = ptr->failcount;
             }
         }
 
-      if (!found)
+      if(!found)
         break;
 
-      if (foundany == 0)
+      if(foundany == 0)
         {
 	  foundany++;
           print_to_socket(sock, "Userhosts with most connect rejections:\n");
@@ -290,7 +289,7 @@ report_failures(int sock,int num)
       found->failcount = -found->failcount;   /* Yes, this is horrible */
     }
 
-  if (foundany == 0)
+  if(foundany == 0)
     {
       print_to_socket(sock,"No userhosts have %d or more rejections.\n",num);
     }
@@ -299,7 +298,7 @@ report_failures(int sock,int num)
 
   for (ptr = failures; ptr; ptr = ptr->next)
     {
-      if (ptr->failcount < 0)
+      if(ptr->failcount < 0)
         ptr->failcount = -ptr->failcount;   /* Ugly, but it works. */
     }
 }

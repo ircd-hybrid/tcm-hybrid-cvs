@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.26 2002/06/02 23:13:18 db Exp $
+ * $Id: hash.c,v 1.27 2002/06/02 23:41:33 db Exp $
  */
 
 #include <stdio.h>
@@ -66,7 +66,7 @@ free_hash_links(struct hash_rec *ptr)
 {
   struct hash_rec *next_ptr = NULL;  /* Quell warnings */
 
-  if (ptr == NULL)
+  if(ptr == NULL)
     return;
 
   for(; next_ptr != NULL; ptr = next_ptr);
@@ -100,26 +100,26 @@ clear_hash(void)
 
   for (i=0; i<HASHTABLESIZE; i++)
     {
-      if ((ptr = user_table[i]) != NULL)
+      if((ptr = user_table[i]) != NULL)
 	{
 	  free_hash_links(ptr);
 	  user_table[i] = NULL;
 	}
 
-      if ((ptr = host_table[i]) != NULL)
+      if((ptr = host_table[i]) != NULL)
 	{
 	  free_hash_links(ptr);
 	  host_table[i] = NULL;
 	}
 
-      if ((ptr = domain_table[i]) != NULL)
+      if((ptr = domain_table[i]) != NULL)
 	{
 	  free_hash_links(ptr);
 	  domain_table[i] = NULL;
 	}
 
 #ifdef VIRTUAL
-      if ((ptr = ip_table[i]) != NULL)
+      if((ptr = ip_table[i]) != NULL)
 	{
 	  free_hash_links(ptr);
 	  ip_table[i] = NULL;
@@ -141,21 +141,21 @@ find_nick_or_host(const char *find, int find_nick)
   int i;
   struct hash_rec *ptr;
 
-  if (find == NULL)
+  if(find == NULL)
     return (NULL);
 
   for (i=0; i<HASHTABLESIZE; ++i)
     {
       for (ptr = domain_table[i]; ptr; ptr = ptr->next)
 	{
-	  if (find_nick)
+	  if(find_nick)
 	    {
-	      if (!wldcmp((char *)find, ptr->info->nick))
+	      if(!wldcmp((char *)find, ptr->info->nick))
 		return (ptr->info);
 	    }
 	  else
 	    {
-	      if (!wldcmp((char *)find, ptr->info->host))
+	      if(!wldcmp((char *)find, ptr->info->host))
 		return (ptr->info);
 	    }
 	}
@@ -182,13 +182,13 @@ add_to_hash_table(struct hash_rec *table[],
 
   assert(new_user != NULL);
 
-  if ((new_hash = (struct hash_rec *)xmalloc(sizeof(struct hash_rec))) == NULL)
+  if((new_hash = (struct hash_rec *)xmalloc(sizeof(struct hash_rec))) == NULL)
     exit(-1);
   new_hash->info = new_user;
   new_hash->next = NULL;
 
   ind = hash_func(key);
-  if (table[ind] == NULL)
+  if(table[ind] == NULL)
     {
       table[ind] = new_hash;
     }
@@ -224,19 +224,19 @@ remove_from_hash_table(struct hash_rec *table[],
 
   for (find = table[(ind = hash_func(key))]; find; find = find->next)
   {
-    if ((!host_match	|| !strcmp(find->info->host, host_match)) &&
-	(!user_match	|| !strcmp(find->info->user, user_match)) &&
-	(!nick_match	|| !strcmp(find->info->nick, nick_match)))
+    if((!host_match	|| !strcmp(find->info->host, host_match)) &&
+       (!user_match	|| !strcmp(find->info->user, user_match)) &&
+       (!nick_match	|| !strcmp(find->info->nick, nick_match)))
     {
-      if (prev != NULL)
+      if(prev != NULL)
 	prev->next = find->next;
       else
 	table[ind] = find->next;
 
-      if (find->info->link_count > 0)
+      if(find->info->link_count > 0)
 	{
 	  find->info->link_count--;
-	  if (find->info->link_count == 0)
+	  if(find->info->link_count == 0)
 	    {
 	      xfree(find->info);
 	    }
@@ -267,11 +267,11 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
   char *domain;
 
 #if defined(DETECT_WINGATE) || defined(DETECT_SOCKS) || defined(DETECT_SQUID)
-  if (tcm_status.doing_trace == NO)
+  if(tcm_status.doing_trace == NO)
     user_signon(user_info);
 #endif
 
-  if ((new_user = (struct user_entry *)xmalloc(sizeof(struct user_entry))) 
+  if((new_user = (struct user_entry *)xmalloc(sizeof(struct user_entry))) 
       == NULL)
     exit(-1);
   new_user->link_count = 0;
@@ -280,7 +280,7 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
   strlcpy(new_user->user, user_info->user, MAX_NICK);
   strlcpy(new_user->host, user_info->host, MAX_HOST);
 #ifdef VIRTUAL
-  if (user_info->ip_host[0] != '\0')
+  if(user_info->ip_host[0] != '\0')
     strlcpy(new_user->ip_host, user_info->ip_host, MAX_IP);
   else
     strcpy(new_user->ip_host,"0.0.0.0");
@@ -306,12 +306,12 @@ add_user_host(struct user_entry *user_info, int fromtrace, int is_oper)
   add_to_hash_table(domain_table, domain, new_user);
 
 #ifdef VIRTUAL
-  if (new_user->ip_class_c[0])
+  if(new_user->ip_class_c[0])
     add_to_hash_table(ip_table, new_user->ip_class_c, new_user);
 #endif
 
   /* Clonebot check */
-  if (!fromtrace)
+  if(!fromtrace)
     {
       check_host_clones(user_info->host);
 #ifdef VIRTUAL
@@ -341,39 +341,39 @@ remove_user_host(char *nick, struct user_entry *user_info)
 
   domain = find_domain(user_info->host);
 
-  if (!remove_from_hash_table(host_table, user_info->host,
+  if(!remove_from_hash_table(host_table, user_info->host,
 			      user_info->host, user_info->user, nick)) 
     {
-      if (!remove_from_hash_table(host_table, user_info->host,
+      if(!remove_from_hash_table(host_table, user_info->host,
 				  user_info->host, user_info->user, NULL))
 	{
-	  if (config_entries.debug && outfile)
+	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from host table!\n",
 		      nick, user_info->user, user_info->host);
 	    }
 	}
     }
-  if (!remove_from_hash_table(domain_table, domain,
+  if(!remove_from_hash_table(domain_table, domain,
 			      user_info->host, user_info->user, nick))
     {
-      if (!remove_from_hash_table(domain_table, domain,
+      if(!remove_from_hash_table(domain_table, domain,
 				  user_info->host, user_info->user, NULL))
 	{
-	  if (config_entries.debug && outfile)
+	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from domain table!\n",
 		      nick, user_info->user, user_info->host);
 	    }
 	}
     }
-  if (!remove_from_hash_table(user_table, user_info->user,
+  if(!remove_from_hash_table(user_table, user_info->user,
 			      user_info->host, user_info->user, nick))
     {
-      if (!remove_from_hash_table(user_table, user_info->user,
+      if(!remove_from_hash_table(user_table, user_info->user,
 				  user_info->host, user_info->user, NULL))
 	{
-	  if (config_entries.debug && outfile)
+	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,"*** Error removing %s!%s@%s from user table!\n",
 		      nick, user_info->user, user_info->host);
@@ -382,18 +382,18 @@ remove_user_host(char *nick, struct user_entry *user_info)
     }
 
 #ifdef VIRTUAL
-  if (user_info->ip_host[0])
+  if(user_info->ip_host[0])
     strlcpy(ip_class_c, user_info->ip_host, MAX_IP);
   else
     strcpy(ip_class_c, "0.0.0.0");
   make_ip_class_c(ip_class_c);
-  if (!remove_from_hash_table(ip_table, ip_class_c,
+  if(!remove_from_hash_table(ip_table, ip_class_c,
 			      user_info->host, user_info->user, nick))
     {
-      if (!remove_from_hash_table(ip_table, ip_class_c,
+      if(!remove_from_hash_table(ip_table, ip_class_c,
 				  user_info->host, user_info->user, NULL))
 	{
-	  if (config_entries.debug && outfile)
+	  if(config_entries.debug && outfile)
 	    {
 	      fprintf(outfile,
 		      "*** Error removing %s!%s@%s [%s] from iptable table!\n",
@@ -418,11 +418,11 @@ hash_func(const char *string)
   int i;
 
   i = *(string++);
-  if (*string)
+  if(*string)
     i |= (*(string++) << 8);
-    if (*string)
+    if(*string)
       i |= (*(string++) << 16);
-      if (*string)
+      if(*string)
         i |= (*string << 24);
   return (i % HASHTABLESIZE);
 }
@@ -449,25 +449,25 @@ find_domain(char* host)
  
   ip_domain = host;
 
-  if (isdigit(*ip_domain))
+  if(isdigit(*ip_domain))
   {
     while (*ip_domain)
     {
       iphold[i++] = *ip_domain;
-      if (*ip_domain == '.')
+      if(*ip_domain == '.')
 	found_dots++;
-      else if (!isdigit((int) *ip_domain))
+      else if(!isdigit(*ip_domain))
 	{
 	  is_legal_ip = NO;
 	  break;
 	}
 
-      if (found_dots == 3 )
+      if(found_dots == 3 )
 	break;
 
       ip_domain++;
 
-      if (i > (MAX_IP-2))
+      if(i > (MAX_IP-2))
       {
 	is_legal_ip = NO;
 	break;
@@ -478,16 +478,16 @@ find_domain(char* host)
     ip_domain = iphold;
   }
 
-  if ((found_dots != 3) || !is_legal_ip)
+  if((found_dots != 3) || !is_legal_ip)
   {
     found_domain = host + (strlen(host) - 1);
 
     /* find tld "com" "net" "org" or two letter domain i.e. "ca" */
     while (found_domain != host)
     {
-      if (*found_domain == '.')
+      if(*found_domain == '.')
       {
-	if (found_domain[3] == '\0')
+	if(found_domain[3] == '\0')
 	{
 	  two_letter_tld = YES;
 	}
@@ -499,9 +499,9 @@ find_domain(char* host)
 
     while (found_domain != host)
     {
-      if (*found_domain == '.')
+      if(*found_domain == '.')
       {
-	if (!two_letter_tld)
+	if(!two_letter_tld)
 	{
 	  found_domain++;
 	}
@@ -514,11 +514,11 @@ find_domain(char* host)
       found_domain--;
     }
 
-    if (two_letter_tld)
+    if(two_letter_tld)
     {
       while (found_domain != host)
       {
-	if (*found_domain == '.')
+	if(*found_domain == '.')
 	{
 	  found_domain++;
 	  break;
@@ -564,29 +564,29 @@ check_host_clones(char *host)
 
   for (find = host_table[ind]; find; find = find->next)
   {
-    if ((strcmp(find->info->host, host) == 0) &&
+    if((strcmp(find->info->host, host) == 0) &&
 	(now - find->info->connecttime < CLONECONNECTFREQ + 1))
     {
-      if (find->info->reporttime > 0)
+      if(find->info->reporttime > 0)
       {
 	++reportedclones;
-	if (lastreport < find->info->reporttime)
+	if(lastreport < find->info->reporttime)
 	  lastreport = find->info->reporttime;
       }
       else
       {
 	++clonecount;
-	if (find->info->connecttime < oldest)
+	if(find->info->connecttime < oldest)
 	  oldest = find->info->connecttime;
       }
     }
   }
 
-  if ((reportedclones == 0 && clonecount < CLONECONNECTCOUNT) ||
+  if((reportedclones == 0 && clonecount < CLONECONNECTCOUNT) ||
       now - lastreport < 10)
     return;
 
-  if (reportedclones)
+  if(reportedclones)
   {
     report(FLAGS_WARN,
 	   CHANNEL_REPORT_CLONES,
@@ -610,14 +610,14 @@ check_host_clones(char *host)
 
   for (find = host_table[ind],clonecount = 0; find; find = find->next)
   {
-    if ((strcmp(find->info->host, host) == 0) &&
+    if((strcmp(find->info->host, host) == 0) &&
 	(now - find->info->connecttime < CLONECONNECTFREQ + 1) &&
 	find->info->reporttime == 0)
     {
       ++clonecount;
       tmrec = localtime(&find->info->connecttime);
 
-      if (clonecount == 1)
+      if(clonecount == 1)
       {
 	(void)snprintf(notice1, MAX_BUFF-1,
 		       "  %s is %s@%s (%2.2d:%2.2d:%2.2d)\n",
@@ -634,19 +634,19 @@ check_host_clones(char *host)
 
       current_identd = YES;
 
-      if (clonecount == 1)
+      if(clonecount == 1)
 	last_user = find->info->user;
-      else if (clonecount == 2)
+      else if(clonecount == 2)
       {
 	char *current_user;
 	
-	if (*last_user == '~')
+	if(*last_user == '~')
 	{
 	  last_user++;
 	}
 
 	current_user = find->info->user;
-	if (*current_user != '~')
+	if(*current_user != '~')
 	  current_identd = YES;
 	else
 	  ++current_user;
@@ -657,32 +657,32 @@ check_host_clones(char *host)
       }
 
       find->info->reporttime = now;
-      if (clonecount == 2)
+      if(clonecount == 2)
       {
-        if (notice1[0] != '\0')
+        if(notice1[0] != '\0')
         {
   	  report(FLAGS_WARN, CHANNEL_REPORT_CLONES, "%s", notice1);
 	  tcm_log(L_NORM, "%s", notice1);
         }
-	if (notice0[0] != '\0')
+	if(notice0[0] != '\0')
         {
           report(FLAGS_WARN, CHANNEL_REPORT_CLONES, "%s", notice0);
   	  tcm_log(L_NORM, "%s", notice0);
         }
       }
-      else if (clonecount < 5)
+      else if(clonecount < 5)
       {
-        if (notice0[0] != '\0')
+        if(notice0[0] != '\0')
         {
 	  report(FLAGS_WARN, CHANNEL_REPORT_CLONES, "%s", notice0);
 	  tcm_log(L_NORM, "%s", notice0);
         }
       }
-      else if (clonecount == 5)
+      else if(clonecount == 5)
       {
-        if (notice0[0] != '\0')
+        if(notice0[0] != '\0')
         {
-	  send_to_all( FLAGS_WARN, "%s", notice0);
+	  send_to_all(FLAGS_WARN, "%s", notice0);
 	  tcm_log(L_NORM, "  [etc.]\n");
         }
       }
@@ -719,29 +719,29 @@ check_virtual_host_clones(char *ip_class_c)
 
   for (find = ip_table[ind]; find; find = find->next)
     {
-      if (!strcmp(find->info->ip_class_c, ip_class_c) &&
+      if(!strcmp(find->info->ip_class_c, ip_class_c) &&
 	  (now - find->info->connecttime < CLONECONNECTFREQ + 1))
       {
-	if (find->info->reporttime > 0)
+	if(find->info->reporttime > 0)
 	  {
 	    ++reportedclones;
-	    if (lastreport < find->info->reporttime)
+	    if(lastreport < find->info->reporttime)
 	      lastreport = find->info->reporttime;
 	  }
 	else
 	  {
 	    ++clonecount;
-	    if (find->info->connecttime < oldest)
+	    if(find->info->connecttime < oldest)
 	      oldest = find->info->connecttime;
 	  }
        }
     }
 
-  if (((reportedclones == 0) && (clonecount < CLONECONNECTCOUNT)) ||
+  if(((reportedclones == 0) && (clonecount < CLONECONNECTCOUNT)) ||
       (now - lastreport < 10))
     return;
 
-  if (reportedclones)
+  if(reportedclones)
     {
       report(FLAGS_WARN,
 	     CHANNEL_REPORT_VCLONES,
@@ -769,25 +769,25 @@ check_virtual_host_clones(char *ip_class_c)
   memset(&user, 0, sizeof(user));
   for (find = ip_table[ind]; find; find = find->next)
     {
-      if (!strcmp(find->info->ip_class_c, ip_class_c) &&
+      if(!strcmp(find->info->ip_class_c, ip_class_c) &&
 	  (now - find->info->connecttime < CLONECONNECTFREQ + 1) &&
 	  find->info->reporttime == 0)
 	{
 	  ++clonecount;
 	  tmrec = localtime(&find->info->connecttime);
 
-          if (user[0] == '\0')
+          if(user[0] == '\0')
 	    snprintf(user, MAX_USER-1, "%s", find->info->user);
 
-          if (strcasecmp(user, find->info->user))
+          if(strcasecmp(user, find->info->user))
 	    different=YES;
 
-          if (find->info->user[0] == '~')
+          if(find->info->user[0] == '~')
 	    ident = NO;
           else
 	    ident = YES;
 
-	  if (clonecount == 1)
+	  if(clonecount == 1)
 	    {
 	      (void)snprintf(notice1,MAX_BUFF - 1,
 			     "  %s is %s@%s [%s] (%2.2d:%2.2d:%2.2d)\n",
@@ -810,7 +810,7 @@ check_virtual_host_clones(char *ip_class_c)
 	   * we do, however, if they differ w/o ident
 	   * (ie ~clone1, ~clone2, ~clone3)        
 	   */
-          if ((different == NO && ident == YES) || (ident == NO))
+          if((different == NO && ident == YES) || (ident == NO))
             {
 	      handle_action(act_vclone, ident,
 			    find->info->nick, find->info->user,
@@ -818,9 +818,9 @@ check_virtual_host_clones(char *ip_class_c)
 	    }
 
 	  find->info->reporttime = now;
-	  if (clonecount == 1)
+	  if(clonecount == 1)
 	    ;
-	  else if (clonecount == 2)
+	  else if(clonecount == 2)
 	    {
 	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s", notice1);
 	      tcm_log(L_NORM, "%s", notice1);
@@ -828,12 +828,12 @@ check_virtual_host_clones(char *ip_class_c)
 	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s", notice0);
 	      tcm_log(L_NORM, "%s", notice0);
 	    }
-	  else if (clonecount < 5)
+	  else if(clonecount < 5)
 	    {
 	      report(FLAGS_WARN, CHANNEL_REPORT_VCLONES, "%s", notice0);
 	      tcm_log(L_NORM, "%s", notice0);
 	    }
-	  else if (clonecount == 5)
+	  else if(clonecount == 5)
 	    {
 	      send_to_all(FLAGS_WARN, "%s", notice0);
 	      tcm_log(L_NORM, "  [etc.]\n");
@@ -860,7 +860,7 @@ update_nick(char *nick1, char *nick2)
 
   for (find = domain_table[hash_func(nick1)]; find; find = find->next)
     {
-      if (strcmp(find->info->nick, nick1) == 0)
+      if(strcmp(find->info->nick, nick1) == 0)
 	{
 	  strlcpy(find->info->nick, nick2, MAX_NICK);
 	}
@@ -889,24 +889,24 @@ kill_add_report(char *server_notice)
   struct hash_rec *ptr;
   int i=0;
 
-  if ((p = strstr(server_notice, ". From")) == NULL)
+  if((p = strstr(server_notice, ". From")) == NULL)
     return;
   *p = '\0';
   p+=7;
-  if ((nick = strrchr(server_notice, ' ')) == NULL)
+  if((nick = strrchr(server_notice, ' ')) == NULL)
     return;
   ++nick;
   by = p;
-  if ((p = strchr(by, ' ')) == NULL)
+  if((p = strchr(by, ' ')) == NULL)
     return;
   *p = '\0';
-  if (strchr(by, '.')) /* ignore kills by servers */
+  if(strchr(by, '.')) /* ignore kills by servers */
     return;
   p+=7;
-    if ((q = strchr(p, ' ')) == NULL)
+    if((q = strchr(p, ' ')) == NULL)
      return;
   q+=2;
-  if ((p = strrchr(q, ')')) == NULL)
+  if((p = strrchr(q, ')')) == NULL)
     return;
   *p = '\0';
   reason = q;
@@ -914,7 +914,7 @@ kill_add_report(char *server_notice)
     {
       for (ptr = domain_table[i]; ptr; ptr = ptr->next)
 	{
-	  if (!strcasecmp(nick, ptr->info->nick))
+	  if(!strcasecmp(nick, ptr->info->nick))
 	    {
 	      send_to_all(FLAGS_VIEW_KLINES, "%s killed by %s: %s",
 			  nick, by, reason);
@@ -954,12 +954,12 @@ report_domains(int sock,int num)
         {
           for (j=0; j < inuse; ++j)
             {
-              if (!strcasecmp(ptr->info->domain,
+              if(!strcasecmp(ptr->info->domain,
 			      sort[j].domain_rec->info->domain))
                 break;
             }
 
-          if ((j == inuse) && (inuse < MAXDOMAINS))
+          if((j == inuse) && (inuse < MAXDOMAINS))
             {
               sort[inuse].domain_rec = ptr;
               sort[inuse++].count = 1;
@@ -976,14 +976,14 @@ report_domains(int sock,int num)
       maxx = num-1;
       found = -1;
       for (i=0;i<inuse;++i)
-        if (sort[i].count > maxx)
+        if(sort[i].count > maxx)
           {
             found = i;
             maxx = sort[i].count;
           }
-      if (found == -1)
+      if(found == -1)
         break;
-      if (!foundany)
+      if(!foundany)
         {
           foundany = YES;
           print_to_socket(sock,"Domains with most users on the server:\n");
@@ -994,7 +994,7 @@ report_domains(int sock,int num)
       sort[found].count = 0;
     }
 
-  if (!foundany)
+  if(!foundany)
     {
       print_to_socket(sock, "No domains have %d or more users.\n",num);
     }
@@ -1030,11 +1030,11 @@ list_class(int sock,char *class_to_find,int total_only)
           if(strcmp(ptr->info->class, "unknown") == 0)
             num_unknown++;
 
-          if (strcasecmp(class_to_find, ptr->info->class) == 0)
+          if(strcasecmp(class_to_find, ptr->info->class) == 0)
             {
               if(!total_only)
                 {
-                  if (num_found == 0)
+                  if(num_found == 0)
                     {
                       /* Simply the header to the list of clients */
                       print_to_socket(sock,
@@ -1051,7 +1051,7 @@ list_class(int sock,char *class_to_find,int total_only)
         }
     }
 
-  if (num_found != 0)
+  if(num_found != 0)
     print_to_socket(sock,
          "%d are in class %s\n", num_found, class_to_find );
   else
@@ -1080,7 +1080,7 @@ list_nicks(int sock,char *nick,int regex)
   int numfound=0;
 
 #ifdef HAVE_REGEX_H
-  if (regex == YES && (i=regcomp((regex_t *)&reg, nick, 1)))
+  if(regex == YES && (i=regcomp((regex_t *)&reg, nick, 1)))
   {
     char errbuf[1024];
     regerror(i, (regex_t *)&reg, errbuf, 1024); 
@@ -1094,11 +1094,11 @@ list_nicks(int sock,char *nick,int regex)
       for (ptr = domain_table[i]; ptr; ptr = ptr->next)
         {
 #ifdef HAVE_REGEX_H
-          if ((regex == YES &&
+          if((regex == YES &&
                !regexec((regex_t *)&reg, ptr->info->nick,1,m,REGEXEC_FLAGS))
               || (regex == NO && !match(nick, ptr->info->nick)))
 #else
-          if (!match(nick, ptr->info->nick))
+          if(!match(nick, ptr->info->nick))
 #endif
             {
               if(!numfound)
@@ -1116,7 +1116,7 @@ list_nicks(int sock,char *nick,int regex)
         }
     }
 
-  if (numfound)
+  if(numfound)
     print_to_socket(sock,
 		    "%d matches for %s found\n",numfound,nick);
   else
@@ -1149,7 +1149,7 @@ kill_or_list_users(int sock, char *userhost, int regex,
   int numfound = 0;
 
 #ifdef HAVE_REGEX_H
-  if (regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
+  if(regex == YES && (i = regcomp((regex_t *)&reg, userhost, 1)))
   {
     char errbuf[REGEX_SIZE];
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE); 
@@ -1158,7 +1158,7 @@ kill_or_list_users(int sock, char *userhost, int regex,
     return;
   }
 #endif
-  if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
+  if(!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
     {
       print_to_socket(sock,
 "Listing all users is not recommended.  To do it anyway, use '.list ?*@*'.\n");
@@ -1171,16 +1171,16 @@ kill_or_list_users(int sock, char *userhost, int regex,
     {
       snprintf(uhost, MAX_USERHOST, "%s@%s", ptr->info->user, ptr->info->host);
 #ifdef HAVE_REGEX_H
-      if ((regex == YES &&
+      if((regex == YES &&
           !regexec((regex_t *)&reg, uhost, 1, m, REGEXEC_FLAGS)) 
           || (regex == NO && !match(userhost, uhost)))
 #else
-      if (!match(userhost, uhost))
+      if(!match(userhost, uhost))
 #endif 
       {
-	if (kill_users)
+	if(kill_users)
 	  {
-	    if (numfound == 0)
+	    if(numfound == 0)
 	      {
 		numfound++;
 		tcm_log(L_NORM, "killlisted %s\n", uhost);
@@ -1189,12 +1189,12 @@ kill_or_list_users(int sock, char *userhost, int regex,
 	  }
 	else
 	  {
-	    if (numfound == 0)
+	    if(numfound == 0)
 	      print_to_socket(sock,
 			      "The following clients match %s:\n", userhost);
 
 	    numfound++;
-	    if (ptr->info->ip_host[0] > '9' || ptr->info->ip_host[0] < '0')
+	    if(ptr->info->ip_host[0] > '9' || ptr->info->ip_host[0] < '0')
 	      print_to_socket(sock, "  %s (%s@%s) {%s}\n", ptr->info->nick,
                ptr->info->user, ptr->info->host, ptr->info->class);
 	    else
@@ -1206,7 +1206,7 @@ kill_or_list_users(int sock, char *userhost, int regex,
       }
     }
   }
-  if (numfound > 0)
+  if(numfound > 0)
     print_to_socket(sock, "%d matches for %s found\n", numfound, userhost);
   else
     print_to_socket(sock, "No matches for %s found\n", userhost);
@@ -1253,7 +1253,7 @@ void report_mem(int sock)
 
   for (i = 0; i < HASHTABLESIZE; i++)
     {
-      for( current = domain_table[i]; current; current = current->next)
+      for (current = domain_table[i]; current; current = current->next)
         {
           total_domain_table += sizeof(struct hash_rec);
           count_domain_table++;
@@ -1327,10 +1327,10 @@ make_ip_class_c(char *p)
 
   while(*p)
   {
-    if (*p == '.')
+    if(*p == '.')
       found_dots++;
     
-    if (found_dots == 3)
+    if(found_dots == 3)
     {
       *p = '\0';
       break;

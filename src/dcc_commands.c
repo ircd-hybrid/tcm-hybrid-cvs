@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.119 2002/06/02 22:16:58 db Exp $ */
+/* $Id: dcc_commands.c,v 1.120 2002/06/02 23:41:32 db Exp $ */
 
 #include "setup.h"
 
@@ -510,7 +510,7 @@ m_dline(int connnum, int argc, char *argv[])
 		    "You do not have access to .dline");
     return;
   }
-  if (argc >= 3)
+  if(argc >= 3)
   {
     p = reason;
     for (i = 2; i < argc; i++)
@@ -520,7 +520,7 @@ m_dline(int connnum, int argc, char *argv[])
     }
     /* blow away last ' ' */
     *--p = '\0';
-    if (reason[0] == ':')
+    if(reason[0] == ':')
       log_kline("DLINE", argv[1], 0, connections[connnum].registered_nick, 
                 reason+1);
     else
@@ -547,7 +547,7 @@ m_quote(int connnum, int argc, char *argv[])
 {
   char dccbuff[MAX_BUFF];
 
-  if (argc < 2)
+  if(argc < 2)
   {
     print_to_socket(connections[connnum].socket,
 		    "Usage: %s <server message>", 
@@ -580,7 +580,7 @@ m_rehash(int connnum, int argc, char *argv[])
                connections[connnum].registered_nick :
                connections[connnum].nick);
 
-  if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
+  if(config_entries.hybrid && (config_entries.hybrid_version >= 6))
     {
       print_to_server("STATS I");
       print_to_server("STATS Y");
@@ -613,9 +613,9 @@ m_trace(int connnum, int argc, char *argv[])
 void
 m_failures(int connnum, int argc, char *argv[])
 {
-  if (argc < 2)
+  if(argc < 2)
     report_failures(connections[connnum].socket, 7);
-  else if (atoi(argv[1]) < 1)
+  else if(atoi(argv[1]) < 1)
     print_to_socket(connections[connnum].socket,
 		    "Usage: %s [min failures]", argv[0]);
   else
@@ -625,9 +625,9 @@ m_failures(int connnum, int argc, char *argv[])
 void
 m_domains(int connnum, int argc, char *argv[])
 {
-  if (argc < 2)
+  if(argc < 2)
     report_domains(connections[connnum].socket, 5);
-  else if (atoi(argv[1]) < 1)
+  else if(atoi(argv[1]) < 1)
     print_to_socket(connections[connnum].socket,
 		    "Usage: %s [min users]", argv[0]);
   else
@@ -644,15 +644,15 @@ void
 m_nfind(int connnum, int argc, char *argv[])
 {
 #ifdef HAVE_REGEX_H
-  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+  if((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
     print_to_socket(connections[connnum].socket,
 		    "Usage: %s [-r] <wildcarded/regexp nick>", argv[0]);
-  else if (argc == 2)
+  else if(argc == 2)
     list_nicks(connections[connnum].socket, argv[1], NO);
   else
     list_nicks(connections[connnum].socket, argv[2], YES);
 #else
-  if (argc <= 2)
+  if(argc <= 2)
     print_to_socket(connections[connnum].socket,
 		    "Usage: %s <wildcarded nick>", argv[0]);
   else
@@ -664,15 +664,15 @@ void
 m_list(int connnum, int argc, char *argv[])
 {
 #ifdef HAVE_REGEX_H
-  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+  if((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
     print_to_socket(connections[connnum].socket,
          "Usage: %s [-r] <wildcarded/regex userhost>", argv[0]);
-  else if (argc == 2)
+  else if(argc == 2)
     kill_or_list_users(connections[connnum].socket, argv[1], NO, NO, NULL);
   else
     kill_or_list_users(connections[connnum].socket, argv[2], YES, NO, NULL);
 #else
-  if (argc < 2)
+  if(argc < 2)
     print_to_socket(connections[connnum].socket,
 		    "Usage: %s <wildcarded userhost>",
          argv[0]);
@@ -687,10 +687,10 @@ m_ulist(int connnum, int argc, char *argv[])
   char buf[MAX_BUFF];
 
 #ifdef HAVE_REGEX_H
-  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+  if((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
     print_to_socket(connections[connnum].socket,
          "Usage: %s [-r] <wildcarded/regex username>", argv[0]);
-  else if (argc == 2)
+  else if(argc == 2)
   {
     snprintf(buf, MAX_BUFF, "%s@*", argv[1]);
     kill_or_list_users(connections[connnum].socket, buf, NO, NO, NULL);
@@ -701,7 +701,7 @@ m_ulist(int connnum, int argc, char *argv[])
     kill_or_list_users(connections[connnum].socket, buf, YES, NO, NULL);
   }
 #else
-  if (argc < 2)
+  if(argc < 2)
     print_to_socket(connections[connnum].socket,
 		    "Usage: %s <wildcarded username>",
          argv[0]);
@@ -719,10 +719,10 @@ m_hlist(int connnum, int argc, char *argv[])
   char buf[MAX_BUFF];
 
 #ifdef HAVE_REGEX_H
-  if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
+  if((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
     print_to_socket(connections[connnum].socket,
          "Usage: %s [-r] <wildcarded/regex host>", argv[0]);
-  else if (argc == 2)
+  else if(argc == 2)
   {
     snprintf(buf, MAX_BUFF, "*@%s", argv[1]);
     kill_or_list_users(connections[connnum].socket, buf, NO, NO, NULL);
@@ -733,7 +733,7 @@ m_hlist(int connnum, int argc, char *argv[])
     kill_or_list_users(connections[connnum].socket, buf, YES, NO, NULL);
   }
 #else
-  if (argc < 2)
+  if(argc < 2)
     print_to_socket(connections[connnum].socket, 
 		    "Usage: %s <wildcarded host>",
          argv[0]);
@@ -758,9 +758,9 @@ m_hlist(int connnum, int argc, char *argv[])
 static void
 register_oper(int connnum, char *password, char *who_did_command)
 {
-  if (password != NULL)
+  if(password != NULL)
   {
-    if (is_legal_pass(connnum, password))
+    if(is_legal_pass(connnum, password))
     {
       int user;
 
@@ -847,7 +847,7 @@ list_exemptions(int sock)
       break;
     sprintf(buf, "%s@%s is exempted for:", hostlist[i].user, hostlist[i].host);
     for (n=0;actions[n].name[0];n++)
-      if ((1 << n) & hostlist[i].type)
+      if((1 << n) & hostlist[i].type)
 	snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " %s", actions[n].name);
     print_to_socket(sock,"%s", buf);
   }
@@ -1083,7 +1083,7 @@ is_legal_pass(int connect_id, char *password)
 
   for(i=0; userlist[i].user && userlist[i].host[0]; i++)
     {
-      if ((match(userlist[i].user,connections[connect_id].user) == 0) &&
+      if((match(userlist[i].user,connections[connect_id].user) == 0) &&
           (wldcmp(userlist[i].host,connections[connect_id].host) == 0))
         {
 	  /* 
@@ -1147,7 +1147,7 @@ print_help(int sock,char *text)
       while(*text == ' ')
         text++;
 
-      if ((*text == '\0') || (*text == '?'))
+      if((*text == '\0') || (*text == '?'))
         {
           if( (userfile = fopen(HELP_PATH "/" HELP_FILE,"r")) == NULL )
             {

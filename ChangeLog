@@ -1,3 +1,24 @@
+leeh        2002/05/25 11:08:11 EDT	(20020525_9)
+
+  Modified files:
+    include              commands.h parse.h tcm.h 
+    src                  commands.c main.c parse.c tcm_io.c 
+  Log:
+  - moved parse_args and expand_args to parse.c
+  - ripped dccproc, added a cleaner version onto the end of parse_client
+  - ripped last remaining remnants of the old dcc command handler
+  
+  Revision  Changes    Path
+  1.13      +0 -23     tcm-hybrid/include/commands.h
+  1.3       +5 -0      tcm-hybrid/include/parse.h
+  1.33      +0 -1      tcm-hybrid/include/tcm.h
+  1.79      +0 -47     tcm-hybrid/src/commands.c
+  1.63      +0 -34     tcm-hybrid/src/main.c
+  1.17      +95 -21    tcm-hybrid/src/parse.c
+  1.20      +0 -44     tcm-hybrid/src/tcm_io.c
+
+
+
 leeh        2002/05/25 08:34:26 EDT	(20020525_8)
 
   Modified files:

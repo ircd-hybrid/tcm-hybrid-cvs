@@ -1,7 +1,7 @@
 /* clones.c
  *
  * contains the code for clone functions
- * $Id: clones.c,v 1.15 2002/06/03 11:03:06 leeh Exp $
+ * $Id: clones.c,v 1.16 2002/06/05 15:01:31 leeh Exp $
  */
 
 #include <assert.h>
@@ -191,7 +191,6 @@ void
 check_reconnect_clones(char *host)
 {
   int i;
-  time_t now = time(NULL);
 
   if (host == NULL)  /* I don't know how this could happen.  ::shrug:: */
     return;
@@ -203,7 +202,7 @@ check_reconnect_clones(char *host)
       ++reconnect_clone[i].count;
 
       if ((reconnect_clone[i].count > CLONERECONCOUNT) &&
-          (now - reconnect_clone[i].first <= CLONERECONFREQ))
+          (current_time - reconnect_clone[i].first <= CLONERECONFREQ))
       {
         handle_action(act_rclone, "", "", host, 0, 0);
         reconnect_clone[i].host[0] = '\0';
@@ -217,7 +216,7 @@ check_reconnect_clones(char *host)
   for (i=0; i < RECONNECT_CLONE_TABLE_SIZE; ++i)
   {
     if ((reconnect_clone[i].host[0]) &&
-        (now - reconnect_clone[i].first > CLONERECONFREQ))
+        (current_time - reconnect_clone[i].first > CLONERECONFREQ))
     {
       reconnect_clone[i].host[0] = 0;
       reconnect_clone[i].count = 0;
@@ -231,7 +230,7 @@ check_reconnect_clones(char *host)
     {
       strlcpy(reconnect_clone[i].host, host, MAX_HOST);
       reconnect_clone[i].host[MAX_HOST] = 0;
-      reconnect_clone[i].first = now;
+      reconnect_clone[i].first = current_time;
       reconnect_clone[i].count = 1;
       break;
     }

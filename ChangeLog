@@ -1,3 +1,15 @@
+bill        2002/09/20 01:49:04 EDT	(20020920_4)
+
+  Modified files:
+    src                  event.c 
+  Log:
+  - report to active admins when event table is full
+  
+  Revision  Changes    Path
+  1.13      +8 -4      tcm-hybrid/src/event.c
+
+
+
 bill        2002/09/20 01:43:01 EDT	(20020920_3)
 
   Modified files:

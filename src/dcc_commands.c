@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.69 2002/05/24 14:32:31 leeh Exp $ */
+/* $Id: dcc_commands.c,v 1.70 2002/05/24 15:17:45 db Exp $ */
 
 #include "setup.h"
 
@@ -154,21 +154,18 @@ void m_killlist(int connnum, int argc, char *argv[])
 #ifdef HAVE_REGEX_H
   if (strcasecmp(argv[1], "-r"))
   {
-    sendtoalldcc(incoming_connnum, SEND_ALL,
-		 "*** killlist %s :%s by %s", argv[1],
+    send_to_all( SEND_ALL, "*** killlist %s :%s by %s", argv[1],
                  reason, connections[connnum].registered_nick);
     kill_list_users(connections[connnum].socket, argv[1], reason, NO);
   }
   else
   {
-    sendtoalldcc(incoming_connnum, SEND_ALL,
-		 "*** killlist %s :%s by %s", argv[2],
+    send_to_all( SEND_ALL, "*** killlist %s :%s by %s", argv[2],
                  reason, connections[connnum].registered_nick);
     kill_list_users(connections[connnum].socket, argv[2], reason, YES);
   }
 #else
-  sendtoalldcc(incoming_connnum, SEND_ALL,
-	       "*** killlist %s :%s by %s", argv[1],
+  send_to_all( SEND_ALL, "*** killlist %s :%s by %s", argv[1],
                reason, connections[connnum].registered_nick);
   kill_list_users(connections[connnum].socket, argv[1], reason, NO);
 #endif
@@ -233,8 +230,7 @@ void m_kill(int connnum, int argc, char *argv[])
   {
     expand_args(reason, sizeof(reason)-1, argc-2, argv+2);
   }
-  sendtoalldcc(incoming_connnum, SEND_KLINE_NOTICES,
-	       "*** kill %s :%s by %s",
+  send_to_all( SEND_KLINE_NOTICES, "*** kill %s :%s by %s",
                argv[1], reason, connections[connnum].registered_nick);
   log_kline("KILL", argv[1], 0, connections[connnum].registered_nick, reason);
   if (!(connections[connnum].type & (TYPE_INVS|TYPE_INVM)))
@@ -598,8 +594,7 @@ void m_op(int connnum, int argc, char *argv[])
 void m_cycle(int connnum, int argc, char *argv[])
 {
   leave(config_entries.defchannel);
-  sendtoalldcc(incoming_connnum, SEND_ALL,
-	       "I'm cycling.  Be right back.\n");
+  send_to_all( SEND_ALL, "I'm cycling.  Be right back.\n");
   sleep(1);
   /* probably on a cycle, we'd want the tcm to set
    * the key as well...
@@ -611,8 +606,7 @@ void m_cycle(int connnum, int argc, char *argv[])
 
 void m_die(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(incoming_connnum, SEND_ALL,
-	       "I've been ordered to quit irc, goodbye.");
+  send_to_all( SEND_ALL, "I've been ordered to quit irc, goodbye.");
   print_to_server("QUIT :Dead by request!");
   log("DIEd by oper %s\n", connections[connnum].registered_nick);
   exit(1);
@@ -620,8 +614,7 @@ void m_die(int connnum, int argc, char *argv[])
 
 void m_restart(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(incoming_connnum, SEND_ALL,
-	       "I've been ordered to restart.");
+  send_to_all( SEND_ALL, "I've been ordered to restart.");
   print_to_server("QUIT :Restart by request!");
   log("RESTART by oper %s", connections[connnum].registered_nick);
   sleep(1);
@@ -673,8 +666,7 @@ void m_unkline(int connnum, int argc, char *argv[])
   {
     log("UNKLINE %s attempted by oper %s", argv[1],
         connections[connnum].registered_nick);
-    sendtoalldcc(incoming_connnum, SEND_KLINE_NOTICES,
-		 "UNKLINE %s attempted by oper %s", 
+    send_to_all( SEND_KLINE_NOTICES, "UNKLINE %s attempted by oper %s", 
                  argv[1], connections[connnum].registered_nick);
     print_to_server("UNKLINE %s",argv[1]);
   }
@@ -716,8 +708,7 @@ void m_dline(int connnum, int argc, char *argv[])
     else
       log_kline("DLINE", argv[1], 0, connections[connnum].registered_nick,
                 reason);
-    sendtoalldcc(incoming_connnum, SEND_ALL,
-		 "*** dline %s :%s by %s", argv[1],
+    send_to_all( SEND_ALL, "*** dline %s :%s by %s", argv[1],
                  reason, connections[connnum].registered_nick);
     if (!connections[connnum].type & (TYPE_INVS|TYPE_INVM))
     {
@@ -773,7 +764,7 @@ void m_nflood(int connnum, int argc, char *argv[])
 
 void m_rehash(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(incoming_connnum, SEND_ALL,
+  send_to_all( SEND_ALL,
 	       "*** rehash requested by %s", 
                connections[connnum].registered_nick[0] ?
                connections[connnum].registered_nick :
@@ -796,7 +787,7 @@ void m_rehash(int connnum, int argc, char *argv[])
 
 void m_trace(int connnum, int argc, char *argv[])
 {
-  sendtoalldcc(incoming_connnum, SEND_ALL,
+  send_to_all( SEND_ALL,
 	       "Trace requested by %s",
                connections[connnum].registered_nick[0] ?
                connections[connnum].registered_nick :
@@ -993,7 +984,7 @@ dccproc(int connnum, int argc, char *argv[])
            connections[connnum].nick, config_entries.dfltnick, buffer);
 
   if(connections[connnum].type & TYPE_PARTYLINE)
-    sendtoalldcc(incoming_connnum, SEND_ALL, "%s", dccbuff);
+    send_to_all( SEND_ALL, "%s", dccbuff);
   else
   {
     print_to_socket(connections[connnum].socket,
@@ -1361,8 +1352,7 @@ save_umodes(char *registered_nick, unsigned long type)
 
   if((fp = fopen(user_pref,"w")) == NULL)
   {
-    sendtoalldcc(incoming_connnum, SEND_ALL,
-		 "Couldn't open %s for write", user_pref);
+    send_to_all( SEND_ALL, "Couldn't open %s for write", user_pref);
     return;
   }
 
@@ -1395,8 +1385,7 @@ load_umodes(int connect_id)
   {
     if((fp = fopen(user_pref,"w")) == NULL)
     {
-      sendtoalldcc(incoming_connnum, SEND_ALL,
-		   "Couldn't open %s for write", user_pref);
+      send_to_all( SEND_ALL, "Couldn't open %s for write", user_pref);
       return;
     }
     type = connections[connect_id].type;
@@ -1559,8 +1548,7 @@ register_oper(int connnum, char *password, char *who_did_command)
       {
 	print_to_socket(connections[connnum].socket,
 	     "You are suspended");
-	sendtoalldcc(incoming_connnum, SEND_ALL,
-		     "%s is suspended", who_did_command);
+	send_to_all( SEND_ALL, "%s is suspended", who_did_command);
 	if (connections[connnum].type &
 	    (TYPE_PENDING))
 	  connections[connnum].type &= ~TYPE_PENDING;
@@ -1569,8 +1557,7 @@ register_oper(int connnum, char *password, char *who_did_command)
       {
 	print_to_socket(connections[connnum].socket,
 	     "You are now registered");
-	sendtoalldcc(incoming_connnum, SEND_ALL,
-		     "%s has registered", who_did_command);
+	send_to_all( SEND_ALL, "%s has registered", who_did_command);
 	if (connections[connnum].type &
 	    (TYPE_PENDING))
 	  connections[connnum].type &= ~TYPE_PENDING;
@@ -1579,8 +1566,7 @@ register_oper(int connnum, char *password, char *who_did_command)
     else
     {
       print_to_socket(connections[connnum].socket,"illegal password");
-      sendtoalldcc(incoming_connnum, SEND_ALL,
-		   "illegal password from %s", who_did_command);
+      send_to_all( SEND_ALL, "illegal password from %s", who_did_command);
     }
   }
   else
@@ -1735,8 +1721,7 @@ static void
 handle_save(int sock,char *nick)
 {
   print_to_socket(sock, "Saving %s file", CONFIG_FILE);
-  sendtoalldcc(incoming_connnum, SEND_ALL,
-	       "%s is saving %s", nick, CONFIG_FILE);
+  send_to_all( SEND_ALL, "%s is saving %s", nick, CONFIG_FILE);
   save_prefs();
 }
 

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.55 2002/05/24 15:01:31 db Exp $ */
+/* $Id: main.c,v 1.56 2002/05/24 15:17:48 db Exp $ */
 
 #include "setup.h"
 
@@ -151,7 +151,7 @@ bindsocket(char *hostport)
   /* open an inet socket */
   if ((plug = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
-      sendtoalldcc(incoming_connnum, SEND_ALL,
+      send_to_all(SEND_ALL,
 		   "Can't assign fd for socket\n");
       exit(0);
     }
@@ -268,7 +268,7 @@ closeconn(int connnum, int argc, char *argv[])
       maxconns = i+1;
     }
     
-  sendtoalldcc(incoming_connnum, SEND_ALL,
+  send_to_all(SEND_ALL,
 	       "%s %s (%s@%s) has disconnected",
                connections[connnum].type & TYPE_OPER ? "Oper" : "User", 
                connections[connnum].nick, connections[connnum].user,

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.63 2002/05/24 14:32:35 leeh Exp $
+ * $Id: userlist.c,v 1.64 2002/05/24 15:17:49 db Exp $
  *
  */
 
@@ -351,8 +351,7 @@ save_prefs(void)
 
   if ((fp_in = fopen(CONFIG_FILE,"r")) == NULL)
   {
-    sendtoalldcc(incoming_connnum, SEND_ALL,
-		 "Couldn't open %s: %s", CONFIG_FILE, strerror(errno));
+    send_to_all(SEND_ALL, "Couldn't open %s: %s", CONFIG_FILE, strerror(errno));
     return;
   }
 
@@ -360,8 +359,7 @@ save_prefs(void)
 
   if ((fp_out = fopen(filename, "w")) == NULL)
   {
-    sendtoalldcc(incoming_connnum, SEND_ALL,
-		 "Couldn't open %s: %s", filename, strerror(errno));
+    send_to_all(SEND_ALL, "Couldn't open %s: %s", filename, strerror(errno));
     fclose(fp_in);
     return;
   }
@@ -422,7 +420,7 @@ save_prefs(void)
   fclose(fp_out);
 
   if (rename(filename, CONFIG_FILE))
-    sendtoalldcc(incoming_connnum, SEND_ALL,
+    send_to_all(SEND_ALL,
 		 "Error renaming new config file.  Changes may be lost.  %s",
                  strerror(errno));
   chmod(CONFIG_FILE, 0600);
@@ -894,7 +892,7 @@ void reload_user_list(int sig)
 
   initopers();
 
-  sendtoalldcc(incoming_connnum, SEND_ALL, "*** Caught SIGHUP ***\n");
+  send_to_all(SEND_ALL, "*** Caught SIGHUP ***\n");
 }
 
 #ifdef DEBUGMODE

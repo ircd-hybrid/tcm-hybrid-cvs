@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.4 2002/05/24 14:13:51 leeh Exp $
+ * $Id: tcm_io.h,v 1.5 2002/05/24 15:17:43 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -19,10 +19,9 @@ extern void linkclosed(int, int, char *argv[]);
 
 extern void print_to_socket(int, const char *, ...);
 extern void print_to_server(const char *, ...);
-void sendtoalldcc(int incoming_connum,
-		  int type,char *format,...);	/* - Hendrix (va'd by bill) */
+void send_to_all(int type,char *format,...);	/* - Hendrix (va'd by bill) */
 
-/* types for sendtoalldcc */
+/* types for send_to_all */
 
 #define SEND_ALL		0x0001 /* general messages */
 #define SEND_PRIVMSG		0x0002 /* users privmsging tcm */

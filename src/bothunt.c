@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.89 2002/05/24 15:01:31 db Exp $
+ * $Id: bothunt.c,v 1.90 2002/05/24 15:17:48 db Exp $
  */
 
 #include <stdio.h>
@@ -532,9 +532,8 @@ onservnotice(int connnum, int argc, char *argv[])
     if ((q = strrchr(p, ' ')) == NULL)
       return;
     ++q;
-    sendtoalldcc(incoming_connnum, SEND_WARN,
-		 "*** %s has just become an irc operator %s", 
-		 message+14, q);
+    send_to_all(SEND_WARN, "*** %s has just become an irc operator %s", 
+	        message+14, q);
     return;
   }
 
@@ -578,7 +577,7 @@ onservnotice(int connnum, int argc, char *argv[])
       return;
     *p = '\0'; 
     gline_request(user, host, q, nick);
-    sendtoalldcc(incoming_connnum, SEND_KLINE_NOTICES,
+    send_to_all(SEND_KLINE_NOTICES,
                  "GLINE for %s@%s by %s [%s]: %s", user, host, nick, target, q);
     return;
   }
@@ -602,7 +601,7 @@ onservnotice(int connnum, int argc, char *argv[])
       return;
     *q = '\0';
      
-    sendtoalldcc(incoming_connnum, SEND_KLINE_NOTICES,
+    send_to_all(SEND_KLINE_NOTICES,
 		 "G-line for %s@%s triggered by %s: %s", user, host,
                  message+14, p);
     remove_gline(user, host);
@@ -616,12 +615,10 @@ onservnotice(int connnum, int argc, char *argv[])
       return;
     *q++ = '\0';
     if (strstr(q, " DNS"))
-      sendtoalldcc(incoming_connnum, SEND_STATS,
-		   "*** %s is rehashing DNS", nick);
+      send_to_all(SEND_STATS, "*** %s is rehashing DNS", nick);
     else
     {
-      sendtoalldcc(incoming_connnum, SEND_STATS,
-		   "*** %s is rehashing config file", nick);
+      send_to_all(SEND_STATS, "*** %s is rehashing config file", nick);
       print_to_server("STATS Y");
     }
     return;
@@ -632,8 +629,7 @@ onservnotice(int connnum, int argc, char *argv[])
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
-    sendtoalldcc(incoming_connnum, SEND_KLINE_NOTICES,
-		 "*** %s is clearing temp klines", nick);
+    send_to_all(SEND_KLINE_NOTICES, "*** %s is clearing temp klines", nick);
     return;
   }
   else if (strstr(p, "clearing G-lines"))
@@ -642,8 +638,7 @@ onservnotice(int connnum, int argc, char *argv[])
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
-    sendtoalldcc(incoming_connnum, SEND_KLINE_NOTICES,
-		 "*** %s is clearing g-lines", nick);
+    send_to_all(SEND_KLINE_NOTICES, "*** %s is clearing g-lines", nick);
     for (a=0;a<MAXBANS;++a)
     {
       free(glines[i].user);
@@ -658,8 +653,7 @@ onservnotice(int connnum, int argc, char *argv[])
     if ((q = strchr(nick, ' ')) == NULL)
       return;
     *q = '\0';
-    sendtoalldcc(incoming_connnum, SEND_STATS,
-		 "*** %s is garbage collecting", nick);
+    send_to_all(SEND_STATS, "*** %s is garbage collecting", nick);
     return;
   }
   else if (strstr(p, "forcing re-reading of"))
@@ -671,8 +665,7 @@ onservnotice(int connnum, int argc, char *argv[])
     if ((p = strstr(q, "re-reading of")) == NULL)
       return;
     p+=14;
-    sendtoalldcc(incoming_connnum, SEND_STATS,
-		 "*** %is is rehashing %s", nick, p);
+    send_to_all(SEND_STATS, "*** %is is rehashing %s", nick, p);
     return;
   }
 
@@ -772,7 +765,7 @@ onservnotice(int connnum, int argc, char *argv[])
   /* Link with test.server[bill@255.255.255.255] established: (TS) link */ 
   case LINKWITH:
     ++q;
-    sendtoalldcc(incoming_connnum, SEND_SERVERS, "Link with %s", q);
+    send_to_all(SEND_SERVERS, "Link with %s", q);
     break;
 
   /* Received SQUIT test.server from bill[bill@ummm.E] (this is a test) */
@@ -782,15 +775,13 @@ onservnotice(int connnum, int argc, char *argv[])
       return;
     *p = '\0';
     p+=6;
-    sendtoalldcc(incoming_connnum, SEND_SERVERS,
-		 "SQUIT for %s from %s", q, p);
+    send_to_all(SEND_SERVERS, "SQUIT for %s from %s", q, p);
     break;
 
   /* motd requested by bill (bill@ummm.E) [irc.bill.eagan.mn.us] */
   case MOTDREQ:
     ++q;
-    sendtoalldcc(incoming_connnum, SEND_SPY,
-		 "[MOTD requested by %s]\n", q);
+    send_to_all(SEND_SPY, "[MOTD requested by %s]\n", q);
     break;
 
   case  IGNORE:
@@ -848,7 +839,7 @@ onservnotice(int connnum, int argc, char *argv[])
     target = p + 8;
     if (strcasecmp(config_entries.rserver_name,from_server) == 0)
     {
-      sendtoalldcc(incoming_connnum, SEND_WARN,
+      send_to_all(SEND_WARN,
 		   "*** Flooder %s (%s@%s) target: %s",
 		   nick, user, host, target);
       handle_action(act_flood, (*user != '~'), nick, user, host, 0, 0);
@@ -890,8 +881,7 @@ onservnotice(int connnum, int argc, char *argv[])
   /* *** You have been D-lined */
   /* *** Banned: this is a test (2002/04/11 15.10) */
   case BANNED:
-    sendtoalldcc(incoming_connnum, SEND_ALL,
-		 "I am banned from %s.  Exiting..", 
+    send_to_all(SEND_ALL, "I am banned from %s.  Exiting..", 
 		 config_entries.rserver_name[0] ?
 		 config_entries.rserver_name : config_entries.server_name);
     log_problem("onservnotice", "Banned from server.  Exiting.");
@@ -924,8 +914,7 @@ onservnotice(int connnum, int argc, char *argv[])
       break;
     p+=9; 
 
-    sendtoalldcc(incoming_connnum, SEND_WARN,
-		 "Possible drone flooder: %s!%s@%s target: %s",
+    send_to_all(SEND_WARN, "Possible drone flooder: %s!%s@%s target: %s",
                  nick, user, host, p);
     break;
 
@@ -1114,8 +1103,7 @@ onservnotice(int connnum, int argc, char *argv[])
         return;
       *q = '\0';
       user = q+12;
-      sendtoalldcc(incoming_connnum,
-		   SEND_SERVERS, "Server %s split from %s", nick, user);
+      send_to_all(SEND_SERVERS, "Server %s split from %s", nick, user);
     }
     else if (strstr(q, "being introduced"))
     {
@@ -1124,8 +1112,7 @@ onservnotice(int connnum, int argc, char *argv[])
         return;
       *q = '\0';
       user = q+21;
-      sendtoalldcc(incoming_connnum,
-		   SEND_SERVERS, "Server %s being introduced by %s", nick,
+      send_to_all( SEND_SERVERS, "Server %s being introduced by %s", nick,
                    user);
     }
     break;
@@ -1136,8 +1123,7 @@ onservnotice(int connnum, int argc, char *argv[])
       return;
     *q = '\0';
     user = q+1;
-    sendtoalldcc(incoming_connnum, SEND_WARN,
-		 "*** Failed oper attempt by %s %s", nick, user);
+    send_to_all(SEND_WARN, "*** Failed oper attempt by %s %s", nick, user);
     break;
 
   /* info requested by bill (bill@ummm.e) [irc.bill.eagan.mn.us] */
@@ -1150,8 +1136,7 @@ onservnotice(int connnum, int argc, char *argv[])
     if ((q = strchr(user, ')')) == NULL)
       return;
     *q = '\0';
-    sendtoalldcc(incoming_connnum, SEND_SPY,
-		 "[INFO requested by %s (%s)]", nick, user);
+    send_to_all(SEND_SPY, "[INFO requested by %s (%s)]", nick, user);
     break;
 
   /* No aconf found */
@@ -1168,8 +1153,7 @@ onservnotice(int connnum, int argc, char *argv[])
       p += 14;
     else
       p = message;
-    sendtoalldcc(incoming_connnum, SEND_NOTICES,
-		 "Notice: %s", p);
+    send_to_all(SEND_NOTICES, "Notice: %s", p);
     break;
   }
 }
@@ -1356,8 +1340,7 @@ addtohash(struct hashrec *table[],char *key,struct userentry *item)
   newhashrec = (struct hashrec *)malloc(sizeof(struct hashrec));
   if ( !newhashrec )
   {
-    sendtoalldcc(incoming_connnum, SEND_ALL, 
-		 "Ran out of memory in addtohash");
+    send_to_all(SEND_ALL, "Ran out of memory in addtohash");
     exit(-1);
   }
 
@@ -1649,8 +1632,7 @@ adduserhost(char *nick, struct plus_c_info *userinfo,int fromtrace,int is_oper)
     fprintf(outfile, "Ran out of memory in adduserhost\n");
     print_to_socket(connections[0].socket,
 		    "QUIT :Ran out of memory in adduserhost");
-    sendtoalldcc(incoming_connnum, SEND_ALL,
-		 "Ran out of memory in adduserhost");
+    send_to_all(SEND_ALL, "Ran out of memory in adduserhost");
     exit(-1);
   }
 
@@ -2055,8 +2037,7 @@ check_host_clones(char *host)
       {
         if (notice0[0])
         {
-	  sendtoalldcc(incoming_connnum,
-		       SEND_WARN, "%s", notice0);
+	  send_to_all( SEND_WARN, "%s", notice0);
 	  log("  [etc.]\n");
         }
       }
@@ -2215,8 +2196,7 @@ check_virtual_host_clones(char *ip_class_c)
 	    }
 	  else if (clonecount == 5)
 	    {
-	      sendtoalldcc(incoming_connnum, SEND_WARN,
-			   "%s", notice0);
+	      send_to_all(SEND_WARN, "%s", notice0);
 	      log("  [etc.]\n");
 	    }
 	}
@@ -2381,8 +2361,7 @@ link_look_notice(char *snotice)
   *p = '\0';
   host = p+1; 
 
-  sendtoalldcc(incoming_connnum, SEND_SPY,
-	       "[LINKS by %s (%s@%s)]",
+  send_to_all(SEND_SPY, "[LINKS by %s (%s@%s)]",
 	       nick_reported, user, host ); /* - zaph */
 
   snprintf(user_host, sizeof(user_host), "%s@%s", user, host);
@@ -2491,8 +2470,7 @@ static void cs_nick_flood(char *snotice)
 	*p = '\0';
     }
 
-  sendtoalldcc(incoming_connnum, SEND_WARN,
-	       "CS nick flood user_host = [%s]", user_host);
+  send_to_all(SEND_WARN, "CS nick flood user_host = [%s]", user_host);
 
   log("CS nick flood user_host = [%s]\n", user_host);
 
@@ -2543,8 +2521,7 @@ cs_clones(char *snotice)
 	*p = '\0';
     }
 
-  sendtoalldcc(incoming_connnum, SEND_WARN,
-	       "CS clones user_host = [%s]", user_host);
+  send_to_all(SEND_WARN, "CS clones user_host = [%s]", user_host);
   log("CS clones = [%s]\n", user_host);
 
   user = user_host;
@@ -2763,7 +2740,7 @@ add_to_nick_change_table(char *user_host,char *last_nick)
 	  {
 	    tmrec = localtime(&nick_changes[i].last_nick_change);
 
-	    sendtoalldcc(incoming_connnum, SEND_WARN,
+	    send_to_all(SEND_WARN,
 		 "nick flood %s (%s) %d in %d seconds (%2.2d:%2.2d:%2.2d)",
 			 nick_changes[i].user_host,
 			 nick_changes[i].last_nick,
@@ -2898,8 +2875,7 @@ stats_notice(char *snotice)
   }
 #endif
 
-  sendtoalldcc(incoming_connnum, SEND_STATS,
-	       "[STATS %c requested by %s (%s)]",
+  send_to_all(SEND_STATS, "[STATS %c requested by %s (%s)]",
 	       stat, nick, fulluh);
 }
 

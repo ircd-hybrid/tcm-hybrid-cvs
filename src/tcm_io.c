@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.11 2002/05/24 15:01:31 db Exp $
+ * $Id: tcm_io.c,v 1.12 2002/05/24 15:17:49 db Exp $
  */
 
 #include <stdio.h>
@@ -120,8 +120,7 @@ read_packet(void)
     if (current_time > (connections[0].last_message_time + server_time_out))
     {
       /* timer expired */
-      sendtoalldcc(incoming_connnum, SEND_ALL,
-		   "PING time out on server");
+      send_to_all(SEND_ALL, "PING time out on server");
       log_problem("read_packet()", "ping time out");
       argv[0] = "ping time out";
       linkclosed(0, 1, argv);
@@ -226,8 +225,7 @@ read_packet(void)
     {
       if (errno != EINTR)
       {
-        sendtoalldcc(incoming_connnum, SEND_ALL,
-		     "Select error: %s (%d)",
+        send_to_all(SEND_ALL, "Select error: %s (%d)",
                      strerror(errno), errno);
         (void)snprintf(dccbuff, sizeof(dccbuff) - 1,"select error %d", errno);
         log_problem("read_packet()", dccbuff);

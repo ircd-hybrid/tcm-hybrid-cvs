@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.27 2002/05/24 14:13:57 leeh Exp $
+ * $Id: logging.c,v 1.28 2002/05/24 15:17:48 db Exp $
  *
  * - db
  */
@@ -477,7 +477,7 @@ logfailure(char *nickuh,int botreject)
       tmp = (struct failrec *)malloc(sizeof(struct failrec));
       if(tmp == NULL)
         {
-          sendtoalldcc(incoming_connnum, SEND_ALL,
+          send_to_all(SEND_ALL,
 		       "Ran out of memory in logfailure");
 	  exit(0);
         }
@@ -520,7 +520,7 @@ kline_report(char *server_notice)
   current_time = time(NULL);
   broken_up_time = localtime(&current_time);
   
-  sendtoalldcc(incoming_connnum, SEND_KLINE_NOTICES,
+  send_to_all(SEND_KLINE_NOTICES,
 	       "*** %s", server_notice);
 
 /* Probably don't need to log klines. --- Toast */

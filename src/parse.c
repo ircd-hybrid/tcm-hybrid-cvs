@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.11 2002/05/24 14:35:21 leeh Exp $
+ * $Id: parse.c,v 1.12 2002/05/24 15:17:48 db Exp $
  */
 
 #include <stdio.h>
@@ -512,8 +512,7 @@ privmsgproc(char *nick, char *userhost, int argc, char *argv[])
 
   if (argv[3][0] != '.')
   {
-    sendtoalldcc(incoming_connnum, SEND_PRIVMSG,
-                 "[%s!%s@%s] %s", nick, user, host, argv[3]);
+    send_to_all(SEND_PRIVMSG, "[%s!%s@%s] %s", nick, user, host, argv[3]);
     return;
   }
 
@@ -584,14 +583,11 @@ _wallops(int connnum, int argc, char *argv[])
     ++nick;
 
   if (!strncmp(argv[2], ":OPERWALL - ", 12))
-    sendtoalldcc(incoming_connnum, SEND_WALLOPS,
-		 "OPERWALL %s -> %s", nick, argv[2]+12);
+    send_to_all(SEND_WALLOPS, "OPERWALL %s -> %s", nick, argv[2]+12);
   else if (!strncmp(argv[2], ":LOCOPS - ", 9))
-    sendtoalldcc(incoming_connnum, SEND_LOCOPS,
-		 "LOCOPS %s -> %s", nick, argv[2]+9);
+    send_to_all(SEND_LOCOPS, "LOCOPS %s -> %s", nick, argv[2]+9);
   else
-    sendtoalldcc(incoming_connnum, SEND_WALLOPS,
-		 "WALLOPS %s -> %s", nick, argv[2]+11);
+    send_to_all(SEND_WALLOPS, "WALLOPS %s -> %s", nick, argv[2]+11);
 }
 
 /*
@@ -826,7 +822,7 @@ check_clones(void *unused)
             (strlen(userptr->info->domain) ==
              strlen(userptr->info->host));
 
-          sendtoalldcc(incoming_connnum, SEND_WARN,
+          send_to_all(SEND_WARN,
                        "clones> %2d connections -- %s@%s%s {%s}",
                        numfound,userptr->info->user,
                        notip ? "*" : userptr->info->domain,

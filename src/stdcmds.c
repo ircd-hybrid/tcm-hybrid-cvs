@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.64 2002/05/24 14:13:57 leeh Exp $ */
+/* $Id: stdcmds.c,v 1.65 2002/05/24 15:17:49 db Exp $ */
 
 #include "setup.h"
 
@@ -271,7 +271,7 @@ report(int type, int channel_send_flag, char *format,...)
   /* Probably not a format string bug, but I'm calling it this way
   ** for safety sake - Hwy
   */
-  sendtoalldcc(incoming_connnum, type, "%s",msg);
+  send_to_all(type, "%s",msg);
 
   if( channel_send_flag & config_entries.channel_report )
     {
@@ -551,14 +551,14 @@ handle_action(int actionid, int idented, char *nick, char *user,
   if (actions[actionid].method & METHOD_DCC_WARN)
     {
       if (addcmt && addcmt[0])
-	sendtoalldcc(incoming_connnum, SEND_WARN,
+	send_to_all(SEND_WARN,
 		     "*** %s violation (%s) from %s (%s@%s): %s", 
 		     actions[actionid].name, addcmt,
 		     (nick && nick[0]) ? nick : "<unknown>", 
 		     (user && user[0]) ? user : "<unknown>",
 		     host, comment);
       else
-	sendtoalldcc(incoming_connnum, SEND_WARN,
+	send_to_all(SEND_WARN,
 		     "*** %s violation from %s (%s@%s): %s", 
 		     actions[actionid].name, 
 		     (nick && nick[0]) ? nick : "<unknown>", 
@@ -670,8 +670,7 @@ list_nicks(int sock,char *nick,int regex)
   {
     if ((errbuf = (char *)malloc(1024)) == NULL)
     {
-      sendtoalldcc(incoming_connnum, SEND_ALL,
-		   "Ran out of memory in list_nicks()");
+      send_to_all(SEND_ALL, "Ran out of memory in list_nicks()");
       exit(0);
     }
     regerror(i, (regex_t *)&reg, errbuf, 1024); 
@@ -745,8 +744,7 @@ list_users(int sock,char *userhost,int regex)
   int i, numfound = 0;
   if ((uhost = (char *)malloc(1024)) == NULL)
   {
-    sendtoalldcc(incoming_connnum, SEND_ALL,
-		 "Ran out of memory in list_users()\n");
+    send_to_all(SEND_ALL, "Ran out of memory in list_users()\n");
     exit(0);
   }
 
@@ -755,8 +753,7 @@ list_users(int sock,char *userhost,int regex)
   {
     if ((errbuf = (char *)malloc(1024)) == NULL)
     {
-      sendtoalldcc(incoming_connnum, SEND_ALL,
-		   "Ran out of memory in list_users()");
+      send_to_all(SEND_ALL, "Ran out of memory in list_users()");
       exit(0);
     }
     regerror(i, (regex_t *)&reg, errbuf, 1024); 
@@ -831,8 +828,7 @@ list_virtual_users(int sock,char *userhost,int regex)
 
   if ((uhost = (char *)malloc(1024)) == NULL)
   {
-    sendtoalldcc(incoming_connnum, SEND_ALL,
-		 "Ran out of memory in list_users()");
+    send_to_all(SEND_ALL, "Ran out of memory in list_users()");
     exit(0);
   }
 
@@ -841,8 +837,7 @@ list_virtual_users(int sock,char *userhost,int regex)
   {
     if ((errbuf = (char *)malloc(REGEX_SIZE)) == NULL)
     {
-      sendtoalldcc(incoming_connnum, SEND_ALL,
-		   "Ran out of memory in list_users()");
+      send_to_all(SEND_ALL, "Ran out of memory in list_users()");
       exit(0);
     }
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE); 
@@ -905,8 +900,7 @@ void kill_list_users(int sock, char *userhost, char *reason, int regex)
   {
     if ((errbuf = (char *)malloc(REGEX_SIZE)) == NULL)
     {
-      sendtoalldcc(incoming_connnum, SEND_ALL,
-		   "Ran out of memory in kill_list_users()");
+      send_to_all(SEND_ALL, "Ran out of memory in kill_list_users()");
       exit(0);
     }
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE);
@@ -1664,7 +1658,7 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
   if(config_entries.hybrid)
     {
       if(kline_time)
-        sendtoalldcc(incoming_connnum, SEND_ALL,
+        send_to_all(SEND_ALL,
                      "%s %d %s : %s added by oper %s",
                      command_name,
                      kline_time,
@@ -1672,7 +1666,7 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
                      format_reason(reason),
                      who_did_command);
       else
-        sendtoalldcc(incoming_connnum, SEND_ALL,
+        send_to_all(SEND_ALL,
                      "%s %s : %s added by oper %s",
                      command_name,
                      pattern,
@@ -1681,7 +1675,7 @@ do_a_kline(char *command_name,int kline_time, char *pattern,
     }
   else
     {
-      sendtoalldcc(incoming_connnum, SEND_ALL,
+      send_to_all(SEND_ALL,
                    "%s %s : %s added by oper %s",
                    command_name,
                    pattern,

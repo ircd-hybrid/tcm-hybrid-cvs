@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.99 2002/05/28 16:05:58 leeh Exp $
+ * $Id: userlist.c,v 1.100 2002/05/28 16:41:56 db Exp $
  *
  */
 
@@ -313,20 +313,11 @@ find_user_in_userlist(const char *username)
  * output	-
  * side effects - returns place in connections, or -1 if not found
  */
+
 int
-find_user_in_connections(const char *username)
+get_umodes_current(int user)
 {
-  int i;
-  for(i = 0; i < maxconns; i++)
-  {
-    if(connections[i].state != S_CLIENT)
-      continue;
-
-    if(strcasecmp(connections[i].registered_nick, username) == 0)
-      return i;
-  }
-
-  return -1;
+  return(userlist[user].type);
 }
 
 /* get_umodes_from_prefs()
@@ -335,6 +326,7 @@ find_user_in_connections(const char *username)
  * output	-
  * side effects - usermodes from preferences are returned
  */
+
 int
 get_umodes_from_prefs(int user)
 {
@@ -395,8 +387,6 @@ save_umodes(void *unused)
     userlist[i].changed == 0;
   }
 }
-    
-    
     
 /*
  * load_config_file

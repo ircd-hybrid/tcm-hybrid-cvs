@@ -1,10 +1,13 @@
 #ifndef __LOGGING_H
 #define __LOGGING_H
 
-/* $Id: logging.h,v 1.10 2002/05/27 23:59:42 db Exp $ */
+/* $Id: logging.h,v 1.11 2002/05/28 16:41:52 db Exp $ */
 
 extern FILE *logging_fp; 
 extern FILE *outfile;
+
+extern time_t startup_time;
+extern time_t oper_time;
 
 void kline_report(char *snotice);
 void log_kline(char *,char *,int ,char *,char *);

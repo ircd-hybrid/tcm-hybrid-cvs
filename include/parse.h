@@ -1,4 +1,4 @@
-/* $Id: parse.h,v 1.11 2002/05/28 00:35:06 db Exp $ */
+/* $Id: parse.h,v 1.12 2002/05/28 16:41:52 db Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
@@ -18,7 +18,9 @@ void parse_client(int);
 void expand_args(char *, int, int, char *argv[]);
 int parse_args(char *, char *argv[]);
 
-
-extern struct a_entry actions[MAX_ACTIONS+1];
+extern char mynick[MAX_NICK];
+extern char ourhostname[MAX_HOST];   /* This is our hostname with domainname */
+extern char serverhost[MAX_HOST];    /* Server tcm will use. */
+extern int  amianoper;
 
 #endif

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.92 2002/05/28 16:01:57 leeh Exp $ */
+/* $Id: main.c,v 1.93 2002/05/28 16:41:56 db Exp $ */
 
 #include "setup.h"
 
@@ -58,11 +58,10 @@
 
 struct s_testline testlines;
 time_t current_time;
-
+char mynick[MAX_NICK];
 char ourhostname[MAX_HOST];   /* This is our hostname with domainname */
 char serverhost[MAX_HOST];    /* Server tcm will use. */
-
-int act_drone, act_sclone;
+int amianoper;
 
 /* total memory xmalloc'd */
 unsigned long totalmem;
@@ -340,8 +339,6 @@ main(int argc, char *argv[])
       tcm_log(L_ERR, "Could not connect to server at startup\n");
       exit(1);
     }
-
-  maxconns = 1;
 
   if(config_entries.virtual_host_config[0] != '\0')
     {

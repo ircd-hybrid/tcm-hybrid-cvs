@@ -2,13 +2,14 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.28 2002/05/28 15:10:13 leeh Exp $
+ * $Id: tcm_io.h,v 1.29 2002/05/28 16:41:52 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
 
 /* Dummy definition for now XXX */
 struct sockaddr_in;
+extern int maxconns;
 
 /*
  * This structure defines who is connected to this tcm.
@@ -90,4 +91,7 @@ int connect_to_given_ip_port(struct sockaddr_in *, int );
 #define EOL(c) ((c=='\r')||(c=='\n'))
 
 int pingtime; /* XXX hide later */
+
+int find_user_in_connections(const char *);
+
 #endif

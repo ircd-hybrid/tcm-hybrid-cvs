@@ -26,9 +26,12 @@
 
 /* actions.c
  *
- * $Id: actions.c,v 1.5 2002/05/28 00:35:08 db Exp $
+ * $Id: actions.c,v 1.6 2002/05/28 16:41:55 db Exp $
  */
 
+int act_sclone;
+int act_drone;
+int act_sdrone;
 int act_cflood;
 int act_vclone;
 int act_flood;
@@ -37,6 +40,7 @@ int act_bot;
 int act_spambot;
 int act_clone;
 int act_rclone;
+struct a_entry actions[MAX_ACTIONS+1];
 
 void
 init_actions(void)

@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.44 2002/05/28 05:46:38 db Exp $ */
+/* $Id: tcm.h,v 1.45 2002/05/28 16:41:52 db Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -53,18 +53,6 @@ extern time_t current_time;
 
 #define FOREVER for(;;)	
 
-extern struct connection connections[MAXDCCCONNS+1];
-
-time_t startup_time, oper_time;
-
-char mychannel[MAX_CHANNEL];
-char mynick[MAX_NICK];
-char serverhost[MAX_HOST];
-char ourhostname[MAX_HOST];
-
-int amianoper;
-
-int maxconns;
 
 extern unsigned long totalmem;
 extern unsigned long numalloc;
@@ -81,7 +69,6 @@ size_t strlcpy(char *, const char *, size_t);
 #endif
 
 #ifdef SERVICES
-int act_drone, act_sclone;
 void init_services(void);
 void check_services(void *);
 #endif

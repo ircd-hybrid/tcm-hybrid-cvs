@@ -2,7 +2,7 @@
  * logging.c
  * All the logging type functions moved to here for tcm
  *
- * $Id: logging.c,v 1.39 2002/05/28 00:35:10 db Exp $
+ * $Id: logging.c,v 1.40 2002/05/28 16:41:56 db Exp $
  *
  * - db
  */
@@ -40,6 +40,9 @@
 #include "parse.h"
 #include "logging.h"
 #include "stdcmds.h"
+
+time_t startup_time;
+time_t oper_time;
 
 FILE *outfile;             /* Debug output file handle
 			    * Now shared with writing pid file

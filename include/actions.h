@@ -1,8 +1,12 @@
 #ifndef __ACTIONS_H
 #define __ACTIONS_H
 
-/* $Id: actions.h,v 1.3 2002/05/28 05:46:38 db Exp $ */
+/* $Id: actions.h,v 1.4 2002/05/28 16:41:52 db Exp $ */
 
+extern int act_sdrone;
+extern int act_sclone;
+
+extern int act_drone;
 extern int act_cflood;
 extern int act_vclone;
 extern int act_flood;
@@ -84,9 +88,9 @@ struct a_entry {
   int hoststrip, klinetime;
 };
 
-struct a_entry actions[MAX_ACTIONS+1];
 
 char * get_method_names(int method);
 int get_method_number(char * name);
+extern struct a_entry actions[MAX_ACTIONS+1];
 
 #endif

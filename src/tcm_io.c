@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.62 2002/05/28 15:10:16 leeh Exp $
+ * $Id: tcm_io.c,v 1.63 2002/05/28 16:41:56 db Exp $
  */
 
 #include <stdio.h>
@@ -69,6 +69,7 @@ static fd_set writefds;		/* file descriptor set for use with select */
 struct connection connections[MAXDCCCONNS+1]; /*plus 1 for the server, silly*/
 int pingtime;
 static int server_id;
+int maxconns;
 
 /*
  * read_packet()
@@ -87,6 +88,8 @@ read_packet(void)
   int  nread=0;
   int  i;
   struct timeval read_time_out;
+
+  maxconns = 0;
 
   eventAdd("check_clones", check_clones, NULL, CLONE_CHECK_TIME);
 
@@ -1124,4 +1127,20 @@ init_connections(void)
       connections[i].registered_nick[0] = '\0';
       connections[i].time_out = 0;
     }
+}
+
+int
+find_user_in_connections(const char *username)
+{
+  int i;
+  for(i = 0; i < maxconns; i++)
+  {
+    if(connections[i].state != S_CLIENT)
+      continue;
+
+    if(strcasecmp(connections[i].registered_nick, username) == 0)
+      return i;
+  }
+
+  return -1;
 }

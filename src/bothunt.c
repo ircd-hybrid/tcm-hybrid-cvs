@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.129 2002/05/28 12:48:32 leeh Exp $
+ * $Id: bothunt.c,v 1.130 2002/05/28 16:41:55 db Exp $
  */
 
 #include <stdio.h>
@@ -433,26 +433,13 @@ on_server_notice(int argc, char *argv[])
                  "GLINE for %s@%s by %s [%s]: %s", user, host, nick, target, q);
     return;
   }
-  else if (strstr(p, "has triggered gline for "))
+  else if ((q = strstr(p, "has triggered gline for ")) != NULL)
   {
-    q = strstr(p, "has triggered gline for ");
-    q += 25;
-    if ((p = strchr(q, '@')) == NULL)
-      return;
-    *p++ = '\0';
-    user = q;
-    host = p;
-    if ((p = strchr(host, ']')) == NULL)
-      return;
-    *p = '\0';
-    p += 3;
-    if ((q = strrchr(p, ']')) == NULL)
-      return;
-    *q = '\0';
-    if ((q = strchr(message+14, ' ')) == NULL)
-      return;
-    *q = '\0';
-     
+    q += 24;
+    get_user_host(&user, &host, q);
+    if ((p = strchr(message+14, ' ')) != NULL)
+      *p = '\0';
+    p = host + strlen(host) + 1;
     send_to_all(SEND_KLINE_NOTICES,
 		 "G-line for %s@%s triggered by %s: %s", user, host,
                  message+14, p);

@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.41 2002/05/28 12:48:33 leeh Exp $
+ * $Id: parse.c,v 1.42 2002/05/28 16:41:56 db Exp $
  */
 
 #include <stdio.h>
@@ -49,8 +49,7 @@ static void on_nick(char *old_nick, char *new_nick);
 static void on_ctcp(int connnum, int argc, char *argv[]);
 static void wallops(int connnum, int argc, char *argv[]);
 static void on_nick_taken(void);
-
-int  maxconns = 0;
+char mychannel[MAX_CHANNEL];
 
 /*
  * parse_server()

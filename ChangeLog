@@ -1,3 +1,23 @@
+db          2002/06/23 15:50:19 EDT	(20020623_6)
+
+  Modified files:
+    include              bothunt.h hash.h 
+    src                  bothunt.c hash.c parse.c 
+  Log:
+  - get_user_host interface changed. it now returns a pointer to the
+    last char after the user@host i.e.
+    (user@host.host) <- will point at char after )
+  - removed nick parameter from remove_user_host
+  
+  Revision  Changes    Path
+  1.54      +1 -1      tcm-hybrid/include/bothunt.h
+  1.23      +1 -1      tcm-hybrid/include/hash.h
+  1.182     +36 -25    tcm-hybrid/src/bothunt.c
+  1.41      +15 -11    tcm-hybrid/src/hash.c
+  1.79      +1 -1      tcm-hybrid/src/parse.c
+
+
+
 db          2002/06/23 15:24:15 EDT	(20020623_5)
 
   Modified files:

@@ -1,3 +1,21 @@
+leeh        2002/05/26 16:44:45 EDT	(20020526_23)
+
+  Modified files:
+    include              commands.h userlist.h 
+    src                  commands.c main.c userlist.c 
+  Log:
+  - commited what ive done so far of the umode code
+    setting other peoples umodes is broken until tomorrow.
+  
+  Revision  Changes    Path
+  1.17      +0 -1      tcm-hybrid/include/commands.h
+  1.42      +4 -0      tcm-hybrid/include/userlist.h
+  1.93      +5 -108    tcm-hybrid/src/commands.c
+  1.81      +1 -0      tcm-hybrid/src/main.c
+  1.80      +182 -1    tcm-hybrid/src/userlist.c
+
+
+
 db          2002/05/26 15:27:11 EDT	(20020526_22)
 
   Modified files:

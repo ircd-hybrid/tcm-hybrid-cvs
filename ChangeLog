@@ -1,3 +1,17 @@
+leeh        2002/05/28 19:57:23 EDT	(20020529_0)
+
+  Modified files:
+    src                  commands.c tcm_io.c 
+  Log:
+  - added my debug code back
+  - merged m_disconnect and handle_disconnect
+  
+  Revision  Changes    Path
+  1.108     +14 -32    tcm-hybrid/src/commands.c
+  1.70      +3 -0      tcm-hybrid/src/tcm_io.c
+
+
+
 bill        2002/05/28 17:10:29 EDT	(20020528_26)
 
   Modified files:

@@ -1,3 +1,23 @@
+bill        2003/02/11 21:42:15 EST	(20030212_0)
+
+  Modified files:
+    etc                  tcm.cf 
+    include              actions.h config.h 
+    src                  actions.c bothunt.c 
+  Log:
+  Submitted by:    markalso
+  
+  - renamed spambot action to spam, as it is referenced in the config file
+  
+  Revision  Changes    Path
+  1.33      +2 -2      tcm-hybrid/etc/tcm.cf
+  1.20      +2 -2      tcm-hybrid/include/actions.h
+  1.81      +1 -1      tcm-hybrid/include/config.h
+  1.49      +1 -1      tcm-hybrid/src/actions.c
+  1.213     +1 -1      tcm-hybrid/src/bothunt.c
+
+
+
 wiz         2003/02/03 04:02:18 EST	(20030203_2)
 
   Modified files:

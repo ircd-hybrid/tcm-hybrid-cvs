@@ -1,7 +1,7 @@
 #ifndef __TCM_H
 #define __TCM_H
 
-/* $Id: tcm.h,v 1.21 2001/11/10 18:22:15 bill Exp $ */
+/* $Id: tcm.h,v 1.22 2001/11/24 00:07:52 wcampbel Exp $ */
 
 #include <sys/time.h>
 #include "config.h"
@@ -74,6 +74,5 @@ void set_action_method(char *name, char *method);
 int get_action_type(char *name);
 int get_action(char *name);
 char *get_action_method(char *name);
-unsigned long local_ip(void);
 
 #endif

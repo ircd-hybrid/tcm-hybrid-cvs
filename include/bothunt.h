@@ -1,7 +1,7 @@
 #ifndef __BOTHUNT_H
 #define __BOTHUNT_H
 
-/* $Id: bothunt.h,v 1.17 2001/11/23 21:40:46 wcampbel Exp $ */
+/* $Id: bothunt.h,v 1.18 2001/11/24 00:07:52 wcampbel Exp $ */
 
 void report_mem(int);
 void print_motd(int);		
@@ -66,10 +66,7 @@ void list_class(int, char *, int);
 
 void list_virtual_users(int sock,char *);
 
-void check_clones(void);
 void report_clones(int);
-
-void check_virtual_host_clones(char *);
 
 void ilinemask(char *body);
 

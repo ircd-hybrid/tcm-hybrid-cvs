@@ -10,7 +10,7 @@
 *   Based heavily on Adam Roach's bot skeleton.             *
 ************************************************************/
 
-/* $Id: main.c,v 1.21 2001/11/14 22:04:15 bill Exp $ */
+/* $Id: main.c,v 1.22 2001/11/24 00:07:55 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -407,66 +407,6 @@ void closeconn(int connnum, int argc, char *argv[])
   connections[connnum].host[0] = '\0';
   connections[connnum].nick[0] = '\0';
   connections[connnum].registered_nick[0] = '\0';
-}
-
-/* 
- * local_ip()
- * 
- * inputs		- NONE
- * output		- ip of local host
- * side effects	- NONE
- */
-
-unsigned long local_ip(void)
-{
-  struct hostent *local_host;
-  unsigned long l_ip;
-
-  if(config_entries.virtual_host_config[0])
-    {
-      if ((local_host = gethostbyname (config_entries.virtual_host_config)))
-	{
-	  if(config_entries.debug && outfile)
-	    {
-	      fprintf(outfile,
-		      "virtual host [%s]\n",
-		      config_entries.virtual_host_config);
-	      fprintf(outfile, "found official name [%s]\n",
-		      local_host->h_name);
-	    }
-
-          memcpy((void *)&l_ip,(void *)local_host->h_addr,
-		 sizeof(local_host->h_addr));
-
-	  if(config_entries.debug && outfile)
-	    {
-	      fprintf(outfile, "DEBUG: %lu %lX\n", l_ip, l_ip);
-	    }
-	  return(htonl(l_ip));
-	}
-    }
-  else
-    {
-      if ((local_host = gethostbyname (ourhostname)) )
-	{
-	  if(config_entries.debug && outfile)
-	    {
-	      fprintf(outfile, "found official name [%s]\n",
-		      local_host->h_name);
-	    }
-
-	  (void) memcpy((void *) &l_ip,(void *) local_host->h_addr,
-			sizeof(local_host->h_addr));
-
-	  if(config_entries.debug && outfile)
-	    {
-	      fprintf(outfile, "DEBUG: %lu %lX\n", l_ip, l_ip);
-	    }
-	  return(htonl(l_ip));
-	}
-    }
-  /* NOT REACHED */
-  return 0L;
 }
 
 /*

@@ -15,7 +15,7 @@
 
 /* (Hendrix original comments) */
 
-/* $Id: bothunt.c,v 1.41 2001/11/23 21:40:48 wcampbel Exp $ */
+/* $Id: bothunt.c,v 1.42 2001/11/24 00:07:53 wcampbel Exp $ */
 
 #include "setup.h"
 
@@ -80,6 +80,7 @@ static void addtohash(struct hashrec *table[],char *key,struct userentry *item);
 static char removefromhash(struct hashrec *table[], char *key, char *hostmatch,
                     char *usermatch, char *nickmatch);
 static void check_host_clones(char *);
+static void check_virtual_host_clones(char *);
 
 void _ontraceuser(int connnum, int argc, char *argv[]);
 void _ontraceclass(int connnum, int argc, char *argv[]);
@@ -2020,7 +2021,7 @@ static void check_host_clones(char *host)
  * side effects	- 
  */
 
-void check_virtual_host_clones(char *ip_class_c)
+static void check_virtual_host_clones(char *ip_class_c)
 {
   struct hashrec *find;
   int clonecount = 0;

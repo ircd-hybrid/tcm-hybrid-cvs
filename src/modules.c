@@ -1,5 +1,5 @@
 /*
- * $Id: modules.c,v 1.41 2002/05/25 15:57:56 db Exp $B
+ * $Id: modules.c,v 1.42 2002/05/25 18:44:08 leeh Exp $B
  *
  */
 
@@ -61,15 +61,14 @@ modules_init(void)
   add_dcc_handler(&modlist_msgtab);
 }
 
-void
-init_hashtables(void)
-
 /* init_hashtables()
  *
  * input	-
  * output	-
  * side effects - clears the dcc command and server command hashtables
  */
+void
+init_hashtables(void)
 {
   memset(dcc_command_table, 0, sizeof(struct dcc_command) * MAX_HASH);
   memset(serv_command_table, 0, sizeof(struct serv_command) * MAX_HASH);
@@ -101,27 +100,28 @@ add_dcc_handler(struct dcc_command *ptr)
  * side effects - command (if found) is removed from dcc hashtable
  */
 void
-del_dcc_handler(char *cmd)
+del_dcc_handler(struct dcc_command *ptr)
 {
-  struct dcc_command *ptr;
+  struct dcc_command *temp_ptr;
   struct dcc_command *last_ptr = NULL;
   int hashval;
   
-  hashval = hash_command(cmd);
+  hashval = hash_command(ptr->cmd);
 
   /* search the hash table for the command, we dont use 
    * find_dcc_handler because we need last_ptr
    */
-  for(ptr = dcc_command_table[hashval]; ptr; ptr = ptr->next)
+  for(temp_ptr = dcc_command_table[hashval]; temp_ptr; 
+      temp_ptr = temp_ptr->next)
   {
-    if(strcasecmp(cmd, ptr->cmd) == 0)
+    if(temp_ptr == ptr)
       break;
 
-    last_ptr = ptr;
+    last_ptr = temp_ptr;
   }
 
   /* command was found.. */
-  if(ptr)
+  if(temp_ptr)
   {
     /* something points to this command */
     if(last_ptr)
@@ -148,6 +148,140 @@ find_dcc_handler(char *cmd)
   hashval = hash_command(cmd);
 
   for(ptr = dcc_command_table[hashval]; ptr; ptr = ptr->next)
+  {
+    if(strcasecmp(cmd, ptr->cmd) == 0)
+      return ptr;
+  }
+
+  return NULL;
+}
+
+/* add_serv_handler()
+ *
+ * input	- serv command struct
+ * output	-
+ * side effects - command is added to serv hash table
+ */
+void
+add_serv_handler(struct serv_command *ptr)
+{
+  struct serv_command *temp_ptr;
+  struct serv_command *last_func_ptr = NULL;
+  struct serv_command *last_cmd_ptr = NULL;
+  int hashval;
+
+  hashval = hash_command(ptr->cmd);
+
+  /* search across looking for the command */
+  for(temp_ptr = serv_command_table[hashval]; temp_ptr;
+      temp_ptr = temp_ptr->next_func)
+  {
+    /* found same command */
+    if(strcasecmp(ptr->cmd, temp_ptr->cmd) == 0)
+    {
+      /* search downwards so we can add as the last func */
+      for(; temp_ptr; temp_ptr = temp_ptr->next_cmd)
+      {
+        last_cmd_ptr = temp_ptr;
+      }
+
+      break;
+    }
+
+    last_func_ptr = temp_ptr;
+  }
+
+  /* command is already in the hashtable */
+  if(last_cmd_ptr != NULL)
+    last_cmd_ptr->next_cmd = ptr;
+
+  /* something with the same hashval, different command */
+  else if(last_func_ptr != NULL)
+    last_func_ptr->next_func = ptr;
+
+  /* nothing in the table at this hashval */
+  else
+    serv_command_table[hashval] = ptr;
+}
+
+/* del_serv_handler()
+ *
+ * input	- server command
+ * output	-
+ * side effects - command (if found) is removed from server hashtable
+ */
+void
+del_serv_handler(struct serv_command *ptr)
+{
+  struct serv_command *temp_ptr;
+  struct serv_command *last_cmd_ptr;
+  struct serv_command *last_func_ptr;
+  int hashval;
+
+  hashval = hash_command(ptr->cmd);
+
+  /* search across for the right command */
+  for(temp_ptr = serv_command_table[hashval]; temp_ptr; 
+      temp_ptr = temp_ptr->next_func)
+  {
+    if(strcasecmp(ptr->cmd, temp_ptr->cmd) == 0)
+    {
+      for(; temp_ptr; temp_ptr = temp_ptr->next_cmd)
+      {
+        if(ptr == temp_ptr)
+          break;
+
+	last_cmd_ptr = ptr;
+      }
+      
+      break;
+    }
+
+    last_func_ptr = ptr;
+  }
+  
+  if(last_cmd_ptr != NULL)
+    last_cmd_ptr->next_cmd = ptr->next_cmd;
+  else
+  {
+    if(last_func_ptr != NULL)
+    {
+      if(ptr->next_cmd != NULL)
+      {
+        last_func_ptr->next_func = ptr->next_cmd;
+	ptr->next_cmd->next_func = ptr->next_func;
+      }
+      else
+        last_func_ptr->next_func = ptr->next_func;
+    }
+    else
+    {
+      if(ptr->next_cmd != NULL)
+      {
+        ptr->next_cmd->next_func = ptr->next_func;
+	serv_command_table[hashval] = ptr->next_cmd;
+      }
+      else
+        serv_command_table[hashval] = ptr->next_func;
+    }
+  }
+}
+
+/* find_serv_handler()
+ *
+ * input	- command
+ * output	-
+ * side effects - handler of command is returned
+ */
+struct serv_command *
+find_serv_handler(char *cmd)
+{
+  struct serv_command *ptr;
+  int hashval;
+
+  hashval = hash_command(cmd);
+
+  for(ptr = serv_command_table[hashval]; ptr; ptr = ptr->next_cmd)
   {
     if(strcasecmp(cmd, ptr->cmd) == 0)
       return ptr;

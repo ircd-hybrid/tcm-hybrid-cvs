@@ -1,7 +1,7 @@
 #ifndef __MODULES_H_
 #define __MODULES_H_
 
-/* $Id: modules.h,v 1.24 2002/05/25 15:36:24 leeh Exp $ */
+/* $Id: modules.h,v 1.25 2002/05/25 18:44:06 leeh Exp $ */
 
 #define MAX_HASH 256
 
@@ -13,7 +13,7 @@ struct module
 };
 
 struct dcc_command *dcc_command_table[MAX_HASH];
-struct serv_command_hash *serv_command_table[MAX_HASH];
+struct serv_command *serv_command_table[MAX_HASH];
 
 typedef void (*dcc_handler)(int connnum, int argc, char *argv[]);
 typedef void (*serv_handler)(int argc, char *argv[]);
@@ -25,22 +25,21 @@ struct dcc_command
   dcc_handler handler[3];
 };
 
-struct serv_command_hash
-{
-  struct serv_command *msg;
-  struct serv_command_hash *next;
-  struct serv_command_hash *next_func;
-};
-
 struct serv_command
 {
   char *cmd;
+  struct serv_command *next_cmd;
+  struct serv_command *next_func;
   serv_handler handler;
 };
 
-extern void add_dcc_handler(struct dcc_command *);
-extern void del_dcc_handler(char *);
-extern struct dcc_command *find_dcc_handler(char *);
+void add_dcc_handler(struct dcc_command *);
+void del_dcc_handler(struct dcc_command *);
+struct dcc_command *find_dcc_handler(char *);
+
+void add_serv_handler(struct serv_command *);
+void del_serv_handler(struct serv_command *);
+struct serv_command *find_serv_handler(char *);
 
 void m_unregistered(int connnum, int argc, char *argv[]);
 void m_not_admin(int connnum, int argc, char *argv[]);

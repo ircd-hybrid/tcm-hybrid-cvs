@@ -1,3 +1,15 @@
+leeh        2002/06/06 08:06:17 EDT	(20020606_1)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - doh, its all one argv.
+  
+  Revision  Changes    Path
+  1.67      +15 -7     tcm-hybrid/src/parse.c
+
+
+
 wcampbel    2002/06/05 21:58:00 EDT	(20020606_0)
 
   Modified files:

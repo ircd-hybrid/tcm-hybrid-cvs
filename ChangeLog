@@ -1,3 +1,15 @@
+bill        2002/09/26 11:26:34 EDT	(20020926_0)
+
+  Modified files:
+    src                  seedrand.c 
+  Log:
+  - fixed off by one that caused core
+  
+  Revision  Changes    Path
+  1.2       +2 -2      tcm-hybrid/src/seedrand.c
+
+
+
 bill        2002/09/24 11:22:37 EDT	(20020924_0)
 
   Modified files:

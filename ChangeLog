@@ -1,3 +1,18 @@
+bill        2002/10/03 20:28:54 EDT	(20021004_0)
+
+  Modified files:
+    src                  Makefile.in dcc_commands.c modules.c 
+  Log:
+  - sanity check addition in m_kaction()
+  - module names, though pointless now, are no longer dynamically allocated.
+  
+  Revision  Changes    Path
+  1.33      +10 -10    tcm-hybrid/src/Makefile.in
+  1.147     +7 -0      tcm-hybrid/src/dcc_commands.c
+  1.53      +1 -1      tcm-hybrid/src/modules.c
+
+
+
 bill        2002/09/27 00:20:07 EDT	(20020927_0)
 
   Modified files:

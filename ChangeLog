@@ -1,3 +1,30 @@
+bill        2002/04/28 22:18:37 EDT	(20020429_0)
+
+  Modified files:
+    etc                  tcm.cf userlist.cf 
+    include              userlist.h 
+    modules              bothunt.c 
+    src                  main.c userlist.c 
+    tools                csircd-tcm.diff 
+  Log:
+  - updated documentation of user flags and exemptions in default cf files
+  - added exemption_summary(), an action indexed exemption listing function
+  - fixed bug in loading of exemptions
+  - added logging of all suggest_action cases using SEND_WARN_ONLY
+  - fixed reversal of csircd patch file
+  - when dcc connections fail, send REJECT notice (per Kimy's request)
+  
+  Revision  Changes    Path
+  1.19      +1 -1      tcm-hybrid/etc/tcm.cf
+  1.14      +6 -1      tcm-hybrid/etc/userlist.cf
+  1.24      +4 -0      tcm-hybrid/include/userlist.h
+  1.60      +8 -1      tcm-hybrid/modules/bothunt.c
+  1.30      +3 -0      tcm-hybrid/src/main.c
+  1.48      +32 -4     tcm-hybrid/src/userlist.c
+  1.2       +25 -14    tcm-hybrid/tools/csircd-tcm.diff
+
+
+
 leeh        2002/04/27 06:46:59 EDT	(20020427_1)
 
   Modified files:

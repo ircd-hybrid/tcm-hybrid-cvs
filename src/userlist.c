@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.123 2002/06/21 15:20:52 leeh Exp $
+ * $Id: userlist.c,v 1.124 2002/06/21 15:54:56 leeh Exp $
  *
  */
 
@@ -48,6 +48,7 @@ int	wingate_class_list_index;
 
 static void load_a_user(char *);
 static void load_e_line(char *);
+static void add_oper(char *, char *, char *, char *, int);
 
 static void m_umode(int, int, char *argv[]);
 
@@ -796,6 +797,15 @@ load_a_user(char *line)
     if ((userathost = strtok(line,":")) == NULL)
       return;
 
+    if((usernick = strtok(NULL, ":")) == NULL)
+      return;
+
+    if((password = strtok(NULL, ":")) == NULL)
+      return;
+
+    if((type = strtok(NULL, ":")) == NULL)
+      return;
+
     user = userathost;
     if((p = strchr(userathost,'@')) != NULL)
       {
@@ -811,57 +821,19 @@ load_a_user(char *line)
     if((p = strchr(host,' ')) != NULL)
       *p = '\0';
 
-    /* Don't allow *@* or user@* O: lines */
-    if (strcmp(host, "*") == 0)
-      return;
-
-    userlist[user_list_index].usernick[0] = 0;
-    userlist[user_list_index].password[0] = 0;
-
-    strlcpy(userlist[user_list_index].user, user, 
-	    sizeof(userlist[user_list_index].user));
-
-    strlcpy(userlist[user_list_index].host, host, 
-	    sizeof(userlist[user_list_index].host));
-
-    usernick = strtok(NULL,":");
-    
-    if(usernick != NULL)
-      strlcpy(userlist[user_list_index].usernick, usernick, 
-	      sizeof(userlist[user_list_index].usernick));
-
-    password = strtok(NULL,":");
-
-    if(password != NULL)
-      strlcpy(userlist[user_list_index].password, password, 
-	      sizeof(userlist[user_list_index].password));
-
-    type = strtok(NULL,":");
-
-    /* grab the usermodes from the conf */
-    if(type != NULL)
-      set_umode(user_list_index, 1, type);
-
-    /* and then grab the usermodes from <user>.prefs */
-    userlist[user_list_index].type |= get_umodes_from_prefs(user_list_index);
-
-    user_list_index++;
-
-    userlist[user_list_index].user[0] = 0;
-    userlist[user_list_index].host[0] = 0;
-    userlist[user_list_index].usernick[0] = 0;
-    userlist[user_list_index].password[0] = 0;
-    userlist[user_list_index].type = 0;
+    set_umode(user_list_index, 1, type);
+    add_oper(user, host, usernick, password, 
+             get_umodes_from_prefs(user_list_index));
 }
 
-/* add_an_oper()
+/* on_stats_o()
  *
  * input	- server message body (argc/argv)
  * output	-
  * side effects - user listed in RPL_STATSOLINE is added to userlist
  */
 void
-add_an_oper(int argc, char *argv[])
+on_stats_o(int argc, char *argv[])
 {
   char *user_at_host;
   char *user;
@@ -887,31 +859,33 @@ add_an_oper(int argc, char *argv[])
       host = p;
     }
 
-  /* Don't allow *@* or user@* O: lines */
-  if (strcmp(host, "*") == 0)
+  add_oper(user, host, nick, "\0", 0);
+  add_exemption(user, host, 0);
+}
+
+void
+add_oper(char *user, char *host, char *usernick, char *password, int type)
+{
+  if(strcmp(host, "*") == 0)
     return;
 
-  /*
-   * If this user is already loaded due to userlist.load
-   * don't load them again.
-   */
-  if(is_an_oper(user,host) == 0)
-  {
-    strlcpy(userlist[user_list_index].user, user,
-            sizeof(userlist[user_list_index].user));
+  if(is_an_oper(user, host))
+    return;
 
-    strlcpy(userlist[user_list_index].host, host,
-            sizeof(userlist[user_list_index].host));
+  strlcpy(userlist[user_list_index].user, user,
+          sizeof(userlist[user_list_index].user));
 
-    strlcpy(userlist[user_list_index].usernick, nick,
-            sizeof(userlist[user_list_index].usernick));
+  strlcpy(userlist[user_list_index].host, host,
+          sizeof(userlist[user_list_index].host));
 
-    userlist[user_list_index].password[0] = '\0';
-    userlist[user_list_index].type = 0;
-    user_list_index++;
-  }
+  strlcpy(userlist[user_list_index].usernick, usernick,
+          sizeof(userlist[user_list_index].usernick));
 
-  add_exemption(user, host, 0);
+  strlcpy(userlist[user_list_index].password, password,
+          sizeof(userlist[user_list_index].password));
+
+  userlist[user_list_index].type |= type;
+  user_list_index++;
 }
 
 void

@@ -1,3 +1,15 @@
+wcampbel    2002/05/20 08:58:30 EDT	(20020520_8)
+
+  Modified files:
+    modules              commands.c 
+  Log:
+  Make .help ? work
+  
+  Revision  Changes    Path
+  1.63      +2 -2      tcm-hybrid/modules/commands.c
+
+
+
 wcampbel    2002/05/20 08:48:44 EDT	(20020520_7)
 
   Modified files:

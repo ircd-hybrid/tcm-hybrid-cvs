@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.60 2002/06/05 14:15:52 leeh Exp $
+ * $Id: parse.c,v 1.61 2002/06/05 14:55:20 db Exp $
  */
 
 #include <stdio.h>
@@ -38,10 +38,9 @@
 #include "dcc.h"
 
 static void do_init(void);
-static void process_server(struct source_client *,
-			   char *function, char *body);
-static void process_privmsg(struct source_client *,
-			    int argc, char *argv[]);
+static int  split_args(char *, char *argv[]);
+static void process_server(struct source_client *, char *function, char *body);
+static void process_privmsg(struct source_client *, int argc, char *argv[]);
 static void send_umodes(char *nick);
 static void on_ctcp(struct source_client *source_p, int argc, char *argv[]);
 static void on_nick_taken(void);
@@ -59,15 +58,14 @@ struct t_tcm_status tcm_status;
 void
 parse_server(int conn_num)
 {
-  struct source_client *source_p;
+  struct source_client source_p;
   char *buffer = connections[conn_num].buffer;
   char *p;
   char *source;
   char *function;
   char *body = NULL;
 
-  source_p = (struct source_client *)xmalloc(sizeof(struct source_client));
-  memset(source_p, 0, sizeof(struct source_client));
+  memset(&source_p, 0, sizeof(struct source_client));
 
   if (*buffer == ':')
   {
@@ -84,15 +82,15 @@ parse_server(int conn_num)
     {
       *p++ = '\0';
 
-      source_p->name = source;
-      get_user_host(&source_p->username, &source_p->host, p);
+      source_p.name = source;
+      get_user_host(&source_p.username, &source_p.host, p);
     }
     else
-      source_p->name = source;
+      source_p.name = source;
   }
   else
   {
-    source_p->name = config_entries.server_name;
+    source_p.name = config_entries.server_name;
     function = buffer;
   }
   
@@ -111,8 +109,7 @@ parse_server(int conn_num)
     fflush(outfile);
   }
 
-  process_server(source_p, function, body);
-  xfree(source_p);
+  process_server(&source_p, function, body);
 }
 
 /*
@@ -132,7 +129,7 @@ parse_client(int i)
   int argc;
   char *argv[MAX_ARGV];
 
-  if ((argc = parse_args(connections[i].buffer, argv)) == 0)
+  if ((argc = split_args(connections[i].buffer, argv)) == 0)
     return;
 
   /* command */
@@ -179,7 +176,7 @@ parse_client(int i)
  *              - *argv[]
  * output       - none
  * side effects - This function takes a set of argv[] and expands
- *                it back out. basically the reverse of parse_args().
+ *                it back out. basically the reverse of split_args().
  */
 void
 expand_args(char *output, int maxlen, int argc, char *argv[])
@@ -205,7 +202,7 @@ expand_args(char *output, int maxlen, int argc, char *argv[])
 }
 
 /*
- * parse_args
+ * split_args
  *
  * inputs       - input buffer to parse into argvs
  *              - array of pointers to char *
@@ -213,8 +210,8 @@ expand_args(char *output, int maxlen, int argc, char *argv[])
  *              - passed argvs back in input argv
  * side effects - none
  */
-int
-parse_args(char *buffer, char *argv[])
+static int
+split_args(char *buffer, char *argv[])
 {
   int argc = 0;
   char *r;
@@ -267,6 +264,7 @@ static void
 process_server(struct source_client *source_p, char *function, char *param)
 {
   struct serv_command *ptr;
+  struct serv_numeric *nptr;
   char *userhost;
   int numeric=0;      /* if its a numeric */
   int argc=0;
@@ -304,9 +302,7 @@ process_server(struct source_client *source_p, char *function, char *param)
       argv[argc++] = p;
   }
 
-  numeric=0;
-
-  if((ptr = find_serv_handler(function)) != NULL)
+  if ((ptr = find_serv_handler(function)) != NULL)
   {
     ptr->handler(source_p, argc, argv);
     return;
@@ -320,44 +316,45 @@ process_server(struct source_client *source_p, char *function, char *param)
         on_ctcp(source_p, argc, argv);
       else
         process_privmsg(source_p, argc, argv);
+
+      return;	/* done */
     }
   }
-
   else if (strcmp(function, "PING") == 0)
+  {
     print_to_server("PONG %s", argv[2]);
-
-  /* error doesnt have a prefix either */
+    return;	/* done */
+  }
   else if(strcmp(function, "ERROR") == 0)
   {
+    /* error doesnt have a prefix either */
     if (strncmp(argv[2], ":Closing Link: ", 15) == 0)
     {
       if (strstr(argv[2], "collision)"))
         on_nick_taken();
       server_link_closed(0);
+      return;	/* done */
     }
   }
-
 #if 0
   else if (strcmp(function, "NOTICE") == 0)
   {
     if(strcasecmp(source_p->name, config_entries.rserver_name) == 0)
     {
       on_server_notice(argc, argv);
+      return;	/* done */
     }
   }
 #endif
 
-  if(isdigit((int) function[0]) && isdigit((int) function[1]) &&
-     isdigit((int) function[2]))
+  if(isdigit(function[0]) && isdigit(function[1]) &&
+     isdigit(function[2]))
     numeric = atoi(function);
+  else
+    return;	/* Already handled */
 
-  if(numeric > 0)
-  {
-    struct serv_numeric *ptr;
-
-    for(ptr = serv_numeric_table; ptr; ptr = ptr->next)
-      ptr->handler(numeric, argc, argv);
-  }
+  for(nptr = serv_numeric_table; nptr; nptr = nptr->next)
+    nptr->handler(numeric, argc, argv);
 
   switch(numeric)
   {

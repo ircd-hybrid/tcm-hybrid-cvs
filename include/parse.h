@@ -1,12 +1,10 @@
-/* $Id: parse.h,v 1.20 2002/06/05 00:10:53 leeh Exp $ */
+/* $Id: parse.h,v 1.21 2002/06/05 14:55:18 db Exp $ */
 #ifndef __PARSE_H
 #define __PARSE_H
 
 void parse_server(int);
 void parse_client(int);
-
 void expand_args(char *, int, int, char *argv[]);
-int parse_args(char *, char *argv[]);
 
 struct t_tcm_status {
   char my_nick[MAX_NICK];

@@ -1,3 +1,15 @@
+bill        2002/08/08 15:35:07 EDT	(20020808_2)
+
+  Modified files:
+    src                  actions.c 
+  Log:
+  - fixed potential core
+  
+  Revision  Changes    Path
+  1.36      +1 -1      tcm-hybrid/src/actions.c
+
+
+
 bill        2002/08/08 15:00:47 EDT	(20020808_1)
 
   Modified files:

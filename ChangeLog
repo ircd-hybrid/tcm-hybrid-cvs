@@ -1,3 +1,30 @@
+db          2002/05/28 12:41:59 EDT	(20020528_17)
+
+  Modified files:
+    include              actions.h logging.h parse.h tcm.h 
+                         tcm_io.h userlist.h 
+    src                  actions.c bothunt.c logging.c main.c 
+                         parse.c tcm_io.c userlist.c 
+  Log:
+  - cleaned up tcm.h
+  
+  Revision  Changes    Path
+  1.4       +5 -1      tcm-hybrid/include/actions.h
+  1.11      +3 -0      tcm-hybrid/include/logging.h
+  1.12      +4 -2      tcm-hybrid/include/parse.h
+  1.45      +0 -13     tcm-hybrid/include/tcm.h
+  1.29      +4 -0      tcm-hybrid/include/tcm_io.h
+  1.55      +0 -1      tcm-hybrid/include/userlist.h
+  1.6       +4 -0      tcm-hybrid/src/actions.c
+  1.130     +6 -19     tcm-hybrid/src/bothunt.c
+  1.40      +3 -0      tcm-hybrid/src/logging.c
+  1.93      +2 -5      tcm-hybrid/src/main.c
+  1.42      +1 -2      tcm-hybrid/src/parse.c
+  1.63      +19 -0     tcm-hybrid/src/tcm_io.c
+  1.100     +4 -14     tcm-hybrid/src/userlist.c
+
+
+
 leeh        2002/05/28 12:06:00 EDT	(20020528_16)
 
   Modified files:

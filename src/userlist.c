@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.39 2001/12/11 21:55:33 db Exp $
+ * $Id: userlist.c,v 1.40 2001/12/12 23:08:16 einride Exp $
  *
  */
 
@@ -82,6 +82,7 @@ load_config_file(char *file_name)
   char *p;
   char *q;
   int error_in_config;		/* flag if error was found in config file */
+  struct common_function * temp;
 
   error_in_config = NO;
 
@@ -227,6 +228,8 @@ load_config_file(char *file_name)
       break;
 
     default:
+      for (temp=config;temp;temp=temp->next)
+	temp->function(0, argc, argv);
       break;
     }
   }
@@ -675,7 +678,7 @@ void clear_userlist()
 
   memset((void *)userlist, 0, sizeof(userlist));
   memset((void *)hostlist, 0, sizeof(hostlist));
-  memset((void *)banlist, 0, sizeof(banlist))
+  memset((void *)banlist, 0, sizeof(banlist));
 
 }
 

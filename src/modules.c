@@ -2,7 +2,7 @@
  * much of this code has been copied (though none verbatim)
  * from ircd-hybrid-7.
  *
- * $Id: modules.c,v 1.16 2001/11/23 16:49:43 wcampbel Exp $
+ * $Id: modules.c,v 1.17 2001/12/12 23:08:16 einride Exp $
  *
  */
 
@@ -109,166 +109,92 @@ void mod_del_cmd(struct TcmMessage *msg)
 
 void add_common_function(int type, void *function)
 {
-  struct common_function *temp;
+  struct common_function **temp, *new;
   int null=0;
 
   switch (type)
     {
       case F_SIGNON:
-        temp = signon;
+        temp = &signon;
         break;
       case F_SIGNOFF:
-        temp = signoff;
+        temp = &signoff;
         break;
       case F_USER_SIGNON:
-        temp = user_signon;
+        temp = &user_signon;
         break;
       case F_USER_SIGNOFF:
-        temp = user_signoff;
+        temp = &user_signoff;
         break;
       case F_DCC_SIGNON:
-        temp = dcc_signon;
+        temp = &dcc_signon;
         break;
       case F_DCC_SIGNOFF:
-        temp = dcc_signoff;
+        temp = &dcc_signoff;
         break;
       case F_DCC:
-        temp = dcc;
+        temp = &dcc;
         break;
       case F_UPPER_CONTINUOUS:
-        temp = upper_continuous;
+        temp = &upper_continuous;
         break;
       case F_CONTINUOUS:
-        temp = continuous;
+        temp = &continuous;
         break;
       case F_SCONTINUOUS:
-        temp = scontinuous;
+        temp = &scontinuous;
         break;
       case F_CONFIG:
-        temp = config;
+        temp = &config;
         break;
       case F_ACTION:
-        temp = action;
+        temp = &action;
         break;
       case F_RELOAD:
-        temp = reload;
+        temp = &reload;
         break;
       case F_WALLOPS:
-        temp = wallops;
+        temp = &wallops;
         break;
       case F_ONJOIN:
-        temp = onjoin;
+        temp = &onjoin;
         break;
       case F_ONCTCP:
-        temp = onctcp;
+        temp = &onctcp;
         break;
       case F_ONTRACEUSER:
-        temp = ontraceuser;
+        temp = &ontraceuser;
         break;
       case F_ONTRACECLASS:
-        temp = ontraceclass;
+        temp = &ontraceclass;
         break;
       case F_SERVER_NOTICE:
-        temp = server_notice;
+        temp = &server_notice;
         break;
       case F_STATSI:
-        temp = statsi;
+        temp = &statsi;
         break;
       case F_STATSK:
-        temp = statsk;
+        temp = &statsk;
         break;
       case F_STATSE:
-        temp = statse;
+        temp = &statse;
         break;
       case F_STATSO:
-        temp = statso;
+        temp = &statso;
         break;
       default:
         return;
         break;
     }
 
-  if (temp == NULL) null=YES;
-  temp = (struct common_function *) malloc(sizeof(struct common_function));
-  temp->type = type;
-  temp->function = function;
-  temp->next = (struct common_function *) NULL;
-  if (null == YES)
-    switch (type)
-      {
-        case F_SIGNON:
-          signon = temp;
-          break;
-        case F_SIGNOFF:
-          signoff = temp;
-          break;
-        case F_USER_SIGNON:
-          user_signon = temp;
-          break;
-        case F_USER_SIGNOFF:
-          user_signoff = temp;
-          break;
-        case F_DCC_SIGNON:
-          dcc_signon = temp;
-          break;
-        case F_DCC_SIGNOFF:
-          dcc_signoff = temp;
-          break;
-        case F_DCC:
-          dcc = temp;
-          break;
-        case F_UPPER_CONTINUOUS:
-          upper_continuous = temp;
-          break;
-        case F_CONTINUOUS:
-          continuous = temp;
-          break;
-        case F_SCONTINUOUS:
-          scontinuous = temp;
-          break;
-        case F_CONFIG:
-          config = temp;
-          break;
-        case F_ACTION:
-          action = temp;
-          break;
-        case F_RELOAD:
-          reload = temp;
-          break;
-        case F_WALLOPS:
-          wallops = temp;
-          break;
-        case F_ONJOIN:
-          onjoin = temp;
-          break;
-        case F_ONCTCP:
-          onctcp = temp;
-          break;
-        case F_ONTRACEUSER:
-          ontraceuser = temp;
-          break;
-        case F_ONTRACECLASS:
-          ontraceclass = temp;
-          break;
-        case F_SERVER_NOTICE:
-          server_notice = temp;
-          break;
-        case F_STATSI:
-          statsi = temp;
-          break;
-        case F_STATSK:
-          statsk = temp;
-          break;
-        case F_STATSE:
-          statse = temp;
-          break;
-        case F_STATSO:
-          statso = temp;
-          break;
-        default:
-          return;
-          break;
-      }
+  new = (struct common_function *) malloc(sizeof(struct common_function));
+  new->type = type;
+  new->function = function;
+  new->next = (struct common_function *) NULL;
+  while (*temp)
+    temp = &(*temp)->next;
+  *temp = new;
 }
 
 #endif

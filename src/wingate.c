@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.14 2001/11/10 03:14:38 wcampbel Exp $ */
+/* $Id: wingate.c,v 1.15 2001/12/12 23:08:13 einride Exp $ */
 
 #include <netdb.h>
 #include <unistd.h>
@@ -74,6 +74,7 @@ void _scontinuous(int connnum, int argc, char *argv[]);
 void _continuous(int connnum, int argc, char *argv[]);
 void _user_signon(int connnum, int argc, char *argv[]);
 void _reload_wingate(int connnum, int argc, char *argv[]);
+void _config(int connnum, int argc, char * argv[]);
 void _modinit();
 
 #ifdef DETECT_WINGATE
@@ -308,7 +309,7 @@ void _scontinuous(int connnum, int argc, char *argv[])
         {
           if (FD_ISSET(socks[i].socket, &writefds))
             {
-              if (read(socks[i].socket, (char *)&sillybuf, 1) >= 0) report_open_socks(i);
+              report_open_socks(i);
               (void)close(socks[i].socket);
               socks[i].state = 0;
               socks[i].socket = INVALID;
@@ -354,6 +355,14 @@ void _continuous(int connnum, int argc, char *argv[])
         FD_SET(socks[i].socket,&writefds);
      }
 #endif
+
+}
+void _config(int connnum, int argc, char *argv[]) {
+  if ((argc==2) && ((argv[0][0]=='w') || (argv[0][0]=='W'))) {
+    strncpy(wingate_class_list[wingate_class_list_index], argv[1], 
+	    sizeof(wingate_class_list[0]));
+    wingate_class_list_index++;
+  }
 
 }
 
@@ -462,6 +471,7 @@ void _modinit()
   add_common_function(F_USER_SIGNON, _user_signon);
   add_common_function(F_CONTINUOUS, _continuous);
   add_common_function(F_SCONTINUOUS, _scontinuous);
+  add_common_function(F_CONFIG, _config);
   wingate_class_list_index = 0;
 #ifdef DETECT_WINGATE
   add_action("wingate", "kline 60", REASON_WINGATE);

@@ -1,3 +1,15 @@
+db          2002/05/24 22:40:42 EDT	(20020525_3)
+
+  Modified files:
+    src                  main.c 
+  Log:
+  - extern *optarg int optind are declared in unistd.h
+  
+  Revision  Changes    Path
+  1.60      +0 -2      tcm-hybrid/src/main.c
+
+
+
 db          2002/05/24 22:37:40 EDT	(20020525_2)
 
   Modified files:

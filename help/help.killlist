@@ -1,0 +1,7 @@
+Usage: .killlist [-r] <[-l list name]|[pattern]> [reason]
+
+ Kills all known clients matching the given list/pattern
+
+  -l     - specifies the list to find clients in (see .help lists for more information)
+  -r     - specifies the given pattern is a regular expression
+

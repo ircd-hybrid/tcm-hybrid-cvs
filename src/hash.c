@@ -1,6 +1,6 @@
 /* hash.c
  *
- * $Id: hash.c,v 1.72 2004/06/02 02:00:44 bill Exp $
+ * $Id: hash.c,v 1.73 2004/06/02 20:05:55 bill Exp $
  */
 
 #include <stdio.h>
@@ -1182,6 +1182,8 @@ list_class(struct connection *connection_p, char *class_to_find, int total_only,
             }
           }
         }
+        else
+          num_found++;
       }
     }
   }
@@ -1338,7 +1340,7 @@ kill_or_list_users(struct connection *connection_p, char *userhost, int regex,
   }
 #endif
 
-  if(!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
+  if(!BadPtr(userhost) && (!strcmp(userhost,"*") || !strcmp(userhost,"*@*")))
   {
     send_to_connection(connection_p,
                        "Listing all users is not recommended.  To do it anyway, use '.list ?*@*'.");
@@ -1408,11 +1410,11 @@ kill_or_list_users(struct connection *connection_p, char *userhost, int regex,
 
 #ifndef AGGRESSIVE_GECOS
             if (ptr->info->gecos[0] == '\0')
-              snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s}",
+              snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s} [%%s]",
                        MAX_NICK);
             else
 #endif
-              snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s}",
+              snprintf(format, sizeof(format), "  %%%ds (%%s@%%s) [%%s] {%%s} [%%s]",
                        MAX_NICK);
 
             send_to_connection(connection_p, format,

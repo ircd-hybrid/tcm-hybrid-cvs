@@ -1,4 +1,4 @@
-/* $Id: dcc_commands.c,v 1.155 2004/06/02 02:00:44 bill Exp $ */
+/* $Id: dcc_commands.c,v 1.156 2004/06/02 20:05:55 bill Exp $ */
 
 #include "setup.h"
 
@@ -85,10 +85,8 @@ static void m_restart(struct connection *connection_p, int argc, char *argv[]);
 static void m_info(struct connection *connection_p, int argc, char *argv[]);
 static void m_locops(struct connection *connection_p, int argc, char *argv[]);
 static void m_unkline(struct connection *connection_p, int argc, char *argv[]);
-#ifndef NO_DLINE_SUPPORT
 static void m_dline(struct connection *connection_p, int argc, char *argv[]);
 static void m_undline(struct connection *connection_p, int argc, char *argv[]);
-#endif
 #ifdef ENABLE_QUOTE
 static void m_quote(struct connection *connection_p, int argc, char *argv[]);
 #endif
@@ -132,7 +130,7 @@ void
 m_classt(struct connection *connection_p, int argc, char *argv[])
 {
   if (argc < 2)
-    send_to_connection(connection_p, "Usage: %s <class name>", argv[0]);
+    send_to_connection(connection_p, "Usage: %s <class>", argv[0]);
   else
     list_class(connection_p, argv[1], YES, NULL);
 }
@@ -140,72 +138,85 @@ m_classt(struct connection *connection_p, int argc, char *argv[])
 void
 m_killlist(struct connection *connection_p, int argc, char *argv[])
 {
-  char reason[MAX_REASON];
+  char reason[MAX_REASON], pattern[MAX_USER + MAX_HOST + 2], list[BUFFERSIZE], c;
+  const char *usage;
+  int regex = NO, ro;
+
+  reason[0] = list[0] = pattern[0] = c = '\0';
+  optreset = optind = 1;
+  ro = 1;
 
 #ifdef HAVE_REGEX_H
-  if ((argc < 2) || (argc < 4 && (strcasecmp(argv[1], "-r") == 0)))
-  {
-    send_to_connection(connection_p,
-                       "Usage: %s <[wildcard userhost]|[-r regex]|[-l list]> [reason]",
-                       argv[0]);
-    return;
-  }
+  usage = "Usage: %s [-r] <[-l list name]|[pattern]> [reason]";
 
-  if (argc >= 4)
-  {
-    expand_args(reason, MAX_REASON, argc-3, argv+3);
-  }
+  while ((c = getopt(argc, argv, "l:r")) != -1)
 #else
-  if (argc < 2)
+  usage = "Usage: %s <[-l list name]|[pattern]> [reason]";
+
+  while ((c = getopt(argc, argv, "l:")) != -1)
+#endif
   {
-    send_to_connection(connection_p,
-                       "Usage: %s <[wildcard userhost]|[-l list]> [reason]",
-		       argv[0]);
+    switch (c)
+    {
+      case 'l':
+        if (optarg == NULL)
+        {
+          send_to_connection(connection_p, usage, argv[0]);
+          return;
+        }
+
+        strlcpy(list, optarg, sizeof(list));
+        break;
+
+#ifdef HAVE_REGEX_H
+      case 'r':
+        regex = YES;
+        break;
+#endif
+
+      case '?':
+      default:
+        break;
+    }
+  }
+
+  if (argc == 1)
+  {
+    send_to_connection(connection_p, usage, argv[0]);
     return;
   }
 
-  if (argc >= 3)
+  /* only bother if we're not killing a client list */
+  if (list[0] == '\0')
   {
-    expand_args(reason, sizeof(reason), argc-2, argv+2);
+    strlcpy(pattern, argv[argc-1], sizeof(pattern));
+    ro++;
   }
-#endif
   else
-    snprintf(reason, sizeof(reason), "No reason");
+    ro += 2;
+
+  if (regex == YES)
+    ro++;
+
+  expand_args(reason, MAX_REASON, argc-ro, argv+ro);
 
   if((connection_p->type & FLAGS_INVS) == 0)
   {
+    if (reason[0] == '\0')
+      snprintf(reason, sizeof(reason), "No reason");
+
     strncat(reason, " [", MAX_REASON - strlen(reason));
     strncat(reason, connection_p->registered_nick,
             MAX_REASON - strlen(reason));
     strncat(reason, "]", MAX_REASON - strlen(reason));
   }
 
-#ifdef HAVE_REGEX_H
-  if (strcasecmp(argv[1], "-r") == 0)
-  {
-    send_to_all(NULL, FLAGS_ALL, "*** killlist %s :%s by %s", argv[2],
-                reason, connection_p->registered_nick);
-    kill_or_list_users(connection_p, argv[2], YES, KILL, NULL, reason);
-  }
-  else
-#endif
-  if (strcasecmp(argv[1], "-l") == 0)
-  {
-    if (argc <= 2 || BadPtr(argv[2]))
-    {
-      send_to_connection(connection_p, "No such list.");
-      return;
-    }
-    send_to_all(NULL, FLAGS_ALL, "*** killlist -l %s :%s by %s", argv[2],
-                reason, connection_p->registered_nick);
-    kill_or_list_users(connection_p, argv[1], NO, KILL, argv[2], reason);
-  }
-  else
-  {
-    send_to_all(NULL, FLAGS_ALL, "*** killlist %s :%s by %s", argv[1],
-                reason, connection_p->registered_nick);
-    kill_or_list_users(connection_p, argv[1], NO, KILL, NULL, reason);
-  }
+  send_to_all(NULL, FLAGS_ALL, "*** killlist %s :%s by %s",
+              list[0] ? list : pattern,
+              reason, connection_p->registered_nick);
+  kill_or_list_users(connection_p, list[0] ? NULL : pattern,
+                     regex, KILL, list[0] ? list : NULL,
+                     reason[0] ? reason : NULL);
 }
 
 void
@@ -324,15 +335,13 @@ m_kill(struct connection *connection_p, int argc, char *argv[])
   if (argc < 2)
   {
     send_to_connection(connection_p,
-		       "Usage: %s <nick|user@host [reason]", argv[0]);
+		       "Usage: %s <nick> [reason]", argv[0]);
     return;
   }
   else if (argc == 2)
     snprintf(reason, MAX_REASON, "No reason");
   else
-  {
     expand_args(reason, MAX_REASON, argc-2, argv+2);
-  }
 
   send_to_all(NULL, FLAGS_VIEW_KLINES, "*** kill %s :%s by %s",
               argv[1], reason, connection_p->registered_nick);
@@ -894,172 +903,168 @@ m_events(struct connection *connection_p, int argc, char *argv[])
 void
 m_nfind(struct connection *connection_p, int argc, char *argv[])
 {
+  char list[BUFFERSIZE], pattern[MAX_USER + MAX_HOST + 2], c;
+  const char *usage;
+  int regex = NO;
+
+  list[0] = pattern[0] = c = '\0';
+  optreset = optind = 1;
+
 #ifdef HAVE_REGEX_H
-  if(!(argc >= 2) || !(argc <= 5) ||
-     /* .nfind -l list -r [a-z] */
-     (strcasecmp(argv[1], "-l") == 0 && argc >= 4 && strcasecmp(argv[3], "-r") == 0 && argc < 5) ||
-     /* .nfind -l list ?*       */
-     (strcasecmp(argv[1], "-l") == 0 && argc >= 4 && strcasecmp(argv[3], "-r") != 0 && argc < 4) ||
-     /* .nfind -r [a-z]         */
-     (strcasecmp(argv[1], "-l") != 0 && argc >= 2 && strcasecmp(argv[1], "-r") == 0 && argc < 3) ||
-     /* .nfind ?*               */
-     (strcasecmp(argv[1], "-l") != 0 && argc >= 2 && strcasecmp(argv[1], "-r") != 0 && argc < 2) )
-  {
-    send_to_connection(connection_p,
-                       "Usage: %s [-l list] <[wildcard nick]|[-r regex]>",
-                       argv[0]);
-    return;
-  }
+  usage = "Usage: %s [-r] [-l list] <pattern>";
 
-  if (strcasecmp(argv[1], "-l") == 0)
-  {
-    if (strcasecmp(argv[3], "-r") == 0)
-      list_nicks(connection_p, argv[4], YES, argv[2]);
-    else
-      list_nicks(connection_p, argv[3], NO, argv[2]);
-  }
-  else
-  {
-    if (strcasecmp(argv[1], "-r") == 0)
-      list_nicks(connection_p, argv[2], YES, NULL);
-    else
-      list_nicks(connection_p, argv[1], NO, NULL);
-  }
+  while ((c = getopt(argc, argv, "l:r")) != -1)
 #else
-  if(!(argc >= 2) || !(argc <= 4) ||
-     /* .nfind -l list ?*       */
-     (strcasecmp(argv[1], "-l") == 0 && argc < 4) ||
-     /* .nfind ?*               */
-     (strcasecmp(argv[1], "-l") != 0 && argc < 2) )
+  usage = "Usage: %s [-r] [-l list] <pattern>";
+
+  while ((c = getopt(argc, argv, "l:")) != -1)
+#endif
   {
-    send_to_connection(connection_p,
-		       "Usage: %s [-l list] <wildcarded nick>", argv[0]);
+    switch (c)
+    {
+      case 'l':
+        if (optarg == NULL)
+        {
+          send_to_connection(connection_p, usage, argv[0]);
+          return;
+        }
+
+        strlcpy(list, optarg, sizeof(list));
+        break;
+
+#ifdef HAVE_REGEX_H
+      case 'r':
+        regex = YES;
+        break;
+#endif
+
+      case '?':
+      default:
+        break;
+    }
+  }
+
+  if (argc == 1)   
+  {
+    send_to_connection(connection_p, usage, argv[0]);
     return;
   }
 
-  if (strcasecmp(argv[1], "-l") == 0)
-    list_nicks(connection_p, argv[3], NO, argv[2]);
-  else
-    list_nicks(connection_p, argv[1], NO, NULL);
-#endif /* HAVE_REGEX_H */
+  strlcpy(pattern, argv[argc-1], sizeof(pattern));
 
+  list_nicks(connection_p, pattern[0] ? pattern : NULL, regex, list[0] ? list : NULL);
 } 
 
 void
 m_list(struct connection *connection_p, int argc, char *argv[])
 {
+  char list[BUFFERSIZE], pattern[MAX_USER + MAX_HOST + 2], c;
+  const char *usage;
+  int regex = NO;
+
+  list[0] = pattern[0] = c = '\0';
+  optreset = optind = 1;
 #ifdef HAVE_REGEX_H
-  if(!(argc >= 2) || !(argc <= 5) ||
-     /* .list -l list -r [a-z]	*/
-     (strcasecmp(argv[1], "-l") == 0 && argc >= 4 && strcasecmp(argv[3], "-r") == 0 && argc < 5) ||
-     /* .list -l list ?*@*	*/
-     (strcasecmp(argv[1], "-l") == 0 && argc >= 4 && strcasecmp(argv[3], "-r") != 0 && argc < 4) ||
-     /* .list -r [a-z]		*/
-     (strcasecmp(argv[1], "-l") != 0 && argc >= 2 && strcasecmp(argv[1], "-r") == 0 && argc < 3) ||
-     /* .list ?*@*		*/
-     (strcasecmp(argv[1], "-l") != 0 && argc >= 2 && strcasecmp(argv[1], "-r") != 0 && argc < 2) )
-  {
-    send_to_connection(connection_p,
-                       "Usage: %s [-l list] <[wildcard userhost]|[-r regex]>",
-                       argv[0]);
-    return;
-  }
+  usage = "Usage: %s [-l list] <[-r regex]|[wildcarded userhost]>";
 
-  if(strcasecmp(argv[1], "-l") == 0)
-  {
-    if (strcasecmp(argv[3], "-r") == 0)
-      kill_or_list_users(connection_p, argv[4], YES, MAKE, argv[2], NULL);
-    else
-      kill_or_list_users(connection_p, argv[3], NO, MAKE, argv[2], NULL);
-  }
-  else if(argc == 2)
-    kill_or_list_users(connection_p, argv[1], NO, DUMP, NULL, NULL);
-  else
-    kill_or_list_users(connection_p, argv[2], YES, DUMP, NULL, NULL);
+  while ((c = getopt(argc, argv, "l:r")) != -1)
 #else
-  if(!(argc >= 2) || !(argc <= 4) ||
-     /* .list -l list ?*@*	*/
-     (strcasecmp(argv[1], "-l") == 0 && argc < 4) ||
-     /* .list ?*@*		*/
-     (strcasecmp(argv[1], "-l") != 0 && argc < 2) )
+  usage = "Usage: %s [-l list] <wildcarded userhost>";
+
+  while ((c = getopt(argc, argv, "l:")) != -1)
+#endif
   {
-    send_to_connection(connection_p,
-		       "Usage: %s <[wildcard userhost]|[-l list]>",
-                       argv[0]);
+    switch (c)
+    {
+      case 'l':
+        if (optarg == NULL)
+        {
+          send_to_connection(connection_p, usage, argv[0]);
+          return;
+        }
+
+        strlcpy(list, optarg, sizeof(list));
+        break;
+
+#ifdef HAVE_REGEX_H
+      case 'r':
+        regex = YES;
+        break;
+#endif
+
+      case '?':
+      default:
+        break;
+    }
+  }
+
+  if (argc == 1)   
+  {
+    send_to_connection(connection_p, usage, argv[0]);
     return;
   }
 
-  if(strcasecmp(argv[1], "-l") == 0)
-  {
-    if (BadPtr(argv[2]))
-    {
-      send_to_connection(connection_p, "No such list.");
-      return;
-    }
-    kill_or_list_users(connection_p, argv[2], NO, DUMP, argv[2], NULL);
-  }
-  else
-    kill_or_list_users(connection_p, argv[1], NO, DUMP, NULL, NULL);
-#endif /* HAVE_REGEX_H */
+  strlcpy(pattern, argv[argc-1], sizeof(pattern));
 
+  kill_or_list_users(connection_p, pattern[0] ? pattern : NULL,
+                     regex, DUMP, list[0] ? list : NULL, NULL);
+
+  return;
 }
 
 void
 m_gecos(struct connection *connection_p, int argc, char *argv[])
 {
+  char list[BUFFERSIZE], pattern[MAX_USER + MAX_HOST + 2], c;
+  const char *usage;
+  int regex = NO;
+
+  list[0] = pattern[0] = c = '\0';
+  optreset = optind = 1;
+#ifdef HAVE_REGEX_H 
+  usage = "Usage: %s [-l list] <[-r regex]|[wildcarded gecos]>";
+
+  while ((c = getopt(argc, argv, "l:r")) != -1)
+#else             
+  usage = "Usage: %s [-l list] <wildcarded gecos>";
+
+  while ((c = getopt(argc, argv, "l:")) != -1)
+#endif
+  {                
+    switch (c)    
+    { 
+      case 'l':
+        if (optarg == NULL)
+        {
+          send_to_connection(connection_p, usage, argv[0]);
+          return;
+        }
+
+        strlcpy(list, optarg, sizeof(list));
+        break;
+
 #ifdef HAVE_REGEX_H
-  if(!(argc >= 2) || !(argc <= 5) ||
-     /* .gecos -l list -r [a-z]	*/
-     (strcasecmp(argv[1], "-l") == 0 && argc >= 4 && strcasecmp(argv[3], "-r") == 0 && argc < 5) ||
-     /* .gecos -l list ?*		*/
-     (strcasecmp(argv[1], "-l") == 0 && argc >= 4 && strcasecmp(argv[3], "-r") != 0 && argc < 4) ||
-     /* .gecos -r [a-z]		*/
-     (strcasecmp(argv[1], "-l") != 0 && argc >= 2 && strcasecmp(argv[1], "-r") == 0 && argc < 3) ||
-     /* .gecos ?*			*/
-     (strcasecmp(argv[1], "-l") != 0 && argc >= 2 && strcasecmp(argv[1], "-r") != 0 && argc < 2) )
-  {
-    send_to_connection(connection_p,
-                       "Usage: %s [-l list] <[wildcard gecos]|[-r regex]>", argv[0]);
-    return;
-  }
+      case 'r':
+        regex = YES;
+        break;
+#endif
 
-  if(strcasecmp(argv[1], "-l") == 0)
-  {
-    if (strcasecmp(argv[3], "-r") == 0)
-      list_gecos(connection_p, argv[4], YES, argv[2]);
-    else
-      list_gecos(connection_p, argv[1], NO, argv[2]);
-  }
-  else if (argc == 2)
-    list_gecos(connection_p, argv[1], NO, NULL);
-  else
-    list_gecos(connection_p, argv[2], YES, NULL);
-#else
-  if(!(argc >= 2) || !(argc <= 4) ||
-     /* .gecos -l list ?*	*/
-     (strcasecmp(argv[1], "-l") == 0 && argc < 4) ||
-     /* .gecos ?*		*/
-     (strcasecmp(argv[1], "-l") != 0 && argc < 2) )
-  {
-    send_to_connections(connection_p,
-                        "Usage: %s [-l list] <wildcard gecos>",
-         argv[0]);
-    return;
-  }
-
-  if (strcasecmp(argv[1], "-l") == 0)
-  {
-    if (BadPtr(argv[2])
-    {
-      send_to_connection(connection_p, "No such list.");
-      return;
+      case '?':
+      default:
+        send_to_connection(connection_p, usage, argv[0]);
+        return;
     }
-    list_gecos(connection_p, argv[3], NO, argv[2]);
   }
-  else
-    list_gecos(connection_p, argv[1], NO, NULL);
-#endif /* HAVE_REGEX_H */
 
+  if (argc == 1)   
+  {
+    send_to_connection(connection_p, usage, argv[0]);
+    return;
+  }
+
+  strlcpy(pattern, argv[argc-1], sizeof(pattern));
+
+  list_gecos(connection_p, pattern[0] ? pattern : NULL, regex, list[0] ? list : NULL);
 }
 
 void
@@ -1460,9 +1465,6 @@ struct dcc_command klink_msgtab = {
 struct dcc_command kdrone_msgtab = {
  "kdrone", NULL, {m_unregistered, m_kaction, m_kaction}
 };
-struct dcc_command kbot_msgtab = {
- "kbot", NULL, {m_unregistered, m_kaction, m_kaction}
-};
 struct dcc_command kill_msgtab = {
  "kill", NULL, {m_unregistered, m_kill, m_kill}
 };
@@ -1611,7 +1613,6 @@ init_commands(void)
   add_dcc_handler(&kflood_msgtab);
   add_dcc_handler(&klink_msgtab);
   add_dcc_handler(&kdrone_msgtab);
-  add_dcc_handler(&kbot_msgtab);
   add_dcc_handler(&kill_msgtab);
   add_dcc_handler(&kspam_msgtab);
   add_dcc_handler(&register_msgtab);

@@ -1,0 +1,6 @@
+Usage: .class [-l list name] <class>
+
+ Lists all users in the specified connection class
+
+  -l     - specifies the list to append to (see .help lists for more information)
+

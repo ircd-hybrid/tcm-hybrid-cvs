@@ -1,0 +1,6 @@
+Usage: .kline [time] <[nick]|[userhost]|[-l list name]> [reason]
+
+ Places a kline on the server against the specified target(s)
+
+  -l     - specifies the list to append to (see .help lists for more information)
+

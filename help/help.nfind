@@ -1,0 +1,7 @@
+Usage: .nfind [-r] [-l list name] <pattern>
+
+ Matches the given pattern against the nickname of all known clients
+
+  -l     - specifies the list to append to (see .help lists for more information)
+  -r     - specifies the given pattern is a regular expression
+

@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.41 2004/06/02 02:00:43 bill Exp $
+# $Id: Makefile.in,v 1.42 2004/06/02 20:05:55 bill Exp $
 
 CC = @CC@
 RM = @RM@
@@ -61,7 +61,7 @@ OBJECTS = ${SOURCES:.c=.o}
 all: build
 
 clean: 
-	${RM} -f *.o *~ y.tab.c lex.yy.c
+	${RM} -f *.o *~ y.tab.? lex.yy.c
 
 distclean: clean
 	${RM} -f Makefile

@@ -1,6 +1,6 @@
 /* Beginning of major overhaul 9/3/01 */
 
-/* $Id: main.c,v 1.138 2004/06/02 02:00:44 bill Exp $ */
+/* $Id: main.c,v 1.139 2004/06/02 20:05:55 bill Exp $ */
 
 #include "setup.h"
 
@@ -174,10 +174,6 @@ main(int argc, char *argv[])
     load_config_file(CONFIG_FILE);
 #else
   read_conf_files(1);
-#endif
-
-#ifdef DEBUGMODE
-  exempt_summary();
 #endif
 
   srandom(time(NULL));	/* -zaph */

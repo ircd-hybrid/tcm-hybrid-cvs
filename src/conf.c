@@ -1,7 +1,7 @@
 /*
  * config file parsing
  *
- * $Id: conf.c,v 1.1 2004/06/02 02:00:44 bill Exp $
+ * $Id: conf.c,v 1.2 2004/06/02 20:05:55 bill Exp $
  */
 
 #include <stdio.h>
@@ -97,7 +97,7 @@ read_conf_files(int cold)
   {
     if (cold)
     { 
-      fprintf(stderr, "Failed in reading configuration file %s", filename);
+      fprintf(stderr, "Failed in reading configuration file %s\n", filename);
       exit(-1);
     }
     else

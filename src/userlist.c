@@ -3,7 +3,7 @@
  * contains functions for loading and updating the userlist and
  * config files.
  *
- * $Id: userlist.c,v 1.154 2004/06/02 02:00:44 bill Exp $
+ * $Id: userlist.c,v 1.155 2004/06/02 20:05:56 bill Exp $
  */
 
 #include <errno.h>
@@ -28,7 +28,7 @@
 #include "handler.h"
 #include "skline.h"
 
-static void set_initial_umodes(struct oper_entry *, const char *);
+static void set_initial_umodes(struct oper_entry *);
 
 static void m_umode(struct connection *, int, char *argv[]);
 static void set_umode_connection(struct connection *, int, const char *);
@@ -337,27 +337,13 @@ find_user_in_userlist(const char *username)
  * side effects - usermodes from conf and prefs are set
  */
 void
-set_initial_umodes(struct oper_entry *user, const char *umode)
+set_initial_umodes(struct oper_entry *user)
 {
   FILE *fp;
   char user_pref_filename[MAX_BUFF];
   char type_string[SMALL_BUFF];
   char *p;
   int type;
-  int i;
-  int j;
-
-  for(i = 0; umode[i] != '\0'; i++)
-  {
-    for(j = 0; umode_privs[j].umode; j++)
-    {
-      if(umode[i] == umode_privs[j].umode)
-      {
-        user->type |= umode_privs[j].type;
-        break;
-      }
-    }
-  }
 
   snprintf(user_pref_filename, MAX_BUFF,
 	   "etc/%s.pref", user->usernick);
@@ -471,8 +457,7 @@ add_oper(char *username, char *host, char *usernick,
   strlcpy(user->usernick, usernick, sizeof(user->usernick));
   strlcpy(user->password, password, sizeof(user->password));
 
-  if (flags)
-    set_initial_umodes(user, flags);
+  //set_initial_umodes(user);
 
   dlink_add_tail(user, ptr, &user_list);
 }
@@ -660,42 +645,6 @@ reload_userlist(void)
 
   logclear();
 }
-
-#ifdef DEBUGMODE
-/*
- * exempt_summary()
- *
- * inputs - none
- * outputs - none
- * side effects - prints out summary of exempts, indexed by action names
- */
-void
-exempt_summary()
-{
-  dlink_node *ptr;
-  struct exempt_entry *exempt;
-  int i;
-
-  for (i = 0; i < MAX_ACTIONS; i++)
-  {
-    if (actions[i].name[0] == '\0')
-     break;
-
-    printf("%s:", actions[i].name);
-
-    DLINK_FOREACH(ptr, exempt_list.head)
-    {
-      exempt = ptr->data;
-
-      if(exempt->type & i)
-        printf(" %s@%s", exempt->username, exempt->host);
-    }
-
-    printf("\n");
-  }
-}
-#endif
-
 
 /*
  * local_ip()

@@ -1,12 +1,6 @@
-/* Stats - IRC Statistical Services for Hybrid, csircd, and IRCnet 2.10
-** match.c - IRCnet derived match() function
-**
-** Copyright W. Campbell and others.  See README for more details
-** Some code Copyright: Jonathan George, Kai Seidler, ircd-hybrid Team,
-**                      IRCnet IRCD developers.
-**
-** $Id: match.c,v 1.1 2002/04/16 21:33:00 wcampbel Exp $
-*/
+/* match.c - IRCnet derived match() function
+ * $Id: match.c,v 1.2 2002/06/01 02:00:08 wcampbel Exp $
+ */
 
 /* Original header */
 
@@ -33,7 +27,7 @@
 #include <ctype.h>
 #include "match.h"
 
-/* Self containment for NoteServ-Hybrid. */
+/* Self containment for NoteServ-Hybrid, tcm, and Stats. */
 
 #define  BadPtr(x) (!(x) || (*(x) == '\0'))
 #define PRINT 1

@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm, including dcc connections.
  *
- * $Id: tcm_io.c,v 1.20 2002/05/25 15:08:09 leeh Exp $
+ * $Id: tcm_io.c,v 1.21 2002/05/25 15:11:15 db Exp $
  */
 
 #include <stdio.h>
@@ -471,29 +471,29 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
   strncpy(initiated_dcc_user,user,MAX_USER);
   strncpy(initiated_dcc_host,host,MAX_HOST);
 
-  if( (initiated_dcc_socket = socket(PF_INET,SOCK_STREAM,6)) < 0)
+  if ((initiated_dcc_socket = socket(PF_INET,SOCK_STREAM,0)) < 0)
   {
     fprintf(stderr, "Error on open()\n");
     notice(nick,"Error on open");
     return;
   }
 
-  for(dcc_port = LOWEST_DCC_PORT; dcc_port < HIGHEST_DCC_PORT; dcc_port++ )
+  for (dcc_port = LOWEST_DCC_PORT; dcc_port < HIGHEST_DCC_PORT; dcc_port++ )
   {
     memset(&socketname,0, sizeof(struct sockaddr));
     socketname.sin_family = AF_INET;
     socketname.sin_addr.s_addr = INADDR_ANY;
     socketname.sin_port = htons(dcc_port);
 
-    if( (result = bind(initiated_dcc_socket,(struct sockaddr *)&socketname,
-                       sizeof(socketname)) < 0) )
+    if ((result = bind(initiated_dcc_socket,(struct sockaddr *)&socketname,
+                       sizeof(socketname)) < 0))
     {
       continue;
     }
     break;
   }
 
-  if(result < 0)
+  if (result < 0)
   {
     (void)close(initiated_dcc_socket);
     initiated_dcc_socket = (-1);
@@ -512,8 +512,8 @@ initiate_dcc_chat(const char *nick, const char *user, const char *host)
     return;
   }
 
-  privmsg(nick,"\001DCC CHAT chat %lu %d\001",
-          local_ip(ourhostname),dcc_port);
+  privmsg (nick,"\001DCC CHAT chat #%lu %d\001",
+          local_ip(ourhostname), dcc_port);
 
   if (config_entries.debug && outfile)
       (void)fprintf(outfile, "DEBUG: initiated_dcc_socket = %d\n",
@@ -559,19 +559,20 @@ print_to_server(const char *format, ...)
  * notice
  *
  * inputs	- nick to privmsg
+ *		- format string to use
  * 		- var args to send
  * output	- none
  * side effects	- nick is notice'd
  */
 
 void
-notice(const char *nick,...)
+notice(const char *nick, const char *format, ...)
 {
-  char command[MAX_NICK+20];
+  char command[MAX_BUFF];
   va_list va;
-  snprintf(command, MAX_NICK+20, "NOTICE %s :%%s", nick);
-  command[MAX_NICK+19] = '\0';
-  va_start(va,nick);
+  snprintf(command, MAX_BUFF-1, "NOTICE %s :%s", nick, format);
+  command[MAX_BUFF-1] = '\0';
+  va_start(va,format);
   va_print_to_server(command, va);
   va_end(va);
 }
@@ -580,19 +581,20 @@ notice(const char *nick,...)
  * privmsg
  *
  * inputs	- nick to privmsg
- * 		- var args to send
+ * 		- format string to use
+ *		- var args to send
  * output	- none
  * side effects	- nick is privmsg'd
  */
 
 void
-privmsg(const char *nick,...)
+privmsg(const char *nick,const char *format, ...)
 {
-  char command[MAX_NICK+20];
+  char command[MAX_BUFF];
   va_list va;
-  snprintf(command, MAX_NICK+20, "PRIVMSG %s :%%s", nick);
-  command[MAX_NICK+19] = '\0';
-  va_start(va,nick);
+  snprintf(command, MAX_BUFF-1, "PRIVMSG %s :", nick);
+  command[MAX_BUFF-1] = '\0';
+  va_start(va,format);
   va_print_to_server(command, va);
   va_end(va);
 }
@@ -756,8 +758,7 @@ accept_dcc_connection(const char *hostport,
   if ((p = strchr(userhost,'@')) != NULL)
   {
     user = userhost;
-    *p = '\0';
-    p++;
+    *p++ = '\0';
     host = p;
   }
   else

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.68 2002/05/25 02:37:37 db Exp $
+ * $Id: userlist.c,v 1.69 2002/05/25 15:11:16 db Exp $
  *
  */
 
@@ -917,8 +917,8 @@ void exemption_summary()
 /*
  * local_ip()
  *
- * inputs               - NONE
- * output               - ip of local host
+ * inputs	- NONE
+ * output	- ip of local host
  * side effects - NONE
  */
 unsigned long 

@@ -1,3 +1,7 @@
+*** 20010722_12 by wcampbel
+Fixed a couple bugs spotted by Stephen Olsen (Inglish) with .action
+
+
 *** 20010722_11 by wcampbel
 Remove the old strdup code (1990!!!)
 Store the pid file in etc/

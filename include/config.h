@@ -5,7 +5,7 @@
  * tcm config.h
  * Global definitions obtained by including this file.
  *
- * $Id: config.h,v 1.30 2001/11/08 20:39:51 bill Exp $
+ * $Id: config.h,v 1.31 2001/11/09 18:33:06 wcampbel Exp $
  */
 
 /*
@@ -148,18 +148,6 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 #define REASON_KDRONE "Drone bots"
 
 /*
- * define this if you want services code at all
- */
-#define SERVICES
-
-/* to kline drones
- * drone detect only works if the tcm is global oper ;-(
- */
-
-#define SERVICES_DRONES
-#define REASON_DRONES "Auto-kline drones"
-
-/*
  * E: lines in userlist.cf will overrule auto kills/klines
  * exemptions are also derived from /stats E /stats F
  * requests, unless the ircd tells tcm to use /stats I (hybrid 6 and higher)
@@ -210,6 +198,18 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
    not used if OPERS_ONLY is defined */
 #define MAXBANS 25
 
+/*
+ * define this if you want services code at all
+ */
+#define SERVICES
+
+/* to kline drones
+ * drone detect only works if the tcm is global oper ;-(
+ */
+
+#define SERVICES_DRONES
+#define REASON_DRONES "Auto-kline drones"
+
 /* whom to message for a global clone report */
 #define SERVICES_NICK "services@services.us"
 
@@ -234,6 +234,8 @@ for .kflood would be the #define for KLINE_REASON_KFLOOD etc. */
 
 /* how often to check for global clones in seconds */
 #define SERVICES_CHECK_TIME 60
+
+/* END OF SERVICES DEFINES */
 
 /* Maximum DCC chat connections */
 #define MAXDCCCONNS 50

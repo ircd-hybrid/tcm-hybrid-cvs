@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.127 2002/05/28 11:52:38 leeh Exp $
+ * $Id: bothunt.c,v 1.128 2002/05/28 12:14:16 leeh Exp $
  */
 
 #include <stdio.h>
@@ -1706,7 +1706,6 @@ reload_bothunt(void)
 void
 init_bothunt(void)
 {
-  init_hash();
   memset(&nick_changes,0,sizeof(nick_changes));
   memset(&reconnect_clone,0, sizeof(reconnect_clone));
   init_link_look_table();

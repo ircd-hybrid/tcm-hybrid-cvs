@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.39 2002/05/28 04:32:24 db Exp $
+ * $Id: parse.c,v 1.40 2002/05/28 12:14:17 leeh Exp $
  */
 
 #include <stdio.h>
@@ -35,6 +35,7 @@
 #include "serno.h"
 #include "patchlevel.h"
 #include "modules.h"
+#include "handler.h"
 
 static void do_init(void);
 static void process_server(int conn_num,
@@ -48,7 +49,6 @@ static void on_nick(char *old_nick, char *new_nick);
 static void on_ctcp(int connnum, int argc, char *argv[]);
 static void wallops(int connnum, int argc, char *argv[]);
 static void on_nick_taken(void);
-static void cannot_join(char *channel);
 
 int  maxconns = 0;
 
@@ -383,7 +383,7 @@ process_server(int conn_num, char *source, char *function, char *param)
 	
     case ERR_CHANNELISFULL: case ERR_INVITEONLYCHAN:
     case ERR_BANNEDFROMCHAN: case ERR_BADCHANNELKEY:
-      cannot_join(argv[3]);
+      mychannel[0] = '\0';
       break;
 	
     case RPL_MYINFO:
@@ -665,36 +665,6 @@ on_nick_taken(void)
     newnick(randnick);
     strcpy(mynick,randnick);
   }
-}
-
-/*
- * cannot_join
- *
- * inputs       - channel name
- * output       - none
- * side effects -
- */
-
-static void
-cannot_join(char *channel)
-{
-  char newchan[MAX_CHANNEL];
-  int i;
-
-  if (strcmp(channel,config_entries.defchannel) == 0)
-    (void)snprintf(newchan,sizeof(newchan) - 1,"%.78s2",
-                  config_entries.defchannel);
-  else
-  {
-    channel += strlen(config_entries.defchannel);
-    i = atoi(channel);
-    (void)snprintf(newchan,sizeof(newchan) - 1,"%.78s%1d",
-                   config_entries.defchannel,i+1);
-  }
-
-  join(newchan, config_entries.defchannel_key);
-  set_modes(newchan, config_entries.defchannel_mode,
-            config_entries.defchannel_key);
 }
 
 /*

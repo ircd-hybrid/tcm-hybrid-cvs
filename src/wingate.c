@@ -1,4 +1,4 @@
-/* $Id: wingate.c,v 1.59 2002/06/23 13:24:32 wcampbel Exp $ */
+/* $Id: wingate.c,v 1.60 2002/06/23 21:09:16 db Exp $ */
 
 
 #include <netdb.h>
@@ -76,11 +76,11 @@ void m_proxy(int connnum, int argc, char *argv[])
   if (argc <= 2)
   {
 #ifdef DETECT_SQUID
-    print_to_socket(connections[connnum].socket,
+    send_to_connection(connections[connnum].socket,
 		    "Usage: %s <type> <host> [port]",
                     argv[0]);
 #else
-    print_to_socket(connections[connnum].socket,
+    send_to_connection(connections[connnum].socket,
 		    "Usage: %s <type> <host>", argv[0]);
 #endif
     return;
@@ -96,7 +96,7 @@ void m_proxy(int connnum, int argc, char *argv[])
 #ifdef DETECT_SQUID
   if (argc != 4)
   {
-    print_to_socket(connections[connnum].socket,
+    send_to_connection(connections[connnum].socket,
 		    "Usage: %s squid <host> [port]",
                     argv[0]);
     return;
@@ -295,7 +295,7 @@ read_squid(int i)
 	}
       else
 	{
-	  print_to_socket(connections[i].socket,
+	  send_to_connection(connections[i].socket,
 			  "CONNECT %s:%d HTTP/1.0\r\n\r\n",
 			  SOCKS_CHECKIP, SOCKS_CHECKPORT);
 	  connections[i].curr_state = SQUID_READING;

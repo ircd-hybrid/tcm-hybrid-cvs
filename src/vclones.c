@@ -1,7 +1,7 @@
 /* vclones.c
  *
  * contains code for monitoring virtual hosted clones
- * $Id: vclones.c,v 1.12 2002/06/23 13:24:32 wcampbel Exp $
+ * $Id: vclones.c,v 1.13 2002/06/23 21:09:16 db Exp $
  */
 
 #include <assert.h>
@@ -77,7 +77,7 @@ m_vlist(int connnum, int argc, char *argv[])
 {
 #ifdef HAVE_REGEX_H
   if ((argc < 2) || (argc > 2 && strcasecmp(argv[1], "-r")))
-    print_to_socket(connections[connnum].socket,
+    send_to_connection(connections[connnum].socket,
                     "Usage: %s <wildcarded/regexp ip>",
                     argv[0]);
   else if (argc == 2)
@@ -86,7 +86,7 @@ m_vlist(int connnum, int argc, char *argv[])
     list_virtual_users(connections[connnum].socket, argv[2], YES);
 #else
   if (argc < 2)
-    print_to_socket(connections[connnum].socket,
+    send_to_connection(connections[connnum].socket,
                     "Usage %s <wildcarded ip>", argv[0]);
   else
     list_virtual_users(connections[connnum].socket, argv[1], NO);
@@ -163,12 +163,12 @@ report_vbots(int sock, int nclones, int check_user)
                     {
 		      if (check_user)
 			{
-			  print_to_socket(sock,
+			  send_to_connection(sock,
 			  "Multiple clients from the following userhosts:");
 			}
 		      else
 			{
-			  print_to_socket(sock,
+			  send_to_connection(sock,
 			  "Multiple clients from the following ip blocks:");
 			}
                       foundany = YES;
@@ -176,7 +176,7 @@ report_vbots(int sock, int nclones, int check_user)
 
 		  if (check_user)
 		    {
-		      print_to_socket(sock,
+		      send_to_connection(sock,
 				  " %s %2d connections -- %s@%s.* {%s}",
 				      (num_found-nclones > 2) ? "==>" :
 				      "   ", num_found, ptr->info->username,
@@ -185,7 +185,7 @@ report_vbots(int sock, int nclones, int check_user)
 		    }
 		    else
 		    {
-		      print_to_socket(sock,
+		      send_to_connection(sock,
 				      " %s %2d connections -- %s.*",
 				      (num_found-nclones > 3) ? "==>" : "   ",
 				      num_found,
@@ -198,7 +198,7 @@ report_vbots(int sock, int nclones, int check_user)
     }
 
   if (!foundany)
-    print_to_socket(sock, "No multiple virtual logins found.");
+    send_to_connection(sock, "No multiple virtual logins found.");
 }
 
 /*
@@ -228,14 +228,14 @@ list_virtual_users(int sock, char *userhost, int regex)
   {
     char errbuf[REGEX_SIZE];
     regerror(i, (regex_t *)&reg, errbuf, REGEX_SIZE);
-    print_to_socket(sock, "Error compiling regular expression: %s",
+    send_to_connection(sock, "Error compiling regular expression: %s",
                     errbuf);
     return;
   }
 #endif
   if (!strcmp(userhost,"*") || !strcmp(userhost,"*@*"))
     {
-      print_to_socket(sock,
+      send_to_connection(sock,
 "Listing all users is not recommended.  To do it anyway, use '.vlist ?*@*'.");
       return;
     }
@@ -255,19 +255,19 @@ list_virtual_users(int sock, char *userhost, int regex)
 #endif
       {
         if (num_found == 0)
-          print_to_socket(sock, "The following clients match %s:", userhost);
+          send_to_connection(sock, "The following clients match %s:", userhost);
 
 	num_found++;
-        print_to_socket(sock, "  %s (%s@%s) [%s] {%s}", ipptr->info->nick,
+        send_to_connection(sock, "  %s (%s@%s) [%s] {%s}", ipptr->info->nick,
              ipptr->info->username, ipptr->info->host, ipptr->info->ip_host,
              ipptr->info->class);
       }
     }
   }
   if (num_found > 0)
-    print_to_socket(sock, "%d matches for %s found", num_found, userhost);
+    send_to_connection(sock, "%d matches for %s found", num_found, userhost);
   else
-    print_to_socket(sock, "No matches for %s found", userhost);
+    send_to_connection(sock, "No matches for %s found", userhost);
 }
 
 #endif

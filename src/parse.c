@@ -2,7 +2,7 @@
  * 
  * handles all functions related to parsing
  *
- * $Id: parse.c,v 1.79 2002/06/23 19:50:17 db Exp $
+ * $Id: parse.c,v 1.80 2002/06/23 21:09:15 db Exp $
  */
 
 #include <stdio.h>
@@ -146,7 +146,7 @@ parse_client(int i)
     }
     /* command not found */
     else
-      print_to_socket(connections[i].socket,
+      send_to_connection(connections[i].socket,
 		      "Unknown command [%s]", argv[0] + 1);
 
   }
@@ -162,7 +162,7 @@ parse_client(int i)
       send_to_partyline(i, "<%s> %s", connections[i].nick, buff);
     }
     else
-      print_to_socket(connections[i].socket,
+      send_to_connection(connections[i].socket,
 		      "You are not +p, not sending to chat line");
   }
 }
@@ -318,7 +318,7 @@ process_server(struct source_client *source_p, char *function, char *param)
   }
   else if (strcmp(function, "PING") == 0)
   {
-    print_to_server("PONG %s", argv[2]);
+    send_to_server("PONG %s", argv[2]);
     return;	/* done */
   }
   else if(strcmp(function, "ERROR") == 0)
@@ -479,7 +479,7 @@ static void
 do_init(void)
 {
   oper();
-  print_to_server("VERSION");
+  send_to_server("VERSION");
   join();
   clear_bothunt();
 }
@@ -495,9 +495,9 @@ static void
 send_umodes(char *nick)
 {
   if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
-    print_to_server("MODE %s :+bcdfknrswxyzl", nick);
+    send_to_server("MODE %s :+bcdfknrswxyzl", nick);
   else
-    print_to_server("FLAGS +ALL");
+    send_to_server("FLAGS +ALL");
 }
 
 /*

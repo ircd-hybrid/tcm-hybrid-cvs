@@ -1,6 +1,6 @@
 /* bothunt.c
  *
- * $Id: bothunt.c,v 1.182 2002/06/23 19:50:16 db Exp $
+ * $Id: bothunt.c,v 1.183 2002/06/23 21:09:13 db Exp $
  */
 
 #include <stdio.h>
@@ -298,7 +298,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
       return;
     ++q;
     *p = '\0';
-    print_to_socket(connections[testlines.index].socket,
+    send_to_connection(connections[testlines.index].socket,
 		    "%s has access to class %s", testlines.umask, q);
     testlines.index = -1;
     memset(&testlines.umask, 0, sizeof(testlines.umask));
@@ -312,7 +312,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
     if ((p = strchr(q, ']')) == NULL)
       return;
     *p = '\0';
-    print_to_socket(connections[testlines.index].socket, 
+    send_to_connection(connections[testlines.index].socket, 
 	 "%s has been K-lined: %s", testlines.umask, q);
     testlines.index = -1;
     memset(&testlines.umask, 0, sizeof(testlines.umask));
@@ -766,7 +766,7 @@ on_server_notice(struct source_client *source_p, int argc, char *argv[])
 
   /* No aconf found */
   case NOACONFFOUND:
-    print_to_socket(connections[testlines.index].socket,
+    send_to_connection(connections[testlines.index].socket,
 		    "%s does not have access",
 		    testlines.umask);
     testlines.index = -1;
@@ -1360,7 +1360,7 @@ report_nick_flooders(int sock)
                   nick_changes[i].nick_change_count -= time_ticks;
                   if( nick_changes[i].nick_change_count > 1 )
                     {
-                      print_to_socket(sock,
+                      send_to_connection(sock,
 				      "user: %s@%s (%s) %d in %d",
 				      nick_changes[i].user,
 				      nick_changes[i].host,
@@ -1377,7 +1377,7 @@ report_nick_flooders(int sock)
 
   if(!reported_nick_flooder)
     {
-      print_to_socket(sock, "No nick flooders found" );
+      send_to_connection(sock, "No nick flooders found" );
     }
 }
 

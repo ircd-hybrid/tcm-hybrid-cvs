@@ -2,7 +2,7 @@
  *
  * handles dcc connections.
  *
- * $Id: dcc.c,v 1.16 2002/06/22 18:21:46 leeh Exp $
+ * $Id: dcc.c,v 1.17 2002/06/23 21:09:14 db Exp $
  */
 
 #include <stdio.h>
@@ -302,7 +302,7 @@ finish_dcc_chat(int i)
   connections[i].time_out = 0;
   FD_SET(connections[i].socket, &readfds);
   print_motd(connections[i].socket);
-  print_to_socket(connections[i].socket,
+  send_to_connection(connections[i].socket,
                   "Connected.  Send '.help' for commands.");
 }
 

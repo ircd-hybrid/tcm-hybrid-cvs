@@ -2,7 +2,7 @@
  *
  * the include files for the tcm IO
  * 
- * $Id: tcm_io.h,v 1.40 2002/06/22 18:21:44 leeh Exp $
+ * $Id: tcm_io.h,v 1.41 2002/06/23 21:09:11 db Exp $
  */
 #ifndef __TCM_IO_H
 #define __TCM_IO_H
@@ -59,8 +59,8 @@ extern fd_set writefds;
 
 void read_packet(void);
 void client_link_closed(int, const char *format, ...);
-void print_to_socket(int, const char *, ...);
-void print_to_server(const char *, ...);
+void send_to_connection(int, const char *, ...);
+void send_to_server(const char *, ...);
 /* send_to_all - Hendrix (va'd by bill) */
 void send_to_all(int type, const char *format,...);
 void send_to_partyline(int conn_num, const char *format,...);

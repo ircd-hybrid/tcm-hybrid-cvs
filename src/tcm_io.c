@@ -2,7 +2,7 @@
  *
  * handles the I/O for tcm
  *
- * $Id: tcm_io.c,v 1.91 2002/06/22 18:21:47 leeh Exp $
+ * $Id: tcm_io.c,v 1.92 2002/06/23 21:09:15 db Exp $
  */
 
 #include <stdio.h>
@@ -53,8 +53,8 @@
 #include "patchlevel.h"
 
 static int get_line(char *inbuf,int *len, struct connection *connections_p);
-static void va_print_to_socket(int sock, const char *format, va_list va);
-static void va_print_to_server(const char *format, va_list va);
+static void va_send_to_connection(int sock, const char *format, va_list va);
+static void va_send_to_server(const char *format, va_list va);
 static void signon_to_server(int unused);
 static void reconnect(void);
 
@@ -117,7 +117,7 @@ read_packet(void)
                 if(current_time > (connections[i].last_message_time
                                    + (connections[i].time_out / 2)))
 		{
-                  print_to_server("PING tcm");
+                  send_to_server("PING tcm");
 		  tcm_status.ping_state = S_PINGSENT;
 		}
 	      }
@@ -386,7 +386,7 @@ find_free_connection_slot(void)
 
 
 /*
- * print_to_socket()
+ * send_to_connection()
  *
  * inputs	- socket to output on
  *		- format string to output
@@ -394,27 +394,27 @@ find_free_connection_slot(void)
  * side effects	- NONE
  */
 void
-print_to_socket(int sock, const char *format, ...)
+send_to_connection(int sock, const char *format, ...)
 {
   va_list va;
   va_start(va,format);
-  va_print_to_socket(sock, format, va);
+  va_send_to_connection(sock, format, va);
   va_end(va);
 }
 
 /*
- * print_to_server()
+ * send_to_server()
  *
  * inputs	- format string to output to server
  * output	- NONE
  * side effects	- NONE
  */
 void
-print_to_server(const char *format, ...)
+send_to_server(const char *format, ...)
 {
   va_list va;
   va_start(va,format);
-  va_print_to_server(format, va);
+  va_send_to_server(format, va);
   va_end(va);
 }
 
@@ -435,7 +435,7 @@ notice(const char *nick, const char *format, ...)
   va_list va;
   snprintf(command, MAX_BUFF, "NOTICE %s :%s", nick, format);
   va_start(va,format);
-  va_print_to_server(command, va);
+  va_send_to_server(command, va);
   va_end(va);
 }
 
@@ -457,26 +457,26 @@ privmsg(const char *target, const char *format, ...)
 
   snprintf(command, MAX_BUFF, "PRIVMSG %s :%s", target, format);
   va_start(va,format);
-  va_print_to_server(command, va);
+  va_send_to_server(command, va);
   va_end(va);
 }
 
 /*
- * va_print_to_server()
+ * va_send_to_server()
  *
  * inputs	- format string to output to server
  * output	- NONE
  * side effects	- NONE
  */
 static void
-va_print_to_server(const char *format, va_list va)
+va_send_to_server(const char *format, va_list va)
 {
   if (server_id != INVALID)
-    va_print_to_socket(connections[server_id].socket, format, va);
+    va_send_to_connection(connections[server_id].socket, format, va);
 }
 
 /*
- * va_print_to_socket() (helper function for above two)
+ * va_send_to_connection() (helper function for above two)
  *
  * inputs	- socket to output on
  *		- format string to output
@@ -484,7 +484,7 @@ va_print_to_server(const char *format, va_list va)
  * side effects	- NONE
  */
 static void
-va_print_to_socket(int sock, const char *format, va_list va)
+va_send_to_connection(int sock, const char *format, va_list va)
 {
   char msgbuf[MAX_BUFF];
 
@@ -519,7 +519,7 @@ send_to_all(int send_umode, const char *format,...)
     {
       if((connections[i].state == S_CLIENT) &&
          (connections[i].type & send_umode))
-        va_print_to_socket(connections[i].socket, format, va);
+        va_send_to_connection(connections[i].socket, format, va);
     }
   va_end(va);
 }
@@ -546,7 +546,7 @@ send_to_partyline(int conn_num, const char *format,...)
       if (connections[i].state == S_CLIENT)
 	{
 	  if (conn_num != i && connections[i].type & FLAGS_PARTYLINE)
-	    va_print_to_socket(connections[i].socket, format, va);
+	    va_send_to_connection(connections[i].socket, format, va);
 	}
     }
   va_end(va);
@@ -647,15 +647,15 @@ signon_to_server (int unused)
     strcpy (tcm_status.my_nick, config_entries.dfltnick);
 
   if (config_entries.server_pass[0] != '\0')
-    print_to_server("PASS %s", config_entries.server_pass);
+    send_to_server("PASS %s", config_entries.server_pass);
 
-  print_to_server("USER %s %s %s :%s",
+  send_to_server("USER %s %s %s :%s",
 		  config_entries.username_config,
 		  tcm_status.my_hostname,
 		  config_entries.server_name,
 		  config_entries.ircname_config);
   
-  print_to_server("NICK %s", tcm_status.my_nick);
+  send_to_server("NICK %s", tcm_status.my_nick);
 }
 
 /*
@@ -834,7 +834,7 @@ list_connections(int sock)
     {
       if(connections[i].registered_nick[0] != 0)
       {
-  	print_to_socket(sock,
+  	send_to_connection(sock,
 	       "%s/%s %s (%s@%s) is connected - idle: %ld",
 	       connections[i].nick, connections[i].registered_nick,
 	       type_show(connections[i].type), connections[i].username,
@@ -843,7 +843,7 @@ list_connections(int sock)
       }
       else
       {
-	print_to_socket(sock,
+	send_to_connection(sock,
 	     "%s O (%s@%s) is connected - idle: %ld",
 	     connections[i].nick, connections[i].username, connections[i].host,
 	     time(NULL) - connections[i].last_message_time);

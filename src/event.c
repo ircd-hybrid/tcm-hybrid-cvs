@@ -23,7 +23,7 @@
  *  developed and/or copyrighted by other sources.  Please see the
  *  CREDITS file for full details.
  *
- *  $Id: event.c,v 1.7 2002/05/25 16:14:36 jmallett Exp $
+ *  $Id: event.c,v 1.8 2002/06/23 21:09:14 db Exp $
  */
 
 /*
@@ -236,21 +236,21 @@ show_events(int sock)
   int i;
 
   if (last_event_ran)
-    print_to_socket(sock, "*** Last event to run: %s", last_event_ran);
+    send_to_connection(sock, "*** Last event to run: %s", last_event_ran);
 
-  print_to_socket(sock, "*** Operation            Next Execution");
+  send_to_connection(sock, "*** Operation            Next Execution");
 
   for (i = 0; i < event_count; i++)
     {
       if (event_table[i].active)
         {
-          print_to_socket(sock,
+          send_to_connection(sock,
 		 "*** %-20s %-3d seconds",
 		 event_table[i].name,
 		 (int)(event_table[i].when - current_time));
         }
     }
-  print_to_socket(sock, "*** Finished");
+  send_to_connection(sock, "*** Finished");
 }
 
 /* 

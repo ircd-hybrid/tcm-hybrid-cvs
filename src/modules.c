@@ -1,5 +1,5 @@
 /*
- * $Id: modules.c,v 1.49 2002/05/30 01:49:48 leeh Exp $B
+ * $Id: modules.c,v 1.50 2002/06/23 21:09:15 db Exp $B
  *
  */
 
@@ -66,7 +66,7 @@ modules_init(void)
 void
 m_unregistered(int connnum, int argc, char *argv[])
 {
-  print_to_socket(connections[connnum].socket, "You have not registered");
+  send_to_connection(connections[connnum].socket, "You have not registered");
 }
 
 /* m_not_admin()
@@ -76,7 +76,7 @@ m_unregistered(int connnum, int argc, char *argv[])
 void
 m_not_admin(int connnum, int argc, char *argv[])
 {
-  print_to_socket(connections[connnum].socket,
+  send_to_connection(connections[connnum].socket,
 		  "Only authorized admins may use this command");
 }
 
@@ -197,7 +197,7 @@ m_modload (int connnum, int argc, char *argv[])
   if (load_a_module(argv[1], 1) != -1)
     send_to_all(FLAGS_ADMIN, "Loaded by %s", connections[connnum].nick);
   else
-    print_to_socket(connections[connnum].socket,
+    send_to_connection(connections[connnum].socket,
 		    "Load of %s failed", argv[1]);
 }
 
@@ -219,7 +219,7 @@ m_modreload (int connnum, int argc, char *argv[])
         send_to_all(FLAGS_ADMIN, "Reloaded by %s", connections[connnum].nick);
     }
   else
-    print_to_socket(connections[connnum].socket,
+    send_to_connection(connections[connnum].socket,
 		    "Module %s is not loaded", argv[1]);
 }
 
@@ -229,24 +229,24 @@ m_modlist (int connnum, int argc, char *argv[])
   int i;
 
   if (argc >= 2)
-    print_to_socket(connections[connnum].socket,
+    send_to_connection(connections[connnum].socket,
 		    "Listing all modules matching '%s'...", argv[1]);
   else
-    print_to_socket(connections[connnum].socket, "Listing all modules...");
+    send_to_connection(connections[connnum].socket, "Listing all modules...");
 
   for (i=0;i<max_mods;++i)
    {
      if (modlist[i].name != NULL)
        {
          if (argc == 2 && !wldcmp(argv[1], modlist[i].name))
-           print_to_socket(connections[connnum].socket, "--- %s 0x%lx %s", 
+           send_to_connection(connections[connnum].socket, "--- %s 0x%lx %s", 
                 modlist[i].name, modlist[i].address, modlist[i].version);
          else if (argc == 1)
-           print_to_socket(connections[connnum].socket, "--- %s 0x%lx %s", 
+           send_to_connection(connections[connnum].socket, "--- %s 0x%lx %s", 
                 modlist[i].name, modlist[i].address, modlist[i].version);
        }
    }
-  print_to_socket(connections[connnum].socket, "Done.");
+  send_to_connection(connections[connnum].socket, "Done.");
 }
 
 /* XXX - Return value is ignored...use it or lose it... */

@@ -5,7 +5,7 @@
  *  - added config file for bot nick, channel, server, port etc.
  *  - rudimentary remote tcm linking added
  *
- * $Id: userlist.c,v 1.132 2002/06/22 18:21:48 leeh Exp $
+ * $Id: userlist.c,v 1.133 2002/06/23 21:09:15 db Exp $
  *
  */
 
@@ -119,7 +119,7 @@ m_umode(int connnum, int argc, char *argv[])
 
   if(argc < 2)
   {
-    print_to_socket(connections[connnum].socket, 
+    send_to_connection(connections[connnum].socket, 
  		    "Your current flags are: %s",
 		    type_show(connections[connnum].type));
     return;
@@ -133,7 +133,7 @@ m_umode(int connnum, int argc, char *argv[])
       else
         set_umode_connection(connnum, 0, argv[1]);
 
-      print_to_socket(connections[connnum].socket,
+      send_to_connection(connections[connnum].socket,
 		      "Your flags are now: %s",
 		      type_show(connections[connnum].type));
       return;
@@ -142,7 +142,7 @@ m_umode(int connnum, int argc, char *argv[])
     {
       if((connections[connnum].type & FLAGS_ADMIN) == 0)
       {
-        print_to_socket(connections[connnum].socket,
+        send_to_connection(connections[connnum].socket,
 			"You aren't an admin");
 	return;
       }
@@ -151,12 +151,12 @@ m_umode(int connnum, int argc, char *argv[])
       
       if(user != NULL)
       {
-	print_to_socket(connections[connnum].socket,
+	send_to_connection(connections[connnum].socket,
 			"User flags for %s are: %s",
 			argv[1], type_show(user->type));
       }
       else
-        print_to_socket(connections[connnum].socket,
+        send_to_connection(connections[connnum].socket,
 			"Can't find user [%s]", argv[1]);
     }
   }
@@ -166,7 +166,7 @@ m_umode(int connnum, int argc, char *argv[])
 
     if((connections[connnum].type & FLAGS_ADMIN) == 0)
     {
-      print_to_socket(connections[connnum].socket,
+      send_to_connection(connections[connnum].socket,
 		      "You aren't an admin");
       return;
     }
@@ -179,7 +179,7 @@ m_umode(int connnum, int argc, char *argv[])
       if(user_conn)
       {
         set_umode_connection(user_conn, 1, argv[2]);
-        print_to_socket(connections[user_conn].socket,
+        send_to_connection(connections[user_conn].socket,
 		        "Your flags are now: %s (changed by %s)",
 		        type_show(connections[user_conn].type),
 		        connections[connnum].registered_nick);
@@ -189,17 +189,17 @@ m_umode(int connnum, int argc, char *argv[])
         set_umode_userlist(argv[1], argv[2]);
       }
 
-      print_to_socket(connections[connnum].socket,
+      send_to_connection(connections[connnum].socket,
  	 	      "User flags for %s are now: %s",
 		      argv[1], type_show(connections[user_conn].type));
 
       {
-        print_to_socket(connections[connnum].socket, 
+        send_to_connection(connections[connnum].socket, 
 			"Can't find user [%s]", argv[1]);
       }
     }
     else
-      print_to_socket(connections[connnum].socket,
+      send_to_connection(connections[connnum].socket,
 		      ".umode [user] [flags] | [user] | [flags]");
   }
 }
@@ -1113,11 +1113,11 @@ reload_userlist(void)
   clear_userlist();
   load_userlist();
 
-  print_to_server("STATS Y");
-  print_to_server("STATS O");
+  send_to_server("STATS Y");
+  send_to_server("STATS O");
 
   if (config_entries.hybrid && (config_entries.hybrid_version >= 6))
-    print_to_server("STATS I");
+    send_to_server("STATS I");
 
   logclear();
 }

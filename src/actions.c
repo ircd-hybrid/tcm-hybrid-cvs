@@ -1,6 +1,6 @@
 /* actions.c
  *
- * $Id: actions.c,v 1.32 2002/06/23 13:24:30 wcampbel Exp $
+ * $Id: actions.c,v 1.33 2002/06/23 21:09:13 db Exp $
  */
 
 #include "setup.h"
@@ -224,13 +224,13 @@ update_action(int conn_num, int argc, char *argv[])
   }
 
   if(actions[actionid].klinetime > 0)
-    print_to_socket(connections[conn_num].socket,
+    send_to_connection(connections[conn_num].socket,
 		    "%s action now: %s %d, reason '%s'",
 		    actions[actionid].name,
 		    get_method_names(actions[actionid].method),
 		    actions[actionid].klinetime, actions[actionid].reason);
   else
-    print_to_socket(connections[conn_num].socket,
+    send_to_connection(connections[conn_num].socket,
 		    "%s action now: %s %d, reason '%s'",
 		    actions[actionid].name,
 		    get_method_names(actions[actionid].method),
@@ -263,7 +263,7 @@ list_actions(int conn_num)
 {
   int i;
 
-  print_to_socket(connections[conn_num].socket,
+  send_to_connection(connections[conn_num].socket,
 		  "Listing actions..");
 
   for(i = 0; i < MAX_ACTIONS; i++)
@@ -285,7 +285,7 @@ list_one_action(int conn_num, int actionid)
 {
   if(actionid < 0)
   {
-    print_to_socket(connections[conn_num].socket,
+    send_to_connection(connections[conn_num].socket,
 		    "No matching action found");
     return;
   }
@@ -294,14 +294,14 @@ list_one_action(int conn_num, int actionid)
     return;
 
   if(actions[actionid].klinetime > 0)
-    print_to_socket(connections[conn_num].socket,
+    send_to_connection(connections[conn_num].socket,
 		    "%s action: %s %d, reason '%s'",
 		    actions[actionid].name, 
 		    get_method_names(actions[actionid].method),
 		    actions[actionid].klinetime,
 		    actions[actionid].reason);
   else
-    print_to_socket(connections[conn_num].socket,
+    send_to_connection(connections[conn_num].socket,
 		    "%s action: %s, reason '%s'",
 		    actions[actionid].name,
 		    get_method_names(actions[actionid].method),
@@ -385,7 +385,7 @@ handle_action(int actionid, char *nick, char *username,
       /* Now process the event, we got the needed data */
       if (actions[actionid].method & METHOD_KLINE)
 	{
-	  print_to_server("KLINE %s :%s", userhost,
+	  send_to_server("KLINE %s :%s", userhost,
 		 actions[actionid].reason ? 
 		 actions[actionid].reason : "Automated K-Line");
 
@@ -400,7 +400,7 @@ handle_action(int actionid, char *nick, char *username,
 	  else if (actions[actionid].klinetime > 14400) 
 	    actions[actionid].klinetime = 14400;
 
-	  print_to_server("KLINE %d %s :%s",
+	  send_to_server("KLINE %d %s :%s",
 		 actions[actionid].klinetime, userhost,
 		 actions[actionid].reason ?
 		 actions[actionid].reason : "Automated temporary K-Line");
@@ -423,7 +423,7 @@ handle_action(int actionid, char *nick, char *username,
                 "handle_action(%s): Reverting to k-line, couldn't find IP for %s",
 		      actions[actionid].name, host);
 
-		  print_to_server("KLINE *@%s :%s", host,
+		  send_to_server("KLINE *@%s :%s", host,
 				  actions[actionid].reason ?
 				  actions[actionid].reason : "Automated K-Line");
 		  return;
@@ -448,7 +448,7 @@ handle_action(int actionid, char *nick, char *username,
 	      }
 	    }
 
-	  print_to_server("DLINE %s :%s", userhost,
+	  send_to_server("DLINE %s :%s", userhost,
 		 actions[actionid].reason ?
 		 actions[actionid].reason : "Automated D-Line");    
 

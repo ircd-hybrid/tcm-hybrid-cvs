@@ -13,7 +13,7 @@
 *   void privmsg                                            *
 ************************************************************/
 
-/* $Id: stdcmds.c,v 1.95 2002/06/23 13:24:31 wcampbel Exp $ */
+/* $Id: stdcmds.c,v 1.96 2002/06/23 21:09:15 db Exp $ */
 
 #include "setup.h"
 
@@ -47,7 +47,7 @@
 void
 oper()
 {
-  print_to_server("OPER %s %s",
+  send_to_server("OPER %s %s",
           config_entries.oper_nick_config,
           config_entries.oper_pass_config);
 }
@@ -55,7 +55,7 @@ oper()
 void
 op(char *chan,char *nick)
 {
-  print_to_server("MODE %s +o %s", chan, nick);
+  send_to_server("MODE %s +o %s", chan, nick);
 }
 
 void
@@ -65,21 +65,21 @@ join(void)
      (*config_entries.channel == '\0'))
     return;
 
-  print_to_server("JOIN %s %s", 
+  send_to_server("JOIN %s %s", 
  	          config_entries.channel, config_entries.channel_key);
 }
 
 void
 leave(char *chan)
 {
-  print_to_server("PART %s", chan);
+  send_to_server("PART %s", chan);
 }
 
 
 void
 newnick(char *nick)
 {
-  print_to_server("NICK %s", nick);
+  send_to_server("NICK %s", nick);
 }
 
 /*
@@ -163,13 +163,13 @@ print_motd(int sock)
 
   if((userfile = fopen(MOTD_FILE,"r")) == NULL)
     {
-      print_to_socket(sock,"No MOTD");
+      send_to_connection(sock,"No MOTD");
       return;
     }
 
   while (fgets(line, MAX_BUFF-1, userfile))
     {
-      print_to_socket(sock, "%s", line);
+      send_to_connection(sock, "%s", line);
     }
   fclose(userfile);
 }
@@ -203,24 +203,24 @@ do_a_kline(int kline_time, char *pattern,
     {
 #ifdef HIDE_OPER_IN_KLINES
       if(kline_time)
-        print_to_server("KLINE %d %s :%s", kline_time, pattern, reason);
+        send_to_server("KLINE %d %s :%s", kline_time, pattern, reason);
       else
-        print_to_server("KLINE %s :%s", pattern, reason);
+        send_to_server("KLINE %s :%s", pattern, reason);
 #else
       if(kline_time)
-        print_to_server("KLINE %d %s :%s [%s]", kline_time, pattern,reason,
+        send_to_server("KLINE %d %s :%s [%s]", kline_time, pattern,reason,
 			who_did_command);
       else
-        print_to_server("KLINE %s :%s [%s]", pattern, reason,
+        send_to_server("KLINE %s :%s [%s]", pattern, reason,
 			who_did_command);
 #endif
     }
   else
     {
 #ifdef HIDE_OPER_IN_KLINES
-      print_to_server("KLINE %s :%s", pattern, format_reason(reason));
+      send_to_server("KLINE %s :%s", pattern, format_reason(reason));
 #else
-      print_to_server("KLINE %s :%s [%s]", pattern,format_reason(reason),
+      send_to_server("KLINE %s :%s [%s]", pattern,format_reason(reason),
 		      who_did_command);
 #endif
     }
@@ -255,8 +255,8 @@ report_failures(int sock,int num)
       if(foundany == 0)
         {
 	  foundany++;
-          print_to_socket(sock, "Userhosts with most connect rejections:");
-          print_to_socket(sock," %5d rejections: %s@%s",
+          send_to_connection(sock, "Userhosts with most connect rejections:");
+          send_to_connection(sock," %5d rejections: %s@%s",
 			  found->failcount,
 			  (*found->username ? found->username : "<UNKNOWN>"),
 			  found->host);
@@ -266,7 +266,7 @@ report_failures(int sock,int num)
 
   if(foundany == 0)
     {
-      print_to_socket(sock,"No userhosts have %d or more rejections.",num);
+      send_to_connection(sock,"No userhosts have %d or more rejections.",num);
     }
 
   /* XXX what is this "Ugly, but it works" ? */

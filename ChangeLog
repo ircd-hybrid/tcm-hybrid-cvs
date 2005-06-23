@@ -1,3 +1,19 @@
+bill        2005/06/23 12:57:26 EDT	(20050623_0)
+
+  Modified files:
+    libopm/doc           Doxyfile 
+  Added files:
+    libopm               config.guess config.sub 
+  Log:
+  - add two important files to libopm/
+  
+  Revision  Changes    Path
+  1.1       +1318 -0   tcm-hybrid/libopm/config.guess (new)
+  1.1       +1412 -0   tcm-hybrid/libopm/config.sub (new)
+  1.2       +0 -0      tcm-hybrid/libopm/doc/Doxyfile
+
+
+
 bill        2004/06/15 18:39:55 EDT	(20040615_5)
 
   Modified files:

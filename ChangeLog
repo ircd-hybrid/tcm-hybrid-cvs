@@ -1,3 +1,21 @@
+bill        2005/06/27 16:05:18 EDT	(20050627_0)
+
+  Modified files:
+    .                    Makefile.in configure 
+    autoconf             configure.ac 
+    libopm/doc           Doxyfile 
+  Log:
+  - cleaned up primary Makefile, fixed a couple typos
+  - rebuilt configure
+  
+  Revision  Changes     Path
+  1.32      +3 -8       tcm-hybrid/Makefile.in
+  1.7       +1 -0       tcm-hybrid/autoconf/configure.ac
+  1.31      +854 -1706  tcm-hybrid/configure
+  1.3       +0 -0       tcm-hybrid/libopm/doc/Doxyfile
+
+
+
 bill        2005/06/23 12:57:26 EDT	(20050623_0)
 
   Modified files:

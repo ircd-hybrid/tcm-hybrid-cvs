@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.53)
 
-AC_COPYRIGHT([$Id: configure.ac,v 1.6 2004/06/15 22:36:28 bill Exp $])
+AC_COPYRIGHT([$Id: configure.ac,v 1.7 2005/06/27 20:05:15 bill Exp $])
 
 AC_INIT([tcm-hybrid],[4-beta1])
 
@@ -49,6 +49,7 @@ AC_ISC_POSIX
 AC_PROG_MAKE_SET
 AC_PATH_PROG(RM,rm)
 AC_PATH_PROG(CP,cp)
+AC_PATH_PROG(MV,mv)
 AC_PROG_INSTALL
 AC_PROG_YACC
 

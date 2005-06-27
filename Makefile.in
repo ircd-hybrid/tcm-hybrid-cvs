@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.31 2004/06/15 22:36:26 bill Exp $
+# $Id: Makefile.in,v 1.32 2005/06/27 20:05:13 bill Exp $
 
 prefix = @prefix@
 
@@ -14,8 +14,8 @@ all: tcm
 
 build: tcm
 
-install: cm
-	@echo install ==> $(prefix)
+install: tcm
+	@echo "install ==> $(prefix)"
 	-@if [ ! -x $(prefix) ] ; then \
 	echo mkdir -p $(prefix) ; \
 	mkdir -p $(prefix) ; \
@@ -42,12 +42,7 @@ install: cm
 	mkdir -p $(prefix)/logs ; \
 	fi
 
-	mv -f bin/tcm bin/mkpasswd $(prefix)/bin/
-
-	-@if [ ! -e $(prefix)/etc/tcm.conf ] ; then \
-	echo ${CP} etc/tcm.conf $(prefix)/etc/ ; \
-        ${CP} etc/tcm.conf $(prefix)/etc/ ; \
-        fi
+	${MV} -f bin/tcm bin/mkpasswd $(prefix)/bin/
 
 	-@if [ ! -e $(prefix)/etc/tcm.motd ] ; then \
 	echo ${CP} etc/tcm.motd $(prefix)/etc/ ; \

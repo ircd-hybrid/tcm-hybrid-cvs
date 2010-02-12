@@ -1,8 +1,8 @@
 NOTICE: if you still use TCM, please drop a note to bugs@ircd-hybrid.org
         and let us know!!
 
-This is a VERY brief intro to tcm-hybrid
-(Originally TexasNet Connection Monitoring Bot.)
+This is a VERY brief intro to tcm-hybrid (originally
+TexasNet Connection Monitoring Bot).
 
 [I've quickly modified this document because people were getting confused
 with the original README.  its by far incomplete. Any volunteers? ;-) -db]
@@ -61,6 +61,6 @@ III. How to use it
 Diane Bruce, db@db.net
 W. Campbell, wcampbel@botbay.net
 
-$Id: README,v 1.12 2010/02/11 23:39:04 lusky Exp $
+$Id: README,v 1.13 2010/02/12 04:25:27 lusky Exp $
 
 
